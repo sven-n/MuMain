@@ -3,7 +3,7 @@
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -120,9 +120,9 @@ bool FulfillsClassRequirement(const ITEM_SET_OPTION& setOptions, int firstClass,
     return requirement != 0 && secondClass >= requirement - 1;
 }
 
-Core::Utilities::FileHandle OpenBinaryFile(const wchar_t* filename)
+Content::Stream OpenBinaryFile(const wchar_t* filename)
 {
-    return Core::Utilities::FileHandle(_wfopen(filename, L"rb"));
+    return Content::OpenIO(filename);
 }
 }
 
@@ -166,14 +166,14 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
 
     const std::size_t entrySize = sizeof(ITEM_SET_TYPE);
     std::vector<std::uint8_t> buffer(entrySize * MAX_ITEM);
-    if (std::fread(buffer.data(), buffer.size(), 1, file.get()) != 1)
+    if (!DataFileIO::ReadExact(file.get(), buffer.data(), buffer.size()))
     {
         DataFileIO::ReportUnusableFile(filename, L"Failed to read content.");
         return false;
     }
 
     std::uint32_t checksum{};
-    if (std::fread(&checksum, sizeof(checksum), 1, file.get()) != 1)
+    if (!DataFileIO::ReadExact(file.get(), &checksum, sizeof(checksum)))
     {
         DataFileIO::ReportUnusableFile(filename, L"Failed to read checksum.");
         return false;
@@ -207,14 +207,14 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
 
     const std::size_t entrySize = sizeof(ITEM_SET_OPTION_FILE);
     std::vector<std::uint8_t> buffer(entrySize * MAX_SET_OPTION);
-    if (std::fread(buffer.data(), buffer.size(), 1, file.get()) != 1)
+    if (!DataFileIO::ReadExact(file.get(), buffer.data(), buffer.size()))
     {
         DataFileIO::ReportUnusableFile(filename, L"Failed to read content.");
         return false;
     }
 
     std::uint32_t checksum{};
-    if (std::fread(&checksum, sizeof(checksum), 1, file.get()) != 1)
+    if (!DataFileIO::ReadExact(file.get(), &checksum, sizeof(checksum)))
     {
         DataFileIO::ReportUnusableFile(filename, L"Failed to read checksum.");
         return false;

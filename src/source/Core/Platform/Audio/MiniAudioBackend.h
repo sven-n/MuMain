@@ -33,6 +33,9 @@ namespace mu
 // Isolated here to keep miniaudio.h out of ErrorReport.cpp.
 std::vector<std::string> GetAudioDeviceNames();
 
+// The file system the engine's resource manager reads sounds and music through: the game's content.
+ma_vfs* ContentAudioFiles();
+
 class MiniAudioBackend : public IPlatformAudio
 {
 public:

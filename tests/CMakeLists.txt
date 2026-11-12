@@ -137,6 +137,11 @@ mu_add_test_objects(NAME mu_test_bench_stats SOURCES
     ${MU_GAME_SOURCE}/Core/Utilities/Benchmark/BenchTypes.cpp)
 mu_add_test_objects(NAME mu_test_asset_path SOURCES ${MU_GAME_SOURCE}/Render/Textures/AssetPath.cpp)
 mu_add_test_objects(NAME mu_test_path_resolve SOURCES ${MU_GAME_SOURCE}/Core/Platform/PathResolve.cpp)
+# With mu_test_path_resolve in the same LINK_LIBS: an object library's objects reach only its direct consumers.
+mu_add_test_objects(NAME mu_test_content SOURCES
+    ${MU_GAME_SOURCE}/Core/Content/ContentPath.cpp
+    ${MU_GAME_SOURCE}/Core/Content/ContentStore.cpp
+    LINK_LIBS SDL3::SDL3)
 mu_add_test_objects(NAME mu_test_master_skill_tree_layout SOURCES
     ${MU_GAME_SOURCE}/UI/HUD/Skills/MasterSkillTreeLayout.cpp)
 mu_add_test_objects(NAME mu_test_bitmap_gpu_resources SOURCES

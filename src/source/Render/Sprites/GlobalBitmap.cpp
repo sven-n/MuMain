@@ -3,6 +3,7 @@
 #include "Render/Sprites/GlobalBitmap.h"
 #include "GlobalBitmapPath.h"
 #include "Render/Sprites/TextureDecode.h"
+#include "Core/Content/ContentStore.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -439,6 +440,7 @@ bool CGlobalBitmap::Convert_Format(const std::wstring& filename)
 
 bool CGlobalBitmap::Save_Image(const std::wstring& src, const std::wstring& dest, int cDumpHeader)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     const auto srcPath = Render::Sprites::NarrowBitmapPath(src);
     const auto destPath = Render::Sprites::NarrowBitmapPath(dest);
 

@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Utilities/FileHandle.h"
 #include "Core/Utilities/Random.h"
@@ -5882,61 +5883,9 @@ void DeleteObjectTile(int x, int y)
     }
 }
 
-int OpenObjects(wchar_t* FileName)
-{
-    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
-    if (!file)
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls file not found.", FileName);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-        return (-1);
-    }
-    std::optional<std::vector<BYTE>> EncData = DataFileIO::ReadAll(file.get());
-    file.reset();
-    if (!EncData || EncData->empty())
-    {
-        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
-        return (-1);
-    }
-    const int EncBytes = static_cast<int>(EncData->size());
-
-    const unsigned char* Data = EncData->data();
-    int DataBytes = EncBytes;
-
-    int DataPtr = 0;
-
-    BYTE Version = Data[DataPtr];
-    DataPtr += 1;
-
-    int iMapNumber = 0;
-    short Count = 0;
-    memcpy(&Count, Data + DataPtr, sizeof(Count));
-    DataPtr += sizeof(Count);
-    for (int i = 0; i < Count; i++)
-    {
-        vec3_t Position;
-        vec3_t Angle;
-        short Type = 0;
-        memcpy(&Type, Data + DataPtr, sizeof(Type));
-        DataPtr += sizeof(Type);
-        memcpy(Position, Data + DataPtr, sizeof(vec3_t));
-        DataPtr += sizeof(vec3_t);
-        memcpy(Angle, Data + DataPtr, sizeof(vec3_t));
-        DataPtr += sizeof(vec3_t);
-        float Scale = 0.f;
-        memcpy(&Scale, Data + DataPtr, sizeof(Scale));
-        DataPtr += sizeof(Scale);
-        CreateObject(Type, Position, Angle, Scale);
-    }
-
-    return iMapNumber;
-}
-
 int OpenObjectsEnc(wchar_t* FileName)
 {
-    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    Content::Stream file = Content::OpenIO(FileName);
     if (!file)
     {
         wchar_t Text[256];
@@ -5989,6 +5938,7 @@ int OpenObjectsEnc(wchar_t* FileName)
 
 bool SaveObjects(wchar_t* FileName, int iMapNumber)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     FILE* fp = _wfopen(FileName, L"wb");
 
     short ObjectCount = 0;
@@ -6055,6 +6005,7 @@ bool SaveObjects(wchar_t* FileName, int iMapNumber)
 
 void SaveTrapObjects(wchar_t* FileName)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     FILE* fp = _wfopen(FileName, L"wt");
     fwprintf(fp, L"0\n");
     for (int i = 0; i < 16; i++)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Platform/WinCompat.h"
+#include <SDL3/SDL_iostream.h>
 #include <cstddef>
 #include <cstdio>
 #include <memory>
@@ -40,6 +41,8 @@ namespace DataFileIO
      * @return Unique pointer to buffer, or nullptr on failure
      */
     std::unique_ptr<BYTE[]> ReadBuffer(FILE* fp, const IOConfig& config, DWORD* outChecksum = nullptr);
+    // The same from game content (Content::OpenIO).
+    std::unique_ptr<BYTE[]> ReadBuffer(SDL_IOStream* stream, const IOConfig& config, DWORD* outChecksum = nullptr);
 
     /**
      * Verify checksum of buffer
@@ -100,11 +103,31 @@ namespace DataFileIO
         return size == 0 || std::fread(buffer, size, 1, fp) == 1;
     }
 
+    inline bool ReadExact(SDL_IOStream* stream, void* buffer, std::size_t size)
+    {
+        return size == 0 || SDL_ReadIO(stream, buffer, size) == size;
+    }
+
     /**
      * Read a whole open file, from its start to its end
      *
      * @return std::nullopt when its size cannot be told or a read fails
      */
+    inline std::optional<std::vector<BYTE>> ReadAll(SDL_IOStream* stream)
+    {
+        const Sint64 size = SDL_GetIOSize(stream);
+        if (size < 0 || SDL_SeekIO(stream, 0, SDL_IO_SEEK_SET) != 0)
+        {
+            return std::nullopt;
+        }
+        std::vector<BYTE> content(static_cast<std::size_t>(size));
+        if (!ReadExact(stream, content.data(), content.size()))
+        {
+            return std::nullopt;
+        }
+        return content;
+    }
+
     inline std::optional<std::vector<BYTE>> ReadAll(FILE* fp)
     {
         if (std::fseek(fp, 0, SEEK_END) != 0)

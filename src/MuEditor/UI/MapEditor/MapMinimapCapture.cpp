@@ -5,6 +5,7 @@
 #include "MapMinimapCapture.h"
 #include "MapEditorFileUtil.h"
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "Core/Content/ContentStore.h"
 
 #include "Render/Terrain/ZzzLodTerrain.h"    // TerrainMapping*/TERRAIN_SIZE/TERRAIN_INDEX
 #include "Render/Sprites/GlobalBitmap.h"      // Bitmaps / BITMAP_t
@@ -69,6 +70,7 @@ namespace
     bool WriteFile(const wchar_t* path, const BYTE* prefix, int prefixLen,
                    const BYTE* hdr, const std::vector<BYTE>& pixels)
     {
+        const Content::RefreshAfterWrite refreshAfterWrite;
         FILE* fp = _wfopen(path, L"wb");
         if (fp == nullptr)
             return false;

@@ -7,6 +7,7 @@
 
 #include "Render/Terrain/ZzzLodTerrain.h"   // terrain arrays + MapFileEncrypt + TERRAIN_SIZE
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "Core/Content/ContentStore.h"
 
 #include <cstdio>
 #include <cstring>
@@ -29,6 +30,7 @@ namespace
 
 bool SaveMappingEncrypted(int worldNumber, int mapNumber)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     // Build the decrypted byte image exactly as the loader expects to read it.
     auto plain = std::make_unique<BYTE[]>(PLAIN_BYTES);
     int p = 0;

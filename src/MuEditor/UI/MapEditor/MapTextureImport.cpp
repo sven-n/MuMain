@@ -9,6 +9,7 @@
 #include "Render/Sprites/GlobalBitmap.h"     // GL_LINEAR / GL_REPEAT
 #include "Render/Textures/ZzzTexture.h"      // LoadBitmap
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "Core/Content/ContentStore.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -100,6 +101,7 @@ namespace
     // unsupported input or write error.
     bool WriteExtTileOzj(const std::wstring& destOzj, const std::wstring& sourcePath)
     {
+        const Content::RefreshAfterWrite refreshAfterWrite;
         const std::wstring ext = ToLower(fs::path(sourcePath).extension().wstring());
         const std::vector<unsigned char> src = ReadFile(sourcePath);
         if (src.empty())

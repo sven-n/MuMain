@@ -202,4 +202,5 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Core/Content/ContentStore.cpp
     LINK_LIBS
         SDL3::SDL3
+        mu_test_path_resolve
 )

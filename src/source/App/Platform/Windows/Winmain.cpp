@@ -529,27 +529,13 @@ DWORD GetCheckSum(WORD wKey)
 {
     wKey = DecryptCheckSumKey(wKey);
 
-    wchar_t lpszFile[MAX_PATH];
-
-    wcscpy(lpszFile, L"data\\local\\Gameguard.csr");
-
-    HANDLE hFile =
-        CreateFile(lpszFile, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-    if (INVALID_HANDLE_VALUE == hFile)
+    std::optional<std::string> file = Content::ReadFile(L"data\\local\\Gameguard.csr");
+    if (!file)
     {
         return (0);
     }
 
-    DWORD dwSize = GetFileSize(hFile, nullptr);
-    auto* pbyBuffer = new BYTE[dwSize];
-    DWORD dwNumber;
-    ReadFile(hFile, pbyBuffer, dwSize, &dwNumber, nullptr);
-    CloseHandle(hFile);
-
-    DWORD dwCheckSum = GenerateCheckSum(pbyBuffer, dwSize, wKey);
-    delete[] pbyBuffer;
-
-    return (dwCheckSum);
+    return GenerateCheckSum(reinterpret_cast<BYTE*>(file->data()), static_cast<DWORD>(file->size()), wKey);
 }
 
 BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion)
@@ -1698,51 +1684,47 @@ FontSizes CalculateFontSizes()
 }
 
 #ifdef _WIN32
-// Absolute path of a bundled font file (relative to ./fonts) next to the exe.
-// The curated names in kBundledFonts are ASCII, so the byte-wise widen is safe.
-std::wstring BundledFontFullPath(const char* relative)
-{
-    wchar_t exePath[MAX_PATH] = {};
-    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-    std::wstring path(exePath);
-    path.resize(path.find_last_of(L"\\/") + 1); // keep the directory + separator
-    while (*relative)
-        path.push_back(static_cast<wchar_t>(static_cast<unsigned char>(*relative++)));
-    return path;
-}
+// The bundled faces added to GDI; it keeps its own copy of each file's bytes.
+std::vector<HANDLE> g_bundledFontFaces;
 #endif
+
+// Mirrors RegisterBundledFonts so the process leaves no private faces behind.
+void UnregisterBundledFonts()
+{
+#ifdef _WIN32
+    for (auto it = g_bundledFontFaces.rbegin(); it != g_bundledFontFaces.rend(); ++it)
+        RemoveFontMemResourceEx(*it);
+    g_bundledFontFaces.clear();
+#endif
+}
 
 // Privately register the TTFs bundled in ./fonts so GDI resolves their face
 // names even when they are not installed system-wide — parity with the
-// non-Windows GdiText shim, which reads ./fonts directly. FR_PRIVATE scopes the
-// faces to this process, leaving the system font list untouched. No-op off Windows,
+// non-Windows GdiText shim, which reads ./fonts directly. Memory fonts are
+// private to this process, leaving the system font list untouched. No-op off Windows,
 // where bundled fonts are resolved by GdiText. Shares the kBundledFonts table.
 bool RegisterBundledFonts()
 {
 #ifdef _WIN32
-    std::vector<std::wstring> registeredPaths;
-    const auto rollback = [&registeredPaths]()
+    const auto registerPath = [](const char* relativePath)
     {
-        for (auto it = registeredPaths.rbegin(); it != registeredPaths.rend(); ++it)
-            RemoveFontResourceExW(it->c_str(), FR_PRIVATE, nullptr);
-    };
-    const auto registerPath = [&registeredPaths, &rollback](const char* relativePath)
-    {
-        const std::wstring path = BundledFontFullPath(relativePath);
-        if (!std::filesystem::is_regular_file(path))
+        std::optional<std::string> bytes = Content::ReadFile(relativePath);
+        if (!bytes)
         {
-            mu::log::Get("render")->error("GDI -- bundled font missing path='{}'", WideToUtf8(path));
-            rollback();
+            mu::log::Get("render")->error("GDI -- bundled font missing path='{}'", relativePath);
+            UnregisterBundledFonts();
             return false;
         }
-        if (AddFontResourceExW(path.c_str(), FR_PRIVATE, nullptr) == 0)
+        DWORD faces = 0;
+        const HANDLE font = AddFontMemResourceEx(bytes->data(), static_cast<DWORD>(bytes->size()), nullptr, &faces);
+        if (font == nullptr)
         {
-            mu::log::Get("render")->error("GDI -- AddFontResourceExW failed path='{}' error={}", WideToUtf8(path),
+            mu::log::Get("render")->error("GDI -- AddFontMemResourceEx failed path='{}' error={}", relativePath,
                                           GetLastError());
-            rollback();
+            UnregisterBundledFonts();
             return false;
         }
-        registeredPaths.push_back(path);
+        g_bundledFontFaces.push_back(font);
         return true;
     };
 
@@ -1755,19 +1737,6 @@ bool RegisterBundledFonts()
         return false;
 #endif
     return true;
-}
-
-// Mirrors RegisterBundledFonts so the process leaves no private faces behind.
-void UnregisterBundledFonts()
-{
-#ifdef _WIN32
-    for (const auto& font : kBundledFonts)
-    {
-        RemoveFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
-        RemoveFontResourceExW(BundledFontFullPath(font.bold).c_str(), FR_PRIVATE, nullptr);
-    }
-    RemoveFontResourceExW(BundledFontFullPath(kBundledFixedFont.regular).c_str(), FR_PRIVATE, nullptr);
-#endif
 }
 
 HFONT CreateFontForFamily(int size, int weight, std::string_view family)
@@ -2180,7 +2149,7 @@ bool StartClient(char* szCmdLine)
     RefreshWindowContentScale();
 
 #if defined(__linux__)
-    SDL_Surface* applicationIcon = SDL_LoadPNG(Core::Platform::GameWindowIconFile);
+    SDL_Surface* applicationIcon = SDL_LoadPNG_IO(Content::OpenIO(Core::Platform::GameWindowIconFile).release(), true);
     if (applicationIcon != nullptr)
     {
         SDL_SetWindowIcon(g_sdlWindow, applicationIcon);

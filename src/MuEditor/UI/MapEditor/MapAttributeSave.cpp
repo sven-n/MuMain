@@ -8,6 +8,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"   // TerrainWall / MapFileEncrypt / TERRAIN_SIZE
 #include "Core/Globals/_crypt.h"            // BuxConvert
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "Core/Content/ContentStore.h"
 
 #include <cstdio>
 #include <memory>
@@ -30,6 +31,7 @@ namespace
     // Writes a dead-simple instructions file next to the server .att.
     void WriteHowTo(int mapNumber)
     {
+        const Content::RefreshAfterWrite refreshAfterWrite;
         wchar_t howToName[128];
         swprintf_s(howToName, L"terrain_map%d_server_HOWTO.txt", mapNumber);
 
@@ -112,6 +114,7 @@ BYTE StaticAttribute(WORD wall)
 
 bool SaveClientAtt(int world, int mapNumber)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     auto plain = std::make_unique<BYTE[]>(PLAIN_BYTES);
     plain[0] = ATT_VERSION;
     plain[1] = static_cast<BYTE>(mapNumber);
@@ -224,6 +227,7 @@ bool SaveServerAtt(int serverMapNumber,
                    std::wstring& outPath,
                    int& outChanged)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     outChanged = 0;
 
     if (serverBase.size() != static_cast<size_t>(SERVER_HEADER_BYTES + CELLS)

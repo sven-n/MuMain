@@ -3,12 +3,14 @@
 #include "Core/Content/ContentPath.h"
 
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
 
 struct SDL_Storage;
+struct SDL_IOStream;
 
 // The game's content (Data/, fonts/, shaders/ ...) read by logical path from one read-only source: the client folder
 // on desktop, the APK's assets on Android, whatever a port or a test plugs in. Lookups ignore case on every platform.
@@ -37,7 +39,17 @@ std::vector<Entry> List(std::string_view folder);
 
 // For code that takes any path (tests and the editor pass absolute ones): a relative path is read as content; an
 // absolute one, or one that leaves the content, is a file on disk.
-std::optional<std::string> ReadFile(const std::filesystem::path& path);
+std::optional<std::string> ReadFile(const std::filesystem::path& path, std::string* error = nullptr);
+
+struct StreamCloser
+{
+    void operator()(SDL_IOStream* stream) const noexcept;
+};
+// A stream over a file's bytes, for code that reads piece by piece or a library that takes a stream; it owns the
+// bytes and frees them when it closes.
+using Stream = std::unique_ptr<SDL_IOStream, StreamCloser>;
+// Null when the file can't be read, with "<path>: <reason>" in `error`.
+Stream OpenIO(const std::filesystem::path& path, std::string* error = nullptr);
 
 enum class Found
 {

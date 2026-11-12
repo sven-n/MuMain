@@ -1,5 +1,10 @@
 #include "Core/Content/ContentStore.h"
 
+#ifndef _WIN32
+#include "Core/Platform/PathResolve.h"
+#endif
+
+#include <SDL3/SDL_iostream.h>
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_storage.h>
 
@@ -55,6 +60,18 @@ std::optional<Path> AsContent(const std::filesystem::path& path)
         return std::nullopt;
     }
     return Path::From(reinterpret_cast<const char*>(path.generic_u8string().c_str()));
+}
+
+// A path on disk as the file system spells it: on POSIX, '\' becomes '/' and each part takes the case it has on
+// disk, as the game's file shims did.
+std::filesystem::path OnDisk(const std::filesystem::path& path)
+{
+#ifdef _WIN32
+    return path;
+#else
+    const std::string resolved = MuResolvePath(reinterpret_cast<const char*>(path.u8string().c_str()));
+    return std::filesystem::path(reinterpret_cast<const char8_t*>(resolved.c_str()));
+#endif
 }
 
 // ASCII only, whatever the C locale: names are UTF-8, and their other bytes stay as they are.
@@ -260,29 +277,63 @@ std::vector<Entry> List(std::string_view folder)
     return entries;
 }
 
-std::optional<std::string> ReadFile(const std::filesystem::path& path)
+std::optional<std::string> ReadFile(const std::filesystem::path& requested, std::string* error)
 {
-    if (const std::optional<Path> content = AsContent(path))
+    if (const std::optional<Path> content = AsContent(requested))
     {
-        return ReadAll(*content);
+        return ReadAll(*content, error);
     }
+    const std::filesystem::path path = OnDisk(requested);
     // Only a regular file: on Linux a folder opens, and reading it throws.
-    std::error_code error;
-    if (!std::filesystem::is_regular_file(path, error))
+    std::error_code fileError;
+    std::optional<std::string> bytes;
+    if (std::filesystem::is_regular_file(path, fileError))
     {
-        return std::nullopt;
+        if (std::ifstream file(path, std::ios::binary); file)
+        {
+            bytes.emplace(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+        }
     }
-    std::ifstream file(path, std::ios::binary);
-    if (!file)
+    if (!bytes && error != nullptr)
     {
-        return std::nullopt;
+        *error = reinterpret_cast<const char*>(requested.u8string().c_str()) + std::string(": cannot be read");
     }
-    return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    return bytes;
 }
 
-Found Probe(const std::filesystem::path& path)
+void StreamCloser::operator()(SDL_IOStream* stream) const noexcept
 {
-    if (const std::optional<Path> content = AsContent(path))
+    SDL_CloseIO(stream);
+}
+
+Stream OpenIO(const std::filesystem::path& path, std::string* error)
+{
+    const std::optional<std::string> bytes = ReadFile(path, error);
+    if (!bytes)
+    {
+        return nullptr;
+    }
+    // SDL frees the copy when the stream closes; an empty file still gets a buffer of its own.
+    void* const memory = SDL_malloc(bytes->empty() ? 1 : bytes->size());
+    if (memory == nullptr)
+    {
+        return nullptr;
+    }
+    SDL_memcpy(memory, bytes->data(), bytes->size());
+    SDL_IOStream* const stream = SDL_IOFromConstMem(memory, bytes->size());
+    if (stream == nullptr)
+    {
+        SDL_free(memory);
+        return nullptr;
+    }
+    SDL_SetPointerProperty(SDL_GetIOProperties(stream), SDL_PROP_IOSTREAM_MEMORY_FREE_FUNC_POINTER,
+                           reinterpret_cast<void*>(&SDL_free));
+    return Stream(stream);
+}
+
+Found Probe(const std::filesystem::path& requested)
+{
+    if (const std::optional<Path> content = AsContent(requested))
     {
         SDL_PathInfo info{};
         if (!Resolve(GetState(), content->str(), info))
@@ -295,6 +346,7 @@ Found Probe(const std::filesystem::path& path)
         }
         return info.type == SDL_PATHTYPE_FILE ? Found::File : Found::Nothing;
     }
+    const std::filesystem::path path = OnDisk(requested);
     std::error_code error;
     if (!std::filesystem::exists(path, error))
     {
@@ -307,12 +359,13 @@ Found Probe(const std::filesystem::path& path)
     return std::filesystem::is_regular_file(path, error) ? Found::File : Found::Unknown;
 }
 
-std::vector<Entry> ListFolder(const std::filesystem::path& folder)
+std::vector<Entry> ListFolder(const std::filesystem::path& requested)
 {
-    if (const std::optional<Path> content = AsContent(folder))
+    if (const std::optional<Path> content = AsContent(requested))
     {
         return List(content->str());
     }
+    const std::filesystem::path folder = OnDisk(requested);
     std::vector<Entry> entries;
     std::error_code error;
     for (const auto& entry : std::filesystem::directory_iterator(folder, error))

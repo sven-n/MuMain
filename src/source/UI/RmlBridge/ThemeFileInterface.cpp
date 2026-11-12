@@ -3,7 +3,7 @@
 
 #include "UI/RmlBridge/ThemeInheritance.h"
 #include "UI/RmlBridge/ThemeFonts.h"
-#include "Core/Platform/PathResolve.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
@@ -23,30 +23,19 @@ namespace
 {
 struct FileState
 {
-    std::FILE* stream = nullptr;
     std::string contents;
     size_t position = 0;
 };
 
-std::FILE* OpenFile(const std::string& path)
-{
-#ifdef _WIN32
-    return _wfopen(Core::Text::PathFromUtf8(path).c_str(), L"rb");
-#else
-    return std::fopen(MuResolvePath(path.c_str()).c_str(), "rb");
-#endif
-}
-
-std::string ResolveToken(const ThemeInheritance& theme, const std::string& tokenName,
-                         const std::string& stylesheetPath)
+std::string ResolveToken(const ThemeInheritance& theme, const std::string& tokenName, const std::string& stylesheetPath)
 {
     if (const auto font = ResolveThemeFontToken(theme, tokenName))
         return *font;
     const auto setting = theme.GetSetting("Tokens", tokenName);
     if (setting)
         return setting->value;
-    g_ErrorReport.Write(L"> [RmlTheme] Missing token '%hs' in stylesheet '%hs'.\r\n",
-        tokenName.c_str(), stylesheetPath.c_str());
+    g_ErrorReport.Write(L"> [RmlTheme] Missing token '%hs' in stylesheet '%hs'.\r\n", tokenName.c_str(),
+                        stylesheetPath.c_str());
     return {};
 }
 
@@ -59,8 +48,7 @@ std::string SubstituteTokens(const std::string& source, const std::string& theme
     std::string result;
     result.reserve(source.size());
     size_t lastEnd = 0;
-    for (auto it = std::sregex_iterator(source.begin(), source.end(), tokenPattern);
-         it != std::sregex_iterator(); ++it)
+    for (auto it = std::sregex_iterator(source.begin(), source.end(), tokenPattern); it != std::sregex_iterator(); ++it)
     {
         const std::smatch& match = *it;
         result.append(source, lastEnd, static_cast<size_t>(match.position()) - lastEnd);
@@ -75,63 +63,31 @@ std::string SubstituteTokens(const std::string& source, const std::string& theme
     return result;
 }
 
-std::optional<std::string> ReadAll(std::FILE* stream)
-{
-    if (std::fseek(stream, 0, SEEK_END) != 0)
-        return std::nullopt;
-    const long length = std::ftell(stream);
-    if (length < 0 || std::fseek(stream, 0, SEEK_SET) != 0)
-        return std::nullopt;
-    std::string result(static_cast<size_t>(length), '\0');
-    if (length != 0 && std::fread(result.data(), 1, result.size(), stream) != result.size())
-        return std::nullopt;
-    return result;
-}
 } // namespace
 
 Rml::FileHandle ThemeFileInterface::Open(const Rml::String& path)
 {
-    const auto resolved = ResolveThemeResource(path);
-    std::FILE* stream = OpenFile(resolved);
-    if (!stream)
+    auto source = Content::ReadFile(Core::Text::PathFromUtf8(ResolveThemeResource(path)));
+    if (!source)
         return 0;
 
     auto file = std::make_unique<FileState>();
-    file->stream = stream;
     if (const auto theme = ThemeDirectoryForResource(path);
-        theme && Core::Text::PathFromUtf8(path).extension() == ".rcss")
-    {
-        const auto source = ReadAll(stream);
-        if (!source)
-        {
-            std::fclose(stream);
-            return 0;
-        }
-        if (source->find("token(") != std::string::npos)
-        {
-            file->contents = SubstituteTokens(*source, ThemePathUtf8(*theme), path);
-            std::fclose(stream);
-            file->stream = nullptr;
-        }
-        else
-            std::rewind(stream);
-    }
+        theme && Core::Text::PathFromUtf8(path).extension() == ".rcss" && source->find("token(") != std::string::npos)
+        file->contents = SubstituteTokens(*source, ThemePathUtf8(*theme), path);
+    else
+        file->contents = std::move(*source);
     return reinterpret_cast<Rml::FileHandle>(file.release());
 }
 
 void ThemeFileInterface::Close(Rml::FileHandle file)
 {
-    auto* state = reinterpret_cast<FileState*>(file);
-    if (state->stream)
-        std::fclose(state->stream);
-    delete state;
+    delete reinterpret_cast<FileState*>(file);
 }
 
 size_t ThemeFileInterface::Read(void* buffer, size_t size, Rml::FileHandle file)
 {
     auto* state = reinterpret_cast<FileState*>(file);
-    if (state->stream)
-        return std::fread(buffer, 1, size, state->stream);
     const size_t count = std::min(size, state->contents.size() - state->position);
     if (count != 0)
         std::memcpy(buffer, state->contents.data() + state->position, count);
@@ -142,9 +98,6 @@ size_t ThemeFileInterface::Read(void* buffer, size_t size, Rml::FileHandle file)
 bool ThemeFileInterface::Seek(Rml::FileHandle file, long offset, int origin)
 {
     auto* state = reinterpret_cast<FileState*>(file);
-    if (state->stream)
-        return std::fseek(state->stream, offset, origin) == 0;
-
     size_t base = 0;
     if (origin == SEEK_CUR)
         base = state->position;
@@ -162,10 +115,6 @@ bool ThemeFileInterface::Seek(Rml::FileHandle file, long offset, int origin)
 
 size_t ThemeFileInterface::Tell(Rml::FileHandle file)
 {
-    auto* state = reinterpret_cast<FileState*>(file);
-    if (!state->stream)
-        return state->position;
-    const long position = std::ftell(state->stream);
-    return position < 0 ? 0 : static_cast<size_t>(position);
+    return reinterpret_cast<FileState*>(file)->position;
 }
 } // namespace UI::RmlBridge

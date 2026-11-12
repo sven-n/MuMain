@@ -3,11 +3,12 @@
 port can serve it from anywhere: the APK, the browser, memory. This finds the calls in src/source that open, probe or
 list files themselves, and fails when a file has more of a kind than check_content_io_baseline.txt allows.
 
-The baseline lists the calls still to move and the ones that stay on disk (settings, logs, editor saves); each change
-that moves calls lowers it. A file with fewer calls than its baseline line also fails, so the baseline keeps up.
-Comments and string literals are not code and are left out.
+The baseline lists the calls that stay on disk (settings, logs, editor saves), each with why in a fourth column, and
+the calls still to move, without one; the check lists those as it runs. Each change that moves calls lowers it. A file
+with fewer calls than its baseline line also fails, so the baseline keeps up. Comments and string literals are not
+code and are left out.
 
-Usage: check_content_io.py <repo root> [--update]   (--update rewrites the baseline from the code)
+Usage: check_content_io.py <repo root> [--update]   (--update rewrites the counts from the code, keeping the reasons)
 """
 import re
 import sys
@@ -62,17 +63,23 @@ def count_calls(root):
 
 def read_baseline(file):
     allowed = Counter()
+    reasons = {}
     for line in file.read_text(encoding="utf-8").splitlines():
         if line.strip() and not line.startswith("#"):
-            path, name, count = line.split("\t")
+            path, name, count, *reason = line.split("\t")
             allowed[(path, name)] = int(count)
-    return allowed
+            if reason and reason[0].strip():
+                reasons[(path, name)] = reason[0].strip()
+    return allowed, reasons
 
 
-def write_baseline(file, counts):
-    lines = ["# check_content_io.py: file<TAB>call<TAB>how many it may still have. Lower it, never raise it."]
-    lines += [f"{path}\t{name}\t{count}" for (path, name), count in sorted(counts.items())]
-    file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+def write_baseline(file, counts, reasons):
+    lines = ["# check_content_io.py: file<TAB>call<TAB>how many it may still have<TAB>why it stays on disk (none: "
+             "still to move). Lower the count, never raise it."]
+    for (path, name), count in sorted(counts.items()):
+        reason = reasons.get((path, name))
+        lines.append(f"{path}\t{name}\t{count}" + (f"\t{reason}" if reason else ""))
+    file.write_bytes(("\n".join(lines) + "\n").encode("utf-8"))
 
 
 def main(argv):
@@ -81,11 +88,14 @@ def main(argv):
         return 2
     root = Path(argv[1]).resolve()
     counts = count_calls(root)
+    allowed, reasons = read_baseline(root / BASELINE)
     if "--update" in argv:
-        write_baseline(root / BASELINE, counts)
+        write_baseline(root / BASELINE, counts, reasons)
         return 0
 
-    allowed = read_baseline(root / BASELINE)
+    for key in sorted(counts):
+        if key not in reasons and counts[key] <= allowed[key]:
+            print(f"still to move: {key[0]}: {counts[key]} {key[1]} call(s)")
     problems = []
     for key in sorted(set(counts) | set(allowed)):
         path, name = key

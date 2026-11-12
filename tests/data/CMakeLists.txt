@@ -354,8 +354,9 @@ target_compile_definitions(render_style_tests PRIVATE
     MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
 )
 
-# Each case of the data tests once more, with the shipped client data read from a storage of the test's own
-# (ClientDataScope, Core/Content). The extra argument keeps this discovery's files apart from the first one's.
+# Each case of the data tests once more, with the shipped client data read from a storage of the test's own and the
+# working directory elsewhere (ClientDataScope), so a loader that goes around the content layer (Core/Content) fails
+# here. The extra argument keeps this discovery's files apart from the first one's.
 foreach(data_test IN ITEMS monster_data_tests test_item_database_files)
     doctest_discover_tests(${data_test}
         TEST_PREFIX "content storage: "

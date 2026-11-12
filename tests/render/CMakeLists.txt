@@ -111,7 +111,7 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/BloomSource.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/ColorGradingTable.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/SceneBoundary.cpp
-    LINK_LIBS SDL3::SDL3
+    LINK_LIBS SDL3::SDL3 mu_test_content mu_test_path_resolve
 )
 
 mu_add_test(
@@ -174,9 +174,9 @@ mu_add_test(
         test_texture_pack.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePack.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePackFiles.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmapPath.cpp
     LINK_LIBS
         mu_test_asset_path
+        mu_test_content
         mu_test_path_resolve
 )
 

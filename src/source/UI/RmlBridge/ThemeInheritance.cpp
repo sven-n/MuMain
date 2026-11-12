@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
-#include "Core/Platform/PathResolve.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <cctype>
-#include <fstream>
 #include <set>
+#include <sstream>
 #include <string_view>
 
 namespace UI::RmlBridge
@@ -16,7 +16,7 @@ namespace
 std::string Lower(std::string text)
 {
     std::transform(text.begin(), text.end(), text.begin(),
-        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     return text;
 }
 
@@ -26,20 +26,15 @@ std::string Trim(std::string text)
     if (first == std::string::npos)
         return {};
     text = text.substr(first, text.find_last_not_of(" \t\r\n") - first + 1);
-    if (text.size() >= 2 && ((text.front() == '"' && text.back() == '"') ||
-                            (text.front() == '\'' && text.back() == '\'')))
+    if (text.size() >= 2 &&
+        ((text.front() == '"' && text.back() == '"') || (text.front() == '\'' && text.back() == '\'')))
         text = text.substr(1, text.size() - 2);
     return text;
 }
 
 bool IsFile(const std::filesystem::path& path)
 {
-    std::error_code error;
-#ifndef _WIN32
-    return std::filesystem::is_regular_file(MuResolvePath(path.string().c_str()), error);
-#else
-    return std::filesystem::is_regular_file(path, error);
-#endif
+    return Content::Probe(path) == Content::Found::File;
 }
 
 std::filesystem::path TextureFile(std::filesystem::path path)
@@ -55,8 +50,9 @@ std::filesystem::path TextureFile(std::filesystem::path path)
 
 bool ThemeInheritance::IsValidName(const std::string& name)
 {
-    return !name.empty() && std::all_of(name.begin(), name.end(), [](unsigned char c)
-        { return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '-'; });
+    return !name.empty() &&
+           std::all_of(name.begin(), name.end(), [](unsigned char c)
+                       { return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '-'; });
 }
 
 ThemeInheritance::IniLine ThemeInheritance::ParseIniLine(std::string line)
@@ -79,7 +75,10 @@ ThemeInheritance::Values ThemeInheritance::ReadValues(const std::filesystem::pat
     Values values;
     for (const char* name : {"theme.ini", "tokens.ini"})
     {
-        std::ifstream input(directory / name, std::ios::binary);
+        const auto bytes = Content::ReadFile(directory / name);
+        if (!bytes)
+            continue;
+        std::istringstream input(*bytes);
         std::string section, line;
         while (std::getline(input, line))
         {
@@ -98,7 +97,7 @@ ThemeInheritance::Values ThemeInheritance::ReadValues(const std::filesystem::pat
 }
 
 std::optional<std::string> ThemeInheritance::ReadSetting(const std::filesystem::path& directory,
-                                                      const std::string& section, const std::string& key)
+                                                         const std::string& section, const std::string& key)
 {
     const auto values = ReadValues(directory);
     const auto found = values.find(Lower(section));
@@ -120,8 +119,7 @@ void ThemeInheritance::Build(std::filesystem::path directory)
     while (true)
     {
         const std::string name = Lower(directory.filename().string());
-        std::error_code error;
-        if (!IsValidName(name) || !std::filesystem::is_directory(directory, error))
+        if (!IsValidName(name) || Content::Probe(directory) != Content::Found::Folder)
         {
             m_Error = "Invalid or missing theme: " + directory.generic_string();
             return;
@@ -148,7 +146,7 @@ void ThemeInheritance::Build(std::filesystem::path directory)
 }
 
 std::optional<std::filesystem::path> ThemeInheritance::ResolveFile(const std::filesystem::path& relative,
-                                                                 bool texture) const
+                                                                   bool texture) const
 {
     if (!IsValid() || relative.empty() || relative.is_absolute())
         return std::nullopt;
@@ -181,7 +179,7 @@ std::map<std::string, ThemeInheritance::Setting> ThemeInheritance::Section(const
 }
 
 std::optional<ThemeInheritance::Setting> ThemeInheritance::GetSetting(const std::string& section,
-                                                                    const std::string& key) const
+                                                                      const std::string& key) const
 {
     if (!IsValid())
         return std::nullopt;

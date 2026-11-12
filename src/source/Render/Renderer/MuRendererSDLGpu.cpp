@@ -46,6 +46,7 @@
 #include "SdlGpuValidation.h"
 #include "SingleSampleTwins.h"
 #include "WorldPipelineSet.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/PostProcessing/BloomSource.h"
@@ -64,7 +65,6 @@
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
-#include <fstream>
 #include <limits>
 #include <span>
 #include <string>
@@ -227,17 +227,12 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 #define MU_SHADER_DIR ""
 #endif
     // Primary: cmake build-output path (works for local dev builds).
-    // Fallback: shaders/ next to the executable (works for CI artifacts and installs).
+    // Fallback: shaders/ in the game's content (works for CI artifacts and installs).
     std::string filename = std::string(name) + "." + stage + "." + ext;
     std::filesystem::path cmakePath = std::filesystem::path(MU_SHADER_DIR) / filename;
-    if (!cmakePath.empty() && std::filesystem::exists(cmakePath))
+    if (!cmakePath.empty() && Content::Probe(cmakePath) == Content::Found::File)
     {
         return cmakePath.string();
-    }
-    const char* basePath = SDL_GetBasePath();
-    if (basePath != nullptr)
-    {
-        return (std::filesystem::path(basePath) / "shaders" / filename).string();
     }
     return (std::filesystem::path("shaders") / filename).string();
 }
@@ -266,27 +261,18 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 [[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* driver)
 {
     const std::string path = GetShaderBlobPath(driver, stage, name);
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file.is_open())
+    const std::optional<std::string> file = Content::ReadFile(path);
+    if (!file)
     {
         mu::log::Get("render")->error("SDL_gpu -- shader blob not found: {}", path);
         return {};
     }
-    const auto fileSize = static_cast<std::streamsize>(file.tellg());
-    if (fileSize <= 0)
+    if (file->empty())
     {
         mu::log::Get("render")->error("SDL_gpu -- shader blob empty: {}", path);
         return {};
     }
-    file.seekg(0, std::ios::beg);
-    std::vector<Uint8> blob(static_cast<size_t>(fileSize));
-    file.read(reinterpret_cast<char*>(blob.data()), fileSize);
-    if (!file)
-    {
-        mu::log::Get("render")->error("SDL_gpu -- shader blob read error: {}", path);
-        return {};
-    }
-    return blob;
+    return std::vector<Uint8>(file->begin(), file->end());
 }
 
 // ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 
 #include <algorithm>
 #include <codecvt>
@@ -18,7 +18,6 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "Core/Utilities/ReadScript.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
@@ -57,7 +56,7 @@ int  AbuseNameFilterNumber = 0;
 
 void OpenFilterFile(const wchar_t* FileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(FileName);
     if (!fp)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
@@ -69,7 +68,7 @@ void OpenFilterFile(const wchar_t* FileName)
     BYTE* Buffer = content.data();
     // The list ends at its first empty entry; the checksum behind the table is not checked. A file made for a
     // smaller table ends early, after that entry, and still loads.
-    const std::size_t entries = fread(Buffer, Size, MAX_FILTERS, fp.get());
+    const std::size_t entries = SDL_ReadIO(fp.get(), Buffer, static_cast<std::size_t>(Size) * MAX_FILTERS) / Size;
     fp.reset();
 
     bool ended = false;
@@ -103,7 +102,7 @@ void OpenFilterFile(const wchar_t* FileName)
 
 void OpenNameFilterFile(const wchar_t* FileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(FileName);
     if (!fp)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
@@ -144,7 +143,7 @@ void OpenNameFilterFile(const wchar_t* FileName)
 
 void OpenGateScript(const wchar_t* FileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(FileName);
     if (fp)
     {
         int Size = sizeof(GATE_ATTRIBUTE);
@@ -156,8 +155,8 @@ void OpenGateScript(const wchar_t* FileName)
         {
             // A file made for fewer gates ends between two of them; the gates it lacks stay empty. A file that
             // ends inside a gate is corrupt.
-            const std::size_t read = fread(Buffer, 1, Size, fp.get());
-            if (read == 0 && feof(fp.get()))
+            const std::size_t read = SDL_ReadIO(fp.get(), Buffer, Size);
+            if (read == 0 && SDL_GetIOStatus(fp.get()) == SDL_IO_STATUS_EOF)
             {
                 break;
             }
@@ -181,35 +180,6 @@ void OpenGateScript(const wchar_t* FileName)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
     }
-}
-
-void OpenNpcScript(wchar_t* FileName)
-{
-    if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-        return;
-    }
-    SMDToken Token;
-    while (true)
-    {
-        Token = (*GetToken)();
-        if (Token == END) break;
-        if (Token == NAME && strcmp("end", TokenString) == 0) break;
-        if (Token == NUMBER)
-        {
-            int Type, x, y, Dir;
-            Type = (int)TokenNumber;
-            Token = (*GetToken)(); x = (int)TokenNumber;
-            Token = (*GetToken)(); y = (int)TokenNumber;
-            Token = (*GetToken)(); Dir = (int)TokenNumber;
-        }
-    }
-    fclose(SMDFile);
 }
 
 BOOL IsValidateSkillIdx(INT iSkillIdx)

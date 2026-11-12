@@ -3,7 +3,9 @@
 
 #include "stdafx.h"
 #include "Core/Utilities/Random.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/FileHandle.h"
+#include "Data/DataHandler/DataFileIO.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -187,14 +189,14 @@ bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
 {
     UnLoadCameraWalkScript();
 
-    Core::Utilities::FileHandle fileHandle(_wfopen(filename.c_str(), L"rb"));
+    const Content::Stream fileHandle = Content::OpenIO(filename);
     if (!fileHandle)
     {
         return false;
     }
 
     DWORD signature = 0;
-    if (fread(&signature, sizeof(DWORD), 1, fileHandle.get()) != 1 || signature != 0x00535743)
+    if (!DataFileIO::ReadExact(fileHandle.get(), &signature, sizeof(DWORD)) || signature != 0x00535743)
     {
         return false;
     }
@@ -204,7 +206,7 @@ bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
     // pulls in the first waypoint's bytes and yields a garbage count that
     // overflows the reserve.
     std::uint32_t waypointCount = 0;
-    if (fread(&waypointCount, sizeof(waypointCount), 1, fileHandle.get()) != 1)
+    if (!DataFileIO::ReadExact(fileHandle.get(), &waypointCount, sizeof(waypointCount)))
     {
         return false;
     }
@@ -213,7 +215,7 @@ bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
     for (std::uint32_t index = 0; index < waypointCount; ++index)
     {
         auto waypoint = std::make_unique<WAYPOINT>();
-        if (fread(waypoint.get(), sizeof(WAYPOINT), 1, fileHandle.get()) != 1)
+        if (!DataFileIO::ReadExact(fileHandle.get(), waypoint.get(), sizeof(WAYPOINT)))
         {
             return false;
         }
@@ -230,6 +232,7 @@ void CCameraMove::UnLoadCameraWalkScript()
 }
 bool CCameraMove::SaveCameraWalkScript(const std::wstring& filename)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     if (m_listWayPoint.empty())
     {
         return false;
