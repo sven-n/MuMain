@@ -29,6 +29,56 @@ internal static class Program
         AddressFamiliesAlternate();
         await LocalhostReachesAnIPv4OnlyServerQuickly();
         await RefusedOnEveryAddressFailsByCode();
+        await ClosingWhileThePeerStopsReadingLetsGo();
+    }
+
+    // A server that stopped reading keeps the send pending forever; the close must still give the socket up.
+    private static async Task ClosingWhileThePeerStopsReadingLetsGo()
+    {
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Server.ReceiveBufferSize = 1024;
+        listener.Start();
+        using var stop = listener.Server;
+        var pipe = new DeferredTcpPipe();
+        var events = new Events();
+        pipe.Start("127.0.0.1", Port(listener), Wait, events.Opened, events.Failed);
+        using var server = await listener.AcceptSocketAsync().WaitAsync(Wait);
+        await events.OpenedTask.WaitAsync(Wait);
+        // Writes until everything between here and the server is full, however much the system buffers.
+        var chunk = new byte[1024];
+        Task? stalled = null;
+        for (var i = 0; i < 16384 && stalled is null; i++)
+        {
+            var write = pipe.Output.WriteAsync(chunk).AsTask();
+            if (await Task.WhenAny(write, Task.Delay(500)) != write)
+            {
+                stalled = write;
+            }
+        }
+
+        Expect(stalled is not null, "the writes fill the buffers of a server that doesn't read");
+        await pipe.Output.CompleteAsync();
+        pipe.Dispose();
+
+        // Input ends once the socket is closed; nothing else here would end it.
+        var watch = Stopwatch.StartNew();
+        try
+        {
+            while (true)
+            {
+                var result = await pipe.Input.ReadAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(10));
+                pipe.Input.AdvanceTo(result.Buffer.End);
+                if (result.IsCompleted)
+                {
+                    break;
+                }
+            }
+        }
+        catch (Exception ex) when (ex is not TimeoutException)
+        {
+        }
+
+        Expect(watch.Elapsed < TimeSpan.FromSeconds(8), $"a close gives the socket up although the server stopped reading (took {watch.ElapsedMilliseconds} ms)");
     }
 
     private static async Task WritesBeforeOpenGoOutInOrder()
