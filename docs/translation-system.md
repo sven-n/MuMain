@@ -546,6 +546,30 @@ missing attribute amounts. These shared tooltips also appear in shops and other
 item windows. Item names still depend on **Translate item names** and the item's
 available name translations.
 
+The storage and expanded-vault windows translate their titles, fees, Zen deposit
+and withdrawal controls, vault locking and password prompts, and related error
+messages.
+
+The player-trade window translates its title, partner and item warnings, Zen
+offer prompt, incoming request, cancellation reasons and reinforced-item
+restriction.
+
+Personal stores translate their owner labels, opening and closing controls,
+price and currency dialogs, sale and purchase confirmations, restrictions and
+status notices.
+
+NPC shops translate the merchant title, purchase confirmation, real-time tax
+rate and reinforced-item selling restriction; their repair and ordinary selling
+messages reuse the inventory translations.
+
+The main HUD translates life, mana, AG, SD and experience tooltips, its character,
+friends, party, guild, command, menu and item-shop buttons, the MU Helper controls,
+and buff duration and cancellation prompts.
+
+The character information window translates level and reset counts, available
+points, combat, defense, magic and curse statistics, HP and MP, and its quest,
+pet and master-skill controls.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
