@@ -62,6 +62,9 @@ struct RefreshAfterWrite
     RefreshAfterWrite() = default;
     RefreshAfterWrite(const RefreshAfterWrite&) = delete;
     RefreshAfterWrite& operator=(const RefreshAfterWrite&) = delete;
-    ~RefreshAfterWrite() { Refresh(); }
+    ~RefreshAfterWrite()
+    {
+        Refresh();
+    }
 };
 } // namespace Content
