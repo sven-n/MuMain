@@ -26,6 +26,9 @@ internal static class Program
         await ConnectTimesOut();
         await DisposeWhileConnectingNeverOpens();
         GameSocketOptions();
+        AddressFamiliesAlternate();
+        await LocalhostReachesAnIPv4OnlyServerQuickly();
+        await RefusedOnEveryAddressFailsByCode();
     }
 
     private static async Task WritesBeforeOpenGoOutInOrder()
@@ -153,6 +156,46 @@ internal static class Program
         DeferredTcpPipe.ConfigureSocket(socket);
         Expect(socket.NoDelay, "small packets go out at once (NoDelay)");
         Expect((int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive)! != 0, "keep-alive is on");
+    }
+
+    private static void AddressFamiliesAlternate()
+    {
+        var v6a = IPAddress.Parse("::1");
+        var v6b = IPAddress.Parse("fe80::1");
+        var v4a = IPAddress.Parse("127.0.0.1");
+        var v4b = IPAddress.Parse("10.0.0.1");
+        Expect(DeferredTcpPipe.Interleave([v6a, v6b, v4a]).SequenceEqual([v6a, v4a, v6b]), "IPv6 first, then alternating");
+        Expect(DeferredTcpPipe.Interleave([v4a, v4b, v6a]).SequenceEqual([v4a, v6a, v4b]), "the resolver's first family leads");
+        Expect(DeferredTcpPipe.Interleave([]).Count == 0, "no address, nothing to try");
+    }
+
+    private static async Task LocalhostReachesAnIPv4OnlyServerQuickly()
+    {
+        // localhost resolves to ::1 first; nothing listens there, and Windows retries a refused connect for about 2 s.
+        using var listener = Listen();
+        using var pipe = new DeferredTcpPipe();
+        var events = new Events();
+        var watch = Stopwatch.StartNew();
+        pipe.Start("localhost", Port(listener), Wait, events.Opened, events.Failed);
+        await Task.WhenAny(events.OpenedTask, events.FailedTask).WaitAsync(Wait);
+        Expect(events.OpenedTask.IsCompleted, "localhost reaches a server listening on IPv4 only");
+        Expect(watch.Elapsed < TimeSpan.FromSeconds(1), $"localhost opens without waiting out IPv6, took {watch.Elapsed}");
+    }
+
+    private static async Task RefusedOnEveryAddressFailsByCode()
+    {
+        int port;
+        using (var listener = Listen())
+        {
+            port = Port(listener);
+        }
+
+        using var pipe = new DeferredTcpPipe();
+        var events = new Events();
+        pipe.Start("localhost", port, Wait, events.Opened, events.Failed);
+        var error = await events.FailedTask.WaitAsync(Wait * 2);
+        Expect(ConnectFailure.Describe(error).StartsWith("SocketException ", StringComparison.Ordinal),
+               $"a connect refused on every address is described by its code, not \"{ConnectFailure.Describe(error)}\"");
     }
 
     private static TcpListener Listen()

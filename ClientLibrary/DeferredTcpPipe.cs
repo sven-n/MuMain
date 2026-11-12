@@ -5,7 +5,10 @@
 namespace MUnique.Client.Library;
 
 using System;
+using System.Collections.Generic;
 using System.IO.Pipelines;
+using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +25,11 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
     /// reset the connection, and the server then drops what it has not read yet.
     /// </summary>
     private static readonly TimeSpan LingerTime = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// How long one address gets before the next one is tried alongside it (RFC 8305's recommended 250 ms).
+    /// </summary>
+    private static readonly TimeSpan AttemptDelay = TimeSpan.FromMilliseconds(250);
 
     /// <summary>Idle time, in seconds, before the OS starts sending TCP keep-alive probes.</summary>
     private const int KeepAliveIdleSeconds = 4;
@@ -122,12 +130,124 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
         }
     }
 
-    private static async Task<Socket> ConnectAsync(string host, int port, CancellationToken cancellationToken)
+    /// <summary>
+    /// Connects to the first of the host's addresses that answers, trying them side by side as RFC 8305 ("Happy
+    /// Eyeballs") describes: the families alternate in the resolver's order, and each next attempt starts
+    /// <see cref="AttemptDelay"/> after the previous one, or as soon as it fails. A host whose IPv6 address doesn't
+    /// answer (<c>localhost</c> with an IPv4-only server: Windows retries a refused connect for about 2 s) then
+    /// connects over IPv4 within a fraction of a second.
+    /// </summary>
+    /// <param name="host">The host name or address.</param>
+    /// <param name="port">The port.</param>
+    /// <param name="cancellationToken">Ends the whole attempt.</param>
+    /// <returns>The connected socket.</returns>
+    internal static async Task<Socket> ConnectAsync(string host, int port, CancellationToken cancellationToken)
     {
-        var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+        IPAddress[] addresses = IPAddress.TryParse(host, out var literal)
+            ? [literal]
+            : await Dns.GetHostAddressesAsync(host, cancellationToken).ConfigureAwait(false);
+        var ordered = Interleave(addresses);
+        if (ordered.Count == 0)
+        {
+            throw new SocketException((int)SocketError.HostNotFound);
+        }
+
+        using var race = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var attempts = new List<Task<Socket>>();
         try
         {
-            await socket.ConnectAsync(host, port, cancellationToken).ConfigureAwait(false);
+            Exception? lastError = null;
+            var next = 0;
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (next < ordered.Count)
+                {
+                    attempts.Add(ConnectOneAsync(ordered[next++], port, race.Token));
+                }
+
+                if (attempts.Count == 0)
+                {
+                    throw lastError ?? new SocketException((int)SocketError.HostUnreachable);
+                }
+
+                var waitForNext = next < ordered.Count ? Task.Delay(AttemptDelay, race.Token) : Task.Delay(Timeout.Infinite, race.Token);
+                var finished = await Task.WhenAny(attempts.Append<Task>(waitForNext)).ConfigureAwait(false);
+                if (finished is not Task<Socket> attempt)
+                {
+                    continue;
+                }
+
+                attempts.Remove(attempt);
+                if (attempt.IsCompletedSuccessfully)
+                {
+                    return await attempt.ConfigureAwait(false);
+                }
+
+                lastError = attempt.Exception?.InnerException ?? lastError;
+            }
+        }
+        finally
+        {
+            // The attempts still running end with the race; one that connected anyway is closed.
+            await race.CancelAsync().ConfigureAwait(false);
+            foreach (var loser in attempts)
+            {
+                _ = loser.ContinueWith(DisposeOrObserve, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            }
+        }
+    }
+
+    private static void DisposeOrObserve(Task<Socket> attempt)
+    {
+        if (attempt.IsCompletedSuccessfully)
+        {
+            attempt.Result.Dispose();
+        }
+        else
+        {
+            _ = attempt.Exception;
+        }
+    }
+
+    /// <summary>
+    /// The addresses with their families alternating, starting with the family the resolver put first.
+    /// </summary>
+    /// <param name="addresses">The addresses in the resolver's order.</param>
+    /// <returns>The order to try them in.</returns>
+    internal static List<IPAddress> Interleave(IReadOnlyList<IPAddress> addresses)
+    {
+        if (addresses.Count == 0)
+        {
+            return [];
+        }
+
+        var first = addresses[0].AddressFamily;
+        var preferred = new Queue<IPAddress>(addresses.Where(a => a.AddressFamily == first));
+        var other = new Queue<IPAddress>(addresses.Where(a => a.AddressFamily != first));
+        var ordered = new List<IPAddress>(addresses.Count);
+        while (preferred.Count > 0 || other.Count > 0)
+        {
+            if (preferred.Count > 0)
+            {
+                ordered.Add(preferred.Dequeue());
+            }
+
+            if (other.Count > 0)
+            {
+                ordered.Add(other.Dequeue());
+            }
+        }
+
+        return ordered;
+    }
+
+    private static async Task<Socket> ConnectOneAsync(IPAddress address, int port, CancellationToken cancellationToken)
+    {
+        var socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        try
+        {
+            await socket.ConnectAsync(new IPEndPoint(address, port), cancellationToken).ConfigureAwait(false);
             return socket;
         }
         catch
