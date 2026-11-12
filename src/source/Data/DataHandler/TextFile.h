@@ -9,7 +9,8 @@
 namespace Data
 {
 // The whole file as text, without a UTF-8 byte order mark; nullopt when it
-// cannot be opened or is not a regular file (a folder).
+// cannot be opened or is not a regular file (a folder). A relative path is
+// read from the game's content (Core/Content), an absolute one from disk.
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path);
 
 // "<path>.tmp", where a save writes the new text before it replaces the file.

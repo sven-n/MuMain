@@ -49,6 +49,12 @@ add_test(NAME test_case_names_reach_ctest_whole
 add_test(NAME test_case_names_check_fixtures
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_test_case_names.py")
 
+# Game content is read through Core/Content; the baseline holds the file calls still to move or that stay on disk.
+add_test(NAME content_io_goes_through_the_content_layer
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_content_io.py" "${MU_REPO_ROOT}")
+add_test(NAME content_io_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_content_io.py")
+
 add_test(
     NAME msvc_runtime_dll_staging_contract
     COMMAND "${CMAKE_COMMAND}"

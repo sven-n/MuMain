@@ -55,6 +55,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include <SDL3/SDL.h>
+#include "Core/Content/ContentStore.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -1924,23 +1925,46 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.AddSeparator();
 }
 
-static void SetWorkingDirectoryToBasePath()
+// The client folder; empty when it can't be told.
+static std::filesystem::path ClientFolder()
 {
 #if defined(__APPLE__)
     // The working directory hasn't moved yet, so a relative start path still leads to the client here and is kept
     // absolute for every later caller (WinApiShims.h).
     if (const std::filesystem::path executable = Core::Platform::GetExecutablePath(); !executable.empty())
     {
-        std::error_code error;
-        std::filesystem::current_path(executable.parent_path(), error);
+        return executable.parent_path();
     }
 #else
     if (const char* basePath = SDL_GetBasePath(); basePath != nullptr)
     {
-        std::error_code error;
-        std::filesystem::current_path(basePath, error);
+        return std::filesystem::path(reinterpret_cast<const char8_t*>(basePath));
     }
 #endif
+    return {};
+}
+
+static void SetWorkingDirectoryToBasePath()
+{
+    if (const std::filesystem::path folder = ClientFolder(); !folder.empty())
+    {
+        std::error_code error;
+        std::filesystem::current_path(folder, error);
+    }
+}
+
+// The game's content is read from the client folder, named the same way on every platform (Core/Content). Returns
+// the line for the error report: where content is read from, or why the working directory is read instead.
+static std::string OpenContent()
+{
+    const std::string root = reinterpret_cast<const char*>(ClientFolder().u8string().c_str());
+    SDL_Storage* storage = SDL_OpenTitleStorage(root.empty() ? nullptr : root.c_str(), 0);
+    if (storage == nullptr)
+    {
+        return "cannot open " + root + " (" + SDL_GetError() + "), reading the working directory";
+    }
+    Content::Open(storage);
+    return root;
 }
 
 // The language the player reads: SetLocale falls back to en for a locale it doesn't know.
@@ -2019,7 +2043,11 @@ bool StartClient(char* szCmdLine)
         }
     }
 
+    const std::string contentRoot = OpenContent();
+    g_teardown.Push([] { Content::Close(); });
+
     WriteStartupDiagnostics(lpszExeVersion, wVersion);
+    g_ErrorReport.Write(L"> Content: %hs\r\n", contentRoot.c_str());
     InitializeDotNetBridge();
 
     g_ErrorReport.Write(L"> To read config.ini.\r\n");

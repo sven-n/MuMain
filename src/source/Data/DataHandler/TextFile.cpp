@@ -2,6 +2,8 @@
 
 #include "TextFile.h"
 
+#include "Core/Content/ContentStore.h"
+
 #include <cstddef>
 #include <fstream>
 #include <iterator>
@@ -41,6 +43,7 @@ bool PutBack(const std::filesystem::path& path, const std::optional<std::string>
     {
         std::error_code error;
         std::filesystem::remove(path, error);
+        Content::Refresh();
         return !error;
     }
     std::string error;
@@ -50,7 +53,7 @@ bool PutBack(const std::filesystem::path& path, const std::optional<std::string>
 
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
 {
-    std::optional<std::string> text = ReadFileBytes(path);
+    std::optional<std::string> text = Content::ReadFile(path);
     if (text && text->starts_with(Utf8ByteOrderMark))
     {
         text->erase(0, Utf8ByteOrderMark.size());
@@ -95,6 +98,8 @@ bool ReplaceWithTemporaryFile(const std::filesystem::path& path, std::string& er
         std::filesystem::remove(temporaryPath, fileError);
         return false;
     }
+    // A new file is found by content lookups in any case only once they list its folder again.
+    Content::Refresh();
     return true;
 }
 

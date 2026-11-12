@@ -2,13 +2,14 @@
 
 #include "LookProfile.h"
 
+#include "Core/Content/ContentStore.h"
+
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
 #include <algorithm>
 #include <cmath>
 #include <set>
 #include <sstream>
-#include <system_error>
 
 namespace Data::Maps
 {
@@ -388,8 +389,7 @@ LookProfileLoadResult LoadLookProfileFile(const std::filesystem::path& file)
     const std::string source = file.generic_string();
     // Only a file that is certainly absent selects the built-in values; one whose existence cannot be
     // checked (an inaccessible folder) is read, and the read reports the failure.
-    std::error_code error;
-    if (!std::filesystem::exists(file, error) && !error)
+    if (Content::Probe(file) == Content::Found::Nothing)
     {
         IssueList(source, result.issues).Warning("", "not found, the built-in values apply");
         return result;

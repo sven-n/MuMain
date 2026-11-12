@@ -192,3 +192,14 @@ mu_add_test(
         test_number_parse.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
 )
+
+mu_add_test(
+    NAME test_content
+    SOURCES
+        test_content_path.cpp
+        test_content_store.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Content/ContentPath.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Content/ContentStore.cpp
+    LINK_LIBS
+        SDL3::SDL3
+)

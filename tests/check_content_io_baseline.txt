@@ -1,0 +1,85 @@
+# check_content_io.py: file<TAB>call<TAB>how many it may still have. Lower it, never raise it.
+src/source/App/Platform/Windows/Winmain.cpp	SDL file	1
+src/source/App/Platform/Windows/Winmain.cpp	Win32 file	1
+src/source/App/Platform/Windows/Winmain.cpp	filesystem probe	1
+src/source/App/Platform/Windows/Winmain.cpp	font file	1
+src/source/Camera/CameraMove.cpp	fopen	2
+src/source/Core/Platform/Audio/MiniAudioBackend.cpp	audio file	2
+src/source/Core/Platform/Audio/MiniAudioBackend.cpp	filesystem probe	1
+src/source/Core/Platform/Dpapi.h	fopen	1
+src/source/Core/Platform/GdiText.cpp	fopen	1
+src/source/Core/Platform/LocalSocket.cpp	Win32 file	1
+src/source/Core/Platform/SecureCrt.h	fopen	2
+src/source/Core/Platform/WinApiShims.h	fopen	2
+src/source/Core/Platform/WinFile.h	Win32 file	2
+src/source/Core/Platform/WinFileFind.h	Win32 file	1
+src/source/Core/Platform/WinFileFind.h	fopen	2
+src/source/Core/Platform/WinIni.cpp	fopen	2
+src/source/Core/Platform/WinMM.cpp	fopen	1
+src/source/Core/Utilities/PlatformInfo.cpp	fopen	1
+src/source/Data/DataHandler/CommonDataSaver.cpp	Win32 file	3
+src/source/Data/DataHandler/CommonDataSaver.inl	fopen	2
+src/source/Data/DataHandler/ItemData/ItemDataExportAsCSV.cpp	fopen	1
+src/source/Data/DataHandler/ItemData/ItemDataExportS6E3.cpp	fopen	1
+src/source/Data/DataHandler/ItemData/ItemDataLoader.cpp	fopen	1
+src/source/Data/DataHandler/ItemData/ItemJsonStorage.cpp	filesystem probe	1
+src/source/Data/DataHandler/LoadData.cpp	fopen	1
+src/source/Data/DataHandler/SkillData/SkillDataExportAsCSV.cpp	fopen	1
+src/source/Data/DataHandler/SkillData/SkillDataExportS6E3.cpp	fopen	1
+src/source/Data/DataHandler/SkillData/SkillDataLoader.cpp	fopen	1
+src/source/Data/DataHandler/TextFile.cpp	filesystem probe	1
+src/source/Data/DataHandler/TextFile.cpp	ifstream	1
+src/source/Data/GameConfig/PersonalTuning.cpp	filesystem probe	2
+src/source/Data/GameConfig/PersonalTuning.cpp	ifstream	1
+src/source/Data/GameData/ModelData/ModelFiles.cpp	filesystem probe	2
+src/source/Engine/Object/ZzzInfomation.cpp	fopen	4
+src/source/Engine/Object/ZzzObject.cpp	fopen	6
+src/source/Engine/Object/ZzzOpenData.cpp	fopen	2
+src/source/GameLogic/Items/CSItemOption.cpp	fopen	1
+src/source/GameLogic/Items/ItemAddOptioninfo.cpp	fopen	1
+src/source/GameLogic/Items/MixMgr.cpp	fopen	1
+src/source/GameLogic/Pets/w_PetProcess.cpp	fopen	1
+src/source/GameLogic/Quests/CSQuest.cpp	ifstream	1
+src/source/GameLogic/Quests/QuestMng.cpp	fopen	3
+src/source/GameShop/FileDownloader/FileDownloader.cpp	filesystem probe	1
+src/source/GameShop/FileDownloader/FileDownloader.cpp	stream open	1
+src/source/GameShop/InGameShopSystem.cpp	filesystem probe	2
+src/source/GameShop/ShopListManager/BannerInfo.cpp	filesystem probe	1
+src/source/GameShop/ShopListManager/BannerInfoList.cpp	ifstream	1
+src/source/GameShop/ShopListManager/BannerInfoList.cpp	stream open	1
+src/source/GameShop/ShopListManager/FTPFileDownLoader.cpp	Win32 file	1
+src/source/GameShop/ShopListManager/ListManager.cpp	Win32 file	1
+src/source/GameShop/ShopListManager/ShopList.cpp	ifstream	4
+src/source/GameShop/ShopListManager/ShopList.cpp	stream open	6
+src/source/GameShop/ShopListManager/interface/PathMethod/Path.cpp	fstream	1
+src/source/GameShop/ShopListManager/interface/PathMethod/Path.cpp	ifstream	1
+src/source/Network/MoveCommandData.cpp	fopen	1
+src/source/Network/Server/SocketSystem.cpp	fopen	1
+src/source/Render/Models/Gltf/GlbLoader.cpp	glTF file	1
+src/source/Render/Models/SMD.cpp	fopen	1
+src/source/Render/Models/ZzzBMD.cpp	fopen	2
+src/source/Render/PostProcessing/ColorGradingTable.cpp	SDL file	1
+src/source/Render/PostProcessing/ColorGradingTable.cpp	filesystem probe	1
+src/source/Render/Renderer/MuRendererSDLGpu.cpp	filesystem probe	1
+src/source/Render/Renderer/MuRendererSDLGpu.cpp	ifstream	1
+src/source/Render/Sprites/GlobalBitmap.cpp	ifstream	1
+src/source/Render/Sprites/GlobalBitmapLoad.cpp	filesystem probe	2
+src/source/Render/Sprites/GlobalBitmapLoad.cpp	ifstream	3
+src/source/Render/Terrain/ZzzLodTerrain.cpp	fopen	10
+src/source/Render/Text/SdlTtfFontSet.cpp	filesystem probe	1
+src/source/Render/Text/SdlTtfFontSet.cpp	font file	4
+src/source/Render/Textures/TexturePack.cpp	filesystem listing	1
+src/source/Render/Textures/TexturePackFiles.cpp	filesystem listing	1
+src/source/Render/Textures/ZzzTexture.cpp	fopen	4
+src/source/UI/HUD/MasterLevel.cpp	fopen	2
+src/source/UI/HUD/MiniMap.cpp	fopen	2
+src/source/UI/HUD/SlideTicker.cpp	fopen	1
+src/source/UI/Inventory/UIJewelHarmony.cpp	fopen	1
+src/source/UI/RmlBridge/RmlTheme.cpp	filesystem listing	1
+src/source/UI/RmlBridge/RmlTheme.cpp	ifstream	2
+src/source/UI/RmlBridge/RmlTheme.cpp	stream open	1
+src/source/UI/RmlBridge/ThemeFileInterface.cpp	fopen	2
+src/source/UI/RmlBridge/ThemeFonts.cpp	filesystem probe	1
+src/source/UI/RmlBridge/ThemeInheritance.cpp	filesystem probe	3
+src/source/UI/RmlBridge/ThemeInheritance.cpp	ifstream	1
+src/source/UI/Windows/CreditWin.cpp	fopen	2
