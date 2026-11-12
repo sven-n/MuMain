@@ -378,7 +378,7 @@ struct AcceptedCastFixture : SkillFixture
         REQUIRE(munique_client_library_handle != nullptr);
         connection = std::make_unique<Connection>(u"127.0.0.1", peer.port, false, nullptr);
         SocketClient = connection.get();
-        REQUIRE(connection->IsConnected());
+        REQUIRE(connection->State() != Network::ConnectionState::Closed);
         peer.Accept();
         restore.ownsHeadlessServices = true;
         Render::Sprites::SetGpuUploadsSkipped(true);

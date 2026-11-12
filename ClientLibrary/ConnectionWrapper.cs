@@ -19,6 +19,7 @@ public sealed class ConnectionWrapper : IDisposable
 {
     private readonly int _handle;
     private readonly Connection _connection;
+    private readonly DeferredTcpPipe _pipe;
     private readonly OutboundFlushLoop _outboundFlushLoop;
     private readonly bool _networkDiagnosticsEnabled = Environment.GetEnvironmentVariable("MU_NETWORK_DIAGNOSTICS") == "1";
 
@@ -34,6 +35,8 @@ public sealed class ConnectionWrapper : IDisposable
     /// The unmanaged callback to a disconnect handler. Parameter: handle.
     /// </summary>
     private readonly unsafe delegate* unmanaged<int, void> _onDisconnected;
+    private readonly unsafe delegate* unmanaged<int, void> _onOpened;
+    private int _disconnectNotified;
 
     private volatile bool _isDisposed;
     private int _isDisconnecting;
@@ -44,6 +47,7 @@ public sealed class ConnectionWrapper : IDisposable
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="connection">The connection.</param>
+    /// <param name="pipe">The transport under the connection, connected by <see cref="Connect"/>.</param>
     /// <param name="onPacketReceived">
     /// The pointer to an unmanaged method which is called when a new packet got received.
     /// Parameters: handle, size, pointer to the data.
@@ -52,10 +56,15 @@ public sealed class ConnectionWrapper : IDisposable
     /// The pointer to an unmanaged method which is called when the connection got disconnected.
     /// Parameter: handle.
     /// </param>
-    public unsafe ConnectionWrapper(int handle, Connection connection, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
+    /// <param name="onOpened">
+    /// The pointer to an unmanaged method which is called when the connection opened. Parameter: handle.
+    /// </param>
+    internal unsafe ConnectionWrapper(int handle, Connection connection, DeferredTcpPipe pipe, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected, delegate* unmanaged<int, void> onOpened)
     {
         this._handle = handle;
         this._connection = connection;
+        this._pipe = pipe;
+        this._onOpened = onOpened;
         this._onPacketReceived = onPacketReceived;
         this._onDisconnected = onDisconnected;
         this._outboundFlushLoop = new OutboundFlushLoop(this.FlushOutputAsync, this.OnSendFailed);
@@ -68,6 +77,17 @@ public sealed class ConnectionWrapper : IDisposable
     /// Gets the output pipe writer.
     /// </summary>
     internal PipeWriter Output => this._connection.Output;
+
+    /// <summary>
+    /// Starts connecting; the native side hears <c>onOpened</c>, or <c>onDisconnected</c> if it fails.
+    /// </summary>
+    /// <param name="host">The host name or address.</param>
+    /// <param name="port">The port.</param>
+    /// <param name="timeout">How long the whole connect may take.</param>
+    public void Connect(string host, int port, TimeSpan timeout)
+    {
+        this._pipe.Start(host, port, timeout, this.NotifyOpened, this.OnConnectFailed);
+    }
 
     /// <summary>
     /// Begins receiving packets from the client.
@@ -186,6 +206,7 @@ public sealed class ConnectionWrapper : IDisposable
         }
 
         this._isDisposed = true;
+        ConnectionManager.Forget(this._handle);
         _ = Task.Run(() => this.ShutdownAsync(disconnect));
     }
 
@@ -212,6 +233,7 @@ public sealed class ConnectionWrapper : IDisposable
         finally
         {
             this._connection.Dispose();
+            this._pipe.Dispose();
         }
     }
 
@@ -274,7 +296,7 @@ public sealed class ConnectionWrapper : IDisposable
         {
             Trace.WriteLine($"[NET] Connection disconnected, handle={this._handle}");
             this.WriteNetworkDiagnostic($"Disconnected event, handle={this._handle}");
-            this.NotifyDisconnected();
+            this.NotifyDisconnectedOnce();
             this.Dispose();
         }
         catch (Exception ex)
@@ -284,8 +306,26 @@ public sealed class ConnectionWrapper : IDisposable
         }
     }
 
-    private unsafe void NotifyDisconnected()
+    private void OnConnectFailed(Exception error)
     {
-        this._onDisconnected(this._handle);
+        // Nothing may be receiving yet, so the connection's own disconnect event can't be relied on.
+        this.NotifyDisconnectedOnce();
+        this.Dispose();
+    }
+
+    private unsafe void NotifyOpened()
+    {
+        if (!this._isDisposed)
+        {
+            this._onOpened(this._handle);
+        }
+    }
+
+    private unsafe void NotifyDisconnectedOnce()
+    {
+        if (Interlocked.Exchange(ref this._disconnectNotified, 1) == 0)
+        {
+            this._onDisconnected(this._handle);
+        }
     }
 }

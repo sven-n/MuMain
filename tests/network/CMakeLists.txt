@@ -115,6 +115,40 @@ mu_add_test(
         MuClient
 )
 
+mu_add_test(
+    NAME test_connection_lifecycle
+    SOURCES
+        test_connection_lifecycle.cpp
+)
+
+mu_add_test(
+    NAME test_incoming_packet_queue
+    SOURCES
+        test_incoming_packet_queue.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# Needs the managed library beside the test, which only the Windows build stages for tests.
+if(WIN32 AND TARGET ClientLibrary)
+    mu_add_test(
+        NAME test_connection_open
+        SOURCES
+            test_connection_open.cpp
+        LINK_LIBS
+            MuClient
+    )
+    target_link_libraries(test_connection_open PRIVATE ws2_32)
+    add_dependencies(test_connection_open ClientLibrary)
+    add_custom_command(TARGET test_connection_open PRE_LINK
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_BINARY_DIR}/src/MUnique.Client.Library.dll"
+            "$<TARGET_FILE_DIR:test_connection_open>/MUnique.Client.Library.dll"
+        COMMENT "Staging ClientLibrary beside the connection test"
+        VERBATIM
+    )
+endif()
+
 find_package(Threads REQUIRED)
 mu_add_test(
     NAME test_handle_registry
@@ -215,6 +249,16 @@ if(DOTNET_EXECUTABLE)
             --artifacts-path ${MU_DOTNET_SELF_CHECK_ARTIFACTS}
     )
     set_tests_properties(connect_failure_description PROPERTIES TIMEOUT 30)
+
+    add_test(
+        NAME deferred_tcp_pipe
+        COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
+            "${DOTNET_EXECUTABLE}" run
+            --project ${CMAKE_CURRENT_SOURCE_DIR}/deferred_tcp_pipe_self_check/DeferredTcpPipeSelfCheck.csproj
+            --configuration Release
+            --artifacts-path ${MU_DOTNET_SELF_CHECK_ARTIFACTS}
+    )
+    set_tests_properties(deferred_tcp_pipe PROPERTIES TIMEOUT 60)
 
     add_test(
         NAME outbound_flush_loop

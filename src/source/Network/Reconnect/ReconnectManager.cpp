@@ -417,7 +417,7 @@ double ReconnectManager::ElapsedMs() const
 
 bool ReconnectManager::IsSocketAlive() const
 {
-    return SocketClient != nullptr && SocketClient->IsConnected();
+    return SocketClient != nullptr && SocketClient->State() != Network::ConnectionState::Closed;
 }
 
 int ReconnectManager::GetStepCount()

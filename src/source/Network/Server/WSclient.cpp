@@ -395,53 +395,73 @@ bool IsGameServerPort(unsigned short Port)
     return Port > 0xADFF || Port < 0xAD00;
 }
 
-BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
+namespace
 {
-    BOOL bResult = TRUE;
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
+// Where SocketClient connects to: for the message when it can't, and for the auto-reconnect once a game server
+// greets it.
+struct ConnectAttempt
+{
+    std::wstring host;
+    unsigned short port = 0;
+    bool serverPick = false; // a game server the connect server sent the client to
+};
+ConnectAttempt s_connectAttempt;
 
-    const bool isEncrypted = IsGameServerPort(Port);
-    SocketClient = new Connection(MU_C16(IpAddr), Port, isEncrypted, &HandleIncomingPacket);
-    if (!SocketClient->IsConnected())
+void ReportConnectFailure(const ConnectAttempt& attempt)
+{
+    wchar_t connectError[256];
+    mu_swprintf_s(connectError, L"Cannot connect to %ls:%d. Server may be offline.", attempt.host.c_str(),
+                  attempt.port);
+    // The dialog names the address; the log, which players post, follows Network::DescribeEndpointForLog.
+    g_ErrorReport.Write(L"NET: Cannot connect to %hs. Server may be offline.\r\n",
+                        Network::DescribeEndpointForLog(mu_wchar_to_utf8(attempt.host.c_str()), attempt.port).c_str());
+    g_ErrorReport.WriteCurrentTime();
+
+    // While auto-reconnecting we probe the server repeatedly; the reconnect
+    // dialog already shows the status, so don't stack "server lost" popups.
+    // On the login screen LoginSceneReconnect says it with its Reconnect / Exit message.
+    if (!ReconnectManager::Instance().IsActive() && SceneFlag != LOG_IN_SCENE)
     {
-        bResult = FALSE;
-        wchar_t connectError[256];
-        mu_swprintf_s(connectError, L"Cannot connect to %ls:%d. Server may be offline.", IpAddr, Port);
-        // The dialog names the address; the log, which players post, follows Network::DescribeEndpointForLog.
-        g_ErrorReport.Write(L"NET: Cannot connect to %hs. Server may be offline.\r\n",
-                            Network::DescribeEndpointForLog(mu_wchar_to_utf8(IpAddr), Port).c_str());
-        g_ErrorReport.WriteCurrentTime();
-        delete SocketClient;
-        SocketClient = nullptr;
-
-        // While auto-reconnecting we probe the server repeatedly; the reconnect
-        // dialog already shows the status, so don't stack "server lost" popups.
-        // On the login screen LoginSceneReconnect says it with its Reconnect / Exit message.
-        if (!ReconnectManager::Instance().IsActive() && SceneFlag != LOG_IN_SCENE)
+        static bool connectErrorDisplayed = false;
+        if (!connectErrorDisplayed)
         {
-            static bool connectErrorDisplayed = false;
-            if (!connectErrorDisplayed)
-            {
-                connectErrorDisplayed = true;
-                MessageBoxW(nullptr, connectError, L"Connection Error", MB_ICONERROR | MB_OK);
-            }
+            connectErrorDisplayed = true;
+            MessageBoxW(nullptr, connectError, L"Connection Error", MB_ICONERROR | MB_OK);
         }
     }
-    else if (isEncrypted)
+}
+} // namespace
+
+BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
+{
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
+
+    s_connectAttempt = ConnectAttempt{IpAddr, Port};
+    SocketClient = new Connection(MU_C16(IpAddr), Port, IsGameServerPort(Port), &HandleIncomingPacket);
+    // Only a connect that couldn't even start fails here; one the server refuses closes later (FinishFailedConnect).
+    if (SocketClient->FailedToOpen())
     {
-        // Remember the address we actually connected to so auto-reconnect can
-        // probe it directly. Only cache game-server endpoints: a reconnect
-        // re-runs the login/character/join sequence, which the connect server
-        // can't answer. The connect server is the only unencrypted endpoint
-        // (see the port heuristic above), so caching when isEncrypted captures
-        // both the redirected game server (ReceiveServerConnect), a map-server
-        // change, and a direct game-server connection (where ReceiveServerConnect
-        // never runs), while skipping the connect server that would otherwise
-        // poison the cache and break reconnection (issue #68).
-        ReconnectManager::Instance().CacheServer(IpAddr, Port);
+        ReportConnectFailure(s_connectAttempt);
+        delete SocketClient;
+        SocketClient = nullptr;
+        return FALSE;
     }
 
-    return bResult;
+    return TRUE;
+}
+
+bool FinishFailedConnect()
+{
+    ReportConnectFailure(s_connectAttempt);
+    DeleteSocket();
+    if (s_connectAttempt.serverPick && SceneFlag == LOG_IN_SCENE)
+    {
+        // The connect server still lists a game server that is down.
+        LoginSceneReconnect::Instance().OnServerUnreachable(LoginServer::Game);
+        return true;
+    }
+
+    return false;
 }
 
 void DeleteSocket()
@@ -590,6 +610,7 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
         LoginSceneReconnect::Instance().OnServerUnreachable(LoginServer::Game);
         return;
     }
+    s_connectAttempt.serverPick = true;
 
     g_bGameServerConnected = TRUE;
 
@@ -608,6 +629,14 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 {
     auto Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
     mu::log::Get("network")->info("NET: Login response result=0x{:02X}", Data2->Result);
+
+    // A game server answered, so auto-reconnect can come back to it. Only game servers: a reconnect re-runs the
+    // login/character/join sequence, which the connect server can't answer. Cached on its greeting,
+    // not when connecting, so a server that couldn't be reached never replaces the last good one.
+    if (IsGameServerPort(s_connectAttempt.port))
+    {
+        ReconnectManager::Instance().CacheServer(s_connectAttempt.host.c_str(), s_connectAttempt.port);
+    }
 
     // A login may follow: the server let the client in, and the client is new enough.
     bool readyForLogin = false;
@@ -14714,6 +14743,12 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 
 void ProcessPacketCallback(const PacketInfo* Packet)
 {
+    if (Packet->Event != Network::ConnectionEvent::None)
+    {
+        Connection::ApplyQueuedEvent(Packet->ConnectionHandle, Packet->Event);
+        return;
+    }
+
     // By the id, not the live handle: what a server sent right before it closed the
     // connection (e.g. why it closed it) still counts.
     if (SocketClient == nullptr || Packet->ConnectionHandle != SocketClient->GetId())

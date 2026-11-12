@@ -789,7 +789,12 @@ static void UpdateLoginSceneReconnect()
  */
 static void CheckServerConnection()
 {
-    if (SocketClient != nullptr && SocketClient->IsConnected())
+    if (SocketClient != nullptr && SocketClient->State() != Network::ConnectionState::Closed)
+    {
+        return;
+    }
+
+    if (SocketClient != nullptr && SocketClient->FailedToOpen() && FinishFailedConnect())
     {
         return;
     }

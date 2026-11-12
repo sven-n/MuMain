@@ -28,7 +28,8 @@ LoginSceneReconnect& LoginSceneReconnect::Instance()
 
 bool GameLoginSceneLink::IsConnected() const
 {
-    return SocketClient != nullptr && SocketClient->IsConnected();
+    // Connecting counts: the connection to that server is on its way.
+    return SocketClient != nullptr && SocketClient->State() != Network::ConnectionState::Closed;
 }
 
 LoginServer GameLoginSceneLink::ConnectedServer() const
