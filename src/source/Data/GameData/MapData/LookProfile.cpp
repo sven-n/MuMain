@@ -5,11 +5,15 @@
 #include "Core/Content/ContentStore.h"
 
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
+#include "Data/GameData/MapData/LightMood.h"
 
 #include <algorithm>
+#include <charconv>
 #include <cmath>
-#include <set>
+#include <map>
 #include <sstream>
+#include <system_error>
+#include <utility>
 
 namespace Data::Maps
 {
@@ -62,6 +66,16 @@ constexpr std::array<LookValueInfo, LookValueCount> Infos = {{
     {LookValue::CloudCover, "clouds.cover", 0.45, 0.0, 1.0},
     {LookValue::SkyFill, "sky.fill", 0.0, 0.0, 1.0},
     {LookValue::RimSunFollow, "lighting.rim.sunFollow", 0.0, 0.0, 1.0},
+    // The light mood's built-in values are Classic's light; their ranges are the mood file's (a doctest
+    // compares them with LightMoodValueInfos).
+    {LookValue::MoodBase, "mood.base", 1.0, MinLightMoodBase, 1.0},
+    {LookValue::MoodFigures, "mood.figures", 1.0, MinLightMoodBase, 1.0},
+    {LookValue::MoodDynamicGain, "mood.dynamicGain", 1.0, MinLightMoodDynamicGain, MaxLightMoodDynamicGain},
+    {LookValue::MoodBackground, "mood.background", 1.0, 0.0, 1.0},
+    {LookValue::MoodSun, "mood.sun", 1.0, 0.0, 1.0},
+    {LookValue::MoodShadowKeep, "mood.shadowKeep", 0.0, 0.0, 1.5},
+    {LookValue::MoodShadeCool, "mood.shadeCool", 0.0, 0.0, 0.5},
+    {LookValue::MoodBrightScale, "mood.brightScale", 1.0, 0.3, 1.0},
 }};
 
 constexpr bool InfosFollowLookValueOrder()
@@ -153,6 +167,11 @@ bool ReadOverrides(const OrderedJson& json, const std::string& object, std::init
     return valid;
 }
 
+std::string MapObject(int firstMap)
+{
+    return std::string(MapsKey) + "[map " + std::to_string(firstMap) + "]";
+}
+
 bool CheckRootKeys(const OrderedJson& root, IssueList& issues)
 {
     bool valid = true;
@@ -211,45 +230,81 @@ bool ReadEnvironments(const OrderedJson& root, LookProfileData& data, IssueList&
     return valid;
 }
 
-bool ReadWorld(const OrderedJson& json, const std::string& object, int& world, IssueList& issues)
+bool ReadMapNumber(const OrderedJson& json, const std::string& field, int& map, IssueList& issues)
 {
-    const auto field = json.find(WorldKey);
     long long number = 0;
-    if (field == json.end() || !field->is_number_integer() || !Items::Json::ReadWholeNumber(*field, number) ||
-        number < 0 || number > MaxLookProfileWorld)
+    if (!json.is_number_integer() || !Items::Json::ReadWholeNumber(json, number) || number < 0 ||
+        number > MaxLookProfileWorld)
     {
-        issues.Fatal(Field(object, WorldKey),
-                     "missing or not a whole number from 0 to " + std::to_string(MaxLookProfileWorld));
+        issues.Fatal(field, "missing or not a whole number from 0 to " + std::to_string(MaxLookProfileWorld));
         return false;
     }
-    world = static_cast<int>(number);
+    map = static_cast<int>(number);
     return true;
 }
 
-bool ReadMap(const OrderedJson& json, size_t index, std::set<int>& worlds, LookProfileData& data, IssueList& issues)
+// Format 1: "world", one map.
+bool ReadWorld(const OrderedJson& json, const std::string& object, std::vector<int>& maps, IssueList& issues)
+{
+    const auto field = json.find(WorldKey);
+    int world = 0;
+    if (!ReadMapNumber(field != json.end() ? *field : OrderedJson(), Field(object, WorldKey), world, issues))
+    {
+        return false;
+    }
+    maps.push_back(world);
+    return true;
+}
+
+// Format 2: "maps", a list of maps.
+bool ReadMapList(const OrderedJson& json, const std::string& object, std::vector<int>& maps, IssueList& issues)
+{
+    const auto field = json.find(MapsKey);
+    if (field == json.end() || !field->is_array() || field->empty())
+    {
+        issues.Fatal(Field(object, MapsKey), "missing or not a list of map numbers");
+        return false;
+    }
+    bool valid = true;
+    for (size_t index = 0; index < field->size(); ++index)
+    {
+        int map = 0;
+        if (ReadMapNumber((*field)[index], Field(object, MapsKey) + "[" + std::to_string(index) + "]", map, issues))
+        {
+            maps.push_back(map);
+        }
+        else
+        {
+            valid = false;
+        }
+    }
+    return valid;
+}
+
+bool ReadMap(const OrderedJson& json, size_t index, int formatVersion, LookProfileData& data, IssueList& issues)
 {
     const std::string entry = std::string(MapsKey) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        issues.Fatal(entry, "must be an object with a world and its values");
+        issues.Fatal(entry, "must be an object with its maps and values");
         return false;
     }
     MapLookOverrides map;
-    if (!ReadWorld(json, entry, map.world, issues))
+    const char* mapsKey = formatVersion == 1 ? WorldKey : MapsKey;
+    if (!(formatVersion == 1 ? ReadWorld(json, entry, map.maps, issues) : ReadMapList(json, entry, map.maps, issues)))
     {
         return false;
     }
-    const std::string object = std::string(MapsKey) + "[world " + std::to_string(map.world) + "]";
-    if (!worlds.insert(map.world).second)
-    {
-        issues.Fatal(object, "is in the list more than once");
-        return false;
-    }
+    const std::string object = MapObject(map.maps.front());
     const auto name = json.find(NameKey);
     if (name != json.end() && !name->is_string())
     {
         issues.Fatal(Field(object, NameKey), "must be text");
         return false;
+    }
+    if (name != json.end())
+    {
+        map.name = name->get<std::string>();
     }
     if (const auto environment = json.find(EnvironmentKey); environment != json.end())
     {
@@ -265,15 +320,15 @@ bool ReadMap(const OrderedJson& json, size_t index, std::set<int>& worlds, LookP
         }
         map.environment = static_cast<std::size_t>(known - data.environments.begin());
     }
-    if (!ReadOverrides(json, object, {WorldKey, NameKey, EnvironmentKey}, map.overrides, issues))
+    if (!ReadOverrides(json, object, {mapsKey, NameKey, EnvironmentKey}, map.overrides, issues))
     {
         return false;
     }
-    data.maps.push_back(map);
+    data.maps.push_back(std::move(map));
     return true;
 }
 
-bool ReadMaps(const OrderedJson& root, LookProfileData& data, IssueList& issues)
+bool ReadMaps(const OrderedJson& root, int formatVersion, LookProfileData& data, IssueList& issues)
 {
     const auto list = root.find(MapsKey);
     if (list == root.end())
@@ -286,12 +341,98 @@ bool ReadMaps(const OrderedJson& root, LookProfileData& data, IssueList& issues)
         return false;
     }
     bool valid = true;
-    std::set<int> worlds;
     for (size_t index = 0; index < list->size(); ++index)
     {
-        valid = ReadMap((*list)[index], index, worlds, data, issues) && valid;
+        valid = ReadMap((*list)[index], index, formatVersion, data, issues) && valid;
     }
     return valid;
+}
+
+// Format 1 has its light mood in Data/Maps/LightMood.json; a mood value beside it would override that file's.
+bool HasNoMoodValues(const LookProfileData& data, IssueList& list)
+{
+    bool none = true;
+    const auto check = [&none, &list](const LookOverrides& overrides, const std::string& object)
+    {
+        for (const LookValueInfo& info : Infos)
+        {
+            if (IsMoodValue(info.value) && overrides[info.value])
+            {
+                list.Fatal(Field(object, info.name),
+                           std::string("is a format 2 value; a format 1 file has its light mood in ") + LightMoodFile);
+                none = false;
+            }
+        }
+    };
+    check(data.defaultOverrides, DefaultKey);
+    for (const EnvironmentLookOverrides& environment : data.environments)
+    {
+        check(environment.overrides, Field(EnvironmentsKey, environment.name));
+    }
+    for (const MapLookOverrides& entry : data.maps)
+    {
+        check(entry.overrides, entry.maps.empty() ? std::string(MapsKey) : MapObject(entry.maps.front()));
+    }
+    return none;
+}
+
+bool CheckFiguresNotBelowBase(const LookValues& values, const std::string& object, IssueList& issues)
+{
+    const double base = values[LookValue::MoodBase];
+    const double figures = values[LookValue::MoodFigures];
+    if (figures >= base)
+    {
+        return true;
+    }
+    issues.Fatal(Field(object, Info(LookValue::MoodFigures).name),
+                 "is " + FormatNumber(figures) + ", must not be below mood.base " + FormatNumber(base));
+    return false;
+}
+
+std::string FormatValue(double value)
+{
+    // The shortest text that reads back as the same number: 1, 0.45, 2048.
+    std::array<char, 32> buffer{};
+    const auto [end, error] = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+    return error == std::errc() ? std::string(buffer.data(), end) : FormatNumber(value);
+}
+
+std::string Quoted(const std::string& text)
+{
+    return OrderedJson(text).dump();
+}
+
+// `"name": value` for each value the overrides name, in LookValue order.
+std::vector<std::string> ValueFields(const LookOverrides& overrides)
+{
+    std::vector<std::string> fields;
+    for (const LookValueInfo& info : Infos)
+    {
+        if (const std::optional<double>& value = overrides[info.value])
+        {
+            fields.push_back(Quoted(info.name) + ": " + FormatValue(*value));
+        }
+    }
+    return fields;
+}
+
+std::string InlineObject(const std::vector<std::string>& fields)
+{
+    std::string text = "{";
+    for (size_t index = 0; index < fields.size(); ++index)
+    {
+        text += (index == 0 ? "" : ", ") + fields[index];
+    }
+    return text + "}";
+}
+
+// Lines of a block (`{` or `[` written by the caller), with commas between them.
+void AppendLines(std::string& text, const std::vector<std::string>& lines, const char* indent)
+{
+    for (size_t index = 0; index < lines.size(); ++index)
+    {
+        text += indent + lines[index] + (index + 1 < lines.size() ? ",\n" : "\n");
+    }
 }
 } // namespace
 
@@ -337,11 +478,32 @@ LookValues BuiltInLookValues()
     return builtIn;
 }
 
+bool MapLookOverrides::Has(int world) const
+{
+    return std::find(maps.begin(), maps.end(), world) != maps.end();
+}
+
 const MapLookOverrides* LookProfileData::FindMap(int world) const
 {
     const auto map =
-        std::find_if(maps.begin(), maps.end(), [world](const MapLookOverrides& entry) { return entry.world == world; });
+        std::find_if(maps.begin(), maps.end(), [world](const MapLookOverrides& entry) { return entry.Has(world); });
     return map != maps.end() ? &*map : nullptr;
+}
+
+MapLookOverrides* LookProfileData::FindMap(int world)
+{
+    return const_cast<MapLookOverrides*>(std::as_const(*this).FindMap(world));
+}
+
+LookValues LookProfileData::ForEnvironment(std::size_t environment) const
+{
+    LookValues values = BuiltInLookValues();
+    defaultOverrides.ApplyTo(values);
+    if (environment < environments.size())
+    {
+        environments[environment].overrides.ApplyTo(values);
+    }
+    return values;
 }
 
 LookValues LookProfileData::ForWorld(int world) const
@@ -360,14 +522,23 @@ LookValues LookProfileData::ForWorld(int world) const
 }
 
 void ReadLookProfileJson(std::string_view text, const std::string& source, LookProfileData& data,
-                         std::vector<ItemDataIssue>& issues)
+                         std::vector<ItemDataIssue>& issues, int* formatVersion)
 {
     data = {};
+    if (formatVersion)
+    {
+        *formatVersion = 0;
+    }
     IssueList list(source, issues);
     OrderedJson root;
     if (!Items::Json::ReadFileVersion(text, source, LookProfileFormatVersion, root, issues))
     {
         return;
+    }
+    const int version = root[Items::Json::Keys::FormatVersion].get<int>();
+    if (formatVersion)
+    {
+        *formatVersion = version;
     }
 
     LookProfileData read;
@@ -376,11 +547,134 @@ void ReadLookProfileJson(std::string_view text, const std::string& source, LookP
     const bool defaults = ReadDefault(root, read.defaultOverrides, list);
     // Before the maps, which name them.
     const bool environments = ReadEnvironments(root, read, list);
-    const bool maps = ReadMaps(root, read, list);
-    if (keys && defaults && environments && maps)
+    const bool maps = ReadMaps(root, version, read, list);
+    const bool moods = version >= LookProfileFormatVersion || HasNoMoodValues(read, list);
+    if (keys && defaults && environments && maps && moods && ValidateLookProfile(read, source, issues))
     {
         data = std::move(read);
     }
+}
+
+bool ValidateLookProfile(const LookProfileData& data, const std::string& source, std::vector<ItemDataIssue>& issues)
+{
+    IssueList list(source, issues);
+    // Non-short-circuit: every problem is reported.
+    LookValues defaults = BuiltInLookValues();
+    data.defaultOverrides.ApplyTo(defaults);
+    bool valid = CheckFiguresNotBelowBase(defaults, DefaultKey, list);
+    for (std::size_t index = 0; index < data.environments.size(); ++index)
+    {
+        valid = CheckFiguresNotBelowBase(data.ForEnvironment(index),
+                                         Field(EnvironmentsKey, data.environments[index].name), list) &&
+                valid;
+    }
+    // The entry each map was first seen in.
+    std::map<int, std::size_t> entryOfMap;
+    for (std::size_t index = 0; index < data.maps.size(); ++index)
+    {
+        const MapLookOverrides& entry = data.maps[index];
+        if (entry.maps.empty())
+        {
+            list.Fatal(std::string(MapsKey) + "[" + std::to_string(index) + "]", "has no maps");
+            valid = false;
+            continue;
+        }
+        const std::string object = MapObject(entry.maps.front());
+        if (entry.environment && *entry.environment >= data.environments.size())
+        {
+            list.Fatal(Field(object, EnvironmentKey), "must name one of \"environments\"");
+            valid = false;
+            continue;
+        }
+        for (const int map : entry.maps)
+        {
+            if (map < 0 || map > MaxLookProfileWorld)
+            {
+                list.Fatal(object, "has map " + std::to_string(map) + ", which is not from 0 to " +
+                                       std::to_string(MaxLookProfileWorld));
+                valid = false;
+                continue;
+            }
+            const auto [other, added] = entryOfMap.emplace(map, index);
+            if (!added)
+            {
+                list.Fatal(object, other->second == index
+                                       ? "lists map " + std::to_string(map) + " twice"
+                                       : "has map " + std::to_string(map) + ", which another entry has too");
+                valid = false;
+            }
+        }
+        valid = CheckFiguresNotBelowBase(data.ForWorld(entry.maps.front()), object, list) && valid;
+    }
+    return valid;
+}
+
+std::string WriteLookProfileJson(const LookProfileData& data)
+{
+    std::string text = "{\n  \"" + std::string(Items::Json::Keys::FormatVersion) +
+                       "\": " + std::to_string(LookProfileFormatVersion) + ",\n";
+
+    const std::vector<std::string> defaults = ValueFields(data.defaultOverrides);
+    text += "  \"" + std::string(DefaultKey) + "\": {" + (defaults.empty() ? "" : "\n");
+    AppendLines(text, defaults, "    ");
+    text += std::string(defaults.empty() ? "" : "  ") + "},\n";
+
+    std::vector<const EnvironmentLookOverrides*> environments;
+    for (const EnvironmentLookOverrides& environment : data.environments)
+    {
+        environments.push_back(&environment);
+    }
+    std::sort(environments.begin(), environments.end(),
+              [](const auto* left, const auto* right) { return left->name < right->name; });
+    std::vector<std::string> environmentLines;
+    for (const EnvironmentLookOverrides* environment : environments)
+    {
+        environmentLines.push_back(Quoted(environment->name) + ": " +
+                                   InlineObject(ValueFields(environment->overrides)));
+    }
+    text += "  \"" + std::string(EnvironmentsKey) + "\": {" + (environmentLines.empty() ? "" : "\n");
+    AppendLines(text, environmentLines, "    ");
+    text += std::string(environmentLines.empty() ? "" : "  ") + "},\n";
+
+    std::vector<MapLookOverrides> maps = data.maps;
+    for (MapLookOverrides& entry : maps)
+    {
+        std::sort(entry.maps.begin(), entry.maps.end());
+    }
+    std::sort(maps.begin(), maps.end(),
+              [](const MapLookOverrides& left, const MapLookOverrides& right)
+              {
+                  const int leftFirst = left.maps.empty() ? -1 : left.maps.front();
+                  const int rightFirst = right.maps.empty() ? -1 : right.maps.front();
+                  return leftFirst < rightFirst;
+              });
+    std::vector<std::string> mapLines;
+    for (const MapLookOverrides& entry : maps)
+    {
+        std::string list;
+        for (const int map : entry.maps)
+        {
+            list += (list.empty() ? "" : ", ") + std::to_string(map);
+        }
+        std::vector<std::string> fields{Quoted(MapsKey) + ": [" + list + "]"};
+        if (!entry.name.empty())
+        {
+            fields.push_back(Quoted(NameKey) + ": " + Quoted(entry.name));
+        }
+        if (entry.environment && *entry.environment < data.environments.size())
+        {
+            fields.push_back(Quoted(EnvironmentKey) + ": " + Quoted(data.environments[*entry.environment].name));
+        }
+        for (std::string& field : ValueFields(entry.overrides))
+        {
+            fields.push_back(std::move(field));
+        }
+        mapLines.push_back(InlineObject(fields));
+    }
+    text += "  \"" + std::string(MapsKey) + "\": [" + (mapLines.empty() ? "" : "\n");
+    AppendLines(text, mapLines, "    ");
+    text += std::string(mapLines.empty() ? "" : "  ") + "]\n}\n";
+    return text;
 }
 
 LookProfileLoadResult LoadLookProfileFile(const std::filesystem::path& file)

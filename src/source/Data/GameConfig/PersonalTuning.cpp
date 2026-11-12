@@ -150,7 +150,8 @@ void ReadEntry(std::string_view key, std::string_view text, PersonalTuning& tuni
         return;
     }
     const std::optional<LookValue> value = Data::Maps::FindLookValue(key);
-    if (!value)
+    // The light mood's values are the map's own light, not a player's (only its strength is).
+    if (!value || Data::Maps::IsMoodValue(*value))
     {
         issues.Ignored(key, "is not a tuning value");
         return;
@@ -188,6 +189,10 @@ std::vector<KeyChange> Changes(const PersonalTuning& from, const PersonalTuning&
     std::vector<KeyChange> changes;
     for (const LookValueInfo& info : Data::Maps::LookValueInfos())
     {
+        if (Data::Maps::IsMoodValue(info.value))
+        {
+            continue;
+        }
         const std::optional<double>& value = to.look[info.value];
         if (value != from.look[info.value])
         {

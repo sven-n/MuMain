@@ -48,17 +48,20 @@ the default, a map's environment, the map's own entry.
     "mood.sun": 0.8
   },
   "environments": {
-    "enclosed": { "mood.base": 0.45, "mood.sun": 1.0, "mood.shadowKeep": 0 }
+    "enclosed": {"mood.base": 0.45, "mood.sun": 1, "mood.shadowKeep": 0},
+    "outdoor": {}
   },
   "maps": [
-    { "maps": [80, 81], "name": "Karutan", "environment": "outdoor", "mood.base": 0.62, "mood.brightScale": 0.9 }
+    {"maps": [80, 81], "name": "Karutan", "environment": "outdoor", "mood.base": 0.62, "mood.brightScale": 0.9}
   ]
 }
 ```
 
 A value no layer names has its Classic value: 1, and 0 for `shadowKeep` and
 `shadeCool`. The mood values are not player values: a player changes the
-mood only through its strength (`mood.strengthPercent`).
+mood only through its strength (`mood.strengthPercent`); a `mood.base` or
+other mood value in `[EnhancedTuning]` is ignored with a warning and never
+written there.
 
 | Value | Scales | Range |
 |---|---|---|

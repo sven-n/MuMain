@@ -294,20 +294,31 @@ std::optional<double> TuningPointerValue(const TuningControl& control, double cu
     return value;
 }
 
-void DeveloperLookEdits::Mark(LookValue value, std::optional<int> world)
+void DeveloperLookEdits::Mark(LookValue value, const std::optional<std::vector<int>>& entryMaps)
 {
-    Flags& flags = world ? worlds[*world] : defaults;
-    flags[static_cast<std::size_t>(value)] = true;
+    const auto index = static_cast<std::size_t>(value);
+    if (!entryMaps)
+    {
+        defaults[index] = true;
+        return;
+    }
+    for (const int world : *entryMaps)
+    {
+        worlds[world][index] = true;
+    }
 }
 
-void DeveloperLookEdits::Clear(LookValue value, int world)
+void DeveloperLookEdits::Clear(LookValue value, const std::vector<int>& entryMaps)
 {
     const auto index = static_cast<std::size_t>(value);
     defaults[index] = false;
-    const auto entry = worlds.find(world);
-    if (entry != worlds.end())
+    for (const int world : entryMaps)
     {
-        entry->second[index] = false;
+        const auto entry = worlds.find(world);
+        if (entry != worlds.end())
+        {
+            entry->second[index] = false;
+        }
     }
 }
 
@@ -323,18 +334,11 @@ bool DeveloperLookEdits::Covers(const Data::Maps::LookProfileData& profile, int 
     {
         return false;
     }
-    // An edited default shows only where neither a map entry nor its environment overrides it.
-    return std::none_of(profile.maps.begin(), profile.maps.end(),
-                        [&profile, world, value](const Data::Maps::MapLookOverrides& map)
-                        {
-                            if (map.world != world)
-                            {
-                                return false;
-                            }
-                            return map.overrides[value].has_value() ||
-                                   (map.environment && *map.environment < profile.environments.size() &&
-                                    profile.environments[*map.environment].overrides[value].has_value());
-                        });
+    // An edited default shows only where neither the world's entry nor its environment overrides it.
+    const Data::Maps::MapLookOverrides* map = profile.FindMap(world);
+    return !map || !(map->overrides[value].has_value() ||
+                     (map->environment && *map->environment < profile.environments.size() &&
+                      profile.environments[*map->environment].overrides[value].has_value()));
 }
 
 TuningGroupSet TuningGroupsApplying(const LookFeatures& features)

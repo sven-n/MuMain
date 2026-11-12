@@ -125,7 +125,10 @@ start, and the map object sounds as the Map Editor's Sounds tab has them
 Problems have three levels, the same in every area: **fatal** (the data
 cannot be used: Save refuses it, and the game does not start with it; only
 the graphics look starts anyway, with the built-in look values and the
-Classic light),
+Classic light; a version 1 `Look.json` without its `LightMood.json` keeps
+its look values with the Classic light and cannot be saved, and a
+`LightMood.json` beside a version 2 file is a warning, as it is no longer
+read),
 **error** (something it names is missing, e.g. an item or a model file: the
 game runs without it, Save keeps it) and **warning** (it works, but is worth
 knowing). The worst come first. The boxes above the table show or hide each

@@ -10,6 +10,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <vector>
 
 // The player's tuning controls of the Enhanced look: one per look value a player may change, plus
 // the light mood's strength. Each belongs to the feature it tunes (the options window shows it
@@ -145,10 +146,10 @@ struct DeveloperLookEdits
     Flags defaults{};
     std::map<int, Flags> worlds;
 
-    // A `$look set` (no world) or `$look set map` on `world`.
-    void Mark(Data::Maps::LookValue value, std::optional<int> world);
-    // A `$look reset <name>` on `world`: the default and that world's entry, as the reset restores.
-    void Clear(Data::Maps::LookValue value, int world);
+    // A `$look set` (no maps) or a `$look set map` that changed the entry of `entryMaps`.
+    void Mark(Data::Maps::LookValue value, const std::optional<std::vector<int>>& entryMaps);
+    // A `$look reset <name>`: the default and the entry of `entryMaps`, as the reset restores.
+    void Clear(Data::Maps::LookValue value, const std::vector<int>& entryMaps);
     // True when the developer's value is what `profile` gives `world`: the world's edited entry, or an
     // edited default that neither an entry of the world nor its environment overrides.
     [[nodiscard]] bool Covers(const Data::Maps::LookProfileData& profile, int world, Data::Maps::LookValue value) const;

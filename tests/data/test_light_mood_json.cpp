@@ -177,11 +177,10 @@ TEST_CASE("a broken or missing light mood file is an error [data][lightmood]")
     CHECK(missing.data.defaultMood == LightMood{});
 }
 
-TEST_CASE("the shipped light mood file has the tuned values [data][lightmood]")
+TEST_CASE("the last light mood file has the tuned values [data][lightmood]")
 {
-    // MU_TEST_DATA_DIR is the client folder's Data; the file name starts with it.
-    const std::filesystem::path file =
-        std::filesystem::path(MU_TEST_DATA_DIR).parent_path() / Data::Maps::LightMoodFile;
+    // The file as it was shipped before Look.json held the moods (tests/data/look_v1).
+    const std::filesystem::path file = std::filesystem::path(MU_TEST_LOOK_V1_DIR) / "LightMood.json";
     const Data::Maps::LightMoodLoadResult loaded = Data::Maps::LoadLightMoodFile(file);
 
     CHECK_MESSAGE(loaded.issues.empty(), Messages(loaded.issues));

@@ -58,9 +58,11 @@ LookFilesLoad LoadShipped(LookFileSystem& fileSystem)
     {
         mu::log::Get("render")->warn("Look profile unusable; the built-in values apply");
     }
-    if (!loaded.files.moodUsable)
+    if (loaded.files.saveBlocked)
     {
-        mu::log::Get("render")->warn("Light mood data unusable; the world keeps its Classic light");
+        mu::log::Get("render")->warn("Light mood unusable; the world keeps its Classic light and the look cannot be "
+                                     "saved: {}",
+                                     *loaded.files.saveBlocked);
     }
     return loaded;
 }
@@ -128,6 +130,16 @@ bool Applied(const LookEditResult& result, const char* what)
         return false;
     }
     return true;
+}
+
+std::string DescribeMaps(const std::vector<int>& maps)
+{
+    std::string text;
+    for (const int map : maps)
+    {
+        text += (text.empty() ? "" : ", ") + std::to_string(map);
+    }
+    return text;
 }
 
 std::string MapName(int world)
@@ -198,17 +210,24 @@ bool SetLive(std::span<const LookEdit> edits, bool currentMap)
         mu::log::Get("render")->info("$look set {}{}: {} -> {}", currentMap ? "map " + std::to_string(world) + " " : "",
                                      edits[index].name, result.oldValues[index], edits[index].value);
     }
+    if (result.entryMaps.size() > 1)
+    {
+        mu::log::Get("render")->info("$look set map: the entry is shared, maps {} all get it",
+                                     DescribeMaps(result.entryMaps));
+    }
     return true;
 }
 
 bool ResetLive(std::optional<std::string_view> name)
 {
-    if (!Applied(s_state.layers.Reset(name, gMapManager.WorldActive), "reset"))
+    const LookEditResult result = s_state.layers.Reset(name, gMapManager.WorldActive);
+    if (!Applied(result, "reset"))
     {
         return false;
     }
-    mu::log::Get("render")->info("$look reset {} to the values loaded from {}",
-                                 name ? std::string(*name) : "every value", s_state.source);
+    mu::log::Get("render")->info(
+        "$look reset {} to the values loaded from {}{}", name ? std::string(*name) : "every value", s_state.source,
+        result.entryMaps.size() > 1 ? ", on maps " + DescribeMaps(result.entryMaps) : std::string());
     return true;
 }
 
@@ -224,7 +243,7 @@ bool LoadLive(std::string_view candidate)
     const std::filesystem::path folder = std::filesystem::path("Data/Render/Candidates") / std::string(candidate);
     std::vector<Data::Items::ItemDataIssue> issues;
     std::optional<LookFiles> files = LoadCandidateFiles(fileSystem, folder / "Look.json", folder / "LightMood.json",
-                                                        Data::Maps::LightMoodFile, issues);
+                                                        Data::Maps::LookProfileFile, Data::Maps::LightMoodFile, issues);
     LogIssues(issues);
     if (!files)
     {
@@ -239,8 +258,7 @@ bool LoadLive(std::string_view candidate)
 bool SaveLive()
 {
     DiskLookFileSystem fileSystem;
-    const LookSaveResult result =
-        SaveLookFiles(fileSystem, s_state.layers.Live(), Data::Maps::LookProfileFile, Data::Maps::LightMoodFile);
+    const LookSaveResult result = SaveLookFiles(fileSystem, s_state.layers.Live(), Data::Maps::LookProfileFile);
     if (!result.saved)
     {
         mu::log::Get("render")->error("$look save failed: {}", result.message);

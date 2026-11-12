@@ -14,6 +14,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Render/Look/LookTuning.h"
+#include "World/MapInfra/MapManager.h"
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/Common/MuEditorLayout.h"
@@ -600,6 +601,17 @@ void CDevEditorUI::RenderLookPanel()
     ImGui::RadioButton(I18N::Editor::LookScopeDefault, &m_LookScopeMap, 0);
     ImGui::SameLine();
     ImGui::RadioButton(I18N::Editor::LookScopeCurrentMap, &m_LookScopeMap, 1);
+    // A map edit changes the map's entry, which the variants of a map share.
+    if (const Data::Maps::MapLookOverrides* entry = Render::Look::LiveFiles().lookData.FindMap(gMapManager.WorldActive);
+        m_LookScopeMap != 0 && entry && entry->maps.size() > 1)
+    {
+        std::string maps;
+        for (const int map : entry->maps)
+        {
+            maps += (maps.empty() ? "" : ", ") + std::to_string(map);
+        }
+        ImGui::Text("%s: %s", I18N::Editor::LookEntryMaps, maps.c_str());
+    }
     if (ImGui::Button(I18N::Editor::LookResetAll))
     {
         (void)Render::Look::ResetLive(std::nullopt);

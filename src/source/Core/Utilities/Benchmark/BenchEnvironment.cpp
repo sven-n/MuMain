@@ -95,7 +95,7 @@ void CaptureGraphics(EnvironmentInfo& info)
         info.enhancedTuning += std::string(key) + "=" + value;
     };
     for (const Data::Maps::LookValueInfo& value : Data::Maps::LookValueInfos())
-        if (const std::optional<double>& set = tuning.look[value.value])
+        if (const std::optional<double>& set = tuning.look[value.value]; set && !Data::Maps::IsMoodValue(value.value))
             addTuning(value.name, Data::Config::FormatTuningNumber(*set));
     if (tuning.moodStrengthPercent)
         addTuning(Data::Config::MoodStrengthKey, std::to_string(*tuning.moodStrengthPercent));
