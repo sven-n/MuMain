@@ -245,7 +245,12 @@ any character.
 | `moveSpeed` | Its walk speed, 0 to 65535 |
 | `noBloodPool` | Leaves no blood pool when it dies |
 | `hooks` | Code of the maps it hands over to when it appears, with the values that code fixed (Q-MN36d): `[{"hook": "EmpireGuardianRageReset", "boss": "Raymond"}]`. The hooks: `RaklionBossDrop` (Selupan drops down from where he waits), `Kanturu2ndEntrance` (Kanturu's entrance window takes the Gateway Machine, whose animations and the way in it runs), `EmpireGuardianRageReset` with `boss` `Raymond`, `Ercanne`, `Daesuler`, `Gallia`, `Bermont`, `Kato`, `Gaion` or `Jerint` (a new boss starts without the rage before it), `IllusionTempleStorageReset` with `storage` `allied` or `illusion` (a new storage shows no point effect its team had). A hook or value the maps do not know is an Error and does nothing |
-| `stateVariants` | Fields that are other while a state of the game is on, each replacing the monster's: `[{"state": "castleSiegeNotRunning", "heightOffset": -100}]`. The states: `castleSiegeRunning`, `castleSiegeNotRunning`, `raklionBossWaiting` (Selupan above the map, from standby to ready), `playerTransformed` (a player transformed into the monster comes into view, packet 0x45: the Giant is smaller then), `crywolfReady` (Crywolf's battle is about to start: its monsters come in at once, without the thunder). A state variant changes fields and clears none, and has no state variants of its own. A map variant's `stateVariants` replace the monster's on its maps |
+| `stateVariants` | Fields that are other while a state of the game is on, each replacing the monster's: `[{"state": "castleSiegeNotRunning", "heightOffset": -100}]`. The states: `castleSiegeRunning`, `castleSiegeNotRunning`, `raklionBossWaiting` (Selupan above the map, from standby to ready), `playerTransformed` (a player transformed into the monster comes into view, packet 0x45: the Giant is smaller then), `crywolfReady` (Crywolf's battle is about to start: its monsters come in at once, without the thunder), `crywolfElfTime` (on Crywolf only elves may make the altar contracts: the Werewolf Guardsman 407 only talks then). A state variant changes fields and clears none, and has no state variants of its own. A map variant's `stateVariants` replace the monster's on its maps |
+| `talks` | Whether the NPC talks when the hero clicks it (MN5, D66): `false` for the Wolf Status 204; every other NPC talks |
+| `talkLevel` | The level the hero needs to talk to it, and the message below it, with `%d` for the level: `{"level": 10, "message": {"en": "Only level above %d can do the Chaos Combination."}}` (the Chaos Goblin 238). Below it the hero gets the message and keeps the NPC as the target |
+| `repairShop` | Its shop shows the repair buttons: the five repair shops 243, 246, 251, 416 and 578 |
+| `onTalk` | What talking to it does, in order ([Talking to NPCs](#talking-to-npcs)); without it the NPC sends the talk request |
+| `crywolfContract` | It takes part in Crywolf's hero contract: a buff the server sends again while it shows it (0x07) toggles the contract and takes the other Crywolf states off (the altars 205-209 and the NPCs 226, 230, 240, 248, 250, 251, 256, 478) |
 
 A value of the wrong kind is fatal; a joint, object, buff or standing the code
 does not have is an Error, and the character appears without it.
@@ -260,6 +265,61 @@ code went, the monster recorder compared each number's data with it on each
 map its entry names, with each state its state variants name on and off,
 in a new slot, a slot another character left and the slot of a living
 character with its key, through the packets and the cutscenes.
+
+### Talking to NPCs
+
+When the hero talks to an NPC, the client checks `talks` and `talkLevel`,
+sets the shop's repair buttons by `repairShop`, closes the quest window and
+asks the legacy quest state, then runs the NPC's `onTalk` steps in order
+(MN5, D66, Q-MN46). The server answers the talk request with the NPC's window.
+
+```json
+"onTalk": [
+  {"dialog": {"title": {"en": "Werewolf Guardsman"}, "lines": [{"en": "..."}],
+              "ok": {"request": "enterRefuge", "if": {"quest": "thirdChangeUp2", "is": ["ongoing", "done"]},
+                     "zen": 3000000, "failure": {"en": "You are short of Zen."}}}},
+  {"send": "talk"}
+]
+```
+
+| Step | What it does |
+|---|---|
+| `{"send": "talk"}` | Sends the talk request, as the map lets it: on Kanturu 2nd not while the gate machine animates, in the Illusion Temple only to the event's NPCs (their code stays) |
+| `{"send": "petInfo"}` | Asks the server for the equipped Dark Horse's and Dark Raven's information (the Pet Trainer 226) |
+| `{"dialog": ...}` | Shows a dialog: its bold `title`, its `lines`, and an `ok` that sends a `request` (`enterRefuge`, `enterBarracks`) when the `quest` (`changeUp1` ... `thirdChangeUp3`) is in one of the states of `is` (`none`, `ongoing`, `done`, `no`, `ready`, `error`) and the hero has the `zen`, else its `failure` message |
+| `{"message": ...}` | Logs a system message (the red and blue Little Santas 470 and 471) |
+| `{"questWindow": {"noQuestTitleFor": [...]}}` | The quest window shows the NPC's own name and no quest title for these classes (Marlon 229 for the Dark Lord, Magic Gladiator and Rage Fighter, whose quest is another NPC's) |
+| `{"crywolfAltarContract": "crywolfAltar"}` | A Crywolf altar's contract (205-209), which the map's code makes while only elves may, with the texts of the shared set it names ([Shared talk texts](#shared-talk-texts)). On Crywolf otherwise it does nothing; elsewhere it sends the talk request |
+
+The Werewolf Guardsman 407 shows his dialog and talks, the Gatekeeper 408
+talks and shows his. The texts are translatable like the names, copied from
+the game's texts in the 11 languages that have them (the game's zh-CN texts
+have none of them yet); Data Checks warns about a text missing one of the
+game's languages (it shows the English one there), about an OK whose quest
+has no state in `is` (it never sends) and about a `crywolfAltarContract`
+step on a model that is no Crywolf altar (it only talks). While only elves
+may make the Crywolf altar contracts (the state `crywolfElfTime`), an altar
+runs its `crywolfAltarContract` step and the Werewolf Guardsman 407 only
+talks, by his state variant; every other NPC talks as always.
+
+#### Shared talk texts
+
+Talk texts several NPCs share are defined once, by name, in `talkTexts` of
+`Monsters.json`, and a step names its set. The five altars' contract step
+names `crywolfAltar`, whose texts are `canContract` (`%d` for the contracts
+left), `proceed`, `onMount`, `needGuardian`, `destroyed` and `ongoing`:
+
+```json
+"talkTexts": {
+  "crywolfAltar": {"canContract": {"en": "Contract can be made for %d times."}, "proceed": {"en": "..."}, ...}
+}
+```
+
+A step naming a set the list does not have, and a set missing one of its
+texts, are fatal when the list is read; in the editor Data Checks reports a
+step naming a set that is not there as an error (the altar shows empty
+texts, Save refuses it). The sets' texts are translatable like the others
+and Data Checks warns about their missing languages.
 
 ### Unknown monsters
 
@@ -833,6 +893,11 @@ item tools.
   monster's row; see
   [translation-system.md → In the monster editor](translation-system.md#in-the-monster-editor)
   and [Import and export of NpcName txt](#import-and-export-of-npcname-txt).
+  The tab **Talk texts** has a row per text of the shared talk texts
+  ("talkTexts.crywolfAltar.canContract"), then per text of an NPC's talk, its
+  map and state variants' included ("408 onTalk[1].dialog.lines[0]",
+  "205 mapVariants[0].onTalk[0].message"), with a column per language and the
+  same missing-language filter; an edit is an undo step.
 - **Monster Model**: the model of the selected monster, from the model list:
   its slot and range (hover over the range for what the code does with it),
   the monsters with the model (a click selects one), and
@@ -1013,7 +1078,18 @@ item tools.
   are edited under their label once set. The equipment shows its count
   and **Open Monster Equipment**. Below them, always shown, the section
   **Unknown monsters** edits the bug look of every monster the game cannot
-  show as itself ([Unknown monsters](#unknown-monsters)).
+  show as itself ([Unknown monsters](#unknown-monsters)), and **Shared talk
+  texts** the sets of [Shared talk texts](#shared-talk-texts): each set's
+  texts in English with **x**, and **Add a set** with its name. The section **NPC
+  rules** has `talks`, the minimum level to talk with its message,
+  `repairShop`, `crywolfContract` and **On talk, in order**: a row per step,
+  opened to its kind and values (a dialog's title, lines with **Add a line**,
+  and **OK sends a request** with its request, quest and states, zen and the
+  text without the zen, and a red hint while a quest has no state ticked; a
+  message; the classes of a quest window; the shared set an altar contract
+  shows),
+  with **Move up**, **Move down**, **x** and **Add a step**. Texts are typed
+  in English there; the other languages are in Monster Translations.
 - **Monster Equipment**: what the selected monster holds and wears, laid
   out as the game's character window (helm and wings on top; weapon 1,
   armor, weapon 2 and helper; gloves, pants and boots). A click on a slot

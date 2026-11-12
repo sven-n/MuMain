@@ -8,6 +8,88 @@
     "messageSeconds": 10,
     "for": ["noEntry", "noModel", "missingFile"]
   },
+  "talkTexts": {
+    "crywolfAltar": {
+      "canContract": {
+        "en": "Contract can be made for %d times.",
+        "de": "Der Vertrag kann %d-mal geschlossen werden.",
+        "es": "El contrato se puede realizar por tiempos %d.",
+        "id": "Kontrak dapat dibuat untuk waktu %d.",
+        "ja": "契約可能な回数は%d回です。",
+        "pl": "Kontrakt można zawrzeć %d razy.",
+        "pt": "O contrato pode ser feito para horários %d.",
+        "ru": "Контракт может быть заключен на %d раз.",
+        "tl": "Maaaring gawin ang kontrata para sa %d beses.",
+        "uk": "Контракт можна укласти на %d разів.",
+        "zh-TW": "可以簽訂%d次的合約。"
+      },
+      "proceed": {
+        "en": "Would you like to proceed with the contract?",
+        "de": "Möchten Sie den Vertrag schließen?",
+        "es": "¿Le gustaría continuar con el contrato?",
+        "id": "Apakah Anda ingin melanjutkan kontrak?",
+        "ja": "契約しますか?",
+        "pl": "Czy chcesz kontynuować realizację umowy?",
+        "pt": "Gostaria de prosseguir com o contrato?",
+        "ru": "Хотите продолжить контракт?",
+        "tl": "Gusto mo bang magpatuloy sa kontrata?",
+        "uk": "Бажаєте продовжити контракт?",
+        "zh-TW": "您想繼續履行合約嗎？"
+      },
+      "onMount": {
+        "en": "Contract can't be made when you are on a mount.",
+        "de": "Auf einem Reittier kann kein Vertrag geschlossen werden.",
+        "es": "No se puede hacer contrato cuando estás en una montura.",
+        "id": "Kontrak tidak dapat dibuat saat Anda berada di atas tunggangan.",
+        "ja": "乗物に乗った状態では契約できません。",
+        "pl": "Kontraktu nie można zawrzeć będąc na wierzchowcu.",
+        "pt": "O contrato não pode ser feito quando você está montado.",
+        "ru": "Контракт не может быть заключен, когда вы находитесь на скакуне.",
+        "tl": "Ang kontrata ay hindi maaaring gawin kapag ikaw ay nasa bundok.",
+        "uk": "Контракт не можна укласти, коли ви перебуваєте на верховій їзді.",
+        "zh-TW": "坐騎時無法簽訂契約。"
+      },
+      "needGuardian": {
+        "en": "We need a guardian to protect the wolf.",
+        "de": "Wir brauchen einen Wächter, der den Wolf beschützt.",
+        "es": "Necesitamos un guardián para proteger al lobo.",
+        "id": "Kita membutuhkan wali untuk melindungi serigala.",
+        "ja": "狼の神像を守る契約者が必要です。",
+        "pl": "Potrzebujemy strażnika, który będzie chronił wilka.",
+        "pt": "Precisamos de um guardião para proteger o lobo.",
+        "ru": "Нам нужен страж, который защитит волка.",
+        "tl": "Kailangan natin ng tagapag-alaga para protektahan ang lobo.",
+        "uk": "Нам потрібен охоронець, щоб захистити вовка.",
+        "zh-TW": "我們需要一個守護者來保護狼。"
+      },
+      "destroyed": {
+        "en": "Further contract can't be done since the altar has been destroyed.",
+        "de": "Ein weiterer Vertrag kann nicht abgeschlossen werden, da der Altar zerstört wurde.",
+        "es": "No se pueden realizar más contratos ya que el altar ha sido destruido.",
+        "id": "Kontrak lebih lanjut tidak dapat dilakukan karena altar telah dihancurkan.",
+        "ja": "祭壇が破壊され、これ以上の契約ができません。",
+        "pl": "Dalszego kontraktu nie można wykonać, gdyż ołtarz został zniszczony.",
+        "pt": "Novos contratos não podem ser feitos porque o altar foi destruído.",
+        "ru": "Дальнейший контракт невозможно заключить, так как алтарь разрушен.",
+        "tl": "Ang karagdagang kontrata ay hindi maaaring gawin dahil ang altar ay nawasak.",
+        "uk": "Подальший контракт неможливий, оскільки вівтар було зруйновано.",
+        "zh-TW": "由於祭壇已被毀壞，進一步的契約無法進行。"
+      },
+      "ongoing": {
+        "en": "Contract is ongoing therefore dual compact is not possible.",
+        "de": "Es läuft bereits ein Vertrag, daher ist ein zweiter Vertrag nicht möglich.",
+        "es": "El contrato está en curso, por lo que no es posible un pacto dual.",
+        "id": "Kontrak sedang berlangsung sehingga dual compact tidak dimungkinkan.",
+        "ja": "契約中であるため、重複契約はできません。",
+        "pl": "Kontrakt jest w toku, nie można zawrzeć drugiego.",
+        "pt": "O contrato está em andamento, portanto o pacto duplo não é possível.",
+        "ru": "Контракт действует, поэтому двойной договор невозможен.",
+        "tl": "Patuloy ang kontrata kaya hindi posible ang dual compact.",
+        "uk": "Контракт діє, тому подвійний компакт неможливий.",
+        "zh-TW": "合約正在進行中，因此雙重緊湊是不可能的。"
+      }
+    }
+  },
   "monsters": [
     {
       "name": {"en": "Bull Fighter", "es": "Toro Luchador", "pt": "Toureiro"},
@@ -2554,6 +2636,7 @@
       "kind": "npc",
       "model": "MODEL_CRYWOLF_STATUE",
       "live": false,
+      "talks": false,
       "numbers": [
         {"number": 204, "maps": [34]}
       ]
@@ -2564,6 +2647,12 @@
       "model": "MODEL_CRYWOLF_ALTAR1",
       "hiddenMesh": -2,
       "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 205, "maps": [34]}
       ]
@@ -2574,6 +2663,12 @@
       "model": "MODEL_CRYWOLF_ALTAR2",
       "hiddenMesh": -2,
       "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 206, "maps": [34]}
       ]
@@ -2584,6 +2679,12 @@
       "model": "MODEL_CRYWOLF_ALTAR3",
       "hiddenMesh": -2,
       "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 207, "maps": [34]}
       ]
@@ -2594,6 +2695,12 @@
       "model": "MODEL_CRYWOLF_ALTAR4",
       "hiddenMesh": -2,
       "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 208, "maps": [34]}
       ]
@@ -2604,6 +2711,12 @@
       "model": "MODEL_CRYWOLF_ALTAR5",
       "hiddenMesh": -2,
       "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 209, "maps": [34]}
       ]
@@ -2739,6 +2852,15 @@
       "name": {"en": "Trainer", "es": "Adiestrador", "pt": "Treinador"},
       "kind": "npc",
       "model": "MODEL_NPC_BREEDER",
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "send": "petInfo"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 226, "maps": [0, 34]}
       ]
@@ -2782,6 +2904,20 @@
           "level": 7
         }
       },
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "questWindow": {
+            "noQuestTitleFor": [
+              "darkLord",
+              "magicGladiator",
+              "rageFighter"
+            ]
+          }
+        }
+      ],
       "numbers": [
         {"number": 229, "maps": [0, 2, 3, 7]}
       ]
@@ -2804,6 +2940,7 @@
           "part": "MODEL_MERCHANT_MAN_BOOTS"
         }
       },
+      "crywolfContract": true,
       "numbers": [
         {"number": 230, "maps": [0]}
       ]
@@ -2887,6 +3024,22 @@
       "model": "MODEL_MIX_NPC",
       "soundSet": "Chaos Goblin",
       "glowMesh": 1,
+      "talkLevel": {
+        "level": 10,
+        "message": {
+          "en": "Only level above %d can do the Chaos Combination.",
+          "de": "Nur Charaktere über Level %d können die Chaos-Kombination durchführen.",
+          "es": "Sólo el nivel superior a %d puede realizar la Combinación del Caos.",
+          "id": "Hanya level di atas %d yang dapat melakukan Kombinasi Chaos.",
+          "ja": "レベル %d以上からカオス合成が可能です。",
+          "pl": "Kombinację Chaos mogą wykonać tylko postacie powyżej poziomu %d.",
+          "pt": "Somente níveis acima de %d podem fazer a Combinação do Caos.",
+          "ru": "Только уровень выше %d может выполнить Комбинацию Хаоса.",
+          "tl": "Ang antas lamang sa itaas ng %d ang makakagawa ng Chaos Combination.",
+          "uk": "Тільки рівень вище %d може виконувати комбінацію хаосу.",
+          "zh-TW": "只有%d以上的等級才能進行混沌組合。"
+        }
+      },
       "numbers": [
         {"number": 238, "maps": [3]}
       ]
@@ -2903,6 +3056,7 @@
       "name": {"en": "Safety Guardian", "es": "Guardián de Seguridad", "pt": "Guardião de segurança"},
       "kind": "npc",
       "model": "MODEL_STORAGE",
+      "crywolfContract": true,
       "numbers": [
         {"number": 240, "maps": [0, 2, 3, 4, 6, 7, 34, 51, 80]}
       ]
@@ -2930,6 +3084,7 @@
       "name": {"en": "Eo the Craftsman", "es": "Eo el Artesano", "pt": "Eo, o artesão"},
       "kind": "npc",
       "model": "MODEL_ELF_MERCHANT",
+      "repairShop": true,
       "numbers": [
         {"number": 243, "maps": [3]}
       ]
@@ -2954,6 +3109,7 @@
       "name": {"en": "Weapons Merchant Zienna", "es": "Mercader de Armas Zienna", "pt": "Zienna, a Mercadora de armas"},
       "kind": "npc",
       "model": "MODEL_SNOW_SMITH",
+      "repairShop": true,
       "numbers": [
         {"number": 246, "maps": [2]}
       ]
@@ -3018,6 +3174,7 @@
           "part": "MODEL_MERCHANT_MAN_BOOTS+1"
         }
       },
+      "crywolfContract": true,
       "numbers": [
         {"number": 248, "maps": [0, 34]}
       ]
@@ -3040,6 +3197,7 @@
           "part": "MODEL_MERCHANT_MAN_BOOTS"
         }
       },
+      "crywolfContract": true,
       "numbers": [
         {"number": 250, "maps": [0]}
       ]
@@ -3050,6 +3208,8 @@
       "model": "MODEL_SMITH",
       "soundSet": "Hanzo the Blacksmith",
       "scale": 0.95,
+      "repairShop": true,
+      "crywolfContract": true,
       "numbers": [
         {"number": 251, "maps": [0, 34]}
       ]
@@ -3114,6 +3274,7 @@
       "name": {"en": "Lahap", "es": "Lahap", "pt": "Lahap"},
       "kind": "npc",
       "model": "MODEL_NPC_SERBIS",
+      "crywolfContract": true,
       "numbers": [
         {"number": 256, "maps": [2, 34, 51]}
       ]
@@ -4617,6 +4778,116 @@
       "kind": "npc",
       "model": "MODEL_NPC_QUARREL",
       "scale": 1.9,
+      "stateVariants": [
+        {
+          "state": "crywolfElfTime",
+          "onTalk": [
+            {
+              "send": "talk"
+            }
+          ]
+        }
+      ],
+      "onTalk": [
+        {
+          "dialog": {
+            "title": {
+              "en": "Werewolf Guardsman",
+              "de": "Werwolf-Wächter",
+              "es": "Guardia hombre lobo",
+              "id": "Penjaga Manusia Serigala",
+              "ja": "ウェアウルフコーラル",
+              "pl": "Werewolf Guardsman",
+              "pt": "Guarda Lobisomem",
+              "ru": "Оборотень-гвардеец",
+              "tl": "Werewolf Guardsman",
+              "uk": "Гвардійський перевертень",
+              "zh-TW": "狼人守衛"
+            },
+            "lines": [
+              {
+                "en": "'Do you even know about me? I've been both blessed and cursed from Lugard. You may be helped if you are appropriately qualified.'",
+                "de": "„Wissen Sie überhaupt etwas über mich? Ich wurde von Lugard sowohl gesegnet als auch verflucht. Wenn Sie entsprechend qualifiziert sind, kann Ihnen geholfen werden.“",
+                "es": "'¿Sabes siquiera acerca de mí? He sido bendecido y maldecido por parte de Lugard. Es posible que le ayuden si está debidamente cualificado.",
+                "id": "'Apakah kamu tahu tentang aku? Saya telah diberkati sekaligus dikutuk dari Lugard. Anda mungkin terbantu jika Anda memiliki kualifikasi yang sesuai.'",
+                "ja": "「私を知っているのか?私はルガド様の祝福と呪いを同時に受けた者だ。君が資格を持っていれば者であれば助けを与えよう。」",
+                "pl": "Czy ty w ogóle o mnie wiesz? Zostałem pobłogosławiony i przeklęty przez Lugarda. Jeśli masz odpowiednie kwalifikacje, możesz uzyskać pomoc.",
+                "pt": "'Você ao menos sabe sobre mim? Fui abençoado e amaldiçoado por Lugard. Você pode ser ajudado se estiver devidamente qualificado.",
+                "ru": "— Ты вообще знаешь обо мне? Лугард одновременно благословил и проклял меня. Вам могут помочь, если вы обладаете соответствующей квалификацией».",
+                "tl": "'May alam ka pa ba tungkol sa akin? Pareho akong pinagpala at isinumpa mula kay Lugard. Maaari kang matulungan kung ikaw ay angkop na kuwalipikado.'",
+                "uk": "«Ти взагалі про мене знаєш? Мене одночасно благословив і прокляв Лугард. Вам можуть допомогти, якщо ви маєте належну кваліфікацію».",
+                "zh-TW": "'你還了解我嗎？我既受到盧加德的祝福，也受到盧加德的詛咒。如果您有適當的資格，您可能會得到幫助。"
+              },
+              {
+                "en": "If you have passed through the Apostle Devin's test, Werewolf Guardsman will send you and your party members Balgass' Barrack.",
+                "de": "Wenn Sie die Prüfung des Apostels Devin bestanden haben, schickt der Werwolf-Wächter Sie und Ihre Partymitglieder in die Balgass-Kaserne.",
+                "es": "Si has pasado la prueba del Apóstol Devin, Werewolf Guardsman te enviará a ti y a los miembros de tu grupo el Cuartel de Balgass.",
+                "id": "Jika Anda telah lulus ujian Rasul Devin, Penjaga Manusia Serigala akan mengirim Anda dan anggota partai Anda Balgass' Barrack.",
+                "ja": "君が「司祭デヴィン」の試練を通過した者なら君と仲間たちを「バルガスの兵営」へ送ろう。",
+                "pl": "Jeśli przeszedłeś próbę Apostoła Devina, Werewolf Guardsman wyśle ciebie i członków twojej grupy do Balgass' Barrack.",
+                "pt": "Se você passou no teste do Apóstolo Devin, o Guarda Lobisomem enviará você e os membros do seu grupo Balgass' Barrack.",
+                "ru": "Если вы прошли испытание апостола Девина, гвардеец-оборотень отправит вас и членов вашей группы в казарму Балгасса.",
+                "tl": "Kung nakapasa ka sa pagsubok ni Apostol Devin, ipapadala ka ng Werewolf Guardsman at ng iyong mga miyembro ng partido na Balgass' Barrack.",
+                "uk": "Якщо ви пройшли випробування Апостола Девіна, Werewolf Guardsman надішле вам і членам вашої групи казарму Балгаса.",
+                "zh-TW": "如果你通過了使徒德文的考驗，狼人守衛將把你和你的小隊成員送到巴爾加斯的兵營。"
+              },
+              {
+                "en": "You must be located closely together in order to enter Balgass' Barrack at once.",
+                "de": "Um gemeinsam die Balgass-Kaserne zu betreten, müssen Sie dicht beieinander stehen.",
+                "es": "Deben estar ubicados muy juntos para poder ingresar al Cuartel de Balgass de inmediato.",
+                "id": "Anda harus berada berdekatan agar dapat memasuki Barak Balgass sekaligus.",
+                "ja": "あなたのパーティーメンバーたちが「バルガスの兵営」に一緒に入場するためにはあなたの近くにいなければなりません。",
+                "pl": "Aby od razu wejść do Balgass' Barrack, musicie znajdować się blisko siebie.",
+                "pt": "Vocês devem estar próximos um do outro para entrar no Quartel de Balgass imediatamente.",
+                "ru": "Вы должны находиться близко друг к другу, чтобы сразу войти в казарму Балгасса.",
+                "tl": "Dapat kang matatagpuan malapit nang magkasama upang makapasok nang sabay-sabay sa Balgass' Barrack.",
+                "uk": "Ви повинні розташуватися близько один до одного, щоб відразу потрапити в казарму Балгаса.",
+                "zh-TW": "你們必須靠得很近才能立即進入巴爾加斯的軍營。"
+              },
+              {
+                "en": "In order to receive help from Werewolf Guardsman; you must pay him 3,000,000 Zen.",
+                "de": "Um Hilfe vom Werwolf-Wächter zu erhalten, müssen Sie ihm 3.000.000 Zen zahlen.",
+                "es": "Para recibir ayuda de Werewolf Guardsman; debes pagarle 3.000.000 Zen.",
+                "id": "Untuk menerima bantuan dari Werewolf Guardsman; Anda harus membayarnya 3.000.000 Zen.",
+                "ja": "「ウェアウルフコーラル」に手伝ってもらうためには彼に300万ゼンを払わなければならない。",
+                "pl": "Aby otrzymać pomoc od Werewolf Guardsman, musisz mu zapłacić 3 000 000 Zen.",
+                "pt": "Para receber ajuda do Guarda Lobisomem; você deve pagar a ele 3.000.000 Zen.",
+                "ru": "Чтобы получить помощь от гвардейца-оборотня; вы должны заплатить ему 3 000 000 дзэн.",
+                "tl": "Upang makatanggap ng tulong mula sa Werewolf Guardsman; kailangan mong bayaran siya ng 3,000,000 Zen.",
+                "uk": "Щоб отримати допомогу від Werewolf Guardsman; ви повинні заплатити йому 3 000 000 дзен.",
+                "zh-TW": "為了得到狼人守衛的幫助；你必須付給他 3,000,000 Zen。"
+              }
+            ],
+            "ok": {
+              "request": "enterRefuge",
+              "if": {
+                "quest": "thirdChangeUp2",
+                "is": [
+                  "ongoing",
+                  "done"
+                ]
+              },
+              "zen": 3000000,
+              "failure": {
+                "en": "You are short of Zen.",
+                "de": "Ihnen fehlt Zen.",
+                "es": "Te falta Zen.",
+                "id": "Anda kekurangan Zen.",
+                "ja": "ゼンが不足しています。",
+                "pl": "Brakuje ci Zen.",
+                "pt": "Você está com falta de Zen.",
+                "ru": "Вам не хватает дзэн.",
+                "tl": "Kulang ka kay Zen.",
+                "uk": "Вам не вистачає Дзен.",
+                "zh-TW": "你缺乏禪宗。"
+              }
+            }
+          }
+        },
+        {
+          "send": "talk"
+        }
+      ],
       "numbers": [
         {"number": 407, "maps": [34]}
       ]
@@ -4629,6 +4900,78 @@
       "outline": 1.1,
       "shadow": false,
       "heightOffset": 240,
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "dialog": {
+            "title": {
+              "en": "Gatekeeper",
+              "de": "Torwächter",
+              "es": "Portero",
+              "id": "Penjaga gerbang",
+              "ja": "門番",
+              "pl": "Odźwierny",
+              "pt": "Porteiro",
+              "ru": "привратник",
+              "tl": "Gatekeeper",
+              "uk": "Воротар",
+              "zh-TW": "看門人"
+            },
+            "lines": [
+              {
+                "en": "'Hmm, who are you? I'm confused. Are you even approved of Balgass?",
+                "de": "„Hmm, wer sind Sie? Ich bin verwirrt. Hat Balgass Sie überhaupt zugelassen?“",
+                "es": "'Mmm, ¿quién eres? Estoy confundido. ¿Apruebas siquiera a Balgass?",
+                "id": "'Hmm, siapa kamu? saya bingung. Apakah Anda menyetujui Balgass?",
+                "ja": "「誰だ？?怪しい奴だな。お前はバルガス様の許可をもらった者なのか?」",
+                "pl": "'Hm, kim jesteś? Nic nie rozumiem. Czy Balgass w ogóle cię przyjął?",
+                "pt": "'Hum, quem é você? Estou confuso. Você ao menos aprovou Balgass?",
+                "ru": "'Хм, а ты кто? Я в замешательстве. Вы вообще одобряете Балгасса?",
+                "tl": "'Hmm, sino ka? naguguluhan ako. Approved ka na ba kay Balgass?",
+                "uk": "«Хм, хто ти? я збентежений Ви взагалі схвалюєте Балгасса?",
+                "zh-TW": "’嗯，你是誰？我很困惑。您是否認可巴爾加斯？"
+              },
+              {
+                "en": "Lugadr's 12 apostles are helping by blinding the gatekeeper by the road to Balgass' Resting Place.",
+                "de": "Die 12 Apostel von Lugard helfen, indem sie den Torwächter am Weg zu Balgass’ Ruhestätte blenden.",
+                "es": "Los 12 apóstoles de Lugadr están ayudando cegando al portero en el camino hacia el lugar de descanso de Balgass.",
+                "id": "Ke-12 rasul Lugadr membantu dengan membutakan penjaga gerbang di jalan menuju Tempat Peristirahatan Balgass.",
+                "ja": "クエスト遂行中はルガドの12司祭の力で「安息所」の門番の目を欺くことが可能です。",
+                "pl": "Pomaga mu 12 apostołów Lugadra, oślepiając odźwiernego przy drodze do miejsca spoczynku Balgassa.",
+                "pt": "Os 12 apóstolos de Lugadr estão ajudando cegando o porteiro na estrada para o local de descanso de Balgass.",
+                "ru": "12 апостолов Лугадра помогают ослепить привратника на дороге к месту упокоения Балгасса.",
+                "tl": "Ang 12 apostol ni Lugadr ay tumutulong sa pamamagitan ng pagbulag sa bantay-pinto sa daan patungo sa Balgass' Resting Place.",
+                "uk": "12 апостолів Лугадра допомагають, засліплюючи воротаря біля дороги до місця спочинку Балгаса.",
+                "zh-TW": "盧加德爾的 12 名使徒正在幫忙，他們蒙蔽了通往巴爾加斯安息之地的道路旁的守門人。"
+              },
+              {
+                "en": "Apostle Devin's third mission request enables entrance into the resting place.",
+                "de": "Die dritte Mission des Apostels Devin ermöglicht den Zutritt zur Ruhestätte.",
+                "es": "La tercera petición de misión del apóstol Devin permite la entrada al lugar de descanso.",
+                "id": "Permintaan misi ketiga Rasul Devin memungkinkan masuk ke tempat peristirahatan.",
+                "ja": "司祭デヴィンの三番目の要請を遂行する間、安息所への入場が可能になります。",
+                "pl": "Trzecia misja apostoła Devina umożliwia wejście do miejsca spoczynku.",
+                "pt": "O terceiro pedido missionário do apóstolo Devin permite a entrada no local de descanso.",
+                "ru": "Третья миссия апостола Девина позволяет войти в место упокоения.",
+                "tl": "Ang ikatlong kahilingan sa misyon ni Apostol Devin ay nagbibigay-daan sa pagpasok sa pahingahang lugar.",
+                "uk": "Третє прохання апостола Девіна про місію дозволяє ввійти до місця спочинку.",
+                "zh-TW": "使徒德文的第三個任務請求允許進入安息之地。"
+              }
+            ],
+            "ok": {
+              "request": "enterBarracks",
+              "if": {
+                "quest": "thirdChangeUp3",
+                "is": [
+                  "ongoing"
+                ]
+              }
+            }
+          }
+        }
+      ],
       "numbers": [
         {"number": 408, "maps": [41]}
       ]
@@ -4778,6 +5121,7 @@
       "model": "MODEL_ELBELAND_RHEA",
       "scale": 1,
       "outline": 1.1,
+      "repairShop": true,
       "numbers": [
         {"number": 416, "maps": [51]}
       ]
@@ -5285,6 +5629,26 @@
       "model": "MODEL_LITTLESANTA+2",
       "scale": 0.43,
       "facing": 90,
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "message": {
+            "en": "Health has been recovered of 100%.",
+            "de": "Das Leben wurde zu 100% wiederhergestellt.",
+            "es": "La salud se ha recuperado del 100%.",
+            "id": "Kesehatan telah pulih 100%.",
+            "ja": "体力が100%回復しました。",
+            "pl": "Zdrowie zostało odzyskane w 100%.",
+            "pt": "A saúde foi recuperada de 100%.",
+            "ru": "Здоровье восстановлено на 100%.",
+            "tl": "Ang kalusugan ay nakuhang muli ng 100%.",
+            "uk": "Здоров'я відновлено на 100%.",
+            "zh-TW": "健康已恢復100%。"
+          }
+        }
+      ],
       "numbers": [
         {"number": 470, "maps": [62]}
       ]
@@ -5295,6 +5659,26 @@
       "model": "MODEL_LITTLESANTA+3",
       "scale": 0.43,
       "facing": 90,
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "message": {
+            "en": "Mana has been recovered of 100%.",
+            "de": "Das Mana wurde zu 100% wiederhergestellt.",
+            "es": "Mana se ha recuperado del 100%.",
+            "id": "Mana telah pulih 100%.",
+            "ja": "マナが100%回復しました。",
+            "pl": "Mana została odzyskana w 100%.",
+            "pt": "Mana foi recuperada em 100%.",
+            "ru": "Мана восстановлена ​​на 100%.",
+            "tl": "Nabawi ang Mana ng 100%.",
+            "uk": "Мана була відновлена ​​на 100%.",
+            "zh-TW": "魔力已恢復100%。"
+          }
+        }
+      ],
       "numbers": [
         {"number": 471, "maps": [62]}
       ]
@@ -5363,6 +5747,7 @@
       "name": {"en": "Delgado", "es": "Delgado", "pt": "Delgado"},
       "kind": "npc",
       "model": "MODEL_NPC_SERBIS",
+      "crywolfContract": true,
       "numbers": [
         {"number": 478, "maps": [2]}
       ]
@@ -6817,6 +7202,7 @@
       "name": {"en": "Weapons Merchant Bolo", "es": "Weapons Merchant Bolo", "pt": "Weapons Merchant Bolo"},
       "kind": "npc",
       "model": "MODEL_KARUTAN_NPC_VOLVO",
+      "repairShop": true,
       "numbers": [
         {"number": 578, "maps": [80]}
       ]

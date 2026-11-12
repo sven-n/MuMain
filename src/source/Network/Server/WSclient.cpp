@@ -51,6 +51,8 @@
 #include "GameLogic/Events/MatchEvent.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "GameLogic/Monsters/MonsterFacing.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSetup.h"
 #include "GameLogic/Monsters/MonsterSetupApply.h"
 #include "World/GameMaps/MonsterSpawnWorld.h"
 #include "Engine/AI/GOBoid.h"
@@ -3774,9 +3776,13 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
         {
             // Shown already (a monster's spawn buff): the server's now too.
             GameLogic::Monsters::Setup::NoteServerBuff(*o, static_cast<int>(bufftype), true);
-            if ((o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5) || o->Type == MODEL_SMITH ||
-                o->Type == MODEL_NPC_SERBIS || o->Type == MODEL_MERCHANT_MAN || o->Type == MODEL_STORAGE ||
-                o->Type == MODEL_NPC_BREEDER)
+            // The altars and the Crywolf NPCs take part in the hero contract
+            // (their entries' crywolfContract).
+            const Data::Monsters::MonsterDefinition* entry = g_MonsterDatabase.Find(c->MonsterIndex);
+            if (entry != nullptr && GameLogic::Monsters::Setup::SetupWithField(
+                                        *entry, [](const Data::Monsters::MonsterSetup& setup)
+                                        { return setup.crywolfContract.has_value(); }, World::Monsters::GetSpawnWorld())
+                                        .crywolfContract.value_or(false))
             {
                 if (g_isCharacterBuff(o, eBuff_CrywolfHeroContracted))
                 {

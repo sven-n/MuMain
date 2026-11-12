@@ -4,10 +4,14 @@
 
 #include "MonsterSetupLists.h"
 
+#include "TalkStepStates.h"
+
 #include "../MuEditor/UI/ItemTools/ItemFieldWidgets.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Data/GameData/EffectData/EffectTypeSymbols.h"
+#include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "I18N/All.h"
@@ -16,8 +20,10 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
+#include <functional>
 #include <limits>
 #include <optional>
+#include <span>
 #include <string_view>
 
 namespace MuEditor::Monsters::SetupLists
@@ -669,6 +675,319 @@ bool FacingByTile(std::vector<Data::Monsters::MonsterTileFacing>& tiles, const A
     }
     return changed;
 }
+namespace
+{
+using Data::Monsters::MonsterTalkBlock;
+using TalkKind = MonsterTalkBlock::Kind;
+
+struct TalkKindEntry
+{
+    TalkKind kind;
+    const char* const* name;
+};
+
+const std::array<TalkKindEntry, 6> TalkKindNames{{
+    {TalkKind::Dialog, &I18N::Editor::TalkDialog},
+    {TalkKind::SendTalk, &I18N::Editor::SendTheTalkRequest},
+    {TalkKind::SendPetInfo, &I18N::Editor::AskForPetInformation},
+    {TalkKind::Message, &I18N::Editor::Message},
+    {TalkKind::QuestWindow, &I18N::Editor::QuestWindowWithoutItsTitle},
+    {TalkKind::CrywolfAltarContract, &I18N::Editor::CrywolfAltarContract},
+}};
+
+const char* TalkKindName(TalkKind kind)
+{
+    const auto found = std::ranges::find(TalkKindNames, kind, &TalkKindEntry::kind);
+    return found != TalkKindNames.end() ? *found->name : "";
+}
+
+// The English text; the other languages are edited in Monster Translations.
+void EnglishText(const char* label, Data::LocalizedString& text, float numbers, const AfterField& afterField)
+{
+    std::string english = text.GetNeutral();
+    ImGui::SetNextItemWidth(Width(numbers));
+    if (Items::InputString(label, english))
+        text.Set(Data::LocalizedString::NeutralLocale, english);
+    afterField();
+}
+
+// A combo of the names; true when another was picked.
+bool NameCombo(const char* label, std::string& value, std::span<const std::string_view> names, bool allowNone)
+{
+    bool changed = false;
+    ImGui::SetNextItemWidth(Width(1.6f));
+    if (ImGui::BeginCombo(label, value.empty() ? I18N::Editor::None : value.c_str()))
+    {
+        if (allowNone && ImGui::Selectable(I18N::Editor::None, value.empty()) && !value.empty())
+        {
+            value.clear();
+            changed = true;
+        }
+        for (const std::string_view name : names)
+        {
+            if (ImGui::Selectable(std::string(name).c_str(), name == value) && name != value)
+            {
+                value = std::string(name);
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+bool TalkOk(Data::Monsters::MonsterTalkOk& ok, const AfterField& afterField)
+{
+    bool changed = NameCombo(I18N::Editor::Request, ok.request, Data::Monsters::GetTalkRequests(), false);
+    if (NameCombo(I18N::Editor::IfTheQuest, ok.quest, Data::Monsters::GetTalkQuests(), true))
+    {
+        // Without a quest there are no states to keep.
+        if (ok.quest.empty())
+            ok.questStates.clear();
+        changed = true;
+    }
+    if (!ok.quest.empty())
+    {
+        ImGui::TextUnformatted(I18N::Editor::IsIn);
+        for (const std::string_view state : Data::Monsters::GetTalkQuestStates())
+        {
+            ImGui::SameLine();
+            const auto found = std::ranges::find(ok.questStates, state);
+            bool ticked = found != ok.questStates.end();
+            if (ImGui::Checkbox(std::string(state).c_str(), &ticked))
+            {
+                if (ticked)
+                    ok.questStates.emplace_back(state);
+                else
+                    ok.questStates.erase(found);
+                changed = true;
+            }
+        }
+        if (ok.questStates.empty())
+            ImGui::TextColored(WarningColor, "%s", I18N::Editor::TickAStateWithoutOneTheOKSendsNothing);
+    }
+    int zen = static_cast<int>(ok.zen);
+    ImGui::SetNextItemWidth(Width(1.2f));
+    if (ImGui::InputInt(I18N::Editor::ZenItCosts, &zen, 0))
+        ok.zen = static_cast<unsigned long>(std::max(zen, 0));
+    afterField();
+    EnglishText(I18N::Editor::WithoutTheZen, ok.failure, 4.0f, afterField);
+    return changed;
+}
+
+bool TalkDialog(Data::Monsters::MonsterTalkDialog& dialog, const AfterField& afterField)
+{
+    bool changed = false;
+    EnglishText(I18N::Editor::DialogTitle, dialog.title, 3.0f, afterField);
+    for (size_t index = 0; index < dialog.lines.size(); ++index)
+    {
+        ImGui::PushID(static_cast<int>(index));
+        EnglishText("##Line", dialog.lines[index], 5.0f, afterField);
+        ImGui::SameLine();
+        const bool remove = ImGui::SmallButton("x");
+        ImGui::PopID();
+        if (remove)
+        {
+            dialog.lines.erase(dialog.lines.begin() + static_cast<std::ptrdiff_t>(index));
+            return true;
+        }
+    }
+    if (ImGui::SmallButton(I18N::Editor::AddALine))
+    {
+        dialog.lines.emplace_back();
+        changed = true;
+    }
+    bool hasOk = dialog.ok.has_value();
+    if (ImGui::Checkbox(I18N::Editor::OKSendsARequest, &hasOk))
+    {
+        dialog.ok = hasOk ? std::optional<Data::Monsters::MonsterTalkOk>(
+                                Data::Monsters::MonsterTalkOk{std::string(Data::Monsters::GetTalkRequests().front())})
+                          : std::nullopt;
+        changed = true;
+    }
+    if (dialog.ok)
+    {
+        ImGui::Indent();
+        changed |= TalkOk(*dialog.ok, afterField);
+        ImGui::Unindent();
+    }
+    return changed;
+}
+
+bool TalkBlockFields(MonsterTalkBlock& block, const AfterField& afterField)
+{
+    bool changed = false;
+    ImGui::SetNextItemWidth(Width(2.5f));
+    if (ImGui::BeginCombo(I18N::Editor::Kind, TalkKindName(block.kind)))
+    {
+        for (const TalkKindEntry& kind : TalkKindNames)
+        {
+            if (ImGui::Selectable(*kind.name, kind.kind == block.kind) && kind.kind != block.kind)
+            {
+                // A step of the new kind, with none of the old one's values;
+                // an altar contract shows the first shared set.
+                block = MonsterTalkBlock{};
+                block.kind = kind.kind;
+                if (block.kind == TalkKind::CrywolfAltarContract && !g_MonsterDatabase.GetTalkTexts().empty())
+                    block.altarTexts = g_MonsterDatabase.GetTalkTexts().begin()->first;
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    switch (block.kind)
+    {
+    case TalkKind::Dialog:
+        changed |= TalkDialog(block.dialog, afterField);
+        break;
+    case TalkKind::Message:
+        EnglishText("##Message", block.message, 5.0f, afterField);
+        break;
+    case TalkKind::QuestWindow:
+    {
+        const std::span<const char* const> classes = Data::Items::GetClassKeys();
+        for (size_t index = 0; index < classes.size(); ++index)
+        {
+            const int classIndex = static_cast<int>(index);
+            const auto found = std::ranges::find(block.noQuestTitleFor, classIndex);
+            bool ticked = found != block.noQuestTitleFor.end();
+            if (index > 0)
+                ImGui::SameLine();
+            if (ImGui::Checkbox(classes[index], &ticked))
+            {
+                if (ticked)
+                    block.noQuestTitleFor.push_back(classIndex);
+                else
+                    block.noQuestTitleFor.erase(found);
+                changed = true;
+            }
+        }
+        break;
+    }
+    case TalkKind::CrywolfAltarContract:
+    {
+        // The map's code makes the contract; its texts are a shared set.
+        std::vector<std::string_view> names;
+        for (const auto& [name, contract] : g_MonsterDatabase.GetTalkTexts())
+            names.emplace_back(name);
+        changed |= NameCombo(I18N::Editor::TextsOfTheSet, block.altarTexts, names, false);
+        ImGui::TextDisabled("%s", I18N::Editor::TheTextsAreEditedInSharedTalkTexts);
+        break;
+    }
+    case TalkKind::SendTalk:
+    case TalkKind::SendPetInfo:
+        break;
+    }
+    return changed;
+}
+// What tells two steps apart: the kind, the English texts and the values.
+// Two equal steps may share it; they are interchangeable.
+unsigned int StepSignature(const MonsterTalkBlock& block)
+{
+    std::string text = std::to_string(static_cast<int>(block.kind));
+    const auto add = [&](std::string_view part)
+    {
+        text += '\x1f';
+        text += part;
+    };
+    add(block.message.GetNeutral());
+    add(block.dialog.title.GetNeutral());
+    for (const Data::LocalizedString& line : block.dialog.lines)
+        add(line.GetNeutral());
+    if (block.dialog.ok)
+    {
+        add(block.dialog.ok->request);
+        add(block.dialog.ok->quest);
+        for (const std::string& state : block.dialog.ok->questStates)
+            add(state);
+        add(std::to_string(block.dialog.ok->zen));
+        add(block.dialog.ok->failure.GetNeutral());
+    }
+    for (const int classIndex : block.noQuestTitleFor)
+        add(std::to_string(classIndex));
+    add(block.altarTexts);
+    return static_cast<unsigned int>(std::hash<std::string>{}(text));
+}
+
+} // namespace
+
+bool TalkBlocks(std::vector<Data::Monsters::MonsterTalkBlock>& blocks, const AfterField& afterField)
+{
+    ImGui::TextDisabled("%s", I18N::Editor::TalkTextsNote);
+    // Each step's tree node is keyed by an id of its own, which follows it
+    // when steps move, go or come here, and is found again by its signature
+    // after a change made elsewhere (undo, redo).
+    TalkStepStates states(blocks.size());
+    std::vector<unsigned int> signatures;
+    for (const MonsterTalkBlock& block : blocks)
+        signatures.push_back(StepSignature(block));
+    const std::vector<int> ids = MatchStepIds(states.Before(), signatures, [&] { return states.NewId(); });
+    for (size_t row = 0; row < ids.size(); ++row)
+        states.SetId(row, ids[row]);
+    const auto done = [&](bool changed)
+    {
+        if (changed)
+        {
+            signatures.clear();
+            for (const MonsterTalkBlock& block : blocks)
+                signatures.push_back(StepSignature(block));
+        }
+        states.Leave(signatures);
+        return changed;
+    };
+
+    for (size_t index = 0; index < blocks.size(); ++index)
+    {
+        ImGui::PushID(states.Id(index));
+        const std::string title = std::to_string(index + 1) + ". " + TalkKindName(blocks[index].kind);
+        const bool open = ImGui::TreeNode("##Step", "%s", title.c_str());
+        ImGui::SameLine();
+        std::optional<size_t> moveTo;
+        if (index > 0 && ImGui::SmallButton(I18N::Editor::MoveUp))
+            moveTo = index - 1;
+        ImGui::SameLine();
+        if (index + 1 < blocks.size() && ImGui::SmallButton(I18N::Editor::MoveDown))
+            moveTo = index + 1;
+        ImGui::SameLine();
+        const bool remove = ImGui::SmallButton("x");
+        bool changed = false;
+        if (open)
+        {
+            if (!moveTo && !remove)
+                changed = TalkBlockFields(blocks[index], afterField);
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+        if (moveTo)
+        {
+            // The two steps change rows with their ids.
+            std::swap(blocks[index], blocks[*moveTo]);
+            const int idHere = states.Id(index);
+            states.SetId(index, states.Id(*moveTo));
+            states.SetId(*moveTo, idHere);
+            return done(true);
+        }
+        if (remove)
+        {
+            // The later steps move up a row with their ids.
+            for (size_t row = index; row + 1 < blocks.size(); ++row)
+                states.SetId(row, states.Id(row + 1));
+            blocks.erase(blocks.begin() + static_cast<std::ptrdiff_t>(index));
+            return done(true);
+        }
+        if (changed)
+            return done(true);
+    }
+    if (ImGui::SmallButton(I18N::Editor::AddAStep))
+    {
+        // A new step has a new id, so it starts closed.
+        states.SetId(blocks.size(), states.NewId());
+        blocks.emplace_back();
+        return done(true);
+    }
+    return done(false);
+}
+
 } // namespace MuEditor::Monsters::SetupLists
 
 #endif // _EDITOR

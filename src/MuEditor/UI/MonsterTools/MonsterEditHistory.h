@@ -76,6 +76,10 @@ struct MonsterEditEntry
     // entry changed it.
     std::optional<Data::Monsters::UnknownMonsterLook> unknownBefore;
     std::optional<Data::Monsters::UnknownMonsterLook> unknownAfter;
+    // The shared talk texts before and after; both set when the entry
+    // changed them.
+    std::optional<Data::Monsters::MonsterTalkTexts> talkTextsBefore;
+    std::optional<Data::Monsters::MonsterTalkTexts> talkTextsAfter;
     // Made on a monster with several numbers as a whole (its shared values):
     // its undo selects the monster as a whole again.
     bool wholeMonster = false;
@@ -110,6 +114,9 @@ public:
         // that change it.
         std::function<Data::Monsters::UnknownMonsterLook()> readUnknownLook;
         std::function<void(const Data::Monsters::UnknownMonsterLook& look)> restoreUnknownLook;
+        // The same for the shared talk texts.
+        std::function<Data::Monsters::MonsterTalkTexts()> readTalkTexts;
+        std::function<void(const Data::Monsters::MonsterTalkTexts& texts)> restoreTalkTexts;
     };
 
     // Why the last Undo or Redo did nothing.

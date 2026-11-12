@@ -28,7 +28,10 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
-extern bool bCheckNPC;
+#include <algorithm>
+#include <vector>
+
+extern std::vector<int> g_noQuestTitleClasses;
 extern int g_iNumLineMessageBoxCustom;
 extern int g_iNumAnswer;
 extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
@@ -371,8 +374,8 @@ void CNPCQuest::SyncRmlModel()
     const BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
     const BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
 
-    const bool bDarkNpcCheck = (Hero->Class == CLASS_DARK_LORD || Hero->Class == CLASS_DARK
-        || Hero->Class == CLASS_RAGEFIGHTER) && bCheckNPC;
+    const bool bDarkNpcCheck =
+        std::ranges::find(g_noQuestTitleClasses, static_cast<int>(Hero->Class)) != g_noQuestTitleClasses.end();
 
     model.npcName = StringUtils::WideToNarrow(bDarkNpcCheck ? g_csQuest.GetNPCName(2) : g_csQuest.GetNPCName(byCurQuestIndex));
     m_RmlView.MarkDirty("npc_name");

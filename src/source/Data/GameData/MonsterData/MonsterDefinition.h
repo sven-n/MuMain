@@ -110,4 +110,25 @@ const std::string& GetSoundSetWithModel(const MonsterDefinition& monster, int sl
 // the monster names too (Data::Maps::Overlaps); a map in two variants is
 // fatal (Q-MN65).
 std::vector<Data::Maps::MapRef> FindMapsOfOtherVariants(const MonsterDefinition& monster, size_t variant);
+
+// Each text of the monster's talk with its field (ForEachTalkText), on the
+// entry, its state variants ("stateVariants[0].onTalk[0].message"), its map
+// variants ("mapVariants[1].talkLevel.message") and theirs. `monster` may be
+// const.
+template <typename TMonster, typename TVisit> void ForEachMonsterTalkText(TMonster& monster, TVisit&& visit)
+{
+    const auto withStates = [&](auto& setup, const std::string& prefix)
+    {
+        ForEachTalkText(setup, [&](auto& text, const std::string& field) { visit(text, prefix + field); });
+        for (size_t index = 0; index < setup.stateVariants.size(); ++index)
+        {
+            const std::string state = prefix + "stateVariants[" + std::to_string(index) + "].";
+            ForEachTalkText(setup.stateVariants[index].setup,
+                            [&](auto& text, const std::string& field) { visit(text, state + field); });
+        }
+    };
+    withStates(monster.setup, "");
+    for (size_t index = 0; index < monster.mapVariants.size(); ++index)
+        withStates(monster.mapVariants[index].setup, "mapVariants[" + std::to_string(index) + "].");
+}
 } // namespace Data::Monsters

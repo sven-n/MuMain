@@ -8,6 +8,7 @@
 #include "MonsterGroupChecks.h"
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "I18N/All.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/MonsterData/MonsterDataValidation.h"
@@ -48,6 +49,11 @@ void RunMonsters(std::vector<Data::Items::ItemDataIssue>& issues)
     GroupChecks::Validate(issues);
     ValidateItems(issues);
     Data::Monsters::ValidateMonsterSetups(AllMonsters(), Data::Monsters::GetMonstersFile().generic_string(), issues);
+    Data::Monsters::ValidateMonsterTalkSteps(AllMonsters(), g_MonsterDatabase.GetTalkTexts(),
+                                             Data::Monsters::GetMonstersFile().generic_string(), issues);
+    Data::Monsters::ValidateMonsterTalkTexts(AllMonsters(), g_MonsterDatabase.GetTalkTexts(),
+                                             I18N::GetAvailableLocales(),
+                                             Data::Monsters::GetMonstersFile().generic_string(), issues);
 }
 
 void RunModels(std::vector<Data::Items::ItemDataIssue>& issues)
