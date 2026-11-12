@@ -2217,7 +2217,9 @@ bool StartClient(char* szCmdLine)
 
     g_ErrorReport.Write(L"> SDL_gpu init success.\r\n");
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteGpuInfo();
+    const auto& renderer = mu::GetRenderer();
+    g_ErrorReport.WriteGpuInfo(renderer.GetGPUDeviceName(), renderer.GetGPUDriverName(),
+                               renderer.GetGPUDriverVersion());
     g_ErrorReport.AddSeparator();
 
     // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
