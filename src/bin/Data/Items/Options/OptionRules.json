@@ -2,17 +2,19 @@
   "formatVersion": 1,
   "rules": [
     {"options": [], "tags": ["ammunition"]},
-    {"options": ["luck", "physicalAndWizardryDamageOption"], "tags": ["magicSword"]},
-    {"options": ["luck", "physicalDamageOption"], "group": [0, 1, 2, 3, 4]},
-    {"options": ["luck", "curseDamageOption"], "group": [5], "tags": ["summonerBook"]},
-    {"options": ["luck", "wizardryDamageOption"], "group": [5]},
-    {"options": ["luck", "defenseRateOption"], "group": [6]},
-    {"options": ["luck", "defenseOption"], "group": [7, 8, 9, 10, 11]},
+    {"options": ["luck", "physicalAndWizardryDamageOption", "excellentPhysicalAttack"], "tags": ["magicSword"]},
+    {"options": ["luck", "physicalDamageOption", "excellentPhysicalAttack"], "group": [0, 1, 2, 3, 4]},
+    {"options": ["luck", "curseDamageOption", "excellentWizardryAttack"], "group": [5], "tags": ["summonerBook"]},
+    {"options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"], "group": [5]},
+    {"options": ["luck", "defenseRateOption", "excellentDefense"], "group": [6]},
+    {"options": ["luck", "defenseOption", "excellentDefense"], "group": [7, 8, 9, 10, 11]},
     {"options": ["luck"], "group": [12], "numbers": [0, 1, 2, 3, 4, 5, 6, 41, 42, 49]},
     {"options": ["luck"], "slot": ["wings"], "wingTier": ["third"]},
     {"options": ["luck"], "group": [13], "numbers": [30]},
-    {"options": ["jewelryHealthRecovery"], "group": [13], "numbers": [8, 9, 12, 13, 21, 22, 23, 25, 26, 27]},
-    {"options": ["ringOfMagicMana"], "group": [13], "numbers": [24]},
-    {"options": ["pendantOfAbilityAg"], "group": [13], "numbers": [28]}
+    {"options": ["jewelryHealthRecovery", "excellentDefense"], "group": [13], "numbers": [8, 9, 21, 22, 23]},
+    {"options": ["ringOfMagicMana", "excellentDefense"], "group": [13], "numbers": [24]},
+    {"options": ["jewelryHealthRecovery", "excellentWizardryAttack"], "group": [13], "numbers": [12, 25, 27]},
+    {"options": ["jewelryHealthRecovery", "excellentPhysicalAttack"], "group": [13], "numbers": [13, 26]},
+    {"options": ["pendantOfAbilityAg", "excellentPhysicalAttack"], "group": [13], "numbers": [28]}
   ]
 }

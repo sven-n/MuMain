@@ -169,8 +169,9 @@ public:
 };
 } // namespace
 
-// Every item's tooltip at every level 0 to 15, in the twenty variants of WriteItemTooltipSnapshot (plain, full, ancient,
-// harmony, each option alone, the additional option at levels 2 to 7 and option types 1 to 3, worn, broken and expired),
+// Every item's tooltip at every level 0 to 15, in the 25 variants of WriteItemTooltipSnapshot (plain, full, ancient,
+// harmony, each option alone, the additional option at levels 2 to 7 and option types 1 to 3, each excellent option
+// alone, worn, broken and expired),
 // for the two heroes, against the hashes recorded in item_tooltip_snapshot.txt: a tooltip that changes shows here.
 // After a change that is meant, run the test with MU_TOOLTIP_SNAPSHOT_UPDATE=1 to record the new hashes; the control
 // socket's `tooltip-snapshot` writes the full lines in the game to compare with.
@@ -224,7 +225,7 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
                     changedTooltips.emplace_back(key, text);
                 }
             });
-        CHECK(tooltips == 911 * 20 * 16);
+        CHECK(tooltips == 911 * 25 * 16);
     }
     SetItemTooltipTextMeasure(nullptr);
 
@@ -952,7 +953,7 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
     CHECK(lucky.textColor == rgb(0x66, 0xb2, 0xff));
     CHECK(lucky.text == std::wstring(L"Kris +3") + I18N::Game::Luck);
     CHECK(lucky.style == "withOptions");
-    // ... green when excellent, also first-tier wings, but not the second-tier wings, ...
+    // ... green when excellent (active excellent options), not wings with the excellent byte, ...
     const auto excellent = [&](int group, int number)
     {
         ItemCreationParams params = at(group, number, 0);
@@ -961,8 +962,10 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
         return label(params).textColor;
     };
     CHECK(excellent(0, 0) == rgb(0x19, 0xff, 0x7f));
-    CHECK(excellent(12, 0) == rgb(0x19, 0xff, 0x7f));
+    CHECK(excellent(12, 0) == rgb(0xb2, 0xb2, 0xb2));
     CHECK(excellent(12, 3) == rgb(0xb2, 0xb2, 0xb2));
+    // ... and the Horn of Fenrir with a colour, until its options move into data, ...
+    CHECK(excellent(13, 37) == rgb(0x19, 0xff, 0x7f));
     // ... a set item green on blue and bold after its set's name, but not an item whose discriminator names no set.
     ItemCreationParams rapier = at(0, 2, 0);
     rapier.IsAncient = true;
@@ -1030,6 +1033,12 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
     for (const int number : {10, 39, 41, 68, 76, 122})
     {
         INFO("13/" << number);
+        // A transformation ring links no options: one linked for the test gives it option lines to come after.
+        const int type = Data::Items::MakeItemType(13, number);
+        const Data::Items::ItemDefinition shipped = *g_ItemDatabase.Find(type);
+        Data::Items::ItemDefinition linked = shipped;
+        linked.options.push_back("excellentDefense");
+        g_ItemDatabase.Set(linked);
         const std::vector<ItemTooltipLine> plain = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, number));
         ItemCreationParams full = Engine::Items::TooltipSnapshot::FullItemParameters(13, number);
         full.WithLuck = true;
@@ -1048,6 +1057,7 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
             shown += Core::Text::ToUtf8(line.text.c_str()) + " | ";
         }
         INFO(shown);
+        g_ItemDatabase.Set(shipped);
         if (at == lines.end())
         {
             CHECK(at != lines.end());

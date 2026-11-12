@@ -19,6 +19,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "I18N/All.h"
 #include "UI/Inventory/ItemHelpContentKey.h"
@@ -297,7 +298,7 @@ TEST_CASE("Item stats come from the item's stat profile [data][items]")
     const auto stats = [&items](int itemType, int level, BYTE excellentFlags = 0, BYTE ancientDiscriminator = 0)
     {
         return GameLogic::Items::ComputeItemStats(items[itemType],
-                                                  {itemType, level, excellentFlags, ancientDiscriminator});
+                                                  {itemType, level, excellentFlags, ancientDiscriminator, 0});
     };
 
     // Shield: block rate from the default table, defense +1 per level and no excellent part;
@@ -360,12 +361,23 @@ TEST_CASE("Item requirements come from the item's stat profile [data][items]")
     CHECK(stats(ITEM_DRAGON_KNIGHT_HELM, 0, 0x01).requireLevel == 380);
     CHECK(stats(ITEM_HORN_OF_FENRIR, 15, 0x01).requireLevel == 300);
 
-    // Requirements by level, and the +20 on top of the ring's list.
+    // Requirements by level.
     CHECK(stats(ITEM_ORB_OF_SUMMONING, 3).requireEnergy == 130);
     CHECK(stats(ITEM_ORB_OF_SUMMONING, 7).requireEnergy == 500);
     CHECK(stats(ITEM_ORB_OF_SUMMONING, 8).requireEnergy == 0);
     CHECK(stats(ITEM_TRANSFORMATION_RING, 2).requireLevel == 20);
-    CHECK(stats(ITEM_TRANSFORMATION_RING, 3, 0x01).requireLevel == 70);
+    // A transformation ring links no excellent options, so the excellent byte doesn't raise it (OpenMU never sends one).
+    CHECK(stats(ITEM_TRANSFORMATION_RING, 3, 0x01).requireLevel == 50);
+    // A level requirement given by level gets the excellent +20 too: a Ring of Ice with one.
+    ItemDefinition ringByLevel = *g_ItemDatabase.Find(ITEM_RING_OF_ICE);
+    RequirementByLevel ringLevels{};
+    ringLevels.fill(30);
+    ringByLevel.requirementsByLevel.Set(ItemRequirement::Level, ringLevels);
+    const GameLogic::Items::ItemStatSources ringSources{items[ITEM_RING_OF_ICE], &ringByLevel,
+                                                        g_ItemDatabase.GetStatProfile(ITEM_RING_OF_ICE),
+                                                        g_ItemDatabase.GetOptionLinks(ITEM_RING_OF_ICE)};
+    CHECK(GameLogic::Items::ComputeItemStats(ringSources, {ITEM_RING_OF_ICE, 3}).requireLevel == 30);
+    CHECK(GameLogic::Items::ComputeItemStats(ringSources, {ITEM_RING_OF_ICE, 3, 0x01}).requireLevel == 50);
 
     // Books: energy with one per level; their strength grows with the option even from 0. The item counts its option
     // at its value list's last level above the list (GetAdditionalOptionLevel): 4.
@@ -418,7 +430,7 @@ TEST_CASE("Item stats from an item's definition are those from the item database
         const ItemStatProfile& profile = profiles.Get(
             profileIndex == ItemStatProfiles::UnknownProfile ? ItemStatProfiles::DefaultProfile : profileIndex);
         const GameLogic::Items::ItemStatSources sources{attribute, &definition, profile,
-                                                        definition.slot == ItemSlot::Wings};
+                                                        g_ItemDatabase.GetOptionLinks(itemType)};
         for (int level = 0; level < ItemLevelCount; ++level)
         {
             for (const BYTE excellentFlags : {BYTE{0}, BYTE{0x01}})

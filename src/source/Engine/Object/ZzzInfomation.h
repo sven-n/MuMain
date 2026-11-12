@@ -41,6 +41,8 @@ bool IsRequireEquipItem(ITEM* pItem);
 bool AreItemOptionsActive(ITEM* Item);
 // Adds the values of the item's option slots of effect `Special` to `Value` when its options count.
 void PlusSpecial(WORD* Value, int Special, ITEM* Item);
+// Adds the per cent of `Value` the item's option slots of effect `Special` hold to `Value` when its options count.
+void PlusSpecialPercentOfSlot(WORD* Value, int Special, ITEM* Item);
 
 class CHARACTER_MACHINE
 {

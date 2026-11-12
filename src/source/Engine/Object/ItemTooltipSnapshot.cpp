@@ -19,6 +19,12 @@ struct TooltipVariant
     void (*apply)(ItemCreationParams& params);
 };
 
+void ApplyExcellent(ItemCreationParams& params, int number)
+{
+    params.HasExcellentOption = true;
+    params.ExcellentFlags = static_cast<BYTE>(1 << (number - 1));
+}
+
 void ApplyOption(ItemCreationParams& params, BYTE level, BYTE type)
 {
     params.WithOption = true;
@@ -77,6 +83,12 @@ constexpr TooltipVariant TooltipVariants[] = {
          params.HasExcellentOption = true;
          params.ExcellentFlags = 1;
      }},
+    // Each other excellent option alone: the excellent byte's bit number - 1.
+    {"excellent 2", [](ItemCreationParams& params) { ApplyExcellent(params, 2); }},
+    {"excellent 3", [](ItemCreationParams& params) { ApplyExcellent(params, 3); }},
+    {"excellent 4", [](ItemCreationParams& params) { ApplyExcellent(params, 4); }},
+    {"excellent 5", [](ItemCreationParams& params) { ApplyExcellent(params, 5); }},
+    {"excellent 6", [](ItemCreationParams& params) { ApplyExcellent(params, 6); }},
     // A worn and a broken item; for a stack, its count (one, none).
     {"durability 1", [](ItemCreationParams& params) { params.Durability = 1; }},
     {"durability 0", [](ItemCreationParams& params) { params.Durability = 0; }},

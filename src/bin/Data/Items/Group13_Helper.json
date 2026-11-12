@@ -345,7 +345,7 @@
         "pl": "Pierścień Lodu",
         "pt": "Anel de gelo"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentDefense"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -378,7 +378,7 @@
         "pl": "Pierścień Trucizny",
         "pt": "Anel do veneno"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentDefense"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -612,7 +612,7 @@
         "pl": "Wisior Błyskawic",
         "pt": "Pingente da luz"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentWizardryAttack"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -645,7 +645,7 @@
         "pl": "Wisior Ognia",
         "pt": "Pingente do fogo"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentPhysicalAttack"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -1737,7 +1737,7 @@
         "pl": "Pierścień Ognia",
         "pt": "Anel do fogo"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentDefense"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1770,7 +1770,7 @@
         "pl": "Pierścień Ziemi",
         "pt": "Anel da terra"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentDefense"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1803,7 +1803,7 @@
         "pl": "Pierścień Wiatru",
         "pt": "Anel do vento"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentDefense"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1836,7 +1836,7 @@
         "pl": "Pierścień Magii",
         "pt": "Anel da magia"
       },
-      "options": ["ringOfMagicMana"],
+      "options": ["ringOfMagicMana", "excellentDefense"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1866,7 +1866,7 @@
         "pl": "Wisior Lodu",
         "pt": "Pingente do gelo"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentWizardryAttack"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -1899,7 +1899,7 @@
         "pl": "Wisior Wiatru",
         "pt": "Pingente do vento"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentPhysicalAttack"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -1932,7 +1932,7 @@
         "pl": "Wisior Wody",
         "pt": "Pingente da água"
       },
-      "options": ["jewelryHealthRecovery"],
+      "options": ["jewelryHealthRecovery", "excellentWizardryAttack"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -1965,7 +1965,7 @@
         "pl": "Wisior Zdolności",
         "pt": "Pingente da habilidade"
       },
-      "options": ["pendantOfAbilityAg"],
+      "options": ["pendantOfAbilityAg", "excellentPhysicalAttack"],
       "width": 1,
       "height": 1,
       "slot": "pendant",

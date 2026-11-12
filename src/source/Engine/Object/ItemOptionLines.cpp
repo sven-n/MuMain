@@ -18,10 +18,19 @@ namespace Engine::Items::OptionLines
 {
 namespace
 {
-// A text split at its {value}: the value goes between two pieces. A placeholder of another name stays as written.
+// The placeholders a line fills in.
+enum class Placeholder : unsigned char
+{
+    Value,
+    Divisor,
+};
+
+// A text split at its {value} and {divisor}: between two pieces goes the number of the placeholder between them. A
+// placeholder of another name stays as written.
 struct SplitText
 {
     std::vector<std::wstring> pieces;
+    std::vector<Placeholder> between;
 };
 
 // A text of the option texts in a language. The texts stay where they are until the item data changes.
@@ -51,12 +60,14 @@ SplitText Split(std::string_view text)
     size_t position = 0;
     for (const Data::Items::PlaceholderSpan& span : Data::Items::FindPlaceholders(text).spans)
     {
-        if (span.name != Data::Items::OptionValuePlaceholder)
+        if (span.name != Data::Items::OptionValuePlaceholder && span.name != Data::Items::OptionDivisorPlaceholder)
         {
             continue;
         }
         piece.append(text.substr(position, span.begin - position));
         split.pieces.push_back(Core::Text::FromUtf8(piece));
+        split.between.push_back(span.name == Data::Items::OptionValuePlaceholder ? Placeholder::Value
+                                                                                 : Placeholder::Divisor);
         piece.clear();
         position = span.end;
     }
@@ -91,7 +102,7 @@ void Append(const wchar_t* text, size_t length, wchar_t* out, size_t capacity, s
 }
 } // namespace
 
-bool Write(std::string_view name, int value, wchar_t* out, size_t capacity)
+bool Write(std::string_view name, const LineValues& values, wchar_t* out, size_t capacity)
 {
     const Data::LocalizedString* text = Data::Items::ItemDatabase::GetInstance().GetOptions().GetTexts().Find(name);
     if (text == nullptr || capacity == 0)
@@ -100,13 +111,14 @@ bool Write(std::string_view name, int value, wchar_t* out, size_t capacity)
     }
     const SplitText& split = Find(*text, I18N::GetCurrentLocale());
     std::array<wchar_t, 16> number{};
-    const int numberLength = std::swprintf(number.data(), number.size(), L"%d", value);
     size_t written = 0;
     out[0] = L'\0';
     for (size_t piece = 0; piece < split.pieces.size(); ++piece)
     {
         if (piece > 0)
         {
+            const int shown = split.between[piece - 1] == Placeholder::Value ? values.value : values.divisor;
+            const int numberLength = std::swprintf(number.data(), number.size(), L"%d", shown);
             Append(number.data(), static_cast<size_t>(numberLength > 0 ? numberLength : 0), out, capacity, written);
         }
         Append(split.pieces[piece].c_str(), split.pieces[piece].size(), out, capacity, written);

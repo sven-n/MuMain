@@ -174,7 +174,7 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope s
     {
         values.resistances[resistance] = attribute->Resistance[resistance] ? item.Level + 1 : 0;
     }
-    values.excellent = item.ExcellentFlags > 0;
+    values.excellent = GameLogic::Items::HasExcellentOptions(item);
     values.ancient = item.AncientDiscriminator > 0;
     values.socketItem = g_SocketItemMgr.IsSocketItem(&item);
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(item.Type);

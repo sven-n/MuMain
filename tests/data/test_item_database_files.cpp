@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "ItemModelDatabaseScope.h"
+#include "ItemOptionsScope.h"
 #include "LookEditsScope.h"
 #include "LogCapture.h"
 #include "ItemStatProfilesScope.h"
@@ -49,6 +50,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Physics/PhysicsManager.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "Core/Text/Utf8.h"
 #include "I18N/All.h"
@@ -1929,12 +1931,13 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         REQUIRE(g_ItemDataHandler.AddItem(spear, nullptr));
         CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(3, 100)) == WeaponKind::Spear);
         // And the options the option rules give it.
-        CHECK(g_ItemDatabase.Find(3, 100)->options == std::vector<std::string>{"luck", "physicalDamageOption"});
+        CHECK(g_ItemDatabase.Find(3, 100)->options == std::vector<std::string>{"luck", "physicalDamageOption",
+                                                                                   "excellentPhysicalAttack"});
     }
 
     SUBCASE("an item's option list follows its data, and a list an edit picked stays")
     {
-        const std::vector<std::string> weapon{"luck", "physicalDamageOption"};
+        const std::vector<std::string> weapon{"luck", "physicalDamageOption", "excellentPhysicalAttack"};
         REQUIRE(g_ItemDatabase.Find(KrisType)->options == weapon);
         EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition); });
         CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
@@ -4078,8 +4081,9 @@ TEST_CASE("Item Basics shows the stats at each level, from the values being type
             for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
             {
                 const GameLogic::Items::ItemStatValues game = GameLogic::Items::ComputeItemStats(
-                    ItemAttribute[itemType], {itemType, level, static_cast<BYTE>(variant.excellent ? 1 : 0),
-                                              static_cast<BYTE>(variant.ancient ? 1 : 0), 0});
+                    ItemAttribute[itemType],
+                    {itemType, level, static_cast<BYTE>(variant.excellent ? 1 : 0),
+                     static_cast<BYTE>(variant.ancient ? 1 : 0), 0});
                 const GameLogic::Items::ItemStatValues& shown = values[static_cast<size_t>(level)];
                 INFO(g_ItemDatabase.GetLogName(itemType)
                      << " +" << level << " excellent " << variant.excellent << " ancient " << variant.ancient);
@@ -4098,6 +4102,20 @@ TEST_CASE("Item Basics shows the stats at each level, from the values being type
     const int before = ComputeItemLevelValues(stronger, {})[5].damageMax;
     stronger.damageMax = static_cast<BYTE>(stronger.damageMax + 10);
     CHECK(ComputeItemLevelValues(stronger, {})[5].damageMax == before + 10);
+
+    // Excellent counts with any excellent option the draft's definition has, also without option 1.
+    ItemOptionsScope restoreOptions;
+    const Data::Items::ItemOptionDatabase& shipped = restoreOptions.Saved();
+    std::vector<Data::Items::ItemOptionDefinition> definitions(shipped.GetDefinitions().begin(),
+                                                              shipped.GetDefinitions().end());
+    const int physical = shipped.Find("excellentPhysicalAttack");
+    REQUIRE(physical != Data::Items::ItemOptionDatabase::NoDefinition);
+    std::erase_if(definitions[static_cast<size_t>(physical)].options,
+                  [](const Data::Items::ItemOption& option) { return option.number == 1; });
+    g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    CHECK(ComputeItemLevelValues(kris, RequirementVariant{true, false, 0})[0].damageMin >
+          ComputeItemLevelValues(kris, {})[0].damageMin);
 }
 
 TEST_CASE("Item Requirements shows what the game asks at each level, from the values being typed "

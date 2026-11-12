@@ -11,7 +11,8 @@ namespace
 {
 // The order the game takes an item's definitions in, by type (the tooltip shows their lines in it): wing options,
 // the skill (no definition), luck, the additional option, the Dark Horse, excellent options, fixed options.
-constexpr std::array<ItemOptionType, 2> TakeOrder = {ItemOptionType::Luck, ItemOptionType::Option};
+constexpr std::array<ItemOptionType, 3> TakeOrder = {ItemOptionType::Luck, ItemOptionType::Option,
+                                                     ItemOptionType::Excellent};
 
 size_t GetTakeOrder(ItemOptionType type)
 {
@@ -24,13 +25,25 @@ ItemOptionDatabase::ItemOptionDatabase(std::vector<ItemOptionDefinition> definit
     : m_definitions(std::move(definitions)), m_texts(std::move(texts)), m_rules(std::move(rules))
 {
     m_effects.reserve(m_definitions.size());
-    for (const ItemOptionDefinition& definition : m_definitions)
+    m_optionOrders.reserve(m_definitions.size());
+    for (ItemOptionDefinition& definition : m_definitions)
     {
         std::vector<ItemOptionEffect>& effects = m_effects.emplace_back();
-        for (const ItemOption& option : definition.options)
+        for (ItemOption& option : definition.options)
         {
+            ResolveTermAttributes(option.value);
             effects.push_back(FindItemOptionEffect(definition.type, option.attribute, option.add)
                                   .value_or(ItemOptionEffect{NoItemOptionEffect, false}));
+        }
+        std::vector<size_t>& order = m_optionOrders.emplace_back(definition.options.size());
+        for (size_t index = 0; index < order.size(); ++index)
+        {
+            order[index] = index;
+        }
+        if (definition.type == ItemOptionType::Excellent)
+        {
+            std::stable_sort(order.begin(), order.end(), [&definition](size_t left, size_t right)
+                             { return definition.options[left].number > definition.options[right].number; });
         }
     }
 }

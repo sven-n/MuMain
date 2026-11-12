@@ -14,6 +14,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Character/CharacterManager.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -156,6 +157,8 @@ static void InitializeMainScene()
     MU_LOG_DEBUG(mu::log::Get("network"), "SendRequestJoinMapServer");
 
     CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
+    // The hero before's master level would count for the new one until the server sends its own.
+    gCharacterManager.ForgetHeroMasterLevel();
     SocketClient->ToGameServer()->SendSelectCharacter(MU_C16(CharactersClient[SelectedHero].ID));
 
     // Remember which character is in play so auto-reconnect can re-select it.
