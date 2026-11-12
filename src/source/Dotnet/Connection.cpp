@@ -190,7 +190,7 @@ using onPacketReceived = void(int32_t, int32_t, BYTE*);
 using onHandle = void(int32_t);
 
 typedef int32_t(CORECLR_DELEGATE_CALLTYPE* BeginConnect)(const char16_t*, int32_t, BYTE, onPacketReceived, onHandle,
-                                                          onHandle);
+                                                         onHandle);
 typedef void(CORECLR_DELEGATE_CALLTYPE* Disconnect)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* BeginReceive)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* Send)(int32_t, const BYTE*, int32_t);
@@ -271,9 +271,7 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
     _connectServer = std::make_unique<PacketFunctions_ConnectServer>();
     _gameServer = std::make_unique<PacketFunctions_ClientToServer>();
     const int32_t handle = Connections().AddCreated(
-        [&] {
-            return beginConnect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS, &OnOpenedS);
-        },
+        [&] { return beginConnect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS, &OnOpenedS); },
         this);
     mu::log::Get("dotnet")->info("NET: connect started, handle={}", handle);
     if (handle <= 0)

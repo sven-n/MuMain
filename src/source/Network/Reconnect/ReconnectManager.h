@@ -26,14 +26,14 @@ class ReconnectManager
 public:
     enum class Phase
     {
-        Idle,           // not reconnecting
-        Probing,        // in-game, world still rendered; connecting in the background until the server answers
-        Connecting,     // socket opened, waiting for the server hello
-        LoggingIn,      // login sent, login/character scene loops are driving
-        SelectingChar,  // character list arrived, selecting the cached character
-        Joining,        // loading into the world
-        Retrying,       // post-teardown: re-connect + re-login attempt failed, retry
-        Done,           // back in game; dialog dismissed next frame
+        Idle,          // not reconnecting
+        Probing,       // in-game, world still rendered; connecting in the background until the server answers
+        Connecting,    // socket opened, waiting for the server hello
+        LoggingIn,     // login sent, login/character scene loops are driving
+        SelectingChar, // character list arrived, selecting the cached character
+        Joining,       // loading into the world
+        Retrying,      // post-teardown: re-connect + re-login attempt failed, retry
+        Done,          // back in game; dialog dismissed next frame
     };
 
     static ReconnectManager& Instance();

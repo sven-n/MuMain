@@ -19,12 +19,12 @@
 // client uses for timeouts (see ZzzAI.cpp).
 namespace
 {
-    constexpr double PROBE_INTERVAL_MS = 5000.0;    // gap between background connects
-    constexpr double PROBE_TIMEOUT_MS = 2000.0;     // allow a background connect this long to open
-    constexpr double CONNECT_TIMEOUT_MS = 10000.0;  // wait for the server hello
-    constexpr double LOGIN_TIMEOUT_MS = 10000.0;    // login -> character list
-    constexpr double RETRY_INTERVAL_MS = 5000.0;    // gap between re-login retries
-    constexpr int STEP_COUNT = 4;                   // progress-bar steps
+constexpr double PROBE_INTERVAL_MS = 5000.0;   // gap between background connects
+constexpr double PROBE_TIMEOUT_MS = 2000.0;    // allow a background connect this long to open
+constexpr double CONNECT_TIMEOUT_MS = 10000.0; // wait for the server hello
+constexpr double LOGIN_TIMEOUT_MS = 10000.0;   // login -> character list
+constexpr double RETRY_INTERVAL_MS = 5000.0;   // gap between re-login retries
+constexpr int STEP_COUNT = 4;                  // progress-bar steps
 }
 
 extern double WorldTime;

@@ -115,8 +115,10 @@ TEST_CASE("HandleRegistry delivers a callback that arrives while the handle is c
     std::thread early;
     std::atomic<bool> delivered = false;
     const int32_t handle = registry.AddCreated(
-        [&] {
-            early = std::thread([&] { delivered = registry.Dispatch(5, [](FakeConnection& target) { ++target.calls; }); });
+        [&]
+        {
+            early =
+                std::thread([&] { delivered = registry.Dispatch(5, [](FakeConnection& target) { ++target.calls; }); });
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
             return 5;
         },
