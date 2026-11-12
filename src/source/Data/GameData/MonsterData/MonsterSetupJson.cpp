@@ -889,7 +889,10 @@ struct Reader
                 continue;
             }
             MonsterTalkBlock block;
-            const auto& [kind, content] = *row.items().begin();
+            // The step's one key and its value (the iterator's own key and value
+            // would end with the iterator, which is a temporary).
+            const std::string kind = row.begin().key();
+            const OrderedJson& content = row.begin().value();
             const std::string contentKey = rowKey + "." + kind;
             if (kind == DialogKey)
             {
