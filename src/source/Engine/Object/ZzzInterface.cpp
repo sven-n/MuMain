@@ -24,6 +24,7 @@
 #include "UI/Chat/ChatInput.h"
 #include "GameLogic/Combat/ClassAttack.h"
 #include "GameLogic/Combat/SkillCast.h"
+#include "GameLogic/Combat/SkillAim.h"
 #include "GameLogic/Combat/SkillExecution.h"
 #include "Core/Input/ImeInput.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -2652,12 +2653,6 @@ bool SkillKeyPush(int Skill)
     return false;
 }
 
-bool RepeatsAutoAttack(bool autoAttackOn)
-{
-    return autoAttackOn && gMapManager.WorldActive != WD_6STADIUM && !gMapManager.InChaosCastle() && Attacking == 2 &&
-           CheckAttack();
-}
-
 void Attack(CHARACTER* c)
 {
     const bool mouseOnHud = g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud();
@@ -2729,7 +2724,13 @@ void Attack(CHARACTER* c)
             MouseRButtonPush = false;
             Success = true;
         }
-        if (RepeatsAutoAttack(g_pOption->IsAutoAttack()))
+        GameLogic::Combat::SkillAim::AutoAttackState autoAttack;
+        autoAttack.optionOn = g_pOption->IsAutoAttack();
+        autoAttack.mapAllowsIt = gMapManager.WorldActive != WD_6STADIUM && !gMapManager.InChaosCastle();
+        autoAttack.afterSkillCast = Attacking == 2;
+        autoAttack.hasSelection = SelectedCharacter != -1;
+        autoAttack.selectionAttackable = autoAttack.hasSelection && CheckAttack();
+        if (GameLogic::Combat::SkillAim::RepeatsAutoAttack(autoAttack))
         {
             Success = true;
         }

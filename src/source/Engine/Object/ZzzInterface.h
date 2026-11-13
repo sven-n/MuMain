@@ -116,10 +116,6 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2);
 bool CheckTile(CHARACTER* c, OBJECT* o, float Range);
 void LetHeroStop(CHARACTER* c = NULL, BOOL bSetMovementFalse = FALSE);
 void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
-// Whether auto-attack casts the last skill again without a button: the option is on, outside the stadium and Chaos
-// Castle, after a skill cast (Attacking == 2), while the character under the cursor can be attacked. A party member or
-// NPC under the cursor stops it.
-bool RepeatsAutoAttack(bool autoAttackOn);
 void Attack(CHARACTER* c);
 void SendRequestMagic(int Type, int Key);
 void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey, BYTE* pSkillSerial);

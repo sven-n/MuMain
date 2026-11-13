@@ -83,4 +83,21 @@ inline bool PullIntoRange(const float origin[2], float point[2], float rangeTile
     point[1] = origin[1] + dy * scale;
     return true;
 }
+// What auto-attack looks at before it casts the last skill again without a button.
+struct AutoAttackState
+{
+    bool optionOn = false;            // the auto-attack option
+    bool mapAllowsIt = false;         // not the stadium or Chaos Castle
+    bool afterSkillCast = false;      // a skill was cast (Attacking == 2)
+    bool hasSelection = false;        // a character is under the cursor
+    bool selectionAttackable = false; // CheckAttack() for that character
+};
+
+// Whether auto-attack casts the last skill again. It has to agree with CheckTarget's pull: a character that can't be
+// attacked gives a direction skill an aim at any distance, so it must not keep the repeat going.
+[[nodiscard]] constexpr bool RepeatsAutoAttack(const AutoAttackState& state)
+{
+    return state.optionOn && state.mapAllowsIt && state.afterSkillCast && state.hasSelection &&
+           state.selectionAttackable;
+}
 } // namespace GameLogic::Combat::SkillAim
