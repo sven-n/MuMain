@@ -64,6 +64,12 @@ constexpr std::array Fields{
     Field{"gate", &I18N::Editor::CastleGate, GateAndHooks, NextSpawn},
     Field{"hooks", &I18N::Editor::Hooks, GateAndHooks, NextSpawn},
     Field{"stateVariants", &I18N::Editor::StateVariants, GateAndHooks, AtOnce},
+    // The talk rules are read when the hero talks to the NPC.
+    Field{"talks", &I18N::Editor::Talks, NpcRules, AtOnce},
+    Field{"talkLevel", &I18N::Editor::TalkLevel, NpcRules, AtOnce},
+    Field{"repairShop", &I18N::Editor::RepairShop, NpcRules, AtOnce},
+    Field{"onTalk", &I18N::Editor::OnTalk, NpcRules, AtOnce},
+    Field{"crywolfContract", &I18N::Editor::CrywolfHeroContract, NpcRules, AtOnce},
 };
 } // namespace
 

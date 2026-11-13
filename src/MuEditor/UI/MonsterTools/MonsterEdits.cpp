@@ -151,11 +151,28 @@ MonsterEdits::MonsterEdits()
                  [](std::span<const MonsterModelSnapshot> snapshots) { g_MonsterDataHandler.RestoreModels(snapshots); },
                  [](const std::string& name) { return g_MonsterDataHandler.ReadSoundSet(name); },
                  [](std::span<const MonsterSoundSetSnapshot> snapshots)
-                 { g_MonsterDataHandler.RestoreSoundSets(snapshots); }, [](int id)
-                 { return g_MonsterDataHandler.ReadGroup(id); }, [](std::span<const MonsterGroupSnapshot> snapshots)
-                 { g_MonsterDataHandler.RestoreGroups(snapshots); }, [] { return g_MonsterDatabase.GetUnknownLook(); },
-                 [](const Data::Monsters::UnknownMonsterLook& look) { g_MonsterDatabase.SetUnknownLook(look); }})
+                 { g_MonsterDataHandler.RestoreSoundSets(snapshots); },
+                 [](int id) { return g_MonsterDataHandler.ReadGroup(id); },
+                 [](std::span<const MonsterGroupSnapshot> snapshots) { g_MonsterDataHandler.RestoreGroups(snapshots); },
+                 [] { return g_MonsterDatabase.GetUnknownLook(); }, [](const Data::Monsters::UnknownMonsterLook& look)
+                 { g_MonsterDatabase.SetUnknownLook(look); }, [] { return g_MonsterDatabase.GetTalkTexts(); },
+                 [](const Data::Monsters::MonsterTalkTexts& texts) { g_MonsterDatabase.SetTalkTexts(texts); }})
 {
+}
+
+bool MonsterEdits::SetTalkTexts(std::string label, const Data::Monsters::MonsterTalkTexts& texts)
+{
+    const Data::Monsters::MonsterTalkTexts before = g_MonsterDatabase.GetTalkTexts();
+    if (before == texts)
+    {
+        return false;
+    }
+    g_MonsterDatabase.SetTalkTexts(texts);
+    MonsterEditEntry entry{std::move(label), {}, {}, {}, {}};
+    entry.talkTextsBefore = before;
+    entry.talkTextsAfter = texts;
+    m_history.Record(std::move(entry));
+    return true;
 }
 
 bool MonsterEdits::SetUnknownLook(std::string label, const Data::Monsters::UnknownMonsterLook& look)

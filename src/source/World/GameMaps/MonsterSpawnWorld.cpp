@@ -7,6 +7,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "World/GameMaps/GMBattleCastle.h"
+#include "World/GameMaps/GMCrywolf1st.h"
 #include "World/GameMaps/GMEmpireGuardian1.h"
 #include "World/GameMaps/GMEmpireGuardian2.h"
 #include "World/GameMaps/GMEmpireGuardian3.h"
@@ -67,6 +68,8 @@ bool IsSpawnStateOn(std::string_view state)
         return g_playerTransformed;
     if (state == "crywolfReady")
         return g_Direction.m_CMVP.m_iCryWolfState == CRYWOLF_STATE_READY;
+    if (state == "crywolfElfTime")
+        return M34CryWolf1st::IsCyrWolf1st() && M34CryWolf1st::Get_State_Only_Elf();
     return false;
 }
 

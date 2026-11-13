@@ -35,6 +35,18 @@ public:
         return m_unknownLook;
     }
 
+    // The talk texts several NPCs share, by name (the list's talkTexts); a
+    // change counts as one of the monsters (GetVersion).
+    void SetTalkTexts(const MonsterTalkTexts& texts)
+    {
+        m_talkTexts = texts;
+        ++m_version;
+    }
+    const MonsterTalkTexts& GetTalkTexts() const
+    {
+        return m_talkTexts;
+    }
+
     // Shows the names in another language: a missing translation shows English.
     void SetDisplayLocale(std::string_view locale);
     const std::string& GetDisplayLocale() const
@@ -93,6 +105,7 @@ private:
     std::array<NameBuffer, MonsterNumberCount> m_englishNames{};
     std::string m_displayLocale = std::string(LocalizedString::NeutralLocale);
     UnknownMonsterLook m_unknownLook;
+    MonsterTalkTexts m_talkTexts;
     int m_version = 0;
     int m_builds = 0;
 };

@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <limits>
 #include <optional>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -94,6 +95,10 @@ MonsterSetup MakeStartValues()
     setup.appear = Data::Monsters::MonsterAppear{};
     setup.teleport = Data::Monsters::MonsterAppear{};
     setup.gate = Data::Monsters::MonsterGate{};
+    setup.talks = true;
+    setup.talkLevel = Data::Monsters::MonsterTalkLevel{1, {}};
+    setup.repairShop = true;
+    setup.crywolfContract = true;
     return setup;
 }
 
@@ -114,15 +119,15 @@ bool IsSummaryField(std::string_view key)
 // appear, teleport and the gate once set.
 bool IsBlockField(std::string_view key)
 {
-    return key == "appear" || key == "teleport" || key == "gate";
+    return key == "appear" || key == "teleport" || key == "gate" || key == "talkLevel";
 }
 
 // The fields that are lists: on the monster always edited (a row added or
 // removed); on a variant edited when it has the list or the monster has none.
 bool IsListField(std::string_view key)
 {
-    constexpr std::array<std::string_view, 5> Lists{"spawnEffects", "spawnBuffs", "randomLook", "facingByTile",
-                                                    "hooks"};
+    constexpr std::array<std::string_view, 6> Lists{"spawnEffects", "spawnBuffs", "randomLook",
+                                                    "facingByTile", "hooks",      "onTalk"};
     return std::ranges::find(Lists, key) != Lists.end();
 }
 
@@ -250,6 +255,16 @@ std::string Describe(std::string_view key, const MonsterSetup& setup)
         return optionalNumber(setup.deathEffect);
     if (key == "hooks")
         return RowCount(setup.hooks.size());
+    if (key == "talks")
+        return YesNo(*setup.talks);
+    if (key == "talkLevel")
+        return std::to_string(setup.talkLevel->level);
+    if (key == "repairShop")
+        return YesNo(*setup.repairShop);
+    if (key == "crywolfContract")
+        return YesNo(*setup.crywolfContract);
+    if (key == "onTalk")
+        return RowCount(setup.onTalk.size());
     return std::string();
 }
 
@@ -278,6 +293,8 @@ const char* SectionName(Section section)
         return I18N::Editor::Behaviour;
     case Section::GateAndHooks:
         return I18N::Editor::GateAndHooks;
+    case Section::NpcRules:
+        return I18N::Editor::NPCRules;
     }
     return "";
 }
@@ -357,6 +374,7 @@ void MuMonsterSetupUI::Render(bool* open)
         }
         m_draft.End();
         RenderUnknownMonsters();
+        RenderSharedTalkTexts();
     }
     ToolWindow::End();
 }
@@ -510,6 +528,111 @@ void MuMonsterSetupUI::RenderUnknownMonsters()
     ImGui::PopID();
 }
 
+namespace
+{
+// The shared sets the monsters' talk steps name (their entries, map and
+// state variants), found again only when the monsters change.
+const std::set<std::string>& NamedTalkTextSets()
+{
+    static std::set<std::string> named;
+    static int builtVersion = -1;
+    if (builtVersion == g_MonsterDatabase.GetVersion())
+        return named;
+    named.clear();
+    const auto add = [&](const Data::Monsters::MonsterSetup& setup)
+    {
+        for (const Data::Monsters::MonsterTalkBlock& block : setup.onTalk)
+        {
+            if (block.kind == Data::Monsters::MonsterTalkBlock::Kind::CrywolfAltarContract)
+                named.insert(block.altarTexts);
+        }
+    };
+    const auto withStates = [&](const Data::Monsters::MonsterSetup& setup)
+    {
+        add(setup);
+        for (const Data::Monsters::MonsterStateVariant& state : setup.stateVariants)
+            add(state.setup);
+    };
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number);
+        if (monster == nullptr)
+            continue;
+        withStates(monster->setup);
+        for (const Data::Monsters::MonsterMapVariant& variant : monster->mapVariants)
+            withStates(variant.setup);
+    }
+    builtVersion = g_MonsterDatabase.GetVersion();
+    return named;
+}
+} // namespace
+
+void MuMonsterSetupUI::RenderSharedTalkTexts()
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::SharedTalkTexts))
+        return;
+    ImGui::PushID("SharedTalkTexts");
+    ImGui::TextDisabled("%s", I18N::Editor::SharedTalkTextsNote);
+    if (!m_talkTextsEditing)
+        m_talkTexts = g_MonsterDatabase.GetTalkTexts();
+    bool store = false;
+    bool active = false;
+    // The altar contract's texts, in MonsterAltarContract's order.
+    const std::array<const char*, 6> labels{I18N::Editor::ContractsLeft,  I18N::Editor::TheQuestion,
+                                            I18N::Editor::OnAMount,       I18N::Editor::OnCancel,
+                                            I18N::Editor::AltarDestroyed, I18N::Editor::ContractOngoing};
+    std::optional<std::string> removed;
+    for (auto& [name, contract] : m_talkTexts)
+    {
+        ImGui::PushID(name.c_str());
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted(name.c_str());
+        ImGui::SameLine();
+        // A set a step names stays, so no NPC is left without its texts.
+        const bool named = NamedTalkTextSets().contains(name);
+        ImGui::BeginDisabled(named);
+        if (ImGui::SmallButton("x"))
+            removed = name;
+        ImGui::EndDisabled();
+        if (named && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            ImGui::SetTooltip("%s", I18N::Editor::ATalkStepNamesThisSet);
+        const auto texts = Data::Monsters::AltarContractTexts(contract);
+        for (size_t index = 0; index < texts.size(); ++index)
+        {
+            std::string english = texts[index]->GetNeutral();
+            ImGui::SetNextItemWidth(Items::Fields::ScaledWidth(Items::Fields::NumberWidth * 5.0f));
+            if (Items::InputString(labels[index], english))
+                texts[index]->Set(Data::LocalizedString::NeutralLocale, english);
+            active |= ImGui::IsItemActive();
+            store |= ImGui::IsItemDeactivatedAfterEdit();
+        }
+        ImGui::PopID();
+    }
+    if (removed)
+    {
+        m_talkTexts.erase(*removed);
+        store = true;
+    }
+    ImGui::SetNextItemWidth(Items::Fields::ScaledWidth(Items::Fields::NumberWidth * 2.0f));
+    Items::InputString(I18N::Editor::SetName, m_newSetName);
+    ImGui::SameLine();
+    ImGui::BeginDisabled(m_newSetName.empty() || m_talkTexts.contains(m_newSetName));
+    if (ImGui::SmallButton(I18N::Editor::AddASet))
+    {
+        m_talkTexts.emplace(m_newSetName, Data::Monsters::MonsterAltarContract{});
+        m_newSetName.clear();
+        store = true;
+    }
+    ImGui::EndDisabled();
+    m_talkTextsEditing = active && !store;
+    if (store)
+    {
+        g_MonsterEdits.SetTalkTexts(I18N::Editor::SharedTalkTexts, m_talkTexts);
+        m_talkTextsEditing = false;
+    }
+    ImGui::PopID();
+}
+
 std::string MuMonsterSetupUI::SetupLabel() const
 {
     return m_shown != nullptr ? ShownValues::LogName(*m_shown) + ": " + I18N::Editor::MonsterSetup : std::string();
@@ -568,7 +691,7 @@ void MuMonsterSetupUI::RenderSetup(MonsterDefinition& monster)
     RenderVariantLine(monster);
     ImGui::Separator();
     for (const Section section :
-         {Section::Look, Section::Spawn, Section::Appear, Section::Behaviour, Section::GateAndHooks})
+         {Section::Look, Section::Spawn, Section::Appear, Section::Behaviour, Section::GateAndHooks, Section::NpcRules})
     {
         RenderSection(section, monster);
     }
@@ -1108,6 +1231,26 @@ bool MuMonsterSetupUI::RenderValue(std::string_view key, MonsterSetup& setup, co
         return boolField(setup.live);
     if (key == "deathEffect")
         return intField(setup.deathEffect);
+    if (key == "talks")
+        return boolField(setup.talks);
+    if (key == "repairShop")
+        return boolField(setup.repairShop);
+    if (key == "crywolfContract")
+        return boolField(setup.crywolfContract);
+    if (key == "talkLevel" && setup.talkLevel)
+    {
+        ImGui::SetNextItemWidth(width);
+        if (ImGui::InputInt(I18N::Editor::Level, &setup.talkLevel->level, 0))
+            setup.talkLevel->level = std::clamp(setup.talkLevel->level, 0, Data::Monsters::MaxTalkLevel);
+        m_draft.AfterField(undoLabel);
+        // The English text; the other languages in Monster Translations.
+        std::string message = setup.talkLevel->message.GetNeutral();
+        ImGui::SetNextItemWidth(width * 4.0f);
+        if (Items::InputString(I18N::Editor::Message, message))
+            setup.talkLevel->message.Set(Data::LocalizedString::NeutralLocale, message);
+        m_draft.AfterField(undoLabel);
+        return false;
+    }
     const auto afterField = [&] { m_draft.AfterField(undoLabel); };
     if (key == "spawnEffects")
         return SetupLists::SpawnEffects(setup.spawnEffects, afterField, SetupLists::EffectRows::Spawn);
@@ -1125,6 +1268,8 @@ bool MuMonsterSetupUI::RenderValue(std::string_view key, MonsterSetup& setup, co
         return SetupLists::Gate(*setup.gate);
     if (key == "hooks")
         return SetupLists::Hooks(setup.hooks);
+    if (key == "onTalk")
+        return SetupLists::TalkBlocks(setup.onTalk, afterField);
     return false;
 }
 } // namespace MuEditor::Monsters

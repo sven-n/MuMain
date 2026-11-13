@@ -745,6 +745,67 @@ TEST_CASE("Monster data: maps that are no list of maps are an error, a monster's
     CHECK(shared.monsters[0].numbers[0].maps.empty());
 }
 
+// A talk text without a text of its own in one of the game's languages shows
+// the English one there: a warning naming them (Q-MN47).
+TEST_CASE("Monster data: a talk text missing a language is a warning (Q-MN47) [data][monsters]")
+{
+    MonsterDefinition santa = Monster(470, "Little Santa");
+    Data::Monsters::MonsterTalkBlock message;
+    message.kind = Data::Monsters::MonsterTalkBlock::Kind::Message;
+    message.message.Set("en", "Health has been recovered.");
+    message.message.Set("de", "Leben wiederhergestellt.");
+    santa.setup.onTalk = {message};
+    MonsterDefinition whole = santa;
+    whole.number = 471;
+    whole.setup.onTalk[0].message.Set("es", "Vida recuperada.");
+    const std::array<const MonsterDefinition*, 2> monsters = {&santa, &whole};
+    const std::array<const char*, 3> locales = {"en", "de", "es"};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::MonsterTalkTexts shared;
+    Data::Monsters::MonsterAltarContract& altar = shared["crywolfAltar"];
+    for (Data::LocalizedString* text : Data::Monsters::AltarContractTexts(altar))
+    {
+        text->Set("en", "Text");
+        text->Set("de", "Text");
+        text->Set("es", "Texto");
+    }
+    altar.ongoing = Data::LocalizedString{};
+    altar.ongoing.Set("en", "Busy.");
+
+    Data::Monsters::ValidateMonsterTalkTexts(monsters, shared, locales, "Monsters.json", issues);
+
+    REQUIRE(issues.size() == 2);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[0].field == "talkTexts.crywolfAltar.ongoing");
+    CHECK(issues[0].message.find("de, es") != std::string::npos);
+    CHECK(issues[1].field == "monster 470 onTalk[0].message");
+    CHECK(issues[1].message.find("es") != std::string::npos);
+}
+
+// A variant's talk text is named as Monster Translations' Talk texts rows name
+// it, so a field copied from the warning finds the row.
+TEST_CASE("Monster data: a variant's talk text missing a language is named as its row [data][monsters]")
+{
+    MonsterDefinition guard = Monster(407, "Werewolf Guardsman");
+    Data::Monsters::MonsterStateVariant state;
+    state.state = "crywolfElfTime";
+    state.setup.onTalk.emplace_back().kind = Data::Monsters::MonsterTalkBlock::Kind::Message;
+    state.setup.onTalk[0].message.Set("en", "Elf time.");
+    Data::Monsters::MonsterMapVariant variant;
+    variant.maps = {Data::Maps::MapRef{34, 0}};
+    variant.setup.stateVariants = {state};
+    guard.mapVariants.push_back(variant);
+    const std::array<const MonsterDefinition*, 1> monsters = {&guard};
+    const std::array<const char*, 2> locales = {"en", "de"};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::ValidateMonsterTalkTexts(monsters, {}, locales, "Monsters.json", issues);
+
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].field == "monster 407 mapVariants[0].stateVariants[0].onTalk[0].message");
+}
+
 // Old behaviours the setup keeps are warnings (Q-MN36): `live` false drops the
 // character when it appears (the Wolf Status, P24), wherever it is set.
 TEST_CASE("Monster data: a setup that drops the monster when it appears is a warning (P24) [data][monsters]")
@@ -778,4 +839,69 @@ TEST_CASE("Monster data: a setup that drops the monster when it appears is a war
     CHECK(issues[0].field == "monster 204 live");
     CHECK(issues[1].field == "monster 205 (map variant 1) live");
     CHECK(issues[2].field == "monster 206 (state crywolfReady) live");
+}
+
+// The talk steps as the editor leaves them: an OK quest without a state, a
+// warning; an altar step naming a set that is not there, an error.
+TEST_CASE("Monster data: Data Checks finds an OK quest without a state and an unknown talk text set [data][monsters]")
+{
+    MonsterDefinition guard = Monster(407, "Werewolf Guardsman");
+    Data::Monsters::MonsterTalkBlock dialog;
+    dialog.kind = Data::Monsters::MonsterTalkBlock::Kind::Dialog;
+    dialog.dialog.ok.emplace().quest = "thirdChangeUp2";
+    Data::Monsters::MonsterMapVariant variant;
+    variant.maps = {Data::Maps::MapRef{34, 0}};
+    variant.setup.onTalk = {dialog};
+    guard.mapVariants.push_back(variant);
+    MonsterDefinition altar = Monster(205, "Wolf Altar1");
+    Data::Monsters::MonsterTalkBlock contract;
+    contract.kind = Data::Monsters::MonsterTalkBlock::Kind::CrywolfAltarContract;
+    contract.altarTexts = "gone";
+    altar.setup.onTalk = {contract};
+    MonsterDefinition named = Monster(206, "Wolf Altar2");
+    contract.altarTexts = "crywolfAltar";
+    named.setup.onTalk = {contract};
+    Data::Monsters::MonsterTalkTexts texts;
+    texts["crywolfAltar"];
+    const std::array<const MonsterDefinition*, 3> monsters = {&guard, &altar, &named};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::ValidateMonsterTalkSteps(monsters, texts, "Monsters.json", issues);
+
+    REQUIRE(issues.size() == 2);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[0].field == "monster 407 mapVariants[0].onTalk[0].dialog.ok.if.is");
+    CHECK(issues[1].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[1].field == "monster 205 onTalk[0].crywolfAltarContract");
+}
+
+// The altar contract's code counts from the altars' models: on another model
+// the step only talks, a warning.
+TEST_CASE("Monster data: an altar contract step on a model that is no altar is a warning [data][monsters]")
+{
+    Data::Monsters::MonsterTalkBlock contract;
+    contract.kind = Data::Monsters::MonsterTalkBlock::Kind::CrywolfAltarContract;
+    MonsterDefinition altar = Monster(205, "Altar");
+    altar.model = "MODEL_CRYWOLF_ALTAR1";
+    altar.setup.onTalk = {contract};
+    MonsterDefinition smith = Monster(251, "Hanzo");
+    smith.model = "MODEL_SMITH";
+    smith.setup.onTalk = {contract};
+    MonsterDefinition onMap = Monster(206, "Altar 2");
+    onMap.model = "MODEL_CRYWOLF_ALTAR2";
+    Data::Monsters::MonsterMapVariant variant;
+    variant.maps = {Data::Maps::MapRef{34, 0}};
+    variant.model = "MODEL_SMITH";
+    variant.setup.onTalk = {contract};
+    onMap.mapVariants.push_back(variant);
+    const std::array<const MonsterDefinition*, 3> monsters = {&altar, &smith, &onMap};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::ValidateMonsterSetups(monsters, "Monsters.json", issues);
+
+    REQUIRE(issues.size() == 2);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[0].field == "monster 251 onTalk");
+    CHECK(issues[0].message.find("MODEL_SMITH") != std::string::npos);
+    CHECK(issues[1].field == "monster 206 mapVariants[0].onTalk");
 }

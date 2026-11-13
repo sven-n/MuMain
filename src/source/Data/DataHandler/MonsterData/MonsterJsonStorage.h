@@ -27,6 +27,8 @@ struct MonsterDataLoadResult
     std::vector<MonsterDefinition> monsters;
     // How the game shows a monster it cannot show as itself (D64).
     UnknownMonsterLook unknown;
+    // The talk texts several NPCs share, by name.
+    MonsterTalkTexts talkTexts;
     std::vector<Items::ItemDataIssue> issues;
 };
 
@@ -37,7 +39,8 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file);
 // problems found are added to `issues`. The old file stays when the new one
 // cannot be written whole.
 bool SaveMonstersFile(const std::filesystem::path& file, std::span<const MonsterGroup> monsters,
-                      const UnknownMonsterLook& unknown, std::vector<Items::ItemDataIssue>& issues);
+                      const UnknownMonsterLook& unknown, const MonsterTalkTexts& talkTexts,
+                      std::vector<Items::ItemDataIssue>& issues);
 
 // The text SaveMonstersFile writes, so that a caller can check more files
 // before it writes any (with WriteTextFiles): the text for the file when the
@@ -45,7 +48,7 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
 // added to `issues`.
 std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& file,
                                                 std::span<const MonsterGroup> monsters,
-                                                const UnknownMonsterLook& unknown,
+                                                const UnknownMonsterLook& unknown, const MonsterTalkTexts& talkTexts,
                                                 std::vector<Items::ItemDataIssue>& issues);
 
 // Makes `file` the source of the problems from `first` on: the checks of the

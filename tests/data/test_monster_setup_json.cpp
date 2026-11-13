@@ -285,6 +285,128 @@ TEST_CASE("Monster data: state variants and the height fields (Q-MN36c) [data][m
 
 // The hooks hand over to the maps' own code with the values it fixed
 // (Q-MN36d); a joint carries its key like an effect.
+// An NPC's talk (MN5, D66): whether it talks, its minimum level and its
+// message, its repair shop and its talk's steps, with texts by language.
+TEST_CASE("Monster data: reads and writes the talk fields of an NPC (D66) [data][monsters]")
+{
+    const GroupsResult read = ReadGroups(File(R"({
+        "name": "Gatekeeper", "kind": "npc",
+        "talks": true, "repairShop": true,
+        "talkLevel": {"level": 10, "message": {"en": "Only level %d or above", "de": "Erst ab Stufe %d"}},
+        "onTalk": [
+          {"send": "talk"},
+          {"dialog": {"title": "Gatekeeper", "lines": ["Who are you?", {"en": "Line two", "de": "Zeile zwei"}],
+                      "ok": {"request": "enterRefuge", "if": {"quest": "thirdChangeUp2", "is": ["ongoing", "done"]},
+                             "zen": 3000000, "failure": "You are short of Zen."}}},
+          {"send": "petInfo"},
+          {"message": "Health has been recovered."},
+          {"questWindow": {"noQuestTitleFor": ["darkLord", "magicGladiator"]}}
+        ],
+        "numbers": [{"number": 408}] })"));
+
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    REQUIRE(read.monsters.size() == 1);
+    const MonsterSetup& setup = read.monsters[0].numbers[0].setup;
+    CHECK(setup.talks == true);
+    CHECK(setup.repairShop == true);
+    REQUIRE(setup.talkLevel.has_value());
+    CHECK(setup.talkLevel->level == 10);
+    CHECK(setup.talkLevel->message.Get("de") == "Erst ab Stufe %d");
+    using Kind = Data::Monsters::MonsterTalkBlock::Kind;
+    REQUIRE(setup.onTalk.size() == 5);
+    CHECK(setup.onTalk[0].kind == Kind::SendTalk);
+    CHECK(setup.onTalk[1].kind == Kind::Dialog);
+    CHECK(setup.onTalk[1].dialog.title.GetNeutral() == "Gatekeeper");
+    REQUIRE(setup.onTalk[1].dialog.lines.size() == 2);
+    REQUIRE(setup.onTalk[1].dialog.ok.has_value());
+    CHECK(setup.onTalk[1].dialog.ok->request == "enterRefuge");
+    CHECK(setup.onTalk[1].dialog.ok->quest == "thirdChangeUp2");
+    CHECK(setup.onTalk[1].dialog.ok->questStates == std::vector<std::string>{"ongoing", "done"});
+    CHECK(setup.onTalk[1].dialog.ok->zen == 3000000);
+    CHECK(setup.onTalk[2].kind == Kind::SendPetInfo);
+    CHECK(setup.onTalk[3].kind == Kind::Message);
+    CHECK(setup.onTalk[4].kind == Kind::QuestWindow);
+    CHECK(setup.onTalk[4].noQuestTitleFor.size() == 2);
+
+    const std::string text = Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(read.monsters));
+    INFO(text);
+    const GroupsResult again = ReadGroups(text);
+    CHECK_MESSAGE(again.issues.empty(), Messages(again.issues));
+    CHECK(again.monsters == read.monsters);
+
+    // Names the client does not know are fatal.
+    const GroupsResult wrong = ReadGroups(File(R"({
+        "name": "X", "kind": "npc",
+        "onTalk": [{"send": "shop"}, {"dialog": {"lines": [], "ok": {"request": "fly"}}},
+                   {"questWindow": {"noQuestTitleFor": ["bard"]}}, {"wave": 1}],
+        "numbers": [{"number": 538}] })"));
+    CHECK(Has(wrong.issues, ItemDataIssueSeverity::Fatal, "monster 538 onTalk[0].send"));
+    CHECK(Has(wrong.issues, ItemDataIssueSeverity::Fatal, "monster 538 onTalk[1].dialog.ok.request"));
+    CHECK(Has(wrong.issues, ItemDataIssueSeverity::Fatal, "monster 538 onTalk[2].questWindow.noQuestTitleFor[0]"));
+    CHECK(Has(wrong.issues, ItemDataIssueSeverity::Fatal, "monster 538 onTalk[3]"));
+
+    // A quest without states: the OK never sends, a warning.
+    const GroupsResult noStates = ReadGroups(File(R"({
+        "name": "X", "kind": "npc",
+        "onTalk": [{"dialog": {"lines": [], "ok": {"request": "enterRefuge", "if": {"quest": "changeUp1", "is": []}}}}],
+        "numbers": [{"number": 538}] })"));
+    CHECK(Has(noStates.issues, ItemDataIssueSeverity::Warning, "monster 538 onTalk[0].dialog.ok.if.is"));
+}
+
+// A Crywolf altar's contract step names its six texts in the list's
+// talkTexts, which the five altars share (Q-MN46); a name the list does not
+// have and a set missing a text are fatal.
+TEST_CASE("Monster data: a Crywolf altar's contract step and its shared texts [data][monsters]")
+{
+    const std::string talkTexts = R"("talkTexts": {"crywolfAltar": {"canContract": "Left: %d", "proceed": "Go?",
+        "onMount": "No mount.", "needGuardian": "Guard!", "destroyed": {"en": "Gone.", "de": "Weg."},
+        "ongoing": "Busy."}},)";
+    const std::string altar = R"({"name": "Wolf Altar1", "kind": "npc",
+        "onTalk": [{"crywolfAltarContract": "crywolfAltar"}], "numbers": [{"number": 205}]})";
+    const std::string file = R"({ "formatVersion": 2, )" + talkTexts + R"( "monsters": [ )" + altar + " ] }";
+    std::vector<MonsterGroup> groups;
+    Data::Monsters::UnknownMonsterLook unknown;
+    Data::Monsters::MonsterTalkTexts texts;
+    std::vector<ItemDataIssue> issues;
+    Data::Monsters::ReadMonstersJson(file, "Monsters.json", groups, unknown, texts, issues);
+    CHECK_MESSAGE(issues.empty(), Messages(issues));
+    REQUIRE(groups.size() == 1);
+    const MonsterSetup& setup = groups[0].numbers[0].setup;
+    REQUIRE(setup.onTalk.size() == 1);
+    CHECK(setup.onTalk[0].kind == Data::Monsters::MonsterTalkBlock::Kind::CrywolfAltarContract);
+    CHECK(setup.onTalk[0].altarTexts == "crywolfAltar");
+    REQUIRE(texts.contains("crywolfAltar"));
+    CHECK(texts.at("crywolfAltar").canContract.GetNeutral() == "Left: %d");
+    CHECK(texts.at("crywolfAltar").destroyed.Get("de") == "Weg.");
+
+    // Written and read again, the same.
+    const std::string written = Data::Monsters::WriteMonstersJson(groups, unknown, texts);
+    INFO(written);
+    std::vector<MonsterGroup> again;
+    Data::Monsters::MonsterTalkTexts againTexts;
+    std::vector<ItemDataIssue> againIssues;
+    Data::Monsters::ReadMonstersJson(written, "Monsters.json", again, unknown, againTexts, againIssues);
+    CHECK_MESSAGE(againIssues.empty(), Messages(againIssues));
+    CHECK(again == groups);
+    CHECK(againTexts == texts);
+
+    // A name the list does not have.
+    const GroupsResult unnamed = ReadGroups(File(altar));
+    CHECK(Has(unnamed.issues, ItemDataIssueSeverity::Fatal, "monster 205 onTalk[0].crywolfAltarContract"));
+    // A set without one of its texts.
+    const GroupsResult missing = ReadGroups(R"({ "formatVersion": 2,
+        "talkTexts": {"crywolfAltar": {"canContract": "Left: %d"}}, "monsters": [ )" +
+                                            altar + " ] }");
+    CHECK(Has(missing.issues, ItemDataIssueSeverity::Fatal, "talkTexts.crywolfAltar.ongoing"));
+    // That one problem only: the step still finds its set.
+    CHECK_FALSE(Has(missing.issues, ItemDataIssueSeverity::Fatal, "monster 205 onTalk[0].crywolfAltarContract"));
+    // The same for a set that is no object.
+    const GroupsResult wrongSet = ReadGroups(R"({ "formatVersion": 2, "talkTexts": {"crywolfAltar": "oops"},
+        "monsters": [ )" + altar + " ] }");
+    CHECK(Has(wrongSet.issues, ItemDataIssueSeverity::Fatal, "talkTexts.crywolfAltar"));
+    CHECK_FALSE(Has(wrongSet.issues, ItemDataIssueSeverity::Fatal, "monster 205 onTalk[0].crywolfAltarContract"));
+}
+
 TEST_CASE("Monster data: spawn hooks with their values, and a joint's key [data][monsters]")
 {
     const GroupsResult read = ReadGroups(File(R"({
@@ -602,7 +724,7 @@ TEST_CASE("Monster data: the unknown monsters' look [data][monsters]")
     CHECK_FALSE(look.forMissingFile);
 
     // Written and read back, it is the same.
-    const std::string text = Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(groups), look);
+    const std::string text = Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(groups), look, {});
     INFO(text);
     std::vector<MonsterGroup> again;
     Data::Monsters::UnknownMonsterLook readBack;

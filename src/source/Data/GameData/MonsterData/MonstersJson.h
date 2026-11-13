@@ -34,7 +34,9 @@
 //
 // "unknownMonsters" holds how the game shows a monster it cannot show as
 // itself (UnknownMonsterLook.h, D64); a file without it has the look's
-// defaults.
+// defaults. "talkTexts" holds the talk texts several NPCs share, by name
+// (MonsterTalkTexts): a crywolfAltarContract step names one, and a name the
+// section does not have is fatal.
 //
 // Version 1 listed each number with its values ("number" next to "name");
 // such a file is read as a monster for each entry.
@@ -50,16 +52,23 @@ void ReadMonstersJson(std::string_view text, const std::string& source, std::vec
 // The same, with the unknown monsters' look of the file.
 void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
                       UnknownMonsterLook& unknown, std::vector<Items::ItemDataIssue>& issues);
+// The same, with the unknown monsters' look and the shared talk texts of the
+// file.
+void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
+                      UnknownMonsterLook& unknown, MonsterTalkTexts& talkTexts,
+                      std::vector<Items::ItemDataIssue>& issues);
 
 // The entries of the numbers the text has, as ReadMonstersJson reads them.
 void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterDefinition>& numbers,
                       std::vector<Items::ItemDataIssue>& issues);
 
 // The text of the file with these monsters, sorted by their first number, and
-// their numbers sorted; without the unknown monsters' look.
+// their numbers sorted; without the unknown monsters' look and talk texts.
 std::string WriteMonstersJson(std::span<const MonsterGroup> monsters);
-// The same, with the unknown monsters' look (the file the game reads).
-std::string WriteMonstersJson(std::span<const MonsterGroup> monsters, const UnknownMonsterLook& unknown);
+// The same, with the unknown monsters' look and the shared talk texts (the
+// file the game reads).
+std::string WriteMonstersJson(std::span<const MonsterGroup> monsters, const UnknownMonsterLook& unknown,
+                              const MonsterTalkTexts& talkTexts);
 
 // The text of the file with a monster for each entry.
 std::string WriteMonstersJson(std::span<const MonsterDefinition> numbers);

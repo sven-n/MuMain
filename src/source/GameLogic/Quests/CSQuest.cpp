@@ -34,7 +34,9 @@
 #include "UI/Core/WindowSystem.h"
 #include "Render/Text/CUIRenderText.h"
 
-bool bCheckNPC = false;
+// The classes whose quest window shows the talked NPC's own name and no quest
+// title (an NPC's questWindow talk step, Marlon's); empty for other NPCs.
+std::vector<int> g_noQuestTitleClasses;
 extern  int  g_iMessageTextStart;
 extern  char g_cMessageTextCurrNum;
 extern  char g_cMessageTextNum;
@@ -282,7 +284,7 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
 void CSQuest::setQuestLists(const std::uint8_t* byList, int num, CLASS_TYPE Class)
 {
     m_bOnce = true;
-    bCheckNPC = false;
+    g_noQuestTitleClasses.clear();
     m_byClass = gCharacterManager.GetBaseClass(Class);
 
     m_byQuestList.fill(0);

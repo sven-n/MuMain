@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Data/GameData/Common/LocalizedString.h"
+
 #include <array>
 #include <cstddef>
+#include <map>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -27,6 +30,8 @@ inline constexpr int MaxTileOffset = 16;
 inline constexpr int MaxLookLevel = 65535;
 inline constexpr int MaxMoveSpeed = 65535;
 inline constexpr int MaxSpawnEffectCount = 100;
+// The highest level an NPC's talk may ask for.
+inline constexpr int MaxTalkLevel = 1000;
 inline constexpr int MaxSpawnEffectScaleRandom = 10000;
 inline constexpr int MaxFacingTile = 255;
 // An eyes row's bones: the right and left eye, then up to two more pairs.
@@ -215,6 +220,111 @@ struct MonsterHookKind
 std::span<const MonsterHookKind> GetMonsterHookKinds();
 const MonsterHookKind* FindMonsterHookKind(std::string_view name);
 
+// An NPC's minimum level to talk (MN5, Q-MN46b): below it the hero gets the
+// message (with "%d" for the level) and does not talk.
+struct MonsterTalkLevel
+{
+    int level = 0;
+    Data::LocalizedString message;
+
+    bool operator==(const MonsterTalkLevel&) const = default;
+};
+
+// What a talk dialog's OK does (Q-MN46d): a request the client knows
+// (GetTalkRequests), sent when the quest is in one of the states and the hero
+// has the zen; without the zen the failure message.
+struct MonsterTalkOk
+{
+    std::string request;
+    // One of GetTalkQuests, or empty for none; its states (GetTalkQuestStates).
+    std::string quest;
+    std::vector<std::string> questStates;
+    unsigned long zen = 0;
+    Data::LocalizedString failure;
+
+    bool operator==(const MonsterTalkOk&) const = default;
+};
+
+// A dialog an NPC shows when the hero talks to it: a bold title, its lines and
+// what its OK does.
+struct MonsterTalkDialog
+{
+    Data::LocalizedString title;
+    std::vector<Data::LocalizedString> lines;
+    std::optional<MonsterTalkOk> ok;
+
+    bool operator==(const MonsterTalkDialog&) const = default;
+};
+
+// The texts of a Crywolf altar's contract (the hook CrywolfAltarContract,
+// Q-MN46): how many contracts are left ("%d"), the question, the refusal on a
+// mount, the answer to Cancel, a destroyed altar and an ongoing contract.
+struct MonsterAltarContract
+{
+    Data::LocalizedString canContract;
+    Data::LocalizedString proceed;
+    Data::LocalizedString onMount;
+    Data::LocalizedString needGuardian;
+    Data::LocalizedString destroyed;
+    Data::LocalizedString ongoing;
+
+    bool operator==(const MonsterAltarContract&) const = default;
+};
+
+// The talk texts several NPCs share, defined once with a name (the monster
+// list's "talkTexts"): each set is an altar contract's texts, which the five
+// Crywolf altars' steps name ("crywolfAltar").
+using MonsterTalkTexts = std::map<std::string, MonsterAltarContract, std::less<>>;
+
+// The keys of an altar contract's texts in the file, in MonsterAltarContract's
+// order, and its texts in that order.
+std::span<const char* const> GetAltarContractTextKeys();
+std::array<Data::LocalizedString*, 6> AltarContractTexts(MonsterAltarContract& contract);
+std::array<const Data::LocalizedString*, 6> AltarContractTexts(const MonsterAltarContract& contract);
+
+// One step of an NPC's talk, in order (D66, Q-MN46d).
+struct MonsterTalkBlock
+{
+    enum class Kind
+    {
+        // Show a dialog.
+        Dialog,
+        // Send the talk request (the server opens the NPC's window).
+        SendTalk,
+        // Ask the server for the equipped Dark Horse's and Dark Raven's information.
+        SendPetInfo,
+        // Log a system message.
+        Message,
+        // The quest window shows the NPC's own name and no quest title for
+        // these classes (Marlon for the Dark Lord, Magic Gladiator and Rage
+        // Fighter, whose quest is another NPC's).
+        QuestWindow,
+        // A Crywolf altar's contract, which the map's code makes while only
+        // elves may (the hook CrywolfAltarContract), with the talk texts
+        // altarTexts names; on Crywolf otherwise nothing, elsewhere the talk
+        // request.
+        CrywolfAltarContract,
+    };
+
+    Kind kind = Kind::SendTalk;
+    MonsterTalkDialog dialog;
+    Data::LocalizedString message;
+    // Indexes of Items::GetClassKeys.
+    std::vector<int> noQuestTitleFor;
+    // The name of the set of MonsterTalkTexts an altar contract shows.
+    std::string altarTexts;
+
+    bool operator==(const MonsterTalkBlock&) const = default;
+};
+
+// The requests a dialog's OK may send, the quests it may check and their
+// states, by the names the monster list gives them.
+std::span<const std::string_view> GetTalkRequests();
+std::span<const std::string_view> GetTalkQuests();
+std::span<const std::string_view> GetTalkQuestStates();
+// The index of the name in its list, or nullopt.
+std::optional<int> FindTalkName(std::span<const std::string_view> names, std::string_view name);
+
 struct MonsterSetup
 {
     // Object.Scale; or the scale a player has with the monster's equipment
@@ -304,6 +414,17 @@ struct MonsterSetup
     std::vector<MonsterStateVariant> stateVariants;
     // The maps' code it hands over to when it appears (Q-MN36d), in order.
     std::vector<MonsterHook> hooks;
+    // How an NPC talks (MN5, D66): whether it talks at all (else every NPC
+    // does), its minimum level, whether its shop repairs, and its talk's
+    // steps (none: it sends the talk request).
+    std::optional<bool> talks;
+    std::optional<MonsterTalkLevel> talkLevel;
+    std::optional<bool> repairShop;
+    std::vector<MonsterTalkBlock> onTalk;
+    // It takes part in Crywolf's hero contract: a buff the server sends again
+    // while it shows it (0x07) toggles eBuff_CrywolfHeroContracted and strips
+    // the other Crywolf states (the altars and the Crywolf NPCs).
+    std::optional<bool> crywolfContract;
 
     bool operator==(const MonsterSetup&) const = default;
 };
@@ -318,6 +439,43 @@ struct MonsterStateVariant
 
     bool operator==(const MonsterStateVariant&) const = default;
 };
+
+// Each text of an NPC's talk with its field, in order: "talkLevel.message",
+// "onTalk[1].dialog.title", "onTalk[1].dialog.lines[0]",
+// "onTalk[1].dialog.ok.failure", "onTalk[2].message". `setup` may be const.
+template <typename TSetup, typename TVisit> void ForEachTalkText(TSetup& setup, TVisit&& visit)
+{
+    if (setup.talkLevel)
+        visit(setup.talkLevel->message, std::string("talkLevel.message"));
+    for (size_t index = 0; index < setup.onTalk.size(); ++index)
+    {
+        auto& block = setup.onTalk[index];
+        const std::string step = "onTalk[" + std::to_string(index) + "]";
+        if (block.kind == MonsterTalkBlock::Kind::Message)
+            visit(block.message, step + ".message");
+        if (block.kind != MonsterTalkBlock::Kind::Dialog)
+            continue;
+        if (!block.dialog.title.IsEmpty())
+            visit(block.dialog.title, step + ".dialog.title");
+        for (size_t line = 0; line < block.dialog.lines.size(); ++line)
+            visit(block.dialog.lines[line], step + ".dialog.lines[" + std::to_string(line) + "]");
+        if (block.dialog.ok && !block.dialog.ok->failure.IsEmpty())
+            visit(block.dialog.ok->failure, step + ".dialog.ok.failure");
+    }
+}
+
+// Each text of the shared talk texts with its field:
+// "talkTexts.crywolfAltar.canContract". `texts` may be const.
+template <typename TTexts, typename TVisit> void ForEachSharedTalkText(TTexts& texts, TVisit&& visit)
+{
+    for (auto& [name, contract] : texts)
+    {
+        const auto values = AltarContractTexts(contract);
+        const std::span<const char* const> keys = GetAltarContractTextKeys();
+        for (size_t index = 0; index < keys.size(); ++index)
+            visit(*values[index], "talkTexts." + name + "." + keys[index]);
+    }
+}
 
 // The states a state variant may name, as the game's code tells them
 // (World::Monsters::IsSpawnStateOn).

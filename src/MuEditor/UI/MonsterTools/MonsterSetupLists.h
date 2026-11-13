@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -103,6 +104,11 @@ int& TileOnAxis(Data::Monsters::MonsterTileFacing& tile);
 // How it comes in (Q-MN38c): the animation, blend, start frame, fade in,
 // appear time, sound and the effects where it comes in.
 bool Appear(Data::Monsters::MonsterAppear& appear, const AfterField& afterField);
+// An NPC's talk steps in order (D66): a row per step, opened to its values
+// (a dialog's title, lines and OK, a message, the classes of a quest window),
+// with up, down and remove; Add a step. Texts are edited in English.
+bool TalkBlocks(std::vector<Data::Monsters::MonsterTalkBlock>& blocks, const AfterField& afterField);
+
 // A castle gate's animations closed, opening and open, and what an open gate
 // coming into view plays.
 bool Gate(Data::Monsters::MonsterGate& gate);

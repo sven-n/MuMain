@@ -29,6 +29,7 @@ constexpr const char* UnknownGlowKey = "glow";
 constexpr const char* UnknownMarksKey = "marks";
 constexpr const char* UnknownMessageKey = "messageSeconds";
 constexpr const char* UnknownForKey = "for";
+constexpr const char* TalkTextsKey = "talkTexts";
 constexpr const char* ForNoEntry = "noEntry";
 constexpr const char* ForNoModel = "noModel";
 constexpr const char* ForMissingFile = "missingFile";
@@ -1133,6 +1134,103 @@ void ReadUnknownLook(const OrderedJson& root, UnknownMonsterLook& unknown, Issue
         [&](const std::string& unknownKey, const std::string& message) { list.Warning(unknownKey, message); });
 }
 
+// The shared talk texts: each set an object of an altar contract's six texts.
+void ReadTalkTexts(const OrderedJson& root, MonsterTalkTexts& talkTexts, IssueList& list)
+{
+    talkTexts.clear();
+    const auto section = root.find(TalkTextsKey);
+    if (section == root.end())
+        return;
+    if (!section->is_object())
+    {
+        list.Fatal(TalkTextsKey, "must be an object of talk text sets by name");
+        return;
+    }
+    const std::span<const char* const> keys = GetAltarContractTextKeys();
+    for (const auto& [name, set] : section->items())
+    {
+        const std::string setKey = std::string(TalkTextsKey) + "." + name;
+        if (!set.is_object())
+        {
+            list.Fatal(setKey, "must be an object of its texts: canContract, proceed, onMount, needGuardian, "
+                               "destroyed, ongoing");
+            // Kept empty, so the steps naming it add no problem of their own.
+            talkTexts.emplace(name, MonsterAltarContract{});
+            continue;
+        }
+        // A set with a wrong text is kept, so its problem is the text's only
+        // and not also every step that names it.
+        MonsterAltarContract contract;
+        const auto texts = AltarContractTexts(contract);
+        for (size_t index = 0; index < keys.size(); ++index)
+        {
+            const std::string textKey = setKey + "." + keys[index];
+            const auto text = set.find(keys[index]);
+            if (text == set.end())
+            {
+                list.Fatal(textKey, "missing");
+                continue;
+            }
+            Items::Json::ReadLocalizedString(*text, textKey, *texts[index],
+                                             [&](const std::string& field, const std::string& message)
+                                             { list.Fatal(field, message); });
+        }
+        Items::Json::KeySet known(keys.begin(), keys.end());
+        Items::Json::WarnAboutUnknownKeys(set, known, setKey + " ",
+                                          [&](const std::string& unknownKey, const std::string& message)
+                                          { list.Warning(unknownKey, message); });
+        talkTexts.emplace(name, std::move(contract));
+    }
+}
+
+OrderedJson WriteTalkTexts(const MonsterTalkTexts& talkTexts)
+{
+    OrderedJson section = OrderedJson::object();
+    const std::span<const char* const> keys = GetAltarContractTextKeys();
+    for (const auto& [name, contract] : talkTexts)
+    {
+        OrderedJson set = OrderedJson::object();
+        const auto texts = AltarContractTexts(contract);
+        for (size_t index = 0; index < keys.size(); ++index)
+            set[keys[index]] = Items::Json::WriteLocalizedString(*texts[index]);
+        section[name] = std::move(set);
+    }
+    return section;
+}
+
+// An altar contract step names a set the talk texts have; a fatal problem
+// once per field.
+void CheckTalkTextNames(std::span<const MonsterGroup> monsters, const MonsterTalkTexts& talkTexts, IssueList& list)
+{
+    std::set<std::string> reported;
+    const auto check = [&](const MonsterSetup& setup, int number, const std::string& where)
+    {
+        for (size_t index = 0; index < setup.onTalk.size(); ++index)
+        {
+            const MonsterTalkBlock& block = setup.onTalk[index];
+            if (block.kind != MonsterTalkBlock::Kind::CrywolfAltarContract || talkTexts.contains(block.altarTexts))
+                continue;
+            const std::string field =
+                MonsterField(number, (where + "onTalk[" + std::to_string(index) + "].crywolfAltarContract").c_str());
+            if (reported.insert(field).second)
+                list.Fatal(field, "names " + block.altarTexts + ", which talkTexts does not have", number);
+        }
+    };
+    for (const MonsterDefinition& entry : CollectNumberEntries(monsters))
+    {
+        const auto withStates = [&](const MonsterSetup& setup, const std::string& where)
+        {
+            check(setup, entry.number, where);
+            for (size_t index = 0; index < setup.stateVariants.size(); ++index)
+                check(setup.stateVariants[index].setup, entry.number,
+                      where + "stateVariants[" + std::to_string(index) + "].");
+        };
+        withStates(entry.setup, "");
+        for (size_t index = 0; index < entry.mapVariants.size(); ++index)
+            withStates(entry.mapVariants[index].setup, "mapVariants[" + std::to_string(index) + "].");
+    }
+}
+
 OrderedJson WriteUnknownLook(const UnknownMonsterLook& unknown)
 {
     OrderedJson section = OrderedJson::object();
@@ -1164,16 +1262,24 @@ void ReadMonstersJson(std::string_view text, const std::string& source, std::vec
 void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
                       UnknownMonsterLook& unknown, std::vector<ItemDataIssue>& issues)
 {
+    MonsterTalkTexts talkTexts;
+    ReadMonstersJson(text, source, monsters, unknown, talkTexts, issues);
+}
+
+void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
+                      UnknownMonsterLook& unknown, MonsterTalkTexts& talkTexts, std::vector<ItemDataIssue>& issues)
+{
     IssueList list(source, issues);
     OrderedJson root;
     if (!Items::Json::ReadFileVersion(text, source, MonstersFormatVersion, root, issues))
     {
         return;
     }
-    Items::Json::WarnAboutUnknownKeys(root, {Items::Json::Keys::FormatVersion, UnknownKey, MonstersKey}, "",
-                                      [&](const std::string& unknownKey, const std::string& message)
+    Items::Json::WarnAboutUnknownKeys(root, {Items::Json::Keys::FormatVersion, UnknownKey, TalkTextsKey, MonstersKey},
+                                      "", [&](const std::string& unknownKey, const std::string& message)
                                       { list.Warning(unknownKey, message); });
     ReadUnknownLook(root, unknown, list);
+    ReadTalkTexts(root, talkTexts, list);
     const auto entries = root.find(MonstersKey);
     if (entries == root.end() || !entries->is_array())
     {
@@ -1207,6 +1313,7 @@ void ReadMonstersJson(std::string_view text, const std::string& source, std::vec
             monsters.push_back(std::move(*monster));
         }
     }
+    CheckTalkTextNames(monsters, talkTexts, list);
 }
 
 void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterDefinition>& numbers,
@@ -1220,7 +1327,8 @@ void ReadMonstersJson(std::string_view text, const std::string& source, std::vec
 
 namespace
 {
-std::string WriteFile(std::span<const MonsterGroup> monsters, const UnknownMonsterLook* unknown)
+std::string WriteFile(std::span<const MonsterGroup> monsters, const UnknownMonsterLook* unknown,
+                      const MonsterTalkTexts* talkTexts)
 {
     std::vector<const MonsterGroup*> sorted;
     sorted.reserve(monsters.size());
@@ -1243,6 +1351,8 @@ std::string WriteFile(std::span<const MonsterGroup> monsters, const UnknownMonst
     root[Items::Json::Keys::FormatVersion] = MonstersFormatVersion;
     if (unknown != nullptr)
         root[UnknownKey] = WriteUnknownLook(*unknown);
+    if (talkTexts != nullptr && !talkTexts->empty())
+        root[TalkTextsKey] = WriteTalkTexts(*talkTexts);
     root[MonstersKey] = std::move(entries);
     const std::string text = root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
     std::string compact = Items::Json::PutObjectsOnOneLine(text, NameKey);
@@ -1260,12 +1370,13 @@ std::string WriteFile(std::span<const MonsterGroup> monsters, const UnknownMonst
 
 std::string WriteMonstersJson(std::span<const MonsterGroup> monsters)
 {
-    return WriteFile(monsters, nullptr);
+    return WriteFile(monsters, nullptr, nullptr);
 }
 
-std::string WriteMonstersJson(std::span<const MonsterGroup> monsters, const UnknownMonsterLook& unknown)
+std::string WriteMonstersJson(std::span<const MonsterGroup> monsters, const UnknownMonsterLook& unknown,
+                              const MonsterTalkTexts& talkTexts)
 {
-    return WriteFile(monsters, &unknown);
+    return WriteFile(monsters, &unknown, &talkTexts);
 }
 
 std::string WriteMonstersJson(std::span<const MonsterDefinition> numbers)
