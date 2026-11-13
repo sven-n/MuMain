@@ -66,11 +66,13 @@ bool IsOptionTurnedOn(const ITEM& item, ItemOptionType type, const ItemOption& o
     case ItemOptionType::Excellent:
         return IsExcellentBitSet(item.ExcellentFlags, option);
     case ItemOptionType::Luck:
+        return true;
+    // The ancient types take no option slots (IsTurnedOn gives them none).
     case ItemOptionType::AncientOption:
     case ItemOptionType::AncientBonus:
         break;
     }
-    return true;
+    return false;
 }
 
 // The value of a hero attribute a term reads; 0 for one the client doesn't read.
@@ -111,19 +113,11 @@ std::optional<OptionSource> FindValidSource(const ITEM& item, int slot)
     return source;
 }
 
-// The level the option's value is taken at: the additional option's level, the ancient bonus level, else the
-// constant's.
+// The level the option's value is taken at: the additional option's level, else the constant's. The ancient bonus
+// takes no option slot; FindAncientBonus takes its value at the bonus level.
 int GetOptionLevel(const ITEM& item, ItemOptionType type)
 {
-    switch (type)
-    {
-    case ItemOptionType::Option:
-        return item.OptionLevel;
-    case ItemOptionType::AncientBonus:
-        return item.AncientBonusOption;
-    default:
-        return LevelOfTypesWithoutLevels;
-    }
+    return type == ItemOptionType::Option ? item.OptionLevel : LevelOfTypesWithoutLevels;
 }
 } // namespace
 

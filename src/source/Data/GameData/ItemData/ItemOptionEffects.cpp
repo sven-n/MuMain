@@ -51,11 +51,11 @@ constexpr std::array<EffectRow, 28> EffectRows = {{
     {ItemOptionType::Excellent, "healthAfterMonsterKillMultiplier", ItemOptionAdd::Add, {AT_IMPROVE_GAIN_LIFE, false}},
     {ItemOptionType::Excellent, "manaAfterMonsterKillMultiplier", ItemOptionAdd::Add, {AT_IMPROVE_GAIN_MANA, false}},
     // The ancient bonus raises a stat, as the set options do: the stat code adds its value at the item's bonus level
-    // (CSItemOption::getAllAddState). It takes no option slot.
-    {ItemOptionType::AncientBonus, "totalStrength", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_STRENGTH, true}},
-    {ItemOptionType::AncientBonus, "totalAgility", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_DEXTERITY, true}},
-    {ItemOptionType::AncientBonus, "totalEnergy", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_ENERGY, true}},
-    {ItemOptionType::AncientBonus, "totalVitality", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_VITALITY, true}},
+    // (CSItemOption::getAllAddState). It takes no option slot, so it writes no slot value.
+    {ItemOptionType::AncientBonus, "totalStrength", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_STRENGTH, false}},
+    {ItemOptionType::AncientBonus, "totalAgility", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_DEXTERITY, false}},
+    {ItemOptionType::AncientBonus, "totalEnergy", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_ENERGY, false}},
+    {ItemOptionType::AncientBonus, "totalVitality", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_VITALITY, false}},
 }};
 } // namespace
 
