@@ -60,7 +60,7 @@ set(MU_CHECK_CTEST_ENTRIES "${CMAKE_CURRENT_LIST_DIR}/check_ctest_entries.cmake"
 # the binary pass only by failing; only the canaries below use it.
 set(MU_TEST_WINMAIN "${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp")
 # Most tests need the client globals of Winmain.cpp; compile it once for all of them, not per test.
-add_library(mu_test_winmain OBJECT "${MU_TEST_WINMAIN}")
+add_library(mu_test_winmain OBJECT "${MU_TEST_WINMAIN}" "${MU_MANAGED_SYMBOL_ADAPTER}")
 target_link_libraries(mu_test_winmain PUBLIC MuClient)
 target_include_directories(mu_test_winmain PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
 if(MSVC)

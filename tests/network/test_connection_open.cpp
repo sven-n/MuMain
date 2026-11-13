@@ -7,6 +7,7 @@
 
 #include "Core/Platform/WinSock.h"
 #include "Dotnet/Connection.h"
+#include "Dotnet/SymbolSources/ManagedLibrarySource.h"
 #include "Network/IncomingPacketQueue.h"
 
 #include <atomic>
@@ -113,8 +114,9 @@ private:
 
 void RequireLibrary()
 {
-    LoadManagedLibrary();
+    InitializeDotNetBridge(DotNetBridge::TargetManagedSymbolSource());
     REQUIRE(munique_client_library_handle != nullptr);
+    REQUIRE(DotNetBridge::ProcessManagedSymbols().State() == DotNetBridge::ManagedSymbolsState::Resolved);
 }
 } // namespace
 

@@ -8,41 +8,14 @@
 
 #include <atomic>
 #include <coreclr_delegates.h>
-#include <filesystem>
 #include <memory>
 
-#include "Core/Platform/PlatformLibrary.h"
+#include "ManagedSymbols.h"
 #include "Network/ConnectionLifecycle.h"
 
 class PacketFunctions_ChatServer;
 class PacketFunctions_ConnectServer;
 class PacketFunctions_ClientToServer;
-
-// MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so".
-// POSIX loaders do not search the executable directory for a bare filename, so resolve the
-// library beside the running executable. Windows keeps its native executable-directory search.
-inline std::string ManagedLibraryPath()
-{
-    const auto libraryName = "MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT);
-#ifdef _WIN32
-    return libraryName;
-#else
-    constexpr DWORD executablePathCapacity = 4096;
-    wchar_t executablePath[executablePathCapacity] = {};
-    if (GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) == 0)
-    {
-        return libraryName;
-    }
-
-    return (std::filesystem::path(mu_narrow_path(executablePath)).parent_path() / libraryName).string();
-#endif
-}
-
-// Null until LoadManagedLibrary, and after it when the library is missing.
-extern mu::platform::LibraryHandle munique_client_library_handle;
-
-// Loads the network library once, at startup after the client has chosen its folders; later calls do nothing.
-void LoadManagedLibrary();
 
 namespace DotNetBridge
 {
@@ -56,29 +29,19 @@ enum class DotNetErrorKind
 };
 
 void ReportDotNetError(const char* detail, DotNetErrorKind kind = DotNetErrorKind::LibraryNotFound);
-bool IsManagedLibraryAvailable();
 
+// An export of the network library, from the table InitializeDotNetBridge resolved.
 template <typename T> T LoadManagedSymbol(const char* name)
 {
-    if (!IsManagedLibraryAvailable())
-    {
-        return nullptr;
-    }
-
-    const auto symbol = reinterpret_cast<T>(mu::platform::GetSymbol(munique_client_library_handle, name));
-    if (!symbol)
-    {
-        ReportDotNetError(name, DotNetErrorKind::SymbolNotFound);
-    }
-
-    return symbol;
+    return reinterpret_cast<T>(LookUpManagedSymbol(name));
 }
 } // namespace DotNetBridge
 
 using DotNetBridge::LoadManagedSymbol;
 
-// Register native services required by the managed bridge.
-void InitializeDotNetBridge();
+// Resolves the network library's exports from the target's source, once, before any connection, and registers the
+// native services the library calls. A source that lacks a required export turns the network off.
+void InitializeDotNetBridge(const DotNetBridge::ManagedSymbolSource& source);
 
 class Connection
 {
