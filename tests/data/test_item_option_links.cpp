@@ -408,3 +408,13 @@ TEST_CASE("The ancient bonus's effects are the four stats [data][items]")
     CHECK_FALSE(FindItemOptionEffect(ItemOptionType::AncientBonus, "totalStrength", ItemOptionAdd::Percent));
     CHECK_FALSE(FindItemOptionEffect(ItemOptionType::AncientBonus, "maximumHealth", ItemOptionAdd::Add));
 }
+
+// A saved option list keeps the names of no definition last, after the ancient types too.
+TEST_CASE("Option links order the ancient types before names of no definition [data][items]")
+{
+    const ItemOptionDatabase options({MakeLuck("luck"), MakeAncientBonus("ancientBonusStrength", "totalStrength")},
+                                     MakeTexts());
+    std::vector<std::string> names{"nothing", "ancientBonusStrength", "luck"};
+    options.OrderLinks(names);
+    CHECK(names == std::vector<std::string>{"luck", "ancientBonusStrength", "nothing"});
+}
