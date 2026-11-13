@@ -65,6 +65,21 @@ class CheckNetworkBridgeTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertEqual(result.stdout.count("loads a library"), 2, result.stdout)
 
+    def test_commented_out_platform_code_passes(self):
+        header = (HEADER + "/* Before the adapters:\n#ifdef _WIN32\n    return LoadLibraryW(path);\n#endif\n*/\n"
+                  "// #if defined(__APPLE__)\nint kept; // dlopen(\"x\", 0) was here\n")
+        commented_include = '#pragma once\n/* #include "Connection.h" */\n#ifdef _WIN32\nint windowsOnly;\n#endif\n'
+        result = self.run_check({"Dotnet/Lists.cpp": LISTS, "Dotnet/Senders.cpp": LOOKUPS,
+                                 "Dotnet/Connection.h": header, "Network/Client.h": commented_include})
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_a_conditional_after_a_block_comment_still_fails(self):
+        header = HEADER + "/* a note */\n#ifdef _WIN32\nint windowsOnly;\n#endif\n"
+        result = self.run_check({"Dotnet/Lists.cpp": LISTS, "Dotnet/Senders.cpp": LOOKUPS,
+                                 "Dotnet/Connection.h": header})
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("src/source/Dotnet/Connection.h:5: platform conditional", result.stdout)
+
     def test_feature_conditionals_and_other_headers_pass(self):
         including = '#pragma once\n#include "Connection.h"\n#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM\nint shop;\n#endif\n'
         unrelated = "#pragma once\n#ifdef _WIN32\nint windowsOnly;\n#endif\n"

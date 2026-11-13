@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cpp_text import code_and_source, source_files  # noqa: E402
+from cpp_text import code_and_source, skipped_spans, source_files, with_spans_blanked  # noqa: E402
 
 SUFFIXES = (".cpp", ".h", ".inl")
 SKIPPED_DIRS = {"ThirdParty"}
@@ -55,16 +55,22 @@ def export_problems(sources):
     return problems
 
 
+def without_comments(text):
+    """The text with its comments blanked and its preprocessor lines kept (code_and_source blanks those, and they are
+    what the header check reads); every line keeps its number."""
+    comments = [span for span in skipped_spans(text) if text.startswith(("//", "/*"), span[0])]
+    return with_spans_blanked(text, comments, keep_literals=True)
+
+
 def header_problems(sources):
     problems = []
-    for path, text, code in sources:
+    for path, text, _ in sources:
         if not path.endswith(".h"):
             continue
+        text = without_comments(text)
         if not (path.endswith("/Connection.h") or INCLUDES_CONNECTION.search(text)):
             continue
-        # The raw lines: code_and_source blanks preprocessor lines, which are what this looks at.
         for number, line in enumerate(text.splitlines(), 1):
-            line = line.split("//", 1)[0]
             if PLATFORM_CONDITIONAL.search(line):
                 problems.append(f"{path}:{number}: platform conditional in a header of the network bridge")
             if LIBRARY_LOADING.search(line):
