@@ -172,7 +172,7 @@ TEST_CASE("An item's links name definitions, one of each byte, and every definit
     issues.clear();
     ValidateOptionDefinitionUse(std::vector<ItemDefinition>{},
                                 ItemOptionDatabase({MakeLuck("unused")}, MakeTexts(), {rule}), issues);
-    CHECK(issues.empty());
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[0].name"));
 }
 
 // The excellent byte of wings and the Horn of Fenrir means something else, and no horn is excellent, so they can't link
@@ -314,4 +314,82 @@ TEST_CASE("A {divisor} text on an option without one divisor term loads with a w
     issues.clear();
     ValidateItemOptions(std::vector<ItemOptionDefinition>{luck}, texts, "OptionTexts.json", issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[0].options[0].text"));
+}
+
+namespace
+{
+ItemOptionDefinition MakeAncientBonus(const std::string& name, const std::string& attribute)
+{
+    ItemOptionDefinition bonus;
+    bonus.name = name;
+    bonus.type = ItemOptionType::AncientBonus;
+    bonus.file = "Ancient.json";
+    ItemOption option;
+    option.attribute = attribute;
+    option.value = {{5, 10}, true};
+    option.texts = {"luckCriticalDamage"};
+    bonus.options.push_back(option);
+    return bonus;
+}
+} // namespace
+
+// No item links the ancient bonus: until the item sets link one to each item of a set, the item's attackType picks it
+// by its name. A link does nothing and warns; a missing name warns that the items of that attackType have no bonus.
+TEST_CASE("The ancient bonus definitions are picked by attackType, not linked [data][items]")
+{
+    const ItemOptionDatabase all({MakeLuck("luck"), MakeAncientBonus("ancientBonusStrength", "totalStrength"),
+                                  MakeAncientBonus("ancientBonusAgility", "totalAgility"),
+                                  MakeAncientBonus("ancientBonusEnergy", "totalEnergy"),
+                                  MakeAncientBonus("ancientBonusVitality", "totalVitality")},
+                                 MakeTexts());
+    CHECK(all.FindAncientBonus(1) == 1);
+    CHECK(all.FindAncientBonus(4) == 4);
+    CHECK(all.FindAncientBonus(0) == ItemOptionDatabase::NoDefinition);
+    CHECK(all.FindAncientBonus(5) == ItemOptionDatabase::NoDefinition);
+    CHECK(all.GetEffect(1, 0).effect == AT_SET_OPTION_IMPROVE_STRENGTH);
+    CHECK(all.GetEffect(4, 0).effect == AT_SET_OPTION_IMPROVE_VITALITY);
+
+    std::vector<ItemDataIssue> issues;
+    const std::vector<ItemDefinition> items{MakeItem(0, 0, {"luck"}), MakeItem(0, 1, {"ancientBonusStrength"})};
+    ValidateItemOptionLinks(items, all, issues);
+    ValidateOptionDefinitionUse(items, all, issues);
+    // Only the link warns: no "no item links" for the unlinked bonuses, no missing name.
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[0].number == 1);
+    CHECK(issues[0].field == "options");
+
+    // A name of another type, or none, leaves its attackType without a bonus.
+    ItemOptionDefinition notBonus = MakeLuck("ancientBonusEnergy");
+    const ItemOptionDatabase missing({MakeLuck("luck"), MakeAncientBonus("ancientBonusStrength", "totalStrength"),
+                                      notBonus},
+                                     MakeTexts());
+    CHECK(missing.FindAncientBonus(3) == ItemOptionDatabase::NoDefinition);
+    issues.clear();
+    ValidateOptionDefinitionUse(std::vector<ItemDefinition>{MakeItem(0, 0, {"luck"})}, missing, issues);
+    const auto missingName = [&](const std::string& name)
+    {
+        return std::any_of(issues.begin(), issues.end(),
+                           [&](const ItemDataIssue& issue)
+                           {
+                               return issue.severity == ItemDataIssueSeverity::Warning &&
+                                      issue.field == "definitions" &&
+                                      issue.message.find("\"" + name + "\"") != std::string::npos;
+                           });
+    };
+    CHECK_FALSE(missingName("ancientBonusStrength"));
+    CHECK(missingName("ancientBonusAgility"));
+    CHECK(missingName("ancientBonusEnergy"));
+    CHECK(missingName("ancientBonusVitality"));
+}
+
+// The ancient bonus raises the four stats; another attribute has no effect, so the Data Check warns about it.
+TEST_CASE("The ancient bonus's effects are the four stats [data][items]")
+{
+    CHECK(FindItemOptionEffect(ItemOptionType::AncientBonus, "totalAgility", ItemOptionAdd::Add)->effect ==
+          AT_SET_OPTION_IMPROVE_DEXTERITY);
+    CHECK(FindItemOptionEffect(ItemOptionType::AncientBonus, "totalEnergy", ItemOptionAdd::Add)->effect ==
+          AT_SET_OPTION_IMPROVE_ENERGY);
+    CHECK_FALSE(FindItemOptionEffect(ItemOptionType::AncientBonus, "totalStrength", ItemOptionAdd::Percent));
+    CHECK_FALSE(FindItemOptionEffect(ItemOptionType::AncientBonus, "maximumHealth", ItemOptionAdd::Add));
 }

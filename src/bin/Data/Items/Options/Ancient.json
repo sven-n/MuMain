@@ -1,0 +1,89 @@
+{
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "ancientBonusStrength",
+      "type": "ancientBonus",
+      "displayName": {
+        "en": "Ancient bonus: strength",
+        "de": "Antiker Bonus: Stärke",
+        "es": "Bonificación antigua: fuerza",
+        "id": "Bonus kuno: kekuatan",
+        "ja": "エンシェントボーナス：力",
+        "pl": "Starożytny bonus: siła",
+        "pt": "Bônus ancestral: força",
+        "ru": "Древний бонус: сила",
+        "tl": "Sinaunang bonus: lakas",
+        "uk": "Стародавній бонус: сила",
+        "zh-TW": "遠古加成：力量"
+      },
+      "openMu": {"id": "00000083-0030-09a3-0000-000000000000", "name": "Ancient Bonus of Total Strength"},
+      "options": [
+        {"attribute": "totalStrength", "add": {"values": [5, 10]}, "text": "increaseStrength"}
+      ]
+    },
+    {
+      "name": "ancientBonusAgility",
+      "type": "ancientBonus",
+      "displayName": {
+        "en": "Ancient bonus: agility",
+        "de": "Antiker Bonus: Beweglichkeit",
+        "es": "Bonificación antigua: agilidad",
+        "id": "Bonus kuno: kelincahan",
+        "ja": "エンシェントボーナス：敏捷",
+        "pl": "Starożytny bonus: zwinność",
+        "pt": "Bônus ancestral: agilidade",
+        "ru": "Древний бонус: ловкость",
+        "tl": "Sinaunang bonus: liksi",
+        "uk": "Стародавній бонус: спритність",
+        "zh-TW": "遠古加成：敏捷"
+      },
+      "openMu": {"id": "00000083-0030-1207-0000-000000000000", "name": "Ancient Bonus of Total Agility"},
+      "options": [
+        {"attribute": "totalAgility", "add": {"values": [5, 10]}, "text": "increaseAgility"}
+      ]
+    },
+    {
+      "name": "ancientBonusEnergy",
+      "type": "ancientBonus",
+      "displayName": {
+        "en": "Ancient bonus: energy",
+        "de": "Antiker Bonus: Energie",
+        "es": "Bonificación antigua: energía",
+        "id": "Bonus kuno: energi",
+        "ja": "エンシェントボーナス：エナジー",
+        "pl": "Starożytny bonus: energia",
+        "pt": "Bônus ancestral: energia",
+        "ru": "Древний бонус: энергия",
+        "tl": "Sinaunang bonus: enerhiya",
+        "uk": "Стародавній бонус: енергія",
+        "zh-TW": "遠古加成：能量"
+      },
+      "openMu": {"id": "00000083-0030-6b45-0000-000000000000", "name": "Ancient Bonus of Total Energy"},
+      "options": [
+        {"attribute": "totalEnergy", "add": {"values": [5, 10]}, "text": "increaseEnergy"}
+      ]
+    },
+    {
+      "name": "ancientBonusVitality",
+      "type": "ancientBonus",
+      "displayName": {
+        "en": "Ancient bonus: vitality",
+        "de": "Antiker Bonus: Vitalität",
+        "es": "Bonificación antigua: vitalidad",
+        "id": "Bonus kuno: vitalitas",
+        "ja": "エンシェントボーナス：体力",
+        "pl": "Starożytny bonus: witalność",
+        "pt": "Bônus ancestral: vitalidade",
+        "ru": "Древний бонус: выносливость",
+        "tl": "Sinaunang bonus: tibay",
+        "uk": "Стародавній бонус: витривалість",
+        "zh-TW": "遠古加成：體力"
+      },
+      "openMu": {"id": "00000083-0030-76e4-0000-000000000000", "name": "Ancient Bonus of Total Vitality"},
+      "options": [
+        {"attribute": "totalVitality", "add": {"values": [5, 10]}, "text": "increaseVitality"}
+      ]
+    }
+  ]
+}

@@ -46,6 +46,14 @@ ItemOptionDatabase::ItemOptionDatabase(std::vector<ItemOptionDefinition> definit
                              { return definition.options[left].number > definition.options[right].number; });
         }
     }
+    for (size_t attackType = 0; attackType < AncientBonusNames.size(); ++attackType)
+    {
+        const int index = Find(AncientBonusNames[attackType]);
+        if (index != NoDefinition && m_definitions[static_cast<size_t>(index)].type == ItemOptionType::AncientBonus)
+        {
+            m_ancientBonuses[attackType] = index;
+        }
+    }
 }
 
 int ItemOptionDatabase::Find(std::string_view name) const

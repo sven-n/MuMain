@@ -180,7 +180,7 @@ variants or option words. An online keyword need not select the same items offli
 | `excellentBonus` | A fixed excellent bonus of damage and magic power instead of the [item stat file's](#item-stats-by-level) excellent term; left out = the term. The Chaos Dragon Axe has 15, the Chaos Nature Bow 30 and the Chaos Lightning Staff 25. The bmd import keeps it |
 | `excellentRaisesLevel` | `false`: excellent options do not raise the level requirement by the [item stat file's](#item-stats-by-level) `excellentLevelAdd`. Left out = they do. The shipped data has it on the Dragon Knight, Venom Mist, Sylphid Ray, Volcano, Sunlight and Storm Blitz armour, the Bone Blade, Explosion Blade, Soleil Scepter, Sylph Wind Bow, Grand Viper Staff and Storm Blitz Stick, the lucky items and the Horn of Fenrir. The bmd import keeps it |
 | `defense`, `magicDefense`, `blockRate` | Armor and shield values |
-| `attackType` | Attack type used by the client |
+| `attackType` | Which [ancient bonus](#item-options) an item of an ancient set has: 1 strength, 2 agility, 3 energy, 4 vitality, until the item sets link one |
 | `sellValue` | Value factor used by the price calculation of some items |
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
 | `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership`. The stat requirements of the orbs, crystals and scrolls (groups 12 and 15, without a slot) are the values the game asks for, as OpenMU stores them: their profiles keep them as they are. The original client's bmd files hold weights for them, which Import from bmd turns into the values and Export as bmd and Export as S6E3 turn back (the smallest weight that gives each value). Which ones convert follows the item's profile: a requirement it keeps as it is while the default grows it (an orb given the default profile holds weights like any item) |
@@ -927,11 +927,12 @@ definitions: the files of `Data/Items/Options` hold the definitions, one
 file per option group, and each item names the ones it can have in its
 `options` list. Which of them an item has comes from the server: its item
 data turns them on (luck by the luck flag, the additional option by its
-level, the excellent options by the excellent byte). Luck, the additional
-option of the items that are no wings and the excellent options are in data
+level, the excellent options by the excellent byte, the ancient bonus by
+the ancient byte's bonus level). Luck, the additional option of the items
+that are no wings, the excellent options and the ancient bonus are in data
 so far; the wings' and the Horn of Dinorant's options, the Wizard's rings',
-the harmony, guardian, socket and pet options and the ancient bonus are
-still code and move into data one group at a time.
+the harmony, guardian, socket and pet options and the ancient set options
+are still code and move into data one group at a time.
 
 ```json
 {
@@ -959,9 +960,13 @@ still code and move into data one group at a time.
   low four bits, 1 to 15; Season 6 sends 1 to 4), its options numbered
   (`"number": 0`) by the option type the server sends in the byte's high
   four bits, their value by that level; `excellent` is the excellent byte,
-  its options numbered 1 to 6, each turned on by the byte's bit number - 1.
-  Each option group brings its type when it moves into data. An item links
-  at most one definition of a type.
+  its options numbered 1 to 6, each turned on by the byte's bit number - 1;
+  `ancientBonus` is the ancient byte's bonus level (its high four bits),
+  with one option without a number, its value by that level;
+  `ancientOption` is an ancient set's options, numbered from 1 (no
+  definition has it yet: the item sets bring them). Each option group
+  brings its type when it moves into data. An item links at most one
+  definition of a type.
 - `displayName`: the definition's name by language, English first.
 - `openMu` and `server`: OpenMU's labels of the same definition (its GUID
   and its English name, which the exchange with the server will match by)
@@ -1057,6 +1062,26 @@ the drop level's excellent bonus still read the byte. The durability per
 cent (what wear takes off the stats) reads it only for weapons, shields
 and armour, whose byte holds excellent options; wings pass no excellent
 flags to it.
+
+`Options/Ancient.json` holds the ancient bonus, as OpenMU's "Ancient Bonus
+of Total Strength" and the others: an item of an ancient set raises a stat
+by its bonus level, +5 at level 1 and +10 at level 2.
+
+| Name | Attribute | Value | `attackType` |
+|---|---|---|---|
+| `ancientBonusStrength` | `totalStrength` | `[5, 10]` | 1 |
+| `ancientBonusAgility` | `totalAgility` | `[5, 10]` | 2 |
+| `ancientBonusEnergy` | `totalEnergy` | `[5, 10]` | 3 |
+| `ancientBonusVitality` | `totalVitality` | `[5, 10]` | 4 |
+
+No item links them: until the item sets link a bonus to each item of a
+set, the item's `attackType` picks the definition by these names (the last
+column), as the code before them picked the stat. The attribute decides the
+stat the bonus adds to (strength, agility, energy, vitality; another one
+adds nothing), and the value list its value; a bonus level above the list
+takes its last entry (servers send 1 and 2; the ancient byte holds up to
+15). The elemental rings and pendants keep their second line,
+"Increase Attribute Damage", in code until the item sets.
 
 `Tooltips/OptionTexts.json` holds the lines' texts:
 
@@ -1189,8 +1214,9 @@ an option without `attribute` or with none or more than one of `add`,
 0 to 65535 or that has `perLevel`, a term (`per`) without `attribute` or
 without exactly one of `times` and `divisor` (whole numbers from 1), a
 number used twice in a definition, an additional option's number above 15,
-an excellent option's number outside 1 to 6, a luck definition with more
-than one option or a numbered one, OpenMU
+an excellent option's number outside 1 to 6, an ancient set option's
+number below 1, a luck or ancient bonus definition with more than one
+option or a numbered one, OpenMU
 labels or server values of the wrong kind, and a rule naming a
 definition that does not exist or a condition it does not have. Errors:
 an item linking a definition that does not exist (the link is left out)
@@ -1204,8 +1230,12 @@ unknown fields, an attribute the client does not compute, a term on a hero
 attribute the client does not read, a text with `{divisor}` on an option
 without a term that has a divisor (the line shows 0 there) or with several
 (it shows the first one's), a definition no
-item and no rule links, a text no option names and a text in a language
-the game has no texts in.
+item and no rule links (but the ancient bonus and set options, which the
+item's `attackType` and the item sets give), an item linking an ancient
+bonus or set options (the link does nothing), an ancient bonus name
+`attackType` picks that no `ancientBonus` definition has (those items show
+and add no bonus), a text no option names and a text in a language the
+game has no texts in.
 
 ---
 

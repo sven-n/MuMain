@@ -26,6 +26,13 @@ enum class ItemOptionType : BYTE
     Option,
     // The excellent byte (ITEM::ExcellentFlags); its options numbered 1 to 6, each on with the byte's bit number - 1.
     Excellent,
+    // An ancient set's options, numbered 1 to n in the order the set gives them. Known to the loader for the item sets
+    // (phase 10); no definition has it yet.
+    AncientOption,
+    // The ancient bonus of an item of a set; one option, its level the ancient byte's bonus level
+    // (ITEM::AncientBonusOption). Until the item sets link it, the item's attackType picks the definition
+    // (ItemOptionDatabase::FindAncientBonus).
+    AncientBonus,
 };
 
 // An excellent option's number - 1 is its bit of the excellent byte, whose bits 0 to 5 hold them.

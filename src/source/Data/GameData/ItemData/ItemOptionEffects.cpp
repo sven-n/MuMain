@@ -22,7 +22,7 @@ struct EffectRow
 // (GameLogic::Combat::GetHeroCriticalDamageRate). The additional options write theirs. A magic sword's option
 // (baseDamageBonus) is one slot, AT_IMPROVE_DAMAGE, as before, which the stat code adds to the wizardry damage too;
 // its definition shows two lines.
-constexpr std::array<EffectRow, 24> EffectRows = {{
+constexpr std::array<EffectRow, 28> EffectRows = {{
     {ItemOptionType::Luck, "criticalDamageChance", ItemOptionAdd::Percent, {AT_LUCK, true}},
     {ItemOptionType::Option, "physicalBaseDmg", ItemOptionAdd::Add, {AT_IMPROVE_DAMAGE, true}},
     {ItemOptionType::Option, "baseDamageBonus", ItemOptionAdd::Add, {AT_IMPROVE_DAMAGE, true, true}},
@@ -50,6 +50,12 @@ constexpr std::array<EffectRow, 24> EffectRows = {{
     {ItemOptionType::Excellent, "attackSpeedAny", ItemOptionAdd::Add, {AT_IMPROVE_ATTACK_SPEED, true}},
     {ItemOptionType::Excellent, "healthAfterMonsterKillMultiplier", ItemOptionAdd::Add, {AT_IMPROVE_GAIN_LIFE, false}},
     {ItemOptionType::Excellent, "manaAfterMonsterKillMultiplier", ItemOptionAdd::Add, {AT_IMPROVE_GAIN_MANA, false}},
+    // The ancient bonus raises a stat, as the set options do: the stat code adds its value at the item's bonus level
+    // (CSItemOption::getAllAddState). It takes no option slot.
+    {ItemOptionType::AncientBonus, "totalStrength", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_STRENGTH, true}},
+    {ItemOptionType::AncientBonus, "totalAgility", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_DEXTERITY, true}},
+    {ItemOptionType::AncientBonus, "totalEnergy", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_ENERGY, true}},
+    {ItemOptionType::AncientBonus, "totalVitality", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_VITALITY, true}},
 }};
 } // namespace
 

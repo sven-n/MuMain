@@ -16,6 +16,12 @@ namespace
 {
 constexpr const char* OptionsField = "options";
 
+// The types the item sets give an item (phase 10), which no item links.
+bool IsAncientType(ItemOptionType type)
+{
+    return type == ItemOptionType::AncientOption || type == ItemOptionType::AncientBonus;
+}
+
 // A definition's problems name its file in Data/Items/Options and its place there.
 std::string DefinitionField(std::span<const ItemOptionDefinition> definitions, size_t index)
 {
@@ -186,6 +192,15 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                  "links excellent options, but its excellent byte holds its wing options or a horn's kind, "
                  "or nothing: no horn is excellent"});
         }
+        // Until the item sets link them (phase 10), the item's attackType picks its ancient bonus and set options.
+        const bool linksAncient = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
+                                              { return IsAncientType(options.Get(link).type); });
+        if (linksAncient)
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", item.group, item.number, OptionsField,
+                              "links an ancient bonus or set options, which the item sets give: the link does "
+                              "nothing, the item's attackType picks its ancient bonus"});
+        }
     }
 }
 
@@ -207,12 +222,24 @@ void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const It
     const std::span<const ItemOptionDefinition> definitions = options.GetDefinitions();
     for (size_t index = 0; index < definitions.size(); ++index)
     {
-        if (!linked.contains(definitions[index].name))
+        // The item's attackType links the ancient bonus definitions, the item sets will link both ancient types.
+        if (!linked.contains(definitions[index].name) && !IsAncientType(definitions[index].type))
         {
             issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definitions[index]),
                               ItemDataIssue::NoItem, ItemDataIssue::NoItem,
                               DefinitionField(definitions, index) + ".name",
                               "no item and no option rule links \"" + definitions[index].name + "\""});
+        }
+    }
+    for (size_t attackType = 0; attackType < AncientBonusNames.size(); ++attackType)
+    {
+        if (options.FindAncientBonus(static_cast<int>(attackType) + 1) == ItemOptionDatabase::NoDefinition)
+        {
+            issues.push_back(
+                {ItemDataIssueSeverity::Warning, "Options", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "definitions",
+                 "no definition of type ancientBonus is named \"" + std::string(AncientBonusNames[attackType]) +
+                     "\": the ancient items with attackType " + std::to_string(attackType + 1) +
+                     " show and add no ancient bonus"});
         }
     }
 }

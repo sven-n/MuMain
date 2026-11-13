@@ -438,3 +438,67 @@ TEST_CASE("Option definitions of type excellent read their numbered options and 
     CHECK(HasIssue(term(R"([{"attribute": "level", "divisor": 20, "round": "up"}])"), ItemDataIssueSeverity::Warning,
                    "definitions[0].options[0].add.per[0].round"));
 }
+
+TEST_CASE("Option definitions of type ancientBonus and ancientOption read and write back [data][items]")
+{
+    constexpr const char* AncientFile = R"({
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "ancientBonusStrength",
+      "type": "ancientBonus",
+      "displayName": {
+        "en": "Ancient bonus: strength"
+      },
+      "openMu": {"id": "00000083-0030-09a3-0000-000000000000", "name": "Ancient Bonus of Total Strength"},
+      "options": [
+        {"attribute": "totalStrength", "add": {"values": [5, 10]}, "text": "increaseStrength"}
+      ]
+    },
+    {
+      "name": "warriorSet",
+      "type": "ancientOption",
+      "displayName": {
+        "en": "Warrior set"
+      },
+      "options": [
+        {"number": 1, "attribute": "totalStrength", "add": {"values": 10}, "text": "increaseStrength"}
+      ]
+    }
+  ]
+}
+)";
+    std::vector<ItemOptionDefinition> definitions;
+    std::vector<ItemDataIssue> issues;
+    ReadItemOptionsJson(AncientFile, "Options/Ancient.json", "Ancient.json", definitions, issues);
+    CHECK(issues.empty());
+    REQUIRE(definitions.size() == 2);
+    CHECK(definitions[0].type == ItemOptionType::AncientBonus);
+    REQUIRE(definitions[0].options.size() == 1);
+    CHECK(definitions[0].options[0].number == 0);
+    CHECK(definitions[0].options[0].value.At(1) == 5);
+    CHECK(definitions[0].options[0].value.At(2) == 10);
+    CHECK(definitions[0].options[0].value.At(3) == 10);
+    CHECK(definitions[1].type == ItemOptionType::AncientOption);
+    CHECK(WriteItemOptionsJson(definitions) == AncientFile);
+
+    const auto bonus = [](const std::string& options)
+    {
+        return R"({"name": "b", "type": "ancientBonus", "displayName": {"en": "B"}, "options": [)" + options + "]}";
+    };
+    // The ancient bonus has one option without a number.
+    CHECK(HasIssue(ReadDefinition(bonus(R"({"number": 1, "attribute": "a", "add": {"values": [5]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    CHECK(HasIssue(ReadDefinition(bonus(R"({"attribute": "a", "add": {"values": [5]}, "text": "t"},
+                                           {"attribute": "b", "add": {"values": [5]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options"));
+    // An ancient set's options count from 1.
+    const auto setOption = [](const std::string& options)
+    {
+        return R"({"name": "s", "type": "ancientOption", "displayName": {"en": "S"}, "options": [)" + options + "]}";
+    };
+    CHECK(HasIssue(ReadDefinition(setOption(R"({"number": 0, "attribute": "a", "add": {"values": 1}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    CHECK_FALSE(HasFatal(
+        ReadDefinition(setOption(R"({"number": 12, "attribute": "a", "add": {"values": 1}, "text": "t"})"))));
+}

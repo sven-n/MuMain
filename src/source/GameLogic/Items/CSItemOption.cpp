@@ -17,6 +17,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/CSItemOption.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "I18N/All.h"
 #include "Render/Text/CUIRenderText.h"
 
@@ -28,6 +29,7 @@
 #include <cwchar>
 #include <cwctype>
 #include <memory>
+#include <optional>
 #include <iterator>
 #include <string>
 #include <string_view>
@@ -535,68 +537,6 @@ int CSItemOption::GetMasteryBonus(const SET_SEARCH_RESULT_OPT& set, std::uint8_t
     return bonus;
 }
 
-namespace
-{
-// The ancient bonus has two levels, as on Season 6 and OpenMU (+5 and +10); a higher level the ancient byte holds counts
-// as the second.
-constexpr BYTE MaxAncientBonusLevel = 2;
-
-int GetAncientBonusLevel(const ITEM* ip)
-{
-    return std::min<int>(ip->AncientBonusOption, MaxAncientBonusLevel);
-}
-} // namespace
-
-int CSItemOption::GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value)
-{
-    if (ip->Type > MAX_ITEM)
-    {
-        return -1;
-    }
-
-    *Value = static_cast<std::uint16_t>(GetAncientBonusLevel(ip));
-
-    const ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
-
-    return p->AttType;
-}
-
-bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
-{
-    if (ip->Type > MAX_ITEM)
-    {
-        return false;
-    }
-
-    if (ip->AncientBonusOption <= 0)
-    {
-        return false;
-    }
-
-    switch (ItemAttribute[ip->Type].AttType)
-    {
-    case SET_OPTION_STRENGTH:
-        mu_swprintf(Text, I18N::Game::IncreaseStrengthD, GetAncientBonusLevel(ip) * 5);
-        break;
-
-    case SET_OPTION_DEXTERITY:
-        mu_swprintf(Text, I18N::Game::IncreaseAgilityD, GetAncientBonusLevel(ip) * 5);
-        break;
-
-    case SET_OPTION_ENERGY:
-        mu_swprintf(Text, I18N::Game::IncreaseEnergyD, GetAncientBonusLevel(ip) * 5);
-        break;
-
-    case SET_OPTION_VITALITY:
-        mu_swprintf(Text, I18N::Game::IncreaseStaminaD, GetAncientBonusLevel(ip) * 5);
-        break;
-
-    default:
-        return false;
-    }
-    return true;
-}
-
 bool CSItemOption::IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill)
 {
     bool checkForWeaponSkill;
@@ -642,13 +582,46 @@ bool CSItemOption::IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill)
     return false;
 }
 
+namespace
+{
+// Adds the item's ancient bonus to the stat its definition's attribute raises (its effect); an attribute the client
+// doesn't add adds nothing.
+void AddAncientBonus(const ITEM& item, std::uint16_t* strength, std::uint16_t* dexterity, std::uint16_t* energy,
+                     std::uint16_t* vitality)
+{
+    const std::optional<GameLogic::Items::AncientBonus> bonus = GameLogic::Items::FindAncientBonus(item);
+    if (!bonus)
+    {
+        return;
+    }
+    const auto value = static_cast<std::uint16_t>(bonus->value);
+    switch (bonus->effect)
+    {
+    case AT_SET_OPTION_IMPROVE_STRENGTH:
+        *strength += value;
+        break;
+    case AT_SET_OPTION_IMPROVE_DEXTERITY:
+        *dexterity += value;
+        break;
+    case AT_SET_OPTION_IMPROVE_ENERGY:
+        *energy += value;
+        break;
+    case AT_SET_OPTION_IMPROVE_VITALITY:
+        *vitality += value;
+        break;
+    default:
+        break;
+    }
+}
+} // namespace
+
 int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
 {
     int TNum = TextNum;
-    if (GetDefaultOptionText(ip, TextList[TNum]))
+    const std::optional<GameLogic::Items::AncientBonus> bonus = GameLogic::Items::FindAncientBonus(*ip);
+    if (bonus)
     {
-        TextListColor[TNum] = TEXT_COLOR_BLUE;
-        TNum++;
+        TNum += WriteOptionLines(*bonus->option, bonus->value, TNum, MaxTextListRows);
 
         if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) || (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) || (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_PENDANT_OF_WATER))
         {
@@ -672,25 +645,7 @@ void CSItemOption::getAllAddState(std::uint16_t* Strength, std::uint16_t* Dexter
             continue;
         }
 
-        std::uint16_t Result = 0;
-        switch (GetDefaultOptionValue(item, &Result))
-        {
-        case SET_OPTION_STRENGTH:
-            *Strength += Result * 5;
-            break;
-
-        case SET_OPTION_DEXTERITY:
-            *Dexterity += Result * 5;
-            break;
-
-        case SET_OPTION_ENERGY:
-            *Energy += Result * 5;
-            break;
-
-        case SET_OPTION_VITALITY:
-            *Vitality += Result * 5;
-            break;
-        }
+        AddAncientBonus(*item, Strength, Dexterity, Energy, Vitality);
     }
 
     AddStatsBySetOptions(Strength, Dexterity, Energy, Vitality, Charisma);
@@ -762,25 +717,7 @@ void CSItemOption::getAllAddOptionStatesbyCompare(std::uint16_t* Strength, std::
             continue;
         }
 
-        std::uint16_t Result = 0;
-        switch (GetDefaultOptionValue(item, &Result))
-        {
-        case SET_OPTION_STRENGTH:
-            *Strength += Result * 5;
-            break;
-
-        case SET_OPTION_DEXTERITY:
-            *Dexterity += Result * 5;
-            break;
-
-        case SET_OPTION_ENERGY:
-            *Energy += Result * 5;
-            break;
-
-        case SET_OPTION_VITALITY:
-            *Vitality += Result * 5;
-            break;
-        }
+        AddAncientBonus(*item, Strength, Dexterity, Energy, Vitality);
     }
 
     AddStatsBySetOptions(Strength, Dexterity, Energy, Vitality, Charisma);

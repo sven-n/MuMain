@@ -1190,3 +1190,96 @@ TEST_CASE("Every ancient item's bonus raises the stat of its attackType [data][i
     broken.Durability = 0;
     CHECK(AddedStats(broken) == std::array<int, 4>{});
 }
+
+namespace
+{
+// The first item whose attackType is `attackType`.
+int FindItemOfAttackType(int attackType)
+{
+    for (int type = 0; type < MAX_ITEM; ++type)
+    {
+        if (ItemAttribute[type].AttType == attackType && g_ItemDatabase.Find(type) != nullptr)
+        {
+            return type;
+        }
+    }
+    return -1;
+}
+} // namespace
+
+// The ancient bonus comes from the definition of Options/Ancient.json the item's attackType picks: +5 at bonus level 1,
+// +10 at level 2, the last entry above the list, nothing at level 0. Its line is the definition's text.
+TEST_CASE("The ancient bonus comes from the definition the item's attackType picks [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    const int strengthItem = FindItemOfAttackType(1);
+    const int vitalityItem = FindItemOfAttackType(4);
+    REQUIRE(strengthItem >= 0);
+    REQUIRE(vitalityItem >= 0);
+
+    CHECK_FALSE(GameLogic::Items::FindAncientBonus(MakeAncientItem(strengthItem, 0)));
+    const std::optional<GameLogic::Items::AncientBonus> level1 =
+        GameLogic::Items::FindAncientBonus(MakeAncientItem(strengthItem, 1));
+    REQUIRE(level1);
+    CHECK(level1->definition->name == "ancientBonusStrength");
+    CHECK(level1->effect == AT_SET_OPTION_IMPROVE_STRENGTH);
+    CHECK(level1->value == 5);
+    CHECK(GameLogic::Items::FindAncientBonus(MakeAncientItem(strengthItem, 2))->value == 10);
+    CHECK(GameLogic::Items::FindAncientBonus(MakeAncientItem(strengthItem, 3))->value == 10);
+    const std::optional<GameLogic::Items::AncientBonus> vitality =
+        GameLogic::Items::FindAncientBonus(MakeAncientItem(vitalityItem, 2));
+    REQUIRE(vitality);
+    CHECK(vitality->definition->name == "ancientBonusVitality");
+    CHECK(vitality->effect == AT_SET_OPTION_IMPROVE_VITALITY);
+
+    ClearTooltipRows();
+    const ITEM strength = MakeAncientItem(strengthItem, 2);
+    CHECK(g_csItemOption.RenderDefaultOptionText(&strength, 0) >= 1);
+    CHECK(std::wstring(TextList[0]) == L"Increase strength +10");
+    CHECK(TextListColor[0] == TEXT_COLOR_BLUE);
+    const ITEM stamina = MakeAncientItem(vitalityItem, 1);
+    CHECK(g_csItemOption.RenderDefaultOptionText(&stamina, 0) >= 1);
+    CHECK(std::wstring(TextList[0]) == L"Increase stamina +5");
+    ClearTooltipRows();
+    const ITEM withoutBonus = MakeAncientItem(strengthItem, 0);
+    CHECK(g_csItemOption.RenderDefaultOptionText(&withoutBonus, 0) == 0);
+}
+
+// The stat code adds the ancient bonus of the worn items with the definitions' values, to the stat the definition's
+// attribute names: an edited value list is added as written, another attribute changes the stat, and one the client
+// doesn't add adds nothing.
+TEST_CASE("The stats add the ancient bonus with its definition's value and attribute [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+    const int strengthItem = FindItemOfAttackType(1);
+    REQUIRE(strengthItem >= 0);
+
+    ItemOptionsScope restoreOptions;
+    const Data::Items::ItemOptionDatabase& shipped = restoreOptions.Saved();
+    const int found = shipped.Find("ancientBonusStrength");
+    REQUIRE(found != Data::Items::ItemOptionDatabase::NoDefinition);
+    const auto edit = [&](const char* attribute, std::vector<int> values)
+    {
+        std::vector<Data::Items::ItemOptionDefinition> definitions(shipped.GetDefinitions().begin(),
+                                                                  shipped.GetDefinitions().end());
+        Data::Items::ItemOption& option = definitions[static_cast<size_t>(found)].options.front();
+        option.attribute = attribute;
+        option.value = {std::move(values), true};
+        g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
+    };
+    edit("totalStrength", {7, 9});
+    CHECK(AddedStats(MakeAncientItem(strengthItem, 2)) == std::array<int, 4>{9, 0, 0, 0});
+    edit("totalEnergy", {7, 9});
+    CHECK(AddedStats(MakeAncientItem(strengthItem, 1)) == std::array<int, 4>{0, 0, 7, 0});
+    edit("maximumHealth", {7, 9});
+    CHECK(AddedStats(MakeAncientItem(strengthItem, 1)) == std::array<int, 4>{0, 0, 0, 0});
+}

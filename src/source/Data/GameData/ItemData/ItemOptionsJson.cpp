@@ -62,12 +62,12 @@ const KeySet TermKeys = {Keys::Attribute, Keys::Times, Keys::Divisor};
 // option only.
 bool HasNumbers(ItemOptionType type)
 {
-    return type != ItemOptionType::Luck;
+    return type != ItemOptionType::Luck && type != ItemOptionType::AncientBonus;
 }
 
 bool HasOneOption(ItemOptionType type)
 {
-    return type == ItemOptionType::Luck;
+    return type == ItemOptionType::Luck || type == ItemOptionType::AncientBonus;
 }
 
 bool IsGuid(std::string_view text)
@@ -402,7 +402,8 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
         AddFatal(field + "." + Keys::Number, "missing");
         return;
     }
-    const int minimum = type == ItemOptionType::Excellent ? 1 : 0;
+    // Excellent options count from 1 (bit number - 1), an ancient set's options in the order the set gives them.
+    const int minimum = type == ItemOptionType::Excellent || type == ItemOptionType::AncientOption ? 1 : 0;
     const int maximum = type == ItemOptionType::Option      ? MaxOptionTypeNumber
                         : type == ItemOptionType::Excellent ? MaxExcellentOptionNumber
                                                             : MaxNumber;
