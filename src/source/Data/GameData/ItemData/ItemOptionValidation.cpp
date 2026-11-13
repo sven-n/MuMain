@@ -252,8 +252,13 @@ void ValidateAncientBonusNames(const ItemOptionDatabase& options, std::vector<It
     {
         if (options.FindAncientBonus(static_cast<int>(attackType) + 1) == ItemOptionDatabase::NoDefinition)
         {
+            // The file of a definition of that name of another type, else the file the four belong in.
+            const int named = options.Find(AncientBonusNames[attackType]);
+            const std::string source = named != ItemOptionDatabase::NoDefinition
+                                           ? DefinitionSource(options.Get(static_cast<ItemOptionIndex>(named)))
+                                           : std::string("Options/Ancient.json");
             issues.push_back(
-                {ItemDataIssueSeverity::Warning, "Options", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "definitions",
+                {ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "definitions",
                  "no definition of type ancientBonus is named \"" + std::string(AncientBonusNames[attackType]) +
                      "\": the ancient items with attackType " + std::to_string(attackType + 1) +
                      " show and add no ancient bonus"});

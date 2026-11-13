@@ -393,6 +393,15 @@ TEST_CASE("The ancient bonus definitions are picked by attackType, not linked [d
                            });
     };
     CHECK_FALSE(missingName("ancientBonusStrength"));
+    // The issue names the file of the definition of that name, else the file the four belong in.
+    const auto sourceOf = [&](const std::string& name)
+    {
+        const auto found = std::find_if(issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
+                                        { return issue.message.find("\"" + name + "\"") != std::string::npos; });
+        return found != issues.end() ? found->source : std::string();
+    };
+    CHECK(sourceOf("ancientBonusEnergy") == "Options/Luck.json");
+    CHECK(sourceOf("ancientBonusAgility") == "Options/Ancient.json");
     CHECK(missingName("ancientBonusAgility"));
     CHECK(missingName("ancientBonusEnergy"));
     CHECK(missingName("ancientBonusVitality"));
