@@ -359,6 +359,21 @@ TEST_CASE("The ancient bonus definitions are picked by attackType, not linked [d
     CHECK(issues[0].number == 1);
     CHECK(issues[0].field == "options");
 
+    // Another ancient bonus or an ancient set's options, which nothing picks yet, are unlinked definitions.
+    ItemOptionDefinition setOptions = MakeAncientBonus("warriorSet", "totalStrength");
+    setOptions.type = ItemOptionType::AncientOption;
+    const ItemOptionDatabase extra({MakeLuck("luck"), MakeAncientBonus("ancientBonusStrength", "totalStrength"),
+                                    MakeAncientBonus("ancientBonusAgility", "totalAgility"),
+                                    MakeAncientBonus("ancientBonusEnergy", "totalEnergy"),
+                                    MakeAncientBonus("ancientBonusVitality", "totalVitality"),
+                                    MakeAncientBonus("ancientBonusCharisma", "totalLeadership"), setOptions},
+                                   MakeTexts());
+    issues.clear();
+    ValidateOptionDefinitionUse(std::vector<ItemDefinition>{MakeItem(0, 0, {"luck"})}, extra, issues);
+    REQUIRE(issues.size() == 2);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[4].name"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[5].name"));
+
     // A name of another type, or none, leaves its attackType without a bonus.
     ItemOptionDefinition notBonus = MakeLuck("ancientBonusEnergy");
     const ItemOptionDatabase missing({MakeLuck("luck"), MakeAncientBonus("ancientBonusStrength", "totalStrength"),

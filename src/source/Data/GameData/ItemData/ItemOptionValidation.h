@@ -30,7 +30,8 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                              std::vector<ItemDataIssue>& issues);
 
 // A definition neither an item nor a rule of `options` links (a warning; without the rules, as in the game, only the
-// items count), except the ancient types the item sets give; an ancient bonus name of AncientBonusNames with no
+// items count), except the ancient bonus definitions the items' attackType picks; an ancient bonus name of
+// AncientBonusNames with no
 // definition of type ancientBonus (a warning: the items with that attackType show and add no bonus).
 void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const ItemOptionDatabase& options,
                                  std::vector<ItemDataIssue>& issues);

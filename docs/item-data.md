@@ -1230,8 +1230,8 @@ unknown fields, an attribute the client does not compute, a term on a hero
 attribute the client does not read, a text with `{divisor}` on an option
 without a term that has a divisor (the line shows 0 there) or with several
 (it shows the first one's), a definition no
-item and no rule links (but the ancient bonus and set options, which the
-item's `attackType` and the item sets give), an item linking an ancient
+item and no rule links (but the four ancient bonus definitions the item's
+`attackType` picks), an item linking an ancient
 bonus or set options (the link does nothing), an ancient bonus name
 `attackType` picks that no `ancientBonus` definition has (those items show
 and add no bonus), a text no option names and a text in a language the

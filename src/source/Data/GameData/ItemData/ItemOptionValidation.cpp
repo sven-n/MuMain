@@ -22,6 +22,19 @@ bool IsAncientType(ItemOptionType type)
     return type == ItemOptionType::AncientOption || type == ItemOptionType::AncientBonus;
 }
 
+// Whether an item's attackType picks the definition at `index` (ItemOptionDatabase::FindAncientBonus).
+bool IsPickedByAttackType(const ItemOptionDatabase& options, size_t index)
+{
+    for (int attackType = 1; attackType <= static_cast<int>(AncientBonusNames.size()); ++attackType)
+    {
+        if (options.FindAncientBonus(attackType) == static_cast<int>(index))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 // A definition's problems name its file in Data/Items/Options and its place there.
 std::string DefinitionField(std::span<const ItemOptionDefinition> definitions, size_t index)
 {
@@ -222,8 +235,8 @@ void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const It
     const std::span<const ItemOptionDefinition> definitions = options.GetDefinitions();
     for (size_t index = 0; index < definitions.size(); ++index)
     {
-        // The item's attackType links the ancient bonus definitions, the item sets will link both ancient types.
-        if (!linked.contains(definitions[index].name) && !IsAncientType(definitions[index].type))
+        // The item's attackType links the four ancient bonus definitions of AncientBonusNames.
+        if (!linked.contains(definitions[index].name) && !IsPickedByAttackType(options, index))
         {
             issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definitions[index]),
                               ItemDataIssue::NoItem, ItemDataIssue::NoItem,
