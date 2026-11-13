@@ -538,9 +538,16 @@ private:
                                             [&](size_t i)
                                             {
                                                 const cgltf_node* parent = skin_->joints[i]->parent;
-                                                const auto parentJoint =
-                                                    parent ? skinJoints.find(parent) : skinJoints.end();
-                                                return parentJoint == skinJoints.end() || placed[parentJoint->second];
+                                                if (!parent)
+                                                {
+                                                    return true;
+                                                }
+                                                const auto parentJoint = skinJoints.find(parent);
+                                                if (parentJoint == skinJoints.end())
+                                                {
+                                                    return true;
+                                                }
+                                                return static_cast<bool>(placed[parentJoint->second]);
                                             });
             if (ready == extras.end())
             {
