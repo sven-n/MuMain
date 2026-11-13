@@ -165,17 +165,25 @@ struct FenrirScope
     }
 };
 
-// Clears the live sprites and effects when made and again when it ends, also when a REQUIRE stops the test, so no
-// effect outlives the characters it is attached to. Declare it after the CharacterScope, so it ends first.
+// Clears the live sprites, effects, particles and joints when made and again when it ends, also when a REQUIRE stops
+// the test, so none outlives the characters it is attached to. Declare it after the CharacterScope, so it ends first.
 struct SpawnsCleared
 {
     SpawnsCleared()
     {
-        FenrirScope::ClearSpawns();
+        Clear();
     }
     ~SpawnsCleared()
     {
+        Clear();
+    }
+    static void Clear()
+    {
         FenrirScope::ClearSpawns();
+        for (int i = 0; i < MAX_PARTICLES; ++i)
+            Particles[i].Live = false;
+        for (int i = 0; i < MAX_JOINTS; ++i)
+            Joints[i].Live = false;
     }
     SpawnsCleared(const SpawnsCleared&) = delete;
     SpawnsCleared& operator=(const SpawnsCleared&) = delete;
