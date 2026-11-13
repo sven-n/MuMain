@@ -8,6 +8,7 @@
 #include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
@@ -37,6 +38,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <cwchar>
 #include <functional>
 #include <memory>
 #include <new>
@@ -781,6 +783,34 @@ TEST_CASE("The defense-down debuff lights get their own color, as the attack-dow
     Render::Effects::StatDownDebuffLights::Update(o);
     CHECK(lightsOf(1).empty());
     CHECK(lightsOf(2).empty());
+}
+
+// While the hero is in a party, a Dark Lord outside it who uses the flash skill used to end his whole update during the
+// party link (AnimationFrame < 2), so his stat-down lights, set glow and other buff lights were skipped.
+TEST_CASE("A Dark Lord's flash outside the hero's party still updates his stat-down debuff lights [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    SpawnsCleared spawns;
+    CHARACTER& darkLord = scope.character();
+    OBJECT* o = &darkLord.Object;
+    darkLord.Class = CLASS_DARK_LORD;
+    std::wcscpy(darkLord.ID, L"DarkLord");
+    o->CurrentAction = PLAYER_SKILL_FLASH;
+    o->AnimationFrame = 1.f; // linking the party, before the gathering at 1.2
+    g_CharacterRegisterBuff(o, eDeBuff_AttackDown);
+
+    const int previousPartyNumber = PartyNumber;
+    const PARTY_t previousMember = Party[0];
+    PartyNumber = 1;
+    std::wcscpy(Party[0].Name, L"Someone");
+    Party[0].index = -1;
+
+    UpdateCharacterEffects();
+    const size_t lights = StatDownLightsOf(o, 1).size();
+
+    Party[0] = previousMember;
+    PartyNumber = previousPartyNumber;
+    CHECK(lights == 2);
 }
 
 TEST_CASE("Every spawn while drawing is a violation, outside a draw it is none [effects]")
