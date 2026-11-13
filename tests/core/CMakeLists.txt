@@ -87,6 +87,20 @@ mu_add_test(
         MuClient
 )
 
+# The adapters of a target without saved logins, shop downloads or CPU measurement. MuClient is linked on demand, so
+# its desktop adapters stay out: these define the same symbols first. Linking MuClient::MuClient (whole archive)
+# would pull the desktop adapters in too and fail with duplicate symbols.
+mu_add_test(
+    NAME test_platform_services_unavailable
+    SOURCES
+        test_platform_services_unavailable.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/Adapters/CredentialsUnavailable.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameShop/FileDownloader/Adapters/ShopDownloadUnavailable.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Adapters/CpuUsageUnavailable.cpp
+    LINK_LIBS
+        MuClient
+)
+
 mu_add_test(
     NAME test_teardown_stack
     SOURCES

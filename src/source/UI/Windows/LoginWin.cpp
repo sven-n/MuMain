@@ -26,9 +26,6 @@
 #include "UI/Windows/RememberPasswordPrompt.h"
 
 #include "Network/Server/ServerListManager.h"
-#ifdef _WIN32
-#include <dpapi.h>
-#endif
 
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"

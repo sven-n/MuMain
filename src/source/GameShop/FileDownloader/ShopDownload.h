@@ -1,6 +1,5 @@
-// libcurl-backed shop file downloader (issue #462).
-//
-// Downloads one shop catalog, script, or banner file through libcurl.
+// Downloads one shop catalog, script, or banner file. Each target compiles one adapter from Adapters/: libcurl, or
+// one that reports downloads as unavailable (DL_UNAVAILABLE).
 #pragma once
 
 #include <atomic>
@@ -8,7 +7,7 @@
 
 #include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
 
-class CurlFileDownloader
+class ShopDownload
 {
 public:
     // Downloads url to localPath, creating parent directories as needed.
@@ -17,10 +16,6 @@ public:
     // null, is polled during the transfer and aborts it once it becomes true.
     // Returns a WZResult using the same DL_/WZ_ codes as the WinINet
     // downloader so callers handle both paths identically.
-    static WZResult DownloadFile(const std::wstring& url,
-        const std::wstring& localPath,
-        const std::wstring& username,
-        const std::wstring& password,
-        bool passiveFtp,
-        const std::atomic_bool* pBreak);
+    static WZResult DownloadFile(const std::wstring& url, const std::wstring& localPath, const std::wstring& username,
+                                 const std::wstring& password, bool passiveFtp, const std::atomic_bool* pBreak);
 };

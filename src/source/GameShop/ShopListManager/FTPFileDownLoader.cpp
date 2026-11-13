@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "GameShop/FileDownloader/CurlFileDownloader.h"
+#include "GameShop/FileDownloader/ShopDownload.h"
 
 namespace
 {
@@ -46,7 +46,6 @@ std::wstring BuildFtpUrl(const std::wstring& host, unsigned short port, const st
 CFTPFileDownLoader::CFTPFileDownLoader() // OK
 {
     this->m_Break = 0;
-    this->m_pFileDownloader = NULL;
 }
 
 CFTPFileDownLoader::~CFTPFileDownLoader() // OK
@@ -79,7 +78,7 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type,
         const std::wstring localPath = localBase + (*it);
         const std::wstring url = BuildFtpUrl(strServerIP, PortNum, remoteBase + (*it));
 
-        result = CurlFileDownloader::DownloadFile(url, localPath, strUserName, strPWD, bPassiveMode, &this->m_Break);
+        result = ShopDownload::DownloadFile(url, localPath, strUserName, strPWD, bPassiveMode, &this->m_Break);
 
         if (this->m_Break != 0)
         {

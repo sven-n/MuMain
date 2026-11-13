@@ -18,7 +18,7 @@
 #include <filesystem>
 #include <iterator>
 
-#include "GameShop/FileDownloader/CurlFileDownloader.h"
+#include "GameShop/FileDownloader/ShopDownload.h"
 
 CBannerInfo::CBannerInfo() // OK
 {
@@ -68,7 +68,7 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
         if (bDonwLoad || !std::filesystem::exists(std::filesystem::path(this->BannerImagePath), error))
         {
             const std::atomic_bool cancel = false;
-            CurlFileDownloader::DownloadFile(this->BannerImageURL, this->BannerImagePath, L"", L"", true, &cancel);
+            ShopDownload::DownloadFile(this->BannerImageURL, this->BannerImagePath, L"", L"", true, &cancel);
         }
     }
 

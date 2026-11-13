@@ -19,9 +19,6 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
 
-#ifdef _WIN32
-#include <dpapi.h>
-#endif
 #include <clocale>
 #include <cstring>
 #include <filesystem>
@@ -926,6 +923,7 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
     return true;
 }
 
+// -1 on a target that can't measure the process's CPU use.
 double CPU_AVG = 0.0;
 static void RenderProfiledFrame()
 {
@@ -954,7 +952,13 @@ void RecordCpuUsage()
 
     while (!Destroy)
     {
-        double currentUsage = CpuUsage::Instance()->GetUsage() * 100.0;
+        const std::optional<double> sample = CpuUsage::Instance()->GetUsage();
+        if (!sample)
+        {
+            CPU_AVG = -1.0;
+            return;
+        }
+        double currentUsage = *sample * 100.0;
 
         currentUsage = std::clamp(currentUsage, 0.0, 100.0);
 

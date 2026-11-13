@@ -18,13 +18,8 @@ public:
 
     void Break();
 
-    FileDownloader* GetFileDownloader()
-    {
-        return m_pFileDownloader;
-    }
 
 private:
     bool CreateFolder(std::wstring strFilePath);
     std::atomic_bool m_Break;
-    FileDownloader* m_pFileDownloader;
 };
