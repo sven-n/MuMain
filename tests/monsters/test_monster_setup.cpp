@@ -549,10 +549,10 @@ TEST_CASE("Monster setup: a buff sent again keeps a monster's Crywolf states [mo
     CHECK_FALSE(altar->Object.m_BuffMap.isBuff(eBuff_CrywolfAltarEnable));
 }
 
-// 0x07 for a stat-down debuff gives a monster its pair of lights, also when it arrives again, and taking the debuff
-// removes them. Monsters get these lights only from this packet. The shipped buff table says it is a debuff, which
-// the packet's handler needs before it draws anything.
-TEST_CASE("Monster setup: a stat-down debuff sent twice gives one pair of lights [monsters][creation]")
+// 0x07 for a stat-down debuff gives a monster its pair of lights, and taking the debuff removes them. Monsters get
+// these lights only from this packet. The shipped buff table says it is a debuff, which the packet's handler needs
+// before it draws anything.
+TEST_CASE("Monster setup: 0x07 gives a monster the stat-down lights and takes them away [monsters][creation]")
 {
     using MonsterRecorder::CreationScope;
     const Data::Buffs::BuffsLoadResult shipped =
@@ -579,6 +579,8 @@ TEST_CASE("Monster setup: a stat-down debuff sent twice gives one pair of lights
 
     CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, true);
     CHECK(lights() == 2);
+    // A debuff the monster shows already adds nothing: ReceiveSkillStatus doesn't register it again. This doesn't reach
+    // the check in StatDownDebuffLights::Create, which guards the in-place re-create instead.
     CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, true);
     CHECK(lights() == 2);
 
