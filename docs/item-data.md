@@ -1039,8 +1039,9 @@ known difference from OpenMU) and the pendants 13/12, 13/25 and 13/27.
 Arrows and bolts have none, as on Season 6 and OpenMU.
 
 The Zen option is +30 %, Season 6's value; OpenMU has +40 %. "Level / 20"
-divides the hero's level, as the client did; OpenMU divides level plus
-master level (`totalLevel`).
+divides level plus master level (`totalLevel`), rounded down, as the
+Season 6 servers and OpenMU do; the client before divided the hero's level
+only, so a level 400 hero with 200 master levels now gets +30, not +20.
 
 "Excellent" (the name's prefix and green colour, the excellent +15
 durability, the tooltip state `excellent`, the ground label's excellent

@@ -934,7 +934,8 @@ TEST_CASE("The excellent options' tooltip lines come from their texts [data][ite
 }
 
 // The stat code adds an option with terms on the hero's attributes as the hero is now, not as the hero was when the
-// item was made: level / 20 grows with the hero. The other options add what the item was made with.
+// item was made: level / 20 grows with the hero and counts the master level. The other options add what the item was
+// made with.
 TEST_CASE("The stat code adds the excellent level / 20 as the hero is now [data][items]")
 {
     ClientDataScope client(ClientDirectory);
@@ -952,6 +953,12 @@ TEST_CASE("The stat code adds the excellent level / 20 as the hero is now [data]
     hero.Hero().Level = 85;
     CHECK(GameLogic::Items::GetCurrentSlotValue(kris, 0) == 4);
     CHECK(kris.SpecialValue[0] == 0);
+    // Level plus master level, rounded down: (85 + 30) / 20 for a master hero.
+    hero.Hero().Class = CLASS_GRANDMASTER;
+    const MASTER_LEVEL_VALUE savedMasterLevel = Master_Level_Data;
+    Master_Level_Data.nMLevel = 30;
+    CHECK(GameLogic::Items::GetCurrentSlotValue(kris, 0) == 5);
+    Master_Level_Data = savedMasterLevel;
     // The others: what the item was made with (2 % and attack speed 7).
     CHECK(GameLogic::Items::GetCurrentSlotValue(kris, 1) == 2);
     CHECK(GameLogic::Items::GetCurrentSlotValue(kris, 2) == 7);
