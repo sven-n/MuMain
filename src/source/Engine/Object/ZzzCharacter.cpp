@@ -4093,8 +4093,8 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
     WORD resumeSkill = 0;
     int resumeDamage = 0;
     BYTE resumeAttackFlag = 0;
-    if (last.time > 0.f && c->AttackTime > 0.f && c->AttackTime < last.time
-        && (int)last.time < g_iLimitAttackTime && last.skill != 0)
+    if (last.time > 0.f && c->AttackTime > 0.f && c->AttackTime < last.time && (int)last.time < g_iLimitAttackTime &&
+        last.skill != 0)
     {
         resumeAttack = true;
         resumeAttackTime = c->AttackTime;
