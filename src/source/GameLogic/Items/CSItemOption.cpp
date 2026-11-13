@@ -584,33 +584,42 @@ bool CSItemOption::IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill)
 
 namespace
 {
-// Adds the item's ancient bonus to the stat its definition's attribute raises (its effect); an attribute the client
-// doesn't add adds nothing.
-void AddAncientBonus(const ITEM& item, std::uint16_t* strength, std::uint16_t* dexterity, std::uint16_t* energy,
-                     std::uint16_t* vitality)
+// Adds `value` to the stat `effect` raises (AT_SET_OPTION_IMPROVE_STRENGTH to AT_SET_OPTION_IMPROVE_CHARISMA), as the
+// set options and the ancient bonus do; another effect adds nothing.
+void AddToStat(int effect, int value, std::uint16_t* strength, std::uint16_t* dexterity, std::uint16_t* energy,
+               std::uint16_t* vitality, std::uint16_t* charisma)
 {
-    const std::optional<GameLogic::Items::AncientBonus> bonus = GameLogic::Items::FindAncientBonus(item);
-    if (!bonus)
-    {
-        return;
-    }
-    const auto value = static_cast<std::uint16_t>(bonus->value);
-    switch (bonus->effect)
+    const auto added = static_cast<std::uint16_t>(value);
+    switch (effect)
     {
     case AT_SET_OPTION_IMPROVE_STRENGTH:
-        *strength += value;
+        *strength += added;
         break;
     case AT_SET_OPTION_IMPROVE_DEXTERITY:
-        *dexterity += value;
+        *dexterity += added;
         break;
     case AT_SET_OPTION_IMPROVE_ENERGY:
-        *energy += value;
+        *energy += added;
         break;
     case AT_SET_OPTION_IMPROVE_VITALITY:
-        *vitality += value;
+        *vitality += added;
+        break;
+    case AT_SET_OPTION_IMPROVE_CHARISMA:
+        *charisma += added;
         break;
     default:
         break;
+    }
+}
+
+// Adds the item's ancient bonus to the stat its definition's attribute raises (its effect); an attribute the client
+// doesn't add adds nothing.
+void AddAncientBonus(const ITEM& item, std::uint16_t* strength, std::uint16_t* dexterity, std::uint16_t* energy,
+                     std::uint16_t* vitality, std::uint16_t* charisma)
+{
+    if (const std::optional<GameLogic::Items::AncientBonus> bonus = GameLogic::Items::FindAncientBonus(item))
+    {
+        AddToStat(bonus->effect, bonus->value, strength, dexterity, energy, vitality, charisma);
     }
 }
 } // namespace
@@ -650,7 +659,7 @@ void CSItemOption::getAllAddState(std::uint16_t* Strength, std::uint16_t* Dexter
             continue;
         }
 
-        AddAncientBonus(*item, Strength, Dexterity, Energy, Vitality);
+        AddAncientBonus(*item, Strength, Dexterity, Energy, Vitality, Charisma);
     }
 
     AddStatsBySetOptions(Strength, Dexterity, Energy, Vitality, Charisma);
@@ -669,31 +678,7 @@ void    CSItemOption::AddStatsBySetOptions(std::uint16_t* Strength, std::uint16_
                 continue;
             }
 
-            switch (option.OptionNumber)
-            {
-            case AT_SET_OPTION_IMPROVE_STRENGTH:
-                *Strength += option.Value;
-                break;
-
-            case AT_SET_OPTION_IMPROVE_DEXTERITY:
-                *Dexterity += option.Value;
-                break;
-
-            case AT_SET_OPTION_IMPROVE_ENERGY:
-                *Energy += option.Value;
-                break;
-
-            case AT_SET_OPTION_IMPROVE_VITALITY:
-                *Vitality += option.Value;
-                break;
-
-            case AT_SET_OPTION_IMPROVE_CHARISMA:
-                *Charisma += option.Value;
-                break;
-            default:
-                // other options are not handled here.
-                break;
-            }
+            AddToStat(option.OptionNumber, option.Value, Strength, Dexterity, Energy, Vitality, Charisma);
         }
     }
 }
@@ -722,7 +707,7 @@ void CSItemOption::getAllAddOptionStatesbyCompare(std::uint16_t* Strength, std::
             continue;
         }
 
-        AddAncientBonus(*item, Strength, Dexterity, Energy, Vitality);
+        AddAncientBonus(*item, Strength, Dexterity, Energy, Vitality, Charisma);
     }
 
     AddStatsBySetOptions(Strength, Dexterity, Energy, Vitality, Charisma);
