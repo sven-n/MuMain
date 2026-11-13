@@ -24,6 +24,7 @@
 #include "UI/Chat/ChatInput.h"
 #include "GameLogic/Combat/ClassAttack.h"
 #include "GameLogic/Combat/SkillCast.h"
+#include "GameLogic/Combat/SkillAim.h"
 #include "GameLogic/Combat/SkillExecution.h"
 #include "Core/Input/ImeInput.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -2671,12 +2672,14 @@ void Attack(CHARACTER* c)
             MouseRButtonPush = false;
             Success = true;
         }
-        if (
-            g_pOption->IsAutoAttack()
-            && gMapManager.WorldActive != WD_6STADIUM
-            && gMapManager.InChaosCastle() == false
-            && Attacking == 2
-            && SelectedCharacter != -1)
+        GameLogic::Combat::SkillAim::AutoAttackState autoAttack;
+        autoAttack.optionOn = g_pOption->IsAutoAttack();
+        autoAttack.mapAllowsIt = gMapManager.WorldActive != WD_6STADIUM && !gMapManager.InChaosCastle();
+        autoAttack.afterSkillCast = Attacking == 2;
+        autoAttack.hasSelection = SelectedCharacter != -1;
+        autoAttack.selectionAttackable = autoAttack.hasSelection && CheckAttack();
+        autoAttack.skill = Skill;
+        if (GameLogic::Combat::SkillAim::RepeatsAutoAttack(autoAttack))
         {
             Success = true;
         }

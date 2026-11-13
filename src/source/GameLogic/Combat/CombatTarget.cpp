@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameLogic/Combat/CombatTarget.h"
+#include "GameLogic/Combat/SkillAim.h"
 
 // Includes mirror ZzzInterface.cpp, the unit this was extracted from.
 #include "Core/Platform/Imm.h"
@@ -50,26 +51,53 @@ extern bool SelectFlag;
 
 namespace GameLogic::Combat
 {
-bool CheckTarget(CHARACTER* c)
+namespace
+{
+// A direction skill only takes the direction from its aim, so an aim beyond the
+// skill's range is pulled back along it instead of making the hero walk there.
+void PullDirectionAimIntoRange(CHARACTER* c, int skill, float distance)
+{
+    if (c != Hero || !SkillAim::IsAimedByDirection(skill))
+    {
+        return;
+    }
+    SkillAim::PullIntoRange(c->Object.Position, c->TargetPosition, distance, TERRAIN_SCALE);
+}
+
+void SetTargetTile(const CHARACTER* c)
+{
+    TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
+    TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
+}
+} // namespace
+
+bool CheckTarget(CHARACTER* c, int skill, float distance)
 {
     if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
     {
-        TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
-        TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
         VectorCopy(CharactersClient[SelectedCharacter].Object.Position, c->TargetPosition);
+        // A character that can't be attacked only gives a direction skill its direction.
+        if (!CheckAttack())
+        {
+            PullDirectionAimIntoRange(c, skill, distance);
+        }
+        SetTargetTile(c);
         return true;
     }
-    else
+
+    RenderTerrain(true);
+    if (!SelectFlag)
     {
-        RenderTerrain(true);
-        if (SelectFlag)
-        {
-            VectorCopy(CollisionPosition, c->TargetPosition);
-            TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
-            TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
-            return true;
-        }
+        return false;
     }
-    return false;
+    AimAtGround(c, skill, distance, CollisionPosition);
+    return true;
+}
+
+void AimAtGround(CHARACTER* c, int skill, float distance, const float ground[3])
+{
+    VectorCopy(ground, c->TargetPosition);
+    PullDirectionAimIntoRange(c, skill, distance);
+    SetTargetTile(c);
 }
 }
