@@ -205,7 +205,8 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                  "links excellent options, but its excellent byte holds its wing options or a horn's kind, "
                  "or nothing: no horn is excellent"});
         }
-        // Until the item sets link them (phase 10), the item's attackType picks its ancient bonus and set options.
+        // Until the item sets link them (phase 10), the item's attackType picks its ancient bonus; its set options come
+        // from its set (the ancient byte's set number).
         const bool linksAncient = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
                                               { return IsAncientType(options.Get(link).type); });
         if (linksAncient)
