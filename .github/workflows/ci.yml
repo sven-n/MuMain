@@ -733,7 +733,8 @@ jobs:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
-      CCACHE_MAXSIZE: 1G
+      # The client twice: the player build, and the port-like target's position-independent objects.
+      CCACHE_MAXSIZE: 2G
       # What Install build tools installs. Find apt packages lists the files apt fetches for them.
       APT_PACKAGES: >-
         cmake ninja-build gcc g++ ccache
@@ -912,6 +913,28 @@ jobs:
               exit 1
             fi
           done
+
+      # A target file shaped like a port's (docs/build/README.md, Targets) still configures and builds: it needs
+      # neither OpenSSL nor libcurl, brings its own network library adapter, and builds SDL and the game as shared
+      # libraries, so every static library in the game must be position independent. From the sources fetched above;
+      # before the trim, so the compiler cache keeps its objects too.
+      - name: Build a port-like target
+        run: |
+          cmake --preset linux-x64 -B out/build/port-like \
+            "-DMU_TARGET_FILE=${{ github.workspace }}/tests/cmake/port-like-target.cmake" \
+            -DCMAKE_DISABLE_FIND_PACKAGE_OpenSSL=ON \
+            -DCMAKE_DISABLE_FIND_PACKAGE_CURL=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DBUILD_TESTING=OFF \
+            -DENABLE_EDITOR=OFF \
+            -DMU_COPY_RUNTIME_ASSETS=OFF \
+            "-DFETCHCONTENT_SOURCE_DIR_GLM=${{ github.workspace }}/out/build/linux-ci/_deps/glm-src" \
+            "-DFETCHCONTENT_SOURCE_DIR_MINIAUDIO=${{ github.workspace }}/out/build/linux-ci/_deps/miniaudio-src" \
+            "-DFETCHCONTENT_SOURCE_DIR_SDL3_IMAGE=${{ github.workspace }}/out/build/linux-ci/_deps/sdl3_image-src" \
+            "-DFETCHCONTENT_SOURCE_DIR_SDL3_TTF=${{ github.workspace }}/out/build/linux-ci/_deps/sdl3_ttf-src" \
+            "-DFETCHCONTENT_SOURCE_DIR_SPDLOG=${{ github.workspace }}/out/build/linux-ci/_deps/spdlog-src"
+          cmake --build out/build/port-like --config Release --target Main
 
       - name: Trim compiler cache
         # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer

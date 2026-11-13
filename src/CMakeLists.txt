@@ -16,14 +16,81 @@ cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH REPO_ROOT)
 
 include("${REPO_ROOT}/cmake/EnsureSubmodule.cmake")
 include("${REPO_ROOT}/cmake/StdafxPrecompiledHeader.cmake")
+include("${REPO_ROOT}/cmake/MuDependencies.cmake")
+
+# Each target's build choices live in one file, cmake/targets/<target>.cmake (docs/build/README.md, Targets): its
+# platform service adapters, its dependencies, its system libraries and its network library. A port adds its own file.
+set(MU_TARGET_NAMES_Windows windows)
+set(MU_TARGET_NAMES_Linux linux)
+set(MU_TARGET_NAMES_Darwin macos)
+set(MU_TARGET_NAMES_Android android)
+set(MU_TARGET_NAMES_Emscripten web)
+set(MU_TARGET_NAMES_iOS ios)
+set(MU_TARGET "${MU_TARGET_NAMES_${CMAKE_SYSTEM_NAME}}")
+if(NOT MU_TARGET)
+  string(TOLOWER "${CMAKE_SYSTEM_NAME}" MU_TARGET)
+endif()
+set(MU_TARGET_FILE "${REPO_ROOT}/cmake/targets/${MU_TARGET}.cmake" CACHE FILEPATH
+  "The target file: cmake/targets/<target>.cmake by default, chosen from CMAKE_SYSTEM_NAME")
+if(NOT EXISTS "${MU_TARGET_FILE}")
+  message(FATAL_ERROR "No target file for ${CMAKE_SYSTEM_NAME}: add cmake/targets/${MU_TARGET}.cmake "
+    "(docs/build/README.md, Targets) or point MU_TARGET_FILE at one.")
+endif()
+# What a target file may change; desktop defaults.
+set(MU_SDL_SHARED OFF)
+set(MU_APP_LIBRARY OFF)
+set(MU_APP_OUTPUT_NAME "")
+set(MU_TARGET_SYSTEM_LIBRARIES "")
+set(MU_DOTNET_USES_LIBRARY_PATH FALSE)
+set(MU_DOTNET_PKG_MODULES "")
+# Where the network library's exports come from: "library" (the NativeAOT library, through
+# Dotnet/SymbolSources/ManagedLibrarySource.cpp), or a name of the target's own, whose adapter source the target file
+# gives in MU_TARGET_SYMBOL_ADAPTER.
+set(MU_MANAGED_SYMBOL_SOURCE "library" CACHE STRING
+  "Where the network library's exports come from: library (the NativeAOT library) or the target file's own adapter")
+set(MU_TARGET_SYMBOL_ADAPTER "")
+include("${MU_TARGET_FILE}")
+set(_mu_required MU_PLATFORM_SOURCES MU_TARGET_ADAPTERS MU_TARGET_DEPENDENCIES)
+if(MU_MANAGED_SYMBOL_SOURCE STREQUAL "library")
+  list(APPEND _mu_required MU_MANAGED_LIBRARY_FILE MU_MANAGED_LIBRARY_BY_NAME MU_DOTNET_RID MU_DOTNET_PLATFORM)
+elseif(NOT MU_TARGET_SYMBOL_ADAPTER)
+  message(FATAL_ERROR "${MU_TARGET_FILE} takes the network library's exports from '${MU_MANAGED_SYMBOL_SOURCE}' "
+    "but names no adapter for it: set MU_TARGET_SYMBOL_ADAPTER (docs/build/README.md, Targets).")
+endif()
+foreach(_mu_variable IN LISTS _mu_required)
+  if(NOT DEFINED ${_mu_variable})
+    message(FATAL_ERROR "${MU_TARGET_FILE} does not set ${_mu_variable} (docs/build/README.md, Targets).")
+  endif()
+endforeach()
+# Only ManagedLibrarySource.cpp reads these.
+if(NOT DEFINED MU_MANAGED_LIBRARY_FILE)
+  set(MU_MANAGED_LIBRARY_FILE "")
+  set(MU_MANAGED_LIBRARY_BY_NAME 0)
+endif()
+message(STATUS "Target: ${MU_TARGET} (${MU_TARGET_FILE})")
+
+# A target that builds the game as a shared library needs every static library linked into it position independent,
+# spdlog included, which the root CMakeLists.txt creates before this file.
+if(MU_APP_LIBRARY)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  if(TARGET spdlog)
+    set_target_properties(spdlog PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  endif()
+endif()
 
 mu_ensure_submodule("ThirdParty/SDL"
   INDICATOR "CMakeLists.txt"
   URL "https://github.com/libsdl-org/SDL.git")
 
-# SDL3 — static link, no tests, no install
-set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-set(SDL_STATIC ON CACHE BOOL "" FORCE)
+# SDL3 — static link unless the target needs it shared (an Android app loads it as its own library), no tests, no
+# install
+if(MU_SDL_SHARED)
+  set(SDL_SHARED ON CACHE BOOL "" FORCE)
+  set(SDL_STATIC OFF CACHE BOOL "" FORCE)
+else()
+  set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+  set(SDL_STATIC ON CACHE BOOL "" FORCE)
+endif()
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
 set(SDL_TESTS OFF CACHE BOOL "" FORCE)
 set(SDL_INSTALL OFF CACHE BOOL "" FORCE)
@@ -213,51 +280,23 @@ list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\]AppMain\\.cpp$")
 # Where the network library's exports come from: one adapter per target, compiled into the executable beside the
 # entry files rather than into the library, so a target or a test can bring its own instead.
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Dotnet[/\\]SymbolSources[/\\]")
-set(MU_MANAGED_SYMBOL_SOURCE "library" CACHE STRING
-  "Where the network library's exports come from: library (the NativeAOT library)")
-set_property(CACHE MU_MANAGED_SYMBOL_SOURCE PROPERTY STRINGS library)
 if(MU_MANAGED_SYMBOL_SOURCE STREQUAL "library")
-  set(MU_MANAGED_SYMBOL_ADAPTER "${CMAKE_CURRENT_SOURCE_DIR}/source/Dotnet/SymbolSources/ManagedLibrarySource.cpp"
-    CACHE INTERNAL "The adapter the executable and the tests that use the real library compile")
+  set(_mu_symbol_adapter "${CMAKE_CURRENT_SOURCE_DIR}/source/Dotnet/SymbolSources/ManagedLibrarySource.cpp")
 else()
-  message(FATAL_ERROR "MU_MANAGED_SYMBOL_SOURCE=${MU_MANAGED_SYMBOL_SOURCE} has no adapter")
+  set(_mu_symbol_adapter "${MU_TARGET_SYMBOL_ADAPTER}")
 endif()
-# The library's file, and whether the loader finds it by bare name (the executable's folder on Windows, the app's
-# libraries on Android) or needs it beside the executable (Linux, macOS).
-if(ANDROID)
-  set(MU_MANAGED_LIBRARY_FILE "libMUnique.Client.Library.so")
-else()
-  set(MU_MANAGED_LIBRARY_FILE "MUnique.Client.Library${CMAKE_SHARED_LIBRARY_SUFFIX}")
-endif()
-if(WIN32 OR ANDROID)
-  set(MU_MANAGED_LIBRARY_BY_NAME 1)
-else()
-  set(MU_MANAGED_LIBRARY_BY_NAME 0)
-endif()
-
-# Platform services (saved logins, shop downloads, CPU use) have one adapter per target in an Adapters/ folder beside
-# their header; the library compiles the target's choice.
+set(MU_MANAGED_SYMBOL_ADAPTER "${_mu_symbol_adapter}"
+  CACHE INTERNAL "The adapter the executable and the tests that use the target's network library compile")
+# Platform services (saved logins, shop downloads, CPU use) have one adapter per platform in an Adapters/ folder beside
+# their header; the library compiles the ones the target file names. Core/Platform/win32 and posix hold the rest of the
+# platform code; the target file names one.
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]src[/\\]source[/\\](.+[/\\])?Adapters[/\\]")
-set(MU_SERVICE_ADAPTERS
-  "source/Core/Platform/Adapters/OpenSslCredentials.cpp"
-  "source/GameShop/FileDownloader/Adapters/CurlShopDownload.cpp")
-if(WIN32)
-  list(APPEND MU_SERVICE_ADAPTERS
-    "source/Core/Platform/Adapters/CredentialHostWin32.cpp"
-    "source/Core/Utilities/Adapters/CpuUsageWin32.cpp")
-else()
-  list(APPEND MU_SERVICE_ADAPTERS
-    "source/Core/Platform/Adapters/CredentialHostPosix.cpp"
-    "source/Core/Utilities/Adapters/CpuUsagePosix.cpp")
-endif()
-list(TRANSFORM MU_SERVICE_ADAPTERS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
-list(APPEND MU_CLIENT_SOURCES ${MU_SERVICE_ADAPTERS})
-
-if(WIN32)
-  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]posix[/\\]")
-else()
-  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]win32[/\\]")
-endif()
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\](win32|posix)[/\\]")
+set(MU_SERVICE_ADAPTERS ${MU_TARGET_ADAPTERS})
+list(TRANSFORM MU_SERVICE_ADAPTERS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/source/")
+file(GLOB MU_PLATFORM_SOURCE_FILES CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Core/Platform/${MU_PLATFORM_SOURCES}/*.cpp")
+list(APPEND MU_CLIENT_SOURCES ${MU_SERVICE_ADAPTERS} ${MU_PLATFORM_SOURCE_FILES})
 
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\]Renderer[/\\]MuRenderer\\.cpp$")
 
@@ -363,43 +402,15 @@ if(MSVC)
 endif()
 target_compile_definitions(MuClient PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_link_libraries(MuClient PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
-find_package(OpenSSL REQUIRED COMPONENTS Crypto)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND MU_LINK_SDL_PLATFORM_BACKENDS)
   # SDL dlopen()s libvulkan.so.1 even with this option. Linking the loader into Main (below)
   # records its directory in Main's RUNPATH, which that dlopen() searches, and makes it a
   # DT_NEEDED entry: a missing loader then stops Main at start-up, and ldd lists it.
   find_package(Vulkan REQUIRED)
 endif()
-target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
-# Crypto++: the ciphers of version 14 BMD models (Render/Models/BmdModulusCipher), linked statically so Main
-# needs no Crypto++ library at run time (the release builds ship none). vcpkg ships a CMake package with a
-# static library; Debian/Ubuntu (libcrypto++-dev) and Homebrew (cryptopp) ship pkg-config files and install
-# the static archive next to the shared one, which pkg-config would pick.
-# MuCryptopp names whichever one was found, for MuClient and the tests.
-add_library(MuCryptopp INTERFACE)
-find_package(cryptopp CONFIG QUIET)
-if(MSVC AND NOT TARGET cryptopp::cryptopp)
-  message(FATAL_ERROR "Crypto++ not found: install vcpkg's cryptopp (vcpkg.json lists it).")
-endif()
-if(TARGET cryptopp::cryptopp)
-  # Global, so the tests' directories can resolve it through MuCryptopp.
-  set_target_properties(cryptopp::cryptopp PROPERTIES IMPORTED_GLOBAL TRUE)
-  target_link_libraries(MuCryptopp INTERFACE cryptopp::cryptopp)
-else()
-  find_package(PkgConfig REQUIRED)
-  pkg_search_module(CRYPTOPP REQUIRED libcrypto++ libcryptopp)
-  find_library(MU_CRYPTOPP_STATIC_LIBRARY
-    NAMES libcrypto++.a libcryptopp.a
-    HINTS ${CRYPTOPP_LIBRARY_DIRS}
-  )
-  if(NOT MU_CRYPTOPP_STATIC_LIBRARY)
-    message(FATAL_ERROR "Crypto++'s static library (libcrypto++.a or libcryptopp.a) not found in "
-                        "'${CRYPTOPP_LIBRARY_DIRS}': install libcrypto++-dev or Homebrew's cryptopp.")
-  endif()
-  target_include_directories(MuCryptopp INTERFACE ${CRYPTOPP_INCLUDE_DIRS})
-  target_link_libraries(MuCryptopp INTERFACE "${MU_CRYPTOPP_STATIC_LIBRARY}")
-endif()
-target_link_libraries(MuClient PRIVATE MuCryptopp)
+# The target file's dependencies (cmake/MuDependencies.cmake) and system libraries.
+mu_link_target_dependencies(MuClient)
+target_link_libraries(MuClient PUBLIC ${MU_TARGET_SYSTEM_LIBRARIES})
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
 endif()
@@ -428,10 +439,6 @@ target_compile_definitions(MuClient PUBLIC
   RMLUI_SDL_GPU_NUM_MSAA_SAMPLES=${RMLUI_SDL_GPU_NUM_MSAA_SAMPLES}
 )
 
-# The in-game shop downloader uses libcurl on every platform.
-find_package(CURL REQUIRED)
-target_link_libraries(MuClient PUBLIC CURL::libcurl)
-
 # The engine relies on self-registering globals whose constructors get
 # silently dropped if the linker only pulls archive members on demand, so
 # every consumer must link MuClient with WHOLE_ARCHIVE. Rather than make each
@@ -446,41 +453,21 @@ add_library(MuClient::MuClient ALIAS MuClient_whole)
 
 # Thin executable: platform bootstrap only, links the engine library. The
 # executable shell's sources live under source/App/ (see issue #346). Every
-# desktop platform enters through SDL's main callbacks (AppMain.cpp), which drive
-# the shared bootstrap and game loop in Winmain.cpp one frame at a time.
-#
-# Unsupported platforms fail loudly rather than silently selecting the Linux
-# entry: the mobile targets need a different entry model and a renderer port
-# (the engine uses fixed-function desktop OpenGL), so quietly compiling a
-# desktop main() for them would be wrong. iOS is matched before the generic
-# APPLE/macOS branch, and Android before the generic UNIX/Linux branch.
+# platform enters through SDL's main callbacks (AppMain.cpp), which drive
+# the shared bootstrap and game loop in Winmain.cpp one frame at a time. A target
+# whose platform loads the game as a library (Android's SDLActivity loads
+# libmain.so) sets MU_APP_LIBRARY and MU_APP_OUTPUT_NAME in its target file.
 set(MU_APP_ENTRY_SOURCES
   "source/App/Platform/AppMain.cpp"
   "source/App/Platform/Windows/Winmain.cpp"
   "${MU_MANAGED_SYMBOL_ADAPTER}")
-if (WIN32)
-  set(MU_APP_ENTRY ${MU_APP_ENTRY_SOURCES})
-elseif (CMAKE_SYSTEM_NAME STREQUAL "iOS")
-  message(FATAL_ERROR "iOS is not a supported build target yet: it needs an "
-    "OpenGL ES/Metal renderer port and a touch UI, and distribution is App "
-    "Store restricted. When that work starts, add source/App/Platform/iOS/ "
-    "and replace this branch.")
-elseif (APPLE)
-  set(MU_APP_ENTRY ${MU_APP_ENTRY_SOURCES})
-elseif (ANDROID)
-  message(FATAL_ERROR "Android is not a supported build target yet: it needs "
-    "an OpenGL ES renderer port, and its entry point is android_main via "
-    "native_app_glue built as a shared library, not an executable. When that "
-    "work starts, add source/App/Platform/Android/ and replace this branch.")
-elseif (UNIX)
-  set(MU_APP_ENTRY ${MU_APP_ENTRY_SOURCES})
-else()
-  message(FATAL_ERROR "No executable entry point defined for this platform "
-    "(CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}). Add source/App/Platform/<OS>/ "
-    "and a branch above.")
-endif()
+set(MU_APP_ENTRY ${MU_APP_ENTRY_SOURCES})
 
-if (APPLE)
+if (MU_APP_LIBRARY)
+  add_library(Main SHARED
+    "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
+  )
+elseif (APPLE)
   set(MU_MACOS_ICON "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Platform/macOS/MuMain.icns")
   add_executable(Main MACOSX_BUNDLE
     "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
@@ -499,6 +486,9 @@ else()
   add_executable(Main
     "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
   )
+endif()
+if (MU_APP_OUTPUT_NAME)
+  set_target_properties(Main PROPERTIES OUTPUT_NAME "${MU_APP_OUTPUT_NAME}")
 endif()
 target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)
@@ -629,31 +619,6 @@ add_custom_command(TARGET Main POST_BUILD
     "$<TARGET_FILE_DIR:Main>/shaders"
   VERBATIM
 )
-
-# Skeleton Linux-native linkage. This intentionally depends only on
-# ubiquitous system libraries so we can focus on getting the project to
-# compile; more platform-specific adjustments will follow as we iterate.
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  find_library(TURBOJPEG_LIBRARY NAMES turbojpeg REQUIRED)
-  target_link_libraries(MuClient PUBLIC
-    pthread
-    dl
-    m
-    ${TURBOJPEG_LIBRARY}
-  )
-endif()
-
-if (APPLE)
-  find_library(TURBOJPEG_LIBRARY NAMES turbojpeg
-    PATHS
-      "/opt/homebrew/lib"
-      "/usr/local/lib"
-    REQUIRED
-  )
-  target_link_libraries(MuClient PUBLIC
-    ${TURBOJPEG_LIBRARY}
-  )
-endif()
 
 # --- .NET / NuGet infrastructure (shared by wire-sizes codegen and ClientLibrary)
 # Lifted up here so the wire-sizes block below can resolve the OpenMU packet
@@ -851,39 +816,6 @@ if (MSVC)
     WIN32
     _WINDOWS
   )
-
-  # Link against Windows system libraries and local static libs
-  # Use architecture-specific library directories
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(LIB_ARCH_DIR "x64")
-  else()
-    set(LIB_ARCH_DIR "x86")
-  endif()
-
-  target_link_directories(MuClient PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/${LIB_ARCH_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib"  # Fallback for arch-independent libs
-  )
-
-  target_link_libraries(MuClient PUBLIC
-    imm32
-    vfw32
-    dxguid
-    opengl32
-    glu32
-    winmm
-    ws2_32
-    version
-    shlwapi
-    crypt32
-    wininet
-    urlmon
-    turbojpeg-static
-  )
-  # The checked-in turbojpeg-static.lib (x64 and x86) was built against the static CRT and asks for libcmt.lib,
-  # while the game and vcpkg's libraries use the DLL CRT. Without libcmt, its objects use the DLL CRT too, and the
-  # linker no longer warns about two runtimes (LNK4098).
-  target_link_options(MuClient PUBLIC /NODEFAULTLIB:libcmt.lib)
 endif()
 
 if (MSVC)
@@ -945,6 +877,10 @@ if (DOTNET_EXECUTABLE)
   # and only need a working dotnet on the host - so gate the ClientLibrary
   # step separately rather than clearing DOTNET_EXECUTABLE altogether.
   set(DOTNET_CAN_BUILD_CLIENT_LIBRARY TRUE)
+  # Only a target whose network library is the NativeAOT library (MU_MANAGED_SYMBOL_SOURCE) builds it.
+  if (NOT MU_MANAGED_SYMBOL_SOURCE STREQUAL "library")
+    set(DOTNET_CAN_BUILD_CLIENT_LIBRARY FALSE)
+  endif()
   if (NOT DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(WARNING "Found Linux dotnet but target is Windows. "
       "Cross-OS Native AOT is not supported. MUnique.Client.Library.dll will NOT be built. "
@@ -956,15 +892,9 @@ if (DOTNET_EXECUTABLE)
   message(STATUS "Found .NET SDK: ${DOTNET_EXECUTABLE}")
 
   # 1. Define the output path. Native AOT emits a platform-native shared
-  # library: .dll on Windows, .so on Linux (the runtime client dlopen's it by
+  # library, under the name the target file gives (the client loads it by
   # this name).
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(DOTNET_LIB_NAME "MUnique.Client.Library.so")
-  elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(DOTNET_LIB_NAME "MUnique.Client.Library.dylib")
-  else()
-    set(DOTNET_LIB_NAME "MUnique.Client.Library.dll")
-  endif()
+  set(DOTNET_LIB_NAME "${MU_MANAGED_LIBRARY_FILE}")
   set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/${DOTNET_LIB_NAME}")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
@@ -1004,36 +934,12 @@ if (DOTNET_EXECUTABLE)
 
   # 3. Build to temp directory with Native AOT, then copy to build and bin directories
   # Override environment variables to avoid issues with umlauts in Windows username
-  # Determine the runtime identifier from the target OS and pointer width. Native
-  # AOT has no linux-x86 target, so 32-bit is Windows-only.
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(DOTNET_RID "linux-x64")
-    set(DOTNET_PLATFORM "x64")
-    # The PreBuild XSLT step regenerates files using Windows-style backslash
-    # paths and corrupts them on Linux; the generated sources are committed, so
-    # skip it (ci=true) and use the checked-in output.
-    set(DOTNET_EXTRA_ARGS "-p:ci=true")
-    message(STATUS ".NET Client Library will build for linux-x64")
-  elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    if (CMAKE_OSX_ARCHITECTURES MATCHES "(^|;)arm64($|;)" OR CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64)$")
-      set(DOTNET_RID "osx-arm64")
-      set(DOTNET_PLATFORM "arm64")
-    else()
-      set(DOTNET_RID "osx-x64")
-      set(DOTNET_PLATFORM "x64")
-    endif()
-    set(DOTNET_EXTRA_ARGS "-p:ci=true")
+  # The runtime identifier and its arguments come from the target file.
+  set(DOTNET_RID "${MU_DOTNET_RID}")
+  set(DOTNET_PLATFORM "${MU_DOTNET_PLATFORM}")
+  set(DOTNET_EXTRA_ARGS "${MU_DOTNET_EXTRA_ARGS}")
+  if (DOTNET_CAN_BUILD_CLIENT_LIBRARY)
     message(STATUS ".NET Client Library will build for ${DOTNET_RID}")
-  elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(DOTNET_RID "win-x64")
-    set(DOTNET_PLATFORM "x64")
-    set(DOTNET_EXTRA_ARGS "")
-    message(STATUS ".NET Client Library will build for win-x64 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
-  else()
-    set(DOTNET_RID "win-x86")
-    set(DOTNET_PLATFORM "x86")
-    set(DOTNET_EXTRA_ARGS "")
-    message(STATUS ".NET Client Library will build for win-x86 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   endif()
 
   if (DOTNET_CAN_BUILD_CLIENT_LIBRARY)
@@ -1046,7 +952,7 @@ if (DOTNET_EXECUTABLE)
       "TMP=${DOTNET_TEMP_DIR_NATIVE}"
     )
 
-    if (UNIX)
+    if (MU_DOTNET_USES_LIBRARY_PATH)
       set(MU_NATIVE_AOT_LIBRARY_PATH "" CACHE STRING
         "Additional Native AOT linker search directories")
       set(MU_NATIVE_AOT_LIBRARY_DIRS ${MU_NATIVE_AOT_LIBRARY_PATH})
@@ -1056,16 +962,17 @@ if (DOTNET_EXECUTABLE)
         list(APPEND MU_NATIVE_AOT_LIBRARY_DIRS "${MU_OPENSSL_LIBRARY_DIR}")
       endif()
 
-      if (APPLE)
+      # Libraries Native AOT's runtime links on this target (the target file's MU_DOTNET_PKG_MODULES).
+      if (MU_DOTNET_PKG_MODULES)
         find_package(PkgConfig QUIET)
         if (PkgConfig_FOUND)
-          pkg_check_modules(MU_BROTLI QUIET libbrotlienc libbrotlidec libbrotlicommon)
-          list(APPEND MU_NATIVE_AOT_LIBRARY_DIRS ${MU_BROTLI_LIBRARY_DIRS})
+          pkg_check_modules(MU_DOTNET_PKG QUIET ${MU_DOTNET_PKG_MODULES})
+          list(APPEND MU_NATIVE_AOT_LIBRARY_DIRS ${MU_DOTNET_PKG_LIBRARY_DIRS})
         endif()
-        if (NOT MU_BROTLI_FOUND AND NOT MU_NATIVE_AOT_LIBRARY_PATH)
+        if (NOT MU_DOTNET_PKG_FOUND AND NOT MU_NATIVE_AOT_LIBRARY_PATH)
           message(FATAL_ERROR
-            "Native AOT requires Brotli libraries. Install Brotli or set "
-            "MU_NATIVE_AOT_LIBRARY_PATH to its library directory.")
+            "Native AOT needs ${MU_DOTNET_PKG_MODULES} on the ${MU_TARGET} target. Install them (Brotli) or set "
+            "MU_NATIVE_AOT_LIBRARY_PATH to their library directory.")
         endif()
       endif()
 
@@ -1350,82 +1257,6 @@ add_custom_target(CheckLayoutTransformUsers ALL
   VERBATIM
 )
 add_dependencies(Main CheckLayoutTransformUsers)
-
-# MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
-# system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.
-# For turbojpeg and wzAudio we link against the logically named libraries,
-# which must be provided as MinGW-compatible .a import libraries.
-if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-mingw32")
-  target_link_directories(MuClient PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib"
-  )
-
-  set(MU_TURBOJPEG_STATIC_LIB "" CACHE FILEPATH "Path to MinGW-w64 static libturbojpeg.a")
-  if (MU_TURBOJPEG_STATIC_LIB STREQUAL "" OR MU_TURBOJPEG_STATIC_LIB MATCHES "-NOTFOUND$")
-    unset(MU_TURBOJPEG_STATIC_LIB CACHE)
-  endif()
-  if (NOT MU_TURBOJPEG_STATIC_LIB)
-    find_library(MU_TURBOJPEG_STATIC_LIB
-      NAMES turbojpeg
-      PATHS
-        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib"
-      NO_CMAKE_FIND_ROOT_PATH
-    )
-  endif()
-  if (NOT MU_TURBOJPEG_STATIC_LIB)
-    set(_MU_OLD_FIND_LIBRARY_SUFFIXES "${CMAKE_FIND_LIBRARY_SUFFIXES}")
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-    set(_MU_TURBOJPEG_SEARCH_PATHS "")
-    foreach(_mu_root IN LISTS CMAKE_FIND_ROOT_PATH)
-      list(APPEND _MU_TURBOJPEG_SEARCH_PATHS "${_mu_root}/lib" "${_mu_root}/usr/lib")
-    endforeach()
-    list(APPEND _MU_TURBOJPEG_SEARCH_PATHS "/usr/i686-w64-mingw32/lib" "/usr/x86_64-w64-mingw32/lib")
-    find_library(MU_TURBOJPEG_STATIC_LIB
-      NAMES turbojpeg
-      PATHS ${_MU_TURBOJPEG_SEARCH_PATHS}
-      NO_CMAKE_FIND_ROOT_PATH
-    )
-    unset(_MU_TURBOJPEG_SEARCH_PATHS)
-    unset(_mu_root)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES "${_MU_OLD_FIND_LIBRARY_SUFFIXES}")
-    unset(_MU_OLD_FIND_LIBRARY_SUFFIXES)
-  endif()
-  if (NOT MU_TURBOJPEG_STATIC_LIB OR MU_TURBOJPEG_STATIC_LIB MATCHES "\\.dll\\.a$")
-    message(FATAL_ERROR "Static libturbojpeg not found (libturbojpeg.a) or CMake picked an import library (.dll.a): '${MU_TURBOJPEG_STATIC_LIB}'. Install/build a MinGW-w64 static libjpeg-turbo to avoid shipping libturbojpeg.dll, or set MU_TURBOJPEG_STATIC_LIB to the full path of libturbojpeg.a.")
-  endif()
-
-  target_link_libraries(MuClient PUBLIC
-    imm32
-    vfw32
-    dxguid
-    opengl32
-    glu32
-    winmm
-    ws2_32
-    version
-    shlwapi
-    crypt32
-    wininet
-    urlmon
-    gdi32
-    user32
-    ole32
-    oleaut32
-    uuid
-    comdlg32
-    advapi32
-    ${MU_TURBOJPEG_STATIC_LIB}
-  )
-endif()
-
-if(APPLE)
-  target_link_libraries(MuClient PUBLIC
-    "-framework AudioToolbox"
-    "-framework AudioUnit"
-    "-framework CoreAudio"
-    "-framework CoreFoundation"
-  )
-endif()
 
 # Link ImGui for all platforms when editor is enabled. Untouched compatibility
 # code retains its existing OpenGL system-library links above.

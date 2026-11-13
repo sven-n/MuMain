@@ -232,7 +232,7 @@ mu_add_test(
         # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
         mu_test_rml_layout_fixture
         # The test's version 14 model is encrypted with Crypto++'s ciphers.
-        MuCryptopp
+        MuDep::Cryptopp
 )
 target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"

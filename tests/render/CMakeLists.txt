@@ -142,7 +142,7 @@ mu_add_test(
         test_bmd_modulus_cipher.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Models/BmdModulusCipher.cpp
     LINK_LIBS
-        MuCryptopp
+        MuDep::Cryptopp
 )
 
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer, and the holes it finds in a texture's alpha.
