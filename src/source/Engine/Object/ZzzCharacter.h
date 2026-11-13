@@ -52,8 +52,8 @@ void UpdateCharacterEffects();
 void UpdatePreviewCharacter(CHARACTER* c);
 // The attack-down and defense-down debuff lights, spawned while the debuff lasts and removed once it ends.
 void UpdateStatDownDebuffEffects(OBJECT* o);
-// A stat-down debuff's (eDeBuff_AttackDown, eDeBuff_DefenseDown) lights on its character: created once, deleted when
-// present. Other debuffs are ignored.
+// A stat-down debuff's (eDeBuff_AttackDown, eDeBuff_DefenseDown) lights on its character: created once, deleted if
+// there. Other debuffs are ignored.
 void CreateStatDownDebuffLights(OBJECT* o, eBuffState debuff);
 void DeleteStatDownDebuffLights(OBJECT* o, eBuffState debuff);
 // What a character's draw used to set while drawing it, set before the draw: its light, a Doppelganger's look and

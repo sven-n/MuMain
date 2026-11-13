@@ -12341,10 +12341,8 @@ void DeleteStatDownDebuffLights(OBJECT* o, eBuffState debuff)
     if (!lights)
         return;
 
-    if (SearchEffect(BITMAP_SHINY + 6, o, lights->subType))
-        DeleteEffect(BITMAP_SHINY + 6, o, lights->subType);
-    if (SearchEffect(BITMAP_PIN_LIGHT, o, lights->subType))
-        DeleteEffect(BITMAP_PIN_LIGHT, o, lights->subType);
+    DeleteEffect(BITMAP_SHINY + 6, o, lights->subType);
+    DeleteEffect(BITMAP_PIN_LIGHT, o, lights->subType);
 }
 
 void UpdateStatDownDebuffEffects(OBJECT* o)
