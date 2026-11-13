@@ -6,7 +6,9 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/TeardownStack.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Platform/ErrorDialog.h"
 #include "Core/Platform/GameWindow.h"
+#include "Core/Platform/Quit.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
 #include "App/Platform/ClientMain.h"
@@ -82,7 +84,6 @@
 #include "MUHelper/MuHelper.h"
 #include "Camera/CameraManager.h"
 
-#include "UI/Windows/CBTMessageBox.h"
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #ifdef _WIN32
@@ -658,10 +659,6 @@ void DestroyWindow()
     PtrReset(g_petProcess);
 
     g_ErrorReport.Write(L"Destroy");
-
-    HWND shWnd = FindWindow(nullptr, L"MuPlayer");
-    if (shWnd)
-        SendMessage(shWnd, WM_DESTROY, 0, 0);
 }
 void DestroySound()
 {
@@ -720,11 +717,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     // WM_ACTIVATE is handled via SDL window focus events (issue #442).
     case WM_NPROTECT_EXIT_TWO:
         SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
-        // Inform the user, then close. A frame-ticked timer cannot fire while
-        // this modal dialog blocks the main loop, so close right after the
-        // dialog is dismissed instead of via a timer.
-        MessageBox(nullptr, I18N::Game::Error9AHackingToolHasBeen, L"Error", MB_OK);
-        PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", I18N::Game::Error9AHackingToolHasBeen);
         break;
     case WM_ERASEBKGND:
         return TRUE;
@@ -738,20 +731,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
         return 0;
         break;
-    case WM_DESTROY:
-    {
-        // Just request shutdown; the main loop exits on Destroy and the teardown
-        // (sound, GL, window) runs after it. SDL owns the window now, so the GL
-        // context and window must not be torn down from inside a message.
-        SaveOptionsBeforeClose();
-        Destroy = true;
-        if (SocketClient != nullptr)
-        {
-            SocketClient->Close();
-            g_bGameServerConnected = false;
-        }
-    }
-    break;
     case WM_SETCURSOR:
 #ifdef _EDITOR
         // When hovering UI (including Open Editor button), let Windows show cursor
@@ -1012,11 +991,11 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
     if (msg->hwnd != nullptr && msg->hwnd != g_hWnd)
         return true;
 
-    // Only F10's zoom lock, Enter's legacy input flag and posted WM_DESTROY
-    // shutdown requests need this bridge. SDL dispatches everything else.
+    // Only F10's zoom lock and Enter's legacy input flag need this bridge. SDL
+    // dispatches everything else.
     const bool isZoomLockKey = msg->message == WM_SYSKEYDOWN && msg->wParam == VK_F10;
     const bool isEnterKey = msg->message == WM_CHAR && msg->wParam == VK_RETURN;
-    if (isZoomLockKey || isEnterKey || msg->message == WM_DESTROY)
+    if (isZoomLockKey || isEnterKey)
     {
         WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     }
@@ -1577,6 +1556,13 @@ bool HandleClientEvent(SDL_Event& event)
 // One frame, as SDL_AppIterate calls it after handing over the frame's events; false once the client should quit.
 bool IterateClient()
 {
+    // A quit requested before SDL's events ran (during startup) arrives as the flag alone.
+    if (Core::Platform::QuitRequested() && !Destroy)
+    {
+        SaveOptionsBeforeClose();
+        Destroy = true;
+    }
+
     // Nothing runs, not even the packets or the timers; the events still arrive, so the window can close.
     if (FramesPaused())
     {
@@ -2120,7 +2106,7 @@ bool StartClient(char* szCmdLine)
         const std::wstring videoInitError = Utf8ToWide(SDL_GetError());
         g_ErrorReport.Write(L"> SDL video init failed. Requested driver: %ls. SDL error: %ls\r\n",
                             requestedDriver.c_str(), videoInitError.c_str());
-        MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
+        Core::Platform::ErrorDialog::Show("Aplication Error", "Windows aplication error!", false);
         return false;
     }
     g_teardown.Push([] { SDL_Quit(); });
@@ -2144,7 +2130,7 @@ bool StartClient(char* szCmdLine)
     if (!g_sdlWindow)
     {
         g_ErrorReport.Write(L"> SDL_CreateWindow failed.\r\n");
-        MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
+        Core::Platform::ErrorDialog::Show("Aplication Error", "Windows aplication error!", false);
         return false;
     }
     Core::Platform::SetGameWindow(g_sdlWindow);
@@ -2182,8 +2168,8 @@ bool StartClient(char* szCmdLine)
                                 static_cast<float>(initialFontSizes.fixed)))
     {
         g_ErrorReport.Write(L"SDL_gpu renderer init failed.\r\n");
-        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"SDL_gpu Renderer Error.",
-                   MB_OK | MB_ICONEXCLAMATION);
+        Core::Platform::ErrorDialog::Show("SDL_gpu Renderer Error.",
+                                          mu_wchar_to_utf8(I18N::Game::InstallTheLatestGraphicsCardDriver), false);
         return false;
     }
 
@@ -2500,6 +2486,16 @@ bool StartClient(char* szCmdLine)
             // The recorder polls process state until Destroy is set.
             Destroy = true;
             g_cpuUsageRecorder.join();
+        });
+    // Pushed last so a quit leaves the server first, however it was asked for.
+    g_teardown.Push(
+        []
+        {
+            if (SocketClient != nullptr)
+            {
+                SocketClient->Close();
+                g_bGameServerConnected = false;
+            }
         });
     return true;
 }

@@ -65,6 +65,12 @@ add_test(NAME platform_services_only_in_adapters
 add_test(NAME platform_services_check_fixtures
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_platform_services.py")
 
+# The game quits and shows errors through Core/Platform/Quit.h and ErrorDialog, not Win32 messages and MessageBox.
+add_test(NAME quit_and_errors_through_core_platform
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_quit_paths.py" "${MU_REPO_ROOT}")
+add_test(NAME quit_paths_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_quit_paths.py")
+
 add_test(
     NAME msvc_runtime_dll_staging_contract
     COMMAND "${CMAKE_COMMAND}"

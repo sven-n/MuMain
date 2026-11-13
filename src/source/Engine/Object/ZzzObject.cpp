@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Utilities/FileHandle.h"
@@ -5890,8 +5891,7 @@ int OpenObjectsEnc(wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return (-1);
     }
     std::optional<std::vector<BYTE>> EncData = DataFileIO::ReadAll(file.get());

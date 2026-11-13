@@ -102,6 +102,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_quit
+    SOURCES
+        test_quit.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_teardown_stack
     SOURCES
         test_teardown_stack.cpp

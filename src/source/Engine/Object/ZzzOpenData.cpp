@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -52,7 +53,6 @@
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/LookDrawing.h"
 #include "Render/Items/ItemRenderStyles.h"
-#include "Core/Platform/ErrorDialog.h"
 #include "Core/Text/Utf8.h"
 #include "Network/Server/SocketSystem.h"
 #include "Render/Text/CUIRenderText.h"
@@ -74,8 +74,7 @@ void OpenPlayers()
     if (Models[MODEL_PLAYER].NumMeshs > 0)
     {
         g_ErrorReport.Write(L"Player.bmd file error.\r\n");
-        MessageBox(g_hWnd, L"Player.bmd file error!!!", NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", L"Player.bmd file error!!!");
     }
 
     const bool useS6 = GameConfig::GetInstance().GetUseS6PlayerModels();
@@ -308,8 +307,7 @@ static void StopOnDataError(const char* title, const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);
     g_ErrorReport.Write(L"%ls\r\n", message.c_str());
-    Core::Platform::ErrorDialog::Show(title, errorMessage, false);
-    SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+    Core::Platform::ShowFatalError(title, errorMessage);
 }
 
 static void StopOnItemDataError(const std::string& errorMessage)

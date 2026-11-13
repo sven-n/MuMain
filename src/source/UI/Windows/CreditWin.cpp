@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "UI/Windows/CreditWin.h"
 #include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
@@ -261,8 +262,7 @@ void CCreditWin::LoadText()
         wchar_t szMessage[256];
         std::swprintf(szMessage, std::size(szMessage), L"%hs file not found.\r\n", kCreditDataPath.data());
         g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
         return;
     }
 
@@ -273,8 +273,7 @@ void CCreditWin::LoadText()
         std::swprintf(szMessage, std::size(szMessage), L"Failed to read %hs file or file is corrupt.\r\n",
                       kCreditDataPath.data());
         g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
         return;
     }
     ::BuxConvert(reinterpret_cast<BYTE*>(m_aCredit), static_cast<int>(nSize));

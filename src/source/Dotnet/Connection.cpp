@@ -7,6 +7,7 @@
 //   "Login failed. Check credentials."
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 
 #include "Connection.h"
 #include "DotNetMessageFormat.h"
@@ -182,10 +183,7 @@ void ReportDotNetError(const char* detail, DotNetErrorKind kind)
     // Write to MuError.log (persistent diagnostic — spdlog)
     mu::log::Get("dotnet")->error("NET: {}", msg);
 
-    // Show user-visible dialog via MessageBoxW shim → SDL_ShowSimpleMessageBox (PlatformCompat.h)
-    // ASCII-safe conversion: diagnostic messages contain only ASCII characters
-    std::wstring wideMsg(msg.begin(), msg.end());
-    MessageBoxW(nullptr, wideMsg.c_str(), L"Network Error", MB_ICONERROR | MB_OK);
+    Core::Platform::ShowError("Network Error", msg);
 }
 } // namespace DotNetBridge
 

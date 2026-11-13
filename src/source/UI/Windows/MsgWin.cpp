@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "UI/Windows/MsgWin.h"
 #include "Core/Input/Input.h"
 #include "UI/Core/SceneUICoordinator.h"
@@ -457,7 +458,7 @@ void CMsgWin::ManageOKClick()
     {
     case RECEIVE_LOG_IN_FAIL_VERSION:
     case MESSAGE_SERVER_LOST:
-        ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+        Core::Platform::RequestQuit();
         break;
     case RECEIVE_LOG_IN_FAIL_ERROR:
         // The game server closes the connection after the third wrong password: back to
@@ -508,7 +509,7 @@ void CMsgWin::ManageCancelClick()
 {
     if (m_nMsgCode == MESSAGE_SERVER_LOST_RECONNECT)
     {
-        ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+        Core::Platform::RequestQuit();
     }
 
     if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
