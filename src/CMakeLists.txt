@@ -1258,8 +1258,7 @@ add_custom_target(CheckLayoutTransformUsers ALL
 )
 add_dependencies(Main CheckLayoutTransformUsers)
 
-# Link ImGui for all platforms when editor is enabled. Untouched compatibility
-# code retains its existing OpenGL system-library links above.
+# Link ImGui for all platforms when editor is enabled.
 if(ENABLE_EDITOR)
   target_link_libraries(MuClient PUBLIC imgui)
 endif()

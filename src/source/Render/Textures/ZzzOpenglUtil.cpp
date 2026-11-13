@@ -17,9 +17,6 @@
 #include "UI/Core/WindowSystem.h"
 #include <bit>
 #include <SDL3/SDL.h>
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-#include "wglext.h"  // legacy WGL multisample pixel-format path (disabled by default)
-#endif
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
@@ -655,15 +652,6 @@ void EndOpengl()
     mu::GetRenderer().PopMatrix();
 }
 
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-BOOL IsGLExtensionSupported(const wchar_t* extension)
-{
-    (void)extension;
-    return FALSE;
-}
-
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
 void InitVSync()
 {
     // SDL GPU swapchains always support VSync. The renderer applies present-mode changes.
@@ -706,43 +694,6 @@ bool DisableVSync()
 
 // GetFPSLimit() lives in the platform layer (Winmain.cpp): it queries the
 // monitor refresh rate, which SDL exposes per display (issue #442).
-
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd, int iRequestMSAAValue, int& OutiPixelFormat)
-{
-    (void)hInstance;
-    (void)hWnd;
-    (void)pfd;
-    (void)iRequestMSAAValue;
-    (void)OutiPixelFormat;
-    return FALSE;
-}
-
-void SetEnableMultisample()
-{
-    if (TRUE == g_bSupportedMSAA)
-    {
-        mu::GetRenderer().SetMultisample(true);
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-}
-
-void SetDisableMultisample()
-{
-    if (TRUE == g_bSupportedMSAA)
-    {
-        mu::GetRenderer().SetMultisample(false);
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-}
-
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
 
 ///////////////////////////////////////////////////////////////////////////////
 // render util
