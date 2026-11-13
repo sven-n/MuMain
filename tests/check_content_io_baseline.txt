@@ -23,8 +23,6 @@ src/source/Data/GameConfig/PersonalTuning.cpp	filesystem probe	2	per-user file, 
 src/source/Data/GameConfig/PersonalTuning.cpp	ifstream	1	per-user file, not content (#1074)
 src/source/Engine/Object/ZzzObject.cpp	fopen	4	writes content (editor: objects file saver)
 src/source/Engine/Object/ZzzOpenData.cpp	fopen	2	per-user file, not content (#1074): macros
-src/source/GameShop/FileDownloader/FileDownloader.cpp	filesystem probe	1	shop download cache, per-user (#1074)
-src/source/GameShop/FileDownloader/FileDownloader.cpp	stream open	1	shop download cache, per-user (#1074)
 src/source/GameShop/InGameShopSystem.cpp	filesystem probe	2	shop download cache, per-user (#1074)
 src/source/GameShop/ShopListManager/BannerInfo.cpp	filesystem probe	1	shop download cache, per-user (#1074)
 src/source/GameShop/ShopListManager/BannerInfoList.cpp	ifstream	1	shop download cache, per-user (#1074)

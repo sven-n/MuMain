@@ -60,6 +60,10 @@ add_test(NAME network_bridge_exports_listed_and_headers_platform_free
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_network_bridge.py" "${MU_REPO_ROOT}")
 add_test(NAME network_bridge_check_fixtures
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_network_bridge.py")
+add_test(NAME platform_services_only_in_adapters
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_platform_services.py" "${MU_REPO_ROOT}")
+add_test(NAME platform_services_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_platform_services.py")
 
 add_test(
     NAME msvc_runtime_dll_staging_contract

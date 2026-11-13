@@ -235,9 +235,23 @@ else()
   set(MU_MANAGED_LIBRARY_BY_NAME 0)
 endif()
 
-# The in-game shop uses one libcurl transport on every platform. Keep the
-# legacy WinINet implementation out of the build.
-list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\](FileDownloader|FTPConnecter|HTTPConnecter|DownloadInfo)\\.cpp$")
+# Platform services (saved logins, shop downloads, CPU use) have one adapter per target in an Adapters/ folder beside
+# their header; the library compiles the target's choice.
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]src[/\\]source[/\\](.+[/\\])?Adapters[/\\]")
+set(MU_SERVICE_ADAPTERS
+  "source/Core/Platform/Adapters/OpenSslCredentials.cpp"
+  "source/GameShop/FileDownloader/Adapters/CurlShopDownload.cpp")
+if(WIN32)
+  list(APPEND MU_SERVICE_ADAPTERS
+    "source/Core/Platform/Adapters/CredentialHostWin32.cpp"
+    "source/Core/Utilities/Adapters/CpuUsageWin32.cpp")
+else()
+  list(APPEND MU_SERVICE_ADAPTERS
+    "source/Core/Platform/Adapters/CredentialHostPosix.cpp"
+    "source/Core/Utilities/Adapters/CpuUsagePosix.cpp")
+endif()
+list(TRANSFORM MU_SERVICE_ADAPTERS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
+list(APPEND MU_CLIENT_SOURCES ${MU_SERVICE_ADAPTERS})
 
 if(WIN32)
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]posix[/\\]")

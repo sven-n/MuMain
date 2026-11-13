@@ -44,7 +44,6 @@
 #include "Core/Platform/StrSafe.h"
 #include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
 #include "GameShop/ShopListManager/interface/DownloadInfo.h"
-#include "GameShop/ShopListManager/interface/FileDownloader.h"
 
 #if !defined (INVALID_FILE_ATTRIBUTES)
 #define INVALID_FILE_ATTRIBUTES ((DWORD)-1)

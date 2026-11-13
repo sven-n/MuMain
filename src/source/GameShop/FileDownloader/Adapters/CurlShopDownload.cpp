@@ -1,10 +1,10 @@
-// libcurl implementation of the shop file downloader (issue #462).
+// The shop file downloader on libcurl.
 
 #include "stdafx.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#include "CurlFileDownloader.h"
+#include "GameShop/FileDownloader/ShopDownload.h"
 
 #include <cstring>
 #include <filesystem>
@@ -80,12 +80,9 @@ size_t WriteToStream(char* ptr, size_t size, size_t nmemb, void* userdata)
 }
 } // namespace
 
-WZResult CurlFileDownloader::DownloadFile(const std::wstring& url,
-    const std::wstring& localPath,
-    const std::wstring& username,
-    const std::wstring& password,
-    bool passiveFtp,
-    const std::atomic_bool* pBreak)
+WZResult ShopDownload::DownloadFile(const std::wstring& url, const std::wstring& localPath,
+                                    const std::wstring& username, const std::wstring& password, bool passiveFtp,
+                                    const std::atomic_bool* pBreak)
 {
     WZResult result;
 
@@ -99,7 +96,8 @@ WZResult CurlFileDownloader::DownloadFile(const std::wstring& url,
     std::ofstream out(targetPath, std::ios::binary | std::ios::trunc);
     if (!out.is_open())
     {
-        result.SetResult(DL_CREATE_LOCALFILE, 0, L"[CurlFileDownloader] Fail : cannot open local file %ls", localPath.c_str());
+        result.SetResult(DL_CREATE_LOCALFILE, 0, L"[ShopDownload] Fail : cannot open local file %ls",
+                         localPath.c_str());
         return result;
     }
 
@@ -113,14 +111,14 @@ WZResult CurlFileDownloader::DownloadFile(const std::wstring& url,
     CURL* curl = curl_easy_init();
     if (curl == nullptr)
     {
-        result.SetResult(DL_CREATE_SESSION, 0, L"[CurlFileDownloader] Fail : curl_easy_init");
+        result.SetResult(DL_CREATE_SESSION, 0, L"[ShopDownload] Fail : curl_easy_init");
         return result;
     }
 
     curl_easy_setopt(curl, CURLOPT_URL, urlUtf8.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteToStream);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &out);
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);      // HTTP >= 400 is a failure
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L); // HTTP >= 400 is a failure
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, kConnectTimeoutMs);
@@ -132,7 +130,7 @@ WZResult CurlFileDownloader::DownloadFile(const std::wstring& url,
     curl_easy_setopt(curl, CURLOPT_FTP_USE_EPSV, passiveFtp ? 1L : 0L);
     if (!passiveFtp)
     {
-        curl_easy_setopt(curl, CURLOPT_FTPPORT, "-");     // active mode
+        curl_easy_setopt(curl, CURLOPT_FTPPORT, "-"); // active mode
     }
     if (!userUtf8.empty())
     {
@@ -155,12 +153,12 @@ WZResult CurlFileDownloader::DownloadFile(const std::wstring& url,
 
     if (code == CURLE_ABORTED_BY_CALLBACK)
     {
-        result.SetResult(WZ_USER_BREAK, code, L"[CurlFileDownloader] User Break : %ls", url.c_str());
+        result.SetResult(WZ_USER_BREAK, code, L"[ShopDownload] User Break : %ls", url.c_str());
     }
     else
     {
         const std::wstring reason = Utf8ToWide(curl_easy_strerror(code));
-        result.SetResult(DL_READ_REMOTEFILE, code, L"[CurlFileDownloader] Fail : %ls (%ls)", reason.c_str(), url.c_str());
+        result.SetResult(DL_READ_REMOTEFILE, code, L"[ShopDownload] Fail : %ls (%ls)", reason.c_str(), url.c_str());
     }
 
     return result;

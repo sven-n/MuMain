@@ -13,7 +13,6 @@
 #include "GameConfigValidation.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/WinIni.h"  // private-profile (.ini) API
-#include "Core/Platform/Dpapi.h"   // Legacy credential format migration
 #include "Core/Platform/PlatformCrypto.h"
 
 GameConfig& GameConfig::GetInstance()
@@ -525,22 +524,13 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
     if (encryptedData.empty()) return L"";
 
     std::vector<std::uint8_t> decryptedData;
-    if (mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decryptedData))
+    if (mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decryptedData) ||
+        mu_decrypt_legacy_blob(encryptedData.data(), encryptedData.size(), decryptedData))
     {
         std::wstring result(reinterpret_cast<const wchar_t*>(decryptedData.data()), decryptedData.size() / sizeof(wchar_t));
         if (!result.empty() && result.back() == L'\0') {
             result.pop_back();
         }
-        return result;
-    }
-
-    DATA_BLOB dataIn = { static_cast<DWORD>(encryptedData.size()), encryptedData.data() };
-    DATA_BLOB dataOut = {};
-    if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
-    {
-        std::wstring result(reinterpret_cast<wchar_t*>(dataOut.pbData), dataOut.cbData / sizeof(wchar_t));
-        LocalFree(dataOut.pbData);
-        if (!result.empty() && result.back() == L'\0') result.pop_back();
         return result;
     }
 
@@ -562,6 +552,17 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
 
 void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* pass)
 {
+    if (!mu_credentials_available())
+    {
+        static bool reported = false;
+        if (!reported)
+        {
+            g_ErrorReport.Write(L"Saved logins are not available on this platform.\r\n");
+            reported = true;
+        }
+        return;
+    }
+
     std::wstring encUser = EncryptSetting(user);
     if (encUser.empty())
     {
