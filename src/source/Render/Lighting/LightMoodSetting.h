@@ -7,8 +7,8 @@
 namespace Render::Lighting::LightMood
 {
 
-// Replaces the mood data (Data/Maps/LightMood.json as loaded or edited) and
-// rebuilds the current map's static light.
+// Replaces the mood data (every map's mood, as Data/Render/Look.json loaded or
+// edited gives it) and rebuilds the current map's static light.
 void SetMoodData(Data::Maps::LightMoodData data);
 
 // Switches the mood and sets its strength (0 to 100 percent) from the next

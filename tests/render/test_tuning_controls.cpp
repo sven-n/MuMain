@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "Data/GameData/MapData/LookProfile.h"
+#include "Data/GameData/MapData/LightMood.h"
 #include "Render/Look/TuningControls.h"
 
 #include <optional>
@@ -115,7 +116,7 @@ Data::Maps::LookProfileData ShippedLikeProfile()
     profile.defaultOverrides[LookValue::BloomStrength] = 1.0;
     profile.defaultOverrides[LookValue::DynamicEffectGain] = 1.5;
     Data::Maps::MapLookOverrides icarus;
-    icarus.world = Icarus;
+    icarus.maps = {Icarus};
     icarus.overrides[LookValue::BloomStrength] = 0.3;
     profile.maps.push_back(icarus);
     return profile;
@@ -153,8 +154,17 @@ TEST_CASE("the 33 tuning controls have the specified bounds, steps, units and pl
         const double steps = (control.max - control.min) / control.step;
         CHECK(std::abs(steps - std::round(steps)) < 1e-9);
     }
-    // Every look value has exactly one control, but the sun's direction: painted shadows cannot follow a player's.
-    CHECK(covered.size() == Data::Maps::LookValueCount - 1);
+    // Every look value has exactly one control, but the sun's direction (painted shadows cannot follow a
+    // player's) and the light mood's values (the map's own light; players set only its strength).
+    CHECK(covered.size() == Data::Maps::LookValueCount - 1 - Data::Maps::LightMoodValueCount);
+    for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
+    {
+        if (info.value != LookValue::GroundShadowAngle)
+        {
+            CAPTURE(info.name);
+            CHECK(Data::Maps::IsMoodValue(info.value) == !Render::Look::FindTuningControl(info.value).has_value());
+        }
+    }
     CHECK_FALSE(Render::Look::FindTuningControl(LookValue::GroundShadowAngle));
     // Colour grading may now be off entirely.
     CHECK(Data::Maps::Info(LookValue::GradingStrength).min == 0.0);
@@ -271,7 +281,7 @@ TEST_CASE("a developer's edit covers only the scope it was made in [render][look
     Data::Maps::LookProfileData profile = ShippedLikeProfile();
     Render::Look::DeveloperLookEdits developer;
     // `$look set map bloom.strength 0.2` in Icarus.
-    developer.Mark(LookValue::BloomStrength, Icarus);
+    developer.Mark(LookValue::BloomStrength, std::vector<int>{Icarus});
     CHECK(developer.Covers(profile, Icarus, LookValue::BloomStrength));
     CHECK_FALSE(developer.Covers(profile, Lorencia, LookValue::BloomStrength));
     CHECK_FALSE(developer.Covers(profile, Icarus, LookValue::RimStrength));
@@ -283,9 +293,9 @@ TEST_CASE("a developer's edit covers only the scope it was made in [render][look
     CHECK_FALSE(developer.Covers(profile, Icarus, LookValue::BloomStrength));
 
     // A named reset clears the default and the reset world's entry, not another world's.
-    developer.Mark(LookValue::BloomStrength, Icarus);
-    developer.Mark(LookValue::BloomStrength, Lorencia);
-    developer.Clear(LookValue::BloomStrength, Lorencia);
+    developer.Mark(LookValue::BloomStrength, std::vector<int>{Icarus});
+    developer.Mark(LookValue::BloomStrength, std::vector<int>{Lorencia});
+    developer.Clear(LookValue::BloomStrength, {Lorencia});
     CHECK_FALSE(developer.Covers(profile, Lorencia, LookValue::BloomStrength));
     CHECK(developer.Covers(profile, Icarus, LookValue::BloomStrength));
 }
@@ -322,9 +332,9 @@ TEST_CASE("an edited default does not show where an environment overrides it [re
     environment.overrides[LookValue::BloomStrength] = 0.5;
     profile.environments.push_back(environment);
     Data::Maps::MapLookOverrides open;
-    open.world = Open;
+    open.maps = {Open};
     Data::Maps::MapLookOverrides enclosed;
-    enclosed.world = Enclosed;
+    enclosed.maps = {Enclosed};
     enclosed.environment = 0;
     profile.maps = {open, enclosed};
 

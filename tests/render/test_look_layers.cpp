@@ -20,26 +20,24 @@ namespace
 {
 constexpr int Lorencia = 0;
 constexpr int Icarus = 10;
+constexpr int BloodCastle2 = 12;
+constexpr int BloodCastle3 = 13;
 
 const Render::Look::TuningGroupSet AllGroups{true, true, true, true, true};
 
 const std::string LookText = R"({
-  "formatVersion": 1,
-  "default": { "bloom.strength": 1.0, "lighting.highlightKnee": 0.8 },
-  "maps": [ { "world": 10, "name": "Icarus", "bloom.strength": 0.3 } ]
-})";
-
-const std::string MoodText = R"({
-  "formatVersion": 1,
-  "default": { "base": 0.7, "figures": 0.7, "dynamicGain": 1.0, "background": 1.0, "sun": 0.6 },
-  "maps": []
+  "formatVersion": 2,
+  "default": { "bloom.strength": 1.0, "lighting.highlightKnee": 0.8, "mood.base": 0.7, "mood.figures": 0.7,
+               "mood.sun": 0.6 },
+  "maps": [ { "maps": [10], "name": "Icarus", "bloom.strength": 0.3 },
+            { "maps": [11, 12, 13], "name": "Blood Castle" } ]
 })";
 
 // Reads only; the layers never write.
 class MemoryFileSystem final : public Render::Look::LookFileSystem
 {
 public:
-    std::map<std::string, std::string> files{{"Look.json", LookText}, {"LightMood.json", MoodText}};
+    std::map<std::string, std::string> files{{"Look.json", LookText}};
 
     bool Exists(const std::filesystem::path& path) override
     {
@@ -74,7 +72,6 @@ Render::Look::LookFiles Files()
     Render::Look::LookFilesLoad loaded = Render::Look::LoadLookFiles(fileSystem, "Look.json", "LightMood.json");
     REQUIRE(loaded.issues.empty());
     REQUIRE(loaded.files.lookUsable);
-    REQUIRE(loaded.files.moodUsable);
     return loaded.files;
 }
 
@@ -220,14 +217,64 @@ TEST_CASE("a map-scoped developer edit leaves the player's values on other maps 
     CHECK(Bloom(layers, Lorencia) == 0.5);
 }
 
+TEST_CASE("a developer edit on a shared entry covers every map of it, and its reset too [render][look][tuning]")
+{
+    LookLayers layers;
+    layers.UseFiles(Files());
+    layers.SetApplyingGroups(AllGroups);
+    layers.SetPersonal(PersonalBloom(0.5));
+
+    // `$look set map bloom.strength 0.2` in Blood Castle 2, then to Blood Castle 3: the same entry.
+    const LookEdit edit{"bloom.strength", 0.2};
+    const Render::Look::LookEditResult set = layers.Set({&edit, 1}, BloodCastle2, "Blood Castle");
+    REQUIRE_MESSAGE(set.applied, set.error);
+    CHECK(set.entryMaps == std::vector<int>{11, 12, 13});
+    CHECK(Bloom(layers, BloodCastle3) == 0.2);
+    std::vector<Render::Look::LookValueState> states = layers.Describe(BloodCastle3, "bloom.strength");
+    REQUIRE(states.size() == 1);
+    CHECK(states[0].source == LookValueSource::Map);
+    CHECK(Bloom(layers, Lorencia) == 0.5);
+
+    // A named reset made in Blood Castle 3 restores the entry and clears the mark on all its maps.
+    REQUIRE(layers.Reset(std::string_view("bloom.strength"), BloodCastle3).applied);
+    for (const int world : {11, BloodCastle2, BloodCastle3})
+    {
+        CAPTURE(world);
+        CHECK(Bloom(layers, world) == 0.5);
+        CHECK_FALSE(layers.DeveloperEdits().Covers(layers.Live().lookData, world, LookValue::BloomStrength));
+        states = layers.Describe(world, "bloom.strength");
+        REQUIRE(states.size() == 1);
+        CHECK(states[0].source == LookValueSource::Personal);
+    }
+    CHECK_FALSE(layers.Live().lookData.FindMap(BloodCastle2)->overrides[LookValue::BloomStrength].has_value());
+}
+
+TEST_CASE("the mood rebuild reads the files' mood, never a player's [render][look][tuning]")
+{
+    std::vector<Data::Maps::LightMoodData> rebuilt;
+    LookLayers layers([&rebuilt](const Data::Maps::LightMoodData& moods) { rebuilt.push_back(moods); });
+    layers.UseFiles(Files());
+    layers.SetApplyingGroups(AllGroups);
+    Data::Maps::LookOverrides personal;
+    personal[LookValue::MoodBase] = 0.3;
+    layers.SetPersonal(personal);
+    CHECK(layers.Active(Lorencia)[LookValue::MoodBase] == 0.7);
+
+    const LookEdit edit{"mood.sun", 0.5};
+    REQUIRE(layers.Set({&edit, 1}, std::nullopt).applied);
+    REQUIRE_FALSE(rebuilt.empty());
+    CHECK(rebuilt.back().defaultMood.base == 0.7);
+    CHECK(rebuilt.back().defaultMood.sun == 0.5);
+}
+
 TEST_CASE("a default edit hidden by an environment leaves the player's value there [render][look][tuning]")
 {
     MemoryFileSystem fileSystem;
     fileSystem.files["Look.json"] = R"({
-  "formatVersion": 1,
+  "formatVersion": 2,
   "default": { "bloom.strength": 1.0 },
   "environments": { "enclosed": { "bloom.strength": 0.3 } },
-  "maps": [ { "world": 1, "name": "Dungeon", "environment": "enclosed" } ]
+  "maps": [ { "maps": [1], "name": "Dungeon", "environment": "enclosed" } ]
 })";
     Render::Look::LookFilesLoad loaded = Render::Look::LoadLookFiles(fileSystem, "Look.json", "LightMood.json");
     REQUIRE(loaded.issues.empty());

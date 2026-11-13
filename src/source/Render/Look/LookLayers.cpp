@@ -2,6 +2,7 @@
 
 #include "Render/Look/LookLayers.h"
 
+#include <algorithm>
 #include <utility>
 
 namespace Render::Look
@@ -15,7 +16,7 @@ void LookLayers::Changed(bool moodChanged)
     m_cacheValid = false;
     if (moodChanged && m_rebuildMood)
     {
-        m_rebuildMood(m_live.moodData);
+        m_rebuildMood(Data::Maps::MoodsOf(m_live.lookData));
     }
 }
 
@@ -85,12 +86,13 @@ LookEditResult LookLayers::Set(std::span<const LookEdit> edits, std::optional<in
     {
         return result;
     }
-    // Marked before the change is announced: the mood rebuild below already reads the edit.
+    // Marked before the change is announced: the mood rebuild below already reads the edit. A map
+    // edit is on every map of the entry, so it is marked on each.
     for (const LookEdit& edit : edits)
     {
         if (const std::optional<Data::Maps::LookValue> value = Data::Maps::FindLookValue(edit.name))
         {
-            m_developerEdits.Mark(*value, world);
+            m_developerEdits.Mark(*value, world ? std::optional(result.entryMaps) : std::nullopt);
         }
     }
     Changed(result.moodChanged);
@@ -111,7 +113,12 @@ LookEditResult LookLayers::Reset(std::optional<std::string_view> name, int world
     }
     else if (const std::optional<Data::Maps::LookValue> value = Data::Maps::FindLookValue(*name))
     {
-        m_developerEdits.Clear(*value, world);
+        std::vector<int> maps = result.entryMaps;
+        if (std::find(maps.begin(), maps.end(), world) == maps.end())
+        {
+            maps.push_back(world);
+        }
+        m_developerEdits.Clear(*value, maps);
     }
     Changed(result.moodChanged);
     return result;

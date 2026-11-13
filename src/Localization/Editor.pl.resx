@@ -478,6 +478,9 @@
   <data name="Look Scope Current Map" xml:space="preserve">
     <value>Bieżąca mapa</value>
   </data>
+  <data name="Look Entry Maps" xml:space="preserve">
+    <value>Wspólne dla map</value>
+  </data>
   <data name="Look Reset" xml:space="preserve">
     <value>Resetuj</value>
   </data>

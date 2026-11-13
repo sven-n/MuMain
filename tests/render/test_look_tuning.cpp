@@ -6,6 +6,7 @@
 #include "Render/Look/LookFiles.h"
 #include "Render/Look/LookTuningCommand.h"
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <string>
@@ -23,17 +24,42 @@ namespace
 constexpr int Lorencia = 0;
 constexpr int Dungeon = 1;
 constexpr int Noria = 3;
+constexpr int Icarus = 10;
+constexpr int BloodCastle2 = 12;
+constexpr int BloodCastle3 = 13;
 
 const std::string LookFile = "Data/Render/Look.json";
 const std::string MoodFile = "Data/Maps/LightMood.json";
 
 const std::string ShippedLook = R"({
+  "formatVersion": 2,
+  "default": {
+    "lighting.rim.strength": 0.35,
+    "bloom.strength": 0.6,
+    "mood.base": 0.7,
+    "mood.figures": 0.7,
+    "mood.sun": 0.6
+  },
+  "environments": {
+    "dim": {"mood.figures": 0.75},
+    "fixed": {"mood.sun": 1}
+  },
+  "maps": [
+    {"maps": [1], "name": "Dungeon", "grading.strength": 0.8, "mood.sun": 0.3},
+    {"maps": [10], "name": "Icarus", "mood.background": 0.7, "mood.sun": 0.8},
+    {"maps": [11, 12, 13], "name": "Blood Castle", "environment": "fixed"}
+  ]
+}
+)";
+
+// The same look as the files of format 1.
+const std::string LegacyLook = R"({
   "formatVersion": 1,
   "default": { "lighting.rim.strength": 0.35, "bloom.strength": 0.6 },
   "maps": [ { "world": 1, "name": "Dungeon", "grading.strength": 0.8 } ]
 })";
 
-const std::string ShippedMood = R"({
+const std::string LegacyMood = R"({
   "formatVersion": 1,
   "default": { "base": 0.7, "figures": 0.7, "dynamicGain": 1.0, "background": 1.0, "sun": 0.6 },
   "maps": [
@@ -99,7 +125,14 @@ FakeFileSystem Shipped()
 {
     FakeFileSystem fileSystem;
     fileSystem.files[LookFile] = ShippedLook;
-    fileSystem.files[MoodFile] = ShippedMood;
+    return fileSystem;
+}
+
+FakeFileSystem Legacy()
+{
+    FakeFileSystem fileSystem;
+    fileSystem.files[LookFile] = LegacyLook;
+    fileSystem.files[MoodFile] = LegacyMood;
     return fileSystem;
 }
 
@@ -128,12 +161,22 @@ LookValueSource SourceOf(const LookFiles& files, const std::string& name, int wo
     return Render::Look::DescribeLookValues(files, world, name).at(0).source;
 }
 
-// Same documents, so the same live values.
+Data::Maps::LightMood MoodOn(const LookFiles& files, int world)
+{
+    return Data::Maps::MoodOf(files.lookData.ForWorld(world));
+}
+
+// Same values on every map: the same file text (entries may be in another order in memory).
 bool SameFiles(const LookFiles& left, const LookFiles& right)
 {
-    return left.look.dump() == right.look.dump() && left.mood.dump() == right.mood.dump() &&
-           left.lookData == right.lookData && left.moodData.defaultMood == right.moodData.defaultMood &&
-           left.moodData.maps == right.moodData.maps;
+    return left.lookUsable == right.lookUsable && left.saveBlocked == right.saveBlocked &&
+           Data::Maps::WriteLookProfileJson(left.lookData) == Data::Maps::WriteLookProfileJson(right.lookData);
+}
+
+bool Mentions(const std::vector<Data::Items::ItemDataIssue>& issues, const std::string& text)
+{
+    return std::any_of(issues.begin(), issues.end(), [&text](const Data::Items::ItemDataIssue& issue)
+                       { return issue.ToString().find(text) != std::string::npos; });
 }
 } // namespace
 
@@ -146,24 +189,41 @@ TEST_CASE("$look set changes the default or the current map's entry [render][loo
     REQUIRE_MESSAGE(defaultEdit.applied, defaultEdit.error);
     REQUIRE(defaultEdit.oldValues.size() == 1);
     CHECK(defaultEdit.oldValues[0] == Approx(0.6));
+    CHECK_FALSE(defaultEdit.moodChanged);
     CHECK(Effective(files, "bloom.strength", Lorencia) == Approx(0.9));
     CHECK(Effective(files, "bloom.strength", Dungeon) == Approx(0.9));
 
     // A map value applies on that map only.
     const LookEditResult mapEdit = Set(files, "lighting.rim.strength", 0.5, Lorencia);
     REQUIRE_MESSAGE(mapEdit.applied, mapEdit.error);
+    CHECK(mapEdit.entryMaps == std::vector<int>{Lorencia});
     CHECK(Effective(files, "lighting.rim.strength", Lorencia) == Approx(0.5));
     CHECK(SourceOf(files, "lighting.rim.strength", Lorencia) == LookValueSource::Map);
     CHECK(Effective(files, "lighting.rim.strength", Noria) == Approx(0.35));
     CHECK(SourceOf(files, "lighting.rim.strength", Noria) == LookValueSource::Default);
     CHECK(SourceOf(files, "dynamic.wrap", Noria) == LookValueSource::BuiltIn);
 
-    // Mood values edit LightMood.json the same way.
+    // Mood values are look values: the same edit, and the map's mood changes.
     const LookEditResult moodEdit = Set(files, "mood.sun", 0.9, Noria);
     REQUIRE_MESSAGE(moodEdit.applied, moodEdit.error);
     CHECK(moodEdit.moodChanged);
-    CHECK(files.moodData.ForWorld(Noria).sun == Approx(0.9));
-    CHECK(files.moodData.ForWorld(Lorencia).sun == Approx(0.6));
+    CHECK(MoodOn(files, Noria).sun == Approx(0.9));
+    CHECK(MoodOn(files, Lorencia).sun == Approx(0.6));
+}
+
+TEST_CASE("$look set map changes the entry the map shares with its variants [render][look][tuning]")
+{
+    FakeFileSystem fileSystem = Shipped();
+    LookFiles files = Load(fileSystem);
+    const std::size_t entries = files.lookData.maps.size();
+
+    const LookEditResult edit = Set(files, "bloom.strength", 0.4, BloodCastle2);
+    REQUIRE_MESSAGE(edit.applied, edit.error);
+    CHECK(edit.entryMaps == std::vector<int>{11, 12, 13});
+    CHECK(files.lookData.maps.size() == entries);
+    CHECK(Effective(files, "bloom.strength", BloodCastle3) == Approx(0.4));
+    CHECK(SourceOf(files, "bloom.strength", BloodCastle3) == LookValueSource::Map);
+    CHECK(Effective(files, "bloom.strength", Lorencia) == Approx(0.6));
 }
 
 TEST_CASE("$look set refuses an unknown name, a value out of range and figures below base [render][look][tuning]")
@@ -184,8 +244,8 @@ TEST_CASE("$look set refuses an unknown name, a value out of range and figures b
     // The current map's figures below its effective base: both values are named.
     const LookEditResult rule = Set(files, "mood.figures", 0.5, Noria);
     CHECK_FALSE(rule.applied);
-    CHECK_MESSAGE(rule.error.find("figures") != std::string::npos, rule.error);
-    CHECK_MESSAGE(rule.error.find("not below base 0.7") != std::string::npos, rule.error);
+    CHECK_MESSAGE(rule.error.find("mood.figures") != std::string::npos, rule.error);
+    CHECK_MESSAGE(rule.error.find("mood.base 0.7") != std::string::npos, rule.error);
     // Raising the default base above the default figures breaks the rule too.
     CHECK_FALSE(Set(files, "mood.base", 0.8).applied);
 
@@ -193,6 +253,26 @@ TEST_CASE("$look set refuses an unknown name, a value out of range and figures b
     const std::vector<LookEdit> edits{{"bloom.strength", 0.9}, {"dynamic.wrap", 0.9}};
     CHECK_FALSE(Render::Look::SetLookValues(files, edits, std::nullopt).applied);
 
+    CHECK(SameFiles(files, before));
+}
+
+TEST_CASE("several edits are checked together, on everything below them [render][look][tuning]")
+{
+    FakeFileSystem fileSystem = Shipped();
+    LookFiles files = Load(fileSystem);
+
+    // Each alone breaks the rule; together they keep it.
+    const std::vector<LookEdit> together{{"mood.base", 0.75}, {"mood.figures", 0.75}};
+    const LookEditResult raised = Render::Look::SetLookValues(files, together, std::nullopt);
+    REQUIRE_MESSAGE(raised.applied, raised.error);
+    CHECK(MoodOn(files, Lorencia).base == Approx(0.75));
+
+    // The default stays valid, but the "dim" environment overrides only figures (0.75), now below base.
+    const LookFiles before = files;
+    const std::vector<LookEdit> higher{{"mood.base", 0.8}, {"mood.figures", 0.8}};
+    const LookEditResult refused = Render::Look::SetLookValues(files, higher, std::nullopt);
+    CHECK_FALSE(refused.applied);
+    CHECK_MESSAGE(refused.error.find("environments.dim") != std::string::npos, refused.error);
     CHECK(SameFiles(files, before));
 }
 
@@ -205,16 +285,83 @@ TEST_CASE("$look reset goes back to the loaded values [render][look][tuning]")
     REQUIRE(Set(files, "bloom.strength", 0.9).applied);
     REQUIRE(Set(files, "bloom.strength", 1.2, Lorencia).applied);
     REQUIRE(Set(files, "dynamic.wrap", 0.2).applied);
+    REQUIRE(Set(files, "grading.strength", 0.5, Dungeon).applied);
 
     // One name: in the default and the current map's entry; a new, now empty entry goes.
     REQUIRE(Render::Look::ResetLookValues(files, loaded, std::string_view("bloom.strength"), Lorencia).applied);
     CHECK(Effective(files, "bloom.strength", Lorencia) == Approx(0.6));
     CHECK(Effective(files, "dynamic.wrap", Lorencia) == Approx(0.2));
-    CHECK(files.look["maps"].size() == 1);
+    CHECK(files.lookData.maps.size() == loaded.lookData.maps.size());
+    // A loaded value comes back as it was; one the loaded entry did not name goes again.
+    REQUIRE(Render::Look::ResetLookValues(files, loaded, std::string_view("grading.strength"), Dungeon).applied);
+    CHECK(Effective(files, "grading.strength", Dungeon) == Approx(0.8));
+    REQUIRE(Set(files, "bloom.strength", 0.5, Dungeon).applied);
+    REQUIRE(Render::Look::ResetLookValues(files, loaded, std::string_view("bloom.strength"), Dungeon).applied);
+    CHECK_FALSE(files.lookData.FindMap(Dungeon)->overrides[LookValue::BloomStrength].has_value());
 
     REQUIRE(Render::Look::ResetLookValues(files, loaded, std::nullopt, Lorencia).applied);
     CHECK(SameFiles(files, loaded));
     CHECK_FALSE(Render::Look::ResetLookValues(files, loaded, std::string_view("no.such"), Lorencia).applied);
+}
+
+TEST_CASE("a format 1 look and its light mood load as one profile [render][look][tuning]")
+{
+    FakeFileSystem legacy = Legacy();
+    FakeFileSystem shipped = Shipped();
+    const LookFiles upgraded = Load(legacy);
+    const LookFiles current = Load(shipped);
+    CHECK_FALSE(upgraded.saveBlocked);
+
+    // Every map the same, look and mood (the shipped fixture adds only "dim", "fixed" and Blood Castle).
+    for (const int world : {Lorencia, Dungeon, Noria, Icarus, 200})
+    {
+        CAPTURE(world);
+        CHECK(upgraded.lookData.ForWorld(world) == current.lookData.ForWorld(world));
+    }
+
+    // Saving writes format 2 into Look.json only.
+    const Render::Look::LookSaveResult saved = Render::Look::SaveLookFiles(legacy, upgraded, LookFile);
+    REQUIRE_MESSAGE(saved.saved, saved.message);
+    CHECK(legacy.files[MoodFile] == LegacyMood);
+    CHECK(legacy.files[LookFile].find("\"formatVersion\": 2") != std::string::npos);
+    // Read again, the old mood file is no longer read but reported.
+    const Render::Look::LookFilesLoad again = Render::Look::LoadLookFiles(legacy, LookFile, MoodFile);
+    CHECK(again.files.lookData == upgraded.lookData);
+    CHECK_FALSE(Data::Items::HasFatal(again.issues));
+    CHECK(Mentions(again.issues, "no longer read"));
+}
+
+TEST_CASE("a format 1 look without a usable light mood keeps Classic light and cannot be saved [render][look][tuning]")
+{
+    for (const bool missing : {true, false})
+    {
+        CAPTURE(missing);
+        FakeFileSystem fileSystem = Legacy();
+        if (missing)
+        {
+            fileSystem.files.erase(MoodFile);
+        }
+        else
+        {
+            fileSystem.files[MoodFile] = R"({ "formatVersion": 1, "default": { "base": 0.7 } })";
+        }
+        const Render::Look::LookFilesLoad loaded = Render::Look::LoadLookFiles(fileSystem, LookFile, MoodFile);
+        LookFiles files = loaded.files;
+        CHECK(Data::Items::HasFatal(loaded.issues));
+        CHECK(files.lookUsable);
+        REQUIRE(files.saveBlocked.has_value());
+        CHECK_MESSAGE(files.saveBlocked->find(MoodFile) != std::string::npos, *files.saveBlocked);
+        // The look values apply, the mood is Classic.
+        CHECK(Effective(files, "bloom.strength", Lorencia) == Approx(0.6));
+        CHECK(MoodOn(files, Dungeon) == Data::Maps::LightMood{});
+        // Live edits still work; the save is refused and changes nothing.
+        REQUIRE(Set(files, "bloom.strength", 0.9).applied);
+        const std::map<std::string, std::string> before = fileSystem.files;
+        const Render::Look::LookSaveResult result = Render::Look::SaveLookFiles(fileSystem, files, LookFile);
+        CHECK_FALSE(result.saved);
+        CHECK_MESSAGE(result.message.find(MoodFile) != std::string::npos, result.message);
+        CHECK(fileSystem.files == before);
+    }
 }
 
 TEST_CASE("a candidate becomes the live values, with the shipped mood when it has none [render][look][tuning]")
@@ -224,39 +371,62 @@ TEST_CASE("a candidate becomes the live values, with the shipped mood when it ha
     fileSystem.files["Candidates/a/LightMood.json"] =
         R"({ "formatVersion": 1, "default": { "base": 0.5, "figures": 0.6, "dynamicGain": 1.5, "background": 1, "sun": 0.8 } })";
     fileSystem.files["Candidates/b/Look.json"] = R"({ "formatVersion": 1, "default": { "bloom.strength": 1.1 } })";
+    fileSystem.files["Candidates/c/Look.json"] =
+        R"({ "formatVersion": 2, "default": { "mood.base": 0.4, "mood.figures": 0.5 } })";
+    fileSystem.files["Candidates/c/LightMood.json"] = LegacyMood;
     fileSystem.files["Candidates/bad/Look.json"] = R"({ "formatVersion": 1, "default": { "bloom.strength": 5 } })";
     fileSystem.files["Candidates/badmood/Look.json"] = R"({ "formatVersion": 1 })";
+    // Format 1 with a mood value of its own, which would override the shipped moods it shows.
+    fileSystem.files["Candidates/v1mood/Look.json"] =
+        R"({ "formatVersion": 1, "environments": { "dim": { "mood.sun": 0.1 } } })";
     fileSystem.files["Candidates/badmood/LightMood.json"] = R"({ "formatVersion": 1, "default": { "base": 0.7 } })";
 
-    const auto candidate = [&fileSystem](const std::string& name)
+    std::vector<Data::Items::ItemDataIssue> issues;
+    const auto candidate = [&fileSystem, &issues](const std::string& name)
     {
-        std::vector<Data::Items::ItemDataIssue> issues;
+        issues.clear();
         return Render::Look::LoadCandidateFiles(fileSystem, "Candidates/" + name + "/Look.json",
-                                                "Candidates/" + name + "/LightMood.json", MoodFile, issues);
+                                                "Candidates/" + name + "/LightMood.json", LookFile, MoodFile, issues);
     };
 
     const std::optional<LookFiles> a = candidate("a");
     REQUIRE(a.has_value());
     CHECK(a->lookData.ForWorld(Lorencia)[LookValue::BloomStrength] == Approx(0.9));
-    CHECK(a->moodData.ForWorld(Lorencia).base == Approx(0.5));
+    CHECK(MoodOn(*a, Lorencia).base == Approx(0.5));
 
-    // B after A equals B loaded directly: B has no mood, so the shipped one applies, not A's.
+    // B after A equals B loaded directly: B has no mood, so the shipped profile's applies, not A's.
     const std::optional<LookFiles> b = candidate("b");
     REQUIRE(b.has_value());
-    CHECK(b->moodData.ForWorld(Lorencia).base == Approx(0.7));
-    CHECK(b->moodData.ForWorld(Dungeon).sun == Approx(0.3));
+    CHECK(MoodOn(*b, Lorencia).base == Approx(0.7));
+    CHECK(MoodOn(*b, Dungeon).sun == Approx(0.3));
+    CHECK(MoodOn(*b, BloodCastle2).sun == Approx(1.0));
     CHECK(SameFiles(*b, *candidate("b")));
+    // Only to look at: it cannot be saved, and a default mood edit still reaches the maps it copied.
+    REQUIRE(b->saveBlocked.has_value());
+    LookFiles edited = *b;
+    REQUIRE(Set(edited, "mood.base", 0.6).applied);
+    CHECK(MoodOn(edited, BloodCastle2).base == Approx(0.6));
+    CHECK_FALSE(Render::Look::SaveLookFiles(fileSystem, edited, LookFile).saved);
+    CHECK_FALSE(a->saveBlocked.has_value());
+
+    // A format 2 candidate has its mood; a LightMood.json beside it is not read.
+    const std::optional<LookFiles> c = candidate("c");
+    REQUIRE(c.has_value());
+    CHECK(MoodOn(*c, Dungeon).base == Approx(0.4));
+    CHECK(Mentions(issues, "no longer read"));
 
     // An invalid look file, an invalid mood file or a missing candidate gives nothing to apply.
     CHECK_FALSE(candidate("bad").has_value());
     CHECK_FALSE(candidate("badmood").has_value());
+    CHECK_FALSE(candidate("v1mood").has_value());
+    CHECK(Mentions(issues, "is a format 2 value"));
     CHECK_FALSE(candidate("missing").has_value());
 
-    // Back to the shipped files.
+    // Back to the shipped file.
     CHECK(Load(fileSystem).lookData.ForWorld(Lorencia)[LookValue::BloomStrength] == Approx(0.6));
 }
 
-TEST_CASE("$look save keeps only a map entry's overrides and leaves other entries as they were [render][look][tuning]")
+TEST_CASE("$look save writes the one file in its fixed layout [render][look][tuning]")
 {
     FakeFileSystem fileSystem = Shipped();
     LookFiles files = Load(fileSystem);
@@ -264,67 +434,52 @@ TEST_CASE("$look save keeps only a map entry's overrides and leaves other entrie
     REQUIRE(Set(files, "dynamic.wrap", 0.3, Lorencia).applied);
     REQUIRE(Set(files, "mood.sun", 0.4, Dungeon).applied);
 
-    const Render::Look::LookSaveResult saved = Render::Look::SaveLookFiles(fileSystem, files, LookFile, MoodFile);
+    const Render::Look::LookSaveResult saved = Render::Look::SaveLookFiles(fileSystem, files, LookFile);
     REQUIRE_MESSAGE(saved.saved, saved.message);
-    CHECK(fileSystem.files.size() == 2); // no temporaries or backups left
+    CHECK(fileSystem.files.size() == 1); // no temporaries, backups or mood file
 
     const std::string look = fileSystem.files[LookFile];
-    CHECK_MESSAGE(look.find(R"("bloom.strength": 0.9)") != std::string::npos, look);
-    CHECK_MESSAGE(look.find(R"({ "world": 1, "name": "Dungeon", "grading.strength": 0.8 })") != std::string::npos,
+    CHECK_MESSAGE(look.find("    \"bloom.strength\": 0.9,\n") != std::string::npos, look);
+    CHECK_MESSAGE(look.find(R"({"maps": [0], "name": "Map", "dynamic.wrap": 0.3})") != std::string::npos, look);
+    CHECK_MESSAGE(look.find(R"({"maps": [1], "name": "Dungeon", "grading.strength": 0.8, "mood.sun": 0.4})") !=
+                      std::string::npos,
                   look);
-    CHECK_MESSAGE(look.find(R"({ "world": 0, "name": "Map", "dynamic.wrap": 0.3 })") != std::string::npos, look);
+    CHECK(look.find("\"maps\": [0]") < look.find("\"maps\": [1]"));
 
-    const std::string mood = fileSystem.files[MoodFile];
-    CHECK_MESSAGE(mood.find(R"({ "world": 1, "name": "Dungeon", "sun": 0.4 })") != std::string::npos, mood);
-    CHECK_MESSAGE(mood.find(R"({ "world": 10, "name": "Icarus", "background": 0.7, "sun": 0.8 })") != std::string::npos,
-                  mood);
-    CHECK_MESSAGE(mood.find(R"("dynamicGain": 1.0)") != std::string::npos, mood);
-    CHECK(mood.find("Dungeon") < mood.find("Icarus"));
-
-    // Loading the saved files gives the same values.
-    CHECK(SameFiles(Load(fileSystem), files));
+    // Loading the saved file gives the same values, and saving it again the same text.
+    const LookFiles reloaded = Load(fileSystem);
+    CHECK(SameFiles(reloaded, files));
+    REQUIRE(Render::Look::SaveLookFiles(fileSystem, reloaded, LookFile).saved);
+    CHECK(fileSystem.files[LookFile] == look);
 }
 
-TEST_CASE("a failed save leaves both files as they were [render][look][tuning]")
+TEST_CASE("a failed save leaves the file as it was [render][look][tuning]")
 {
     FakeFileSystem fileSystem = Shipped();
     LookFiles files = Load(fileSystem);
     REQUIRE(Set(files, "bloom.strength", 0.9).applied);
-    REQUIRE(Set(files, "mood.sun", 0.4).applied);
     const std::map<std::string, std::string> before = fileSystem.files;
 
-    SUBCASE("a temporary cannot be written")
+    SUBCASE("the temporary cannot be written")
     {
-        fileSystem.failWrite.insert(MoodFile + ".tmp");
-        const Render::Look::LookSaveResult result = Render::Look::SaveLookFiles(fileSystem, files, LookFile, MoodFile);
+        fileSystem.failWrite.insert(LookFile + ".tmp");
+        const Render::Look::LookSaveResult result = Render::Look::SaveLookFiles(fileSystem, files, LookFile);
         CHECK_FALSE(result.saved);
-        CHECK_MESSAGE(result.message.find("LightMood.json.tmp") != std::string::npos, result.message);
-        CHECK(fileSystem.files == before);
+        CHECK_MESSAGE(result.message.find("Look.json.tmp") != std::string::npos, result.message);
     }
-    SUBCASE("the second file cannot be replaced: the first is restored")
+    SUBCASE("the original cannot be backed up")
     {
-        fileSystem.failRenameTo.insert(MoodFile);
-        const Render::Look::LookSaveResult result = Render::Look::SaveLookFiles(fileSystem, files, LookFile, MoodFile);
-        CHECK_FALSE(result.saved);
-        CHECK_FALSE(result.backupsKept);
-        CHECK_MESSAGE(result.message.find("restored") != std::string::npos, result.message);
-        CHECK(fileSystem.files == before);
+        fileSystem.failCopyTo.insert(LookFile + ".bak");
+        CHECK_FALSE(Render::Look::SaveLookFiles(fileSystem, files, LookFile).saved);
     }
-    SUBCASE("the restore fails too: the backups are kept and named")
+    SUBCASE("the file cannot be replaced")
     {
-        fileSystem.failRenameTo.insert(MoodFile);
-        fileSystem.failCopyTo.insert(LookFile);
-        const Render::Look::LookSaveResult result = Render::Look::SaveLookFiles(fileSystem, files, LookFile, MoodFile);
+        fileSystem.failRenameTo.insert(LookFile);
+        const Render::Look::LookSaveResult result = Render::Look::SaveLookFiles(fileSystem, files, LookFile);
         CHECK_FALSE(result.saved);
-        CHECK(result.backupsKept);
-        CHECK(fileSystem.files[LookFile + ".bak"] == ShippedLook);
-        CHECK(fileSystem.files[MoodFile + ".bak"] == ShippedMood);
-        CHECK(fileSystem.files[MoodFile] == ShippedMood);
-        for (const std::string& name : {LookFile, MoodFile, LookFile + ".bak", MoodFile + ".bak"})
-        {
-            CHECK_MESSAGE(result.message.find(name) != std::string::npos, result.message);
-        }
+        CHECK_MESSAGE(result.message.find("nothing was saved") != std::string::npos, result.message);
     }
+    CHECK(fileSystem.files == before);
     // The live values are not touched by a save.
     CHECK(Effective(files, "bloom.strength", Lorencia) == Approx(0.9));
 }
@@ -333,20 +488,19 @@ TEST_CASE(
     "a missing look profile is edited from the built-in values, an invalid one is not edited [render][look][tuning]")
 {
     FakeFileSystem fileSystem;
-    fileSystem.files[MoodFile] = ShippedMood;
     LookFiles files = Render::Look::LoadLookFiles(fileSystem, LookFile, MoodFile).files;
     CHECK(files.lookUsable);
     REQUIRE(Set(files, "bloom.strength", 0.9).applied);
 
-    fileSystem.files[LookFile] = R"({ "formatVersion": 1, "default": { "bloom.strength": 9 } })";
+    fileSystem.files[LookFile] = R"({ "formatVersion": 2, "default": { "bloom.strength": 9 } })";
     LookFiles invalid = Render::Look::LoadLookFiles(fileSystem, LookFile, MoodFile).files;
     CHECK_FALSE(invalid.lookUsable);
     CHECK(Effective(invalid, "bloom.strength", Lorencia) == Approx(0.6));
     CHECK_FALSE(Set(invalid, "bloom.strength", 0.9).applied);
-    // Its mood is still editable, and saving leaves the invalid look file alone.
-    REQUIRE(Set(invalid, "mood.sun", 0.5).applied);
-    REQUIRE(Render::Look::SaveLookFiles(fileSystem, invalid, LookFile, MoodFile).saved);
-    CHECK(fileSystem.files[LookFile] == R"({ "formatVersion": 1, "default": { "bloom.strength": 9 } })");
+    CHECK_FALSE(Set(invalid, "mood.sun", 0.5).applied);
+    // Saving leaves the invalid file alone.
+    CHECK_FALSE(Render::Look::SaveLookFiles(fileSystem, invalid, LookFile).saved);
+    CHECK(fileSystem.files[LookFile] == R"({ "formatVersion": 2, "default": { "bloom.strength": 9 } })");
 }
 
 #ifndef _WIN32
@@ -416,15 +570,14 @@ TEST_CASE("$look commands parse their verb, scope, name and value [render][look]
 
 TEST_CASE("a value an environment sets names the environment as its source [render][look][tuning]")
 {
-    FakeFileSystem fileSystem = Shipped();
+    FakeFileSystem fileSystem;
     fileSystem.files[LookFile] = R"({
-  "formatVersion": 1,
+  "formatVersion": 2,
   "default": { "bloom.strength": 1.0, "ao.strength": 0.5 },
   "environments": { "enclosed": { "bloom.strength": 0.4 } },
-  "maps": [ { "world": 1, "name": "Dungeon", "environment": "enclosed", "ao.strength": 0.2 } ]
+  "maps": [ { "maps": [1], "name": "Dungeon", "environment": "enclosed", "ao.strength": 0.2 } ]
 })";
     LookFiles files = Load(fileSystem);
-    constexpr int Dungeon = 1;
     constexpr int Open = 0;
     CHECK(SourceOf(files, "bloom.strength", Dungeon) == LookValueSource::Environment);
     CHECK(Effective(files, "bloom.strength", Dungeon) == Approx(0.4));

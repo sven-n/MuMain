@@ -3,10 +3,11 @@
 The client has two looks. **Classic** (the default) draws the game as it
 always looked. **Enhanced** is a preset that switches on five rendering
 features and 4x multisample anti-aliasing together. The values of the Enhanced
-preset ship with the client in two data files, and every piece of it can be
-tuned there, also per map, without touching the code (see "Tuning the Enhanced
-preset" below). Players can also tune its strengths for themselves in the
-options window, without editing those files (see "Tuning it yourself").
+preset ship with the client in one data file, `Data/Render/Look.json`, and
+every piece of it can be tuned there, also per map, without touching the code
+(see "Tuning the Enhanced preset" below). Players can also tune its strengths
+for themselves in the options window, without editing that file (see "Tuning
+it yourself").
 
 | Feature | What it does | Guide |
 |---|---|---|
@@ -156,8 +157,7 @@ not a number or one outside its range is ignored on its own, with a warning in
 the `render` log; the other lines still apply. The section is written through
 a temporary file that replaces `config.ini` only when it is complete: if the
 save fails, the window says that the change is shown but not saved, and
-`config.ini` keeps what it had. Your tuning never changes `Data/Render/Look.json`
-or `Data/Maps/LightMood.json`.
+`config.ini` keeps what it had. Your tuning never changes `Data/Render/Look.json`.
 
 ## Tuning the Enhanced preset
 
@@ -169,36 +169,80 @@ its look is fixed in the code. To change how Enhanced looks:
 | model lighting (diffuse curve, rim, specular, highlight roll-off) | `lighting.*` in `Data/Render/Look.json` | below |
 | how candles, fires and spells light models | `dynamic.*` in `Data/Render/Look.json` | below |
 | bloom and colour grading | `bloom.*`, `grading.*` in `Data/Render/Look.json`; grading tables in `Data/Grading/` | [post-processing.md](post-processing.md) |
-| how dark each map's baked light is | `Data/Maps/LightMood.json` | [light-mood.md](light-mood.md) |
+| how dark each map's baked light is | `mood.*` in `Data/Render/Look.json` | [light-mood.md](light-mood.md) |
 | which armour shines | `material.specular` in the item-model JSON (`Data/Items/Models/`) | below |
 
 Every value can be set for the whole game or for one map; a player's own
 value (see "Tuning it yourself") then applies over it. Developer builds
-change any value live and save it back to the files (`$look set`, `$look
+change any value live and save it back to the file (`$look set`, `$look
 save`, or the DevEditor's Look panel; see "Developer commands"), so a change
 can be judged in the game before it is kept. A server or a player who wants a
 different Enhanced ships different data files; the code stays the same.
 
 ## The Enhanced values: `Data/Render/Look.json`
 
-The look profile holds the tuning values of the features; the light mood's
-values are in `Data/Maps/LightMood.json` ([light-mood.md](light-mood.md)).
-Classic uses neither file.
+The look profile holds the tuning values of the features and the light
+mood's values (`mood.*`, [light-mood.md](light-mood.md)). Classic doesn't use
+it.
 
 ```json
 {
-  "formatVersion": 1,
-  "default": { "bloom.strength": 1.0, "dynamic.effectCap": 2.5 },
-  "environments": { "enclosed": { "sun.shadow": 0 } },
-  "maps": [ { "world": 10, "name": "Icarus", "environment": "sky", "bloom.strength": 0.3 } ]
+  "formatVersion": 2,
+  "default": {
+    "bloom.strength": 1,
+    "mood.base": 0.6
+  },
+  "environments": {
+    "enclosed": {"sun.shadow": 0, "mood.base": 0.45},
+    "fixed": {"mood.sun": 1},
+    "sky": {"mood.background": 0.7}
+  },
+  "maps": [
+    {"maps": [1], "name": "Dungeon", "environment": "enclosed"},
+    {"maps": [10], "name": "Icarus", "environment": "sky", "bloom.strength": 0.3},
+    {"maps": [11, 12, 13, 14, 15, 16, 17, 52], "name": "Blood Castle", "environment": "fixed"}
+  ]
 }
 ```
 
-`default` applies everywhere; a map entry names its world number and
-overrides any value for that map (`name` is for the reader). A value left out
-keeps its built-in value. One value out of its range or a broken file makes
-the client log every problem once (`render` log) and use the built-in values
-for the whole file.
+- **Layers.** A value comes from the first of these that names it: the
+  map's entry, its environment, `default`, the built-in value. A player's own
+  value (see "Tuning it yourself") applies over all of them.
+- **Environments** are kinds of place (see below). A map entry picks one by
+  name with `"environment"`; an environment does not list its maps.
+- **Map entries** list their maps by the number of the world the client
+  loads. That is the server's map number, except Devil Square 5–7: the server
+  sends 32, the client loads world 9 (Devil Square 1–4) and takes world 9's
+  entry, so an entry for 32 is not read. One entry holds the variants of one
+  map, such as Blood Castle 1–8, which are alike. Maps that are only alike in
+  kind share an environment, not an entry. A map is in at most one entry;
+  `name` is for the reader. Which maps are variants of one map is not checked
+  yet (the map data has no groups so far), only that every number is a map
+  from 0 to 255 and in one entry.
+- **Rules between values** are checked on the result: on the default, on each
+  environment over the default and on each map, `mood.figures` is not below
+  `mood.base`.
+- **Errors.** An unknown name, a value out of its range, a map in two entries,
+  a stage instead of a map number, an unknown environment or a broken file
+  make the client log every problem once (`render` log) and use the built-in
+  values for the whole file. Data Checks shows the same problems.
+- **Saving** (`$look save`, the Dev Editor) writes a fixed layout: the
+  default one value per line, each environment and each map entry on one
+  line, environments by name, map entries by their first map, values in the
+  order of the tables here and in [light-mood.md](light-mood.md), numbers in
+  their shortest form (`1`, not `1.0`). Saving without changes writes the
+  same file.
+- **Version 1** files still load: a version 1 `Look.json` is read together
+  with the `Data/Maps/LightMood.json` beside it, which held the mood values
+  (a `mood.*` value in a version 1 `Look.json` makes it unusable). The mood's default becomes `mood.*` values on `default`, and each map keeps
+  every mood value its entry named, even one equal to the default, so a later
+  change of the default leaves it as it was. Saving writes version 2 into
+  `Look.json` alone. Without a valid `LightMood.json` beside it, a version 1
+  `Look.json` still applies, with the Classic mood, but cannot be saved:
+  that would make the Classic mood the file's. Restore the mood file, or
+  write `Look.json` as version 2 by hand with its `mood.*` values. A
+  `LightMood.json` beside a version 2 `Look.json` is not read; Data Checks
+  warns about it ("is no longer read") so it can be deleted.
 
 | Value | Shipped | Built-in | Range | Meaning |
 |---|---|---|---|---|
@@ -245,11 +289,16 @@ own. The shipped ones:
 | Environment | What it sets | Maps |
 |---|---|---|
 | `outdoor` | nothing yet | Lorencia, Devias, Noria, Tarkan, Valley of Loren, Land of Trials, Crywolf, Elbeland, Loren Market, Karutan |
-| `outdoorDense` | nothing yet | Aida, Kanturu Ruins, Swamp of Calmness, Raklion, Vulcanus |
-| `sky` | nothing yet | Icarus |
-| `underwater` | softer sun shadows | Atlans |
-| `enclosed` | no sun shadows | Dungeon, Lost Tower, Devil Square, Chaos Castle, Kanturu Relics, Refinery Tower, Balgass Refuge, Illusion Temple, Raklion boss cave, Doppelganger, Imperial Guardian |
-| `fixed` | nothing (open air) | Arena, Blood Castle, Kalima, Barracks of Balgass, Santa Village, Duel Arena |
+| `outdoorDense` | models lit fully by the sun (`mood.sun` 1) | Aida, Kanturu Ruins, Swamp of Calmness, Raklion, Vulcanus |
+| `sky` | lighter baked light, darker background | Icarus |
+| `underwater` | softer sun shadows, lighter baked light | Atlans |
+| `enclosed` | no sun shadows, character shadows from two point lights, baked light darkened evenly | Dungeon, Lost Tower, Devil Square, Chaos Castle, Kanturu Relics, Refinery Tower, Balgass Refuge, Illusion Temple, Raklion boss cave, Doppelganger, Imperial Guardian |
+| `fixed` | models lit fully by the sun (`mood.sun` 1) | Arena, Blood Castle, Kalima, Barracks of Balgass, Santa Village, Duel Arena |
+
+A map's own entry can still differ from its environment: Aida, Raklion, Arena,
+Santa Village and Duel Arena keep the default's `mood.sun`. The file also has
+an entry for map 32 (Devil Square 5–7) with the default's `mood.sun`, but the
+client shows Devil Square 5–7 with world 9's entry (see "Map entries" above).
 
 [enhanced-look-map-environments.md](enhanced-look-map-environments.md) lists
 every map with its world number and why it has its environment.
@@ -316,19 +365,20 @@ of them; there only `$look enhanced|classic` exists.
 Live tuning of the look profile (session only until `$look save`). A value
 changed this way wins over the player's own value of it where the change
 applies: `$look set` on every map without its own entry for that value,
-`$look set map` on the active map only. `$look reset <name>` clears the change
+`$look set map` on the active map's entry, so on every map that entry lists
+(the reply names them; a map without an entry gets one of its own). `$look reset <name>` clears the change
 in the default and the active map's entry (another map's `set map` change
 stays), `$look reset` and `$look load` clear every change; `$look show` names
-a player's value `player`. `$look save` writes the files' own values, never a
+a player's value `player`. `$look save` writes the file's own values, never a
 player's:
 
 | Command | Effect |
 |---|---|
 | `$look show [<name>]` | every effective value and where it comes from (render log) |
-| `$look set [map] <name> <value>` | changes a value of the default profile, or of the current map's entry |
-| `$look reset [<name>]` | back to the values loaded from the files |
-| `$look load [<candidate>]` | loads `Data/Render/Candidates/<candidate>/Look.json` and `LightMood.json`, or the shipped files again |
-| `$look save` | writes both files |
+| `$look set [map] <name> <value>` | changes a value of the default profile, or of the current map's entry; when the entry lists several maps, the reply names them ("the entry is shared, maps … all get it") and the Dev Editor's Look panel shows them under "Shared by maps" |
+| `$look reset [<name>]` | back to the values loaded from the file |
+| `$look load [<candidate>]` | loads `Data/Render/Candidates/<candidate>/Look.json` (a version 1 candidate with its `LightMood.json`; without one it shows the shipped moods and cannot be saved), or the shipped file again |
+| `$look save` | writes `Data/Render/Look.json` |
 
 Shorter forms of `$look set`: `$lighting rim <v>`, `$lighting specular <v>`,
 `$lighting diffuse <scale> <ambient> <floor>`, `$lightmood knee <k>`,
