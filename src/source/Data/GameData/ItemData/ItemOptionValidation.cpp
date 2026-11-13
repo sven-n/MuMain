@@ -244,6 +244,10 @@ void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const It
                               "no item and no option rule links \"" + definitions[index].name + "\""});
         }
     }
+}
+
+void ValidateAncientBonusNames(const ItemOptionDatabase& options, std::vector<ItemDataIssue>& issues)
+{
     for (size_t attackType = 0; attackType < AncientBonusNames.size(); ++attackType)
     {
         if (options.FindAncientBonus(static_cast<int>(attackType) + 1) == ItemOptionDatabase::NoDefinition)

@@ -172,7 +172,7 @@ TEST_CASE("An item's links name definitions, one of each byte, and every definit
     issues.clear();
     ValidateOptionDefinitionUse(std::vector<ItemDefinition>{},
                                 ItemOptionDatabase({MakeLuck("unused")}, MakeTexts(), {rule}), issues);
-    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[0].name"));
+    CHECK(issues.empty());
 }
 
 // The excellent byte of wings and the Horn of Fenrir means something else, and no horn is excellent, so they can't link
@@ -381,7 +381,7 @@ TEST_CASE("The ancient bonus definitions are picked by attackType, not linked [d
                                      MakeTexts());
     CHECK(missing.FindAncientBonus(3) == ItemOptionDatabase::NoDefinition);
     issues.clear();
-    ValidateOptionDefinitionUse(std::vector<ItemDefinition>{MakeItem(0, 0, {"luck"})}, missing, issues);
+    ValidateAncientBonusNames(missing, issues);
     const auto missingName = [&](const std::string& name)
     {
         return std::any_of(issues.begin(), issues.end(),
