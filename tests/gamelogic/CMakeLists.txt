@@ -130,6 +130,16 @@ if(WIN32 AND TARGET ClientLibrary)
     )
 endif()
 
+# Skill aiming (direction skills, auto-attack). Its own target, so the helper rotation's ClientLibrary staging and
+# socket fixtures on Windows don't block it.
+mu_add_test(
+    NAME test_skill_aim
+    SOURCES
+        test_skill_aim.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
 mu_add_test(
     NAME test_ancient_set_options
     SOURCES

@@ -12,9 +12,9 @@
 namespace Render::Look
 {
 
-// Reads Data/Render/Look.json and Data/Maps/LightMood.json (their problems are logged once; an
-// unusable look profile keeps the built-in values, an unusable light mood the Classic light) and
-// hands the light mood its data. Call once at startup.
+// Reads Data/Render/Look.json (its problems are logged once; an unusable file keeps the built-in
+// values, a format 1 file without its Data/Maps/LightMood.json the Classic light) and hands the
+// light mood its data. Call once at startup.
 void LoadProfile();
 
 // The values of the active world (gMapManager.WorldActive).

@@ -24,6 +24,7 @@
 #include "UI/Chat/ChatInput.h"
 #include "GameLogic/Combat/ClassAttack.h"
 #include "GameLogic/Combat/SkillCast.h"
+#include "GameLogic/Combat/SkillAim.h"
 #include "GameLogic/Combat/SkillExecution.h"
 #include "Core/Input/ImeInput.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -37,6 +38,11 @@
 
 #include "GameLogic/Events/MatchEvent.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSetup.h"
+#include "GameLogic/Monsters/MonsterSetupApply.h"
+#include "World/GameMaps/MonsterSpawnWorld.h"
+#include "GameLogic/NPCs/NpcTalk.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/NPCs/npcBreeder.h"
@@ -76,7 +82,7 @@ extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;
 extern CUIMapName* g_pUIMapName;	// rozy
-extern bool bCheckNPC;
+extern std::vector<int> g_noQuestTitleClasses;
 extern BOOL g_bWhileMovingZone;
 extern DWORD g_dwLatestZoneMoving;
 extern bool LogOut;
@@ -1230,6 +1236,180 @@ void SendRequestAction(OBJECT& obj, BYTE action)
     SocketClient->ToGameServer()->SendAnimationRequest(rotation, action);
 }
 
+// The Crywolf altar dialog's button and the altar it asks for.
+extern int Button_Down;
+extern int BackUp_Key;
+
+namespace
+{
+// The Crywolf altar contract an elf makes while only elves may (the hook
+// CrywolfAltarContract, Q-MN46), with the texts of its talk step.
+void CrywolfAltarTalk(CHARACTER& npc, const GameLogic::Npcs::CrywolfAltarTexts& texts)
+{
+    // Talk calls it for the altars' models only.
+    const int altarNum = npc.Object.Type - MODEL_CRYWOLF_ALTAR1;
+    const bool isElf = gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF;
+    const bool altarActive = M34CryWolf1st::Get_AltarState_State(altarNum);
+    const BYTE state = (m_AltarState[altarNum] & 0x0f);
+
+    if (isElf && !altarActive)
+    {
+        if (state > 0)
+        {
+            BackUp_Key = npc.Key;
+
+            // The contracts left for the text's "%d".
+            const std::wstring canContract = GameLogic::Npcs::WithNumber(texts.canContract, state);
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.showCancel = true;
+            cfg.lines = {
+                {canContract, false},
+                {texts.proceed, false},
+            };
+            cfg.onPrimary = [onMount = texts.onMount]
+            {
+                if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT ||
+                    Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
+                {
+                    mu::ui::window::GenericDialogConfig dontCfg;
+                    dontCfg.lines.push_back({onMount, false});
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(dontCfg));
+                }
+                else
+                {
+                    Button_Down = 2;
+                    SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
+                }
+            };
+            cfg.onCancel = [needGuardian = texts.needGuardian]
+            {
+                Button_Down = 1;
+                mu::ui::window::GenericDialogConfig needGuardianCfg;
+                needGuardianCfg.lines.push_back({needGuardian, false});
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(needGuardianCfg));
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        }
+        else
+        {
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.lines.push_back({texts.destroyed, false});
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        }
+    }
+    else if (isElf && altarActive)
+    {
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({texts.ongoing, false});
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+    }
+    else
+    {
+        SocketClient->ToGameServer()->SendTalkToNpcRequest(npc.Key);
+    }
+}
+
+// Kanturu 2nd's entrance: no talk while the gate machine animates.
+void Kanturu2ndTalk(CHARACTER& npc)
+{
+    if (g_pKanturu2ndEnterNpc->IsNpcAnimation())
+        return;
+    // Talking to another NPC replaces the gate dialog: release
+    // the server dialog BEFORE the new Talk request so packet
+    // order stays Close(old) then Talk(new). A Close sent later
+    // (e.g. from the new dialog's Show path) would clear the
+    // just-opened dialog instead.
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC))
+    {
+        g_pKanturu2ndEnterNpc->ClosingProcess();
+    }
+    SocketClient->ToGameServer()->SendTalkToNpcRequest(npc.Key);
+}
+
+// The Illusion Temple: only the event's own NPCs react, by its window.
+void CursedTempleTalk(CHARACTER& npc)
+{
+    if (g_CursedTemple->IsGaugebarEnabled())
+        return;
+    const int monsterIndex = npc.MonsterIndex;
+    if (monsterIndex == MONSTER_STONE_STATUE || (g_pCursedTempleWindow->CheckInventoryHolyItem(Hero) &&
+                                                 ((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied &&
+                                                   monsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE) ||
+                                                  (g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion &&
+                                                   monsterIndex == MONSTER_ILLUSION_ITEM_STORAGE))))
+    {
+        g_CursedTemple->SetGaugebarEnabled(true);
+    }
+    g_pCursedTempleWindow->CheckTalkProgressNpc(monsterIndex, npc.Key);
+}
+
+// The game's side of talking to an NPC.
+const GameLogic::Npcs::TalkWorld& GameTalkWorld()
+{
+    static const GameLogic::Npcs::TalkWorld world{
+        .talkSetup =
+            [](const CHARACTER& npc)
+        {
+            const Data::Monsters::MonsterDefinition* entry = g_MonsterDatabase.Find(npc.MonsterIndex);
+            return entry != nullptr ? GameLogic::Monsters::Setup::SetupNow(*entry, World::Monsters::GetSpawnWorld())
+                                    : Data::Monsters::MonsterSetup{};
+        },
+        .locale = [] { return g_MonsterDatabase.GetDisplayLocale(); },
+        .findTalkTexts = [](const std::string& name) -> const Data::Monsters::MonsterAltarContract*
+        {
+            const Data::Monsters::MonsterTalkTexts& texts = g_MonsterDatabase.GetTalkTexts();
+            const auto found = texts.find(name);
+            return found != texts.end() ? &found->second : nullptr;
+        },
+        .heroLevel = [] { return static_cast<int>(CharacterAttribute->Level); },
+        // The state the Werewolf Guardsman's variant reads, so the two agree.
+        .isCrywolfElfTime = [] { return World::Monsters::IsSpawnStateOn("crywolfElfTime"); },
+        .isCrywolfMap = [] { return M34CryWolf1st::IsCyrWolf1st(); },
+        .isKanturu2nd = [] { return M38Kanturu2nd::Is_Kanturu2nd(); },
+        .isCursedTemple = [] { return gMapManager.IsCursedTemple(); },
+        .questState = [](int quest) { return static_cast<int>(g_csQuest.getQuestState2(quest)); },
+        .gold = [] { return static_cast<unsigned long>(CharacterMachine->Gold); },
+        .hasDarkHorse = [] { return CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_DARK_HORSE_ITEM; },
+        .hasDarkRaven = [] { return CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_DARK_RAVEN_ITEM; },
+        .sendTalk = [](int key) { SocketClient->ToGameServer()->SendTalkToNpcRequest(key); },
+        .sendEnterRefuge = [] { SocketClient->ToGameServer()->SendEnterOnWerewolfRequest(); },
+        .sendEnterBarracks = [] { SocketClient->ToGameServer()->SendEnterOnGatekeeperRequest(); },
+        .sendDarkHorseInfo =
+            []
+        {
+            SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkHorse, StorageType::Inventory,
+                                                             EQUIPMENT_HELPER);
+        },
+        .sendDarkRavenInfo =
+            []
+        {
+            SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkRaven, StorageType::Inventory,
+                                                             EQUIPMENT_WEAPON_LEFT);
+        },
+        .showDialog = [](mu::ui::window::GenericDialogConfig config)
+        { mu::ui::window::g_pGenericConfirmDialog->Show(std::move(config)); },
+        .systemMessage = [](const std::wstring& text)
+        { g_pSystemLogBox->AddText(text.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE); },
+        .errorMessage = [](const std::wstring& text)
+        { g_pSystemLogBox->AddText(text.c_str(), mu::ui::window::TYPE_ERROR_MESSAGE); },
+        .setRepairShop = [](bool repair) { g_pNPCShop->SetRepairShop(repair); },
+        .setNoQuestTitleFor = [](const std::vector<int>& classes) { g_noQuestTitleClasses = classes; },
+        .beforeTalk =
+            []
+        {
+            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST))
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYQUEST);
+            if (g_csQuest.IsInit())
+                SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
+        },
+        .crywolfAltarTalk = CrywolfAltarTalk,
+        .kanturu2ndTalk = Kanturu2ndTalk,
+        .cursedTempleTalk = CursedTempleTalk,
+    };
+    return world;
+}
+} // namespace
+
 int ItemKey = 0;
 int ActionTarget = -1;
 
@@ -1540,244 +1720,13 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 			if (TargetNpc == -1)
 				break;
 
-			// === Rozpoznanie napotkanego NPC ===
-			const int npcIndex = 205;
-			const int monsterIndex = CharactersClient[TargetNpc].MonsterIndex;
+            // A rule that stops before the talk keeps the NPC as the target.
+            if (!GameLogic::Npcs::Talk(CharactersClient[TargetNpc], GameTalkWorld()))
+                break;
 
-			if (monsterIndex >= npcIndex)
-			{
-				const int level = CharacterAttribute->Level;
-
-				if (monsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
-				{
-					wchar_t text[100];
-					mu_swprintf(text, I18N::Game::OnlyLevelAboveDCanDoTheChaosCombination, CHAOS_MIX_LEVEL);
-					g_pSystemLogBox->AddText(text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-					break;
-				}
-
-				// Sklepy
-				bool isRepairNpc =
-					monsterIndex == MONSTER_EO_THE_CRAFTSMAN ||
-					monsterIndex == MONSTER_ZIENNA_THE_WEAPONS_MERCHANT ||
-					monsterIndex == MONSTER_HANZO_THE_BLACKSMITH ||
-					monsterIndex == MONSTER_RHEA ||
-					monsterIndex == MONSTER_WEAPONS_MERCHANT_BOLO;
-
-				g_pNPCShop->SetRepairShop(isRepairNpc);
-
-				if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST))
-					g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYQUEST);
-
-				if (g_csQuest.IsInit())
-					SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
-
-				// === Specjalne rozmowy ===
-				const int objectType = CharactersClient[TargetNpc].Object.Type;
-				if (isCryWolfElf)
-				{
-					if (objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5)
-					{
-						const int altarNum = objectType - MODEL_CRYWOLF_ALTAR1;
-						const bool isElf = gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF;
-						const bool altarActive = M34CryWolf1st::Get_AltarState_State(altarNum);
-						const BYTE state = (m_AltarState[altarNum] & 0x0f);
-
-						if (isElf && !altarActive)
-						{
-							if (state > 0)
-							{
-								extern int Button_Down;
-								extern int BackUp_Key;
-								BackUp_Key = CharactersClient[TargetNpc].Key;
-
-								wchar_t szCryWolfText[256];
-								mu_swprintf(szCryWolfText, I18N::Game::ContractCanBeMadeForDTimes, state);
-								mu::ui::window::GenericDialogConfig cfg;
-								cfg.showCancel = true;
-								cfg.lines = {
-									{ szCryWolfText, false },
-									{ I18N::Game::WouldYouLikeToProceedWithTheContract, false },
-								};
-								cfg.onPrimary = []
-								{
-									if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
-									{
-										mu::ui::window::GenericDialogConfig dontCfg;
-										dontCfg.lines.push_back({ I18N::Game::ContractCanTBeMadeWhenYouAreOnAMount, false });
-										mu::ui::window::g_pGenericConfirmDialog->Show(std::move(dontCfg));
-									}
-									else
-									{
-										Button_Down = 2;
-										SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
-									}
-								};
-								cfg.onCancel = []
-								{
-									Button_Down = 1;
-									mu::ui::window::GenericDialogConfig needGuardianCfg;
-									needGuardianCfg.lines.push_back({ I18N::Game::WeNeedAGuardianToProtectTheWolf, false });
-									mu::ui::window::g_pGenericConfirmDialog->Show(std::move(needGuardianCfg));
-								};
-								mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-							}
-							else
-							{
-								mu::ui::window::GenericDialogConfig cfg;
-								cfg.lines.push_back({ I18N::Game::FurtherContractCanTBeDoneSinceTheAltarHasBeenDestroyed, false });
-								mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-							}
-						}
-						else if (isElf && altarActive)
-						{
-							mu::ui::window::GenericDialogConfig cfg;
-							cfg.lines.push_back({ I18N::Game::ContractIsOngoingThereforeDualCompactIsNotPossible, false });
-							mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-						}
-						else
-						{
-							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-						}
-					}
-					else
-					{
-						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-					}
-				}
-				else if (M34CryWolf1st::IsCyrWolf1st())
-				{
-					if (!(objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5))
-					{
-						if (objectType == MODEL_NPC_QUARREL)
-						{
-							mu::ui::window::GenericDialogConfig cfg;
-							cfg.lines = {
-								{ I18N::Game::WerewolfGuardsman, true },
-								{ I18N::Game::DoYouEvenKnowAboutMe, false },
-								{ I18N::Game::IfYouHavePassedThroughThe, false },
-								{ I18N::Game::YouMustBeLocatedCloselyTogether, false },
-								{ I18N::Game::InOrderToReceiveHelpFrom, false },
-							};
-							cfg.onPrimary = []
-							{
-								// Original visually disabled (LockOkButton) the OK button in this
-								// quest state instead of gating inside the callback -- the new
-								// primitive has no disabled-button concept yet, so this guard
-								// substitutes for that (functionally equivalent, cosmetically not).
-								BYTE byQuestState = g_csQuest.getQuestState2(QUEST_3RD_CHANGE_UP_2);
-								if (QUEST_ING != byQuestState && QUEST_END != byQuestState)
-									return;
-
-								DWORD dwGold = CharacterMachine->Gold;
-								if (dwGold >= 3000000)
-									SocketClient->ToGameServer()->SendEnterOnWerewolfRequest();
-								else
-									g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfZen, mu::ui::window::TYPE_ERROR_MESSAGE);
-							};
-							mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-						}
-
-						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-					}
-				}
-				else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
-				{
-					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-
-					{
-						mu::ui::window::GenericDialogConfig cfg;
-						cfg.lines = {
-							{ I18N::Game::Gatekeeper, true },
-							{ I18N::Game::HmmWhoAreYouIMConfusedAreYouEvenApprovedOfBalgass, false },
-							{ I18N::Game::LugadrS12ApostlesAreHelping, false },
-							{ I18N::Game::ApostleDevinSThirdMissionRequest, false },
-						};
-						cfg.onPrimary = []
-						{
-							// Same disabled-OK-button substitution as the Werewolf dialog above.
-							BYTE byQuestState = g_csQuest.getQuestState2(QUEST_3RD_CHANGE_UP_3);
-							if (QUEST_ING != byQuestState)
-								return;
-							SocketClient->ToGameServer()->SendEnterOnGatekeeperRequest();
-						};
-						mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-					}
-				}
-				else if (monsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && monsterIndex <= MONSTER_LITTLE_SANTA_PINK)
-				{
-					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-
-					wchar_t temp[32] = { 0 };
-					if (monsterIndex == MONSTER_LITTLE_SANTA_RED)
-						mu_swprintf(temp, I18N::Game::HealthHasBeenRecoveredOf100, 100);
-					else if (monsterIndex == MONSTER_LITTLE_SANTA_BLUE)
-						mu_swprintf(temp, I18N::Game::ManaHasBeenRecoveredOf100, 100);
-
-					g_pSystemLogBox->AddText(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-				}
-				else if (monsterIndex == MONSTER_DELGADO || monsterIndex == MONSTER_LUGARD ||
-					monsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA || monsterIndex == MONSTER_DAVID)
-				{
-					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-				}
-				else
-				{
-					if (M38Kanturu2nd::Is_Kanturu2nd())
-					{
-						if (!g_pKanturu2ndEnterNpc->IsNpcAnimation())
-						{
-							// Talking to another NPC replaces the gate dialog: release
-							// the server dialog BEFORE the new Talk request so packet
-							// order stays Close(old) then Talk(new). A Close sent later
-							// (e.g. from the new dialog's Show path) would clear the
-							// just-opened dialog instead.
-							if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC))
-							{
-								g_pKanturu2ndEnterNpc->ClosingProcess();
-							}
-							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-						}
-					}
-					else if (gMapManager.IsCursedTemple())
-					{
-						if (!g_CursedTemple->IsGaugebarEnabled())
-						{
-							if (
-								CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE ||
-								(g_pCursedTempleWindow->CheckInventoryHolyItem(Hero) &&
-									((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && monsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE) ||
-										(g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && monsterIndex == MONSTER_ILLUSION_ITEM_STORAGE)))
-								)
-							{
-								g_CursedTemple->SetGaugebarEnabled(true);
-							}
-							g_pCursedTempleWindow->CheckTalkProgressNpc(monsterIndex, CharactersClient[TargetNpc].Key);
-						}
-					}
-					else
-					{
-						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-					}
-				}
-
-				bCheckNPC = (monsterIndex == MONSTER_MARLON);
-
-				if (monsterIndex == MONSTER_PET_TRAINER)
-				{
-					ITEM* pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-					if (pItem->Type == ITEM_DARK_HORSE_ITEM)
-						SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkHorse, StorageType::Inventory, EQUIPMENT_HELPER);
-
-					pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-					if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
-						SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkRaven, StorageType::Inventory, EQUIPMENT_WEAPON_LEFT);
-				}
-			}
-
-			TargetNpc = -1;
-			break;
-		}
+            TargetNpc = -1;
+            break;
+        }
     case MOVEMENT_OPERATE:
         if (std::max<int>(abs((Hero->PositionX) - TargetX), abs((Hero->PositionY) - TargetY)) <= 1)
         {
@@ -2723,12 +2672,14 @@ void Attack(CHARACTER* c)
             MouseRButtonPush = false;
             Success = true;
         }
-        if (
-            g_pOption->IsAutoAttack()
-            && gMapManager.WorldActive != WD_6STADIUM
-            && gMapManager.InChaosCastle() == false
-            && Attacking == 2
-            && SelectedCharacter != -1)
+        GameLogic::Combat::SkillAim::AutoAttackState autoAttack;
+        autoAttack.optionOn = g_pOption->IsAutoAttack();
+        autoAttack.mapAllowsIt = gMapManager.WorldActive != WD_6STADIUM && !gMapManager.InChaosCastle();
+        autoAttack.afterSkillCast = Attacking == 2;
+        autoAttack.hasSelection = SelectedCharacter != -1;
+        autoAttack.selectionAttackable = autoAttack.hasSelection && CheckAttack();
+        autoAttack.skill = Skill;
+        if (GameLogic::Combat::SkillAim::RepeatsAutoAttack(autoAttack))
         {
             Success = true;
         }

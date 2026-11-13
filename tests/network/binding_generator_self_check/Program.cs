@@ -38,6 +38,11 @@ if (bindings.Contains("dotnet_SendProbe", StringComparison.Ordinal))
     throw new InvalidOperationException($"Generated binding has namespace-scope state:\n{bindings}");
 }
 
+if (!Regex.IsMatch(bindings, @"kManagedExports_Probe\[\] = \{\s*""SendProbe"",\s*\};"))
+{
+    throw new InvalidOperationException($"Generated binding does not list its export for startup:\n{bindings}");
+}
+
 var functions = Transform(args[1]);
 const string lazyBinding =
     "static const auto dotnet_SendProbe = LoadManagedSymbol<::SendProbe>(\"SendProbe\");";

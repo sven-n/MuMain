@@ -12,6 +12,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Data/DataHandler/BuffData/BuffStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/BuffData/BuffDatabase.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
@@ -1077,6 +1078,55 @@ TEST_CASE("Monster setup: Respawn keeps the buffs the server gave (D55) [monster
     respawn({"poison"});
     respawn({});
     CHECK_FALSE(object.m_BuffMap.isBuff(eDeBuff_Poison));
+}
+
+// The Crywolf hero contract rule of 0x07 is the entries' crywolfContract: a
+// monster given it runs the rule too.
+TEST_CASE("Monster setup: a monster in the Crywolf hero contract loses its states to a buff sent again "
+          "[monsters][creation]")
+{
+    using MonsterRecorder::CreationScope;
+    CreationScope scope(0);
+    const MonsterEntryScope kept(MONSTER_BUDGE_DRAGON);
+    Data::Monsters::MonsterDefinition changed = kept.Original();
+    changed.setup.crywolfContract = true;
+    g_MonsterDatabase.Set(changed);
+    MonsterRecorder::PrepareCreationSlot(CreationSlot::Clean);
+    CHARACTER* budge = scope.Create(MONSTER_BUDGE_DRAGON);
+    REQUIRE(budge != nullptr);
+    g_CharacterRegisterBuff((&budge->Object), eBuff_CrywolfAltarEnable);
+    CreationScope::SendBuffState(*budge, eBuff_CrywolfAltarEnable, true);
+    CHECK_FALSE(budge->Object.m_BuffMap.isBuff(eBuff_CrywolfAltarEnable));
+}
+
+// The shipped entries with crywolfContract are those the old code named by
+// model: the five altars, MODEL_SMITH, MODEL_NPC_SERBIS, MODEL_MERCHANT_MAN,
+// MODEL_STORAGE and MODEL_NPC_BREEDER, on the entry and its map variants.
+TEST_CASE("Monster setup: the shipped crywolfContract entries are the old code's models [monsters][creation]")
+{
+    constexpr std::array<std::string_view, 10> OldModels{
+        "MODEL_CRYWOLF_ALTAR1", "MODEL_CRYWOLF_ALTAR2", "MODEL_CRYWOLF_ALTAR3", "MODEL_CRYWOLF_ALTAR4",
+        "MODEL_CRYWOLF_ALTAR5", "MODEL_SMITH",          "MODEL_NPC_SERBIS",     "MODEL_MERCHANT_MAN",
+        "MODEL_STORAGE",        "MODEL_NPC_BREEDER"};
+    const auto oldRule = [&](const std::string& model)
+    { return std::ranges::find(OldModels, model) != OldModels.end(); };
+    const std::vector<Data::Monsters::MonsterDefinition> monsters =
+        Data::Monsters::LoadMonstersFile(MonsterRecorder::ClientFolder() / "Data" / "Monsters" / "Monsters.json")
+            .monsters;
+    REQUIRE(monsters.size() > 500);
+    int contracts = 0;
+    for (const Data::Monsters::MonsterDefinition& monster : monsters)
+    {
+        INFO("monster " << monster.number);
+        const bool own = monster.setup.crywolfContract.value_or(false);
+        CHECK(own == oldRule(monster.model));
+        contracts += own ? 1 : 0;
+        for (const Data::Monsters::MonsterMapVariant& variant : monster.mapVariants)
+        {
+            CHECK(variant.setup.crywolfContract.value_or(own) == oldRule(variant.model.value_or(monster.model)));
+        }
+    }
+    CHECK(contracts == 13);
 }
 
 // Respawn makes a monster with a tile offset (Elpis) on the server's tile, as

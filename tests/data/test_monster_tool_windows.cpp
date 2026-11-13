@@ -35,6 +35,7 @@
 #include "UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "UI/MonsterTools/MonsterSetupFields.h"
 #include "UI/MonsterTools/MonsterSetupLists.h"
+#include "UI/MonsterTools/TalkStepStates.h"
 #include "UI/MonsterTools/MuMonsterSetupUI.h"
 #include "UI/MonsterTools/MuMonsterEquipmentUI.h"
 #include "UI/Common/MapPicker.h"
@@ -1663,6 +1664,173 @@ TEST_CASE("Monster Setup: a player-shaped monster's box starts as the player's [
     g_MonsterEdits.GetHistory().Clear();
 }
 
+// The NPC rules section: an NPC's talk steps, added, moved with their open
+// state and removed, and its repair shop box (D66).
+TEST_CASE("Monster Setup: an NPC's talk steps are added, moved and removed [editor][monsters]")
+{
+    MonsterDefinition gatekeeper = Monster(408, "Gatekeeper");
+    gatekeeper.kind = Data::Monsters::MonsterKind::Npc;
+    gatekeeper.setup.onTalk.resize(2);
+    gatekeeper.setup.onTalk[1].kind = Data::Monsters::MonsterTalkBlock::Kind::SendPetInfo;
+    const std::array monsters = {gatekeeper};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(408);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(408); };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    click(ImGui::GetIDWithSeed(I18N::Editor::NPCRules, nullptr, ImGui::GetIDWithSeed(408, window->ID)));
+
+    click(SetupItemId(408, "onTalk", I18N::Editor::AddAStep));
+    REQUIRE(stored().setup.onTalk.size() == 3);
+    CHECK(stored().setup.onTalk[2].kind == Data::Monsters::MonsterTalkBlock::Kind::SendTalk);
+
+    const ImGuiID list = ImGui::GetIDWithSeed("onTalk", nullptr, ImGui::GetIDWithSeed(408, window->ID));
+    ImGuiStorage& storage = ImGui::FindWindowByName(WindowIds::MonsterSetup)->StateStorage;
+    // A row's step is keyed by the step's id, which the window keeps per row.
+    const auto rowOf = [&](int index)
+    {
+        const ImGuiID row = ImGui::GetIDWithSeed(index, ImGui::GetIDWithSeed("##Steps", nullptr, list));
+        return ImGui::GetIDWithSeed(storage.GetInt(ImGui::GetIDWithSeed("id", nullptr, row), 0), list);
+    };
+    const auto isOpen = [&](int index)
+    { return storage.GetInt(ImGui::GetIDWithSeed("##Step", nullptr, rowOf(index)), 0) != 0; };
+    // The second step, opened and moved up, stays open as the first.
+    storage.SetInt(ImGui::GetIDWithSeed("##Step", nullptr, rowOf(1)), 1);
+    // An open step's buttons are under its tree node.
+    click(ImGui::GetIDWithSeed(I18N::Editor::MoveUp, nullptr, ImGui::GetIDWithSeed("##Step", nullptr, rowOf(1))));
+    CHECK(stored().setup.onTalk[0].kind == Data::Monsters::MonsterTalkBlock::Kind::SendPetInfo);
+    CHECK(isOpen(0));
+    CHECK_FALSE(isOpen(1));
+    // Undone elsewhere, the open step goes back down with its move.
+    REQUIRE(g_MonsterEdits.Undo());
+    render();
+    CHECK(stored().setup.onTalk[1].kind == Data::Monsters::MonsterTalkBlock::Kind::SendPetInfo);
+    CHECK_FALSE(isOpen(0));
+    CHECK(isOpen(1));
+
+    // The third step, open, stays open a row up when the first is removed.
+    storage.SetInt(ImGui::GetIDWithSeed("##Step", nullptr, rowOf(1)), 0);
+    storage.SetInt(ImGui::GetIDWithSeed("##Step", nullptr, rowOf(2)), 1);
+    click(ImGui::GetIDWithSeed("x", nullptr, rowOf(0)));
+    CHECK(stored().setup.onTalk.size() == 2);
+    CHECK_FALSE(isOpen(0));
+    CHECK(isOpen(1));
+    // A text changed elsewhere (Monster Translations) keeps it open.
+    MonsterDefinition translated = stored();
+    translated.setup.onTalk[1].message.Set("de", "Hallo");
+    g_MonsterDatabase.Set(translated);
+    render();
+    CHECK(isOpen(1));
+
+    click(SetupItemId(408, "repairShop", I18N::Editor::Set));
+    CHECK(stored().setup.repairShop == true);
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK_FALSE(stored().setup.repairShop.has_value());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
+// A talk step's id from the rows before (a change made elsewhere): the same
+// step in its row, a moved one, one changed in its row, one shown no more, two
+// equal ones, and a new one.
+TEST_CASE("Monster Setup: talk steps find their ids again after a change elsewhere [editor][monsters]")
+{
+    using MuEditor::Monsters::SetupLists::MatchStepIds;
+    using MuEditor::Monsters::SetupLists::StepRow;
+    int next = 100;
+    const auto newId = [&] { return next++; };
+    const std::vector<StepRow> abc = {{10, 1}, {20, 2}, {30, 3}};
+
+    CHECK(MatchStepIds(abc, std::vector<unsigned int>{10, 20, 30}, newId) == std::vector<int>{1, 2, 3});
+    // Moved: B up.
+    CHECK(MatchStepIds(abc, std::vector<unsigned int>{20, 10, 30}, newId) == std::vector<int>{2, 1, 3});
+    // A's text changed in its row.
+    CHECK(MatchStepIds(abc, std::vector<unsigned int>{11, 20, 30}, newId) == std::vector<int>{1, 2, 3});
+    // A gone: B and C keep theirs, though C's row is past the new length.
+    CHECK(MatchStepIds(abc, std::vector<unsigned int>{20, 30}, newId) == std::vector<int>{2, 3});
+    // Two equal steps keep one id each.
+    const std::vector<StepRow> twins = {{10, 1}, {10, 2}};
+    CHECK(MatchStepIds(twins, std::vector<unsigned int>{10, 10}, newId) == std::vector<int>{1, 2});
+    // A new step.
+    CHECK(MatchStepIds(std::vector<StepRow>{}, std::vector<unsigned int>{10}, newId) == std::vector<int>{100});
+}
+
+// Two steps of the same kind: an open one moved up and the move undone goes
+// back down still open, found again by its texts.
+TEST_CASE("Monster Setup: an open talk step follows its move's undo among steps of its kind [editor][monsters]")
+{
+    MonsterDefinition santa = Monster(470, "Little Santa");
+    santa.kind = Data::Monsters::MonsterKind::Npc;
+    santa.setup.onTalk.resize(2);
+    for (int index = 0; index < 2; ++index)
+    {
+        santa.setup.onTalk[index].kind = Data::Monsters::MonsterTalkBlock::Kind::Message;
+        santa.setup.onTalk[index].message.Set("en", index == 0 ? "First" : "Second");
+    }
+    const std::array monsters = {santa};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(470);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(470); };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    click(ImGui::GetIDWithSeed(I18N::Editor::NPCRules, nullptr, ImGui::GetIDWithSeed(470, window->ID)));
+    const ImGuiID list = ImGui::GetIDWithSeed("onTalk", nullptr, ImGui::GetIDWithSeed(470, window->ID));
+    ImGuiStorage& storage = ImGui::FindWindowByName(WindowIds::MonsterSetup)->StateStorage;
+    const auto stepOf = [&](int index)
+    {
+        const ImGuiID row = ImGui::GetIDWithSeed(index, ImGui::GetIDWithSeed("##Steps", nullptr, list));
+        return ImGui::GetIDWithSeed(storage.GetInt(ImGui::GetIDWithSeed("id", nullptr, row), 0), list);
+    };
+    const auto isOpen = [&](int index)
+    { return storage.GetInt(ImGui::GetIDWithSeed("##Step", nullptr, stepOf(index)), 0) != 0; };
+
+    storage.SetInt(ImGui::GetIDWithSeed("##Step", nullptr, stepOf(1)), 1);
+    click(ImGui::GetIDWithSeed(I18N::Editor::MoveUp, nullptr, ImGui::GetIDWithSeed("##Step", nullptr, stepOf(1))));
+    CHECK(stored().setup.onTalk[0].message.GetNeutral() == "Second");
+    CHECK(isOpen(0));
+    REQUIRE(g_MonsterEdits.Undo());
+    render();
+    CHECK(stored().setup.onTalk[1].message.GetNeutral() == "Second");
+    CHECK(isOpen(1));
+    CHECK_FALSE(isOpen(0));
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
 // A facing-by-tile row switched to the other axis has that axis only, with
 // its tile, and the field shows that axis' tile.
 // A typed value the reader would refuse is kept to its range: a class step
@@ -2040,6 +2208,58 @@ TEST_CASE("Monster Setup: the unknown monsters' look is edited, undone and previ
     CHECK(g_MonsterSelection.GetNumber() == 700);
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
     g_MonsterModelDatabase.Build({});
+}
+
+// The shared talk texts in Monster Setup: x removes a set no step names, as
+// an undo step; a set a step names stays.
+TEST_CASE("Monster Setup: a shared talk text set is removed and undone, a named one stays [editor][monsters]")
+{
+    MonsterDefinition altar = Monster(205, "Wolf Altar1");
+    Data::Monsters::MonsterTalkBlock contract;
+    contract.kind = Data::Monsters::MonsterTalkBlock::Kind::CrywolfAltarContract;
+    contract.altarTexts = "crywolfAltar";
+    altar.setup.onTalk = {contract};
+    const std::array monsters = {altar};
+    g_MonsterDatabase.Build(monsters, "en");
+    Data::Monsters::MonsterTalkTexts texts;
+    texts["crywolfAltar"].canContract.Set("en", "Left: %d");
+    texts["spare"].canContract.Set("en", "Spare");
+    g_MonsterDatabase.SetTalkTexts(texts);
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(205);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    click(ImGui::GetIDWithSeed(I18N::Editor::SharedTalkTexts, nullptr, window->ID));
+    const ImGuiID section = ImGui::GetIDWithSeed("SharedTalkTexts", nullptr, window->ID);
+    const auto removeOf = [&](const char* name)
+    { return ImGui::GetIDWithSeed("x", nullptr, ImGui::GetIDWithSeed(name, nullptr, section)); };
+
+    click(removeOf("crywolfAltar"));
+    CHECK(g_MonsterDatabase.GetTalkTexts().contains("crywolfAltar"));
+    click(removeOf("spare"));
+    CHECK_FALSE(g_MonsterDatabase.GetTalkTexts().contains("spare"));
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(g_MonsterDatabase.GetTalkTexts() == texts);
+
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterDatabase.SetTalkTexts({});
+    g_MonsterEdits.GetHistory().Clear();
 }
 
 #endif // _EDITOR

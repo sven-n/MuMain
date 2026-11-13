@@ -20,7 +20,7 @@ MonsterEditHistory::MonsterEditHistory(Hooks hooks) : m_hooks(std::move(hooks)) 
 void MonsterEditHistory::Record(MonsterEditEntry entry)
 {
     if (entry.steps.empty() && entry.models.empty() && entry.soundSets.empty() && entry.groups.empty() &&
-        !entry.unknownAfter)
+        !entry.unknownAfter && !entry.talkTextsAfter)
     {
         return;
     }
@@ -138,7 +138,9 @@ bool MonsterEditHistory::IsAsLeft(const MonsterEditEntry& entry, bool undoing) c
                             { return m_hooks.readSoundSet(step.name) == (undoing ? step.after : step.before); });
     const bool unknownAsLeft = !entry.unknownAfter || !m_hooks.readUnknownLook ||
                                m_hooks.readUnknownLook() == *(undoing ? entry.unknownAfter : entry.unknownBefore);
-    return monstersAsLeft && modelsAsLeft && setsAsLeft && unknownAsLeft &&
+    const bool talkTextsAsLeft = !entry.talkTextsAfter || !m_hooks.readTalkTexts ||
+                                 m_hooks.readTalkTexts() == *(undoing ? entry.talkTextsAfter : entry.talkTextsBefore);
+    return monstersAsLeft && modelsAsLeft && setsAsLeft && unknownAsLeft && talkTextsAsLeft &&
            std::ranges::all_of(entry.groups, [&](const MonsterGroupEditStep& step)
                                { return m_hooks.readGroup(step.id) == (undoing ? step.after : step.before); });
 }
@@ -149,6 +151,10 @@ void MonsterEditHistory::Apply(const MonsterEditEntry& entry, bool undoing)
     if (entry.unknownAfter && m_hooks.restoreUnknownLook)
     {
         m_hooks.restoreUnknownLook(*(undoing ? entry.unknownBefore : entry.unknownAfter));
+    }
+    if (entry.talkTextsAfter && m_hooks.restoreTalkTexts)
+    {
+        m_hooks.restoreTalkTexts(*(undoing ? entry.talkTextsBefore : entry.talkTextsAfter));
     }
     if (!entry.steps.empty())
     {

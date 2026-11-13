@@ -51,6 +51,7 @@
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "Network/EndpointForLog.h"
+#include "Dotnet/ManagedSymbols.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
@@ -2017,7 +2018,7 @@ bool StartClient(char* szCmdLine)
 
     WriteStartupDiagnostics(lpszExeVersion, wVersion);
     g_ErrorReport.Write(L"> Content: %hs\r\n", contentRoot.c_str());
-    InitializeDotNetBridge();
+    InitializeDotNetBridge(DotNetBridge::TargetManagedSymbolSource());
 
     g_ErrorReport.Write(L"> To read config.ini.\r\n");
 

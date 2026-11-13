@@ -28,7 +28,8 @@ mu_add_test(
         MuClient
 )
 
-# The light mood of the world maps (Data/Maps/LightMood.json).
+# The old light mood file of the world maps (Data/Maps/LightMood.json), read to upgrade a format 1
+# Look.json; look_v1 holds the last shipped pair.
 mu_add_test(
     NAME light_mood_data_tests
     SOURCES
@@ -37,7 +38,7 @@ mu_add_test(
         MuClient
 )
 target_compile_definitions(light_mood_data_tests PRIVATE
-    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_LOOK_V1_DIR="${CMAKE_CURRENT_SOURCE_DIR}/look_v1"
 )
 
 # The buffs (Data/Buffs/Buffs.json, buffs design): reader, writer, checks, the
@@ -179,18 +180,21 @@ target_compile_definitions(monster_data_tests PRIVATE
 # GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
 mu_allow_gcc13_stringop_overflow(monster_data_tests test_monster_npc_name_files.cpp)
 
-# The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
-# tuning of it ([EnhancedTuning] of config.ini).
+# The look profile of the Enhanced rendering features (Data/Render/Look.json), its edit operations
+# and the player's own tuning of it ([EnhancedTuning] of config.ini). look_v1 holds the last shipped
+# pair of format 1 files, which the shipped file must match on every map.
 mu_add_test(
     NAME look_profile_data_tests
     SOURCES
         test_look_profile_json.cpp
+        test_look_profile_edits.cpp
         test_personal_tuning.cpp
     LINK_LIBS
         MuClient
 )
 target_compile_definitions(look_profile_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_LOOK_V1_DIR="${CMAKE_CURRENT_SOURCE_DIR}/look_v1"
 )
 
 # Reads the item and item model files shipped in src/bin/Data through the real

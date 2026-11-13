@@ -76,6 +76,25 @@ mu_add_test(
     NAME test_connection_library_load
     SOURCES
         test_connection_library_load.cpp
+        ${MU_MANAGED_SYMBOL_ADAPTER}
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_managed_symbols
+    SOURCES
+        test_managed_symbols.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# A target with an adapter of its own: no Dotnet/SymbolSources/ file and no Winmain.cpp, which starts the bridge from
+# the game's adapter.
+mu_add_test(
+    NAME test_managed_symbol_target
+    SOURCES
+        test_managed_symbol_target.cpp
     LINK_LIBS
         MuClient
 )
@@ -127,6 +146,7 @@ if(WIN32 AND TARGET ClientLibrary)
         NAME test_connection_open
         SOURCES
             test_connection_open.cpp
+            ${MU_MANAGED_SYMBOL_ADAPTER}
         LINK_LIBS
             MuClient
     )

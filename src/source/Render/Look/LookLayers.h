@@ -21,7 +21,7 @@ namespace Render::Look
 class LookLayers
 {
 public:
-    // Rebuilds the map light from the live light mood (Lighting::LightMood::SetMoodData).
+    // Rebuilds the map light from every map's mood in the live profile (Lighting::LightMood::SetMoodData).
     using MoodRebuild = std::function<void(const Data::Maps::LightMoodData&)>;
 
     explicit LookLayers(MoodRebuild rebuildMood = {});

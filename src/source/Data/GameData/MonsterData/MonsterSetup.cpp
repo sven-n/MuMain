@@ -98,6 +98,11 @@ const MonsterSetupField SetupFields[] = {
     MONSTER_SETUP_OPTIONAL(gate),
     MONSTER_SETUP_LIST(stateVariants),
     MONSTER_SETUP_LIST(hooks),
+    MONSTER_SETUP_OPTIONAL(talks),
+    MONSTER_SETUP_OPTIONAL(talkLevel),
+    MONSTER_SETUP_OPTIONAL(repairShop),
+    MONSTER_SETUP_LIST(onTalk),
+    MONSTER_SETUP_OPTIONAL(crywolfContract),
 };
 
 #undef MONSTER_SETUP_OPTIONAL
@@ -150,9 +155,57 @@ constexpr MonsterHookKind HookKinds[] = {
 
 // playerTransformed: the monster is made for a player transformed into it
 // (0x45, Q-MN38d); crywolfReady: Crywolf's battle is about to start, its
-// monsters come in at once (Q-MN38c).
+// monsters come in at once (Q-MN38c); crywolfElfTime: on Crywolf only elves
+// may make the altar contracts (the NPCs' talk, MN5).
 constexpr std::string_view States[] = {"castleSiegeRunning", "castleSiegeNotRunning", "raklionBossWaiting",
-                                       "playerTransformed", "crywolfReady"};
+                                       "playerTransformed",  "crywolfReady",          "crywolfElfTime"};
+
+// In the order of the game's requests and quest indexes (QUEST_CHANGE_UP_1
+// ...) and states (QUEST_NONE ...).
+constexpr std::string_view TalkRequests[] = {"enterRefuge", "enterBarracks"};
+constexpr std::string_view TalkQuests[] = {"changeUp1",      "changeUp2",      "changeUp3",     "combo",
+                                           "thirdChangeUp1", "thirdChangeUp2", "thirdChangeUp3"};
+constexpr std::string_view TalkQuestStates[] = {"none", "ongoing", "done", "no", "ready", "error"};
+
+std::span<const std::string_view> GetTalkRequests()
+{
+    return TalkRequests;
+}
+
+std::span<const std::string_view> GetTalkQuests()
+{
+    return TalkQuests;
+}
+
+std::span<const std::string_view> GetTalkQuestStates()
+{
+    return TalkQuestStates;
+}
+
+std::span<const char* const> GetAltarContractTextKeys()
+{
+    static constexpr std::array<const char*, 6> Keys{"canContract",  "proceed",   "onMount",
+                                                     "needGuardian", "destroyed", "ongoing"};
+    return Keys;
+}
+
+std::array<Data::LocalizedString*, 6> AltarContractTexts(MonsterAltarContract& contract)
+{
+    return {&contract.canContract,  &contract.proceed,   &contract.onMount,
+            &contract.needGuardian, &contract.destroyed, &contract.ongoing};
+}
+
+std::array<const Data::LocalizedString*, 6> AltarContractTexts(const MonsterAltarContract& contract)
+{
+    return {&contract.canContract,  &contract.proceed,   &contract.onMount,
+            &contract.needGuardian, &contract.destroyed, &contract.ongoing};
+}
+
+std::optional<int> FindTalkName(std::span<const std::string_view> names, std::string_view name)
+{
+    const auto found = std::ranges::find(names, name);
+    return found != names.end() ? std::optional<int>(static_cast<int>(found - names.begin())) : std::nullopt;
+}
 
 std::span<const std::string_view> GetMonsterStates()
 {

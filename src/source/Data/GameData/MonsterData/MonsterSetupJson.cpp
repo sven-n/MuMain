@@ -11,6 +11,7 @@
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <optional>
 #include <string_view>
@@ -50,6 +51,24 @@ constexpr const char* KeyKey = "key";
 constexpr const char* StateKey = "state";
 constexpr const char* HookKey = "hook";
 constexpr const char* AngleKey = "angle";
+constexpr const char* LevelKey = "level";
+constexpr const char* MessageKey = "message";
+constexpr const char* DialogKey = "dialog";
+constexpr const char* SendKey = "send";
+constexpr const char* TalkSendKey = "talk";
+constexpr const char* PetInfoSendKey = "petInfo";
+constexpr const char* QuestWindowKey = "questWindow";
+constexpr const char* NoQuestTitleForKey = "noQuestTitleFor";
+constexpr const char* TitleKey = "title";
+constexpr const char* LinesKey = "lines";
+constexpr const char* OkKey = "ok";
+constexpr const char* RequestKey = "request";
+constexpr const char* IfKey = "if";
+constexpr const char* QuestKey = "quest";
+constexpr const char* IsKey = "is";
+constexpr const char* ZenKey = "zen";
+constexpr const char* FailureKey = "failure";
+constexpr const char* AltarContractKey = "crywolfAltarContract";
 constexpr const char* TileXKey = "tileX";
 constexpr const char* TileYKey = "tileY";
 constexpr const char* FacingStepKey = "facingStep";
@@ -57,7 +76,6 @@ constexpr const char* SubTypeKey = "subType";
 constexpr const char* ScaleKey = "scale";
 constexpr const char* GroupKey = "group";
 constexpr const char* NumberKey = "number";
-constexpr const char* LevelKey = "level";
 constexpr const char* ExcellentKey = "excellent";
 constexpr const char* PartKey = "part";
 constexpr const char* MountLookKey = "mountLook";
@@ -724,6 +742,233 @@ struct Reader
             Appear(value, name, setup.teleport);
         else if (key == "gate")
             Gate(value, name, setup.gate);
+        else if (key == "talks")
+            Bool(value, name, setup.talks);
+        else if (key == "talkLevel")
+            TalkLevel(value, name, setup.talkLevel);
+        else if (key == "repairShop")
+            Bool(value, name, setup.repairShop);
+        else if (key == "onTalk")
+            OnTalk(value, name, setup.onTalk);
+        else if (key == "crywolfContract")
+            Bool(value, name, setup.crywolfContract);
+    }
+
+    // A text in every language, or the English one.
+    void Text(const OrderedJson& value, const std::string& key, Data::LocalizedString& text)
+    {
+        text = Data::LocalizedString{};
+        Items::Json::ReadLocalizedString(value, prefix + key, text,
+                                         [&](const std::string& field, const std::string& message)
+                                         {
+                                             problem(ItemDataIssueSeverity::Fatal, field, message);
+                                             valid = false;
+                                         });
+    }
+
+    // The NPC's minimum level and the message below it.
+    void TalkLevel(const OrderedJson& value, const std::string& key, std::optional<MonsterTalkLevel>& talkLevel)
+    {
+        if (!value.is_object() || !value.contains(LevelKey) || !value.contains(MessageKey))
+        {
+            Fatal(key, "must be an object: level, message");
+            return;
+        }
+        MonsterTalkLevel read;
+        const std::optional<int> level = Json::ReadWholeIn(*value.find(LevelKey), 0, MaxTalkLevel);
+        if (!level)
+        {
+            Fatal(key + "." + LevelKey, Json::RangeText(0, MaxTalkLevel));
+            return;
+        }
+        read.level = *level;
+        Text(*value.find(MessageKey), key + "." + MessageKey, read.message);
+        WarnUnknown(value, key, {LevelKey, MessageKey});
+        talkLevel = std::move(read);
+    }
+
+    // One of the names, or a fatal problem naming them.
+    std::optional<int> Name(const OrderedJson& value, const std::string& key, std::span<const std::string_view> names)
+    {
+        const std::optional<int> found =
+            value.is_string() ? FindTalkName(names, value.get<std::string>()) : std::nullopt;
+        if (!found)
+        {
+            std::string list;
+            for (const std::string_view name : names)
+                list += (list.empty() ? "" : ", ") + std::string(name);
+            Fatal(key, "must be one of " + list);
+        }
+        return found;
+    }
+
+    void TalkOk(const OrderedJson& value, const std::string& key, std::optional<MonsterTalkOk>& ok)
+    {
+        if (!value.is_object() || !value.contains(RequestKey))
+        {
+            Fatal(key, "must be an object: request, if, zen, failure");
+            return;
+        }
+        MonsterTalkOk read;
+        if (const std::optional<int> request = Name(*value.find(RequestKey), key + "." + RequestKey, GetTalkRequests()))
+            read.request = std::string(GetTalkRequests()[static_cast<size_t>(*request)]);
+        if (const auto condition = value.find(IfKey); condition != value.end())
+        {
+            const std::string conditionKey = key + "." + IfKey;
+            if (!condition->is_object() || !condition->contains(QuestKey) || !condition->contains(IsKey) ||
+                !condition->find(IsKey)->is_array())
+            {
+                Fatal(conditionKey, "must be an object: quest, is (a list of quest states)");
+            }
+            else
+            {
+                if (const std::optional<int> quest =
+                        Name(*condition->find(QuestKey), conditionKey + "." + QuestKey, GetTalkQuests()))
+                    read.quest = std::string(GetTalkQuests()[static_cast<size_t>(*quest)]);
+                const OrderedJson& states = *condition->find(IsKey);
+                for (size_t i = 0; i < states.size(); ++i)
+                {
+                    if (const std::optional<int> state =
+                            Name(states[i], conditionKey + "." + IsKey + "[" + std::to_string(i) + "]",
+                                 GetTalkQuestStates()))
+                        read.questStates.emplace_back(GetTalkQuestStates()[static_cast<size_t>(*state)]);
+                }
+                if (states.empty())
+                    Warning(conditionKey + "." + IsKey, "is empty: the OK sends nothing");
+                WarnUnknown(*condition, conditionKey, {QuestKey, IsKey});
+            }
+        }
+        if (const auto zen = value.find(ZenKey); zen != value.end())
+        {
+            const std::optional<int> amount = Json::ReadWholeIn(*zen, 0, std::numeric_limits<int>::max());
+            if (!amount)
+                Fatal(key + "." + ZenKey, "must be a whole number from 0");
+            else
+                read.zen = static_cast<unsigned long>(*amount);
+        }
+        if (const auto failure = value.find(FailureKey); failure != value.end())
+            Text(*failure, key + "." + FailureKey, read.failure);
+        WarnUnknown(value, key, {RequestKey, IfKey, ZenKey, FailureKey});
+        ok = std::move(read);
+    }
+
+    void TalkDialog(const OrderedJson& value, const std::string& key, MonsterTalkDialog& dialog)
+    {
+        if (!value.is_object() || !value.contains(LinesKey) || !value.find(LinesKey)->is_array())
+        {
+            Fatal(key, "must be an object: title, lines (a list of texts), ok");
+            return;
+        }
+        if (const auto title = value.find(TitleKey); title != value.end())
+            Text(*title, key + "." + TitleKey, dialog.title);
+        const OrderedJson& lines = *value.find(LinesKey);
+        for (size_t i = 0; i < lines.size(); ++i)
+            Text(lines[i], key + "." + LinesKey + "[" + std::to_string(i) + "]", dialog.lines.emplace_back());
+        if (const auto ok = value.find(OkKey); ok != value.end())
+            TalkOk(*ok, key + "." + OkKey, dialog.ok);
+        WarnUnknown(value, key, {TitleKey, LinesKey, OkKey});
+    }
+
+    // The talk's steps in order: each an object with one of dialog, send,
+    // message, questWindow or crywolfAltarContract.
+    void OnTalk(const OrderedJson& value, const std::string& key, std::vector<MonsterTalkBlock>& blocks)
+    {
+        if (!value.is_array())
+        {
+            Fatal(key, "must be a list of talk steps: dialog, send, message, questWindow, crywolfAltarContract");
+            return;
+        }
+        blocks.clear();
+        for (size_t i = 0; i < value.size(); ++i)
+        {
+            const OrderedJson& row = value[i];
+            const std::string rowKey = key + "[" + std::to_string(i) + "]";
+            if (!row.is_object() || row.size() != 1)
+            {
+                Fatal(rowKey, "must be an object with one of dialog, send, message, questWindow, crywolfAltarContract");
+                continue;
+            }
+            MonsterTalkBlock block;
+            // The step's one key and its value (the iterator's own key and value
+            // would end with the iterator, which is a temporary).
+            const std::string kind = row.begin().key();
+            const OrderedJson& content = row.begin().value();
+            const std::string contentKey = rowKey + "." + kind;
+            if (kind == DialogKey)
+            {
+                block.kind = MonsterTalkBlock::Kind::Dialog;
+                TalkDialog(content, contentKey, block.dialog);
+            }
+            else if (kind == SendKey)
+            {
+                if (content == TalkSendKey)
+                    block.kind = MonsterTalkBlock::Kind::SendTalk;
+                else if (content == PetInfoSendKey)
+                    block.kind = MonsterTalkBlock::Kind::SendPetInfo;
+                else
+                {
+                    Fatal(contentKey, std::string("must be ") + TalkSendKey + " or " + PetInfoSendKey);
+                    continue;
+                }
+            }
+            else if (kind == MessageKey)
+            {
+                block.kind = MonsterTalkBlock::Kind::Message;
+                Text(content, contentKey, block.message);
+            }
+            else if (kind == QuestWindowKey)
+            {
+                block.kind = MonsterTalkBlock::Kind::QuestWindow;
+                const auto classes = content.is_object() ? content.find(NoQuestTitleForKey) : content.end();
+                if (classes == content.end() || !classes->is_array())
+                {
+                    Fatal(contentKey, std::string("must be an object: ") + NoQuestTitleForKey + " (a list of classes)");
+                    continue;
+                }
+                const auto keys = Items::GetClassKeys();
+                for (size_t c = 0; c < classes->size(); ++c)
+                {
+                    const OrderedJson& name = (*classes)[c];
+                    const auto found = name.is_string()
+                                           ? std::ranges::find_if(keys, [&](const char* classKey)
+                                                                  { return name.get<std::string>() == classKey; })
+                                           : keys.end();
+                    if (found == keys.end())
+                        Fatal(contentKey + "." + NoQuestTitleForKey + "[" + std::to_string(c) + "]",
+                              "must be a class: darkWizard, darkKnight, fairyElf, ...");
+                    else
+                        block.noQuestTitleFor.push_back(static_cast<int>(found - keys.begin()));
+                }
+            }
+            else if (kind == AltarContractKey)
+            {
+                block.kind = MonsterTalkBlock::Kind::CrywolfAltarContract;
+                // The name of its texts in the list's talkTexts, which the
+                // list's reader checks.
+                if (!content.is_string() || content.get<std::string>().empty())
+                {
+                    Fatal(contentKey, "must be the name of a set of the list's talkTexts");
+                    continue;
+                }
+                block.altarTexts = content.get<std::string>();
+            }
+            else
+            {
+                Fatal(rowKey, "must be an object with one of dialog, send, message, questWindow, crywolfAltarContract");
+                continue;
+            }
+            blocks.push_back(std::move(block));
+        }
+    }
+
+    void WarnUnknown(const OrderedJson& value, const std::string& key, std::initializer_list<const char*> known)
+    {
+        Items::Json::KeySet keys;
+        for (const char* name : known)
+            keys.insert(name);
+        Items::Json::WarnAboutUnknownKeys(value, keys, prefix + key + " ",
+                                          [&](const std::string& unknown, const std::string& message)
+                                          { problem(ItemDataIssueSeverity::Warning, unknown, message); });
     }
 
     // Each a tile coordinate, x or y, and the step there.
@@ -864,6 +1109,67 @@ struct Reader
         }
     }
 };
+
+OrderedJson WriteTalkBlock(const MonsterTalkBlock& block)
+{
+    OrderedJson row = OrderedJson::object();
+    switch (block.kind)
+    {
+    case MonsterTalkBlock::Kind::Dialog:
+    {
+        OrderedJson dialog = OrderedJson::object();
+        if (!block.dialog.title.IsEmpty())
+            dialog[TitleKey] = Items::Json::WriteLocalizedString(block.dialog.title);
+        OrderedJson lines = OrderedJson::array();
+        for (const Data::LocalizedString& line : block.dialog.lines)
+            lines.push_back(Items::Json::WriteLocalizedString(line));
+        dialog[LinesKey] = std::move(lines);
+        if (block.dialog.ok)
+        {
+            const MonsterTalkOk& ok = *block.dialog.ok;
+            OrderedJson okJson = OrderedJson::object();
+            okJson[RequestKey] = ok.request;
+            if (!ok.quest.empty())
+            {
+                OrderedJson condition = OrderedJson::object();
+                condition[QuestKey] = ok.quest;
+                condition[IsKey] = ok.questStates;
+                okJson[IfKey] = std::move(condition);
+            }
+            if (ok.zen > 0)
+                okJson[ZenKey] = ok.zen;
+            if (!ok.failure.IsEmpty())
+                okJson[FailureKey] = Items::Json::WriteLocalizedString(ok.failure);
+            dialog[OkKey] = std::move(okJson);
+        }
+        row[DialogKey] = std::move(dialog);
+        break;
+    }
+    case MonsterTalkBlock::Kind::SendTalk:
+        row[SendKey] = TalkSendKey;
+        break;
+    case MonsterTalkBlock::Kind::SendPetInfo:
+        row[SendKey] = PetInfoSendKey;
+        break;
+    case MonsterTalkBlock::Kind::Message:
+        row[MessageKey] = Items::Json::WriteLocalizedString(block.message);
+        break;
+    case MonsterTalkBlock::Kind::CrywolfAltarContract:
+        row[AltarContractKey] = block.altarTexts;
+        break;
+    case MonsterTalkBlock::Kind::QuestWindow:
+    {
+        OrderedJson classes = OrderedJson::array();
+        for (const int index : block.noQuestTitleFor)
+            classes.push_back(Items::GetClassKeys()[static_cast<size_t>(index)]);
+        OrderedJson window = OrderedJson::object();
+        window[NoQuestTitleForKey] = std::move(classes);
+        row[QuestWindowKey] = std::move(window);
+        break;
+    }
+    }
+    return row;
+}
 
 OrderedJson WriteItem(const MonsterItem& item)
 {
@@ -1137,6 +1443,26 @@ OrderedJson WriteField(std::string_view key, const MonsterSetup& setup)
                 row[valueKey] = hookValue;
             list.push_back(std::move(row));
         }
+        return list;
+    }
+    if (key == "talks")
+        return WriteOptional(setup.talks);
+    if (key == "talkLevel")
+    {
+        OrderedJson talkLevel = OrderedJson::object();
+        talkLevel[LevelKey] = setup.talkLevel->level;
+        talkLevel[MessageKey] = Items::Json::WriteLocalizedString(setup.talkLevel->message);
+        return talkLevel;
+    }
+    if (key == "repairShop")
+        return WriteOptional(setup.repairShop);
+    if (key == "crywolfContract")
+        return WriteOptional(setup.crywolfContract);
+    if (key == "onTalk")
+    {
+        OrderedJson list = OrderedJson::array();
+        for (const MonsterTalkBlock& block : setup.onTalk)
+            list.push_back(WriteTalkBlock(block));
         return list;
     }
     if (key == "stateVariants")

@@ -5263,4 +5263,124 @@
   <data name="Eye bones note" xml:space="preserve">
     <value>Augen brauchen 2, 4 oder 6 Knochen (rechts, links und bis zu zwei weitere Paare), jeweils 0 oder mehr; bis dahin speichert Speichern die Monster nicht.</value>
   </data>
+  <data name="NPC rules" xml:space="preserve">
+    <value>NPC-Regeln</value>
+  </data>
+  <data name="Talks" xml:space="preserve">
+    <value>Spricht</value>
+  </data>
+  <data name="Talk level" xml:space="preserve">
+    <value>Mindeststufe zum Sprechen</value>
+  </data>
+  <data name="Repair shop" xml:space="preserve">
+    <value>Reparaturladen</value>
+  </data>
+  <data name="On talk" xml:space="preserve">
+    <value>Beim Sprechen, der Reihe nach</value>
+  </data>
+  <data name="Talk dialog" xml:space="preserve">
+    <value>Dialog</value>
+  </data>
+  <data name="Send the talk request" xml:space="preserve">
+    <value>Gesprächsanfrage senden</value>
+  </data>
+  <data name="Ask for pet information" xml:space="preserve">
+    <value>Haustier-Informationen erfragen</value>
+  </data>
+  <data name="Quest window without its title" xml:space="preserve">
+    <value>Questfenster ohne Questtitel, für</value>
+  </data>
+  <data name="Request" xml:space="preserve">
+    <value>Anfrage</value>
+  </data>
+  <data name="If the quest" xml:space="preserve">
+    <value>Wenn die Quest</value>
+  </data>
+  <data name="Is in" xml:space="preserve">
+    <value>ist in</value>
+  </data>
+  <data name="Zen it costs" xml:space="preserve">
+    <value>Kosten in Zen</value>
+  </data>
+  <data name="Without the zen" xml:space="preserve">
+    <value>Ohne das Zen</value>
+  </data>
+  <data name="Dialog title" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Add a line" xml:space="preserve">
+    <value>Zeile hinzufügen</value>
+  </data>
+  <data name="OK sends a request" xml:space="preserve">
+    <value>OK sendet eine Anfrage</value>
+  </data>
+  <data name="Tick a state: without one the OK sends nothing." xml:space="preserve">
+    <value>Einen Zustand ankreuzen: ohne ihn sendet OK nichts.</value>
+  </data>
+  <data name="Add a step" xml:space="preserve">
+    <value>Schritt hinzufügen</value>
+  </data>
+  <data name="Talk texts note" xml:space="preserve">
+    <value>Die Texte hier sind Englisch; die anderen Sprachen stehen in Monster Translations.</value>
+  </data>
+  <data name="Names" xml:space="preserve">
+    <value>Namen</value>
+  </data>
+  <data name="Talk texts" xml:space="preserve">
+    <value>Gesprächstexte</value>
+  </data>
+  <data name="All talk texts" xml:space="preserve">
+    <value>Alle Gesprächstexte</value>
+  </data>
+  <data name="Step talk text" xml:space="preserve">
+    <value>Gesprächstext {1} von {0} in {2}</value>
+  </data>
+  <data name="The talk text was not stored" xml:space="preserve">
+    <value>Der Gesprächstext wurde nicht gespeichert.</value>
+  </data>
+  <data name="Crywolf altar contract" xml:space="preserve">
+    <value>Crywolf-Altarvertrag</value>
+  </data>
+  <data name="Contracts left" xml:space="preserve">
+    <value>Verbleibende Verträge (%d)</value>
+  </data>
+  <data name="The question" xml:space="preserve">
+    <value>Die Frage</value>
+  </data>
+  <data name="On a mount" xml:space="preserve">
+    <value>Auf einem Reittier</value>
+  </data>
+  <data name="On Cancel" xml:space="preserve">
+    <value>Bei Abbrechen</value>
+  </data>
+  <data name="Altar destroyed" xml:space="preserve">
+    <value>Altar zerstört</value>
+  </data>
+  <data name="Contract ongoing" xml:space="preserve">
+    <value>Vertrag läuft</value>
+  </data>
+  <data name="Crywolf hero contract" xml:space="preserve">
+    <value>Im Crywolf-Heldenvertrag</value>
+  </data>
+  <data name="Shared talk texts" xml:space="preserve">
+    <value>Geteilte Gesprächstexte</value>
+  </data>
+  <data name="Shared talk texts note" xml:space="preserve">
+    <value>Gesprächstexte, die mehrere NPCs teilen, mit Namen: der Altarvertrags-Schritt von Crywolf nennt seinen Satz. Hier auf Englisch; die anderen Sprachen sind in Monster Translations.</value>
+  </data>
+  <data name="Add a set" xml:space="preserve">
+    <value>Satz hinzufügen</value>
+  </data>
+  <data name="Set name" xml:space="preserve">
+    <value>Name des Satzes</value>
+  </data>
+  <data name="Texts of the set" xml:space="preserve">
+    <value>Texte des Satzes</value>
+  </data>
+  <data name="The texts are edited in Shared talk texts." xml:space="preserve">
+    <value>Die Texte werden in Geteilte Gesprächstexte bearbeitet.</value>
+  </data>
+  <data name="A talk step names this set" xml:space="preserve">
+    <value>Ein Gesprächsschritt nennt diesen Satz: er bleibt.</value>
+  </data>
 </root>

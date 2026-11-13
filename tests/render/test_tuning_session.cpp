@@ -245,7 +245,7 @@ TEST_CASE("a failed save keeps the preview, says so and is retried [render][look
     CHECK(session.Persisted().look[LookValue::BloomStrength] == 0.2);
 }
 
-TEST_CASE("player tuning writes config.ini only, never the look or mood files [render][look][tuning]")
+TEST_CASE("player tuning writes config.ini only, never the look file [render][look][tuning]")
 {
     const std::filesystem::path data = std::filesystem::path(MU_TEST_DATA_DIR);
     const std::filesystem::path dir =
@@ -256,12 +256,10 @@ TEST_CASE("player tuning writes config.ini only, never the look or mood files [r
     const std::filesystem::path mood = dir / "LightMood.json";
     const std::filesystem::path config = dir / "config.ini";
     std::filesystem::copy_file(data / "Render/Look.json", look);
-    std::filesystem::copy_file(data / "Maps/LightMood.json", mood);
     {
         std::ofstream(config, std::ios::binary) << "[Render]\nLook=Enhanced\n";
     }
     const std::string lookBefore = ReadFile(look);
-    const std::string moodBefore = ReadFile(mood);
 
     TuningSession session({[&config](const PersonalTuning& saved, const PersonalTuning& tuning)
                            { return Data::Config::SavePersonalTuningFile(config, saved, tuning); },
@@ -278,13 +276,12 @@ TEST_CASE("player tuning writes config.ini only, never the look or mood files [r
     CHECK(ReadFile(config) == "[Render]\nLook=Enhanced\n");
 
     CHECK(ReadFile(look) == lookBefore);
-    CHECK(ReadFile(mood) == moodBefore);
 
     // A developer's save writes the files' own documents: the player's values are not in them.
     Render::Look::DiskLookFileSystem fileSystem;
     Render::Look::LookFilesLoad loaded = Render::Look::LoadLookFiles(fileSystem, look, mood);
     REQUIRE(loaded.files.lookUsable);
-    REQUIRE(Render::Look::SaveLookFiles(fileSystem, loaded.files, look, mood).saved);
+    REQUIRE(Render::Look::SaveLookFiles(fileSystem, loaded.files, look).saved);
     std::vector<Data::Items::ItemDataIssue> lookIssues;
     Data::Maps::LookProfileData reread;
     Data::Maps::ReadLookProfileJson(ReadFile(look), look.generic_string(), reread, lookIssues);

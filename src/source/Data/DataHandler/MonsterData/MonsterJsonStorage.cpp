@@ -39,7 +39,7 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file)
         AddFatalFileIssue(result.issues, source, "could not be read");
         return result;
     }
-    ReadMonstersJson(*text, source, result.groups, result.unknown, result.issues);
+    ReadMonstersJson(*text, source, result.groups, result.unknown, result.talkTexts, result.issues);
     result.monsters = CollectNumberEntries(result.groups);
     const std::size_t firstValidationIssue = result.issues.size();
     ValidateMonsterNames(result.monsters, result.issues);
@@ -48,9 +48,10 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file)
 }
 
 bool SaveMonstersFile(const std::filesystem::path& file, std::span<const MonsterGroup> monsters,
-                      const UnknownMonsterLook& unknown, std::vector<ItemDataIssue>& issues)
+                      const UnknownMonsterLook& unknown, const MonsterTalkTexts& talkTexts,
+                      std::vector<ItemDataIssue>& issues)
 {
-    const std::optional<std::string> text = MakeMonstersFileText(file, monsters, unknown, issues);
+    const std::optional<std::string> text = MakeMonstersFileText(file, monsters, unknown, talkTexts, issues);
     if (!text)
     {
         return false;
@@ -66,10 +67,11 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
 
 std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& file,
                                                 std::span<const MonsterGroup> monsters,
-                                                const UnknownMonsterLook& unknown, std::vector<ItemDataIssue>& issues)
+                                                const UnknownMonsterLook& unknown, const MonsterTalkTexts& talkTexts,
+                                                std::vector<ItemDataIssue>& issues)
 {
     const std::string source = file.generic_string();
-    std::string text = WriteMonstersJson(monsters, unknown);
+    std::string text = WriteMonstersJson(monsters, unknown, talkTexts);
     std::vector<MonsterDefinition> readBack;
     ReadMonstersJson(text, source, readBack, issues);
     const std::size_t firstValidationIssue = issues.size();

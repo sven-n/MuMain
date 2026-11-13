@@ -34,7 +34,23 @@
     <xsl:text>_Enums.h"
 </xsl:text>
     <xsl:apply-templates select="pd:Packets/pd:Packet" mode="function_binding" />
+    <xsl:value-of select="$newline" />
+    <xsl:text>// The exports the senders above look up; the bridge resolves them all at startup.
+inline constexpr const char* kManagedExports_</xsl:text>
+    <xsl:value-of select="$subNamespace"/>
+    <xsl:text>[] = {</xsl:text>
+    <xsl:value-of select="$newline" />
+    <xsl:apply-templates select="pd:Packets/pd:Packet" mode="export_name" />
+    <xsl:text>};</xsl:text>
+    <xsl:value-of select="$newline" />
 
+  </xsl:template>
+
+  <xsl:template match="pd:Packet[not(pd:Fields/pd:Field/pd:Type = 'Structure[]')]" mode="export_name">
+    <xsl:text>    "Send</xsl:text>
+    <xsl:apply-templates select="pd:Name" />
+    <xsl:text>",</xsl:text>
+    <xsl:value-of select="$newline" />
   </xsl:template>
 
   <xsl:template match="pd:Packet[not(pd:Fields/pd:Field/pd:Type = 'Structure[]')]" mode="function_binding">
@@ -51,6 +67,7 @@
 
 
   <xsl:template match="text()" mode="function_binding"></xsl:template>
+  <xsl:template match="text()" mode="export_name"></xsl:template>
   <xsl:template match="text()"></xsl:template>
 
 </xsl:stylesheet>

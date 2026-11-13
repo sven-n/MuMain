@@ -13,10 +13,10 @@
 // or _EDITOR offer them (Render::Look::HandleDeveloperCommand).
 //
 //   $look show [<name>]            effective values and where each comes from
-//   $look set [map] <name> <v>     the default profile, or the current map's entry
+//   $look set [map] <name> <v>     the default profile, or the entry of the current map (shared by its variants)
 //   $look reset [<name>]           back to the values loaded from the files
 //   $look load [<candidate>]       Data/Render/Candidates/<candidate>/, or the shipped files
-//   $look save                     writes Data/Render/Look.json and Data/Maps/LightMood.json
+//   $look save                     writes Data/Render/Look.json
 //
 // Aliases of `$look set <name>` (the default profile):
 //   $lighting rim <v>              lighting.rim.strength

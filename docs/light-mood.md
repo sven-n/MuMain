@@ -31,20 +31,37 @@ full mood, values between blend; it wins over the player's Mood strength until
 a look is chosen), and `$lightmood knee <k>` (the look
 profile's `lighting.highlightKnee`).
 
-## The moods: `Data/Maps/LightMood.json`
+## The moods: `mood.*` in `Data/Render/Look.json`
+
+The mood's values are look values named `mood.<value>`, in the same file and
+on the same layers as the rest of the Enhanced look
+([enhanced-look.md](enhanced-look.md#the-enhanced-values-datarenderlookjson)):
+the default, a map's environment, the map's own entry.
 
 ```json
 {
-  "formatVersion": 1,
-  "default": { "base": 0.6, "figures": 0.7, "dynamicGain": 1.7, "background": 1.0, "sun": 0.8,
-               "shadowKeep": 0.8, "brightScale": 0.8, "shadeCool": 0.1 },
-  "maps": [ { "world": 7, "name": "Atlans", "base": 0.8, "figures": 0.8, "brightScale": 1.0, "sun": 1.0 } ]
+  "formatVersion": 2,
+  "default": {
+    "mood.base": 0.6,
+    "mood.figures": 0.7,
+    "mood.dynamicGain": 1.7,
+    "mood.sun": 0.8
+  },
+  "environments": {
+    "enclosed": {"mood.base": 0.45, "mood.sun": 1, "mood.shadowKeep": 0},
+    "outdoor": {}
+  },
+  "maps": [
+    {"maps": [80, 81], "name": "Karutan", "environment": "outdoor", "mood.base": 0.62, "mood.brightScale": 0.9}
+  ]
 }
 ```
 
-`default` applies to every map without its own entry and has the five required values.
-A map entry names its world number and overrides any of them; `name` is only
-for the reader.
+A value no layer names has its Classic value: 1, and 0 for `shadowKeep` and
+`shadeCool`. The mood values are not player values: a player changes the
+mood only through its strength (`mood.strengthPercent`); a `mood.base` or
+other mood value in `[EnhancedTuning]` is ignored with a warning and never
+written there.
 
 | Value | Scales | Range |
 |---|---|---|
@@ -57,17 +74,19 @@ for the reader.
 | `brightScale` | optional, with a shadow keep: the scale places at the shadow keep get, never below `base` (figures: never below `figures`) | 0.3 to 1 (default) |
 | `shadeCool` | optional: how much bluer the darkened shade gets | 0 (default) to 0.5 |
 
-One value out of its range, a broken file or a missing one makes the client
-log every problem once (`render` log) and keep the whole world Classic; it
-never applies part of a file.
+One value out of its range or a broken file makes the client log every
+problem once (`render` log) and use the built-in values of the whole file, so
+the light stays Classic; it never applies part of a file.
 
 The shipped values come from side-by-side review rounds over eleven scenes and
 a survey of 26 places: base 0.6 with the shadow keep at
 0.8, so the shade darkens while sunlit ground keeps most of its light
 (`brightScale` 0.8), figures at 0.7 so characters stay readable, a slightly
 cooler shade, and dynamic lights 1.7 times as strong. Maps that had a weaker
-sun (indoors, underground, event maps) light models from the sun at 1.0. The enclosed maps have
-no sunlight to keep: base 0.45 and no shadow keep, so their baked light darkens evenly. Maps that looked too dark
+sun (indoors, underground, event maps) light models from the sun at 1.0, set
+on their environments. The enclosed maps have no sunlight to keep: their
+environment sets base 0.45 and no shadow keep, so their baked light darkens
+evenly. Maps that looked too dark
 have their own, lighter values (Atlans, Icarus, Raklion, Vulcanus, Karutan);
 Icarus draws no terrain, so its `background` of 0.7 darkens it instead.
 

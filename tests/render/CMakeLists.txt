@@ -298,7 +298,7 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
-# The player tuning tests copy the shipped look and mood files to check they stay untouched, and read
+# The player tuning tests copy the shipped look file to check it stays untouched, and read
 # the sources for the one place that applies a pending light mood strength.
 target_compile_definitions(look_profile_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"

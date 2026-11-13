@@ -5,17 +5,16 @@
 
 #include <spdlog/sinks/ostream_sink.h>
 
+#include <filesystem>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "Dotnet/Connection.h"
+#include "Dotnet/SymbolSources/ManagedLibrarySource.h"
 
 #ifndef _WIN32
-#include <filesystem>
-#include <string>
-
 #include "Core/Platform/SecureCrt.h"
 #include "Core/Platform/WinApiShims.h"
 #endif
@@ -117,15 +116,20 @@ TEST_CASE("The network library loads at startup, once, not during static initial
     CHECK(log.Text().empty());
 }
 
-#ifndef _WIN32
-TEST_CASE("Connection library path follows the executable [network][dotnet]")
+TEST_CASE("The library is found by its configured name, or beside the executable [network][dotnet]")
 {
-    constexpr DWORD executablePathCapacity = 4096;
-    wchar_t executablePath[executablePathCapacity] = {};
-    REQUIRE(GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) != 0);
+    if constexpr (MU_MANAGED_LIBRARY_BY_NAME)
+    {
+        CHECK(ManagedLibraryPath() == MU_MANAGED_LIBRARY_FILE);
+    }
+    else
+    {
+        constexpr DWORD executablePathCapacity = 4096;
+        wchar_t executablePath[executablePathCapacity] = {};
+        REQUIRE(GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) != 0);
 
-    const auto libraryName = "MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT);
-    const auto expectedPath = std::filesystem::path(mu_narrow_path(executablePath)).parent_path() / libraryName;
-    CHECK(std::filesystem::path(ManagedLibraryPath()) == expectedPath);
+        const auto expectedPath =
+            std::filesystem::path(mu_narrow_path(executablePath)).parent_path() / MU_MANAGED_LIBRARY_FILE;
+        CHECK(std::filesystem::path(ManagedLibraryPath()) == expectedPath);
+    }
 }
-#endif

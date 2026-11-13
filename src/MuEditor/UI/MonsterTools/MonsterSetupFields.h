@@ -21,6 +21,7 @@ enum class Section
     Appear,
     Behaviour,
     GateAndHooks,
+    NpcRules,
 };
 
 // When a living monster of the number takes a change (D55): at once (its

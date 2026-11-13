@@ -79,6 +79,9 @@ private:
     // The unknown monsters' look (D64), for every monster: its body, size,
     // glow, marks, message and who gets it, and Preview as a number.
     void RenderUnknownMonsters();
+    // The talk texts several NPCs share (the list's talkTexts): each set's
+    // texts in English, Add a set and x.
+    void RenderSharedTalkTexts();
     std::string SetupLabel() const;
 
     MonsterDraft m_draft;
@@ -121,6 +124,11 @@ private:
     // The look while a field of it is edited, and the number Preview as shows.
     Data::Monsters::UnknownMonsterLook m_unknown;
     bool m_unknownEditing = false;
+    // The shared talk texts while a field of them is edited, and the name a
+    // new set gets.
+    Data::Monsters::MonsterTalkTexts m_talkTexts;
+    bool m_talkTextsEditing = false;
+    std::string m_newSetName;
     int m_previewNumber = 700;
 };
 } // namespace MuEditor::Monsters
