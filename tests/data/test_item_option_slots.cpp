@@ -1147,7 +1147,8 @@ std::array<int, 4> AddedStats(const ITEM& worn)
 } // namespace
 
 // The ancient bonus of an item of a set raises the stat of its attackType (1 strength, 2 agility, 3 energy, 4
-// vitality) by 5 at bonus level 1 and 10 at level 2, for every item that has one; a broken item adds nothing.
+// vitality) by 5 at bonus level 1 and 10 at level 2 and above, for every item that has one; a broken item adds
+// nothing.
 TEST_CASE("Every ancient item's bonus raises the stat of its attackType [data][items]")
 {
     ClientDataScope client(ClientDirectory);
@@ -1172,10 +1173,10 @@ TEST_CASE("Every ancient item's bonus raises the stat of its attackType [data][i
         }
         ++itemsPerStat[static_cast<size_t>(attackType - 1)];
         someAncientItem = type;
-        for (int level = 1; level <= 2; ++level)
+        for (int level = 1; level <= 3; ++level)
         {
             std::array<int, 4> expected{};
-            expected[static_cast<size_t>(attackType - 1)] = 5 * level;
+            expected[static_cast<size_t>(attackType - 1)] = 5 * std::min(level, 2);
             CAPTURE(type);
             CAPTURE(level);
             CHECK(AddedStats(MakeAncientItem(type, static_cast<BYTE>(level))) == expected);

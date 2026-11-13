@@ -535,6 +535,18 @@ int CSItemOption::GetMasteryBonus(const SET_SEARCH_RESULT_OPT& set, std::uint8_t
     return bonus;
 }
 
+namespace
+{
+// The ancient bonus has two levels, as on Season 6 and OpenMU (+5 and +10); a higher level the ancient byte holds counts
+// as the second.
+constexpr BYTE MaxAncientBonusLevel = 2;
+
+int GetAncientBonusLevel(const ITEM* ip)
+{
+    return std::min<int>(ip->AncientBonusOption, MaxAncientBonusLevel);
+}
+} // namespace
+
 int CSItemOption::GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value)
 {
     if (ip->Type > MAX_ITEM)
@@ -542,7 +554,7 @@ int CSItemOption::GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value)
         return -1;
     }
 
-    *Value = ip->AncientBonusOption;
+    *Value = static_cast<std::uint16_t>(GetAncientBonusLevel(ip));
 
     const ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
@@ -564,19 +576,19 @@ bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
     switch (ItemAttribute[ip->Type].AttType)
     {
     case SET_OPTION_STRENGTH:
-        mu_swprintf(Text, I18N::Game::IncreaseStrengthD, ip->AncientBonusOption * 5);
+        mu_swprintf(Text, I18N::Game::IncreaseStrengthD, GetAncientBonusLevel(ip) * 5);
         break;
 
     case SET_OPTION_DEXTERITY:
-        mu_swprintf(Text, I18N::Game::IncreaseAgilityD, ip->AncientBonusOption * 5);
+        mu_swprintf(Text, I18N::Game::IncreaseAgilityD, GetAncientBonusLevel(ip) * 5);
         break;
 
     case SET_OPTION_ENERGY:
-        mu_swprintf(Text, I18N::Game::IncreaseEnergyD, ip->AncientBonusOption * 5);
+        mu_swprintf(Text, I18N::Game::IncreaseEnergyD, GetAncientBonusLevel(ip) * 5);
         break;
 
     case SET_OPTION_VITALITY:
-        mu_swprintf(Text, I18N::Game::IncreaseStaminaD, ip->AncientBonusOption * 5);
+        mu_swprintf(Text, I18N::Game::IncreaseStaminaD, GetAncientBonusLevel(ip) * 5);
         break;
 
     default:
