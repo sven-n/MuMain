@@ -95,7 +95,17 @@ private:
     std::vector<ItemOptionDefinition> m_definitions;
     std::vector<std::vector<ItemOptionEffect>> m_effects;
     std::vector<std::vector<size_t>> m_optionOrders;
-    std::array<int, 4> m_ancientBonuses{NoDefinition, NoDefinition, NoDefinition, NoDefinition};
+    using AncientBonuses = std::array<int, AncientBonusNames.size()>;
+
+    // No ancient bonus for any attackType, what an empty database has.
+    static constexpr AncientBonuses NoAncientBonuses()
+    {
+        AncientBonuses none{};
+        none.fill(NoDefinition);
+        return none;
+    }
+
+    AncientBonuses m_ancientBonuses = NoAncientBonuses();
     ItemOptionTexts m_texts;
     std::vector<OptionRule> m_rules;
 };

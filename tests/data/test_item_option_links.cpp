@@ -427,3 +427,13 @@ TEST_CASE("Option links order the ancient types before names of no definition [d
     options.OrderLinks(names);
     CHECK(names == std::vector<std::string>{"luck", "ancientBonusStrength", "nothing"});
 }
+
+// An empty option database has no ancient bonus for any attackType.
+TEST_CASE("An empty option database picks no ancient bonus [data][items]")
+{
+    const ItemOptionDatabase empty;
+    for (int attackType = 0; attackType <= 5; ++attackType)
+    {
+        CHECK(empty.FindAncientBonus(attackType) == ItemOptionDatabase::NoDefinition);
+    }
+}
