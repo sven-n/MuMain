@@ -55,6 +55,12 @@ add_test(NAME content_io_goes_through_the_content_layer
 add_test(NAME content_io_check_fixtures
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_content_io.py")
 
+# The network library's exports are all resolved at startup, and its headers stay free of platform code.
+add_test(NAME network_bridge_exports_listed_and_headers_platform_free
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_network_bridge.py" "${MU_REPO_ROOT}")
+add_test(NAME network_bridge_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_network_bridge.py")
+
 add_test(
     NAME msvc_runtime_dll_staging_contract
     COMMAND "${CMAKE_COMMAND}"

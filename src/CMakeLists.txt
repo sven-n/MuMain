@@ -210,6 +210,31 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\][Ww]in[Mm]ain\\.[Cc]pp$")
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\]AppMain\\.cpp$")
 
+# Where the network library's exports come from: one adapter per target, compiled into the executable beside the
+# entry files rather than into the library, so a target or a test can bring its own instead.
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Dotnet[/\\]SymbolSources[/\\]")
+set(MU_MANAGED_SYMBOL_SOURCE "library" CACHE STRING
+  "Where the network library's exports come from: library (the NativeAOT library)")
+set_property(CACHE MU_MANAGED_SYMBOL_SOURCE PROPERTY STRINGS library)
+if(MU_MANAGED_SYMBOL_SOURCE STREQUAL "library")
+  set(MU_MANAGED_SYMBOL_ADAPTER "${CMAKE_CURRENT_SOURCE_DIR}/source/Dotnet/SymbolSources/ManagedLibrarySource.cpp"
+    CACHE INTERNAL "The adapter the executable and the tests that use the real library compile")
+else()
+  message(FATAL_ERROR "MU_MANAGED_SYMBOL_SOURCE=${MU_MANAGED_SYMBOL_SOURCE} has no adapter")
+endif()
+# The library's file, and whether the loader finds it by bare name (the executable's folder on Windows, the app's
+# libraries on Android) or needs it beside the executable (Linux, macOS).
+if(ANDROID)
+  set(MU_MANAGED_LIBRARY_FILE "libMUnique.Client.Library.so")
+else()
+  set(MU_MANAGED_LIBRARY_FILE "MUnique.Client.Library${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
+if(WIN32 OR ANDROID)
+  set(MU_MANAGED_LIBRARY_BY_NAME 1)
+else()
+  set(MU_MANAGED_LIBRARY_BY_NAME 0)
+endif()
+
 # The in-game shop uses one libcurl transport on every platform. Keep the
 # legacy WinINet implementation out of the build.
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\](FileDownloader|FTPConnecter|HTTPConnecter|DownloadInfo)\\.cpp$")
@@ -417,7 +442,8 @@ add_library(MuClient::MuClient ALIAS MuClient_whole)
 # APPLE/macOS branch, and Android before the generic UNIX/Linux branch.
 set(MU_APP_ENTRY_SOURCES
   "source/App/Platform/AppMain.cpp"
-  "source/App/Platform/Windows/Winmain.cpp")
+  "source/App/Platform/Windows/Winmain.cpp"
+  "${MU_MANAGED_SYMBOL_ADAPTER}")
 if (WIN32)
   set(MU_APP_ENTRY ${MU_APP_ENTRY_SOURCES})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "iOS")
@@ -785,7 +811,8 @@ target_compile_definitions(MuClient PUBLIC
   _LANGUAGE_FOREIGN
   _LANGUAGE_ENG
   UNICODE
-  "MU_DOTNET_LIB_EXT=\"${CMAKE_SHARED_LIBRARY_SUFFIX}\""
+  "MU_MANAGED_LIBRARY_FILE=\"${MU_MANAGED_LIBRARY_FILE}\""
+  MU_MANAGED_LIBRARY_BY_NAME=${MU_MANAGED_LIBRARY_BY_NAME}
   $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:_USE_32BIT_TIME_T>  # Use 32-bit time_t only for 32-bit builds
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>

@@ -188,6 +188,27 @@ produce a Windows `.dll`, and vice versa. A MinGW-on-Linux build compiles and
 links the client but does **not** produce the `.dll`; build the
 Windows client on Windows to get a connectable one.
 
+At startup the client looks up every export it uses, once
+(`Dotnet/ManagedSymbols.h`):
+
+- the packet senders' exports are listed in the generated `PacketBindings_*.h`;
+  the connection's are listed in `ManagedSymbols.cpp`;
+- if a required export is missing, the log names each one, a dialog says the
+  library doesn't match this client, and the network stays off;
+- the `network_bridge_exports_listed_and_headers_platform_free` check fails if
+  a sender looks up an export that no list holds.
+
+The exports come from one adapter per target, in `Dotnet/SymbolSources/`.
+`src/CMakeLists.txt` compiles the adapter into `Main`, not into `MuClient`.
+
+- On desktop the adapter is `ManagedLibrarySource.cpp`, over the library.
+  `MU_MANAGED_LIBRARY_FILE` gives the library's file name, and
+  `MU_MANAGED_LIBRARY_BY_NAME` says whether the loader finds it by name
+  (Windows, Android) or beside the executable (Linux, macOS).
+- A port that links the exports another way adds its own adapter and selects
+  it with `MU_MANAGED_SYMBOL_SOURCE`. Its adapter defines
+  `DotNetBridge::TargetManagedSymbolSource()`. Shared code doesn't change.
+
 ### Output layout
 
 A post-build step copies the game assets (from `src/bin/`) and the network

@@ -22,17 +22,6 @@
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketFunctions_ClientToServer.h"
 
-mu::platform::LibraryHandle munique_client_library_handle = nullptr;
-
-void LoadManagedLibrary()
-{
-    static bool attempted = false;
-    if (attempted)
-        return;
-    attempted = true;
-    munique_client_library_handle = mu::platform::Load(ManagedLibraryPath().c_str());
-}
-
 namespace
 {
 enum class ManagedLogLevel : BYTE
@@ -74,27 +63,55 @@ using GetManagedLibraryVersion = const char*(CORECLR_DELEGATE_CALLTYPE*)();
 
 // In a release download the library's commit is the client's, so a different one means a library from another
 // download. (A local build rebuilds the library only when its sources change, so there it can be older.)
-// Looked up with FindSymbol, not LoadManagedSymbol: a library from before this function is no error worth a dialog
-// or an error line in the log.
+// An optional export: a library from before this function is no error worth a dialog or an error line in the log.
 void WriteLibraryVersion()
 {
-    const auto getLibraryVersion = reinterpret_cast<GetManagedLibraryVersion>(
-        mu::platform::FindSymbol(munique_client_library_handle, "ConnectionManager_GetLibraryVersion"));
+    const auto getLibraryVersion = LoadManagedSymbol<GetManagedLibraryVersion>("ConnectionManager_GetLibraryVersion");
     const char* version = getLibraryVersion != nullptr ? getLibraryVersion() : nullptr;
     g_ErrorReport.Write(L"ClientLibrary \t\t: %hs\r\n",
                         version != nullptr ? version : "version unknown (older library)");
 }
 
+// The first few missing exports, for the dialog; the log has them all.
+std::string NameMissingExports(const std::vector<std::string>& missing)
+{
+    constexpr std::size_t shown = 5;
+    std::string names;
+    for (std::size_t i = 0; i < missing.size() && i < shown; ++i)
+    {
+        names += (i == 0 ? "" : ", ") + missing[i];
+    }
+    if (missing.size() > shown)
+    {
+        names += " and " + std::to_string(missing.size() - shown) + " more";
+    }
+    return names;
+}
+
 } // anonymous namespace
 
-void InitializeDotNetBridge()
+void InitializeDotNetBridge(const DotNetBridge::ManagedSymbolSource& source)
 {
-    LoadManagedLibrary();
-    if (!munique_client_library_handle)
+    auto& symbols = DotNetBridge::ProcessManagedSymbols();
+    if (symbols.State() != DotNetBridge::ManagedSymbolsState::NotResolved)
     {
+        return;
+    }
+
+    switch (symbols.Resolve(source, DotNetBridge::ManagedExports()))
+    {
+    case DotNetBridge::ManagedSymbolsState::SourceMissing:
         mu::log::Get("dotnet")->error("NET: InitializeDotNetBridge -- library not loaded, skipping");
         g_ErrorReport.Write(L"ClientLibrary \t\t: not loaded\r\n");
         return;
+    case DotNetBridge::ManagedSymbolsState::ExportsMissing:
+        g_ErrorReport.Write(L"ClientLibrary \t\t: does not match this client, %d exports missing\r\n",
+                            static_cast<int>(symbols.MissingExports().size()));
+        DotNetBridge::ReportDotNetError(NameMissingExports(symbols.MissingExports()).c_str(),
+                                        DotNetBridge::DotNetErrorKind::SymbolNotFound);
+        return;
+    default:
+        break;
     }
 
     WriteLibraryVersion();
@@ -154,7 +171,7 @@ void ReportDotNetError(const char* detail, DotNetErrorKind kind)
     if (kind == DotNetErrorKind::LibraryNotFound)
     {
         // AC-1: Library not found — include resolved path and platform
-        msg = FormatLibraryNotFoundMessage(ManagedLibraryPath(), platformName);
+        msg = FormatLibraryNotFoundMessage(ProcessManagedSymbols().Description(), platformName);
     }
     else
     {
@@ -169,18 +186,6 @@ void ReportDotNetError(const char* detail, DotNetErrorKind kind)
     // ASCII-safe conversion: diagnostic messages contain only ASCII characters
     std::wstring wideMsg(msg.begin(), msg.end());
     MessageBoxW(nullptr, wideMsg.c_str(), L"Network Error", MB_ICONERROR | MB_OK);
-}
-
-bool IsManagedLibraryAvailable()
-{
-    if (munique_client_library_handle)
-    {
-        return true;
-    }
-
-    // AC-1: ReportDotNetError names the library path and platform
-    ReportDotNetError(nullptr, DotNetErrorKind::LibraryNotFound);
-    return false;
 }
 } // namespace DotNetBridge
 
