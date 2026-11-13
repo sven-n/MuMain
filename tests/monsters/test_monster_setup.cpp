@@ -6,6 +6,7 @@
 // case by case (D50) before it went.
 
 #include "MonsterCreationRecorder.h"
+#include "../data/BuffTableScope.h"
 #include "../data/LogCapture.h"
 
 #include "doctest.h"
@@ -13,7 +14,6 @@
 #include "Audio/DSPlaySound.h"
 #include "Data/DataHandler/BuffData/BuffStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
-#include "Data/GameData/BuffData/BuffDatabase.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
@@ -558,11 +558,12 @@ TEST_CASE("Monster setup: a stat-down debuff sent twice gives one pair of lights
     const Data::Buffs::BuffsLoadResult shipped =
         Data::Buffs::LoadBuffsFile(std::filesystem::path(MU_TEST_DATA_DIR) / "Buffs" / "Buffs.json");
     REQUIRE_FALSE(shipped.buffs.empty());
-    g_BuffDatabase.Build(shipped.buffs, "en");
+    const BuffTableScope table(shipped.buffs, "en");
     CreationScope scope(0);
     MonsterRecorder::PrepareCreationSlot(CreationSlot::Clean);
     CHARACTER* budge = scope.Create(MONSTER_BUDGE_DRAGON);
-    OBJECT* o = budge != nullptr ? &budge->Object : nullptr;
+    REQUIRE(budge != nullptr);
+    OBJECT* o = &budge->Object;
     auto lights = [o]
     {
         int count = 0;
@@ -576,19 +577,14 @@ TEST_CASE("Monster setup: a stat-down debuff sent twice gives one pair of lights
         return count;
     };
 
-    CHECK(budge != nullptr);
-    if (budge != nullptr)
-    {
-        CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, true);
-        CHECK(lights() == 2);
-        CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, true);
-        CHECK(lights() == 2);
+    CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, true);
+    CHECK(lights() == 2);
+    CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, true);
+    CHECK(lights() == 2);
 
-        CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, false);
-        CHECK(lights() == 0);
-        Render::Effects::StatDownDebuffLights::Delete(o, eDeBuff_AttackDown); // none outlives the monster
-    }
-    g_BuffDatabase.Build({}, "en");
+    CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, false);
+    CHECK(lights() == 0);
+    Render::Effects::StatDownDebuffLights::Delete(o, eDeBuff_AttackDown); // none outlives the monster
 }
 
 // Molt's model file is missing: it is tried once a map, not at each spawn,
