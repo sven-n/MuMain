@@ -2,13 +2,16 @@
 
 #include "VersionFiles.h"
 
+#include "Core/Content/ContentStore.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include <algorithm>
 #include <cctype>
 #include <ctime>
-#include <fstream>
+#include <optional>
+#include <sstream>
 #include <string_view>
 
 namespace Core::Build
@@ -34,9 +37,10 @@ bool IsVersion(const std::string& text)
 
 VersionFile ReadVersionFile(const std::filesystem::path& file)
 {
-    std::ifstream stream(file, std::ios::binary);
-    if (!stream)
+    const std::optional<std::string> text = Content::ReadFile(file);
+    if (!text)
         return {};
+    std::istringstream stream(*text);
 
     VersionFile result;
     result.found = true;

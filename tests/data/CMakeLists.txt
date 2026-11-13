@@ -353,3 +353,17 @@ target_compile_definitions(render_style_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
 )
+
+# Each case of the data tests once more, with the shipped client data read from a storage of the test's own
+# (ClientDataScope, Core/Content). The extra argument keeps this discovery's files apart from the first one's.
+foreach(data_test IN ITEMS monster_data_tests test_item_database_files)
+    doctest_discover_tests(${data_test}
+        TEST_PREFIX "content storage: "
+        EXTRA_ARGS --no-version=true
+        PROPERTIES
+            ENVIRONMENT MU_TEST_CONTENT=storage
+            TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
+            RESOURCE_LOCK ${data_test}
+            FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}"
+            SKIP_REGULAR_EXPRESSION "${MU_TEST_SKIPPED}")
+endforeach()
