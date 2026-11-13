@@ -8,10 +8,12 @@
 #include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Render/Items/ItemEffects.h"
@@ -36,6 +38,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <cwchar>
 #include <functional>
 #include <memory>
 #include <new>
@@ -161,6 +164,44 @@ struct FenrirScope
             Effects[i].Live = false;
     }
 };
+
+// Clears the live sprites, effects, particles and joints when made and again when it ends, also when a REQUIRE stops
+// the test, so none outlives the characters it is attached to. Declare it after the CharacterScope, so it ends first.
+struct SpawnsCleared
+{
+    SpawnsCleared()
+    {
+        Clear();
+    }
+    ~SpawnsCleared()
+    {
+        Clear();
+    }
+    static void Clear()
+    {
+        FenrirScope::ClearSpawns();
+        for (int i = 0; i < MAX_PARTICLES; ++i)
+            Particles[i].Live = false;
+        for (int i = 0; i < MAX_JOINTS; ++i)
+            Joints[i].Live = false;
+    }
+    SpawnsCleared(const SpawnsCleared&) = delete;
+    SpawnsCleared& operator=(const SpawnsCleared&) = delete;
+};
+
+// The live stat-down debuff lights of `o` with the subtype (1 attack down, 2 defense down).
+std::vector<const OBJECT*> StatDownLightsOf(const OBJECT* o, int subType)
+{
+    std::vector<const OBJECT*> lights;
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+    {
+        const OBJECT& effect = Effects[i];
+        if (effect.Live && effect.Owner == o && effect.SubType == subType &&
+            (effect.Type == BITMAP_SHINY + 6 || effect.Type == BITMAP_PIN_LIGHT))
+            lights.push_back(&effect);
+    }
+    return lights;
+}
 
 struct DyingStatueScope : CharacterScope
 {
@@ -711,6 +752,73 @@ TEST_CASE("The stun skull is refreshed for a stunned object, and not while its s
     g_CharacterRegisterBuff(stunned, eBuff_Cloaking);
     RefreshStunSkull(stunned, light);
     CHECK(skulls() == 0);
+}
+
+TEST_CASE("The defense-down debuff lights get their own color, as the attack-down ones do [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    SpawnsCleared spawns;
+    OBJECT* o = &scope.character().Object;
+    auto lightsOf = [o](int subType) { return StatDownLightsOf(o, subType); };
+    auto checkColor = [](const std::vector<const OBJECT*>& lights, float red, float green, float blue)
+    {
+        for (const OBJECT* light : lights)
+        {
+            CHECK(light->Light[0] == doctest::Approx(red));
+            CHECK(light->Light[1] == doctest::Approx(green));
+            CHECK(light->Light[2] == doctest::Approx(blue));
+        }
+    };
+
+    g_CharacterRegisterBuff(o, eDeBuff_AttackDown);
+    g_CharacterRegisterBuff(o, eDeBuff_DefenseDown);
+    Render::Effects::StatDownDebuffLights::Update(o);
+    REQUIRE(lightsOf(1).size() == 2);
+    REQUIRE(lightsOf(2).size() == 2);
+    checkColor(lightsOf(1), 1.4f, 0.2f, 0.2f);
+    checkColor(lightsOf(2), 0.25f, 1.0f, 0.7f);
+
+    Render::Effects::StatDownDebuffLights::Update(o);
+    CHECK(lightsOf(1).size() == 2);
+    CHECK(lightsOf(2).size() == 2);
+
+    g_CharacterUnRegisterBuff(o, eDeBuff_DefenseDown);
+    Render::Effects::StatDownDebuffLights::Update(o);
+    CHECK(lightsOf(1).size() == 2);
+    CHECK(lightsOf(2).empty());
+
+    g_CharacterClearBuff(o);
+    Render::Effects::StatDownDebuffLights::Update(o);
+    CHECK(lightsOf(1).empty());
+    CHECK(lightsOf(2).empty());
+}
+
+// While the hero is in a party, a Dark Lord outside it who uses the flash skill used to end his whole update during the
+// party link (AnimationFrame < 2), so his stat-down lights, set glow and other buff lights were skipped.
+TEST_CASE("A Dark Lord's flash outside the hero's party still updates his stat-down debuff lights [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    SpawnsCleared spawns;
+    CHARACTER& darkLord = scope.character();
+    OBJECT* o = &darkLord.Object;
+    darkLord.Class = CLASS_DARK_LORD;
+    std::wcscpy(darkLord.ID, L"DarkLord");
+    o->CurrentAction = PLAYER_SKILL_FLASH;
+    o->AnimationFrame = 1.f; // linking the party, before the gathering at 1.2
+    g_CharacterRegisterBuff(o, eDeBuff_AttackDown);
+
+    const int previousPartyNumber = PartyNumber;
+    const PARTY_t previousMember = Party[0];
+    PartyNumber = 1;
+    std::wcscpy(Party[0].Name, L"Someone");
+    Party[0].index = -1;
+
+    UpdateCharacterEffects();
+    const size_t lights = StatDownLightsOf(o, 1).size();
+
+    Party[0] = previousMember;
+    PartyNumber = previousPartyNumber;
+    CHECK(lights == 2);
 }
 
 TEST_CASE("Every spawn while drawing is a violation, outside a draw it is none [effects]")

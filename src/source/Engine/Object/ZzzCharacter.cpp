@@ -34,6 +34,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Monsters/MonsterSetupApply.h"
@@ -4676,13 +4677,13 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             CreateEffect(MODEL_SUMMONER_CASTING_EFFECT2, o->Position, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 0.6f);
             CreateEffect(MODEL_SUMMONER_CASTING_EFFECT22, o->Position, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 0.6f);
             CreateEffect(MODEL_SUMMONER_CASTING_EFFECT222, o->Position, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 0.6f);
-            Vector(1.4f, 0.2f, 0.2f, Light);
+            VectorCopy(Render::Effects::StatDownDebuffLights::AttackDownColor, Light);
             CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 0.5f);
             CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 1.f);
             PlayBuffer(SOUND_SKILL_WEAKNESS);
             break;
         case AT_SKILL_ALICE_ENERVATION:
-            Vector(0.25f, 1.0f, 0.7f, Light);
+            VectorCopy(Render::Effects::StatDownDebuffLights::DefenseDownColor, Light);
             CreateEffect(BITMAP_MAGIC_ZIN, o->Position, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 7.0f);
             CreateEffect(BITMAP_MAGIC_ZIN, o->Position, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 2.0f);
             CreateEffect(BITMAP_MAGIC_ZIN, o->Position, o->Angle, Light, 2, NULL, -1, 0, 0, 0, 1.0f);
@@ -10762,11 +10763,9 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (o->AnimationFrame < 2.f)
             {
-                if (PartyNumber > 0 /*&& rand_fps_check(2)*/)
+                // Only a party member's flash links the party; the rest of the update still runs for anyone else.
+                if (PartyNumber > 0 && g_pPartyManager->IsPartyMemberChar(c))
                 {
-                    if (g_pPartyManager->IsPartyMemberChar(c) == false)
-                        return;
-
                     for (int i = 0; i < PartyNumber; ++i)
                     {
                         PARTY_t* p = &Party[i];
@@ -10862,7 +10861,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
         {
-            Vector(0.25f, 1.0f, 0.7f, Light);
+            VectorCopy(Render::Effects::StatDownDebuffLights::DefenseDownColor, vLight);
         }
 
         if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR ||
@@ -10896,13 +10895,13 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         {
             Vector(1.0f, 0.1f, 0.2f, vLight);
         }
-        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        else if (iSkillType == AT_SKILL_ALICE_WEAKNESS)
         {
             Vector(0.8f, 0.1f, 0.1f, vLight);
         }
         else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
         {
-            Vector(0.25f, 1.f, 0.7f, vLight);
+            VectorCopy(Render::Effects::StatDownDebuffLights::DefenseDownColor, vLight);
         }
 
         if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR ||
@@ -10936,13 +10935,13 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         {
             Vector(1.0f, 0.1f, 0.2f, vLight);
         }
-        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        else if (iSkillType == AT_SKILL_ALICE_WEAKNESS)
         {
             Vector(0.8f, 0.1f, 0.1f, vLight);
         }
         else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
         {
-            Vector(0.25f, 1.f, 0.7f, vLight);
+            VectorCopy(Render::Effects::StatDownDebuffLights::DefenseDownColor, vLight);
         }
         if (rand_fps_check(1))
         {
@@ -11115,37 +11114,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         DeleteEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 4);
     }
 
-    if (g_isCharacterBuff((&c->Object), eDeBuff_AttackDown))
-    {
-        if (!SearchEffect(BITMAP_SHINY + 6, o, 1))
-        {
-            vec3_t vLight;
-            Vector(1.4f, 0.2f, 0.2f, vLight);
-            CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 0.5f);
-            CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.f);
-        }
-    }
-    else
-    {
-        DeleteEffect(BITMAP_SHINY + 6, o, 1);
-        DeleteEffect(BITMAP_PIN_LIGHT, o, 1);
-    }
-
-    if (g_isCharacterBuff((&c->Object), eDeBuff_DefenseDown))
-    {
-        if (!SearchEffect(BITMAP_SHINY + 6, o, 2))
-        {
-            vec3_t vLight;
-            Vector(0.25f, 1.0f, 0.7f, Light);
-            CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 0.5f);
-            CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.f);
-        }
-    }
-    else
-    {
-        DeleteEffect(BITMAP_SHINY + 6, o, 2);
-        DeleteEffect(BITMAP_PIN_LIGHT, o, 2);
-    }
+    Render::Effects::StatDownDebuffLights::Update(o);
 
     if (g_isCharacterBuff((&c->Object), eDeBuff_SahamuttDOT))
     {
