@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "CharacterMachineScope.h"
 #include "ClientDataScope.h"
 #include "ItemModelDatabaseScope.h"
 #include "ItemOptionsScope.h"
@@ -1599,33 +1600,18 @@ template <typename TChange> void EditItem(int itemType, TChange&& change)
 class WornItemsScope
 {
 public:
+    // Every other place holds nothing (type -1; type 0 is the Kris).
     explicit WornItemsScope(std::initializer_list<int> itemTypes)
-        : m_previous(CharacterMachine), m_machine(std::make_unique<CHARACTER_MACHINE>())
     {
-        // Type 0 is the Kris: every other place holds nothing.
-        for (ITEM& equipped : m_machine->Equipment)
-        {
-            equipped.Type = -1;
-        }
         size_t index = 0;
         for (const int itemType : itemTypes)
         {
-            m_machine->Equipment[index++].Type = static_cast<short>(itemType);
+            m_machine.Machine().Equipment[index++].Type = static_cast<short>(itemType);
         }
-        CharacterMachine = m_machine.get();
     }
-
-    ~WornItemsScope()
-    {
-        CharacterMachine = m_previous;
-    }
-
-    WornItemsScope(const WornItemsScope&) = delete;
-    WornItemsScope& operator=(const WornItemsScope&) = delete;
 
 private:
-    CHARACTER_MACHINE* m_previous;
-    std::unique_ptr<CHARACTER_MACHINE> m_machine;
+    CharacterMachineScope m_machine;
 };
 
 // The game's characters for the scope, with the editor's hook that drops what
