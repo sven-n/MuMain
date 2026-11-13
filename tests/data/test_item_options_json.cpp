@@ -487,8 +487,11 @@ TEST_CASE("Option definitions of type ancientBonus and ancientOption read and wr
         return R"({"name": "b", "type": "ancientBonus", "displayName": {"en": "B"}, "options": [)" + options + "]}";
     };
     // The ancient bonus has one option without a number.
-    CHECK(HasIssue(ReadDefinition(bonus(R"({"number": 1, "attribute": "a", "add": {"values": [5]}, "text": "t"})")),
-                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    const std::vector<ItemDataIssue> numbered =
+        ReadDefinition(bonus(R"({"number": 1, "attribute": "a", "add": {"values": [5]}, "text": "t"})"));
+    CHECK(HasIssue(numbered, ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    CHECK(std::any_of(numbered.begin(), numbered.end(), [](const ItemDataIssue& issue)
+                      { return issue.message == "an ancientBonus option has no number; leave it out"; }));
     CHECK(HasIssue(ReadDefinition(bonus(R"({"attribute": "a", "add": {"values": [5]}, "text": "t"},
                                            {"attribute": "b", "add": {"values": [5]}, "text": "t"})")),
                    ItemDataIssueSeverity::Fatal, "definitions[0].options"));
