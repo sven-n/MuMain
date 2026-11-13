@@ -11,6 +11,8 @@
 #include "doctest.h"
 
 #include "Audio/DSPlaySound.h"
+#include "Data/DataHandler/BuffData/BuffStorage.h"
+#include "Data/GameData/BuffData/BuffDatabase.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
@@ -21,6 +23,7 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Monsters/MonsterSetupApply.h"
 #include "GameLogic/Monsters/UnknownMonsters.h"
+#include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/GOBoid.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -543,6 +546,48 @@ TEST_CASE("Monster setup: a buff sent again keeps a monster's Crywolf states [mo
     g_CharacterRegisterBuff((&altar->Object), eBuff_CrywolfAltarEnable);
     CreationScope::SendBuffState(*altar, eBuff_CrywolfAltarEnable, true);
     CHECK_FALSE(altar->Object.m_BuffMap.isBuff(eBuff_CrywolfAltarEnable));
+}
+
+// 0x07 for a stat-down debuff gives a monster its pair of lights, also when it arrives again, and taking the debuff
+// removes them. Monsters get these lights only from this packet. The shipped buff table says it is a debuff, which
+// the packet's handler needs before it draws anything.
+TEST_CASE("Monster setup: a stat-down debuff sent twice gives one pair of lights [monsters][creation]")
+{
+    using MonsterRecorder::CreationScope;
+    const Data::Buffs::BuffsLoadResult shipped =
+        Data::Buffs::LoadBuffsFile(std::filesystem::path(MU_TEST_DATA_DIR) / "Buffs" / "Buffs.json");
+    REQUIRE_FALSE(shipped.buffs.empty());
+    g_BuffDatabase.Build(shipped.buffs, "en");
+    CreationScope scope(0);
+    MonsterRecorder::PrepareCreationSlot(CreationSlot::Clean);
+    CHARACTER* budge = scope.Create(MONSTER_BUDGE_DRAGON);
+    OBJECT* o = budge != nullptr ? &budge->Object : nullptr;
+    auto lights = [o]
+    {
+        int count = 0;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+        {
+            const OBJECT& effect = Effects[i];
+            if (effect.Live && effect.Owner == o && effect.SubType == 1 &&
+                (effect.Type == BITMAP_SHINY + 6 || effect.Type == BITMAP_PIN_LIGHT))
+                ++count;
+        }
+        return count;
+    };
+
+    CHECK(budge != nullptr);
+    if (budge != nullptr)
+    {
+        CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, true);
+        CHECK(lights() == 2);
+        CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, true);
+        CHECK(lights() == 2);
+
+        CreationScope::SendBuffState(*budge, eDeBuff_AttackDown, false);
+        CHECK(lights() == 0);
+        Render::Effects::StatDownDebuffLights::Delete(o, eDeBuff_AttackDown); // none outlives the monster
+    }
+    g_BuffDatabase.Build({}, "en");
 }
 
 // Molt's model file is missing: it is tried once a map, not at each spawn,
