@@ -1319,6 +1319,8 @@ item and the field (**Copy text** copies it). All problems are also written to
   stat profile has no excellent term for its damage or magic power (the
   bonus takes the term's place, so it does not count there)
 - `excellentRaisesLevel: false` on an item without a level requirement
+- an `attackType` above 4: it picks no [ancient bonus](#item-options)
+  (1 strength, 2 agility, 3 energy, 4 vitality), so the item has none
 - a `requirementsByLevel` entry next to a base value of the same requirement
 - a name in a language the game has no UI texts for (it is never shown)
 - no `statProfile` on an item the profile rules give one, as in item files
