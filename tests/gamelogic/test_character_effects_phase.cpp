@@ -12,6 +12,7 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Render/Items/ItemEffects.h"
@@ -742,23 +743,23 @@ TEST_CASE("The defense-down debuff lights get their own color, as the attack-dow
 
     g_CharacterRegisterBuff(o, eDeBuff_AttackDown);
     g_CharacterRegisterBuff(o, eDeBuff_DefenseDown);
-    UpdateStatDownDebuffEffects(o);
+    Render::Effects::StatDownDebuffLights::Update(o);
     REQUIRE(lightsOf(1).size() == 2);
     REQUIRE(lightsOf(2).size() == 2);
     checkColor(lightsOf(1), 1.4f, 0.2f, 0.2f);
     checkColor(lightsOf(2), 0.25f, 1.0f, 0.7f);
 
-    UpdateStatDownDebuffEffects(o);
+    Render::Effects::StatDownDebuffLights::Update(o);
     CHECK(lightsOf(1).size() == 2);
     CHECK(lightsOf(2).size() == 2);
 
     g_CharacterUnRegisterBuff(o, eDeBuff_DefenseDown);
-    UpdateStatDownDebuffEffects(o);
+    Render::Effects::StatDownDebuffLights::Update(o);
     CHECK(lightsOf(1).size() == 2);
     CHECK(lightsOf(2).empty());
 
     g_CharacterClearBuff(o);
-    UpdateStatDownDebuffEffects(o);
+    Render::Effects::StatDownDebuffLights::Update(o);
     CHECK(lightsOf(1).empty());
     CHECK(lightsOf(2).empty());
     FenrirScope::ClearSpawns();

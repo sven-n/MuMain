@@ -34,6 +34,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Monsters/MonsterSetupApply.h"
@@ -85,29 +86,6 @@ namespace
     // sounds), one in 16 for others, which the sets' idle events keep.
     constexpr int HeroWalkIdleOneIn = 64;
     constexpr int WalkIdleOneIn = 16;
-
-    // The lights of the stat-down debuffs, also the colors of the Weakness and Innovation casts that apply them.
-    constexpr float AttackDownLightColor[3] = {1.4f, 0.2f, 0.2f};
-    constexpr float DefenseDownLightColor[3] = {0.25f, 1.0f, 0.7f};
-
-    struct StatDownDebuffLights
-    {
-        int subType;
-        const float* color;
-    };
-
-    std::optional<StatDownDebuffLights> LightsOfStatDownDebuff(eBuffState debuff)
-    {
-        switch (debuff)
-        {
-        case eDeBuff_AttackDown:
-            return StatDownDebuffLights{1, AttackDownLightColor};
-        case eDeBuff_DefenseDown:
-            return StatDownDebuffLights{2, DefenseDownLightColor};
-        default:
-            return std::nullopt;
-        }
-    }
 
     // The sound events of the monster's sound set at the moment (monsters
     // design, Q-MN76, Q-MN78), where the sound slots played; `chanceDrawn`
@@ -4699,13 +4677,13 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             CreateEffect(MODEL_SUMMONER_CASTING_EFFECT2, o->Position, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 0.6f);
             CreateEffect(MODEL_SUMMONER_CASTING_EFFECT22, o->Position, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 0.6f);
             CreateEffect(MODEL_SUMMONER_CASTING_EFFECT222, o->Position, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 0.6f);
-            VectorCopy(AttackDownLightColor, Light);
+            VectorCopy(Render::Effects::StatDownDebuffLights::AttackDownColor, Light);
             CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 0.5f);
             CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 1.f);
             PlayBuffer(SOUND_SKILL_WEAKNESS);
             break;
         case AT_SKILL_ALICE_ENERVATION:
-            VectorCopy(DefenseDownLightColor, Light);
+            VectorCopy(Render::Effects::StatDownDebuffLights::DefenseDownColor, Light);
             CreateEffect(BITMAP_MAGIC_ZIN, o->Position, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 7.0f);
             CreateEffect(BITMAP_MAGIC_ZIN, o->Position, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 2.0f);
             CreateEffect(BITMAP_MAGIC_ZIN, o->Position, o->Angle, Light, 2, NULL, -1, 0, 0, 0, 1.0f);
@@ -10883,7 +10861,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
         {
-            VectorCopy(DefenseDownLightColor, vLight);
+            VectorCopy(Render::Effects::StatDownDebuffLights::DefenseDownColor, vLight);
         }
 
         if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR ||
@@ -10923,7 +10901,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
         {
-            VectorCopy(DefenseDownLightColor, vLight);
+            VectorCopy(Render::Effects::StatDownDebuffLights::DefenseDownColor, vLight);
         }
 
         if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR ||
@@ -10963,7 +10941,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
         {
-            VectorCopy(DefenseDownLightColor, vLight);
+            VectorCopy(Render::Effects::StatDownDebuffLights::DefenseDownColor, vLight);
         }
         if (rand_fps_check(1))
         {
@@ -11136,7 +11114,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         DeleteEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 4);
     }
 
-    UpdateStatDownDebuffEffects(o);
+    Render::Effects::StatDownDebuffLights::Update(o);
 
     if (g_isCharacterBuff((&c->Object), eDeBuff_SahamuttDOT))
     {
@@ -12333,39 +12311,6 @@ void RequestEarthQuake(float value)
         return;
     s_hasEarthQuakeRequest = true;
     s_earthQuakeRequest = value;
-}
-
-void CreateStatDownDebuffLights(OBJECT* o, eBuffState debuff)
-{
-    const auto lights = LightsOfStatDownDebuff(debuff);
-    if (!lights || SearchEffect(BITMAP_SHINY + 6, o, lights->subType))
-        return;
-
-    vec3_t color;
-    VectorCopy(lights->color, color);
-    CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, color, lights->subType, o, -1, 0, 0, 0, 0.5f);
-    CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, color, lights->subType, o, -1, 0, 0, 0, 1.f);
-}
-
-void DeleteStatDownDebuffLights(OBJECT* o, eBuffState debuff)
-{
-    const auto lights = LightsOfStatDownDebuff(debuff);
-    if (!lights)
-        return;
-
-    DeleteEffect(BITMAP_SHINY + 6, o, lights->subType);
-    DeleteEffect(BITMAP_PIN_LIGHT, o, lights->subType);
-}
-
-void UpdateStatDownDebuffEffects(OBJECT* o)
-{
-    for (const eBuffState debuff : {eDeBuff_AttackDown, eDeBuff_DefenseDown})
-    {
-        if (g_isCharacterBuff(o, debuff))
-            CreateStatDownDebuffLights(o, debuff);
-        else
-            DeleteStatDownDebuffLights(o, debuff);
-    }
 }
 
 void UpdateCharacterEffects()

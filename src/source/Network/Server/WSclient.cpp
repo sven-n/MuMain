@@ -36,6 +36,7 @@
 #include "Engine/Pathing/ZzzPath.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -15381,7 +15382,7 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     break;
     case eDeBuff_AttackDown:
     case eDeBuff_DefenseDown:
-        CreateStatDownDebuffLights(o, buff);
+        Render::Effects::StatDownDebuffLights::Create(o, buff);
         break;
     case eBuff_Berserker:
     {
@@ -15583,7 +15584,7 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
 
     case eDeBuff_AttackDown:
     case eDeBuff_DefenseDown:
-        DeleteStatDownDebuffLights(o, buff);
+        Render::Effects::StatDownDebuffLights::Delete(o, buff);
         break;
     case eBuff_Berserker:
     {
