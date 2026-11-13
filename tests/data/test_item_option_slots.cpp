@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "CharacterMachineScope.h"
 #include "ClientDataScope.h"
 #include "HeroScope.h"
 #include "ItemOptionsScope.h"
@@ -12,6 +13,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemOptionSlots.h"
 #include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Pets/GIPetManager.h"
@@ -1107,3 +1109,83 @@ TEST_CASE("An item is excellent when its excellent byte turns on an option it li
     CHECK(durability(ITEM_WINGS_OF_SPIRITS, 0x01) == durability(ITEM_WINGS_OF_SPIRITS, 0));
 }
 
+namespace
+{
+// An item of an ancient set with its bonus at `bonusLevel`, as the server sends it (set 1).
+ITEM MakeAncientItem(int type, BYTE bonusLevel)
+{
+    ItemCreationParams params{};
+    params.Group = type / MAX_ITEM_INDEX;
+    params.Number = type % MAX_ITEM_INDEX;
+    params.IsAncient = true;
+    params.AncientDiscriminator = 1;
+    params.AncientBonusOption = bonusLevel;
+    params.Durability = 20;
+    ITEM item;
+    FillItemFromParameters(item, params);
+    return item;
+}
+
+// The stats the stat code adds up (strength, agility, energy, vitality).
+std::array<int, 4> AddedUpStats()
+{
+    std::array<std::uint16_t, 5> stats{};
+    g_csItemOption.getAllAddStateOnlyAddValue(&stats[0], &stats[1], &stats[2], &stats[3], &stats[4]);
+    return {stats[0], stats[1], stats[2], stats[3]};
+}
+
+// What wearing `worn` adds to the stats the stat code adds up, as the difference to wearing nothing, so the set options
+// a test before left in g_csItemOption don't count.
+std::array<int, 4> AddedStats(const ITEM& worn)
+{
+    CharacterMachineScope scope;
+    const std::array<int, 4> without = AddedUpStats();
+    scope.Machine().Equipment[EQUIPMENT_RING_RIGHT] = worn;
+    const std::array<int, 4> with = AddedUpStats();
+    return {with[0] - without[0], with[1] - without[1], with[2] - without[2], with[3] - without[3]};
+}
+} // namespace
+
+// The ancient bonus of an item of a set raises the stat of its attackType (1 strength, 2 agility, 3 energy, 4
+// vitality) by 5 at bonus level 1 and 10 at level 2, for every item that has one; a broken item adds nothing.
+TEST_CASE("Every ancient item's bonus raises the stat of its attackType [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    std::array<int, 4> itemsPerStat{};
+    int someAncientItem = -1;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const int type = definition.group * MAX_ITEM_INDEX + definition.number;
+        const int attackType = ItemAttribute[type].AttType;
+        if (attackType < 1 || attackType > 4)
+        {
+            continue;
+        }
+        ++itemsPerStat[static_cast<size_t>(attackType - 1)];
+        someAncientItem = type;
+        for (int level = 1; level <= 2; ++level)
+        {
+            std::array<int, 4> expected{};
+            expected[static_cast<size_t>(attackType - 1)] = 5 * level;
+            CAPTURE(type);
+            CAPTURE(level);
+            CHECK(AddedStats(MakeAncientItem(type, static_cast<BYTE>(level))) == expected);
+        }
+    }
+    // Each stat has items, so each case of the stat code ran.
+    CHECK(std::all_of(itemsPerStat.begin(), itemsPerStat.end(), [](int items) { return items >= 1; }));
+
+    REQUIRE(someAncientItem >= 0);
+    ITEM broken = MakeAncientItem(someAncientItem, 2);
+    broken.Durability = 0;
+    CHECK(AddedStats(broken) == std::array<int, 4>{});
+}
