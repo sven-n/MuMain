@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "Core/Utilities/Random.h"
 #include "App/Control/ControlTaps.h"
 #include "Audio/SoundPlaces.h"
@@ -429,7 +430,7 @@ void ReportConnectFailure(const ConnectAttempt& attempt)
         if (!connectErrorDisplayed)
         {
             connectErrorDisplayed = true;
-            MessageBoxW(nullptr, connectError, L"Connection Error", MB_ICONERROR | MB_OK);
+            Core::Platform::ShowError("Connection Error", mu_wchar_to_utf8(connectError));
         }
     }
 }
@@ -1071,7 +1072,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
         memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
         SelectMarkColor = 0;
-        PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::RequestQuit();
         break;
     case 1:
         App::Control::Events::RecordDisconnected("the session went back to the character list");

@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/MapObjectSounds.h"
 #include "Audio/SoundLoads.h"
@@ -965,8 +966,7 @@ void CMapManager::LoadWorld(int Map)
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return;
     }
 
@@ -1028,8 +1028,7 @@ void CMapManager::LoadWorld(int Map)
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return;
     }
 
@@ -1042,8 +1041,7 @@ void CMapManager::LoadWorld(int Map)
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return;
     }
 

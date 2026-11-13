@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "MixMgr.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Content/ContentStore.h"
@@ -1222,7 +1223,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
     if (!fp)
     {
         DataFileIO::ReportUnusableFile(szFileName, L"File not exist.");
-        exit(0);
+        return;
     }
 
     int iNumMixRecipes[MAX_MIX_TYPES];
@@ -1230,7 +1231,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
     if (!DataFileIO::ReadExact(fp.get(), iNumMixRecipes, iSize))
     {
         DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
-        exit(0);
+        return;
     }
     BuxConvert(reinterpret_cast<BYTE*>(iNumMixRecipes), iSize);
 
@@ -1242,9 +1243,8 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
             wchar_t Text[256];
             mu_swprintf(Text, L"%ls - Version not matched.", szFileName);
             g_ErrorReport.Write(Text);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
-            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-            exit(0);
+            Core::Platform::ShowFatalError(L"Error", Text);
+            return;
         }
         for (i = 0; i < iNumMixRecipes[j]; ++i)
         {
@@ -1252,7 +1252,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
             if (!DataFileIO::ReadExact(fp.get(), pMixRecipe.get(), iSize))
             {
                 DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
-                exit(0);
+                return;
             }
             BuxConvert(reinterpret_cast<BYTE*>(pMixRecipe.get()), iSize);
             m_MixRecipe[j].AddRecipe(pMixRecipe.release());

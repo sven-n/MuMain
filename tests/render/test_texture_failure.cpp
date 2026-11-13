@@ -1,60 +1,49 @@
-#include "Render/Textures/TextureFailure.h"
+#include "doctest.h"
 
-#include <cstdlib>
-#include <fstream>
-#include <string>
-#include <string_view>
+#include "Render/Textures/TextureFailure.h"
 
 namespace
 {
-std::ofstream trace;
 bool chooseYes = true;
-void Mark(const char* event)
-{
-    trace << event << '\n' << std::flush;
-}
-bool Show(const std::string&, const std::string&, bool)
-{
-    Mark("dialog");
-    return chooseYes;
-}
+int dialogs = 0;
+int quits = 0;
+
 const Render::Textures::TextureErrorActions actions{
-    &Show,
-    []() { Mark("connection"); },
-    []() { Mark("sound"); },
-    []() { Mark("window"); },
+    [](const std::string&, const std::string&, bool)
+    {
+        ++dialogs;
+        return chooseYes;
+    },
+    []() { ++quits; },
 };
+
+void Dispatch(bool forceDestroy, bool yes)
+{
+    chooseYes = yes;
+    dialogs = 0;
+    quits = 0;
+    Render::Textures::DispatchTextureError("Error", "bitmap failure", forceDestroy, actions);
+}
 } // namespace
 
-int main(int argc, char** argv)
+TEST_CASE("A texture error goes on only when the player chooses to and may [render][texture]")
 {
-    if (argc != 2)
-    {
-        return EXIT_FAILURE;
-    }
-    const std::string_view mode(argv[1]);
-    if (mode == "fatal")
-    {
-        Render::Textures::ExitAfterTextureError();
-    }
-    if (mode == "continue")
-    {
-        return Render::Textures::ContinueAfterTextureError(false, true) &&
-                       !Render::Textures::ContinueAfterTextureError(false, false) &&
-                       !Render::Textures::ContinueAfterTextureError(true, true)
-                   ? EXIT_SUCCESS
-                   : EXIT_FAILURE;
-    }
-    if (mode == "dispatch-continue" || mode == "dispatch-fatal" || mode == "dispatch-decline")
-    {
-        chooseYes = mode != "dispatch-decline";
-        trace.open("texture_failure_" + std::string(mode) + ".txt", std::ios::trunc);
-        if (!trace)
-        {
-            return EXIT_FAILURE;
-        }
-        Render::Textures::DispatchTextureError("Error", "bitmap failure", mode == "dispatch-fatal", actions);
-        return mode == "dispatch-continue" ? EXIT_SUCCESS : EXIT_FAILURE;
-    }
-    return EXIT_FAILURE;
+    CHECK(Render::Textures::ContinueAfterTextureError(false, true));
+    CHECK_FALSE(Render::Textures::ContinueAfterTextureError(false, false));
+    CHECK_FALSE(Render::Textures::ContinueAfterTextureError(true, true));
+}
+
+TEST_CASE("A texture error shows the dialog once and asks to quit unless the player continues [render][texture]")
+{
+    Dispatch(false, true);
+    CHECK(dialogs == 1);
+    CHECK(quits == 0);
+
+    Dispatch(false, false);
+    CHECK(dialogs == 1);
+    CHECK(quits == 1);
+
+    Dispatch(true, true);
+    CHECK(dialogs == 1);
+    CHECK(quits == 1);
 }

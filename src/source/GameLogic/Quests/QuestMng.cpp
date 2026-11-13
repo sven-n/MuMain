@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "QuestMng.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Content/ContentStore.h"
@@ -47,8 +48,7 @@ void CQuestMng::LoadNPCDialogueScript()
         wchar_t szMessage[256];
         mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_NPCDIALOGUE_FILE);
         g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
         return;
     }
 
@@ -76,8 +76,7 @@ void CQuestMng::LoadQuestProgressScript()
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_QUESTPROGRESS_FILE);
         g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
         return;
     }
 
@@ -105,8 +104,7 @@ void CQuestMng::LoadQuestWordsScript()
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_QUESTWORDS_FILE);
         g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
         return;
     }
 
