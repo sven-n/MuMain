@@ -172,6 +172,41 @@ cached dependencies, reconfigure the same build directory with
 disconnected mode requires its sources to already exist. Let configuration finish
 successfully before building or running the tests.
 
+### Targets
+
+Each target's build choices live in one file, `cmake/targets/<target>.cmake`.
+`src/CMakeLists.txt` picks it from `CMAKE_SYSTEM_NAME` (`windows`, `linux`,
+`macos`; `android`, `web` and `ios` have no file yet) and stops at configure
+time when it's missing. `MU_TARGET_FILE` points at another file instead.
+
+A target file sets:
+
+| Variable | Meaning |
+|----------|---------|
+| `MU_PLATFORM_SOURCES` | Which of `Core/Platform/win32` or `posix` the game library compiles. |
+| `MU_TARGET_ADAPTERS` | The platform service adapters, from the `Adapters/` folders under `src/source`: saved logins, shop downloads, CPU usage. Each service has an "unavailable" adapter for a target without it. |
+| `MU_TARGET_DEPENDENCIES` | The libraries the target links, by provider name: `OpenSSL`, `CURL`, `Cryptopp`, `TurboJPEG`. |
+| `MU_TARGET_SYSTEM_LIBRARIES` | System libraries and frameworks. |
+| `MU_MANAGED_LIBRARY_FILE`, `MU_MANAGED_LIBRARY_BY_NAME`, `MU_DOTNET_RID`, `MU_DOTNET_PLATFORM`, `MU_DOTNET_EXTRA_ARGS` | The network library: its file name, how it's found, and how .NET builds it. Needed only while the exports come from the NativeAOT library. |
+| `MU_MANAGED_SYMBOL_SOURCE`, `MU_TARGET_SYMBOL_ADAPTER` | Optional: where the network library's exports come from. `library` (the default) is the NativeAOT library; any other name needs the target's own adapter source in `MU_TARGET_SYMBOL_ADAPTER`, and skips building the NativeAOT library. |
+| `MU_SDL_SHARED`, `MU_APP_LIBRARY`, `MU_APP_OUTPUT_NAME` | Optional, `OFF` by default: SDL as a shared library, and the game as a shared library with this name (Android's `SDLActivity` loads `libSDL3.so` and `libmain.so`). |
+
+Each dependency has a provider in `cmake/MuDependencies.cmake` that finds it
+and defines `MuDep::<Name>`. A missing one stops the configure, naming the
+package, the target and what needs it. A target that builds a dependency
+itself, such as a port that compiles Crypto++ from source, defines
+`MuDep::<Name>` in its target file (an `INTERFACE` or `GLOBAL` imported
+target), and the provider is skipped.
+
+With `MU_APP_LIBRARY`, every static library linked into the game is built
+position independent.
+
+A port adds its own target file and adapters, and changes no shared CMake.
+`tests/cmake/port-like-target.cmake` is shaped like one: it uses the
+unavailable adapters and a network adapter with no library, and builds SDL
+and the game as shared libraries. CI's Linux job configures and builds it
+without OpenSSL or libcurl.
+
 ### The network library
 
 The client talks to the server through OpenMU's `MUnique.Client.Library`, a C#
@@ -202,12 +237,13 @@ The exports come from one adapter per target, in `Dotnet/SymbolSources/`.
 `src/CMakeLists.txt` compiles the adapter into `Main`, not into `MuClient`.
 
 - On desktop the adapter is `ManagedLibrarySource.cpp`, over the library.
-  `MU_MANAGED_LIBRARY_FILE` gives the library's file name, and
-  `MU_MANAGED_LIBRARY_BY_NAME` says whether the loader finds it by name
-  (Windows, Android) or beside the executable (Linux, macOS).
-- A port that links the exports another way adds its own adapter and selects
-  it with `MU_MANAGED_SYMBOL_SOURCE`. Its adapter defines
-  `DotNetBridge::TargetManagedSymbolSource()`. Shared code doesn't change.
+  The target file's `MU_MANAGED_LIBRARY_FILE` gives the library's file name,
+  and `MU_MANAGED_LIBRARY_BY_NAME` says whether the loader finds it by name
+  (Windows) or beside the executable (Linux, macOS); see [Targets](#targets).
+- A port that links the exports another way adds its own adapter, which
+  defines `DotNetBridge::TargetManagedSymbolSource()`, and names it in its
+  target file (`MU_MANAGED_SYMBOL_SOURCE`, `MU_TARGET_SYMBOL_ADAPTER`). Shared
+  code doesn't change.
 
 ### Output layout
 
