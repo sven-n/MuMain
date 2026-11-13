@@ -8,7 +8,6 @@ void OpenNpc(int Type);
 void DeleteMonsters();
 void OpenMonsterModel(EMonsterModelType Type);
 
-void OpenModel(int Type, wchar_t* Dir, wchar_t* ModelFileName, ...);
 // The startup data load, as steps for the title screen to run across frames.
 std::vector<std::function<void()>> OpenBasicDataSteps();
 void ReleaseMainData();

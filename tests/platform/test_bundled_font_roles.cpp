@@ -30,12 +30,6 @@ TEST_CASE("bundled font roles resolve deterministically [platform][bundled_font]
     CHECK(std::string_view(kBundledFallbackFonts[3].family) == "Noto Sans SC");
 }
 
-TEST_CASE("bundled font paths follow the normalized runtime directory [platform][bundled_font]")
-{
-    const std::filesystem::path relativePath = "fonts/DejaVuSans.ttf";
-    CHECK(ResolveBundledFontPath(relativePath) == std::filesystem::current_path() / relativePath);
-}
-
 TEST_CASE("bundled font roles load their maximum responsive size [platform][bundled_font]")
 {
     using UI::Scaling::FontRole;

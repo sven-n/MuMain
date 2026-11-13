@@ -8,6 +8,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Data/GameData/ItemData/ItemFieldDefs.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Core/Content/ContentStore.h"
 #include <string>
 
 // X-Macro helpers for CSV generation
@@ -29,6 +30,7 @@
 
 bool ItemDataExportAsCSV::ExportToCsv(wchar_t* fileName, const ITEM_ATTRIBUTE* attributes)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     FILE* csvFp = _wfopen(fileName, L"w");
     if (!csvFp)
     {

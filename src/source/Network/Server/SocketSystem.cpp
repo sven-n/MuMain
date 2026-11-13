@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "SocketSystem.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "I18N/All.h"
 
 #include "Engine/Object/ZzzInventory.h"
@@ -624,7 +624,7 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 
 void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(szFileName);
     if (!fp)
     {
         wchar_t Text[256];

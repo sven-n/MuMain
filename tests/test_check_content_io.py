@@ -11,20 +11,40 @@ SCRIPT = Path(__file__).resolve().parent / "check_content_io.py"
 
 
 class CheckContentIoTests(unittest.TestCase):
-    def run_check(self, files, baseline):
+    def run_check(self, files, baseline, *options):
         with tempfile.TemporaryDirectory() as root:
             for name, text in files.items():
                 path = Path(root, "src", "source", name)
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(text, encoding="utf-8")
             Path(root, "tests").mkdir()
-            Path(root, "tests", "check_content_io_baseline.txt").write_text(baseline, encoding="utf-8")
-            return subprocess.run([sys.executable, str(SCRIPT), root], capture_output=True, text=True)
+            baseline_file = Path(root, "tests", "check_content_io_baseline.txt")
+            baseline_file.write_text(baseline, encoding="utf-8")
+            result = subprocess.run([sys.executable, str(SCRIPT), root, *options], capture_output=True, text=True)
+            result.baseline = baseline_file.read_text(encoding="utf-8")
+            return result
 
-    def test_a_call_the_baseline_allows_passes(self):
+    def test_a_call_the_baseline_allows_passes_and_is_still_to_move(self):
         result = self.run_check({"Data/Load.cpp": 'FILE* f = fopen("Data/x.bmd", "rb");\n'},
                                 "src/source/Data/Load.cpp\tfopen\t1\n")
         self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(result.stdout, "still to move: src/source/Data/Load.cpp: 1 fopen call(s)\n")
+
+    def test_a_call_with_a_reason_passes_quietly(self):
+        result = self.run_check({"Data/Load.cpp": 'FILE* f = fopen("user.ini", "rb");\n'},
+                                "src/source/Data/Load.cpp\tfopen\t1\tper-user file\n")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(result.stdout, "")
+
+    def test_update_keeps_the_reasons_of_lines_that_remain(self):
+        files = {"Data/Load.cpp": 'fopen("a", "rb");\n', "Data/New.cpp": 'fopen("b", "rb");\n'}
+        baseline = ("src/source/Data/Gone.cpp\tfopen\t1\tgone\n"
+                    "src/source/Data/Load.cpp\tfopen\t2\tper-user file\n")
+        result = self.run_check(files, baseline, "--update")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        lines = [line for line in result.baseline.splitlines() if not line.startswith("#")]
+        self.assertEqual(lines, ["src/source/Data/Load.cpp\tfopen\t1\tper-user file",
+                                 "src/source/Data/New.cpp\tfopen\t1"])
 
     def test_a_new_call_fails_and_names_the_file(self):
         result = self.run_check({"Data/Load.cpp": 'std::ifstream file("Data/x.json");\n'}, "")

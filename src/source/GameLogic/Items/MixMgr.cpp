@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "MixMgr.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "I18N/All.h"
 #include "Core/Text/WideFormat.h"
 
@@ -1218,7 +1218,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
         m_MixRecipe[j].Reset();
     }
 
-    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    const Content::Stream fp = Content::OpenIO(szFileName);
     if (!fp)
     {
         DataFileIO::ReportUnusableFile(szFileName, L"File not exist.");
@@ -1237,7 +1237,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
     iSize = sizeof(MIX_RECIPE);
     for (j = 0; j < MAX_MIX_TYPES; ++j)
     {
-        if (feof(fp.get()) || iNumMixRecipes[j] > 1000)
+        if (SDL_GetIOStatus(fp.get()) == SDL_IO_STATUS_EOF || iNumMixRecipes[j] > 1000)
         {
             wchar_t Text[256];
             mu_swprintf(Text, L"%ls - Version not matched.", szFileName);

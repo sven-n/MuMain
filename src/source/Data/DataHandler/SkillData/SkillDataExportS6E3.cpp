@@ -8,6 +8,7 @@
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Core/Content/ContentStore.h"
 #include <memory>
 
 // External references
@@ -15,6 +16,7 @@ extern SKILL_ATTRIBUTE* SkillAttribute;
 
 bool SkillDataExportS6E3::SaveLegacy(wchar_t* fileName)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     const int Size = sizeof(SKILL_ATTRIBUTE_FILE_LEGACY);
 
     FILE* fp = _wfopen(fileName, L"wb");

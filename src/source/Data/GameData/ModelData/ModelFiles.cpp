@@ -5,14 +5,11 @@
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ModelData/ModelFileSymbols.h"
 
-#ifndef _WIN32
-#include "Core/Platform/PathResolve.h"
-#endif
+#include "Core/Content/ContentStore.h"
 
 #include <algorithm>
 #include <cmath>
 #include <set>
-#include <system_error>
 
 namespace Data::Models
 {
@@ -312,12 +309,7 @@ std::optional<std::filesystem::path> DataDirectories::Find(std::string_view rela
     const auto findIn = [relative](const std::filesystem::path& directory) -> std::optional<std::filesystem::path>
     {
         std::filesystem::path path = directory / std::filesystem::path(std::string(relative));
-#ifndef _WIN32
-        // Game data is spelled as on Windows; match the case on disk.
-        path = std::filesystem::path(MuResolvePath(path.generic_string().c_str()));
-#endif
-        std::error_code error;
-        if (std::filesystem::is_regular_file(path, error))
+        if (Content::Probe(path) == Content::Found::File)
         {
             return path;
         }
@@ -343,8 +335,7 @@ DataDirectories MakeDataDirectories(const char* overlayValue, const std::filesys
         return directories;
     }
     const std::filesystem::path overlayData = std::filesystem::path(overlayValue) / "Data";
-    std::error_code error;
-    if (!std::filesystem::is_directory(overlayData, error))
+    if (Content::Probe(overlayData) != Content::Found::Folder)
     {
         AddWarning(issues, DataOverlayVariable, "",
                    overlayData.generic_string() + " is no directory; the overlay is not used");

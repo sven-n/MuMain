@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -35,13 +36,12 @@ ItemAddOptioninfo::~ItemAddOptioninfo()
 
 const wchar_t* ItemAddOptioninfo::OpenItemAddOptionInfoFile(const std::wstring& filename)
 {
-    FILE* fp = ::_wfopen(filename.c_str(), L"rb");
-    if (fp != NULL)
+    const Content::Stream fp = Content::OpenIO(filename);
+    if (fp != nullptr)
     {
         int nSize = sizeof(ITEM_ADD_OPTION) * MAX_ITEM;
 
-        const bool complete = DataFileIO::ReadExact(fp, m_ItemAddOption, nSize);
-        ::fclose(fp);
+        const bool complete = DataFileIO::ReadExact(fp.get(), m_ItemAddOption, nSize);
         if (!complete)
         {
             return L"file corrupted.";

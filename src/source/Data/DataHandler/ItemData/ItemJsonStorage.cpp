@@ -437,8 +437,8 @@ std::filesystem::path GetItemNameCasesFile()
 ItemNameCasesLoadResult LoadItemNameCasesFile(const std::filesystem::path& file)
 {
     ItemNameCasesLoadResult result;
-    std::error_code error;
-    if (!std::filesystem::exists(file, error))
+    if (const Content::Found found = Content::Probe(file);
+        found == Content::Found::Nothing || found == Content::Found::Unknown)
     {
         return result;
     }

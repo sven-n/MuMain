@@ -1,11 +1,11 @@
 #include "TexturePackFiles.h"
 
+#include "Core/Content/ContentStore.h"
 #include "Core/Platform/WinCompat.h"
 #include "Render/Textures/AssetPath.h"
 
 #include <algorithm>
 #include <optional>
-#include <system_error>
 
 namespace Render::Textures
 {
@@ -34,23 +34,29 @@ bool IsTextureFile(const std::filesystem::path& path)
     const std::string extension = MakeKey(GenericUtf8(path.extension()));
     return extension == ".ozj" || extension == ".ozt";
 }
+
+void AddFolder(std::unordered_map<std::string, std::filesystem::path>& files, const std::filesystem::path& root,
+               const std::filesystem::path& folder)
+{
+    for (const Content::Entry& entry : Content::ListFolder(folder))
+    {
+        const std::filesystem::path path = folder / std::u8string(entry.name.begin(), entry.name.end());
+        if (entry.folder)
+        {
+            AddFolder(files, root, path);
+        }
+        else if (IsTextureFile(path))
+        {
+            files.emplace(MakeKey(GenericUtf8(path.lexically_relative(root))), path);
+        }
+    }
+}
 } // namespace
 
 TexturePackFiles TexturePackFiles::List(const std::filesystem::path& root)
 {
     TexturePackFiles files;
-    std::error_code error;
-    const auto options = std::filesystem::directory_options::skip_permission_denied;
-    for (std::filesystem::recursive_directory_iterator it(root, options, error), end; !error && it != end;
-         it.increment(error))
-    {
-        std::error_code typeError;
-        if (!it->is_regular_file(typeError) || !IsTextureFile(it->path()))
-            continue;
-
-        const std::filesystem::path relative = it->path().lexically_relative(root);
-        files.m_files.emplace(MakeKey(GenericUtf8(relative)), it->path());
-    }
+    AddFolder(files.m_files, root, root);
     return files;
 }
 

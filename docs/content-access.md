@@ -55,6 +55,8 @@ The layer has these calls:
 - `ReadAll(path)`: the whole file. Reads are whole files and synchronous; a reader parses the
   bytes it gets.
 - `Exists(path)`: true for a file (not a folder).
+- `OpenIO(path)`: an `SDL_IOStream` over the file's bytes, for code that reads piece by piece
+  (`DataFileIO::ReadExact`, `SDL_ReadIO`) or a library that takes a stream.
 - `List(folder)`: what a folder holds, sorted. An empty folder name is the root.
 
 Code that takes a path from its caller, where tests and the editor pass absolute paths, uses the
@@ -66,6 +68,16 @@ Code that takes a path from its caller, where tests and the editor pass absolute
 
 `Data::ReadTextFile` reads this way and drops a UTF-8 byte order mark. Every JSON data table is
 read through it.
+
+The UI themes read this way too:
+
+- RmlUi opens its documents, stylesheets, templates and fonts through `ThemeFileInterface`, which
+  serves each file from its `ReadFile` bytes;
+- `theme.ini` and `tokens.ini` are parsed from their bytes;
+- the theme list is a `ListFolder` of `Data/Interface/RmlUi/themes`.
+
+A theme's own files are named by relative paths, so they are content. A font the theme names by an
+absolute path (a system font) is read from disk.
 
 Reads are safe from any thread, such as the texture decode workers. `Open` and `Close` are not
 thread-safe, and run only while nothing reads.
@@ -98,8 +110,8 @@ folder whose files it reads only when the game asks for one.
 
 - `ClientDataScope` uses it when `MU_TEST_CONTENT=storage` is set: the scope then reads the shipped
   client data through it, with each file's bytes read only when asked for.
-- The scope still changes into the client folder for the readers that don't use the layer yet (the
-  `.bmd` tables), so that run doesn't yet catch a reader that goes around the layer.
+- The scope then leaves the working directory where it is, so a loader that goes around the layer
+  finds nothing and fails that run.
 - CTest runs each case of `monster_data_tests` and `test_item_database_files` both ways. The
   second entry of a case starts with `content storage: `.
 
@@ -114,9 +126,18 @@ in `src/source` that opens, probes or lists files itself:
 - `SDL_IOFromFile`, `SDL_LoadFile`, `SDL_LoadPNG`;
 - `TTF_OpenFont`, `cgltf_parse_file`, the miniaudio file loaders.
 
-`tests/check_content_io_baseline.txt` lists the calls still to move, and the ones that stay on disk
-(settings, logs, saves).
+`tests/check_content_io_baseline.txt` lists the calls that stay on disk. Each line is a file, a
+kind of call, how many it may have, and why they stay:
+
+- the platform shims, the Win32 and CRT file calls themselves;
+- per-user files: settings, macros, the shop's download cache;
+- system information, such as `/etc/os-release`;
+- what the editor and the savers write, and the editor's imports.
+
+A line without a reason is a call still to move. The check lists it as `still to move:` and
+passes. When every call is on the layer or has its reason, the check prints nothing.
 
 - A new call fails the check.
 - A file that lost calls also fails it until the baseline is lowered with
-  `python tests/check_content_io.py . --update`.
+  `python tests/check_content_io.py . --update`. The update keeps the reason of each line that
+  remains; a new line gets none.

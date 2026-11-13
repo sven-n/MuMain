@@ -24,8 +24,8 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 // outside a scope.
 //
 // With MU_TEST_CONTENT=storage, a scope over the shipped client folder reads its content from a storage of the
-// test's own (ContentMemoryStorage, as a port's backend would serve it). The working directory still moves, for the
-// readers that do not use the content layer yet.
+// test's own (ContentMemoryStorage, as a port's backend would serve it) and leaves the working directory where it
+// is, so a loader that goes around the content layer finds nothing.
 class ClientDataScope
 {
 public:
@@ -42,7 +42,10 @@ public:
             Content::Open(ContentMemoryStorage::OpenFolder(clientDirectory));
             m_openedContent = true;
         }
-        std::filesystem::current_path(clientDirectory);
+        else
+        {
+            std::filesystem::current_path(clientDirectory);
+        }
     }
 
     ~ClientDataScope()
