@@ -163,6 +163,36 @@ struct FenrirScope
     }
 };
 
+// Clears the live sprites and effects when made and again when it ends, also when a REQUIRE stops the test, so no
+// effect outlives the characters it is attached to. Declare it after the CharacterScope, so it ends first.
+struct SpawnsCleared
+{
+    SpawnsCleared()
+    {
+        FenrirScope::ClearSpawns();
+    }
+    ~SpawnsCleared()
+    {
+        FenrirScope::ClearSpawns();
+    }
+    SpawnsCleared(const SpawnsCleared&) = delete;
+    SpawnsCleared& operator=(const SpawnsCleared&) = delete;
+};
+
+// The live stat-down debuff lights of `o` with the subtype (1 attack down, 2 defense down).
+std::vector<const OBJECT*> StatDownLightsOf(const OBJECT* o, int subType)
+{
+    std::vector<const OBJECT*> lights;
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+    {
+        const OBJECT& effect = Effects[i];
+        if (effect.Live && effect.Owner == o && effect.SubType == subType &&
+            (effect.Type == BITMAP_SHINY + 6 || effect.Type == BITMAP_PIN_LIGHT))
+            lights.push_back(&effect);
+    }
+    return lights;
+}
+
 struct DyingStatueScope : CharacterScope
 {
     DyingStatueScope() : CharacterScope(MODEL_CURSEDTEMPLE_STATUE)
@@ -717,20 +747,9 @@ TEST_CASE("The stun skull is refreshed for a stunned object, and not while its s
 TEST_CASE("The defense-down debuff lights get their own color, as the attack-down ones do [effects]")
 {
     CharacterScope scope(MODEL_PLAYER);
+    SpawnsCleared spawns;
     OBJECT* o = &scope.character().Object;
-    FenrirScope::ClearSpawns();
-    auto lightsOf = [o](int subType)
-    {
-        std::vector<const OBJECT*> lights;
-        for (int i = 0; i < MAX_EFFECTS; ++i)
-        {
-            const OBJECT& effect = Effects[i];
-            if (effect.Live && effect.Owner == o && effect.SubType == subType &&
-                (effect.Type == BITMAP_SHINY + 6 || effect.Type == BITMAP_PIN_LIGHT))
-                lights.push_back(&effect);
-        }
-        return lights;
-    };
+    auto lightsOf = [o](int subType) { return StatDownLightsOf(o, subType); };
     auto checkColor = [](const std::vector<const OBJECT*>& lights, float red, float green, float blue)
     {
         for (const OBJECT* light : lights)
@@ -762,7 +781,6 @@ TEST_CASE("The defense-down debuff lights get their own color, as the attack-dow
     Render::Effects::StatDownDebuffLights::Update(o);
     CHECK(lightsOf(1).empty());
     CHECK(lightsOf(2).empty());
-    FenrirScope::ClearSpawns();
 }
 
 TEST_CASE("Every spawn while drawing is a violation, outside a draw it is none [effects]")
