@@ -191,10 +191,11 @@ TEST_CASE("Other skills and attackable characters keep the selected character as
     CHECK_FALSE(CheckTile(Hero, &Hero->Object, Range));
 }
 
-TEST_CASE("Auto-attack repeats a skill only while the character under the cursor can be attacked "
+TEST_CASE("Auto-attack repeats a direction skill only while the character under the cursor can be attacked "
           "[gamelogic][skills]")
 {
     AutoAttackState state;
+    state.skill = AT_SKILL_EVIL_SPIRIT;
     state.optionOn = true;
     state.mapAllowsIt = true;
     state.afterSkillCast = true;
@@ -228,4 +229,20 @@ TEST_CASE("Auto-attack repeats a skill only while the character under the cursor
         state.selectionAttackable = false;
         CHECK_FALSE(RepeatsAutoAttack(state));
     }
+}
+
+TEST_CASE("Auto-attack keeps repeating other skills on a character that can't be attacked [gamelogic][skills]")
+{
+    AutoAttackState state;
+    state.optionOn = true;
+    state.mapAllowsIt = true;
+    state.afterSkillCast = true;
+    state.hasSelection = true;
+    state.selectionAttackable = false;
+
+    state.skill = AT_SKILL_SOUL_BARRIER;
+    CHECK(RepeatsAutoAttack(state));
+
+    state.skill = AT_SKILL_POWER_SLASH;
+    CHECK_FALSE(RepeatsAutoAttack(state));
 }

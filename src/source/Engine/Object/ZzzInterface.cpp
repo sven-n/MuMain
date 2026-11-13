@@ -2730,6 +2730,7 @@ void Attack(CHARACTER* c)
         autoAttack.afterSkillCast = Attacking == 2;
         autoAttack.hasSelection = SelectedCharacter != -1;
         autoAttack.selectionAttackable = autoAttack.hasSelection && CheckAttack();
+        autoAttack.skill = Skill;
         if (GameLogic::Combat::SkillAim::RepeatsAutoAttack(autoAttack))
         {
             Success = true;
