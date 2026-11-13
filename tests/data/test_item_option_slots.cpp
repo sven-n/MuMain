@@ -1283,3 +1283,31 @@ TEST_CASE("The stats add the ancient bonus with its definition's value and attri
     edit("maximumHealth", {7, 9});
     CHECK(AddedStats(MakeAncientItem(strengthItem, 1)) == std::array<int, 4>{0, 0, 0, 0});
 }
+
+// An elemental ring's or pendant's "Increase Attribute Damage" follows its bonus line: without the line (a text the
+// option texts lack) it shows neither.
+TEST_CASE("The elemental rings' second ancient bonus line follows the bonus line [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    ClearTooltipRows();
+    const ITEM ring = MakeAncientItem(ITEM_RING_OF_ICE, 1);
+    CHECK(g_csItemOption.RenderDefaultOptionText(&ring, 0) == 2);
+    CHECK(std::wstring(TextList[0]) == L"Increase agility +5");
+    CHECK(std::wstring(TextList[1]) == L"Increase attribute damage");
+
+    ItemOptionsScope restoreOptions;
+    const Data::Items::ItemOptionDatabase& shipped = restoreOptions.Saved();
+    std::vector<Data::Items::ItemOptionDefinition> definitions(shipped.GetDefinitions().begin(),
+                                                              shipped.GetDefinitions().end());
+    const int found = shipped.Find("ancientBonusAgility");
+    REQUIRE(found != Data::Items::ItemOptionDatabase::NoDefinition);
+    definitions[static_cast<size_t>(found)].options.front().texts = {"noSuchText"};
+    g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
+    ClearTooltipRows();
+    CHECK(g_csItemOption.RenderDefaultOptionText(&ring, 0) == 0);
+}

@@ -619,11 +619,16 @@ int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
 {
     int TNum = TextNum;
     const std::optional<GameLogic::Items::AncientBonus> bonus = GameLogic::Items::FindAncientBonus(*ip);
-    if (bonus)
+    // The elemental rings' and pendants' second line belongs to the bonus line: none without it.
+    const int bonusRows = bonus ? WriteOptionLines(*bonus->option, bonus->value, TNum, MaxTextListRows) : 0;
+    if (bonusRows > 0)
     {
-        TNum += WriteOptionLines(*bonus->option, bonus->value, TNum, MaxTextListRows);
+        TNum += bonusRows;
 
-        if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) || (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) || (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_PENDANT_OF_WATER))
+        const bool elemental = (ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) ||
+                               (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) ||
+                               (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_PENDANT_OF_WATER);
+        if (elemental && TNum < MaxTextListRows)
         {
             mu_swprintf(TextList[TNum], I18N::Game::IncreaseAttributeDamage); // "Increase Attribute Damage"
             TextListColor[TNum] = TEXT_COLOR_BLUE;
