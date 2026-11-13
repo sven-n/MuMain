@@ -39,17 +39,6 @@ bool CGMDoppelGanger3::CreateObject(OBJECT* o)
     return false;
 }
 
-CHARACTER* CGMDoppelGanger3::CreateMonster(int iType, int PosX, int PosY, int Key)
-{
-    CHARACTER* pCharacter = NULL;
-
-    // 	switch (iType)
-    // 	{
-    // 	}
-
-    return pCharacter;
-}
-
 bool CGMDoppelGanger3::MoveObject(OBJECT* o)
 {
     if (IsDoppelGanger3() == false)

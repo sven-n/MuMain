@@ -36,6 +36,9 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "GameLogic/Monsters/MonsterSetupApply.h"
+#include "GameLogic/Monsters/UnknownMonsters.h"
+#include "World/GameMaps/MonsterSpawnWorld.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/MainScene.h"
 #include "Audio/DSPlaySound.h"
@@ -4779,13 +4782,8 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                 || c->Skill == AT_SKILL_TRIPLE_SHOT_STR
                 || c->Skill == AT_SKILL_TRIPLE_SHOT_MASTERY)
                 Skill = 1;
-            if ((o->Type == MODEL_PLAYER &&
-                (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW ||
-                    o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW ||
-                    o->CurrentAction == PLAYER_FENRIR_ATTACK_BOW || o->CurrentAction == PLAYER_FENRIR_ATTACK_CROSSBOW ||
-                    o->CurrentAction == PLAYER_ATTACK_RIDE_BOW || o->CurrentAction == PLAYER_ATTACK_RIDE_CROSSBOW)) ||
-                o->Type != MODEL_PLAYER && o->Kind == KIND_PLAYER
-                )
+            if ((o->Type == MODEL_PLAYER && Engine::Object::IsBowAttackAction(o->CurrentAction)) ||
+                (o->Type != MODEL_PLAYER && o->Kind == KIND_PLAYER))
             {
                 if (AT_SKILL_MULTI_SHOT != (c->Skill))
                     CreateArrows(c, o, NULL, FindHotKey((c->Skill)), Skill, (c->Skill));
@@ -4802,12 +4800,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         {
             CHARACTER* tc = &CharactersClient[c->TargetCharacter];
             OBJECT* to = &tc->Object;
-            if (o->Type == MODEL_PLAYER &&
-                (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW ||
-                    o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW ||
-                    o->CurrentAction == PLAYER_ATTACK_RIDE_BOW || o->CurrentAction == PLAYER_ATTACK_RIDE_CROSSBOW
-                    || o->CurrentAction == PLAYER_FENRIR_ATTACK_BOW || o->CurrentAction == PLAYER_FENRIR_ATTACK_CROSSBOW	//^ 펜릴 스킬 관련(요정 화살 나가게 하는 것)
-                    ))
+            if (o->Type == MODEL_PLAYER && Engine::Object::IsBowAttackAction(o->CurrentAction))
             {
                 if (AT_SKILL_MULTI_SHOT != (c->Skill))
                     CreateArrows(c, o, to, FindHotKey((c->Skill)), 0, (c->Skill));
@@ -5649,6 +5642,10 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         Vector(0.f, 0.f, 0.f, p);
         Luminosity = (float)(Random::Rand() % 8 + 2) * 0.1f;
         bool Smoke = false;
+        // The entry's spawn effects at bones, which have a pose now (MN4).
+        GameLogic::Monsters::Setup::RunWaitingSpawnEffects(*c);
+        // The unknown monsters' glow, marks and message (D64).
+        GameLogic::Monsters::Unknown::ShowOnScreen(*c);
         switch (o->Type)
         {
         case MODEL_PLAYER:
@@ -6348,6 +6345,24 @@ void MoveCharacterPosition(CHARACTER* c)
     o->Timer += 0.15f * FPS_ANIMATION_FACTOR;
 }
 
+bool StartObservedWalk(CHARACTER* c)
+{
+    const bool isDoppelganger =
+        gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4;
+    const int defaultWall = isDoppelganger ? TW_NOMOVE : TW_CHARACTER;
+    if (!PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, defaultWall))
+    {
+        return false;
+    }
+
+    // A walk replaces a running glide (an instant move, a knockback or a skill that moves the attacker): the glide
+    // heads for TargetX/TargetY, which the walk has just overwritten, so it would fly the character to the walk's
+    // end.
+    c->JumpTime = 0;
+    c->Movement = true;
+    return true;
+}
+
 void MoveMonsterClient(CHARACTER* c, OBJECT* o)
 {
     if (c == Hero) return;
@@ -6363,17 +6378,7 @@ void MoveMonsterClient(CHARACTER* c, OBJECT* o)
         {
             if (c->Appear == 0 && o->Type != MODEL_GHOST && ((c->PositionX) != c->TargetX || (c->PositionY) != c->TargetY))
             {
-                int iDefaultWall = TW_CHARACTER;
-
-                if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
-                {
-                    iDefaultWall = TW_NOMOVE;
-                }
-
-                if (PathFinding2((c->PositionX), (c->PositionY), c->TargetX, c->TargetY, &c->Path, 0.0f, iDefaultWall))
-                {
-                    c->Movement = true;
-                }
+                StartObservedWalk(c);
             }
         }
         else
@@ -11529,8 +11534,8 @@ void PrepareHeldWeapons(CHARACTER* c)
         if (!DrawsHeldWeapon(c, i))
             continue;
         PART_t* w = &c->Weapon[i];
-        if (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW ||
-            o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW)
+        if (Engine::Object::IsBowAttackAction(o->CurrentAction) ||
+            Engine::Object::IsRaisedBowAttackAction(o->CurrentAction))
         {
             if (w->Type == MODEL_STINGER_BOW)
             {
@@ -11540,7 +11545,14 @@ void PrepareHeldWeapons(CHARACTER* c)
             {
                 w->CurrentAction = 0;
             }
-            w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_BOW].PlaySpeed;
+            // The weapon draws in step with the character, so it has to follow the
+            // playback speed of the action the character is actually playing. Reading
+            // PLAYER_ATTACK_BOW instead only happens to match while every bow action
+            // shares a play speed, which SetAttackSpeed currently gives all 14 of them.
+            // The mounted, Fenrir and raised-shot actions used to miss this branch and
+            // fall through to the catch-all below, which parks the weapon on frame 0 at
+            // PlaySpeed 0 - the bow holds its idle pose instead of drawing.
+            w->PlaySpeed = Models[MODEL_PLAYER].Actions[o->CurrentAction].PlaySpeed;
         }
         else if (w->Type == MODEL_FLAIL)
         {
@@ -12722,14 +12734,11 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     Vector(0.f, 0.f, Rotation, o->Angle);
     Vector(0.f, 0.f, 0.f, c->Light);
     Vector(0.f, 0.f, 0.f, o->Light);
-    Vector(-60.f, -60.f, 0.f, o->BoundingBoxMin);
-    if (Type == MODEL_PLAYER)
     {
-        Vector(40.f, 40.f, 120.f, o->BoundingBoxMax);
-    }
-    else
-    {
-        Vector(50.f, 50.f, 150.f, o->BoundingBoxMax);
+        using namespace Engine::Object::MonsterBody;
+        const std::array<float, 3>& boxMax = Type == MODEL_PLAYER ? PlayerBoxMax : DefaultBoxMax;
+        Vector(DefaultBoxMin[0], DefaultBoxMin[1], DefaultBoxMin[2], o->BoundingBoxMin);
+        Vector(boxMax[0], boxMax[1], boxMax[2], o->BoundingBoxMax);
     }
     // A model of the model list has its box and weapon bones there.
     const Data::Monsters::MonsterModelDefinition* modelEntry = g_MonsterModelDatabase.Find(Type);
@@ -12743,7 +12752,9 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         delete[] o->BoneTransform;
         o->BoneTransform = NULL;
     }
-    o->BoneTransform = new vec34_t[MAX_BONES];
+    // Zeroed: a creator may read the bones before the first animation fills
+    // them (MoveEye at spawn).
+    o->BoneTransform = new vec34_t[MAX_BONES]();
     Engine::Object::Pose::Invalidate(o);
 
     for (int i = 0; i < 2; i++)
@@ -12786,6 +12797,36 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     c->Weapon[1].LinkBone = 42;
 }
 
+namespace
+{
+// A character starts from a fresh slot's values of the fields
+// CreateCharacterPointer does not set (P14, Q-MN44), not from what the slot's
+// last character left there: a Doppelganger's hidden shadow, a Dark Knight's
+// skin, a stale monster skill, Castle Gate 1's link bones (the others' are
+// set by model), the unknown monsters' look (D64).
+void ResetSlotLeftovers(CHARACTER& c)
+{
+    GameLogic::Monsters::Unknown::Forget(c);
+    GameLogic::Monsters::Setup::ForgetLive(c);
+    OBJECT& o = c.Object;
+    o.m_bpcroom = false;
+    c.HideShadow = false;
+    c.Skin = 0;
+    o.LifeTime = 0;
+    o.Gravity = 0.0f;
+    o.Distance = 0.0f;
+    o.m_iAnimation = 0;
+    c.Appear = 0;
+    c.MonsterSkill = 0;
+    c.SwordCount = 0;
+    o.PKKey = 0;
+    IdentityVector3D(o.EyeLeft3);
+    IdentityVector3D(o.EyeRight3);
+    c.Weapon[0].LinkBone = 0;
+    c.Weapon[1].LinkBone = 0;
+}
+} // namespace
+
 CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -12794,7 +12835,11 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
         OBJECT* o = &c->Object;
         if (o->Live && c->Key == Key)
         {
+            // The same key made again (0x45 transforms a player in place): the
+            // old character's named bones go too.
+            BoneManager::UnregisterBone(c);
             DeleteCharacterCompanions(c);
+            ResetSlotLeftovers(*c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             return c;
@@ -12812,6 +12857,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
             DeleteCloth(c, o);
             DeleteParts(c);
             DeleteCharacterCompanions(c);
+            ResetSlotLeftovers(*c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             c->Key = Key;
@@ -13775,1851 +13821,40 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
 
 extern int HeroIndex;
 
-void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int PositionY)
+// What every monster's character gets after its body: its shown name, its
+// number, its kind and the hero as its target.
+void Setting_Monster(CHARACTER* c, EMonsterType Type)
 {
-    OBJECT* o;
+    if (c == NULL)
+        return;
+    OBJECT* o = &c->Object;
+    GameLogic::Monsters::Names::WriteShownName(*c, Type);
 
-    int nCastle = BLOODCASTLE_NUM + (gMapManager.WorldActive - WD_11BLOODCASTLE_END);
-    if (nCastle > 0 && nCastle <= BLOODCASTLE_NUM)
-    {
-        if (Type >= 84 && Type <= 143)
-        {
-            c->Level = 0;
-            c->Object.Scale += int(nCastle / 3) * 0.05f;
-        }
-    }
-
-    if (c != NULL)
-    {
-        o = &c->Object;
-        GameLogic::Monsters::Names::WriteShownName(*c, Type);
-
-        c->MonsterIndex = Type;
-        c->Object.ExtState = 0;
-        c->TargetCharacter = HeroIndex;
-        o->Kind = Data::Monsters::GetMonsterObjectKind(Type);
-    }
+    c->MonsterIndex = Type;
+    c->Object.ExtState = 0;
+    c->TargetCharacter = HeroIndex;
+    o->Kind = Data::Monsters::GetMonsterObjectKind(Type);
 }
 
 CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
 {
-    CHARACTER* c = NULL;
-    OBJECT* o;
-    int Level;
-
-    c = g_CursedTemple->CreateCharacters(Type, PositionX, PositionY, Key);
-    if (c != NULL)
+    // A monster comes from its entry in the monster data (MN4), on every map.
+    Data::Monsters::UnknownReason why = Data::Monsters::UnknownReason::NoEntry;
+    if (const Data::Monsters::MonsterDefinition* entry = g_MonsterDatabase.Find(Type))
     {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-    c = CreateHellasMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = battleCastle::CreateBattleCastleMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = M31HuntingGround::CreateHuntingGroundMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = M34CryingWolf2nd::CreateCryingWolf2ndMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = M34CryWolf1st::CreateCryWolf1stMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = M33Aida::CreateAidaMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = M37Kanturu1st::CreateKanturu1stMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = M38Kanturu2nd::Create_Kanturu2nd_Monster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = M39Kanturu3rd::CreateKanturu3rdMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = SEASON3A::CGM3rdChangeUp::Instance().CreateBalgasBarrackMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = g_NewYearsDayEvent->CreateMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = SEASON3B::GMNewTown::CreateNewTownMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = SEASON3C::GMSwampOfQuiet::CreateSwampOfQuietMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = g_09SummerEvent->CreateMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    c = TheMapProcess().CreateMonster(Type, PositionX, PositionY, Key);
-    if (c != NULL)
-    {
-        Setting_Monster(c, Type, PositionX, PositionY);
-        return c;
-    }
-
-    switch (Type)
-    {
-    case MONSTER_GUARDSMAN:
-        OpenNpc(MODEL_NPC_CLERK);        //
-        c = CreateCharacter(Key, MODEL_NPC_CLERK, PositionX, PositionY);
-        c->NotRotateOnMagicHit = true;
-        c->Object.Scale = 1.f;
-        c->Object.SubType = Random::Rand() % 2 + 10;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        wcscpy(c->ID, L"Clerk");
-        break;
-#ifdef ADD_ELF_SUMMON
-    case 276:
-        OpenMonsterModel(MONSTER_MODEL_GOLDEN_TITAN);
-        c = CreateCharacter(Key, MODEL_GOLDEN_TITAN, PositionX, PositionY);
-        c->Object.Scale = 1.45f;
-        c->Weapon[0].Type = MODEL_DARK_BREAKER;//MODEL_SWORD+15;
-        c->Weapon[0].Level = 5;
-        break;
-#endif // ADD_ELF_SUMMON
-    case MONSTER_GATE_TO_KALIMA_1:
-    case MONSTER_GATE_TO_KALIMA_2:
-    case MONSTER_GATE_TO_KALIMA_3:
-    case MONSTER_GATE_TO_KALIMA_4:
-    case MONSTER_GATE_TO_KALIMA_5:
-    case MONSTER_GATE_TO_KALIMA_6:
-    case MONSTER_GATE_TO_KALIMA_7:
-        c = CreateCharacter(Key, MODEL_WARCRAFT, PositionX, PositionY);
-        c->NotRotateOnMagicHit = true;
-        c->Weapon[0].Type = -1;
-        c->Weapon[0].Level = 0;
-        c->Object.Scale = 1.f;
-        c->HideShadow = false;
-        o = &c->Object;
-        o->PriorAnimationFrame = 10.f;
-        o->AnimationFrame = 10;
-        o->BlendMesh = -1;
-        wcscpy(c->ID, L"");
-        break;
-    case MONSTER_CHAOS_CASTLE_1:
-    case MONSTER_CHAOS_CASTLE_3:
-    case MONSTER_CHAOS_CASTLE_5:
-    case MONSTER_CHAOS_CASTLE_7:
-    case MONSTER_CHAOS_CASTLE_9:
-    case MONSTER_CHAOS_CASTLE_11:
-    case MONSTER_CHAOS_CASTLE_13:
-    {
-        OpenMonsterModel(MONSTER_MODEL_CHAOSCASTLE_KNIGHT);
-        c = CreateCharacter(Key, MODEL_CHAOS_CASTLE_KNIGHT, PositionX, PositionY);
-        c->Object.Scale = 0.9f;
-        o = &c->Object;
-
-        c->Weapon[0].Type = MODEL_SWORD_OF_DESTRUCTION;
-        c->Weapon[0].Level = 0;
-        c->Weapon[1].Type = MODEL_SWORD_OF_DESTRUCTION;
-        c->Weapon[1].Level = 0;
-    }
-    break;
-
-    case MONSTER_CHAOS_CASTLE_2:
-    case MONSTER_CHAOS_CASTLE_4:
-    case MONSTER_CHAOS_CASTLE_6:
-    case MONSTER_CHAOS_CASTLE_8:
-    case MONSTER_CHAOS_CASTLE_10:
-    case MONSTER_CHAOS_CASTLE_12:
-    case MONSTER_CHAOS_CASTLE_14:
-    {
-        int randType = 0;
-
-        randType = Random::Rand() % 2;
-
-        OpenMonsterModel(randType == 0 ? MONSTER_MODEL_CHAOSCASTLE_ELF : MONSTER_MODEL_CHAOSCASTLE_WIZARD);
-        c = CreateCharacter(Key, MODEL_CHAOS_CASTLE_ELF + randType, PositionX, PositionY);
-        c->Object.Scale = 0.9f;
-        o = &c->Object;
-
-        c->Weapon[0].Type = -1;
-        c->Weapon[0].Level = 0;
-        c->Weapon[1].Type = -1;
-        c->Weapon[1].Level = 0;
-
-        if (randType == 0)
+        CHARACTER* c = GameLogic::Monsters::Setup::Create(*entry, PositionX, PositionY, Key,
+                                                          World::Monsters::GetSpawnWorld(), &why);
+        if (c != NULL)
         {
-            c->Weapon[0].Type = MODEL_GREAT_REIGN_CROSSBOW;
-            c->Weapon[0].Level = 0;
-        }
-        else
-        {
-            c->Weapon[0].Type = MODEL_LEGENDARY_STAFF;
-            c->Weapon[0].Level = 0;
+            Setting_Monster(c, Type);
+            return c;
         }
     }
-    break;
-    case MONSTER_MAGIC_SKELETON_1:
-    case MONSTER_MAGIC_SKELETON_2:
-    case MONSTER_MAGIC_SKELETON_3:
-    case MONSTER_MAGIC_SKELETON_4:
-    case MONSTER_MAGIC_SKELETON_5:
-    case MONSTER_MAGIC_SKELETON_6:
-    case MONSTER_MAGIC_SKELETON_7:
-    case MONSTER_MAGIC_SKELETON_8:
-        OpenMonsterModel(MONSTER_MODEL_MAGIC_SKELETON);
-        c = CreateCharacter(Key, MODEL_MAGIC_SKELETON, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_STAFF;
-        c->Weapon[0].Level = 11;
-        c->Object.Scale = 1.2f;
-        wcscpy(c->ID, L"마법해골");
-        break;
-    case MONSTER_CASTLE_GATE: // ???
-        OpenMonsterModel(MONSTER_MODEL_CASTLE_GATE);
-        c = CreateCharacter(Key, MODEL_CASTLE_GATE, PositionX, PositionY);
-        c->NotRotateOnMagicHit = true;
-        c->Object.Scale = 0.8f;
-        c->Object.EnableShadow = false;
-        wcscpy(c->ID, L"성문");
-        break;
-    case MONSTER_STATUE_OF_SAINT_1:
-        OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT);
-        c = CreateCharacter(Key, MODEL_STATUE_OF_SAINT, PositionX, PositionY);
-        c->NotRotateOnMagicHit = true;
-        c->Object.Scale = 0.8f;
-        c->Object.EnableShadow = false;
-        wcscpy(c->ID, L"성자의석관");
-        break;
-    case MONSTER_STATUE_OF_SAINT_2:
-        OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT);
-        c = CreateCharacter(Key, MODEL_STATUE_OF_SAINT, PositionX, PositionY);
-        c->NotRotateOnMagicHit = true;
-        c->Object.Scale = 0.8f;
-        c->Object.EnableShadow = false;
-        wcscpy(c->ID, L"성자의석관");
-        break;
-    case MONSTER_STATUE_OF_SAINT_3:
-        OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT);
-        c = CreateCharacter(Key, MODEL_STATUE_OF_SAINT, PositionX, PositionY);
-        c->NotRotateOnMagicHit = true;
-        c->Object.Scale = 0.8f;
-        c->Object.EnableShadow = false;
-        wcscpy(c->ID, L"성자의석관");
-        break;
-    case MONSTER_CHIEF_SKELETON_WARRIOR_1:
-    case MONSTER_CHIEF_SKELETON_WARRIOR_2:
-    case MONSTER_CHIEF_SKELETON_WARRIOR_3:
-    case MONSTER_CHIEF_SKELETON_WARRIOR_4:
-    case MONSTER_CHIEF_SKELETON_WARRIOR_5:
-    case MONSTER_CHIEF_SKELETON_WARRIOR_6:
-    case MONSTER_CHIEF_SKELETON_WARRIOR_7:
-    case MONSTER_CHIEF_SKELETON_WARRIOR_8:
-        OpenMonsterModel(MONSTER_MODEL_ORC);
-        c = CreateCharacter(Key, MODEL_ORC, PositionX, PositionY);
-        c->Object.Scale = 1.1f;
-        o = &c->Object;
-        break;
-    case MONSTER_CHIEF_SKELETON_ARCHER_1:
-    case MONSTER_CHIEF_SKELETON_ARCHER_2:
-    case MONSTER_CHIEF_SKELETON_ARCHER_3:
-    case MONSTER_CHIEF_SKELETON_ARCHER_4:
-    case MONSTER_CHIEF_SKELETON_ARCHER_5:
-    case MONSTER_CHIEF_SKELETON_ARCHER_6:
-    case MONSTER_CHIEF_SKELETON_ARCHER_7:
-    case MONSTER_CHIEF_SKELETON_ARCHER_8:
-        OpenMonsterModel(MONSTER_MODEL_ORC_ARCHER);
-        c = CreateCharacter(Key, MODEL_ORC_ARCHER, PositionX, PositionY);
-        c->Object.Scale = 1.1f;
-        c->Weapon[1].Type = MODEL_BATTLE_BOW;
-        c->Weapon[1].Level = 1;
-        o = &c->Object;
-        break;
-    case MONSTER_DARK_SKULL_SOLDIER_1:
-    case MONSTER_DARK_SKULL_SOLDIER_2:
-    case MONSTER_DARK_SKULL_SOLDIER_3:
-    case MONSTER_DARK_SKULL_SOLDIER_4:
-    case MONSTER_DARK_SKULL_SOLDIER_5:
-    case MONSTER_DARK_SKULL_SOLDIER_6:
-    case MONSTER_DARK_SKULL_SOLDIER_7:
-    case MONSTER_DARK_SKULL_SOLDIER_8:
-        OpenMonsterModel(MONSTER_MODEL_DARK_SKULL_SOLDIER);
-        c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_CRESCENT_AXE;
-        c->Weapon[0].Level = 0;
-        c->Weapon[1].Type = MODEL_CRESCENT_AXE;
-        c->Weapon[1].Level = 0;
-        c->Object.Scale = 1.0f;
-        wcscpy(c->ID, L"흑해골전사");
-        break;
-    case MONSTER_GIANT_OGRE_1:
-    case MONSTER_GIANT_OGRE_2:
-    case MONSTER_GIANT_OGRE_3:
-    case MONSTER_GIANT_OGRE_4:
-    case MONSTER_GIANT_OGRE_5:
-    case MONSTER_GIANT_OGRE_6:
-    case MONSTER_GIANT_OGRE_7:
-    case MONSTER_GIANT_OGRE_8:
-        OpenMonsterModel(MONSTER_MODEL_GIANT_OGRE);
-        c = CreateCharacter(Key, MODEL_GIANT_OGRE, PositionX, PositionY);
-        c->Object.Scale = 0.8f;
-        wcscpy(c->ID, L"자이언트오우거");
-        break;
-    case MONSTER_RED_SKELETON_KNIGHT_1:
-    case MONSTER_RED_SKELETON_KNIGHT_2:
-    case MONSTER_RED_SKELETON_KNIGHT_3:
-    case MONSTER_RED_SKELETON_KNIGHT_4:
-    case MONSTER_RED_SKELETON_KNIGHT_5:
-    case MONSTER_RED_SKELETON_KNIGHT_6:
-    case MONSTER_RED_SKELETON_KNIGHT_7:
-    case MONSTER_RED_SKELETON_KNIGHT_8:
-        OpenMonsterModel(MONSTER_MODEL_RED_SKELETON_KNIGHT);
-        c = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_CHAOS_DRAGON_AXE;
 
-        if (!int((7 + (gMapManager.WorldActive - WD_11BLOODCASTLE_END)) / 3))
-            c->Weapon[0].Level = 8;
-        else
-            c->Weapon[0].Level = 0;
-
-        c->Object.Scale = 1.19f;
-        wcscpy(c->ID, L"붉은해골기사");
-        break;
-    case MONSTER_GOLDEN_GOBLIN:
-        OpenMonsterModel(MONSTER_MODEL_GOBLIN);
-        c = CreateCharacter(Key, MODEL_GOBLIN, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_AXE;
-        c->Weapon[0].Level = 9;
-        c->Object.Scale = 0.8f;
-        wcscpy(c->ID, L"고블린");
-        break;
-    case MONSTER_GOLDEN_DERKON:
-        OpenMonsterModel(MONSTER_MODEL_DRAGON);
-        c = CreateCharacter(Key, MODEL_DRAGON_, PositionX, PositionY);
-        wcscpy(c->ID, L"드래곤");
-        c->Object.Scale = 0.9f;
-        break;
-    case MONSTER_GOLDEN_LIZARD_KING:
-        OpenMonsterModel(MONSTER_MODEL_LIZARD);
-        c = CreateCharacter(Key, MODEL_LIZARD, PositionX, PositionY);
-        c->Object.Scale = 1.4f;
-        c->Weapon[0].Type = MODEL_CHAOS_LIGHTNING_STAFF;
-        c->Weapon[0].ExcellentFlags = 63;
-        break;
-    case MONSTER_GOLDEN_VEPAR:
-        OpenMonsterModel(MONSTER_MODEL_VEPAR);
-        c = CreateCharacter(Key, MODEL_VEPAR, PositionX, PositionY);
-        c->Object.Scale = 1.f;
-        break;
-    case MONSTER_GOLDEN_TANTALLOS: //??
-        OpenMonsterModel(MONSTER_MODEL_TANTALLOS);
-        c = CreateCharacter(Key, MODEL_TANTALLOS, PositionX, PositionY);
-        c->Object.BlendMesh = 2;
-        c->Object.BlendMeshLight = 1.f;
-        o = &c->Object;
-        c->Object.Scale = 1.8f;
-        c->Weapon[0].Type = MODEL_SWORD_OF_DESTRUCTION;
-        c->Weapon[0].ExcellentFlags = 63;
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
-        break;
-    case MONSTER_GOLDEN_WHEEL:
-        OpenMonsterModel(MONSTER_MODEL_GOLDEN_WHEEL);
-        c = CreateCharacter(Key, MODEL_GOLDEN_WHEEL, PositionX, PositionY);
-        c->Object.Scale = 1.4f;
-        c->Weapon[0].Type = MODEL_AQUAGOLD_CROSSBOW;
-        c->Weapon[0].ExcellentFlags = 63;
-        //c->Weapon[0].Type = MODEL_BOW+16;
-        o = &c->Object;
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
-        break;
-    case MONSTER_MOLT:
-        OpenMonsterModel(MONSTER_MODEL_MOLT);
-        c = CreateCharacter(Key, MODEL_MOLT, PositionX, PositionY);
-        c->Object.Scale = 1.4f;
-        break;
-
-    case MONSTER_ALQUAMOS:
-        OpenMonsterModel(MONSTER_MODEL_ALQUAMOS);
-        c = CreateCharacter(Key, MODEL_ALQUAMOS, PositionX, PositionY);
-        c->Object.Scale = 1.f;
-        c->Object.BlendMesh = 0;
-        break;
-    case MONSTER_QUEEN_RAINER:
-        OpenMonsterModel(MONSTER_MODEL_QUEEN_RAINER);
-        c = CreateCharacter(Key, MODEL_QUEEN_RAINER, PositionX, PositionY);
-        c->Object.Scale = 1.3f;
-        c->Object.BlendMesh = -2;
-        c->Object.BlendMeshLight = 1.f;
-        c->Object.m_bRenderShadow = false;
-        break;
-    case MONSTER_OMEGA_WING:
-    case MONSTER_MEGA_CRUST:
-    case MONSTER_ALPHA_CRUST:
-        OpenMonsterModel(MONSTER_MODEL_CRUST);
-        c = CreateCharacter(Key, MODEL_CRUST, PositionX, PositionY);
-        if (MONSTER_MEGA_CRUST == Type)
-        {
-            c->Object.Scale = 1.1f;
-            c->Weapon[0].Type = MODEL_THUNDER_BLADE;
-            c->Weapon[0].Level = 5;
-            c->Weapon[1].Type = MODEL_LEGENDARY_SHIELD;
-            c->Weapon[1].Level = 0;
-        }
-        else
-        {
-            c->Object.Scale = 1.3f;
-            c->Weapon[0].Type = MODEL_THUNDER_BLADE;
-            c->Weapon[0].Level = 9;
-            c->Weapon[1].Type = MODEL_LEGENDARY_SHIELD;
-            c->Weapon[1].Level = 9;
-        }
-        c->Object.BlendMesh = 1;
-        c->Object.BlendMeshLight = 1.f;
-        //Models[MODEL_MONSTER01+52].StreamMesh = 1;
-        break;
-
-    case MONSTER_PHANTOM_KNIGHT:
-        OpenMonsterModel(MONSTER_MODEL_PHANTOM_KNIGHT);
-        c = CreateCharacter(Key, MODEL_PHANTOM_KNIGHT, PositionX, PositionY);
-        c->Object.Scale = 1.45f;
-        c->Weapon[0].Type = MODEL_DARK_BREAKER;//MODEL_SWORD+15;
-        c->Weapon[0].Level = 5;
-        break;
-
-    case MONSTER_DRAKAN:
-    case MONSTER_GREAT_DRAKAN:
-        OpenMonsterModel(MONSTER_MODEL_DRAKAN);
-        c = CreateCharacter(Key, MODEL_DRAKAN, PositionX, PositionY);
-        c->NotRotateOnMagicHit = true;
-        if (Type == MONSTER_GREAT_DRAKAN)
-        {
-            c->Object.Scale = 1.0f;
-        }
-        else
-        {
-            c->Object.Scale = 0.8f;
-        }
-        break;
-    case MONSTER_DARK_PHOENIX:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DARK_PHOENIX_SHIELD);
-        OpenMonsterModel(MONSTER_MODEL_DARK_PHOENIX);
-        c = CreateCharacter(Key, MODEL_DARK_PHEONIX_SHIELD, PositionX, PositionY);
-        c->NotRotateOnMagicHit = true;
-        c->Object.Scale = 1.0f;
-    }
-    break;
-    case MONSTER_ORC_ARCHER:
-        OpenMonsterModel(MONSTER_MODEL_ORC_ARCHER);
-        c = CreateCharacter(Key, MODEL_ORC_ARCHER, PositionX, PositionY);
-        c->Object.Scale = 1.2f;
-        c->Weapon[1].Type = MODEL_BATTLE_BOW;
-        c->Weapon[1].Level = 3;
-        o = &c->Object;
-        o->HiddenMesh = 1;
-        break;
-    case MONSTER_ORC_ARCHER_OF_DOOM:
-        OpenMonsterModel(MONSTER_MODEL_ORC_ARCHER);
-        c = CreateCharacter(Key, MODEL_ORC_ARCHER, PositionX, PositionY);
-        c->Object.Scale = 1.2f;
-        c->Weapon[1].Type = MODEL_BATTLE_BOW;
-        c->Weapon[1].Level = 5;
-        o = &c->Object;
-        o->HiddenMesh = 1;
-        break;
-    case MONSTER_ELITE_ORC:
-        OpenMonsterModel(MONSTER_MODEL_ORC);
-        c = CreateCharacter(Key, MODEL_ORC, PositionX, PositionY);
-        c->Object.Scale = 1.3f;
-        o = &c->Object;
-        o->HiddenMesh = 2;
-        break;
-    case MONSTER_ORC_SOLDIER_OF_DOOM:
-        OpenMonsterModel(MONSTER_MODEL_ORC);
-        c = CreateCharacter(Key, MODEL_ORC, PositionX, PositionY);
-        c->Object.Scale = 1.3f;
-        o = &c->Object;
-        o->HiddenMesh = 2;
-        break;
-    case MONSTER_CURSED_KING:
-    case MONSTER_WHITE_WIZARD:
-        OpenMonsterModel(MONSTER_MODEL_CURSED_KING);
-        c = CreateCharacter(Key, MODEL_CURSED_KING, PositionX, PositionY);
-        c->Object.Scale = 1.7f;
-        o = &c->Object;
-        break;
-    case MONSTER_EVIL_GOBLIN:
-        OpenMonsterModel(MONSTER_MODEL_EVIL_GOBLIN);
-        c = CreateCharacter(Key, MODEL_EVIL_GOBLIN, PositionX, PositionY);
-        c->Object.Scale = 0.9f;
-        wcscpy(c->ID, L"저주받은 고블린");
-        o = &c->Object;
-        break;
-    case MONSTER_CURSED_SANTA:
-        OpenMonsterModel(MONSTER_MODEL_CURSED_SANTA);
-        c = CreateCharacter(Key, MODEL_CURSED_SANTA, PositionX, PositionY);
-        c->Object.Scale = 1.7f;
-        wcscpy(c->ID, L"저주받은 산타");
-        o = &c->Object;
-        break;
-    case MONSTER_MUTANT_HERO:
-    case MONSTER_MUTANT:
-        OpenMonsterModel(MONSTER_MODEL_MUTANT);
-        c = CreateCharacter(Key, MODEL_MUTANT, PositionX, PositionY);
-        c->Object.Scale = 1.5f;
-        o = &c->Object;
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
-        break;
-    case MONSTER_DEATH_BEAM_KNIGHT:
-    case MONSTER_BEAM_KNIGHT:
-        OpenMonsterModel(MONSTER_MODEL_BEAM_KNIGHT);
-        c = CreateCharacter(Key, MODEL_BEAM_KNIGHT, PositionX, PositionY);
-        if (Type == MONSTER_DEATH_BEAM_KNIGHT)
-        {
-            c->Object.Scale = 1.9f;
-            c->Object.BlendMesh = -2;
-            c->Object.BlendMeshLight = 1.f;
-        }
-        else
-        {
-            c->Object.Scale = 1.5f;
-        }
-        o = &c->Object;
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
-        break;
-    case MONSTER_BLOODY_WOLF:
-        OpenMonsterModel(MONSTER_MODEL_BLOODY_WOLF);
-        c = CreateCharacter(Key, MODEL_BLOODY_WOLF, PositionX, PositionY);
-        c->Object.Scale = 2.2f;
-        o = &c->Object;
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
-        break;
-    case MONSTER_TANTALLOS:
-    case MONSTER_ZAIKAN:
-        OpenMonsterModel(MONSTER_MODEL_TANTALLOS);
-        c = CreateCharacter(Key, MODEL_TANTALLOS, PositionX, PositionY);
-        c->Object.BlendMesh = 2;
-        c->Object.BlendMeshLight = 1.f;
-        o = &c->Object;
-        if (Type == MONSTER_TANTALLOS)
-        {
-            c->Object.Scale = 1.8f;
-            c->Weapon[0].Type = MODEL_SWORD_OF_DESTRUCTION;
-        }
-        else
-        {
-            c->Object.Scale = 2.1f;
-            o->SubType = 1;
-            c->Weapon[0].Type = MODEL_STAFF_OF_DESTRUCTION;
-        }
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
-        break;
-    case MONSTER_IRON_WHEEL:
-        OpenMonsterModel(MONSTER_MODEL_GOLDEN_WHEEL);
-        c = CreateCharacter(Key, MODEL_GOLDEN_WHEEL, PositionX, PositionY);
-        c->Object.Scale = 1.4f;
-        c->Weapon[0].Type = MODEL_AQUAGOLD_CROSSBOW;
-        //c->Weapon[0].Type = MODEL_BOW+16;
-        o = &c->Object;
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
-        break;
-    case MONSTER_SILVER_VALKYRIE:
-        OpenMonsterModel(MONSTER_MODEL_VALKYRIE);
-        c = CreateCharacter(Key, MODEL_VALKYRIE, PositionX, PositionY);
-        c->Object.Scale = 1.4f;
-        c->Weapon[0].Type = MODEL_BLUEWING_CROSSBOW;
-        break;
-    case MONSTER_GREAT_BAHAMUT:
-        OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
-        c = CreateCharacter(Key, MODEL_BAHAMUT, PositionX, PositionY);
-        c->Object.Scale = 1.f;
-        c->Level = 1;
-        break;
-    case MONSTER_SEA_WORM:
-        OpenMonsterModel(MONSTER_MODEL_SEA_WORM);
-        c = CreateCharacter(Key, MODEL_SEA_WORM, PositionX, PositionY);
-        c->Object.Scale = 1.8f;
-        break;
-    case MONSTER_HYDRA:
-        OpenMonsterModel(MONSTER_MODEL_HYDRA);
-        c = CreateCharacter(Key, MODEL_HYDRA, PositionX, PositionY);
-        c->Object.Scale = 1.f;
-        c->Object.BlendMesh = 5;
-        c->Object.BlendMeshLight = 0.f;
-        break;
-    case MONSTER_LIZARD_KING:
-        OpenMonsterModel(MONSTER_MODEL_LIZARD);
-        c = CreateCharacter(Key, MODEL_LIZARD, PositionX, PositionY);
-        c->Object.Scale = 1.4f;
-        c->Weapon[0].Type = MODEL_STAFF_OF_RESURRECTION;
-        break;
-    case MONSTER_VALKYRIE:
-        OpenMonsterModel(MONSTER_MODEL_VALKYRIE);
-        c = CreateCharacter(Key, MODEL_VALKYRIE, PositionX, PositionY);
-        c->Object.Scale = 1.1f;
-        c->Weapon[0].Type = MODEL_BLUEWING_CROSSBOW;
-        c->Object.BlendMesh = 0;
-        c->Object.BlendMeshLight = 1.f;
-        break;
-    case MONSTER_VEPAR:
-        OpenMonsterModel(MONSTER_MODEL_VEPAR);
-        c = CreateCharacter(Key, MODEL_VEPAR, PositionX, PositionY);
-        c->Object.Scale = 1.f;
-        break;
-    case MONSTER_BAHAMUT:
-        OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
-        c = CreateCharacter(Key, MODEL_BAHAMUT, PositionX, PositionY);
-        c->Object.Scale = 0.6f;
-        break;
-    case MONSTER_BALI:
-        OpenMonsterModel(MONSTER_MODEL_BALI);
-        c = CreateCharacter(Key, MODEL_BALI, PositionX, PositionY);
-        wcscpy(c->ID, L"발리");
-        c->Object.Scale = 0.12f;
-        break;
-    case MONSTER_GOLDEN_DRAGON:
-        OpenMonsterModel(MONSTER_MODEL_DRAGON);
-        c = CreateCharacter(Key, MODEL_DRAGON_, PositionX, PositionY);
-        wcscpy(c->ID, L"드래곤");
-        c->Object.Scale = 0.9f;
-        break;
-    case MONSTER_GOLDEN_BUDGE_DRAGON:
-        OpenMonsterModel(MONSTER_MODEL_BUDGE_DRAGON);
-        c = CreateCharacter(Key, MODEL_BUDGE_DRAGON, PositionX, PositionY);
-        wcscpy(c->ID, L"황금버지드래곤");
-        c->Object.Scale = 0.7f;
-        break;
-    case MONSTER_RED_DRAGON:
-        OpenMonsterModel(MONSTER_MODEL_DRAGON);
-        c = CreateCharacter(Key, MODEL_DRAGON_, PositionX, PositionY);
-        wcscpy(c->ID, L"쿤둔");
-        c->Object.Scale = 1.3f;
-        Vector(200.f, 150.f, 280.f, c->Object.BoundingBoxMax);
-        break;
-    case MONSTER_DEATH_COW:
-        OpenMonsterModel(MONSTER_MODEL_DEATH_COW);
-        c = CreateCharacter(Key, MODEL_DEATH_COW, PositionX, PositionY);
-        wcscpy(c->ID, L"데쓰 카우");
-        c->Weapon[0].Type = MODEL_GREAT_HAMMER;
-        //c->Weapon[0].Type = MODEL_SWORD+14;
-        c->Object.Scale = 1.1f;
-        //c->Level = 1;
-        break;
-    case MONSTER_DEATH_KNIGHT:
-        OpenMonsterModel(MONSTER_MODEL_DEATH_KNIGHT);
-        c = CreateCharacter(Key, MODEL_DEATH_KNIGHT, PositionX, PositionY);
-        wcscpy(c->ID, L"데쓰 나이트");
-        c->Weapon[0].Type = MODEL_GIANT_SWORD;
-        c->Weapon[0].Type = MODEL_LIGHTING_SWORD;
-        //c->Weapon[1].Type = MODEL_SHIELD+8;
-        c->Object.Scale = 1.3f;
-        //c->Level = 1;
-        break;
-    case MONSTER_POISON_SHADOW:
-        OpenMonsterModel(MONSTER_MODEL_SHADOW);
-        c = CreateCharacter(Key, MODEL_SHADOW, PositionX, PositionY);
-        wcscpy(c->ID, L"포이즌 쉐도우");
-        c->Object.Scale = 1.2f;
-        c->Level = 1;
-        break;
-    case MONSTER_BALROG:
-    case MONSTER_METAL_BALROG:	//발록2
-        OpenMonsterModel(MONSTER_MODEL_BALROG);
-        c = CreateCharacter(Key, MODEL_BALROG, PositionX, PositionY);
-        wcscpy(c->ID, L"발록");
-        c->Weapon[0].Type = MODEL_BILL_OF_BALROG;
-        c->Weapon[0].Level = 9;
-        c->Object.Scale = 1.6f;
-        break;
-    case MONSTER_DEVIL:
-        OpenMonsterModel(MONSTER_MODEL_DEVIL);
-        c = CreateCharacter(Key, MODEL_DEVIL, PositionX, PositionY);
-        wcscpy(c->ID, L"데빌");
-        c->Object.Scale = 1.1f;
-        break;
-    case MONSTER_SHADOW:
-        OpenMonsterModel(MONSTER_MODEL_SHADOW);
-        c = CreateCharacter(Key, MODEL_SHADOW, PositionX, PositionY);
-        wcscpy(c->ID, L"쉐도우");
-        c->Object.Scale = 1.2f;
-        break;
-        /*OpenMonsterModel(MONSTER_MODEL_GIANT);
-        c = CreateCharacter(Key,MODEL_MONSTER01+7,PositionX,PositionY);
-        wcscpy(c->ID,"블러드 고스트");
-        c->Object.AlphaTarget = 0.4f;
-        c->MoveSpeed = 15;
-        c->Blood = true;
-        c->Object.Scale = 1.1f;
-        c->Level = 2;*/
-    case MONSTER_DEATH_GORGON:
-        OpenMonsterModel(MONSTER_MODEL_GORGON);
-        c = CreateCharacter(Key, MODEL_GORGON, PositionX, PositionY);
-        wcscpy(c->ID, L"데쓰 고르곤");
-        c->Object.Scale = 1.3f;
-        c->Weapon[0].Type = MODEL_CRESCENT_AXE;
-        c->Weapon[1].Type = MODEL_CRESCENT_AXE;
-        c->Object.BlendMesh = 1;
-        c->Object.BlendMeshLight = 1.f;
-        c->Level = 2;
-        break;
-    case MONSTER_CURSED_WIZARD:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"저주받은 법사");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_LEGENDARY_HELM;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_LEGENDARY_ARMOR;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_LEGENDARY_PANTS;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_LEGENDARY_GLOVES;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_LEGENDARY_BOOTS;
-        c->Weapon[0].Type = MODEL_LEGENDARY_STAFF;
-        c->Weapon[1].Type = MODEL_LEGENDARY_SHIELD;
-        Level = 9;
-        c->BodyPart[BODYPART_HELM].Level = Level;
-        c->BodyPart[BODYPART_ARMOR].Level = Level;
-        c->BodyPart[BODYPART_PANTS].Level = Level;
-        c->BodyPart[BODYPART_GLOVES].Level = Level;
-        c->BodyPart[BODYPART_BOOTS].Level = Level;
-        //c->Weapon[0].Level = Level;
-        //c->Weapon[1].Level = Level;
-        c->PK = PVP_MURDERER2;
-        SetCharacterScale(c);
-        if (gMapManager.InDevilSquare() == true)
-        {
-            c->Object.Scale = 1.0f;
-        }
-        break;
-        /*OpenMonsterModel(MONSTER_MODEL_HELL_HOUND);
-        c = CreateCharacter(Key,MODEL_MONSTER01+5,PositionX,PositionY);
-        wcscpy(c->ID,"자이언트");
-        c->Weapon[0].Type = MODEL_AXE+2;
-        c->Weapon[1].Type = MODEL_AXE+2;
-        c->Object.Scale = 0.7f;
-        Vector(50.f,50.f,80.f,c->Object.BoundingBoxMax);
-        break;*/
-    case MONSTER_ELITE_GOBLIN:
-        OpenMonsterModel(MONSTER_MODEL_GOBLIN);
-        c = CreateCharacter(Key, MODEL_GOBLIN, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_MORNING_STAR;
-        c->Weapon[1].Type = MODEL_HORN_SHIELD;
-        c->Object.Scale = 1.2f;
-        c->Level = 1;
-        wcscpy(c->ID, L"고블린 대장");
-        break;
-    case MONSTER_STONE_GOLEM:
-        OpenMonsterModel(MONSTER_MODEL_STONE_GOLEM);
-        c = CreateCharacter(Key, MODEL_STONE_GOLEM, PositionX, PositionY);
-        wcscpy(c->ID, L"돌괴물");
-        break;
-    case MONSTER_AGON:
-        OpenMonsterModel(MONSTER_MODEL_AGON);
-        c = CreateCharacter(Key, MODEL_AGON, PositionX, PositionY);
-        wcscpy(c->ID, L"아곤");
-        c->Object.Scale = 1.3f;
-        c->Weapon[0].Type = MODEL_SERPENT_SWORD;
-        c->Weapon[1].Type = MODEL_SERPENT_SWORD;
-        break;
-    case MONSTER_FOREST_MONSTER:
-        OpenMonsterModel(MONSTER_MODEL_FOREST_MONSTER);
-        c = CreateCharacter(Key, MODEL_FOREST_MONSTER, PositionX, PositionY);
-        wcscpy(c->ID, L"숲의괴물");
-        c->Object.Scale = 0.75f;
-        break;
-    case MONSTER_HUNTER:
-        OpenMonsterModel(MONSTER_MODEL_HUNTER);
-        c = CreateCharacter(Key, MODEL_HUNTER, PositionX, PositionY);
-        wcscpy(c->ID, L"헌터");
-        c->Weapon[0].Type = MODEL_ARQUEBUS;
-        c->Object.Scale = 0.95f;
-        break;
-    case MONSTER_BEETLE_MONSTER:
-        OpenMonsterModel(MONSTER_MODEL_BEETLE_MONSTER);
-        c = CreateCharacter(Key, MODEL_BEETLE_MONSTER, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL__SPEAR;
-        c->Object.Scale = 0.8f;
-        wcscpy(c->ID, L"풍뎅이괴물");
-        c->Object.BlendMesh = 1;
-        break;
-    case MONSTER_CHAIN_SCORPION:
-        OpenMonsterModel(MONSTER_MODEL_CHAIN_SCORPION);
-        c = CreateCharacter(Key, MODEL_CHAIN_SCORPION, PositionX, PositionY);
-        c->Object.Scale = 1.1f;
-        wcscpy(c->ID, L"고리전갈");
-        break;
-    case MONSTER_GOBLIN:
-        OpenMonsterModel(MONSTER_MODEL_GOBLIN);
-        c = CreateCharacter(Key, MODEL_GOBLIN, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_AXE;
-        c->Object.Scale = 0.8f;
-        wcscpy(c->ID, L"고블린");
-        break;
-    case MONSTER_ICE_QUEEN:
-        OpenMonsterModel(MONSTER_MODEL_ICE_QUEEN);
-        c = CreateCharacter(Key, MODEL_ICE_QUEEN, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_ANGELIC_STAFF;
-        c->Object.BlendMesh = 2;
-        c->Object.BlendMeshLight = 1.f;
-        c->Object.Scale = 1.1f;
-        c->Object.LightEnable = false;
-        c->Level = 3;
-        wcscpy(c->ID, L"아이스퀸");
-        break;
-    case MONSTER_WORM:
-        OpenMonsterModel(MONSTER_MODEL_WORM);
-        c = CreateCharacter(Key, MODEL_WORM, PositionX, PositionY);
-        wcscpy(c->ID, L"웜");
-        break;
-    case MONSTER_HOMMERD:
-        OpenMonsterModel(MONSTER_MODEL_HOMMERD);
-        c = CreateCharacter(Key, MODEL_HOMMERD, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_LARKAN_AXE;
-        c->Weapon[1].Type = MODEL_BIG_ROUND_SHIELD;
-        c->Object.Scale = 1.15f;
-        wcscpy(c->ID, L"호머드");
-        break;
-    case MONSTER_ICE_MONSTER:
-        OpenMonsterModel(MONSTER_MODEL_ICE_MONSTER);
-        c = CreateCharacter(Key, MODEL_ICE_MONSTER, PositionX, PositionY);
-        c->Object.BlendMesh = 0;
-        c->Object.BlendMeshLight = 1.f;
-        wcscpy(c->ID, L"얼음괴물");
-        break;
-    case MONSTER_ASSASSIN:
-        OpenMonsterModel(MONSTER_MODEL_ASSASSIN);
-        c = CreateCharacter(Key, MODEL_ASSASSIN, PositionX, PositionY);
-        c->Object.Scale = 0.95f;
-        wcscpy(c->ID, L"암살자");
-        break;
-    case MONSTER_ELITE_YETI:
-        OpenMonsterModel(MONSTER_MODEL_ELITE_YETI);
-        c = CreateCharacter(Key, MODEL_ELITE_YETI, PositionX, PositionY);
-        wcscpy(c->ID, L"설인 대장");
-        c->Object.Scale = 1.4f;
-        break;
-    case MONSTER_YETI:
-        OpenMonsterModel(MONSTER_MODEL_YETI);
-        c = CreateCharacter(Key, MODEL_YETI, PositionX, PositionY);
-        wcscpy(c->ID, L"설인");
-        c->Object.Scale = 1.1f;
-        break;
-    case MONSTER_GORGON:
-        OpenMonsterModel(MONSTER_MODEL_GORGON);
-        c = CreateCharacter(Key, MODEL_GORGON, PositionX, PositionY);
-        wcscpy(c->ID, L"고르곤");
-        c->Object.Scale = 1.5f;
-        c->Weapon[0].Type = MODEL_GORGON_STAFF;
-        c->Object.BlendMesh = 1;
-        c->Object.BlendMeshLight = 1.f;
-        break;
-    case MONSTER_SPIDER:
-        OpenMonsterModel(MONSTER_MODEL_SPIDER);
-        c = CreateCharacter(Key, MODEL_SPIDER, PositionX, PositionY);
-        wcscpy(c->ID, L"거미");
-        c->Object.Scale = 0.4f;
-        break;
-    case MONSTER_CYCLOPS:
-        OpenMonsterModel(MONSTER_MODEL_CYCLOPS);
-        c = CreateCharacter(Key, MODEL_CYCLOPS, PositionX, PositionY);
-        wcscpy(c->ID, L"싸이크롭스");
-        c->Weapon[0].Type = MODEL_CRESCENT_AXE;
-        //c->Weapon[1].Type = MODEL_MACE+2;
-        //c->Object.HiddenMesh = 2;
-        break;
-    case MONSTER_BULL_FIGHTER:
-    case MONSTER_ELITE_BULL_FIGHTER:
-    case MONSTER_POISON_BULL:
-    default:
-        OpenMonsterModel(MONSTER_MODEL_BULL_FIGHTER);
-        c = CreateCharacter(Key, MODEL_BULL_FIGHTER, PositionX, PositionY);
-        if (Type == MONSTER_BULL_FIGHTER)
-        {
-            c->Object.HiddenMesh = 0;
-            wcscpy(c->ID, L"소뿔전사");
-            c->Object.Scale = 0.8f;
-            c->Weapon[0].Type = MODEL_NIKKEA_AXE;
-        }
-        else if (Type == MONSTER_ELITE_BULL_FIGHTER)
-        {
-            c->Weapon[0].Type = MODEL_BERDYSH;
-            wcscpy(c->ID, L"소뿔전사 대장");
-            c->Object.Scale = 1.15f;
-            c->Level = 1;
-        }
-        else if (Type == MONSTER_POISON_BULL)
-        {
-            c->Weapon[0].Type = MODEL_GREAT_SCYTHE;
-            wcscpy(c->ID, L"포이즌 소뿔전사");
-            c->Object.Scale = 1.f;
-            c->Level = 2;
-
-            g_CharacterRegisterBuff((&c->Object), eDeBuff_Poison);
-        }
-        break;
-    case MONSTER_GHOST:
-        OpenMonsterModel(MONSTER_MODEL_GHOST);
-        c = CreateCharacter(Key, MODEL_GHOST_MONSTER, PositionX, PositionY);
-        wcscpy(c->ID, L"고스트");
-        c->Object.AlphaTarget = 0.4f;
-        c->MoveSpeed = 15;
-        c->Blood = true;
-        break;
-    case MONSTER_LARVA:
-        OpenMonsterModel(MONSTER_MODEL_LARVA);
-        c = CreateCharacter(Key, MODEL_LARVA, PositionX, PositionY);
-        wcscpy(c->ID, L"유충");
-        c->Object.Scale = 0.6f;
-        break;
-    case MONSTER_HELL_SPIDER:
-        OpenMonsterModel(MONSTER_MODEL_HELL_SPIDER);
-        c = CreateCharacter(Key, MODEL_HELL_SPIDER, PositionX, PositionY);
-        wcscpy(c->ID, L"헬스파이더");
-        c->Weapon[0].Type = MODEL_SERPENT_STAFF;
-        c->Object.Scale = 1.1f;
-        break;
-    case MONSTER_HOUND:
-    case MONSTER_HELL_HOUND:
-        OpenMonsterModel(MONSTER_MODEL_HOUND);
-        c = CreateCharacter(Key, MODEL_HOUND, PositionX, PositionY);
-        if (Type == MONSTER_HOUND)
-        {
-            c->Object.HiddenMesh = 0;
-            wcscpy(c->ID, L"하운드");
-            c->Object.Scale = 0.85f;
-            c->Weapon[0].Type = MODEL_SWORD_OF_ASSASSIN;
-        }
-        if (Type == MONSTER_HELL_HOUND)
-        {
-            c->Object.HiddenMesh = 1;
-            c->Weapon[0].Type = MODEL_FALCHION;
-            c->Weapon[1].Type = MODEL_PLATE_SHIELD;
-            wcscpy(c->ID, L"헬하운드");
-            c->Object.Scale = 1.1f;
-            c->Level = 1;
-        }
-        break;
-
-    case MONSTER_BUDGE_DRAGON:
-        OpenMonsterModel(MONSTER_MODEL_BUDGE_DRAGON);
-        c = CreateCharacter(Key, MODEL_BUDGE_DRAGON, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown2");
-        c->Object.Scale = 0.5f;
-        break;
-
-    case MONSTER_DARK_KNIGHT:
-        OpenMonsterModel(MONSTER_MODEL_DARK_KNIGHT);
-        c = CreateCharacter(Key, MODEL_DARK_KNIGHT, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown10");
-        c->Object.Scale = 0.8f;
-        c->Level = 1;
-        c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
-        break;
-    case MONSTER_LICH:
-    case MONSTER_THUNDER_LICH:
-        OpenMonsterModel(MONSTER_MODEL_LICH);
-        c = CreateCharacter(Key, MODEL_LICH, PositionX, PositionY);
-        if (Type == MONSTER_LICH)
-        {
-            wcscpy(c->ID, L"리치");
-            c->Weapon[0].Type = MODEL_SERPENT_STAFF;
-            c->Object.Scale = 0.85f;
-        }
-        else
-        {
-            wcscpy(c->ID, L"썬더 리치");
-            c->Weapon[0].Type = MODEL_THUNDER_STAFF;
-            c->Level = 1;
-            c->Object.Scale = 1.1f;
-        }
-        break;
-    case MONSTER_GIANT:
-        OpenMonsterModel(MONSTER_MODEL_GIANT);
-        c = CreateCharacter(Key, MODEL_GIANT, PositionX, PositionY);
-        wcscpy(c->ID, L"자이언트");
-        c->Weapon[0].Type = MODEL_DOUBLE_AXE;
-        c->Weapon[1].Type = MODEL_DOUBLE_AXE;
-        c->Object.Scale = 1.6f;
-        break;
-
-    case MONSTER_SKELETON_WARRIOR:
-    case MONSTER_DEATH_KING:
-    case MONSTER_DEATH_BONE:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"해골전사");
-        c->Object.SubType = MODEL_SKELETON1;
-        c->Blood = true;
-        if (Type == 14)
-        {
-            c->Object.Scale = 0.95f;
-            c->Weapon[0].Type = MODEL_GLADIUS;
-            c->Weapon[1].Type = MODEL_BUCKLER;
-        }
-        else if (Type == 56)
-        {
-            c->Object.Scale = 0.8f;
-            c->Weapon[0].Type = MODEL_GREAT_SCYTHE;
-        }
-        else
-        {
-            c->Level = 1;
-            c->Object.Scale = 1.4f;
-            c->Weapon[0].Type = MODEL_BILL_OF_BALROG;
-        }
-        break;
-    case MONSTER_SKELETON_ARCHER:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"해골궁수");
-        c->Object.Scale = 1.1f;
-        c->Weapon[1].Type = MODEL_ELVEN_BOW;
-        c->Object.SubType = MODEL_SKELETON2;
-        c->Level = 1;
-        c->Blood = true;
-        break;
-    case MONSTER_ELITE_SKELETON:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"해골전사 대장");
-        c->Object.Scale = 1.2f;
-        c->Weapon[0].Type = MODEL_TOMAHAWK;
-        c->Weapon[1].Type = MODEL_SKULL_SHIELD;
-        c->Object.SubType = MODEL_SKELETON3;
-        c->Level = 1;
-        c->Blood = true;
-        break;
-    case MONSTER_ELITE_SKILL_SOLDIER:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        ::wcscpy(c->ID, L"엘리트 해골전사");
-        c->Object.Scale = 0.95f;
-        c->Object.SubType = MODEL_SKELETON_PCBANG;
-        break;
-    case MONSTER_JACK_OLANTERN:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        ::wcscpy(c->ID, L"잭 오랜턴");
-        c->Object.Scale = 0.95f;
-        c->Object.SubType = MODEL_HALLOWEEN;
-        break;
-    case MONSTER_SANTA:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        ::wcscpy(c->ID, L"크리스마스 걸");
-        c->Object.Scale = 0.85f;
-        c->Object.SubType = MODEL_XMAS_EVENT_CHANGE_GIRL;
-        break;
-    case MONSTER_GAMEMASTER:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        ::wcscpy(c->ID, L"GameMaster");
-        c->Object.Scale = 1.0f;
-        c->Object.SubType = MODEL_GM_CHARACTER;
-        break;
-    case MONSTER_GOLDEN_TITAN:
-        OpenMonsterModel(MONSTER_MODEL_TITAN);
-        c = CreateCharacter(Key, MODEL_TITAN, PositionX, PositionY);
-        wcscpy(c->ID, L"타이탄");
-        c->Object.Scale = 1.8f;
-        c->Object.BlendMesh = 2;
-        c->Object.BlendMeshLight = 1.f;
-        o = &c->Object;
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
-        break;
-    case MONSTER_GOLDEN_SOLDIER:
-    case MONSTER_SOLDIER:
-        OpenMonsterModel(MONSTER_MODEL_SOLDIER);
-        c = CreateCharacter(Key, MODEL_SOLDIER, PositionX, PositionY);
-        wcscpy(c->ID, L"솔져");
-        c->Weapon[1].Type = MODEL_AQUAGOLD_CROSSBOW;
-        if (Type == 54)
-            c->Object.Scale = 1.1f;
-        else
-            c->Object.Scale = 1.3f;
-        break;
-    case MONSTER_LANCE_TRAP:
-        c = CreateCharacter(Key, 39, PositionX, PositionY);
-        break;
-    case MONSTER_IRON_STICK_TRAP:
-        c = CreateCharacter(Key, 40, PositionX, PositionY);
-        break;
-    case MONSTER_FIRE_TRAP:
-        c = CreateCharacter(Key, 51, PositionX, PositionY);
-        break;
-    case MONSTER_METEORITE_TRAP:
-        c = CreateCharacter(Key, 25, PositionX, PositionY);
-        break;
-    case MONSTER_LASER_TRAP:
-        c = CreateCharacter(Key, 51, PositionX, PositionY);
-        break;
-    case MONSTER_SOCCERBALL:
-        c = CreateCharacter(Key, MODEL_BALL, PositionX, PositionY);
-        o = &c->Object;
-        o->BlendMesh = 2;
-        o->Scale = 1.8f;
-        c->Level = 1;
-        break;
-    case MONSTER_PET_TRAINER:
-        OpenNpc(MODEL_NPC_BREEDER);
-        c = CreateCharacter(Key, MODEL_NPC_BREEDER, PositionX, PositionY);
-        wcscpy(c->ID, L"조련사 NPC");
-        break;
-
-#ifdef _PVP_MURDERER_HERO_ITEM
-    case 227:
-        OpenNpc(MODEL_MASTER);
-        c = CreateCharacter(Key, MODEL_MASTER, PositionX, PositionY);
-        wcscpy(c->ID, L"살인마상점");
-        break;
-
-    case 228:
-        OpenNpc(MODEL_HERO_SHOP);
-        c = CreateCharacter(Key, MODEL_HERO_SHOP, PositionX, PositionY);
-        wcscpy(c->ID, L"영웅상점");
-        break;
-#endif	// _PVP_MURDERER_HERO_ITEM
-
-    case MONSTER_MARLON:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"말론");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_PLATE_HELM;
-        c->BodyPart[BODYPART_HELM].Level = 7;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_PLATE_ARMOR;
-        c->BodyPart[BODYPART_ARMOR].Level = 7;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_PLATE_PANTS;
-        c->BodyPart[BODYPART_PANTS].Level = 7;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_PLATE_GLOVES;
-        c->BodyPart[BODYPART_GLOVES].Level = 7;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_PLATE_BOOTS;
-        c->BodyPart[BODYPART_BOOTS].Level = 7;
-        c->Weapon[0].Type = MODEL_BERDYSH;
-        c->Weapon[0].Level = 8;
-        c->Weapon[1].Type = -1;
-        SetCharacterScale(c);
-        c->Object.m_bpcroom = false;
-        break;
-    case MONSTER_ALEX:
-        OpenNpc(MODEL_MERCHANT_MAN);
-        c = CreateCharacter(Key, MODEL_MERCHANT_MAN, PositionX, PositionY);
-        wcscpy(c->ID, L"로랜추가상인");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_MAN_HEAD;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_MERCHANT_MAN_UPPER + 1;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_MERCHANT_MAN_GLOVES + 1;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_MAN_BOOTS;
-        break;
-    case MONSTER_THOMPSON_THE_MERCHANT:
-        OpenNpc(MODEL_DEVIAS_TRADER);
-        c = CreateCharacter(Key, MODEL_DEVIAS_TRADER, PositionX, PositionY);
-        wcscpy(c->ID, L"데비추가상인");
-        break;
-
-    case MONSTER_ARCHANGEL:
-        OpenNpc(MODEL_NPC_ARCHANGEL);
-        c = CreateCharacter(Key, MODEL_NPC_ARCHANGEL, PositionX, PositionY);
-        o = &c->Object;
-        o->Scale = 1.f;
-        o->Kind = KIND_NPC;
-        break;
-    case MONSTER_MESSENGER_OF_ARCH:
-        OpenNpc(MODEL_NPC_ARCHANGEL_MESSENGER);
-        c = CreateCharacter(Key, MODEL_NPC_ARCHANGEL_MESSENGER, PositionX, PositionY);
-        o = &c->Object;
-        o->Scale = 1.f;
-        o->Kind = KIND_NPC;
-        break;
-
-    case MONSTER_GOBLIN_GATE:
-        OpenMonsterModel(MONSTER_MODEL_GOBLIN);
-        c = CreateCharacter(Key, MODEL_GOBLIN, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_STAFF;
-        c->Weapon[0].Level = 4;
-        c->Object.Scale = 1.5f;
-        c->Object.Kind = KIND_NPC;
-        SetAction(&c->Object, 0);
-        break;
-
-    case MONSTER_SEVINA_THE_PRIESTESS:
-        OpenNpc(MODEL_NPC_SEVINA);
-        c = CreateCharacter(Key, MODEL_NPC_SEVINA, PositionX, PositionY);
-        o = &c->Object;
-        o->Scale = 1.f;
-        o->Kind = KIND_NPC;
-        break;
-
-    case MONSTER_GOLDEN_ARCHER:
-        OpenNpc(MODEL_PLAYER);
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        o = &c->Object;
-        o->SubType = MODEL_SKELETON2;
-        o->Scale = 1.0f;
-        o->Kind = KIND_NPC;
-        c->Level = 8;
-        break;
-    case MONSTER_CHARON:
-        OpenNpc(MODEL_NPC_DEVILSQUARE);
-        c = CreateCharacter(Key, MODEL_NPC_DEVILSQUARE, PositionX, PositionY);
-        break;
-    case MONSTER_OSBOURNE:
-        OpenNpc(MODEL_REFINERY_NPC);
-        c = CreateCharacter(Key, MODEL_REFINERY_NPC, PositionX, PositionY);
-        o = &c->Object;
-        break;
-    case MONSTER_JERRIDON://환원
-        OpenNpc(MODEL_RECOVERY_NPC);
-        c = CreateCharacter(Key, MODEL_RECOVERY_NPC, PositionX, PositionY);
-        o = &c->Object;
-        break;
-    case MONSTER_CHAOS_GOBLIN:
-        OpenNpc(MODEL_MIX_NPC);
-        c = CreateCharacter(Key, MODEL_MIX_NPC, PositionX, PositionY);
-        o = &c->Object;
-        o->BlendMesh = 1;
-        break;
-    case MONSTER_ARENA_GUARD:
-        OpenNpc(MODEL_TOURNAMENT);
-        c = CreateCharacter(Key, MODEL_TOURNAMENT, PositionX, PositionY);
-        break;
-    case MONSTER_BAZ_THE_VAULT_KEEPER:
-        OpenNpc(MODEL_STORAGE);
-        c = CreateCharacter(Key, MODEL_STORAGE, PositionX, PositionY);
-        break;
-    case MONSTER_GUILD_MASTER:
-        OpenNpc(MODEL_MASTER);
-        c = CreateCharacter(Key, MODEL_MASTER, PositionX, PositionY);
-        wcscpy(c->ID, L"마스터");
-        break;
-    case MONSTER_LAHAP:
-        OpenNpc(MODEL_NPC_SERBIS);
-        c = CreateCharacter(Key, MODEL_NPC_SERBIS, PositionX, PositionY);
-        wcscpy(c->ID, L"세르비스");
-        break;
-    case MONSTER_ELF_SOLDIER:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        MakeElfHelper(c);
-        wcscpy(c->ID, L"페이아");
-        o = &c->Object;
-        CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 42, o, 15.f);
-        break;
-    case MONSTER_ELF_LALA:
-        OpenNpc(MODEL_ELF_WIZARD);
-        c = CreateCharacter(Key, MODEL_ELF_WIZARD, PositionX, PositionY);
-        wcscpy(c->ID, L"라라 요정");
-        o = &c->Object;
-        o->BlendMesh = 1;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 140.f;
-        break;
-    case MONSTER_EO_THE_CRAFTSMAN:
-        OpenNpc(MODEL_ELF_MERCHANT);
-        c = CreateCharacter(Key, MODEL_ELF_MERCHANT, PositionX, PositionY);
-        wcscpy(c->ID, L"장인");
-        break;
-    case MONSTER_CAREN_THE_BARMAID:
-        OpenNpc(MODEL_SNOW_MERCHANT);
-        c = CreateCharacter(Key, MODEL_SNOW_MERCHANT, PositionX, PositionY);
-        wcscpy(c->ID, L"술집마담");
-        break;
-    case MONSTER_IZABEL_THE_WIZARD:
-        OpenNpc(MODEL_SNOW_WIZARD);
-        c = CreateCharacter(Key, MODEL_SNOW_WIZARD, PositionX, PositionY);
-        wcscpy(c->ID, L"마법사");
-        break;
-    case MONSTER_ZIENNA_THE_WEAPONS_MERCHANT:
-        OpenNpc(MODEL_SNOW_SMITH);
-        c = CreateCharacter(Key, MODEL_SNOW_SMITH, PositionX, PositionY);
-        wcscpy(c->ID, L"무기상인");
-        break;
-    case MONSTER_CROSSBOW_GUARD:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"경비병");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_PLATE_HELM;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_PLATE_ARMOR;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_PLATE_PANTS;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_PLATE_GLOVES;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_PLATE_BOOTS;
-        c->Weapon[0].Type = MODEL_LIGHT_CROSSBOW;
-        c->Weapon[1].Type = MODEL_BOLT;
-        SetCharacterScale(c);
-        break;
-    case MONSTER_WANDERING_MERCHANT_MARTIN:
-        OpenNpc(MODEL_MERCHANT_MAN);
-        c = CreateCharacter(Key, MODEL_MERCHANT_MAN, PositionX, PositionY);
-        wcscpy(c->ID, L"떠돌이 상인");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_MAN_HEAD + 1;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_MERCHANT_MAN_UPPER + 1;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_MERCHANT_MAN_GLOVES + 1;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_MAN_BOOTS + 1;
-        break;
-    case MONSTER_BERDYSH_GUARD:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"경비병");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_PLATE_HELM;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_PLATE_ARMOR;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_PLATE_PANTS;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_PLATE_GLOVES;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_PLATE_BOOTS;
-        c->Weapon[0].Type = MODEL_BERDYSH;
-        SetCharacterScale(c);
-        break;
-    case MONSTER_WANDERING_MERCHANT_HAROLD:
-        OpenNpc(MODEL_MERCHANT_MAN);
-        c = CreateCharacter(Key, MODEL_MERCHANT_MAN, PositionX, PositionY);
-        wcscpy(c->ID, L"떠돌이 상인");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_MAN_HEAD;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_MERCHANT_MAN_UPPER;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_MERCHANT_MAN_GLOVES;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_MAN_BOOTS;
-        break;
-    case MONSTER_WANDERING_MERCHANT_ZYRO:
-        OpenNpc(MODEL_GAMBLE_NPC_MOSS);
-        c = CreateCharacter(Key, MODEL_GAMBLE_NPC_MOSS, PositionX, PositionY);
-        wcscpy(c->ID, L"떠돌이 상인");
-        c->Object.LifeTime = 100;
-        c->Object.Scale = 0.8f;
-        c->Object.m_fEdgeScale = 1.1f;
-        break;
-    case MONSTER_HANZO_THE_BLACKSMITH:
-        OpenNpc(MODEL_SMITH);
-        c = CreateCharacter(Key, MODEL_SMITH, PositionX, PositionY);
-        wcscpy(c->ID, L"대장장이 한스");
-        c->Object.Scale = 0.95f;
-        break;
-    case MONSTER_POTION_GIRL_AMY:
-        OpenNpc(MODEL_MERCHANT_GIRL);
-        c = CreateCharacter(Key, MODEL_MERCHANT_GIRL, PositionX, PositionY);
-        wcscpy(c->ID, L"물약파는 소녀");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_GIRL_HEAD;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_MERCHANT_GIRL_UPPER;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_MERCHANT_GIRL_LOWER;
-        break;
-    case MONSTER_PASI_THE_MAGE:
-        OpenNpc(MODEL_SCIENTIST);
-        c = CreateCharacter(Key, MODEL_SCIENTIST, PositionX, PositionY);
-        wcscpy(c->ID, L"마법사 파시");
-        break;
-    case MONSTER_LUMEN_THE_BARMAID:
-        OpenNpc(MODEL_MERCHANT_FEMALE);
-        c = CreateCharacter(Key, MODEL_MERCHANT_FEMALE, PositionX, PositionY);
-        wcscpy(c->ID, L"술집마담 리아먼");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_FEMALE_HEAD + 1;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_MERCHANT_FEMALE_UPPER + 1;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_MERCHANT_FEMALE_LOWER + 1;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_FEMALE_BOOTS + 1;
-        break;
-    case MONSTER_WOLF_STATUS:
-        OpenNpc(MODEL_CRYWOLF_STATUE);
-        c = CreateCharacter(Key, MODEL_CRYWOLF_STATUE, PositionX, PositionY);
-        wcscpy(c->ID, L"석상");
-        c->Object.Live = false;
-        break;
-    case MONSTER_WOLF_ALTAR1:
-        OpenNpc(MODEL_CRYWOLF_ALTAR1);
-        c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR1, PositionX, PositionY);
-        wcscpy(c->ID, L"제단1");
-        c->Object.Position[2] -= 10.0f;
-        c->Object.HiddenMesh = -2;
-        c->Object.Visible = false;
-        c->Object.EnableShadow = false;
-        break;
-    case MONSTER_WOLF_ALTAR2:
-        OpenNpc(MODEL_CRYWOLF_ALTAR2);
-        c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR2, PositionX, PositionY);
-        wcscpy(c->ID, L"제단2");
-        c->Object.HiddenMesh = -2;
-        c->Object.Position[2] -= 10.0f;
-        c->Object.Visible = false;
-        c->Object.EnableShadow = false;
-        break;
-    case MONSTER_WOLF_ALTAR3:
-        OpenNpc(MODEL_CRYWOLF_ALTAR3);
-        c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR3, PositionX, PositionY);
-        wcscpy(c->ID, L"제단3");
-        c->Object.HiddenMesh = -2;
-        c->Object.Position[2] -= 10.0f;
-        c->Object.Visible = false;
-        c->Object.EnableShadow = false;
-        break;
-    case MONSTER_WOLF_ALTAR4:
-        OpenNpc(MODEL_CRYWOLF_ALTAR4);
-        c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR4, PositionX, PositionY);
-        wcscpy(c->ID, L"제단4");
-        c->Object.HiddenMesh = -2;
-        c->Object.Position[2] -= 10.0f;
-        c->Object.Visible = false;
-        c->Object.EnableShadow = false;
-        break;
-    case MONSTER_WOLF_ALTAR5:
-        OpenNpc(MODEL_CRYWOLF_ALTAR5);
-        c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR5, PositionX, PositionY);
-        wcscpy(c->ID, L"제단5");
-        c->Object.HiddenMesh = -2;
-        c->Object.Position[2] -= 10.0f;
-        c->Object.Visible = false;
-        c->Object.EnableShadow = false;
-        break;
-    case MONSTER_ELPHIS:
-        OpenNpc(MODEL_SMELTING_NPC);
-        c = CreateCharacter(Key, MODEL_SMELTING_NPC, PositionX + 1, PositionY - 1);
-        wcscpy(c->ID, L"제련의탑NPC");
-        c->Object.Scale = 2.5f;
-        c->Object.EnableShadow = false;
-        c->Object.m_bRenderShadow = false;
-        break;
-    case MONSTER_FIREWORKS_GIRL:
-        OpenNpc(MODEL_WEDDING_NPC);
-        c = CreateCharacter(Key, MODEL_WEDDING_NPC, PositionX, PositionY);
-        wcscpy(c->ID, L"WeddingNPC");
-        c->Object.Scale = 1.1f;
-        c->Object.EnableShadow = false;
-        c->Object.m_bRenderShadow = false;
-        break;
-    case MONSTER_LUKE_THE_HELPER:
-    case MONSTER_LEO_THE_HELPER:
-    case MONSTER_HELPER_ELLEN:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"HelperName");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_PLATE_HELM;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_PLATE_ARMOR;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_PLATE_PANTS;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_PLATE_GLOVES;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_PLATE_BOOTS;
-        c->Weapon[0].Type = -1;
-        SetCharacterScale(c);
-        c->Object.m_bpcroom = true;
-        break;
-    case MONSTER_ORACLE_LAYLA:
-        OpenNpc(MODEL_KALIMA_SHOP);
-        c = CreateCharacter(Key, MODEL_KALIMA_SHOP, PositionX, PositionY);
-        c->Object.Position[2] += 140.0f;
-        wcscpy(c->ID, L"KalimaShop");
-        break;
-    case MONSTER_CHAOS_CARD_MASTER:
-    {
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        wcscpy(c->ID, L"ChaosCard");
-        c->BodyPart[BODYPART_HELM].Type = MODEL_VENOM_MIST_HELM;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_VENOM_MIST_ARMOR;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_VENOM_MIST_PANTS;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_VENOM_MIST_GLOVES;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_VENOM_MIST_BOOTS;
-        c->Wing.Type = MODEL_WINGS_OF_HEAVEN;
-        int iLevel = 9;
-        c->BodyPart[BODYPART_HELM].Level = iLevel;
-        c->BodyPart[BODYPART_ARMOR].Level = iLevel;
-        c->BodyPart[BODYPART_PANTS].Level = iLevel;
-        c->BodyPart[BODYPART_GLOVES].Level = iLevel;
-        c->BodyPart[BODYPART_BOOTS].Level = iLevel;
-        c->Weapon[0].Type = -1;
-        SetCharacterScale(c);
-        c->Object.SubType = Type;
-    }
-    break;
-    case MONSTER_PAMELA_THE_SUPPLIER:
-    {
-        OpenNpc(MODEL_BC_NPC1);
-        c = CreateCharacter(Key, MODEL_BC_NPC1, PositionX, PositionY);
-        wcscpy(c->ID, L"공성 NPC");
-        c->Object.Scale = 1.0f;
-        c->Object.Angle[2] = 0.f;
-        CreateObject(MODEL_BC_BOX, c->Object.Position, c->Object.Angle);
-    }
-    break;
-    case MONSTER_ANGELA_THE_SUPPLIER:
-    {
-        OpenNpc(MODEL_BC_NPC2);
-        c = CreateCharacter(Key, MODEL_BC_NPC2, PositionX, PositionY);
-        wcscpy(c->ID, L"공성 NPC");
-        c->Object.Scale = 1.0f;
-        c->Object.Angle[2] = 90.f;
-        CreateObject(MODEL_BC_BOX, c->Object.Position, c->Object.Angle);
-    }
-    break;
-    case MONSTER_PRIEST_DEVIN:
-        OpenNpc(MODEL_NPC_DEVIN);
-        c = CreateCharacter(Key, MODEL_NPC_DEVIN, PositionX, PositionY);
-        wcscpy(c->ID, L"사제데빈");
-        break;
-    case MONSTER_WEREWOLF_QUARREL:
-        OpenNpc(MODEL_NPC_QUARREL);
-        c = CreateCharacter(Key, MODEL_NPC_QUARREL, PositionX, PositionY);
-        wcscpy(c->ID, L"웨어울프쿼렐");
-        c->Object.Scale = 1.9f;
-        break;
-    case MONSTER_GATEKEEPER:
-        OpenNpc(MODEL_NPC_CASTEL_GATE);
-        c = CreateCharacter(Key, MODEL_NPC_CASTEL_GATE, PositionX, PositionY, 90.f);
-        wcscpy(c->ID, L"성문");
-        o = &c->Object;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 240.f;
-        c->Object.Scale = 1.2f;
-        c->Object.m_fEdgeScale = 1.1f;
-        c->Object.EnableShadow = false;
-        c->Object.m_bRenderShadow = false;
-        break;
-    case MONSTER_LUNAR_RABBIT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_LUNAR_RABBIT);
-        c = CreateCharacter(Key, MODEL_LUNAR_RABBIT, PositionX, PositionY);
-        wcscpy(c->ID, L"달토끼");
-        c->Object.Scale = 0.8f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        c->Object.SubType = Random::Rand() % 3;
-        c->Object.m_iAnimation = 0;
-
-        BoneManager::RegisterBone(c, L"Rabbit_1", 3);		// Bip01 Spine
-        BoneManager::RegisterBone(c, L"Rabbit_2", 16);		// Bip01 Head
-        BoneManager::RegisterBone(c, L"Rabbit_3", 15);		// Bip01 Neck1
-        BoneManager::RegisterBone(c, L"Rabbit_4", 2);		// Bip01 Pelvis
-    }
-
-    break;
-    case MONSTER_CHERRY_BLOSSOM_SPIRIT:
-    {
-        OpenNpc(MODEL_NPC_CHERRYBLOSSOM);
-        c = CreateCharacter(Key, MODEL_NPC_CHERRYBLOSSOM, PositionX, PositionY);
-        c->Object.Scale = 0.65f;
-        c->Object.m_fEdgeScale = 1.08f;
-        o = &c->Object;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 170.f;
-        wcscpy(c->ID, L"벚꽃의정령");
-    }
-    break;
-    case MONSTER_CHERRY_BLOSSOM_TREE:
-    {
-        OpenNpc(MODEL_NPC_CHERRYBLOSSOMTREE);
-        c = CreateCharacter(Key, MODEL_NPC_CHERRYBLOSSOMTREE, PositionX, PositionY);
-        c->Object.Scale = 1.0f;
-        c->Object.m_fEdgeScale = 0.0f;
-        c->Object.m_bRenderShadow = false;
-        wcscpy(c->ID, L"벚꽃나무");
-    }
-    break;
-
-    case MONSTER_DAVID:
-        OpenNpc(MODEL_LUCKYITEM_NPC);
-        c = CreateCharacter(Key, MODEL_LUCKYITEM_NPC, PositionX, PositionY);
-        wcscpy(c->ID, L"Lucky Item NPC");
-        c->Object.Scale = 0.95f;
-        c->Object.m_fEdgeScale = 1.2f;
-        break;
-    case MONSTER_SEED_MASTER:
-        OpenNpc(MODEL_SEED_MASTER);
-        c = CreateCharacter(Key, MODEL_SEED_MASTER, PositionX, PositionY);
-        wcscpy(c->ID, L"시드마스터");
-        c->Object.Scale = 1.1f;
-        c->Object.m_fEdgeScale = 1.2f;
-        break;
-    case MONSTER_SEED_RESEARCHER:
-        OpenNpc(MODEL_SEED_INVESTIGATOR);
-        c = CreateCharacter(Key, MODEL_SEED_INVESTIGATOR, PositionX, PositionY);
-        wcscpy(c->ID, L"시드연구가");
-        c->Object.Scale = 0.9f;
-        c->Object.m_fEdgeScale = 1.15f;
-        //Models[MODEL_SEED_INVESTIGATOR].Actions[0].PlaySpeed = 0.2f;
-        //Models[MODEL_SEED_INVESTIGATOR].Actions[1].PlaySpeed = 0.1f;
-        break;
-    case MONSTER_REINIT_HELPER:
-    {
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        //c->Class = 2;
-        wcscpy(c->ID, L"초기화 도우미");
-
-        c->BodyPart[BODYPART_HELM].Type = MODEL_PLATE_HELM;
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_PLATE_ARMOR;
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_PLATE_PANTS;
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_PLATE_GLOVES;
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_PLATE_BOOTS;
-
-        c->Object.m_fEdgeScale = 1.15f;
-        c->Weapon[0].Type = MODEL_LIGHT_CROSSBOW;
-        c->Weapon[1].Type = MODEL_BOLT;
-        SetCharacterScale(c);
-    }
-    break;
-    case MONSTER_TRANSFORMED_SNOWMAN:
-        OpenNpc(MODEL_XMAS2008_SNOWMAN);
-        c = CreateCharacter(Key, MODEL_XMAS2008_SNOWMAN, PositionX, PositionY);
-        ::wcscpy(c->ID, L"Unknown");
-        c->Object.LifeTime = 100;
-        c->Object.Scale = 1.3f;
-        break;
-#ifdef PJH_ADD_PANDA_CHANGERING
-    case MONSTER_TRANSFORMED_PANDA:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        ::wcscpy(c->ID, L"Unknown");
-        c->Object.SubType = MODEL_PANDA;
-        break;
-#endif //PJH_ADD_PANDA_CHANGERING
-    case MONSTER_TRANSFORMED_SKELETON:
-        c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-        ::wcscpy(c->ID, L"Unknown");
-        c->Object.SubType = MODEL_SKELETON_CHANGED;
-        break;
-    case MONSTER_LITTLE_SANTA_YELLOW:
-    case MONSTER_LITTLE_SANTA_GREEN:
-    case MONSTER_LITTLE_SANTA_RED:
-    case MONSTER_LITTLE_SANTA_BLUE:
-    case MONSTER_LITTLE_SANTA_WHITE:
-    case MONSTER_LITTLE_SANTA_BLACK:
-    case MONSTER_LITTLE_SANTA_ORANGE:
-    case MONSTER_LITTLE_SANTA_PINK:
-    {
-        int _Model_NpcIndex = MODEL_LITTLESANTA + (Type - 468);
-
-        OpenNpc(_Model_NpcIndex);
-        c = CreateCharacter(Key, _Model_NpcIndex, PositionX, PositionY);
-
-        c->Object.Scale = 0.43f;
-        wcscpy(c->ID, L"little santa");
-    }
-    break;
-    case MONSTER_DELGADO:
-        //델가도
-        OpenNpc(MODEL_NPC_SERBIS);
-        c = CreateCharacter(Key, MODEL_NPC_SERBIS, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        break;
-    case MONSTER_GATEKEEPER_TITUS:
-        // 결투장 문지기 NPC 타이투스
-        OpenNpc(MODEL_DUEL_NPC_TITUS);
-        c = CreateCharacter(Key, MODEL_DUEL_NPC_TITUS, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.1f;
-        c->Object.m_fEdgeScale = 1.2f;
-        break;
-    case MONSTER_MOSS_THE_MERCHANT:
-    {
-        OpenNpc(MODEL_GAMBLE_NPC_MOSS);
-        c = CreateCharacter(Key, MODEL_GAMBLE_NPC_MOSS, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.LifeTime = 100;
-        c->Object.Scale = 0.8f;
-        c->Object.m_fEdgeScale = 1.1f;
-    }
-    break;
-    case MONSTER_GOLDEN_RABBIT:
-        OpenMonsterModel(MONSTER_MODEL_RABBIT);
-        c = CreateCharacter(Key, MODEL_RABBIT, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.0f * 0.95f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        break;
-    case MONSTER_GOLDEN_DARK_KNIGHT:
-        OpenMonsterModel(MONSTER_MODEL_DARK_KNIGHT);
-        c = CreateCharacter(Key, MODEL_DARK_KNIGHT, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 0.8f;
-        c->Level = 1;
-        c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
-        break;
-        break;
-    case MONSTER_GOLDEN_DEVIL:
-        OpenMonsterModel(MONSTER_MODEL_DEVIL);
-        c = CreateCharacter(Key, MODEL_DEVIL, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.1f;
-        break;
-    case MONSTER_GOLDEN_STONE_GOLEM:
-        OpenMonsterModel(MONSTER_MODEL_GOLDEN_STONE_GOLEM);
-        c = CreateCharacter(Key, MODEL_GOLDEN_STONE_GOLEM, PositionX, PositionY);
-        c->Object.Scale = 1.35f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(c, L"Monster101_L_Arm", 12);
-        BoneManager::RegisterBone(c, L"Monster101_R_Arm", 20);
-        BoneManager::RegisterBone(c, L"Monster101_Head", 6);
-        break;
-    case MONSTER_GOLDEN_CRUST:
-        OpenMonsterModel(MONSTER_MODEL_CRUST);
-        c = CreateCharacter(Key, MODEL_CRUST, PositionX, PositionY);
-        c->Object.Scale = 1.1f;
-        c->Weapon[0].Type = MODEL_THUNDER_BLADE;
-        c->Weapon[0].Level = 5;
-        c->Weapon[1].Type = MODEL_LEGENDARY_SHIELD;
-        c->Weapon[1].Level = 0;
-        c->Object.BlendMesh = 1;
-        c->Object.BlendMeshLight = 1.f;
-        break;
-    case MONSTER_GOLDEN_SATYROS:
-        OpenMonsterModel(MONSTER_MODEL_SATYROS);
-        c = CreateCharacter(Key, MODEL_SATYROS, PositionX, PositionY);
-        c->Object.Scale = 1.3f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        wcscpy(c->ID, L"Unknown");
-        break;
-    case MONSTER_GOLDEN_TWIN_TAIL:
-        OpenMonsterModel(MONSTER_MODEL_TWIN_TAIL);
-        c = CreateCharacter(Key, MODEL_TWIN_TAIL, PositionX, PositionY);
-        c->Object.Scale = 1.3f;
-        c->Object.Angle[0] = 0.0f;
-        c->Object.Gravity = 0.0f;
-        c->Object.Distance = (float)(Random::Rand() % 20) / 10.0f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(c, L"Twintail_Hair24", 16);
-        BoneManager::RegisterBone(c, L"Twintail_Hair32", 24);
-        break;
-    case MONSTER_GOLDEN_IRON_KNIGHT:
-        OpenMonsterModel(MONSTER_MODEL_IRON_KNIGHT);
-        c = CreateCharacter(Key, MODEL_IRON_KNIGHT, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.5f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        break;
-    case MONSTER_GOLDEN_NAPIN:
-        OpenMonsterModel(MONSTER_MODEL_NAPIN);
-        c = CreateCharacter(Key, MODEL_NAPIN, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 0.95f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        break;
-    case MONSTER_GOLDEN_GREAT_DRAGON:
-        OpenMonsterModel(MONSTER_MODEL_DRAGON);
-        c = CreateCharacter(Key, MODEL_DRAGON_, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 0.88f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        break;
-    case MONSTER_LUGARD:
-        OpenNpc(MODEL_DOPPELGANGER_NPC_LUGARD);
-        c = CreateCharacter(Key, MODEL_DOPPELGANGER_NPC_LUGARD, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.1f;
-        c->Object.m_fEdgeScale = 1.2f;
-        break;
-    case MONSTER_COMPENSATION_BOX:
-        OpenNpc(MODEL_DOPPELGANGER_NPC_BOX);
-        c = CreateCharacter(Key, MODEL_DOPPELGANGER_NPC_BOX, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 2.3f;
-        c->Object.m_fEdgeScale = 1.1f;
-        break;
-    case MONSTER_GOLDEN_COMPENSATION_BOX:
-        OpenNpc(MODEL_DOPPELGANGER_NPC_GOLDENBOX);
-        c = CreateCharacter(Key, MODEL_DOPPELGANGER_NPC_GOLDENBOX, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 3.3f;
-        c->Object.m_fEdgeScale = 1.1f;
-        break;
-    case MONSTER_GENS_DUPRIAN:
-        OpenNpc(MODAL_GENS_NPC_DUPRIAN);
-        c = CreateCharacter(Key, MODAL_GENS_NPC_DUPRIAN, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.0f;
-        break;
-    case MONSTER_GENS_VANERT:
-        OpenNpc(MODAL_GENS_NPC_BARNERT);
-        c = CreateCharacter(Key, MODAL_GENS_NPC_BARNERT, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.0f;
-        break;
-    case MONSTER_CHRISTINE_THE_GENERAL_GOODS_MERCHANT:
-        OpenNpc(MODEL_UNITEDMARKETPLACE_CHRISTIN);
-        c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_CHRISTIN, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.1f;
-        c->Object.m_fEdgeScale = 1.2f;
-        break;
-    case MONSTER_JEWELER_RAUL:
-        OpenNpc(MODEL_UNITEDMARKETPLACE_RAUL);
-        c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_RAUL, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.0f;
-        c->Object.m_fEdgeScale = 1.15f;
-        break;
-    case MONSTER_MARKET_UNION_MEMBER_JULIA:
-        OpenNpc(MODEL_UNITEDMARKETPLACE_JULIA);
-        c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_JULIA, PositionX, PositionY);
-        wcscpy(c->ID, L"Unknown");
-        c->Object.Scale = 1.0f;
-        c->Object.m_fEdgeScale = 1.1f;
-        break;
-
-    case MONSTER_MERCENARY_GUILD_FELICIA:
-        OpenNpc(MODEL_TERSIA);
-        c = CreateCharacter(Key, MODEL_TERSIA, PositionX, PositionY);
-        wcscpy(c->ID, L"길드관리인 테르시아");
-        c->Object.Scale = 0.93f;
-        break;
-    case MONSTER_PRIESTESS_VEINA:
-        OpenNpc(MODEL_BENA);
-        c = CreateCharacter(Key, MODEL_BENA, PositionX, PositionY);
-        wcscpy(c->ID, L"신녀 베이나");
-        c->Object.Position[2] += 145.0f;
-        break;
-    case MONSTER_LEINA_THE_GENERAL_GOODS_MERCHANT:
-        OpenNpc(MODEL_KARUTAN_NPC_REINA);
-        c = CreateCharacter(Key, MODEL_KARUTAN_NPC_REINA, PositionX, PositionY);
-        wcscpy(c->ID, L"잡화상인 레이나");
-        c->Object.Scale = 1.1f;
-        c->Object.m_fEdgeScale = 1.2f;
-        break;
-    case MONSTER_WEAPONS_MERCHANT_BOLO:
-        OpenNpc(MODEL_KARUTAN_NPC_VOLVO);
-        c = CreateCharacter(Key, MODEL_KARUTAN_NPC_VOLVO, PositionX, PositionY);
-        wcscpy(c->ID, L"무기상인 볼로");
-        c->Object.Scale = 0.9f;
-        break;
-
-    }
-
-    Setting_Monster(c, Type, PositionX, PositionY);
-
+    // A number without an entry, an entry without a model, a model whose file
+    // is missing: the unknown monsters' look (D64).
+    CHARACTER* c = GameLogic::Monsters::Unknown::Create(Type, why, PositionX, PositionY, Key);
+    Setting_Monster(c, Type);
     return c;
 }
 
@@ -15694,17 +13929,6 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
     if (portal->Level == 7)
         portal->Object.SubType = 1;
 
-    if (CreateFlag)
-    {
-        CreateJoint(BITMAP_JOINT_THUNDER + 1, portal->Object.Position, portal->Object.Position, portal->Object.Angle, 1,
-                    NULL, 60.f + Random::Rand() % 10);
-        CreateJoint(BITMAP_JOINT_THUNDER + 1, portal->Object.Position, portal->Object.Position, portal->Object.Angle, 1,
-                    NULL, 50.f + Random::Rand() % 10);
-        CreateJoint(BITMAP_JOINT_THUNDER + 1, portal->Object.Position, portal->Object.Position, portal->Object.Angle, 1,
-                    NULL, 50.f + Random::Rand() % 10);
-        CreateJoint(BITMAP_JOINT_THUNDER + 1, portal->Object.Position, portal->Object.Position, portal->Object.Angle, 1,
-                    NULL, 60.f + Random::Rand() % 10);
-    }
     return portal;
 }
 

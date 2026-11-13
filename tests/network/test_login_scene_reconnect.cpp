@@ -1,8 +1,8 @@
 // doctest unit tests for the login screen's quiet reconnect.
 //
 // LoginSceneReconnect only decides; a fake link stands in for the connection,
-// the background check, the screens and the clock, so each case walks the
-// state machine through what a server drop on the login screen looks like.
+// the screens and the clock, so each case walks the state machine through what a
+// server drop on the login screen looks like.
 //
 // Run: ctest --test-dir <build directory> --build-config Release -R "Login scene reconnect"
 
@@ -29,15 +29,11 @@ public:
     int connectionId = 1;
     std::optional<LoginServer> awaited;
     bool serverListShown = false;
-    bool probeCanStart = true;
-    ProbeResult probeResult = ProbeResult::Pending;
-    bool connectSucceeds = true;
+    bool connectCanStart = true;
     bool failureShown = false;
     double now = 0.0;
 
-    std::vector<LoginServer> probes;
     std::vector<LoginServer> connects;
-    int probeStops = 0;
     int listRequests = 0;
     int connectingShown = 0;
     int failures = 0;
@@ -63,28 +59,14 @@ public:
         return serverListShown;
     }
 
-    bool StartProbe(LoginServer server) override
-    {
-        probes.push_back(server);
-        return probeCanStart;
-    }
-
-    ProbeResult PollProbe() override
-    {
-        return probeResult;
-    }
-    void StopProbe() override
-    {
-        ++probeStops;
-    }
-
+    // A connect that starts is connecting, which counts as connected until it closes.
     bool Connect(LoginServer server) override
     {
         connects.push_back(server);
-        connected = connectSucceeds;
+        connected = connectCanStart;
         connectedServer = server;
         ++connectionId;
-        return connectSucceeds;
+        return connectCanStart;
     }
 
     void SendServerListRequest() override
@@ -126,11 +108,11 @@ struct DroppedScreen
         return [this] { ++resumed; };
     }
 
-    // The server accepts connections again and the client connects.
-    void ServerComesBack()
+    // The new connection closes before the server greeted the client: it can't be reached.
+    void ServerUnreachable()
     {
-        link.probeResult = LoginSceneReconnectLink::ProbeResult::Reachable;
-        reconnect.Update();
+        link.connected = false;
+        reconnect.OnConnectionLost();
     }
 
     // The next refresh of an open server list is due.
@@ -163,7 +145,7 @@ TEST_SUITE("Login scene reconnect")
         screen.link.connected = true;
 
         CHECK(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
-        CHECK(screen.link.probes.empty());
+        CHECK(screen.link.connects.empty());
         CHECK(screen.resumed == 0);
     }
 
@@ -172,13 +154,10 @@ TEST_SUITE("Login scene reconnect")
         DroppedScreen screen;
 
         CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
-        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        CHECK(screen.link.connects == std::vector{LoginServer::Connect});
         CHECK(screen.reconnect.IsReconnecting());
 
-        screen.reconnect.Update(); // the server hasn't answered the check yet
-        CHECK(screen.link.connects.empty());
-
-        screen.ServerComesBack();
+        screen.reconnect.Update(); // the server hasn't answered yet
         CHECK(screen.link.connects == std::vector{LoginServer::Connect});
         CHECK(screen.resumed == 0); // not before the server's list
 
@@ -196,9 +175,6 @@ TEST_SUITE("Login scene reconnect")
         DroppedScreen screen;
 
         CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Game, screen.CountResume()));
-        CHECK(screen.link.probes == std::vector{LoginServer::Game});
-
-        screen.ServerComesBack();
         CHECK(screen.link.connects == std::vector{LoginServer::Game});
 
         screen.reconnect.OnGreeting(LoginServer::Game);
@@ -211,9 +187,8 @@ TEST_SUITE("Login scene reconnect")
         screen.link.connected = true; // reconnected to the connect server meanwhile
 
         CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Game, screen.CountResume()));
-        CHECK(screen.link.probes == std::vector{LoginServer::Game});
+        CHECK(screen.link.connects == std::vector{LoginServer::Game});
 
-        screen.ServerComesBack();
         CHECK(screen.link.connects == std::vector{LoginServer::Game});
         screen.reconnect.OnGreeting(LoginServer::Game);
         CHECK(screen.resumed == 1);
@@ -226,7 +201,7 @@ TEST_SUITE("Login scene reconnect")
         screen.link.connectedServer = LoginServer::Game;
 
         CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
-        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        CHECK(screen.link.connects == std::vector{LoginServer::Connect});
     }
 
     TEST_CASE("the login window asks for no list, connected or dropped")
@@ -240,7 +215,7 @@ TEST_SUITE("Login scene reconnect")
         screen.reconnect.RequestServerList();
 
         CHECK(screen.link.listRequests == 0);
-        CHECK(screen.link.probes.empty());
+        CHECK(screen.link.connects.empty());
         CHECK_FALSE(screen.reconnect.IsReconnecting());
     }
 
@@ -249,7 +224,6 @@ TEST_SUITE("Login scene reconnect")
         // The game server refused the client, or wants a newer version.
         DroppedScreen screen;
         screen.reconnect.EnsureConnected(LoginServer::Game, screen.CountResume());
-        screen.ServerComesBack();
 
         screen.reconnect.OnGreeting(LoginServer::Game, false);
         CHECK(screen.resumed == 0);
@@ -264,7 +238,6 @@ TEST_SUITE("Login scene reconnect")
         CHECK(screen.link.connectingShown == 1);
 
         screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()); // a second click
-        screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(screen.link.connectingShown == 1);
     }
@@ -279,7 +252,7 @@ TEST_SUITE("Login scene reconnect")
             screen.reconnect.Update();
         }
 
-        CHECK(screen.link.probes.empty());
+        CHECK(screen.link.connects.empty());
         CHECK(screen.link.failures == 0);
         CHECK_FALSE(screen.reconnect.IsReconnecting());
     }
@@ -290,12 +263,11 @@ TEST_SUITE("Login scene reconnect")
         screen.link.awaited = LoginServer::Game;
 
         screen.reconnect.OnConnectionLost();
-        CHECK(screen.link.probes == std::vector{LoginServer::Game});
+        CHECK(screen.link.connects == std::vector{LoginServer::Game});
 
-        screen.reconnect.OnConnectionLost(); // the next frame, still probing
-        CHECK(screen.link.probes.size() == 1);
+        screen.reconnect.Update(); // the next frame, the new connection still on its way
+        CHECK(screen.link.connects.size() == 1);
 
-        screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Game);
         CHECK_FALSE(screen.reconnect.IsReconnecting());
         CHECK(screen.link.failures == 0);
@@ -306,15 +278,14 @@ TEST_SUITE("Login scene reconnect")
         DroppedScreen screen;
         screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
 
-        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
-        screen.reconnect.Update();
+        screen.ServerUnreachable();
         CHECK(screen.link.failures == 1);
         CHECK_FALSE(screen.reconnect.IsReconnecting());
 
         screen.reconnect.OnConnectionLost();
         screen.reconnect.Update();
         CHECK(screen.link.failures == 1);
-        CHECK(screen.link.probes.size() == 1);
+        CHECK(screen.link.connects.size() == 1);
     }
 
     TEST_CASE("a step taken past the failure message starts over")
@@ -323,17 +294,14 @@ TEST_SUITE("Login scene reconnect")
         DroppedScreen screen;
         int firstPick = 0;
         screen.reconnect.EnsureConnected(LoginServer::Connect, [&firstPick] { ++firstPick; });
-        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
-        screen.reconnect.Update();
+        screen.ServerUnreachable();
         REQUIRE(screen.link.failureShown);
 
-        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Pending;
         CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
         CHECK_FALSE(screen.link.failureShown);
-        CHECK(screen.link.probes.size() == 2);
+        CHECK(screen.link.connects.size() == 2);
         CHECK(screen.reconnect.IsReconnecting());
 
-        screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(firstPick == 0);
         CHECK(screen.resumed == 1);
@@ -343,54 +311,41 @@ TEST_SUITE("Login scene reconnect")
     {
         DroppedScreen screen;
         screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
-        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
-        screen.reconnect.Update();
+        screen.ServerUnreachable();
 
         screen.link.failureShown = false; // e.g. "the server is busy" from a click under it
         screen.reconnect.Update();
         screen.reconnect.Retry(); // its button is gone with it
-        CHECK(screen.link.probes.size() == 1);
+        CHECK(screen.link.connects.size() == 1);
 
         // That message is closed too and the screen shows nothing to click.
         screen.link.awaited = LoginServer::Connect;
         screen.reconnect.OnConnectionLost();
-        CHECK(screen.link.probes.size() == 2);
+        CHECK(screen.link.connects.size() == 2);
 
-        screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(screen.resumed == 0); // the pick waiting before the failure is dropped
         CHECK(screen.link.failures == 1);
     }
 
-    TEST_CASE("a check that can't start fails at once")
+    TEST_CASE("a connect that can't start fails at once")
     {
         DroppedScreen screen;
-        screen.link.probeCanStart = false;
+        screen.link.connectCanStart = false;
 
         CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Game, screen.CountResume()));
         CHECK(screen.link.failures == 1);
-    }
-
-    TEST_CASE("a connect that fails after the check shows the failure")
-    {
-        DroppedScreen screen;
-        screen.link.connectSucceeds = false;
-        screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
-
-        screen.ServerComesBack();
-        CHECK(screen.link.failures == 1);
+        CHECK_FALSE(screen.reconnect.IsReconnecting());
     }
 
     TEST_CASE("Reconnect after a failed pick keeps the pick")
     {
         DroppedScreen screen;
         screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
-        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
-        screen.reconnect.Update();
+        screen.ServerUnreachable();
 
         screen.reconnect.Retry();
-        CHECK(screen.link.probes.back() == LoginServer::Connect);
-        screen.ServerComesBack();
+        CHECK(screen.link.connects.back() == LoginServer::Connect);
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(screen.resumed == 1);
     }
@@ -399,13 +354,10 @@ TEST_SUITE("Login scene reconnect")
     {
         DroppedScreen screen;
         screen.reconnect.EnsureConnected(LoginServer::Game, screen.CountResume());
-        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
-        screen.reconnect.Update();
+        screen.ServerUnreachable();
 
         screen.reconnect.Retry();
-        CHECK(screen.link.probes == std::vector{LoginServer::Game, LoginServer::Connect});
-        screen.ServerComesBack();
-        CHECK(screen.link.connects == std::vector{LoginServer::Connect});
+        CHECK(screen.link.connects == std::vector{LoginServer::Game, LoginServer::Connect});
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(screen.resumed == 0); // the player picks a server and logs in again
     }
@@ -418,8 +370,6 @@ TEST_SUITE("Login scene reconnect")
         screen.link.connected = true;
 
         screen.reconnect.ReturnToServerList();
-        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
-        screen.ServerComesBack();
         CHECK(screen.link.connects == std::vector{LoginServer::Connect});
 
         screen.reconnect.OnGreeting(LoginServer::Connect);
@@ -434,11 +384,10 @@ TEST_SUITE("Login scene reconnect")
         screen.reconnect.OnServerUnreachable(LoginServer::Game);
         CHECK(screen.link.failures == 1);
         CHECK(screen.link.failureShown);
-        CHECK(screen.link.probes.empty());
+        CHECK(screen.link.connects.empty());
 
         screen.reconnect.Retry();
-        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
-        screen.ServerComesBack();
+        CHECK(screen.link.connects == std::vector{LoginServer::Connect});
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK_FALSE(screen.reconnect.IsReconnecting());
     }
@@ -447,14 +396,13 @@ TEST_SUITE("Login scene reconnect")
     {
         DroppedScreen screen;
         screen.reconnect.Retry();
-        CHECK(screen.link.probes.empty());
+        CHECK(screen.link.connects.empty());
     }
 
     TEST_CASE("a server that doesn't answer in time fails")
     {
         DroppedScreen screen;
         screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
-        screen.ServerComesBack();
 
         screen.link.now += GreetingTimeoutMs;
         screen.reconnect.Update();
@@ -471,7 +419,6 @@ TEST_SUITE("Login scene reconnect")
     {
         DroppedScreen screen;
         screen.reconnect.EnsureConnected(LoginServer::Game, screen.CountResume());
-        screen.ServerComesBack();
 
         screen.link.connected = false;
         screen.reconnect.OnConnectionLost();
@@ -484,9 +431,8 @@ TEST_SUITE("Login scene reconnect")
         int firstPick = 0;
         screen.reconnect.EnsureConnected(LoginServer::Connect, [&firstPick] { ++firstPick; });
         CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
-        CHECK(screen.link.probes.size() == 1);
+        CHECK(screen.link.connects.size() == 1);
 
-        screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(firstPick == 0);
         CHECK(screen.resumed == 1);
@@ -499,10 +445,9 @@ TEST_SUITE("Login scene reconnect")
 
         screen.reconnect.RequestServerList(); // the credits open, and close again
         screen.reconnect.RequestServerList();
-        CHECK(screen.link.probes.size() == 1);
+        CHECK(screen.link.connects.size() == 1);
         CHECK(screen.link.listRequests == 0);
 
-        screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(screen.resumed == 1);
     }
@@ -513,7 +458,6 @@ TEST_SUITE("Login scene reconnect")
         // where a server list was expected.
         DroppedScreen screen;
         screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
-        screen.ServerComesBack();
 
         screen.reconnect.OnGreeting(LoginServer::Game);
         CHECK(screen.resumed == 0);
@@ -531,9 +475,8 @@ TEST_SUITE("Login scene reconnect")
         screen.link.connected = false;
         screen.reconnect.RequestServerList();
         CHECK(screen.link.listRequests == 1);
-        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        CHECK(screen.link.connects == std::vector{LoginServer::Connect});
 
-        screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(screen.link.listRequests == 1);
     }
@@ -570,7 +513,7 @@ TEST_SUITE("Login scene reconnect")
 
         screen.reconnect.Update();
         CHECK(screen.link.listRequests == 0);
-        CHECK(screen.link.probes.empty());
+        CHECK(screen.link.connects.empty());
     }
 
     TEST_CASE("an open server list connects anew before the connect server's limit")
@@ -578,14 +521,13 @@ TEST_SUITE("Login scene reconnect")
         DroppedScreen screen;
         screen.UseUpListRequests();
         CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
-        CHECK(screen.link.probes.empty());
+        CHECK(screen.link.connects.empty());
 
         screen.RefreshDue(); // one more request would end the connection
         CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
-        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        CHECK(screen.link.connects == std::vector{LoginServer::Connect});
         CHECK(screen.link.connectingShown == 0); // nobody waits for it
 
-        screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Connect); // the new connection's list
         CHECK_FALSE(screen.reconnect.IsReconnecting());
 
@@ -600,14 +542,15 @@ TEST_SUITE("Login scene reconnect")
         screen.UseUpListRequests();
         screen.RefreshDue();
 
-        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
-        screen.reconnect.Update();
+        screen.ServerUnreachable();
         CHECK(screen.link.failures == 0);
         CHECK(screen.link.connectingShown == 0);
         CHECK_FALSE(screen.reconnect.IsReconnecting());
 
-        screen.RefreshDue(); // the old connection still has no request left
-        CHECK(screen.link.probes.size() == 2);
+        // The list's connection went with the renewal: as after any drop, the list waits
+        // for the player's next step.
+        screen.RefreshDue();
+        CHECK(screen.link.connects.size() == 1);
         CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
     }
 
@@ -620,8 +563,7 @@ TEST_SUITE("Login scene reconnect")
         CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
         CHECK(screen.link.connectingShown == 1);
 
-        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
-        screen.reconnect.Update();
+        screen.ServerUnreachable();
         CHECK(screen.link.failures == 1); // the player waits for this one
     }
 
@@ -637,7 +579,7 @@ TEST_SUITE("Login scene reconnect")
 
         screen.reconnect.RequestServerList();
         CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
-        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        CHECK(screen.link.connects == std::vector{LoginServer::Connect});
         CHECK(screen.link.connectingShown == 1);
     }
 
@@ -647,7 +589,6 @@ TEST_SUITE("Login scene reconnect")
         screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
 
         screen.reconnect.Reset();
-        CHECK(screen.link.probeStops == 1);
         CHECK_FALSE(screen.reconnect.IsReconnecting());
 
         screen.reconnect.OnGreeting(LoginServer::Connect);

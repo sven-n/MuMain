@@ -8,6 +8,8 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "GameLogic/Skills/SkillHotkeyConfiguration.h"
+#include "Scenes/SceneCore.h"
 #include "Engine/Object/PlayerBodyModels.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Engine/AI/ZzzAI.h"
@@ -20,7 +22,6 @@
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Network/MoveCommandData.h"
-#include "Scenes/TitleSceneUI.h"
 #include "Data/DataHandler/LoadData.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
@@ -40,6 +41,7 @@
 #include "Data/DataHandler/LookData/LookDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "Data/DataHandler/BuffData/BuffStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
@@ -58,63 +60,6 @@
 ///////////////////////////////////////////
 extern BOOL g_bUseChatListBox;
 ///////////////////////////////////////////
-
-bool Flip = false;
-
-void OpenModel(int Type, wchar_t* Dir, wchar_t* ModelFileName, ...)
-{
-    wchar_t ModelName[100];
-    wchar_t AnimationName[20][100];
-    wcscpy(ModelName, Dir);
-    wcscat(ModelName, ModelFileName);
-
-    va_list Marker;
-    va_start(Marker, ModelFileName);
-    int AnimationCount = 0;
-    while (1)
-    {
-        wchar_t* Temp = va_arg(Marker, wchar_t*);
-        if (Temp == nullptr || wcscmp(Temp, L"end") == 0)
-        {
-            break;
-        }
-        else
-        {
-            wcscpy(AnimationName[AnimationCount], Dir);
-            wcscat(AnimationName[AnimationCount], Temp);
-            AnimationCount++;
-        }
-    }
-    if (AnimationCount == 0)
-    {
-        OpenSMDModel(Type, ModelName, 1, Flip);
-        OpenSMDAnimation(Type, ModelName);
-    }
-    else
-    {
-        OpenSMDModel(Type, ModelName, AnimationCount, Flip);
-        for (int i = 0; i < AnimationCount; i++)
-        {
-            bool Walk = false;
-            if (i == MONSTER01_WALK || i == MONSTER01_RUN) Walk = true;
-            OpenSMDAnimation(Type, AnimationName[i], Walk);
-        }
-    }
-    va_end(Marker);
-
-    Flip = false;
-}
-
-void OpenModels(int Model, wchar_t* FileName, int i)
-{
-    wchar_t Name[64];
-    if (i < 10)
-        mu_swprintf(Name, L"%ls0%d.smd", FileName, i);
-    else
-        mu_swprintf(Name, L"%ls%d.smd", FileName, i);
-    OpenSMDModel(Model, Name);
-    OpenSMDAnimation(Model, Name);
-}
 
 void OpenPlayers()
 {
@@ -420,6 +365,17 @@ static void OpenMapData()
     }
 }
 
+// Loads the buffs (Data/Buffs/Buffs.json): their names, texts and the buff
+// strip's rules; errors stop the game.
+static void OpenBuffData()
+{
+    std::string errorMessage;
+    if (!Data::Buffs::LoadBuffs(errorMessage))
+    {
+        StopOnDataError("Buff data error", errorMessage);
+    }
+}
+
 // Loads the effect types (Data/Effects) and builds the effect registry from
 // their creation values; errors stop the game.
 // Reads the model file table (Data/Models/ModelFiles.json, MU_DATA_OVERLAY
@@ -458,6 +414,14 @@ static bool OpenItemModelData()
     return true;
 }
 
+// Opens a part model from its entry in Data/Items/Models/PartModels.json (design L28) into its slot, with its
+// textures; the code decides where it is drawn.
+static void OpenPartModel(int modelType)
+{
+    Data::Items::ModelLoader::OpenPartModel(modelType,
+                                            {Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
+}
+
 // Models that are drawn for items, but are no item models themselves:
 // event models, the level 14/15 armor decorations and the parts of the
 // Rage Fighter weapons.
@@ -487,17 +451,18 @@ static void OpenItemEffectModels()
     gLoadData.AccessModel(MODEL_EVENT + 22, L"Data\\Item\\", L"obox02");
     gLoadData.AccessModel(MODEL_EVENT + 23, L"Data\\Item\\", L"blue01");
 
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT, L"Data\\Item\\", L"class15_armleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT, L"Data\\Item\\", L"class15_armright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT, L"Data\\Item\\", L"class15_bodyleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT, L"Data\\Item\\", L"class15_bodyright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT, L"Data\\Item\\", L"class15_bootleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT, L"Data\\Item\\", L"class15_bootright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_HEAD, L"Data\\Item\\", L"class15_head");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT, L"Data\\Item\\", L"class15_pantleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT, L"Data\\Item\\", L"class15_pantright");
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_HEAD);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT);
 
     g_CMonkSystem.LoadModelItem();
+    OpenPartModel(MODEL_ARMORINVEN_74);
 
     Models[MODEL_EVENT + 9].Meshs[1].NoneBlendMesh = true;
 }
@@ -527,14 +492,18 @@ void PrepareGrandSoulPantsClothMesh()
                   BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
 }
 
-// Loads the render styles that are data (Data/Effects/RenderStyles.json), before the item models are opened, which
-// check the names of their looks.
+// Loads the looks that are data (Data/Effects/RenderStyles.json and ItemEffects.json), before the item models are
+// opened, which check the names of their looks.
 static void OpenRenderStyleData()
 {
     std::string errorMessage;
     if (!Data::Looks::LoadRenderStyles(errorMessage))
     {
         StopOnDataError("Render style data error", errorMessage);
+    }
+    if (!Data::Looks::LoadItemEffects(errorMessage))
+    {
+        StopOnDataError("Item effect data error", errorMessage);
     }
 }
 
@@ -578,16 +547,6 @@ static void OpenItemEffectModelTextures()
     gLoadData.OpenTexture(MODEL_EVENT + 21, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 22, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 23, L"Item\\");
-
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_HEAD, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT, L"Item\\");
 
     g_CMonkSystem.LoadModelItemTexture();
 }
@@ -662,6 +621,9 @@ void DeleteMonsters()
 
     // The model sounds without a SOUND_* id; their models load them again.
     Audio::SoundNumbers::ReleaseAll();
+
+    // A missing model file is tried once a map (Q-MN45c).
+    Data::Monsters::ModelLoader::ForgetMissingFiles();
 }
 
 // Opens a monster model from its entry in the model list
@@ -1177,8 +1139,7 @@ void OpenSkills()
     gLoadData.AccessModel(MODEL_WINDSPIN03, L"Data\\Effect\\", L"wind_spin03");
     gLoadData.OpenTexture(MODEL_WINDSPIN03, L"Effect\\");
 
-    gLoadData.AccessModel(MODEL_SWORD_35_WING, L"Data\\Item\\", L"sword36wing");
-    gLoadData.OpenTexture(MODEL_SWORD_35_WING, L"Item\\");
+    OpenPartModel(MODEL_SWORD_35_WING);
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
     // 콘드라 돌조각
@@ -1506,27 +1467,21 @@ void OpenMacro(const wchar_t* FileName)
     fclose(fp);
 }
 
+extern BOOL g_bGameServerConnected;
+
 void SaveOptions()
 {
+    namespace Hotkeys = GameLogic::Skills::HotkeyConfiguration;
     // 0 ~ 19 skill hotkey
-    BYTE options[30]{};
+    BYTE options[Hotkeys::KeyConfigurationSize]{};
 
-    int iSkillType = -1;
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < Hotkeys::HotkeyCount; ++i)
     {
-        iSkillType = g_pMainFrame->GetSkillHotKey(i);
-
-        int iIndex = i * 2;
-        if (iSkillType != -1)
-        {
-            options[iIndex] = HIBYTE(CharacterAttribute->Skill[iSkillType]);
-            options[iIndex + 1] = LOBYTE(CharacterAttribute->Skill[iSkillType]);
-        }
-        else
-        {
-            options[iIndex] = 0xff;
-            options[iIndex + 1] = 0xff;
-        }
+        const int iSkillType = g_pMainFrame->GetSkillHotKey(i);
+        const auto skillNumber =
+            iSkillType != -1 ? static_cast<std::uint16_t>(CharacterAttribute->Skill[iSkillType]) : Hotkeys::FreeHotkey;
+        const auto bytes = Hotkeys::Encode(skillNumber);
+        std::copy(bytes.begin(), bytes.end(), options + i * Hotkeys::BytesPerHotkey);
     }
 
     if (g_pOption->IsAutoAttack())
@@ -1569,6 +1524,24 @@ void SaveOptions()
     options[29] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_R);
 
     SocketClient->ToGameServer()->SendSaveKeyConfiguration(options, sizeof options);
+}
+
+namespace
+{
+bool s_keyConfigurationReceived = false;
+}
+
+void SetKeyConfigurationReceived(bool received)
+{
+    s_keyConfigurationReceived = received;
+}
+
+void SaveOptionsIfInGame()
+{
+    if (SocketClient != nullptr && g_bGameServerConnected && SceneFlag == MAIN_SCENE && s_keyConfigurationReceived)
+    {
+        SaveOptions();
+    }
 }
 
 void OpenLogoSceneData()
@@ -1684,12 +1657,14 @@ static void OpenItemDataAndShowModelProblems()
     }
 }
 
-void OpenBasicData(HDC hDC)
+static void OpenBasicDataStep0()
 {
     // Before the first LoadGameSound: the duel sounds below.
     OpenSoundData();
-    TitleSceneUI::RenderSceneUI(hDC, 0, 11);
+}
 
+static void OpenBasicDataStep1()
+{
     LoadBitmap(L"Interface\\Cursor.tga", BITMAP_CURSOR, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Interface\\CursorPush.tga", BITMAP_CURSOR + 1, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Interface\\CursorAttack.tga", BITMAP_CURSOR + 2, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -2004,9 +1979,10 @@ void OpenBasicData(HDC hDC)
     LoadBitmap(L"Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS_FOREIGN, GL_LINEAR, GL_CLAMP_TO_EDGE);
+}
 
-    TitleSceneUI::RenderSceneUI(hDC, 1, 11);
-
+static void OpenBasicDataStep2()
+{
     ::LoadBitmap(L"Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
     ::LoadBitmap(L"Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
@@ -2116,30 +2092,43 @@ void OpenBasicData(HDC hDC)
     g_ErrorReport.Write(L"> First Load Files OK.\r\n");
 
     OpenPlayers();
+}
 
-    TitleSceneUI::RenderSceneUI(hDC, 2, 11);
-
+static void OpenBasicDataStep3()
+{
     OpenPlayerTextures();
-    TitleSceneUI::RenderSceneUI(hDC, 3, 11);
+}
 
+static void OpenBasicDataStep4()
+{
     OpenItems();
     OpenEffectTypeData();
     OpenModelFileData();
-    TitleSceneUI::RenderSceneUI(hDC, 4, 11);
+}
 
+static void OpenBasicDataStep5()
+{
     OpenItemTextures();
     Render::Items::Looks::PrepareTextures();
-    TitleSceneUI::RenderSceneUI(hDC, 5, 11);
+}
 
+static void OpenBasicDataStep6()
+{
     OpenSkills();
-    TitleSceneUI::RenderSceneUI(hDC, 6, 11);
+}
 
+static void OpenBasicDataStep7()
+{
     OpenImages();
-    TitleSceneUI::RenderSceneUI(hDC, 7, 11);
+}
 
+static void OpenBasicDataStep8()
+{
     OpenSounds();
-    TitleSceneUI::RenderSceneUI(hDC, 8, 11);
+}
 
+static void OpenBasicDataStep9()
+{
     wchar_t Text[100];
 
     OpenServerList();
@@ -2158,6 +2147,7 @@ void OpenBasicData(HDC hDC)
 
     OpenMonsterData();
     OpenMapData();
+    OpenBuffData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_csQuest.OpenQuestScript(Text);
@@ -2184,9 +2174,10 @@ void OpenBasicData(HDC hDC)
 
     g_pMasterLevelInterface->OpenMasterSkillTreeData(L"Data\\Local\\MasterSkillTreeData.bmd");
     g_pMasterLevelInterface->OpenMasterSkillTooltip(L"Data\\Local\\Eng\\MasterSkillTooltip_eng.bmd");
+}
 
-    TitleSceneUI::RenderSceneUI(hDC, 9, 11);
-
+static void OpenBasicDataStep10()
+{
     LoadGameSound(SOUND_TITLE01);
     LoadGameSound(SOUND_MENU01);
     LoadGameSound(SOUND_CLICK01);
@@ -2203,8 +2194,14 @@ void OpenBasicData(HDC hDC)
     LoadGameSound(SOUND_RING_EVENT_READY);
     LoadGameSound(SOUND_RING_EVENT_START);
     LoadGameSound(SOUND_RING_EVENT_END);
+}
 
-    TitleSceneUI::RenderSceneUI(hDC, 10, 11);
+// The startup data, a step at a time: the title screen draws its progress between steps.
+std::vector<std::function<void()>> OpenBasicDataSteps()
+{
+    return {&OpenBasicDataStep0, &OpenBasicDataStep1, &OpenBasicDataStep2, &OpenBasicDataStep3,
+            &OpenBasicDataStep4, &OpenBasicDataStep5, &OpenBasicDataStep6, &OpenBasicDataStep7,
+            &OpenBasicDataStep8, &OpenBasicDataStep9, &OpenBasicDataStep10};
 }
 
 void ReleaseMainData()

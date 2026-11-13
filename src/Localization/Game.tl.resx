@@ -8935,6 +8935,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls Ng %ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Hindi kilalang halimaw %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Ako ay isang bug: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>%ls Gusto mo bang kanselahin?</value>
   </data>

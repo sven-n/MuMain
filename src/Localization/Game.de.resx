@@ -8937,6 +8937,9 @@
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Neuer Versuch in %d Sekunden...</value>
   </data>
+  <data name="Reconnected after connection lost" xml:space="preserve">
+    <value>Wieder verbunden: Die Verbindung zum Server war unterbrochen.</value>
+  </data>
   <data name="Reconnect" xml:space="preserve">
     <value>Erneut verbinden</value>
   </data>
@@ -9026,6 +9029,12 @@
   </data>
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls von %ls</value>
+  </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Unbekanntes Monster %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Ich bin ein Fehler: %d</value>
   </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>Möchten Sie %ls abbrechen?</value>

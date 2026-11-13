@@ -106,6 +106,18 @@ void ItemModelDatabase::SetSharedModels(std::span<const SharedItemModel> sharedM
     m_sharedModels.assign(sharedModels.begin(), sharedModels.end());
 }
 
+void ItemModelDatabase::SetPartModels(std::span<const PartModel> partModels)
+{
+    m_partModels.assign(partModels.begin(), partModels.end());
+    ++m_version;
+}
+
+const PartModel* ItemModelDatabase::FindPartModel(std::string_view name) const
+{
+    const auto found = std::ranges::find(m_partModels, name, [](const PartModel& part) { return part.model.name; });
+    return found != m_partModels.end() ? &*found : nullptr;
+}
+
 const SharedItemModel* ItemModelDatabase::FindSharedModel(std::string_view name) const
 {
     const auto found = std::ranges::find(m_sharedModels, name, &SharedItemModel::name);

@@ -27,6 +27,8 @@
 
 #include "Core/Platform/WinNls.h"      // WideCharToMultiByte / CP_UTF8
 #include "Core/Platform/BundledFonts.h" // curated font list shared with Windows
+#include "Core/Content/ContentStore.h"
+#include "Core/Text/Utf8Path.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 namespace
@@ -129,10 +131,10 @@ namespace
     std::string BundledFontPath(const std::string& family, bool bold)
     {
         if (family == kBundledFixedFont.family)
-            return ResolveBundledFontPath(bold ? kBundledFixedFont.bold : kBundledFixedFont.regular).string();
+            return bold ? kBundledFixedFont.bold : kBundledFixedFont.regular;
         for (const auto& e : kBundledFonts)
             if (family == e.family)
-                return ResolveBundledFontPath(bold ? e.bold : e.regular).string();
+                return bold ? e.bold : e.regular;
         return {};
     }
 
@@ -183,22 +185,19 @@ namespace
 
         for (const std::string& path : candidates)
         {
-            FILE* fp = std::fopen(path.c_str(), "rb");
-            if (!fp) continue;
-            std::fseek(fp, 0, SEEK_END);
-            const long size = std::ftell(fp);
-            std::fseek(fp, 0, SEEK_SET);
-            if (size > 0)
+            const std::optional<std::string> bytes = Content::ReadFile(Core::Text::PathFromUtf8(path));
+            if (!bytes)
             {
-                face.data.resize(static_cast<size_t>(size));
-                if (std::fread(face.data.data(), 1, face.data.size(), fp) == face.data.size() &&
-                    stbtt_InitFont(&face.info, face.data.data(),
-                                   stbtt_GetFontOffsetForIndex(face.data.data(), 0)))
+                continue;
+            }
+            if (!bytes->empty())
+            {
+                face.data.assign(bytes->begin(), bytes->end());
+                if (stbtt_InitFont(&face.info, face.data.data(), stbtt_GetFontOffsetForIndex(face.data.data(), 0)))
                 {
                     face.valid = true;
                 }
             }
-            std::fclose(fp);
             if (face.valid)
             {
                 const char* source = path == bundledPath ? "bundled " : "NON-PARITY developer fallback ";

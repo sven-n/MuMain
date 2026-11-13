@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/Globals/_define.h"
+#include "Core/Globals/_enum.h"
+
 #include <optional>
 #include <string>
 #include <string_view>
@@ -27,9 +30,14 @@ std::string_view GetMonsterModelTypeName(int type);
 // model list by its slot ("MONSTER_MODEL_HOUND", "MODEL_SMITH"), "player"
 // (MODEL_PLAYER, a player-shaped monster), a model of another area by the
 // code's name of its slot ("MODEL_WARCRAFT" for the Kalima gates,
-// "MODEL_BALL" for the soccer ball), or a map object ("mapObject 39" for a
-// trap). The slot, or nullopt for a text that names none.
+// "MODEL_BALL" for the soccer ball), a map object ("mapObject 39" for a
+// trap), or "none": NoModelSlot, a monster without a body (the Imperial
+// Guardian's traps 523, P2). The slot, or nullopt for a text that names none.
 std::optional<int> FindMonsterModelReference(std::string_view model);
+
+// The reserved slot of "none": the last of the monster range, which no model
+// and no code uses; it draws nothing and loads no sounds.
+constexpr int NoModelSlot = MODEL_MONSTER01 + MAX_MODEL_MONSTER - 1;
 
 // How a monster's "model" starts that names a map object.
 constexpr std::string_view MapObjectPrefix = "mapObject ";

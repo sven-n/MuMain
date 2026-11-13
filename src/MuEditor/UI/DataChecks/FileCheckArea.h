@@ -43,6 +43,10 @@ std::unique_ptr<DataCheckArea> CreateEffectCheckArea();
 // The glTF model file table (Data/Models/ModelFiles.json, the developer
 // overlay MU_DATA_OVERLAY first); it has no tool to open.
 std::unique_ptr<DataCheckArea> CreateModelFileCheckArea();
+// The buffs (Data/Buffs/Buffs.json) as the game reads them at start, with
+// their items checked against the item list as the item tools have it
+// (unsaved changes too); no tool edits them yet.
+std::unique_ptr<DataCheckArea> CreateBuffCheckArea();
 // The sounds of map objects (Data/Maps/ObjectSounds.json) as the Map Editor
 // has them; a click opens the Map Editor.
 std::unique_ptr<DataCheckArea> CreateMapSoundCheckArea();

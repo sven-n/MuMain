@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The encryptors and Connection the game puts on top of the pipe; the version ClientLibrary uses. -->
+    <PackageReference Include="MUnique.OpenMU.Network.Packets" Version="0.11.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../../ClientLibrary/DeferredTcpPipe.cs" Link="DeferredTcpPipe.cs" />
+    <Compile Include="../../../ClientLibrary/ConnectFailure.cs" Link="ConnectFailure.cs" />
+    <Compile Include="../../../ClientLibrary/ManagedLog.cs" Link="ManagedLog.cs" />
+  </ItemGroup>
+</Project>

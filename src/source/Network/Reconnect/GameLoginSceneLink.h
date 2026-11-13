@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Network/Reconnect/LoginSceneReconnectLink.h"
-#include "Network/Reconnect/ReachabilityProbe.h"
 
 // LoginSceneReconnect's link to the game: the client's connection (SocketClient),
 // the login screen's windows and the addresses the client connected to.
@@ -13,9 +12,6 @@ public:
     int ConnectionId() const override;
     std::optional<LoginServer> AwaitedServer() const override;
     bool IsServerListShown() const override;
-    bool StartProbe(LoginServer server) override;
-    ProbeResult PollProbe() override;
-    void StopProbe() override;
     bool Connect(LoginServer server) override;
     void SendServerListRequest() override;
     void ShowConnecting() override;
@@ -32,6 +28,4 @@ private:
     };
 
     static Address AddressOf(LoginServer server);
-
-    ReachabilityProbe m_probe;
 };

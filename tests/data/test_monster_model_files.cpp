@@ -195,11 +195,18 @@ TEST_CASE("Monster models: the shipped models' textures are in their folders [da
     // effect that loaded a texture of that name before, else it shows an
     // error. The original client has the same files.
     const std::set<std::string> knownMissing = {
-        "MONSTER_MODEL_LIFE_STONE TowerGateplane_R.JPG",      "MONSTER_MODEL_SELUPAN blast2_r.jpg",
-        "MODEL_UNITEDMARKETPLACE_RAUL flareRed.jpg",          "MODEL_UNITEDMARKETPLACE_RAUL youmuk01aeff.jpg",
-        "MODEL_UNITEDMARKETPLACE_RAUL sulnalbagiteam.jpg",    "MODEL_UNITEDMARKETPLACE_RAUL puckitemz.jpg",
-        "MODEL_UNITEDMARKETPLACE_RAUL sulnalbagiteampeg.jpg", "MODEL_UNITEDMARKETPLACE_RAUL motion_blur_r3.JPG",
+        "MONSTER_MODEL_LIFE_STONE TowerGateplane_R.JPG",
+        "MONSTER_MODEL_SELUPAN blast2_r.jpg",
+        "MODEL_UNITEDMARKETPLACE_RAUL flareRed.jpg",
+        "MODEL_UNITEDMARKETPLACE_RAUL youmuk01aeff.jpg",
+        "MODEL_UNITEDMARKETPLACE_RAUL sulnalbagiteam.jpg",
+        "MODEL_UNITEDMARKETPLACE_RAUL puckitemz.jpg",
+        "MODEL_UNITEDMARKETPLACE_RAUL sulnalbagiteampeg.jpg",
+        "MODEL_UNITEDMARKETPLACE_RAUL motion_blur_r3.JPG",
         "MODEL_UNITEDMARKETPLACE_RAUL xmaseffitemx.jpg",
+        // Gayion's five swords (parts) name Data/Item's texture; his creator
+        // opened them from Monster too (Q-MN45a).
+        "MONSTER_MODEL_GAYION mu_rgb_lights.jpg",
     };
     const Data::Monsters::MonsterModelsLoadResult result = LoadShipped();
     for (const MonsterModelDefinition& model : result.models)
@@ -218,7 +225,7 @@ TEST_CASE("Monster models: the shipped models' textures are in their folders [da
             for (const std::string& texture : TexturesNotInFolders(part.load.file, part.load.textureFolders))
             {
                 INFO(model.slot << " part " << part.load.file << " " << texture);
-                CHECK(false);
+                CHECK(knownMissing.contains(model.slot + " " + texture));
             }
         }
     }

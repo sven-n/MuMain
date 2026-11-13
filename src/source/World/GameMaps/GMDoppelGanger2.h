@@ -24,7 +24,6 @@ public:
     bool CreateFireSpark(PARTICLE* o);
 
 public:
-    virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);

@@ -9,7 +9,8 @@ class CHARACTER;
 namespace GameLogic::Monsters::Names
 {
 // Writes the monster list's name of `number` into the character's name; a
-// number without an entry keeps the name the character has.
+// number without an entry gets "Unknown monster {number}" when the unknown
+// monsters' look is for it (D64), else keeps the name the character has.
 void WriteShownName(CHARACTER& character, int number);
 
 // Writes the names again into the living monsters and NPCs of this number, or

@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "w_PetActionStand.h"
 #include "w_PetActionRound.h"
 #include "w_PetActionDemon.h"
@@ -173,7 +173,7 @@ bool PetProcess::LoadData()
     int _ver;
     int _array;
 
-    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(FileName);
     if (!fp)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");

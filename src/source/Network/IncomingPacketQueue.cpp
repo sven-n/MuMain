@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Network/IncomingPacketQueue.h"
-#include "Network/Server/WSclient.h" // PacketInfo (complete type for the queued unique_ptr)
+#include "Network/Server/WSclient.h" // PRECEIVE_ACTION
 
 #include <array>
 #include <cstring>
@@ -186,7 +186,14 @@ namespace Network
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             std::swap(discarded, m_queue);
-            m_stats.depth = 0;
+            for (auto& entry : discarded)
+            {
+                if (entry->Event != ConnectionEvent::None)
+                {
+                    m_queue.push_back(std::move(entry));
+                }
+            }
+            m_stats.depth = m_queue.size();
         }
     }
 

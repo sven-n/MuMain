@@ -19,6 +19,19 @@ struct TooltipVariant
     void (*apply)(ItemCreationParams& params);
 };
 
+void ApplyExcellent(ItemCreationParams& params, int number)
+{
+    params.HasExcellentOption = true;
+    params.ExcellentFlags = static_cast<BYTE>(1 << (number - 1));
+}
+
+void ApplyOption(ItemCreationParams& params, BYTE level, BYTE type)
+{
+    params.WithOption = true;
+    params.OptionLevel = level;
+    params.OptionType = type;
+}
+
 constexpr TooltipVariant TooltipVariants[] = {
     {"plain", [](ItemCreationParams&) {}},
     {"full",
@@ -53,12 +66,29 @@ constexpr TooltipVariant TooltipVariants[] = {
          params.WithOption = true;
          params.OptionLevel = 1;
      }},
+    // The additional option at the other levels a server can send (Season 6 has 1 to 4, jewelry 1 to 3) and with the
+    // other option types (the byte's high nibble: 0 for most items, 0, 2 or 3 for wings).
+    {"option 2", [](ItemCreationParams& params) { ApplyOption(params, 2, 0); }},
+    {"option 3", [](ItemCreationParams& params) { ApplyOption(params, 3, 0); }},
+    {"option 4", [](ItemCreationParams& params) { ApplyOption(params, 4, 0); }},
+    {"option 5", [](ItemCreationParams& params) { ApplyOption(params, 5, 0); }},
+    {"option 6", [](ItemCreationParams& params) { ApplyOption(params, 6, 0); }},
+    {"option 7", [](ItemCreationParams& params) { ApplyOption(params, 7, 0); }},
+    {"option type 1", [](ItemCreationParams& params) { ApplyOption(params, 1, 1); }},
+    {"option type 2", [](ItemCreationParams& params) { ApplyOption(params, 1, 2); }},
+    {"option type 3", [](ItemCreationParams& params) { ApplyOption(params, 1, 3); }},
     {"excellent",
      [](ItemCreationParams& params)
      {
          params.HasExcellentOption = true;
          params.ExcellentFlags = 1;
      }},
+    // Each other excellent option alone: the excellent byte's bit number - 1.
+    {"excellent 2", [](ItemCreationParams& params) { ApplyExcellent(params, 2); }},
+    {"excellent 3", [](ItemCreationParams& params) { ApplyExcellent(params, 3); }},
+    {"excellent 4", [](ItemCreationParams& params) { ApplyExcellent(params, 4); }},
+    {"excellent 5", [](ItemCreationParams& params) { ApplyExcellent(params, 5); }},
+    {"excellent 6", [](ItemCreationParams& params) { ApplyExcellent(params, 6); }},
     // A worn and a broken item; for a stack, its count (one, none).
     {"durability 1", [](ItemCreationParams& params) { params.Durability = 1; }},
     {"durability 0", [](ItemCreationParams& params) { params.Durability = 0; }},

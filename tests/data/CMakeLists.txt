@@ -40,6 +40,19 @@ target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The buffs (Data/Buffs/Buffs.json, buffs design): reader, writer, checks, the
+# table and the game's buff info.
+mu_add_test(
+    NAME buff_data_tests
+    SOURCES
+        test_buffs.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(buff_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
 # The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1) and
 # the Map Editor's Sounds tab. The tab needs the client globals of Winmain.cpp.
 mu_add_test(
@@ -140,11 +153,13 @@ mu_add_test(
         test_monster_edit_history.cpp
         test_monster_grouped_edits.cpp
         test_monster_grouped_tools.cpp
+        test_monster_item_references.cpp
         test_monster_json.cpp
         test_monster_list_model.cpp
         test_monster_model_files.cpp
         test_monster_model_values.cpp
         test_monster_models_json.cpp
+        test_monster_setup_json.cpp
         test_monster_sound_files.cpp
         test_monster_sounds_json.cpp
         test_monster_names.cpp
@@ -338,3 +353,18 @@ target_compile_definitions(render_style_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
 )
+
+# Each case of the data tests once more, with the shipped client data read from a storage of the test's own and the
+# working directory elsewhere (ClientDataScope), so a loader that goes around the content layer (Core/Content) fails
+# here. The extra argument keeps this discovery's files apart from the first one's.
+foreach(data_test IN ITEMS monster_data_tests test_item_database_files)
+    doctest_discover_tests(${data_test}
+        TEST_PREFIX "content storage: "
+        EXTRA_ARGS --no-version=true
+        PROPERTIES
+            ENVIRONMENT MU_TEST_CONTENT=storage
+            TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
+            RESOURCE_LOCK ${data_test}
+            FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}"
+            SKIP_REGULAR_EXPRESSION "${MU_TEST_SKIPPED}")
+endforeach()

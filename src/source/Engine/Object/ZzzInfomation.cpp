@@ -6,9 +6,11 @@
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 
+#include <algorithm>
 #include <codecvt>
+#include <limits>
 #include <sstream>
 
 #include "Render/Models/ZzzBMD.h"
@@ -16,7 +18,6 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "Core/Utilities/ReadScript.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
@@ -55,7 +56,7 @@ int  AbuseNameFilterNumber = 0;
 
 void OpenFilterFile(const wchar_t* FileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(FileName);
     if (!fp)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
@@ -67,7 +68,7 @@ void OpenFilterFile(const wchar_t* FileName)
     BYTE* Buffer = content.data();
     // The list ends at its first empty entry; the checksum behind the table is not checked. A file made for a
     // smaller table ends early, after that entry, and still loads.
-    const std::size_t entries = fread(Buffer, Size, MAX_FILTERS, fp.get());
+    const std::size_t entries = SDL_ReadIO(fp.get(), Buffer, static_cast<std::size_t>(Size) * MAX_FILTERS) / Size;
     fp.reset();
 
     bool ended = false;
@@ -101,7 +102,7 @@ void OpenFilterFile(const wchar_t* FileName)
 
 void OpenNameFilterFile(const wchar_t* FileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(FileName);
     if (!fp)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
@@ -142,7 +143,7 @@ void OpenNameFilterFile(const wchar_t* FileName)
 
 void OpenGateScript(const wchar_t* FileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(FileName);
     if (fp)
     {
         int Size = sizeof(GATE_ATTRIBUTE);
@@ -154,8 +155,8 @@ void OpenGateScript(const wchar_t* FileName)
         {
             // A file made for fewer gates ends between two of them; the gates it lacks stay empty. A file that
             // ends inside a gate is corrupt.
-            const std::size_t read = fread(Buffer, 1, Size, fp.get());
-            if (read == 0 && feof(fp.get()))
+            const std::size_t read = SDL_ReadIO(fp.get(), Buffer, Size);
+            if (read == 0 && SDL_GetIOStatus(fp.get()) == SDL_IO_STATUS_EOF)
             {
                 break;
             }
@@ -179,35 +180,6 @@ void OpenGateScript(const wchar_t* FileName)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
     }
-}
-
-void OpenNpcScript(wchar_t* FileName)
-{
-    if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-        return;
-    }
-    SMDToken Token;
-    while (true)
-    {
-        Token = (*GetToken)();
-        if (Token == END) break;
-        if (Token == NAME && strcmp("end", TokenString) == 0) break;
-        if (Token == NUMBER)
-        {
-            int Type, x, y, Dir;
-            Type = (int)TokenNumber;
-            Token = (*GetToken)(); x = (int)TokenNumber;
-            Token = (*GetToken)(); y = (int)TokenNumber;
-            Token = (*GetToken)(); Dir = (int)TokenNumber;
-        }
-    }
-    fclose(SMDFile);
 }
 
 BOOL IsValidateSkillIdx(INT iSkillIdx)
@@ -377,79 +349,9 @@ void CalcWingOptions(ITEM* ip)
     }
 }
 
-void CalcExcellentOptions(ITEM* ip)
+// The Wizard's rings' options; the excellent options come from the definitions the item links.
+void CalcWizardsRingOptions(ITEM* ip)
 {
-    if ((ip->Type >= ITEM_SHIELD && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX) || (ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) || (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_RING_OF_MAGIC))
-    {
-        // todo: add enum for these flags
-        if ((ip->ExcellentFlags >> 5) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_LIFE);
-        }
-        if ((ip->ExcellentFlags >> 4) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MANA);
-        }
-        if ((ip->ExcellentFlags >> 3) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_DECREASE_DAMAGE);
-        }
-        if ((ip->ExcellentFlags >> 2) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_REFLECTION_DAMAGE);
-        }
-        if ((ip->ExcellentFlags >> 1) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_BLOCKING_PERCENT);
-        }
-        if ((ip->ExcellentFlags) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_GAIN_GOLD);
-        }
-    }
-    if ((ip->Type >= ITEM_SWORD && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX) || (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) || (ip->Type >= ITEM_PENDANT_OF_ICE && ip->Type <= ITEM_PENDANT_OF_ABILITY))
-    {
-        if ((ip->ExcellentFlags >> 5) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_EXCELLENT_DAMAGE);
-        }
-        if ((ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX) ||
-            (ip->Type == ITEM_PENDANT_OF_LIGHTING)
-            || (ip->Type == ITEM_PENDANT_OF_ICE || ip->Type == ITEM_PENDANT_OF_WATER))
-        {
-            if ((ip->ExcellentFlags >> 4) & 1)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC_LEVEL, CharacterAttribute->Level / 20);
-            }
-            if ((ip->ExcellentFlags >> 3) & 1)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC_PERCENT, 2);
-            }
-        }
-        else
-        {
-            if ((ip->ExcellentFlags >> 4) & 1)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE_LEVEL, CharacterAttribute->Level / 20);
-            }
-            if ((ip->ExcellentFlags >> 3) & 1)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE_PERCENT, 2);
-            }
-        }
-        if ((ip->ExcellentFlags >> 2) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_ATTACK_SPEED, 7);
-        }
-        if ((ip->ExcellentFlags >> 1) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_GAIN_LIFE);
-        }
-        if ((ip->ExcellentFlags) & 1)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_GAIN_MANA);
-        }
-    }
     if (ip->Type == ITEM_WIZARDS_RING)
     {
         switch (ip->Level)
@@ -477,9 +379,10 @@ void SetItemAttributes(ITEM* ip)
     ip->WeaponSpeed = p->WeaponSpeed;
     ip->WalkSpeed = p->WalkSpeed;
 
-    // What the + level, excellent options, ancient set and option level add, from the item stat file.
+    // What the + level, excellent options, ancient set and additional option add, from the item stat file.
+    const auto optionLevel = static_cast<BYTE>(GameLogic::Items::GetAdditionalOptionLevel(*ip));
     const GameLogic::Items::ItemStatValues stats = GameLogic::Items::ComputeItemStats(
-        *p, {ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, ip->OptionLevel});
+        *p, {ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, optionLevel});
     ip->DamageMin = static_cast<WORD>(stats.damageMin);
     ip->DamageMax = static_cast<WORD>(stats.damageMax);
     ip->MagicPower = static_cast<WORD>(stats.magicPower);
@@ -506,9 +409,12 @@ void SetItemAttributes(ITEM* ip)
     }
 
     GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Luck);
+    GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Option);
 
+    // The Horn of Dinorant's and the wings' additional options are still code (9b5, 9b1); an item whose additional
+    // option is in data has it from its definition.
     int Option3 = ip->OptionLevel;
-    if (Option3)
+    if (Option3 && !GameLogic::Items::LinksOptionType(ip->Type, Data::Items::ItemOptionType::Option))
     {
         if (ip->Type == ITEM_HORN_OF_DINORANT)
         {
@@ -527,41 +433,6 @@ void SetItemAttributes(ITEM* ip)
         }
         else
         {
-            if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_BOW + MAX_ITEM_INDEX)
-            {
-                if (!GameLogic::Items::IsAmmunition(ip))
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            if (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
-            {
-                const WORD option = GameLogic::Items::IsSummonerBook(ip) ? AT_IMPROVE_CURSE : AT_IMPROVE_MAGIC;
-                GameLogic::Items::AddOptionSlot(*ip, option, Option3 * 4);
-            }
-            if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_BLOCKING, Option3 * 5);
-            }
-            if (ip->Type >= ITEM_HELM && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-            }
-            if (ip->Type >= ITEM_RING_OF_ICE && ip->Type < ITEM_HELPER + MAX_ITEM_INDEX && ip->Type != ITEM_CAPE_OF_LORD)
-            {
-                if (ip->Type == ITEM_RING_OF_MAGIC)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAX_MANA, Option3);
-                }
-                else if (ip->Type == ITEM_PENDANT_OF_ABILITY)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAX_AG, Option3);
-                }
-                else
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-            }
             if (ip->Type == ITEM_WING)
             {
                 GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
@@ -741,7 +612,8 @@ void SetItemAttributes(ITEM* ip)
         giPetManager::SetPetItemConvert(ip, giPetManager::GetPetInfo(ip));
     }
 
-    CalcExcellentOptions(ip);
+    GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Excellent);
+    CalcWizardsRingOptions(ip);
 }
 
 int64_t ItemValue(const ITEM* ip, int goldType)
@@ -1589,11 +1461,11 @@ void PlusSpecial(WORD* Value, int Special, ITEM* Item)
     for (int i = 0; i < Item->SpecialNum; i++)
     {
         if (Item->Special[i] == Special)
-            *Value += Item->SpecialValue[i];
+            *Value += static_cast<WORD>(GameLogic::Items::GetCurrentSlotValue(*Item, i));
     }
 }
 
-void PlusSpecialPercent(WORD* Value, int Special, ITEM* Item, WORD Percent)
+void PlusSpecialPercentOfSlot(WORD* Value, int Special, ITEM* Item)
 {
     if (!AreItemOptionsActive(Item))
     {
@@ -1603,21 +1475,12 @@ void PlusSpecialPercent(WORD* Value, int Special, ITEM* Item, WORD Percent)
     for (int i = 0; i < Item->SpecialNum; i++)
     {
         if (Item->Special[i] == Special)
-            *Value += *Value * Percent / 100;
-    }
-}
-
-void PlusSpecialPercent2(WORD* Value, int Special, ITEM* Item)
-{
-    if (!AreItemOptionsActive(Item))
-    {
-        return;
-    }
-
-    for (int i = 0; i < Item->SpecialNum; i++)
-    {
-        if (Item->Special[i] == Special)
-            *Value += (unsigned short)(*Value * (Item->SpecialValue[i] / 100.f));
+        {
+            // The per cent comes from the data: a large one stops at what the stat holds instead of wrapping around.
+            const long long percent = GameLogic::Items::GetCurrentSlotValue(*Item, i);
+            const long long added = *Value * percent / 100;
+            *Value = static_cast<WORD>(std::min<long long>(*Value + added, std::numeric_limits<WORD>::max()));
+        }
     }
 }
 
@@ -1917,8 +1780,8 @@ void CHARACTER_MACHINE::CalculateDamage()
 
         PlusSpecial(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_LEVEL, Right);
         PlusSpecial(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_LEVEL, Right);
-        PlusSpecialPercent(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_PERCENT, Right, 2);
-        PlusSpecialPercent(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_PERCENT, Right, 2);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_PERCENT, Right);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_PERCENT, Right);
     }
 
     if (Left->Type != -1 && Left->Durability != 0)
@@ -1940,35 +1803,35 @@ void CHARACTER_MACHINE::CalculateDamage()
 
         PlusSpecial(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_LEVEL, Left);
         PlusSpecial(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_LEVEL, Left);
-        PlusSpecialPercent(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_PERCENT, Left, 2);
-        PlusSpecialPercent(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_PERCENT, Left, 2);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_PERCENT, Left);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_PERCENT, Left);
     }
 
     if (Amulet->Type != -1 && Amulet->Durability != 0)
     {
         PlusSpecial(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_LEVEL, Amulet);
         PlusSpecial(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_LEVEL, Amulet);
-        PlusSpecialPercent(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_PERCENT, Amulet, 2);
-        PlusSpecialPercent(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_PERCENT, Amulet, 2);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_PERCENT, Amulet);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_PERCENT, Amulet);
 
         PlusSpecial(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_LEVEL, Amulet);
         PlusSpecial(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_LEVEL, Amulet);
-        PlusSpecialPercent(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_PERCENT, Amulet, 2);
-        PlusSpecialPercent(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_PERCENT, Amulet, 2);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_PERCENT, Amulet);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_PERCENT, Amulet);
     }
     if (RRing->Type != -1 && RRing->Durability != 0)
     {
-        PlusSpecialPercent(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_PERCENT, RRing, RRing->SpecialValue[1]);
-        PlusSpecialPercent(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_PERCENT, RRing, RRing->SpecialValue[1]);
-        PlusSpecialPercent(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_PERCENT, RRing, RRing->SpecialValue[1]);
-        PlusSpecialPercent(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_PERCENT, RRing, RRing->SpecialValue[1]);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_PERCENT, RRing);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_PERCENT, RRing);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_PERCENT, RRing);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_PERCENT, RRing);
     }
     if (LRing->Type != -1 && LRing->Durability != 0)
     {
-        PlusSpecialPercent(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_PERCENT, LRing, LRing->SpecialValue[1]);
-        PlusSpecialPercent(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_PERCENT, LRing, LRing->SpecialValue[1]);
-        PlusSpecialPercent(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_PERCENT, LRing, LRing->SpecialValue[1]);
-        PlusSpecialPercent(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_PERCENT, LRing, LRing->SpecialValue[1]);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMinRight, AT_IMPROVE_DAMAGE_PERCENT, LRing);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMaxRight, AT_IMPROVE_DAMAGE_PERCENT, LRing);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_PERCENT, LRing);
+        PlusSpecialPercentOfSlot(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_PERCENT, LRing);
     }
 
     WORD    Damage = 0;
@@ -2091,7 +1954,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         percent = CalcDurabilityPercent(Right->Durability, p->Durability, Right->Level, Right->ExcellentFlags, Right->AncientDiscriminator);
         DamageMin = 0; DamageMax = 0;
 
-        if (GameLogic::Items::IsMagicSwordType(Right->Type))
+        if (GameLogic::Items::DamageOptionRaisesWizardry(*Right))
         {
             PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Right);
             PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Right);
@@ -2107,8 +1970,8 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 
         PlusSpecial(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_LEVEL, Right);
         PlusSpecial(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_LEVEL, Right);
-        PlusSpecialPercent(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, Right, 2);
-        PlusSpecialPercent(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, Right, 2);
+        PlusSpecialPercentOfSlot(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, Right);
+        PlusSpecialPercentOfSlot(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, Right);
     }
 
     if (Left->Type != -1 && Left->Durability != 0)
@@ -2122,7 +1985,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 
             if (GameLogic::Items::IsWeaponOrAmmunition(Left))
             {
-                if (GameLogic::Items::IsMagicSwordType(Left->Type))
+                if (GameLogic::Items::DamageOptionRaisesWizardry(*Left))
                 {
                     PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Left);
                     PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Left);
@@ -2141,8 +2004,8 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 
                 PlusSpecial(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_LEVEL, Left);
                 PlusSpecial(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_LEVEL, Left);
-                PlusSpecialPercent(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, Left, 2);
-                PlusSpecialPercent(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, Left, 2);
+                PlusSpecialPercentOfSlot(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, Left);
+                PlusSpecialPercentOfSlot(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, Left);
             }
         }
     }
@@ -2155,7 +2018,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
             percent = CalcDurabilityPercent(Left->Durability, p->Durability, Left->Level, Left->ExcellentFlags, Left->AncientDiscriminator);
             DamageMin = 0; DamageMax = 0;
 
-            if (GameLogic::Items::IsMagicSwordType(Right->Type))
+            if (GameLogic::Items::DamageOptionRaisesWizardry(*Right))
             {
                 PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Right);
                 PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Right);
@@ -2175,8 +2038,8 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 
             PlusSpecial(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_LEVEL, Left);
             PlusSpecial(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_LEVEL, Left);
-            PlusSpecialPercent(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, Left, 2);
-            PlusSpecialPercent(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, Left, 2);
+            PlusSpecialPercentOfSlot(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, Left);
+            PlusSpecialPercentOfSlot(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, Left);
         }
     }
 
@@ -2184,19 +2047,19 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
     {
         PlusSpecial(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_LEVEL, Amulet);
         PlusSpecial(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_LEVEL, Amulet);
-        PlusSpecialPercent(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, Amulet, 2);
-        PlusSpecialPercent(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, Amulet, 2);
+        PlusSpecialPercentOfSlot(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, Amulet);
+        PlusSpecialPercentOfSlot(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, Amulet);
     }
 
     if (RRing->Type != -1 && RRing->Durability != 0)
     {
-        PlusSpecialPercent(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, RRing, RRing->SpecialValue[0]);
-        PlusSpecialPercent(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, RRing, RRing->SpecialValue[0]);
+        PlusSpecialPercentOfSlot(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, RRing);
+        PlusSpecialPercentOfSlot(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, RRing);
     }
     if (LRing->Type != -1 && LRing->Durability != 0)
     {
-        PlusSpecialPercent(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, LRing, LRing->SpecialValue[0]);
-        PlusSpecialPercent(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, LRing, LRing->SpecialValue[0]);
+        PlusSpecialPercentOfSlot(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, LRing);
+        PlusSpecialPercentOfSlot(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, LRing);
     }
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4))
@@ -2283,8 +2146,8 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
 
         PlusSpecial(&Character.CurseDamageMin, AT_IMPROVE_MAGIC_LEVEL, pEquipLeft);
         PlusSpecial(&Character.CurseDamageMax, AT_IMPROVE_MAGIC_LEVEL, pEquipLeft);
-        PlusSpecialPercent(&Character.CurseDamageMin, AT_IMPROVE_MAGIC_PERCENT, pEquipLeft, 2);
-        PlusSpecialPercent(&Character.CurseDamageMax, AT_IMPROVE_MAGIC_PERCENT, pEquipLeft, 2);
+        PlusSpecialPercentOfSlot(&Character.CurseDamageMin, AT_IMPROVE_MAGIC_PERCENT, pEquipLeft);
+        PlusSpecialPercentOfSlot(&Character.CurseDamageMax, AT_IMPROVE_MAGIC_PERCENT, pEquipLeft);
     }
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_StrengthOfSanta))
@@ -2427,16 +2290,18 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
 
         Character.SuccessfulBlocking += SuccessBlocking - (WORD)(SuccessBlocking * percent);
 
-        PlusSpecialPercent(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, Left, 10);
+        PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, Left);
     }
 
-    PlusSpecialPercent(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_HELM], 10);
-    PlusSpecialPercent(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_ARMOR], 10);
-    PlusSpecialPercent(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_PANTS], 10);
-    PlusSpecialPercent(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_GLOVES], 10);
-    PlusSpecialPercent(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_BOOTS], 10);
-    PlusSpecialPercent(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_RING_LEFT], 10);
-    PlusSpecialPercent(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_RING_RIGHT], 10);
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_HELM]);
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_ARMOR]);
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_PANTS]);
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_GLOVES]);
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_BOOTS]);
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             &Equipment[EQUIPMENT_RING_LEFT]);
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             &Equipment[EQUIPMENT_RING_RIGHT]);
 
     Character.SuccessfulBlocking *= g_SocketItemMgr.m_StatusBonus.m_fDefenceRateBonus;
 }

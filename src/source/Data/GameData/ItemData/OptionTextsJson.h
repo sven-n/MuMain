@@ -17,14 +17,16 @@
 //     }
 //   }
 //
-// {value} is the option's value at the item's level. An option names its texts ("text" in Data/Items/Options), and
+// {value} is the option's value at the item's level, {divisor} the divisor of its first term that has one (the 20 of
+// "+level/{divisor}"; 0 without such a term). An option names its texts ("text" in Data/Items/Options), and
 // names are looked up in this file only. See docs/item-data.md, "Item options".
 namespace Data::Items
 {
 constexpr int OptionTextsFormatVersion = 1;
 constexpr const char* OptionTextsFileName = "OptionTexts.json";
-// The one placeholder of the option texts.
+// The placeholders of the option texts.
 constexpr const char* OptionValuePlaceholder = "value";
+constexpr const char* OptionDivisorPlaceholder = "divisor";
 
 // Reads the file into `texts`, its problems into `issues` (`source` names the file in them). A text without English or
 // with a placeholder problem is an error and left out: the lines that name it are left out.

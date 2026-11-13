@@ -18,7 +18,7 @@ public:
     void WriteBuildInfo(void);
 
     void WriteSystemInfo(void);
-    void WriteGpuInfo(void);
+    void WriteGpuInfo(const char* deviceName, const char* driverName, const char* driverVersion);
     void WriteFontInfo(void);
     void WriteImeInfo(SDL_Window* window);
     void WriteSoundCardInfo(void);

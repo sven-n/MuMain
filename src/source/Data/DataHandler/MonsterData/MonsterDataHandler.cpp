@@ -133,6 +133,7 @@ bool MonsterDataHandler::Load(std::string& errorMessage)
     }
 
     g_MonsterDatabase.Build(result.monsters, I18N::GetCurrentLocale());
+    g_MonsterDatabase.SetUnknownLook(result.unknown);
 #ifdef _EDITOR
     SetGroups(result.groups);
 #endif
@@ -237,6 +238,10 @@ void MonsterDataHandler::RestoreMonsters(std::span<const MonsterSnapshot> snapsh
     if (changed)
     {
         NotifyNamesChanged(*changed);
+        if (m_monstersChanged != nullptr)
+        {
+            m_monstersChanged(*changed);
+        }
         // The monster may name another sound set.
         m_soundsToLoad = true;
     }
@@ -294,7 +299,7 @@ bool MonsterDataHandler::Save(std::vector<Items::ItemDataIssue>& issues)
 {
     ValidateLocales(CollectMonsters(), issues);
     std::vector<MonsterGroup> groups = CollectGroups();
-    return SaveMonstersFile(GetMonstersFile(), groups, issues);
+    return SaveMonstersFile(GetMonstersFile(), groups, g_MonsterDatabase.GetUnknownLook(), issues);
 }
 
 bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
@@ -306,6 +311,7 @@ bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
     {
         return false;
     }
+    g_MonsterDatabase.SetUnknownLook(result.unknown);
     UseMonsters(result.groups);
     return true;
 }
@@ -318,6 +324,10 @@ void MonsterDataHandler::UseMonsters(std::span<const MonsterGroup> monsters)
     SetGroups(monsters);
     RegisterLocaleObserver();
     NotifyNamesChanged(AllNumbers);
+    if (m_monstersChanged != nullptr)
+    {
+        m_monstersChanged(AllNumbers);
+    }
 }
 
 std::vector<MonsterGroup> MonsterDataHandler::CollectGroups() const
@@ -506,7 +516,8 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
     ValidateLocales(CollectMonsters(), issues);
     std::vector<MonsterGroup> groups = CollectGroups();
     // All are checked, so that the problems of all are listed.
-    const std::optional<std::string> monstersText = MakeMonstersFileText(GetMonstersFile(), groups, issues);
+    const std::optional<std::string> monstersText =
+        MakeMonstersFileText(GetMonstersFile(), groups, g_MonsterDatabase.GetUnknownLook(), issues);
     const std::optional<std::string> modelsText =
         MakeMonsterModelsFileText(GetMonsterModelsFile(), CollectModels(), issues);
     const std::vector<MonsterSoundSet> sets = CollectSoundSets();
@@ -561,6 +572,23 @@ bool MonsterDataHandler::SaveSoundSets(const std::function<bool(std::vector<Mons
     return true;
 }
 
+std::optional<std::string>
+MonsterDataHandler::MakeMonstersFileWith(const std::function<bool(std::vector<MonsterGroup>& groups)>& change,
+                                         std::vector<Items::ItemDataIssue>& issues) const
+{
+    MonsterDataLoadResult file = LoadMonstersFile(GetMonstersFile());
+    if (Items::HasFatal(file.issues))
+    {
+        issues.insert(issues.end(), file.issues.begin(), file.issues.end());
+        return std::nullopt;
+    }
+    if (!change(file.groups))
+    {
+        return std::nullopt;
+    }
+    return MakeMonstersFileText(GetMonstersFile(), file.groups, file.unknown, issues);
+}
+
 bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)
 {
     MonsterDataLoadResult monsters = LoadMonstersFile(GetMonstersFile());
@@ -574,6 +602,7 @@ bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)
     {
         return false;
     }
+    g_MonsterDatabase.SetUnknownLook(monsters.unknown);
     UseMonsters(monsters.groups);
     UseModels(models.models);
     UseSoundSets(sounds.sets);

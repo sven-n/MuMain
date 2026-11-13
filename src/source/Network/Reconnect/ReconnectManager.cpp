@@ -12,17 +12,19 @@
 #include "Engine/Object/ZzzCharacter.h"// CharactersClient
 #include "UI/Windows/LoginWin.h"       // g_LoginWin
 #include "MUHelper/MuHelper.h"         // MUHelper::g_MuHelper
+#include "UI/Chat/ChatMessages.h"
+#include "I18N/All.h"
 
 // Timing (milliseconds). WorldTime is the wall-clock ms timer the rest of the
 // client uses for timeouts (see ZzzAI.cpp).
 namespace
 {
-    constexpr double PROBE_INTERVAL_MS = 5000.0;    // gap between reachability probes
-    constexpr double PROBE_TIMEOUT_MS = 2000.0;     // allow a probe this long to connect
-    constexpr double CONNECT_TIMEOUT_MS = 10000.0;  // wait for the server hello
-    constexpr double LOGIN_TIMEOUT_MS = 10000.0;    // login -> character list
-    constexpr double RETRY_INTERVAL_MS = 5000.0;    // gap between re-login retries
-    constexpr int STEP_COUNT = 4;                   // progress-bar steps
+constexpr double PROBE_INTERVAL_MS = 5000.0;   // gap between background connects
+constexpr double PROBE_TIMEOUT_MS = 2000.0;    // allow a background connect this long to open
+constexpr double CONNECT_TIMEOUT_MS = 10000.0; // wait for the server hello
+constexpr double LOGIN_TIMEOUT_MS = 10000.0;   // login -> character list
+constexpr double RETRY_INTERVAL_MS = 5000.0;   // gap between re-login retries
+constexpr int STEP_COUNT = 4;                  // progress-bar steps
 }
 
 extern double WorldTime;
@@ -35,6 +37,14 @@ ReconnectManager& ReconnectManager::Instance()
 {
     static ReconnectManager instance;
     return instance;
+}
+
+ReconnectManager::ReconnectManager() = default;
+ReconnectManager::~ReconnectManager() = default;
+
+std::unique_ptr<Connection> ReconnectManager::TakeStandby()
+{
+    return std::move(m_standby);
 }
 
 void ReconnectManager::CacheServer(const wchar_t* ip, unsigned short port)
@@ -99,19 +109,19 @@ void ReconnectManager::RequestBegin()
     m_muHelperWasActive = MUHelper::g_MuHelper.IsActive();
 
     // Don't tear the game down yet: keep the main scene rendering (frozen, since
-    // no server data arrives) and probe the server in the background. Only once
-    // it answers do we tear down and re-login. This just sets state, so it's safe
+    // no server data arrives) and connect to the server in the background. Only once
+    // that connection opens do we tear down and re-login over it. This just sets state, so it's safe
     // to call from the render path.
     m_active = true;
     EnterPhase(Phase::Probing);
-    // Probe straight away instead of waiting out the first interval, so a brief
+    // Connect straight away instead of waiting out the first interval, so a brief
     // blip recovers quickly.
     m_phaseStartTime = WorldTime - PROBE_INTERVAL_MS;
 }
 
 void ReconnectManager::Begin()
 {
-    // Runs in the window-proc context once a probe found the server alive. The
+    // Runs between frames once the background connection found the server back. The
     // teardown (ReleaseMainData etc.) must run here, not mid-render.
     if (!m_beginPending)
     {
@@ -127,8 +137,8 @@ void ReconnectManager::Begin()
 
     // Tear the live session down to a clean login state.
     // ResetClientToLoginScene() switches to LOG_IN_SCENE, and this frame's
-    // NewMoveLogInScene() -> CreateLogInScene() opens the reconnect socket to the
-    // cached game server while this reconnect is active.
+    // CreateLogInScene() takes over the background connection to the cached game
+    // server while this reconnect is active.
     ResetClientToLoginScene();
 
     // Cancel pressed while probing: stop here at the login screen.
@@ -197,45 +207,49 @@ void ReconnectManager::Update()
 
 void ReconnectManager::UpdateProbing()
 {
-    // A probe found the server; waiting for Begin() to run in the window proc.
+    // The server is back; waiting for Begin() to run between frames.
     if (m_beginPending)
     {
         return;
     }
 
-    if (!m_probe.IsRunning())
+    if (!m_standby)
     {
         if (ElapsedMs() >= PROBE_INTERVAL_MS)
         {
-            StartProbe();
+            StartStandby();
         }
         return;
     }
 
-    PollProbe();
+    PollStandby();
 }
 
-void ReconnectManager::StartProbe()
+void ReconnectManager::StartStandby()
 {
-    // The cached address works both as an IPv4 literal and as a host name.
-    if (!m_probe.Start(m_serverIp, m_serverPort, WorldTime, PROBE_TIMEOUT_MS))
-    {
-        EnterPhase(Phase::Probing); // can't probe right now; try again later
-    }
+    // The cached address works both as an IP literal and as a host name.
+    m_standby = OpenConnectionForLater(m_serverIp, m_serverPort);
+    m_phaseStartTime = WorldTime;
 }
 
-void ReconnectManager::PollProbe()
+void ReconnectManager::PollStandby()
 {
-    switch (m_probe.Poll(WorldTime))
+    switch (m_standby->State())
     {
-    case ReachabilityProbe::Result::Pending:
+    case Network::ConnectionState::Connecting:
+        if (ElapsedMs() > PROBE_TIMEOUT_MS)
+        {
+            m_standby.reset();
+            EnterPhase(Phase::Probing); // no answer in time; try again later
+        }
         return;
-    case ReachabilityProbe::Result::Reachable:
+    case Network::ConnectionState::Open:
         // Server is up - defer to Begin() (called by the main loop each
-        // frame) to tear down and re-login between frames.
+        // frame) to tear down and re-login between frames, over this connection.
         m_beginPending = true;
         return;
-    case ReachabilityProbe::Result::Unreachable:
+    case Network::ConnectionState::Closed:
+        m_standby.reset();
         EnterPhase(Phase::Probing);
         return;
     }
@@ -330,6 +344,8 @@ void ReconnectManager::UpdateJoining()
             m_muHelperWasActive = false;
         }
 
+        // The dialog can be up for a fraction of a second; this line stays in the chat to say what happened.
+        UI::Chat::PostSystem(I18N::Game::ReconnectedAfterConnectionLost, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         m_active = false;
         m_phase = Phase::Idle;
         return;
@@ -388,7 +404,7 @@ void ReconnectManager::Abort()
     m_cancelRequested = false;
     m_abortAfterTeardown = false;
     m_phase = Phase::Idle;
-    m_probe.Stop();
+    m_standby.reset();
 
     // Begin() already released the in-game data, so this only needs to land on a
     // usable login screen and reconnect to the server for a manual login. It
@@ -413,7 +429,7 @@ double ReconnectManager::ElapsedMs() const
 
 bool ReconnectManager::IsSocketAlive() const
 {
-    return SocketClient != nullptr && SocketClient->IsConnected();
+    return SocketClient != nullptr && SocketClient->State() != Network::ConnectionState::Closed;
 }
 
 int ReconnectManager::GetStepCount()
@@ -441,7 +457,7 @@ int ReconnectManager::GetCountdownSeconds() const
 {
     // Seconds until the next attempt, for the dialog's "retrying in N" text.
     double interval = 0.0;
-    if (m_phase == Phase::Probing && !m_probe.IsRunning())
+    if (m_phase == Phase::Probing && !m_standby)
     {
         interval = PROBE_INTERVAL_MS;
     }

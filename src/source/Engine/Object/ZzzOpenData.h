@@ -1,12 +1,15 @@
 #pragma once
 
+#include <functional>
+#include <vector>
+
 void DeleteNpcs();
 void OpenNpc(int Type);
 void DeleteMonsters();
 void OpenMonsterModel(EMonsterModelType Type);
 
-void OpenModel(int Type, wchar_t* Dir, wchar_t* ModelFileName, ...);
-void OpenBasicData(HDC hDC);
+// The startup data load, as steps for the title screen to run across frames.
+std::vector<std::function<void()>> OpenBasicDataSteps();
 void ReleaseMainData();
 bool OpenFont();
 void OpenLogoSceneData();
@@ -24,6 +27,11 @@ void OpenItemEffectTextures();
 void PrepareGrandSoulPantsClothMesh();
 
 void SaveOptions();
+// SaveOptions, once the character's key configuration has arrived in the game world.
+void SaveOptionsIfInGame();
+// Whether the selected character's key configuration has arrived. Until it has, the hotkeys in memory are the reset
+// ones (or another character's Q/W/E/R), and saving them would overwrite the character's stored layout.
+void SetKeyConfigurationReceived(bool received);
 void SaveMacro(const wchar_t* FileName);
 void OpenMacro(const wchar_t* FileName);
 

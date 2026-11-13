@@ -901,83 +901,55 @@ int mu::ui::window::CGuildInfoWindow::GetUnionCount()
     return static_cast<int>(m_Unions.size());
 }
 
-void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
-    BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL)
+void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType relationshipType,
+                                                                GuildRequestType requestType, WORD requesterKey)
 {
-    if (mu::ui::window::g_pGenericConfirmDialog->IsVisible())
+    // The reply carries the requester's key as the server sent it; OpenMU keeps the request pending until it arrives.
+    const auto reply = [relationshipType, requestType, requesterKey](BYTE result)
     {
-        SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
-            byRelationShipType,
-            byRequestType,
-            0x00,
-            MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
+        SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(relationshipType, requestType, result,
+                                                                          requesterKey);
+    };
+    constexpr BYTE Declined = 0x00;
+    constexpr BYTE Approved = 0x01;
+
+    const bool isKnownRelationship =
+        relationshipType == GuildRelationshipType::Alliance || relationshipType == GuildRelationshipType::Hostility;
+    const bool isKnownRequest = requestType == GuildRequestType::Join || requestType == GuildRequestType::Leave;
+    const int nIndex = FindCharacterIndex(requesterKey);
+    if (mu::ui::window::g_pGenericConfirmDialog->IsVisible() || !isKnownRelationship || !isKnownRequest || nIndex < 0 ||
+        nIndex >= MAX_CHARACTERS_CLIENT)
+    {
+        reply(Declined);
+        return;
+    }
+
+    const CHARACTER* pPlayer = &CharactersClient[nIndex];
+    const bool isJoin = requestType == GuildRequestType::Join;
+
+    wchar_t szText[3][64];
+    ZeroMemory(szText, sizeof(szText));
+    if (relationshipType == GuildRelationshipType::Alliance)
+    {
+        mu_swprintf(szText[0], I18N::Game::FromSForAGuildAlliance, pPlayer->ID);
+        mu_swprintf(szText[1],
+                    isJoin ? I18N::Game::ReceivedARegistrationRequest : I18N::Game::ReceivedAWithdrawalRequest);
     }
     else
     {
-        m_MessageInfo.s_byRelationShipType = byRelationShipType;
-        m_MessageInfo.s_byRelationShipRequestType = byRequestType;
-        m_MessageInfo.s_byTargetUserIndexH = byTargetUserIndexH;
-        m_MessageInfo.s_byTargetUserIndexL = byTargetUserIndexL;
-
-        int nCharKey = MAKEWORD(m_MessageInfo.s_byTargetUserIndexL, m_MessageInfo.s_byTargetUserIndexH);
-        int nIndex = FindCharacterIndex(nCharKey);
-        if (nIndex < 0 || nIndex >= MAX_CHARACTERS_CLIENT)
-            return;
-        CHARACTER* pPlayer = &CharactersClient[nIndex];
-
-        wchar_t szText[3][64];
-        ZeroMemory(szText, sizeof(szText));
-
-        if (m_MessageInfo.s_byRelationShipType == GuildRelationshipType::Alliance)
-        {
-            if (m_MessageInfo.s_byRelationShipRequestType == GuildRequestType::Join)
-            {
-                mu_swprintf(szText[0], I18N::Game::FromSForAGuildAlliance, pPlayer->ID);
-                mu_swprintf(szText[1], I18N::Game::ReceivedARegistrationRequest);
-                mu_swprintf(szText[2], I18N::Game::Approve);
-            }
-            else										// Break Off
-            {
-                mu_swprintf(szText[0], I18N::Game::FromSForAGuildAlliance, pPlayer->ID);
-                mu_swprintf(szText[1], I18N::Game::ReceivedAWithdrawalRequest);
-                mu_swprintf(szText[2], I18N::Game::Approve);
-            }
-        }
-        else if (m_MessageInfo.s_byRelationShipType == GuildRelationshipType::Hostility)
-        {
-            if (m_MessageInfo.s_byRelationShipRequestType == GuildRequestType::Join)
-            {
-                mu_swprintf(szText[0], I18N::Game::FromSForAHostileGuild, pPlayer->ID);
-                mu_swprintf(szText[1], I18N::Game::ReceivedApprovalRequest);
-                mu_swprintf(szText[2], I18N::Game::Approve);
-            }
-            else
-            {
-                mu_swprintf(szText[0], I18N::Game::FromSForAHostileGuild, pPlayer->ID);
-                mu_swprintf(szText[1], I18N::Game::ReceivedCancellationRequest);
-                mu_swprintf(szText[2], I18N::Game::Approve);
-            }
-        }
-
-        mu::ui::window::GenericDialogConfig cfg;
-        cfg.showCancel = true;
-        cfg.lines = {
-            { szText[0], false },
-            { szText[1], false },
-            { szText[2], false },
-        };
-        cfg.onPrimary = [byRelationShipType, byRequestType, byTargetUserIndexH, byTargetUserIndexL]
-        {
-            SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
-                byRelationShipType, byRequestType, 0x01,
-                MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
-        };
-        cfg.onCancel = [byRelationShipType, byRequestType, byTargetUserIndexH, byTargetUserIndexL]
-        {
-            SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
-                byRelationShipType, byRequestType, 0x00,
-                MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
-        };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        mu_swprintf(szText[0], I18N::Game::FromSForAHostileGuild, pPlayer->ID);
+        mu_swprintf(szText[1], isJoin ? I18N::Game::ReceivedApprovalRequest : I18N::Game::ReceivedCancellationRequest);
     }
+    mu_swprintf(szText[2], I18N::Game::Approve);
+
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.showCancel = true;
+    cfg.lines = {
+        {szText[0], false},
+        {szText[1], false},
+        {szText[2], false},
+    };
+    cfg.onPrimary = [reply] { reply(Approved); };
+    cfg.onCancel = [reply] { reply(Declined); };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }

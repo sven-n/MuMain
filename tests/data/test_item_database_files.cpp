@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "ItemModelDatabaseScope.h"
+#include "ItemOptionsScope.h"
 #include "LookEditsScope.h"
 #include "LogCapture.h"
 #include "ItemStatProfilesScope.h"
@@ -40,11 +41,16 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/LookData/LookStore.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterItemReferences.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Physics/PhysicsManager.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "Core/Text/Utf8.h"
 #include "I18N/All.h"
@@ -57,6 +63,7 @@
 #include "UI/ItemEditor/ItemEditorActions.h"
 #include "UI/ItemEditor/ItemListModel.h"
 #include "UI/ItemTools/GlowColorDialog.h"
+#include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/ItemTools/ItemAddDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemFieldWidgets.h"
@@ -173,13 +180,16 @@ public:
         }
     }
 
-    // The shipped glow color list, which the item models name their colors
+    // The shipped glow color list and shine list, which the item models name their colors and shines below +3
     // from.
-    void CopyShippedGlowColors() const
+    void CopyShippedGlowLists() const
     {
-        const std::filesystem::path file = m_directory / GetGlowColorsFile();
-        std::filesystem::create_directories(file.parent_path());
-        std::filesystem::copy_file(ShippedClientDirectory / GetGlowColorsFile(), file);
+        for (const std::filesystem::path& list : {GetGlowColorsFile(), GetShinesFile()})
+        {
+            const std::filesystem::path file = m_directory / list;
+            std::filesystem::create_directories(file.parent_path());
+            std::filesystem::copy_file(ShippedClientDirectory / list, file);
+        }
     }
 
 private:
@@ -1681,7 +1691,7 @@ TEST_CASE("Changing an opened item model drops the cloth the characters wear [da
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -1812,7 +1822,7 @@ TEST_CASE("A bmd import keeps the size and slot of the held items that had data 
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -1921,17 +1931,18 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         REQUIRE(g_ItemDataHandler.AddItem(spear, nullptr));
         CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(3, 100)) == WeaponKind::Spear);
         // And the options the option rules give it.
-        CHECK(g_ItemDatabase.Find(3, 100)->options == std::vector<std::string>{"luck"});
+        CHECK(g_ItemDatabase.Find(3, 100)->options == std::vector<std::string>{"luck", "physicalDamageOption",
+                                                                                   "excellentPhysicalAttack"});
     }
 
     SUBCASE("an item's option list follows its data, and a list an edit picked stays")
     {
-        const std::vector<std::string> luck{"luck"};
-        REQUIRE(g_ItemDatabase.Find(KrisType)->options == luck);
+        const std::vector<std::string> weapon{"luck", "physicalDamageOption", "excellentPhysicalAttack"};
+        REQUIRE(g_ItemDatabase.Find(KrisType)->options == weapon);
         EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition); });
         CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
         EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition, false); });
-        CHECK(g_ItemDatabase.Find(KrisType)->options == luck);
+        CHECK(g_ItemDatabase.Find(KrisType)->options == weapon);
 
         EditItem(KrisType, [](ItemDefinition& item) { item.options.clear(); });
         CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
@@ -2130,13 +2141,98 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     }
 }
 
+// Save Items writes the look files the Style Editor changed, each only when it changed (design L39).
+TEST_CASE("Saving writes ItemEffects.json when the item effects changed, and RenderStyles.json only when its looks did "
+          "[data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowLists();
+    const std::filesystem::path effects = folder.Directory() / "Data" / "Effects";
+    for (const char* file : {"RenderStyles.json", "ItemEffects.json"})
+    {
+        std::filesystem::copy_file(ShippedClientDirectory / "Data" / "Effects" / file, effects / file);
+    }
+    std::ofstream(effects / "RenderStyles.json", std::ios::binary | std::ios::app) << "\n";
+    const std::string renderStylesText = TestFiles::ReadWholeFile(effects / "RenderStyles.json");
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    // The game's looks again afterwards: the editor's read gives the game the folder's.
+    const LookEditsScope looks(std::vector<Data::Looks::LookDefinition>(
+        Data::Looks::g_LookStore.GetRenderStyles().begin(), Data::Looks::g_LookStore.GetRenderStyles().end()));
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    g_ItemDataHandler.ForgetRenderStylesForTest();
+
+    Data::Looks::LookFile file = g_ItemDataHandler.GetLookFile(Data::Looks::LookKind::ItemEffect);
+    REQUIRE_FALSE(file.looks.empty());
+    file.looks[0].objectLight = std::array<Data::Looks::Number, 3>{0.25f, 0.5f, 0.75f};
+    g_ItemDataHandler.SetLookFile(Data::Looks::LookKind::ItemEffect, file);
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    Data::Looks::LookFile saved;
+    std::vector<ItemDataIssue> readIssues;
+    Data::Looks::ReadLookFile(TestFiles::ReadWholeFile(effects / "ItemEffects.json"), "ItemEffects.json",
+                              Data::Looks::LookKind::ItemEffect, saved, readIssues);
+    CHECK_FALSE(HasFatal(readIssues));
+    CHECK(saved.looks == file.looks);
+    CHECK(TestFiles::ReadWholeFile(effects / "RenderStyles.json") == renderStylesText);
+}
+
+// The part models are edited in the Item Model window (design L50): a change is an undo step, and Save writes
+// PartModels.json.
+TEST_CASE("A part model's change is an item edit, and saving writes PartModels.json [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowLists();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    g_ItemEdits.GetHistory().Clear();
+    REQUIRE(g_ItemModelDatabase.FindPartModel("phoenixSoulStarWing") != nullptr);
+
+    std::vector<PartModel> parts(g_ItemModelDatabase.GetPartModels().begin(),
+                                 g_ItemModelDatabase.GetPartModels().end());
+    const auto wing = std::ranges::find(parts, std::string("phoenixSoulStarWing"),
+                                        [](const PartModel& part) { return part.model.name; });
+    REQUIRE(wing != parts.end());
+    const std::string before = wing->renderStyle;
+    wing->renderStyle = "chromeMesh0";
+    wing->model.textureFolders = {"Item", "Effect"};
+    g_ItemEdits.SetPartModels("Part model", parts);
+    CHECK(g_ItemModelDatabase.FindPartModel("phoenixSoulStarWing")->renderStyle == "chromeMesh0");
+    // Its folders changed: it is opened again between frames.
+    CHECK(g_ItemDataHandler.HasModelsToReopen());
+    CHECK(g_ItemEdits.Undo());
+    CHECK(g_ItemModelDatabase.FindPartModel("phoenixSoulStarWing")->renderStyle == before);
+    CHECK(g_ItemEdits.Redo());
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    const ItemModelDataLoadResult saved = LoadItemModelDataDirectory(folder.Directory() / GetItemModelDataDirectory());
+    CHECK_FALSE(HasFatal(saved.issues));
+    const auto savedWing = std::ranges::find(saved.partModels, std::string("phoenixSoulStarWing"),
+                                             [](const PartModel& part) { return part.model.name; });
+    REQUIRE(savedWing != saved.partModels.end());
+    CHECK(savedWing->renderStyle == "chromeMesh0");
+    CHECK(savedWing->model.textureFolders == std::vector<std::string>{"Item", "Effect"});
+    g_ItemEdits.GetHistory().Clear();
+    // The test opens no models: the next test starts with none left to open.
+    g_ItemDataHandler.ForgetModelsToReopenForTest();
+}
+
 // The item editor moves an item's model with the item, and saving writes the
 // model files of the moved models.
 TEST_CASE("A moved item takes its model along, and saving writes it [data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     // A model file the save must not touch: no model of its group moves.
     const std::filesystem::path axeModels = folder.Directory() / GetItemModelDataDirectory() / GetItemGroupFileName(1);
     std::ofstream(axeModels, std::ios::binary | std::ios::app) << "\n";
@@ -2181,7 +2277,7 @@ TEST_CASE("A bmd import moves the models of moved items back [data][items][edito
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope models;
     I18N::SetLocale("en");
@@ -2221,7 +2317,7 @@ TEST_CASE("A bmd import puts a moved entry without a name back with its model [d
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope models;
     I18N::SetLocale("en");
@@ -2254,7 +2350,7 @@ TEST_CASE("After a bmd import every number with a model has an entry [data][item
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope models;
     I18N::SetLocale("en");
@@ -2300,7 +2396,7 @@ TEST_CASE("Export as bmd and Import from bmd keep the orbs', crystals' and scrol
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2390,7 +2486,7 @@ TEST_CASE("A bmd import keeps the entries without a name as they are and does no
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2526,7 +2622,7 @@ TEST_CASE("The item tools add, remove and move items with their models [data][it
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2602,7 +2698,7 @@ TEST_CASE("The item tools change models and shared models [data][items][editor]"
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2699,7 +2795,7 @@ TEST_CASE("The item tools' changes can be undone and redone [data][items][editor
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2796,7 +2892,7 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2824,11 +2920,157 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     CHECK(bless.IsUsedAtNumber());
 }
 
+// The monsters that wear an item use it by its number (D60): the move and
+// remove dialogs list them with their places.
+TEST_CASE("The usage of an item lists the monsters that wear it [data][items][editor]")
+{
+    std::vector<Data::Monsters::MonsterDefinition> previous;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        if (const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+            previous.push_back(*monster);
+    }
+    Data::Monsters::MonsterDefinition knight;
+    knight.number = 163;
+    knight.names.Set("en", "Chaos Castle Knight");
+    knight.setup.equipment.weapons[0] = Data::Monsters::MonsterItem{0, 0};
+    knight.randomVariants.emplace_back();
+    knight.randomVariants[0].equipment.emplace();
+    knight.randomVariants[0].equipment->weapons[1] = Data::Monsters::MonsterItem{0, 0};
+    Data::Monsters::MonsterDefinition other;
+    other.number = 7;
+    other.names.Set("en", "Giant");
+    other.setup.equipment.helm = Data::Monsters::MonsterItem{7, 2};
+    g_MonsterDatabase.Build(std::array{other, knight}, "en");
+
+    const MuEditor::Items::ItemUsage kris = MuEditor::Items::FindItemUsage(KrisType);
+    const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
+    g_MonsterDatabase.Build(previous, "en");
+
+    REQUIRE(kris.monsters.size() == 2);
+    CHECK(kris.monsters[0].number == 163);
+    CHECK(kris.monsters[0].place.slot == "weapons[0]");
+    CHECK(kris.monsters[1].place.variant == Data::Monsters::MonsterItemPlace::Variant::Random);
+    CHECK(kris.IsUsedAtNumber());
+    CHECK(nothing.monsters.empty());
+}
+
+// A move asks whether the monsters that wear the item follow it (D60,
+// Q-MN41): yes puts the move and the monsters into one step, and the item
+// tools' Save writes those references into the monster list as last saved,
+// with the items; the monster tools' other unsaved changes stay unsaved.
+TEST_CASE("An item move can update the monsters that wear it, and the item Save writes them [data][items][editor]")
+{
+    std::vector<Data::Monsters::MonsterDefinition> previous;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        if (const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+            previous.push_back(*monster);
+    }
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowLists();
+    const std::filesystem::path monstersFile = folder.Directory() / Data::Monsters::GetMonstersFile();
+    std::filesystem::create_directories(monstersFile.parent_path());
+    std::ofstream(monstersFile, std::ios::binary) << R"({ "formatVersion": 2, "monsters": [
+        {"name": {"en": "Giant"}, "kind": "monster", "numbers": [{"number": 7}]},
+        {"name": {"en": "Chaos Castle Knight"}, "kind": "monster",
+         "equipment": {"weapons": [{"group": 0, "number": 0, "level": 5}]},
+         "numbers": [{"number": 163}, {"number": 164}]}
+    ] })";
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    REQUIRE(g_MonsterDataHandler.Load(errorMessage));
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    const int target = MakeItemType(0, 100);
+    Data::Monsters::MonsterItemPlace weapon;
+    weapon.slot = "weapons[0]";
+    const auto weaponOf = [&](int number) { return Data::Monsters::FindItemAt(*g_MonsterDatabase.Find(number), weapon); };
+    const auto weaponInFile = [&](int number) -> std::optional<int>
+    {
+        const Data::Monsters::MonsterDataLoadResult file = Data::Monsters::LoadMonstersFile(monstersFile);
+        for (const Data::Monsters::MonsterDefinition& monster : file.monsters)
+        {
+            if (monster.number == number)
+                return Data::Monsters::FindItemAt(monster, weapon);
+        }
+        return std::nullopt;
+    };
+    const auto nameInFile = [&](int number)
+    {
+        const Data::Monsters::MonsterDataLoadResult file = Data::Monsters::LoadMonstersFile(monstersFile);
+        for (const Data::Monsters::MonsterDefinition& monster : file.monsters)
+        {
+            if (monster.number == number)
+                return monster.names.GetNeutral();
+        }
+        return std::string();
+    };
+
+    SUBCASE("yes: one step, saved with the items")
+    {
+        // An unsaved change of the monster tools, which the item tools' Save leaves.
+        REQUIRE(g_MonsterEdits.SetMonsterName("Name", 7, "en", "Big Giant"));
+
+        REQUIRE(edits.MoveItem("Move", KrisType, target, true));
+        CHECK(weaponOf(163) == target);
+        CHECK(weaponOf(164) == target);
+        CHECK(g_MonsterDatabase.Find(163)->setup.equipment.weapons[0]->level == 5);
+        const std::optional<int> group = g_MonsterDataHandler.FindGroupOf(163);
+        REQUIRE(group);
+        CHECK(Data::Monsters::FindItemAt(g_MonsterDataHandler.ReadGroup(*group)->shared, weapon) == target);
+        CHECK(edits.GetUnsavedMonsterItems().size() == 2);
+
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.Find(KrisType) != nullptr);
+        CHECK(weaponOf(163) == KrisType);
+        CHECK(Data::Monsters::FindItemAt(g_MonsterDataHandler.ReadGroup(*group)->shared, weapon) == KrisType);
+        CHECK(edits.GetUnsavedMonsterItems().empty());
+        REQUIRE(edits.Redo());
+        CHECK(weaponOf(164) == target);
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(edits.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(edits.GetUnsavedMonsterItems().empty());
+        CHECK(weaponInFile(163) == target);
+        CHECK(weaponInFile(164) == target);
+        CHECK(nameInFile(7) == "Giant");
+        CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+
+        // Undone after the save: the next save writes the old number back.
+        REQUIRE(edits.Undo());
+        CHECK(edits.GetUnsavedMonsterItems().size() == 2);
+        issues.clear();
+        REQUIRE(edits.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(weaponInFile(163) == KrisType);
+        CHECK(nameInFile(7) == "Giant");
+    }
+
+    SUBCASE("no: the monsters keep the old number")
+    {
+        const std::string before = TestFiles::ReadWholeFile(monstersFile);
+        REQUIRE(edits.MoveItem("Move", KrisType, target));
+        CHECK(weaponOf(163) == KrisType);
+        CHECK(edits.GetUnsavedMonsterItems().empty());
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(edits.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(monstersFile) == before);
+    }
+
+    g_MonsterEdits.OnDataReplaced();
+    g_MonsterDatabase.Build(previous, "en");
+}
+
 TEST_CASE("A number that is not free names what takes it [data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2865,7 +3107,7 @@ TEST_CASE("An entry without a name moves and goes as an item does [data][items][
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     std::string errorMessage;
@@ -2899,7 +3141,7 @@ TEST_CASE("Apply for only this item or a new item makes a copy of the look, whic
     using Data::Looks::LookDefinition;
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     std::string errorMessage;
@@ -3106,7 +3348,7 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     TestModelSlots slots;
@@ -3403,7 +3645,7 @@ TEST_CASE("Add item without copying makes an item without a slot [data][items][e
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -3701,7 +3943,7 @@ TEST_CASE("A click in the shared model warning's list keeps the warning open [da
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     TestModelSlots slots;
@@ -3747,7 +3989,7 @@ TEST_CASE("The shared model form follows an undo of meshes typed without spaces 
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     TestModelSlots slots;
@@ -3839,8 +4081,9 @@ TEST_CASE("Item Basics shows the stats at each level, from the values being type
             for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
             {
                 const GameLogic::Items::ItemStatValues game = GameLogic::Items::ComputeItemStats(
-                    ItemAttribute[itemType], {itemType, level, static_cast<BYTE>(variant.excellent ? 1 : 0),
-                                              static_cast<BYTE>(variant.ancient ? 1 : 0), 0});
+                    ItemAttribute[itemType],
+                    {itemType, level, static_cast<BYTE>(variant.excellent ? 1 : 0),
+                     static_cast<BYTE>(variant.ancient ? 1 : 0), 0});
                 const GameLogic::Items::ItemStatValues& shown = values[static_cast<size_t>(level)];
                 INFO(g_ItemDatabase.GetLogName(itemType)
                      << " +" << level << " excellent " << variant.excellent << " ancient " << variant.ancient);
@@ -3859,6 +4102,20 @@ TEST_CASE("Item Basics shows the stats at each level, from the values being type
     const int before = ComputeItemLevelValues(stronger, {})[5].damageMax;
     stronger.damageMax = static_cast<BYTE>(stronger.damageMax + 10);
     CHECK(ComputeItemLevelValues(stronger, {})[5].damageMax == before + 10);
+
+    // Excellent counts with any excellent option the draft's definition has, also without option 1.
+    ItemOptionsScope restoreOptions;
+    const Data::Items::ItemOptionDatabase& shipped = restoreOptions.Saved();
+    std::vector<Data::Items::ItemOptionDefinition> definitions(shipped.GetDefinitions().begin(),
+                                                              shipped.GetDefinitions().end());
+    const int physical = shipped.Find("excellentPhysicalAttack");
+    REQUIRE(physical != Data::Items::ItemOptionDatabase::NoDefinition);
+    std::erase_if(definitions[static_cast<size_t>(physical)].options,
+                  [](const Data::Items::ItemOption& option) { return option.number == 1; });
+    g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    CHECK(ComputeItemLevelValues(kris, RequirementVariant{true, false, 0})[0].damageMin >
+          ComputeItemLevelValues(kris, {})[0].damageMin);
 }
 
 TEST_CASE("Item Requirements shows what the game asks at each level, from the values being typed "
@@ -3883,6 +4140,12 @@ TEST_CASE("Item Requirements shows what the game asks at each level, from the va
     }
     CHECK(ComputeRequirementTable(kris, {true, false, 0})[0][Strength] == 57);
     CHECK(ComputeRequirementTable(kris, {false, false, 4})[0][Strength] == 47);
+    // The option level counts as the game counts it: above the Kris's list (4 levels) its last level.
+    CHECK(ComputeRequirementTable(kris, {false, false, 7})[0][Strength] == 47);
+    // From the draft's own option links: without the additional option the level adds nothing.
+    ItemDefinition withoutOption = kris;
+    withoutOption.options = {"luck"};
+    CHECK(ComputeRequirementTable(withoutOption, {false, false, 7})[0][Strength] == normal[0][Strength]);
     // The weapon profile adds strength per option level, the default one none.
     CHECK(MuEditor::Items::OptionLevelAddsStrength(kris));
     ItemDefinition defaultProfile = kris;
@@ -4109,7 +4372,7 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -4547,7 +4810,7 @@ TEST_CASE("The item tools add glow colors, change them and remove unused ones [d
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -5070,7 +5333,7 @@ TEST_CASE("A description placeholder that names no table stops the save [editor]
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope models;
     std::string errorMessage;

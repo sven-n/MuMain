@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/Random.h"
 #include "UI/HUD/SlideTicker.h"
 #include "Data/DataHandler/DataFileIO.h"
@@ -495,7 +496,7 @@ void SlideTicker::OpenSlideTextFile(const wchar_t* szFileName)
         }
     }
 
-    FILE* fp = _wfopen(szFileName, L"rb");
+    const Content::Stream fp = Content::OpenIO(szFileName);
     if (fp == nullptr)
     {
         wchar_t Text[256];
@@ -507,8 +508,7 @@ void SlideTicker::OpenSlideTextFile(const wchar_t* szFileName)
     }
 
     SLIDEHELP SlideHelp;
-    const bool complete = DataFileIO::ReadExact(fp, &SlideHelp, sizeof(SLIDEHELP));
-    fclose(fp);
+    const bool complete = DataFileIO::ReadExact(fp.get(), &SlideHelp, sizeof(SLIDEHELP));
     if (!complete)
     {
         DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");

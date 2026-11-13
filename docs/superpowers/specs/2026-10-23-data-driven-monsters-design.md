@@ -926,7 +926,7 @@ model entries.
 | MNG | One monster, several numbers | MN2b | D61: the grouped format (merge and difference), the one-time conversion (36 monsters with 160 numbers) with its comparison, `maps` per number from OpenMU's Season 6 placements (430 numbers, with the event spawns of Kanturu, Raklion, Crywolf, the Imperial Guardian and the Castle Siege), the Browser tree and its number actions, shared and own values in every monster tool. The 13 numbers of P26 keep the generic pattern as their own `attacks`. |
 | MN3 | Models | MN1, MN.P | `Data/Monsters/Models.json` with what `OpenMonsterModel`, `OpenNpc`, the creators' model constants and the slot-dependent code in `CreateCharacterPointer` (with the Hellas and Battle Castle hooks) set; part models by FX1 name; sounds with ids. `model` is filled for every monster for the tools; the creators still choose the model until MN4, and the recorder checks both agree. Monster recorder, model part. Editor: Monster Model, Monster Preview. P1, P9. |
 | MN4 | Setup at spawn | MN3, MN.P, MNG | The values of `CreateMonster` and the creators into the monster entries (D62, D63); the creators keep only logic, as hooks (D49); the post-creation changes of the packet handlers as Q-MN38 decided; `CDirection::SummonCreateMonster` takes the model from the monster table. Three parts in PR 3b: **MN4a** the core switch, **MN4b** the map creators, **MN4c** player-shaped monsters and NPCs and the merchants' part models, with the item tools learning monster references (D60). Monster recorder, creation part. Then the removal commits and one fix commit each: the bug look instead of the Bull Fighter (D64), P2, P13, P14, P27, Gayion's swords as parts, Maya without the Bull Fighter model, Molt once per map (Q-MN45). Editor: Monster Setup, Monster Equipment, the Preview additions. P2, P13–P15, P17, P24, P27. |
-| MN5 | NPC rules | MN4 | P23 fixed first; the talk rules by number into the monster entries as `talks`, `talkLevel`, `repairShop` and talk blocks (D66), replacing the code of Marlon, the Pet Trainer, the Werewolf Guardsman and the barracks Gatekeeper; the Crywolf altar contract stays a hook; texts as translatable strings. Monster recorder, talk part. Editor: NPC rules in Monster Setup, texts in Monster Translations. P23. |
+| MN5 | NPC rules | MN4 | P23 fixed first; the talk rules by number into the monster entries as `talks`, `talkLevel`, `repairShop` and talk blocks (D66), replacing the code of Marlon, the Pet Trainer, the Werewolf Guardsman and the barracks Gatekeeper; the Crywolf altar contract stays a hook; the models that 0x07 runs the Crywolf hero contract rule for (`ReceiveSkillStatus` for a buff shown already: the altars, `MODEL_SMITH`, `MODEL_NPC_SERBIS`, `MODEL_MERCHANT_MAN`, `MODEL_STORAGE`, `MODEL_NPC_BREEDER`; its always-true condition fixed in sven-n/MuMain#1081) become a field or that hook of their entries, so an entry's model change no longer switches the rule; texts as translatable strings. Monster recorder, talk part. Editor: NPC rules in Monster Setup, texts in Monster Translations. P23. |
 | MN6 | OpenMU sync, client side | MN1, MN2, items 7 | Exchange of number and names (D53); the read-only kind, window and skill data for the checks; the skill check against `attacks`. |
 | MN-B | OpenMU sync, server side | MN6 (file format) | OpenMU: monsters in the exchange pages of items phase B, with the event monster skills collected from settings and code. |
 | MN7 | Sounds per animation | MN3 | The global and the 7 map `PlayMonsterSound` hooks (with the 500-unit cut-off), the trap sounds of `SetPlayerAttack` and the per-map sound loads become sound events of the models. Monster recorder, sound part. |
@@ -1051,9 +1051,14 @@ phase.
   stays as their supply box's angle); `Angle[0] = 0` and `Weapon[i].Type = -1`
   (already so after `CreateCharacterPointer`); the Canon Tower's if/else hidden
   mesh (overwritten on the next line); the never compiled 227, 228 and 276;
-  Necron's weapon level 7 on an empty slot.
-- The comparison runs on clean, dirty and same-key slots, through 0x13, 0x1F,
-  0x45, 0x68 and `CDirection` (section 10, Q-MN59).
+  Necron's weapon level 7 on an empty slot; the Lunar Rabbit's and the PK
+  Field creator's `m_iAnimation = 0` (nothing reads it for their models);
+  the Totem Golem's `ShadowScale` (only the birds' shadows read it).
+  The monster recorder leaves these out of the comparison (`CompareMoved`).
+- The comparison runs on each map the entry names, on clean, dirty and
+  same-key slots, through 0x13, 0x1F, 0x45, 0x68 and `CDirection` (section
+  10, Q-MN59). A conversion reads the scale on world 0: `Setting_Monster`
+  adds the Blood Castle step (P13) on the castle maps after every creation.
 - MN4c: the item tools list monsters in "used by" and in the move and remove
   dialogs (D60).
 

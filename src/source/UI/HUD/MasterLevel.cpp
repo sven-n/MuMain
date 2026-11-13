@@ -1,6 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "App/Platform/Windows/Winmain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "GameLogic/Items/CSItemOption.h"
@@ -188,7 +188,7 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 {
     memset(m_stMasterSkillTreeData, 0, sizeof(m_stMasterSkillTreeData));
 
-    Core::Utilities::FileHandle fp(_wfopen(path, L"rb"));
+    Content::Stream fp = Content::OpenIO(path);
 
     if (!fp)
     {
@@ -234,7 +234,7 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
 {
     memset(m_stMasterSkillTooltip, 0, sizeof(m_stMasterSkillTooltip));
 
-    Core::Utilities::FileHandle fp(_wfopen(path, L"rb"));
+    Content::Stream fp = Content::OpenIO(path);
 
     if (!fp)
     {

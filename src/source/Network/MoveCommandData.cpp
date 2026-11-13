@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "MoveCommandData.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -35,7 +35,7 @@ CMoveCommandData* CMoveCommandData::GetInstance()
 
 bool CMoveCommandData::Create(const std::wstring& filename)
 {
-    Core::Utilities::FileHandle fp(_wfopen(filename.c_str(), L"rb"));
+    const Content::Stream fp = Content::OpenIO(filename);
     if (!fp)
         return false;
 

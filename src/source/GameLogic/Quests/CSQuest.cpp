@@ -2,7 +2,8 @@
 
 #include "stdafx.h"
 #include "I18N/All.h"
-#include "Core/Platform/PathResolve.h"
+#include "Core/Content/ContentStore.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Data/Translation/ItemTextExpansion.h"
 
 #include <algorithm>
@@ -11,8 +12,6 @@
 #include <cstdint>
 #include <cwchar>
 #include <cstring>
-#include <filesystem>
-#include <fstream>
 #include <iterator>
 #include <vector>
 
@@ -245,14 +244,7 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
         return false;
     }
 
-#ifdef _WIN32
-    const std::filesystem::path filePath(filename);
-#else
-    // The script path is Windows-spelled (backslashes, mixed case); resolve it
-    // against the case-sensitive filesystem.
-    const std::filesystem::path filePath(MuResolvePath(std::filesystem::path(filename).string().c_str()));
-#endif
-    std::ifstream file(filePath, std::ios::binary);
+    const Content::Stream file = Content::OpenIO(filename);
     if (!file)
     {
         wchar_t text[256];
@@ -267,7 +259,7 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
 
     for (auto& quest : m_Quest)
     {
-        if (!file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(recordSize)))
+        if (!DataFileIO::ReadExact(file.get(), buffer.data(), recordSize))
         {
             return false;
         }

@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/GameData/MonsterData/UnknownMonsterLook.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
@@ -71,6 +72,10 @@ struct MonsterEditEntry
     std::vector<MonsterModelEditStep> models;
     std::vector<MonsterSoundSetEditStep> soundSets;
     std::vector<MonsterGroupEditStep> groups;
+    // The unknown monsters' look before and after (D64); both set when the
+    // entry changed it.
+    std::optional<Data::Monsters::UnknownMonsterLook> unknownBefore;
+    std::optional<Data::Monsters::UnknownMonsterLook> unknownAfter;
     // Made on a monster with several numbers as a whole (its shared values):
     // its undo selects the monster as a whole again.
     bool wholeMonster = false;
@@ -101,6 +106,10 @@ public:
         // entries with monster steps.
         std::function<std::optional<Data::Monsters::MonsterGroupLayout>(int id)> readGroup;
         std::function<void(std::span<const Data::Monsters::MonsterGroupSnapshot> snapshots)> restoreGroups;
+        // The same for the unknown monsters' look; needed only for entries
+        // that change it.
+        std::function<Data::Monsters::UnknownMonsterLook()> readUnknownLook;
+        std::function<void(const Data::Monsters::UnknownMonsterLook& look)> restoreUnknownLook;
     };
 
     // Why the last Undo or Redo did nothing.

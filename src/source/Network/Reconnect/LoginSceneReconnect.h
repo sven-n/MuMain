@@ -68,8 +68,7 @@ private:
     enum class Phase
     {
         Idle,
-        Probing,          // waiting for the server to accept connections
-        AwaitingGreeting, // connected, waiting for the server's first answer
+        AwaitingGreeting, // connecting, then waiting for the server's first answer
         Failed,           // the failure message is up
     };
 
@@ -79,7 +78,6 @@ private:
     void PlayerWaits();
     void RefreshServerList();
     bool TakeListRequest();
-    void UpdateProbing();
     void Fail();
     void EnterPhase(Phase phase);
 

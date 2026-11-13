@@ -76,6 +76,33 @@ void ValidateMonsterNames(std::span<const MonsterDefinition> monsters, std::vect
     }
 }
 
+void ValidateMonsterSetups(std::span<const MonsterDefinition* const> monsters, const std::string& source,
+                           std::vector<ItemDataIssue>& issues)
+{
+    for (const MonsterDefinition* monster : monsters)
+    {
+        const auto check = [&](const MonsterSetup& setup, const std::string& where)
+        {
+            if (setup.live == false)
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, monster->number,
+                                  "monster " + std::to_string(monster->number) + where + " live",
+                                  "is false: the monster is dropped when it appears, so it is not drawn, cannot be "
+                                  "clicked, and later packets for it find nothing, as with the old code (P24)"});
+            }
+        };
+        const auto checkStates = [&](const MonsterSetup& setup, const std::string& where)
+        {
+            check(setup, where);
+            for (const MonsterStateVariant& state : setup.stateVariants)
+                check(state.setup, where + " (state " + state.state + ")");
+        };
+        checkStates(monster->setup, "");
+        for (size_t index = 0; index < monster->mapVariants.size(); ++index)
+            checkStates(monster->mapVariants[index].setup, " (map variant " + std::to_string(index + 1) + ")");
+    }
+}
+
 void ValidateMonsterNameLocales(std::span<const MonsterDefinition> monsters, std::span<const char* const> uiLocales,
                                 std::vector<ItemDataIssue>& issues)
 {

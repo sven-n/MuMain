@@ -1,3 +1,4 @@
+#include "Core/Content/ContentStore.h"
 #pragma once
 
 #ifdef _EDITOR
@@ -183,6 +184,7 @@ bool WriteBufferToFile(
     BYTE* buffer,
     size_t bufferSize)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     // Encrypt entire buffer if needed
     if (config.encryptBuffer)
     {

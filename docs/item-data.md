@@ -20,7 +20,7 @@ fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
 | `Tooltips/GroundLabels.json` | The looks of the item names on the ground: the label styles and the standard rules; see [Ground labels](#ground-labels) |
 | `Tooltips/NameCases.json` | The cases each language declines item names in, for texts that name items with a case; see [Name forms](#name-forms) |
-| `Options/*.json` | The option definitions, one file per option group (luck so far); see [Item options](#item-options) |
+| `Options/*.json` | The option definitions, one file per option group (luck, the additional option and the excellent options so far); see [Item options](#item-options) |
 | `Options/OptionRules.json` | Not read by the game: which option definitions an item's data gives it, for the editor; see [Option rules](#option-rules) |
 | `Tooltips/OptionTexts.json` | The texts of the options' tooltip lines; see [Item options](#item-options) |
 | `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync marks as wrong in the client or wrong in the server; see [Item Sync](#item-sync) |
@@ -579,8 +579,9 @@ background (opaque black when left out) and bold.
   of its own: the first rule whose `when` holds, with the
   [conditions](#tooltip-layouts) of the tooltip lines. They are the level ladder
   of the original client: the set items, the divine archangel weapons, the
-  socket items, the excellent items (not the second- and third-tier wings and
-  capes), from +7, with a skill, luck or option, then by level. A tag is read
+  socket items, the excellent items (the `excellent` condition: active
+  excellent options, as for the name) and the Horn of Fenrir with a kind,
+  from +7, with a skill, luck or option, then by level. A tag is read
   from the item the drop is drawn as: the Weapon of Archangel at +0 to +2 is
   drawn as a divine archangel weapon. Without a rule that holds the label is
   white on black.
@@ -822,7 +823,12 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
     the drop level (without the item level) when it has one. A requirement the item
     does not have stays 0;
   - `strengthPerOptionLevel`: the strength requirement grows by this much per
-    option level (also when the item has no strength requirement).
+    level the additional option counts at (also when the item has no
+    strength requirement): none when no option turns on (no option linked,
+    or an option type that picks none), the value list's last level above
+    the list, as OpenMU adds it for the option the item has. The wings'
+    options, still code, count at their option level, the Horn of
+    Dinorant's (flags, not a level) at none.
 - **Profiles** (`profiles`) write only what differs from the default. A term
   a profile writes replaces the default's as a whole. An item names its
   profile with `statProfile`; an item without one has the default.
@@ -920,10 +926,12 @@ The option groups an item can have are data, as OpenMU's item option
 definitions: the files of `Data/Items/Options` hold the definitions, one
 file per option group, and each item names the ones it can have in its
 `options` list. Which of them an item has comes from the server: its item
-data turns them on (luck by the luck flag). Luck is in data so far; the
-additional option, the excellent, wing, harmony, guardian, socket and pet
-options and the ancient bonus are still code and move into data one group
-at a time.
+data turns them on (luck by the luck flag, the additional option by its
+level, the excellent options by the excellent byte). Luck, the additional
+option of the items that are no wings and the excellent options are in data
+so far; the wings' and the Horn of Dinorant's options, the Wizard's rings',
+the harmony, guardian, socket and pet options and the ancient bonus are
+still code and move into data one group at a time.
 
 ```json
 {
@@ -947,8 +955,13 @@ at a time.
   definition is in is a convention: its type says what it is.
 - `type`: which part of the server's item data turns its options on, as
   OpenMU's option types: `luck` is the luck flag, with one option without
-  a number. Each option group brings its type when it moves into data. An
-  item links at most one definition of a type.
+  a number; `option` is the additional option's level (the option byte's
+  low four bits, 1 to 15; Season 6 sends 1 to 4), its options numbered
+  (`"number": 0`) by the option type the server sends in the byte's high
+  four bits, their value by that level; `excellent` is the excellent byte,
+  its options numbered 1 to 6, each turned on by the byte's bit number - 1.
+  Each option group brings its type when it moves into data. An item links
+  at most one definition of a type.
 - `displayName`: the definition's name by language, English first.
 - `openMu` and `server`: OpenMU's labels of the same definition (its GUID
   and its English name, which the exchange with the server will match by)
@@ -958,7 +971,16 @@ at a time.
   and adds its value as it is (`add`), after the other additions
   (`addFinal`) or in per cent (`percent`). The value is an object:
   `{"values": 5}` is 5 at every level, `{"values": [4, 8, 12, 16]}` one
-  value per level from level 1, the last one also above the list. `text`
+  value per level from level 1, the last one also above the list. `per`
+  adds terms on the hero's attributes, each rounded down on its own:
+  `{"values": 0, "per": [{"attribute": "level", "divisor": 20}]}` is the
+  hero's level / 20 (`times` multiplies instead). The client reads `level`,
+  `totalLevel` (level plus master level) and `masterLevel`, the master
+  level only for a hero whose class has one (0 after a character is picked
+  until the server sends the new hero's); a term on another attribute
+  adds nothing. Such a value is computed again whenever
+  the tooltip or the stats ask, so it grows with the hero, and stops at 0
+  and 65535, what an option slot holds. `text`
   names its tooltip lines in `Tooltips/OptionTexts.json`, one name or a
   list in their order.
 
@@ -967,6 +989,73 @@ of adding: luck's option fills the item's luck slot with its value, which
 the price and the mixes count as before and the character window adds up
 into the [critical damage rate](#critical-damage-rate). An attribute the
 client does not compute still shows its lines and adds nothing.
+
+`Options/Option.json` holds the additional options, as OpenMU's (all with
+OpenMU's server values: a 25 % chance, one per item):
+
+| Definition | Attribute | Value by level | Lines | Items |
+|---|---|---|---|---|
+| `physicalDamageOption` | `physicalBaseDmg` | 4, 8, 12, 16 | Additional Dmg | Groups 0 to 4 but arrows, bolts and magic swords |
+| `physicalAndWizardryDamageOption` | `baseDamageBonus` | 4, 8, 12, 16 | Additional Dmg, Additional Wizardry Dmg | Magic swords |
+| `wizardryDamageOption` | `wizardryBaseDmg` | 4, 8, 12, 16 | Additional Wizardry Dmg | Group 5 but the summoner's books |
+| `curseDamageOption` | `curseBaseDmg` | 4, 8, 12, 16 | Additional Curse Spell | The summoner's books |
+| `defenseRateOption` | `defenseRatePvm` | 5, 10, 15, 20 | Additional defense rate | Shields |
+| `defenseOption` | `defenseBase` | 4, 8, 12, 16 | Additional defense | Groups 7 to 11 |
+| `jewelryHealthRecovery` | `healthRecoveryMultiplier` (per cent) | 1, 2, 3 | Automatic HP recovery | The rings 13/8, 13/9, 13/21 to 13/23 and the pendants 13/12, 13/13, 13/25 to 13/27 |
+| `ringOfMagicMana` | `maximumMana` (per cent) | 1, 2, 3 | Max mana increased by | The Ring of Magic (13/24) |
+| `pendantOfAbilityAg` | `maximumAbility` (per cent) | 1, 2, 3 | Max AG increased by | The Pendant of Ability (13/28) |
+
+The lists end where Season 6 does; a level above a list counts as its
+last value, and a longer list gives a server that sends more its own
+values. A magic sword's one option fills one slot and shows two lines. The
+other items of group 13 (the Transformation Rings, the quest items, Loch's
+Feather and the others) have no additional option, as on OpenMU. The
+wings, the capes and the Horn of Dinorant keep their additional options in
+code until they move into data.
+
+`Options/Excellent.json` holds the excellent options, as OpenMU's (OpenMU's
+server values: a 0.1 % chance, two per item). Each option is the byte's bit
+number - 1; the tooltip lists them from number 6 down, as before.
+
+| Number | `excellentDefense` | `excellentPhysicalAttack` / `excellentWizardryAttack` |
+|---|---|---|
+| 1 | `moneyAmountRate` 30 %: Zen after hunting | `manaAfterMonsterKillMultiplier` 8: Mana after hunting (mana / 8) |
+| 2 | `defenseRatePvm` 10 %: Defense success rate | `healthAfterMonsterKillMultiplier` 8: Life after hunting (life / 8) |
+| 3 | `damageReflection` 5 % | `attackSpeedAny` +7 |
+| 4 | `armorDamageDecrease` 4 % | `physicalBaseDmgIncrease` / `wizardryBaseDmgIncrease` 2 % |
+| 5 | `maximumMana` 4 % | `physicalBaseDmg` / `wizardryBaseDmg` + level / 20 |
+| 6 | `maximumHealth` 4 % | `excellentDamageChance` 10 % |
+
+The client's stats add the damage and wizardry per cent, the defense rate
+per cent and level / 20 with the definitions' values; the server computes
+the other options (the attack speed among them), whose lines the tooltip
+shows.
+
+The defensive options go to groups 6 to 11 and the rings 13/8, 13/9 and
+13/21 to 13/24; the physical attack options to groups 0 to 4 and the
+pendants 13/13, 13/26 and 13/28; the wizardry attack options to group 5
+(the summoner's books too, whose stats add them to the curse damage, a
+known difference from OpenMU) and the pendants 13/12, 13/25 and 13/27.
+Arrows and bolts have none, as on Season 6 and OpenMU.
+
+The Zen option is +30 %, Season 6's value; OpenMU has +40 %. "Level / 20"
+divides the hero's level, as the client did; OpenMU divides level plus
+master level (`totalLevel`).
+
+"Excellent" (the name's prefix and green colour, the excellent +15
+durability, the tooltip state `excellent`, the ground label's excellent
+style, the excellent stat bonus and level requirement) means an active excellent option: the item links an
+excellent definition with an option its byte turns on. Wings with wing
+options use the byte for those, and the Horn of Fenrir for its kind
+(Destroy, Protect, Illusion), so they are not excellent by it; the Horn of
+Fenrir with a kind keeps the ground label's excellent style, as in the
+original client (a rule of the [ground labels](#ground-labels) only it
+meets: the other horns' byte is never set). The mixes, the MU
+Helper's excellent pick-up, the excellent glow, the durability per cent and
+the drop level's excellent bonus still read the byte. The durability per
+cent (what wear takes off the stats) reads it only for weapons, shields
+and armour, whose byte holds excellent options; wings pass no excellent
+flags to it.
 
 `Tooltips/OptionTexts.json` holds the lines' texts:
 
@@ -982,8 +1071,11 @@ client does not compute still shows its lines and adds nothing.
 }
 ```
 
-`{value}` is the option's value at the item's level (luck's is 5). The
-lines are in the UI's language, English where a text has no translation.
+`{value}` is the option's value at the item's level (luck's is 5), and
+`{divisor}` the divisor of its first term that has one: the excellent
+"+level/{divisor}" shows the 20 of its `{"attribute": "level", "divisor":
+20}`, and "+Mana/{value}" the 8 of the mana option. The lines are in the
+UI's language, English where a text has no translation.
 
 ### Critical damage rate
 
@@ -1057,10 +1149,20 @@ The game does not read it: the editor writes the items' lists from it.
   "formatVersion": 1,
   "rules": [
     {"options": [], "tags": ["ammunition"]},
-    {"options": ["luck"], "group": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]},
+    {"options": ["luck", "physicalAndWizardryDamageOption", "excellentPhysicalAttack"], "tags": ["magicSword"]},
+    {"options": ["luck", "physicalDamageOption", "excellentPhysicalAttack"], "group": [0, 1, 2, 3, 4]},
+    {"options": ["luck", "curseDamageOption", "excellentWizardryAttack"], "group": [5], "tags": ["summonerBook"]},
+    {"options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"], "group": [5]},
+    {"options": ["luck", "defenseRateOption", "excellentDefense"], "group": [6]},
+    {"options": ["luck", "defenseOption", "excellentDefense"], "group": [7, 8, 9, 10, 11]},
     {"options": ["luck"], "group": [12], "numbers": [0, 1, 2, 3, 4, 5, 6, 41, 42, 49]},
     {"options": ["luck"], "slot": ["wings"], "wingTier": ["third"]},
-    {"options": ["luck"], "group": [13], "numbers": [30]}
+    {"options": ["luck"], "group": [13], "numbers": [30]},
+    {"options": ["jewelryHealthRecovery", "excellentDefense"], "group": [13], "numbers": [8, 9, 21, 22, 23]},
+    {"options": ["ringOfMagicMana", "excellentDefense"], "group": [13], "numbers": [24]},
+    {"options": ["jewelryHealthRecovery", "excellentWizardryAttack"], "group": [13], "numbers": [12, 25, 27]},
+    {"options": ["jewelryHealthRecovery", "excellentPhysicalAttack"], "group": [13], "numbers": [13, 26]},
+    {"options": ["pendantOfAbilityAg", "excellentPhysicalAttack"], "group": [13], "numbers": [28]}
   ]
 }
 ```
@@ -1073,8 +1175,9 @@ more: `numbers`, item numbers (with `group`), and a tag with `!` before it
 shipped rules give luck to the items the client gave it before: groups 0
 to 11 but arrows and bolts, the wings 12/0 to 12/6, 12/41 and 12/42, the
 Cape of Fighter (12/49), the Cape of Lord (13/30) and the third tier
-wings. A test checks that every shipped item's list is the one its rules
-give.
+wings; and the additional and excellent options above. Since the first
+rule counts, a rule lists all of its items' definitions. A test checks
+that every shipped item's list is the one its rules give.
 
 **Problems** (see [Loading and errors](#loading-and-errors)). Fatal: a
 file that cannot be read or is no JSON, a missing or newer
@@ -1082,15 +1185,24 @@ file that cannot be read or is no JSON, a missing or newer
 English) or `options`, a type the game does not know, a name used twice,
 an option without `attribute` or with none or more than one of `add`,
 `addFinal` and `percent`, a value that is no object of whole numbers from
-0 to 65535 or that has `perLevel`, a number used twice in a definition, a
-luck definition with more than one option or a numbered one, OpenMU
+0 to 65535 or that has `perLevel`, a term (`per`) without `attribute` or
+without exactly one of `times` and `divisor` (whole numbers from 1), a
+number used twice in a definition, an additional option's number above 15,
+an excellent option's number outside 1 to 6, a luck definition with more
+than one option or a numbered one, OpenMU
 labels or server values of the wrong kind, and a rule naming a
 definition that does not exist or a condition it does not have. Errors:
 an item linking a definition that does not exist (the link is left out)
-or two of one type (the later one is left out), an option naming a text
+or two of one type (the later one is left out), wings or a horn
+mount linking excellent options (the excellent byte of wings holds their
+wing options, the Horn of Fenrir's its kind; no horn is excellent), an option naming a text
 the texts do not have, and a text without English or with a placeholder
-other than `{value}` (the lines that name it are left out). Warnings:
-unknown fields, an attribute the client does not compute, a definition no
+other than `{value}` and `{divisor}` (the lines that name it are left
+out). Warnings:
+unknown fields, an attribute the client does not compute, a term on a hero
+attribute the client does not read, a text with `{divisor}` on an option
+without a term that has a divisor (the line shows 0 there) or with several
+(it shows the first one's), a definition no
 item and no rule links, a text no option names and a text in a language
 the game has no texts in.
 
@@ -1193,7 +1305,8 @@ broken item data fails its checks.
 Which 3D model an item shows is set in `src/bin/Data/Items/Models/`, one
 file per item group with the same file names as the item files, and
 `SharedModels.json` with the models that several items use (see
-[Shared models](#shared-models)). They are separate from the item files
+[Shared models](#shared-models)) and `PartModels.json` with the models
+that are drawn with items but are no items (see [Part models](#part-models)). They are separate from the item files
 because they only matter to the client; the item files hold what client
 and server share.
 
@@ -1227,7 +1340,9 @@ and server share.
 | `ground` | How the item lies on the ground, see below. Optional. |
 | `glow` | How the item glows, see below. Optional. |
 | `renderStyle` | The look of the model when it is more than a plain textured model, see below. Optional. |
+| `renderStyleValues` | The values the item sets for the fields of its render style that each item sets, by their names: `{"color": [0.9, 0.1, 0.2]}`; see [Render styles and item effects](#render-styles-and-item-effects). Optional. |
 | `itemEffect` | What the model does before it is drawn (sprites and particles on its bones, a pulsing glow mesh, ...), see below. Optional. |
+| `itemEffectValues` | The values the item sets for the fields of its item effect that each item sets, like `renderStyleValues`. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 | `material` | `{ "specular": 0.5 }`: the strength of the highlight under Enhanced lighting, 0 (none) to 1; see [enhanced-look.md](enhanced-look.md). Optional. |
 
@@ -1265,9 +1380,11 @@ names from the glow color list, see below.
 | `level` | The level the item glows like instead of its own: one level, e.g. `8` for jewels and `0` for wings, or a list of 16, one for each item level from 0 to 15 (arrows, Devil's Square items). Levels above 15 do not glow. | its level |
 | `color` | Color of the glow of items +7 and up. | `orange` |
 | `meshes` / `hiddenMesh` | The glow is only on these meshes (`[0, 1]`), or on all meshes but this one (`1`). | all meshes |
+| `glowAgainInWhite` | The glow of items +7 and up draws this mesh again after the others, in white light, and what is drawn after it glows on that mesh (the Deadly Staff: `1`). | none |
 | `shineColor` | The extra shine of items +11 and up tints the light of the item with this color. | `white` |
 | `shineWhite` | `true`: the shine is plain white instead. | `false` |
 | `shineMeshes` / `shineHiddenMesh` | Like `meshes` / `hiddenMesh`, for the shine and for the glow of ancient items. | all meshes |
+| `shineBelowPlus3` | The shine of items +0 to +2, a name from the shine list (see below): `"seal"`. | none: drawn plainly |
 | `ancientColor` | Color of the glow of ancient items. | `azure` |
 | `excellent` | `false`: excellent items do not glow (wings and capes). | `true` |
 | `excellentMesh` | The excellent glow is only on this mesh. | all meshes |
@@ -1289,6 +1406,26 @@ writes the file in this form, one color a line.
 
 The glow of monsters, and of the event models that level variants are
 drawn with, is still set in code; changing the list does not change them.
+
+The shines below +3 are named in `src/bin/Data/Effects/Shines.json`. At +0
+to +2 an item whose glow names one is drawn in its light times `light` (left
+out: in the light the model has), then each pass draws glowing on the shine
+meshes, in the shine color times its `brightness` and `opacity`: `kind`
+`texture` with the meshes' own texture, `reflection` with a reflection that
+moves as its `motion` says (the [motions of a look's layer](#render-styles-and-item-effects),
+`slowDrift` when left out). `opacity` and `brightness` are 1 when left out.
+
+```json
+{ "formatVersion": 1, "shines": [
+  { "name": "seal", "light": 0.9, "passes": [
+    {"kind": "reflection", "motion": "fastSweep", "opacity": 1.5, "brightness": 1.5},
+    {"kind": "reflection", "motion": "swirl"} ] } ] }
+```
+
+The shipped list has `harmony` (the Jewel of Harmony, the Moonstone Pendant
+and the Illusion Sorcerer Covenant), `seal` (the Seals and Master Seals) and
+`cursedCastleWater`. A name a glow uses that is not in the list stops the
+start with a message.
 
 `renderStyle` names the look of models that are more than a plain textured
 model: chrome layers, glowing or animated meshes, a texture of their own
@@ -1312,11 +1449,15 @@ one mesh), `onlyMesh0WithoutSkin`, `onlyMesh1WithoutSkin` and
 mesh, without the character skin). An item without `renderStyle` is drawn
 plainly; a new look is made in the [Style Editor](#style-editor).
 
-Most styles fit any item. The ones that pick a mesh, a texture or a color
-for each of their items only know those items and draw other items
-plainly: `violentWindToEternalWingHelm`, `…Armor` and `…Pants` (items 39
-to 44), `socketSeed`, `socketSeedSphere`, `characterCard` and
-`divineAndSuccubusSkin`.
+Most styles fit any item. A look picks a mesh, a texture or a color for
+each of its items with the values each item sets (see
+[Render styles and item effects](#render-styles-and-item-effects)):
+`violentWindToEternalWingHelm`, `…Armor` and `…Pants` (items 39 to 44) the
+inventory mesh or texture of each set, `divineAndSuccubusSkin` and
+`luckyItem` theirs, `socketSeed` and `socketSeedSphere` the color of the
+seed, `characterCard` the glow texture of the card, and `sylphWindBow` the
+glow texture, scroll and light of each weapon. An item that sets no values
+draws the look's defaults.
 
 Some styles only apply to some drawings, and the model is drawn plainly
 otherwise: `runeBlade`, `greatScepter`, `grandSoulShield`, the
@@ -1326,11 +1467,8 @@ only in the hands of the Metal Balrog and the Orc Archer of Doom,
 `helperNpcPlate` only on the helper NPCs (Luke and Leo the Helper, Helper
 Ellen; in the code the flag of a PC room look, which no player gets).
 
-A few styles also shine below +3: the model is drawn with the light of the
-item scaled, then with two shine passes. `sealOfAscension`, `sealOfWealth`
-and `sealOfSustenance` (the seals, light at 0.9), `illusionSorcererCovenant`
-and `harmonyShine` (the Jewel of Harmony and the Moonstone Pendant, which
-are drawn plainly otherwise), and `cursedCastleWater`.
+How an item shines below +3 is no part of its style: its glow names the
+shine (`shineBelowPlus3`, see the glow values above).
 
 `itemEffect` names what the model does before it is drawn:
 
@@ -1338,8 +1476,10 @@ are drawn plainly otherwise), and `cursedCastleWater`.
 { "number": 37, "file": "Data/Item/wing09.bmd", "textureFolders": ["Item"], "itemEffect": "wingOfEternal" }
 ```
 
-Each item effect is code with a name; the names are listed at the end of
-`src/source/Render/Items/ItemEffects.cpp`. An item effect runs every frame
+An item effect is a named look in `Data/Effects/ItemEffects.json` (see
+[Render styles and item effects](#render-styles-and-item-effects)), or one
+still in code, listed at the end of `src/source/Render/Items/ItemEffects.cpp`;
+the game looks a name up in the file first. An item effect runs every frame
 before the model is drawn and can:
 
 - place sprites, particles and lightning on bones of the model, so they
@@ -1349,10 +1489,20 @@ before the model is drawn and can:
   `wingsOfSoul`, `redSpirit`, `staffOfKundun`, `divineSet`), a mesh hidden
   by level (`hiddenMeshByLevel` of the Siege Potion and the Contract,
   `hideMesh1`), the level potions glow like (`potion`: +7 at every level
-  above 0);
-- draw the model itself instead of the usual drawing (the Dark Lord's
-  scrolls, `fruits`, `spirit`, `firecracker`, `gmGift`,
-  `meshesPerLevel`).
+  above 0).
+
+The glow values of 39 weapons, shields, wings and orbs are item effects as
+well: `pulsingGlow` (a glow mesh, or `"all"`, whose strength waves),
+`flickeringGlow`, `glowingMesh`, `shimmeringGlow` and `shimmeringPulse`
+(a glow that jumps over the texture), `scrollingDown` (the Bill of Balrog)
+and `hideMesh2` / `hideMesh1` (the Rune Blade, the Elemental Mace and Shield,
+the Dragon Spear). They apply on every drawing, on the ground too, and a
+held item's shadow leaves out the mesh its item effect hides.
+
+An item effect never draws the model: the looks that draw their model
+themselves are render styles that draw alone (the Dark Lord's scrolls,
+`fruits`, `spirit`, `firecracker`, `gmGift`, `meshesPerLevel`), and
+`billOfBalrog` draws an extra pass before the model.
 
 Items with the same item effect share it. The socket seeds and spheres and
 zen have no item effect; they glow like level 0 (`"glow": {"level": 0}`), whatever
@@ -1457,18 +1607,50 @@ drawing hands the look.
 
 | Field | Values |
 |---|---|
-| `kind` | `texture`: the mesh's own texture, or the layer's; `reflection`: a reflection that moves over the mesh (chrome) |
+| `kind` | `texture`: the mesh's own texture, or the layer's; `reflection`: a reflection that moves over the mesh (chrome); `flatColor`: the mesh in the light alone, without a texture |
 | `motion` | How a reflection moves: `slowDrift` (left out), `fastSweep`, `followsLight`, `swirl`, `strongSwirl`, `stripes`, `verySlowDrift`, `oilSheen`, `stillShine` |
+| `where` | Where a reflection goes: `over` the texture (left out), or `underHoles`: on a mesh whose texture has holes, drawn before the texture, solid and on both faces, so it fills the holes (the Magic Gladiator sets); over a texture without holes, a glowing mesh and a see-through item it goes over with its blend. A look with such a layer draws mesh by mesh, every layer of a mesh before the next mesh, and the layer leaves the light as it found it |
 | `blend` | `normal` (left out), `glow` (added to what is below), `asDrawing` (the drawing's own: a doppelganger draws see-through) |
-| `meshes` | Left out: every mesh, with the model's texture scripts, without the item's hidden mesh; `"allEvenHidden"`: every mesh, the hidden one too; `[0, 2]`: those meshes; `{"allBut": [2]}`: every mesh but those |
+| `meshes` | Left out: every mesh, with the model's texture scripts, without the item's hidden mesh; `"allEvenHidden"`: every mesh, the hidden one too; `[0, 2]`: those meshes; `{"allBut": [2]}`: every mesh but those; `"none"`: no mesh, a layer that draws nothing, the default of a layer the values of some items turn on |
 | `texture` | A texture file under `Data` (`Effect/Chrome01.jpg`) instead of the mesh's own: a `.jpg` or a `.tga`, which the game reads from its `.OZJ` or `.OZT` file |
-| `light` | The light the layer is drawn in: `[red, green, blue]`, or `{"tint": [red, green, blue]}`, the item's light times those; each a number or a shape. It stays for the layers after it, and `{"tint": [1, 1, 1]}` is the item's light again. Left out: the light the layer before left |
+| `light` | The light the layer is drawn in: `[red, green, blue]`, or `{"tint": [red, green, blue]}`, the item's light times those; each a number or a shape. `{"brightness": 0.8}` is the item's light scaled so its brightest channel is 0.8 (a grey for a black light). It stays for the layers after it, and `{"tint": [1, 1, 1]}` is the item's light again. Left out: the light the layer before left |
 | `opacity` | A number, a shape, or `"drawing"`: the drawing's opacity |
 | `glowMesh` | The mesh drawn glowing: a mesh number, `"none"` or `"all"` |
 | `glowStrength`, `scrollU`, `scrollV` | A number or a shape |
 | `scrollingMesh` | The mesh whose texture scrolls while the layer draws, without the light of the scene; otherwise the model's own stays |
+| `onlyWhen` | When the layer draws; every condition it sets must hold, otherwise the layer is skipped. `"place"`: `"worn"` (worn or held, with the character's skin), `"inventoryAndGround"` (the skin hidden), `"inventory"` (the inventory's drawing, in white light) or `"ground"`; `"level": [from, to]`: the level the item glows like, both included; `"hiddenMesh"`: the item's hidden mesh in this drawing, a mesh number or `"none"`; `"buff": "infinityArrow"`: the character has the buff; `"withoutBuff": "infinityArrow"`: the character doesn't. Left out: the layer always draws |
 
-A value that changes over time names a **shape**. Its numbers give the
+`notFor` lists the drawings a look is not for, which then draw the item
+plainly, as an item without a look: `"doppelganger"`, and
+`"outsideMonsterHands"` (every drawing but in a monster's hands; the layers
+that draw as the drawing asks then draw without that mark).
+
+`"drawsAlone": true` draws the look right after the item's item effect, in
+the object's own light, and nothing of the drawing code after it: no level
+light from +3, no level glow from +7, no excellent glow, no buff tint. The
+Dark Lord's scrolls, `spirit`, `fruits`, `firecracker`, `gmGift` and
+`meshesPerLevel` draw alone, as their item effects in code did.
+
+```json
+{"name": "ammunition", "layers": [
+  {"kind": "texture", "blend": "asDrawing", "meshes": "allEvenHidden", "onlyWhen": {"buff": "infinityArrow"}, "opacity": "drawing", "light": [1, 0.8, 0.2]},
+  {"kind": "texture", "blend": "asDrawing", "meshes": "allEvenHidden", "onlyWhen": {"withoutBuff": "infinityArrow"}, "opacity": "drawing"}]}
+```
+
+A field of a layer or of `itemValuesAfter` can be one **each item sets**:
+`{"eachItem": "color", "default": [1, 1, 1]}`. An item that uses the look
+sets the value in its model entry,
+`"renderStyleValues": {"color": [0.9, 0.1, 0.2]}`, and draws the look with
+it. An item that sets none draws with
+the default, and without a default with the field left out; an item's
+`null` leaves the field out too (the item's own value, the mesh's own
+texture, the light before). So one look serves items that differ in a mesh,
+a texture or a color: the six socket seeds share `socketSeed`, each with its
+color.
+
+A value that changes over time names a **shape**. A layer's value can be the
+item's value times the shape (`"timesItem": true`), as the Phoenix Soul items
+pulse their own opacity and glow strength. Its numbers give the
 code's values exactly, so a look moved from code keeps them:
 `{"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}` is the
 code's `sin(WorldTime * 0.001f) * 0.6f + 0.4f`.
@@ -1481,28 +1663,63 @@ code's `sin(WorldTime * 0.001f) * 0.6f + 0.4f`.
 | `ramp` | `from`, `to`, `seconds` | From `from` towards `to` in `seconds`, then from `from` again |
 | `frames` | `count`, `step`, `secondsEach` | `count` steps of `step` from 0, `secondsEach` each, then again from 0 (a texture's frames) |
 | `random` | `from`, `to`, `step` | A value from `from` to `to` in steps of `step`, a new one each frame |
+| `zigzag` | `from`, `to`, `seconds` | From `from` straight to `to` in `seconds`, then straight back in as long; with `to` equal to `from` it stays there |
+| `turn` | `from`, `to` | From the item's turning angle: `from` at no turn, `to` at a quarter turn, `from` at half a turn and over the other half (the gamble items) |
 
 `itemValuesAfter` holds what the look leaves for what is drawn after it in
 the same drawing, the +7 glow and the excellent glow: `opacity`,
-`glowStrength`, `scrollU` and `scrollV` (numbers or shapes), and `glowMesh`,
-`hiddenMesh` and `scrollingMesh` (a mesh number or `"none"`). The scrolling
-mesh stays on the model for its later drawings too.
+`glowStrength`, `scrollU` and `scrollV` (numbers or shapes), `glowMesh`,
+`hiddenMesh` and `scrollingMesh` (a mesh number or `"none"`), and `light`, the
+model's light after the look, written like a layer's (`[0.7, 0.7, 0.7]`, or
+`{"tint": [1, 1, 1]}` for the light the drawing handed the look). Without a
+`light` the model keeps the light of the last layer. The scrolling mesh stays
+on the model for its later drawings too.
 
 The checks run at start, in **Data Checks** (area Render styles, on the
 looks as the Style Editor has them before Save Items) and in the Style
 Editor under the picked look. **Fatal**, the game stops at start with
 a message: a file that can't be read, a wrong format version or kind, a name
 that isn't letters and digits or is in the file twice, an unknown kind,
-motion, blend or shape, a shape's missing or wrong number (`seconds` 0 or
-less, `count` outside 1 to 1000, a `random` whose `to` is below `from`), a
-mesh number above 49, and an item effect's part (`itemValuesBefore`).
+motion, blend, shape, drawing a look is not for, place or buff, a shape's
+missing or wrong number (`seconds` 0 or less, `count` outside 1 to 1000, a
+`random` whose `to` is below `from`), a mesh number above 49, a level
+outside 0 to 15 or one whose `from` is above its `to`, `where` on a texture
+layer, a name of a value each item sets that isn't letters and digits, an
+item's value that can't be its field's (about that item), and an item
+effect's part (`itemValuesBefore`).
 **Error**, the game skips that layer: a texture that is no `.jpg` or `.tga`,
 or whose file is missing. **Warning**: unknown fields, a look without
 layers, a look no item uses, a mesh number an item's model doesn't have
-(about that item), and a folder naming a look the file doesn't have.
+(about that item), an `onlyWhen` without a condition, a value an item sets
+that its look doesn't have (about that item), `timesItem` on a number that
+can't be the item's (a light, an item value, an object light, a drawing
+opacity; left out), and a folder naming a look the file doesn't have.
 
-The item effects are all still code (above); their file,
-`Data/Effects/ItemEffects.json`, comes when the first ones move.
+The item effects that are data are in `Data/Effects/ItemEffects.json`,
+built like the render style file with the kind `"itemEffect"`. An item
+effect has none of a render style's parts (layers, `notFor`,
+`itemValuesAfter`; they are fatal there, and its parts in a render style);
+it does what comes before the drawing:
+
+```json
+{"name": "hiddenMeshByLevel", "itemValuesBefore": [
+  {"onlyWhen": {"level": [0, 0]}, "hiddenMesh": 1},
+  {"onlyWhen": {"level": [1, 1]}, "hiddenMesh": 0}]},
+{"name": "potion", "itemValuesBefore": [{"onlyWhen": {"level": [1, 15]}, "glowsLikeLevel": 7}]}
+```
+
+`itemValuesBefore` is a list of item values the effect sets before the
+drawing, each with an `onlyWhen` like a layer's (its level is the level the
+item glows like). The entries apply in their order, so one can read the
+level an entry before it set. An entry sets the item values of
+`itemValuesAfter` but the light (which the drawing sets after the item
+effect), and two more: `drawingOpacity`, the opacity the drawing hands the
+look (a layer's `"drawing"`; the Devil's Eye draws at 2), and
+`glowsLikeLevel`, the level the item glows like from then on (0 to 15).
+`objectLight`, `[red, green, blue]` of numbers or shapes, is the light the
+update puts on the item's object, which the ground item's next draw adds to
+its light (the Devil's Eye's pulse). A field of an entry can be one each
+item sets, which the model entry sets in `itemEffectValues`.
 
 ### Shared models
 
@@ -1531,6 +1748,40 @@ the other items use that data. Everything else (`inventory`, `ground`,
 `glow`, `renderStyle`, `itemEffect`, `cloth`) stays each item's own.
 Changing a shared model changes all its items; the model tool lists them
 first (see [Item Model](#item-model)).
+
+### Part models
+
+A few models are drawn with items but are no items: the nine decorations
+every worn armor piece gets at +15 (`grade15Head`, `grade15BodyLeft`, …),
+the wing on the held Phoenix Soul Star (`phoenixSoulStarWing`) and the
+inventory model of the Phoenix Soul Armor (`phoenixSoulArmorInventory`).
+Their entries are in `PartModels.json`, sorted by name, written like a
+shared model with a `renderStyle` of their own:
+
+```json
+{
+  "formatVersion": 1,
+  "partModels": [
+    { "name": "phoenixSoulStarWing", "file": "Data/Item/sword36wing.bmd", "textureFolders": ["Item"],
+      "renderStyle": "phoenixSoulStar" }
+  ]
+}
+```
+
+The game opens each part model from its entry and draws it with the render
+style the entry names, or plainly without one. The shipped ones use
+`grade15Decoration` (the nine decorations), `phoenixSoulStar` (the wing
+draws like the star it is attached to) and `phoenixSoulArmorInventory`. When and where a part model
+is drawn (which armor piece gets which decoration at which bone, the wing's
+place on the glove, which armor uses an inventory model) stays in the game
+code, which knows them by their names; a new entry of another name is not
+drawn.
+
+**Data Checks** (area Items, file `PartModels.json`) warns about an entry
+whose name is no part model slot (a typo like `grade15Hed`; it is not
+drawn), a `renderStyle` no look has (the model is drawn plainly), a model
+file that is not in the client folder, and a slot without an entry (the game
+draws nothing there).
 
 ---
 
@@ -1592,7 +1843,19 @@ shows it in the others.
   model entry and the shared model it names) and what uses it by its
   number and stays there: the source lines that name it (read from the
   sources the editor was built from; without them that part is not known)
-  and an ancient set, add option, buff or pet of the game data.
+  and an ancient set, add option, buff or pet of the game data, and the
+  monsters that wear it, with their places ("Monster 163 Chaos Castle Elf
+  wears it: weapons[0], weapons[1] (random look 1)"; see
+  [monster-data.md](monster-data.md)).
+
+  Monsters name an item by its number in their equipment, so the move
+  asks: **Move and update them** makes them name the new number too, in
+  the same undo step as the move; **Move only** leaves them at the old
+  number, where they wear nothing, and Data Checks lists them as errors
+  until another item is picked for them. Removing an item says the same of
+  its wearers. Save Items writes the references a move changed into
+  `Data/Monsters/Monsters.json` as it was last saved, with the item files
+  (all or none); the monster tools' other unsaved changes stay theirs.
 - **Item Basics**: the English name, size, slot and wing tier (*None* for
   none), two-handed, weapon kind (*By the group* takes the kind the item's
   group gives, which then follows its group, slot and classes), skill, drop
@@ -1632,7 +1895,7 @@ shows it in the others.
   the base value back; excellent and ancient items get no higher stat
   requirement from them, while excellent options still raise a level given
   by level and the option level still adds the strength its stat profile
-  gives per option level; a stat requirement whose formula takes the level
+  gives per level the additional option counts at; a stat requirement whose formula takes the level
   requirement, follows a level given by level). Below them, what the game asks at each + level
   (the `/<item name>` window shows the normal item), also as excellent,
   ancient or with an option level, while a value is still being typed. Then
@@ -1693,8 +1956,8 @@ How changes work:
   item stat file (a profile or a table nothing uses) opens Item Formulas at
   it. Warnings (a model file that is
   missing, a file several items name themselves instead of through a
-  shared model, a render style or item effect that does not exist) do not
-  stop it. If a file cannot be written (read-only folder, full disk), no
+  shared model, a render style or item effect that does not exist, a
+  [part model](#part-models) problem) do not stop it. If a file cannot be written (read-only folder, full disk), no
   file is replaced, the popup says so and the console names the file. A
   file open in another program can still fail when it is replaced, after
   others were. Only files whose content changed are rewritten.
@@ -1746,14 +2009,15 @@ number that has a model but no item:
   it is clicked again. At a level the preview draws with another model (the
   Box of Luck's levels, for example), the list says so and the preview
   shows none of its meshes. Which parts the render style draws, and with which
-  effects, shows in the [Style Editor](#style-editor); an item effect is
-  drawing code.
+  effects, shows in the [Style Editor](#style-editor), and so does what the item
+  effect sets before the drawing.
 - The inventory display as sliders, each with a number field to type the
   value (a drag is one undo step) beside the item in an inventory grid of
   its size, drawn as
   the game's inventory draws it at the preview's item level (it turns while
   the mouse is on it); the ground display, cloth, specular and the glow
-  (levels, colors with their swatches, meshes, excellent). The **+** beside
+  (levels, colors with their swatches, meshes, **Glow again in white on mesh**,
+  **Shine below +3** from the [shine list](#item-models), excellent). The **+** beside
   each glow color adds a new color to the list, starting as a copy of the
   field's color, and picks it, as one undo step. While a slider is
   dragged, the grid and the game's inventory show the value at once; it is
@@ -1765,8 +2029,19 @@ number that has a model but no item:
 - **Style and effect**: the render style and the item effect, picked from
   their lists with how many models use each and "(code)" for one still in
   code, and the items that use the picked one (a click selects one). **Open
-  in Style Editor** shows the render style in the
-  [Style Editor](#style-editor).
+  in Style Editor** shows the render style or the item effect in the
+  [Style Editor](#style-editor). When the look lets each item set values
+  (`renderStyleValues`, `itemEffectValues`), **Values for this item** lists
+  them, a field each, written as the model file writes them (`[0.9, 0.1, 0.2]`,
+  `2`; `null` leaves the look's field out); an empty field is the look's
+  default, and **Reset** takes the item's value away. Text that is no value
+  is not taken.
+- **Part models**, a section at the top: the [part models](#part-models) by
+  name. A picked one takes the item's place until an item is picked again:
+  its preview, its model file and texture folders, its meshes, and its render
+  style with **Open in Style Editor**. A part model has no inventory, ground,
+  glow or item effect. Its changes are undo steps, a changed file or folder
+  is opened again at once, and Save Items writes `PartModels.json`.
 
 A changed file, texture folder, mesh list or material is opened again
 before the next frame, so the game draws it at once. Models that the game
@@ -1825,15 +2100,17 @@ The editor has no bold font, so it draws a bold label twice, a pixel apart.
 [Colors](#colors) window and docked with the item tools, one of them: the roots **Render
 styles** and **Item effects**, each look with how many models use it, and
 "(code)" for a look that is still drawing code, which you see with its items
-but can't change. Folders sort the render styles of the file as in the Colors
+but can't change. Folders sort the looks of each file as in the Colors
 window (**New folder**, **Rename**, **Remove**, **Move up**, **Move down**,
-drag and drop); the file keeps them as `"lookFolders"`. A look in code stays
+drag and drop); the files keep them as `"lookFolders"`. A look in code stays
 under its root, and the looks there are sorted by name.
 
-**New look** adds a look to the picked folder that draws the item plainly
-(one texture layer), **Copy** copies the picked look under a new name, and
-**Rename** and **Remove** change a look no item uses. A name has letters and
-digits only, and no other render style has it, in the file or in code.
+**New look** adds a look to the picked folder: a render style that draws the
+item plainly (one texture layer), or an item effect that sets nothing yet.
+**Copy** copies the picked look under a new name, and **Rename** and
+**Remove** change a look no item uses. A name has letters and digits only,
+and no other look of its root has it, in the file or in code; a render style
+and an item effect may share one.
 
 The picked look shows:
 
@@ -1886,14 +2163,21 @@ The picked look shows:
   the look and aims at mesh numbers, so it fits every item that uses the
   look; a layer that does several things (an overlay that glows and flows)
   shows as its main effect, with the others among its settings.
+- Above the parts, the render style's own options: **Not for doppelgangers**,
+  **Only in a monster's hands** and **Draws alone** (see
+  [Render styles and item effects](#render-styles-and-item-effects)).
 - **Show the layers** shows the look as its layers instead, for what the
   effects don't cover: the layers in drawing order, one line each written
   from its fields, and **Item values after drawing** as the last line;
   **Add**, **Copy**, **Move up**, **Move down** and **Remove** change the
   list. Below it are the fields of the picked line: kind, motion, blend,
   meshes, texture, light, opacity, glow mesh and strength, scroll and the
-  scrolling mesh. A value is the item's, the drawing's (opacity), a number or
-  a shape. A shape's curve is drawn below its fields: ten seconds of the
+  scrolling mesh, then **Only when** (the place, the levels, the item's
+  hidden mesh, a buff the character has or doesn't have) and **Each item
+  sets**: a checkbox for each field an item may set itself, with the name of
+  its value (the field's value stays the default). A value is the item's, the
+  drawing's (opacity), a number or a shape; a shape of a layer's value can be
+  **Times the item value**. A shape's curve is drawn below its fields: ten seconds of the
   preview's clock, its values from 0 to 1 or as far as the shape goes, with
   the numbers at its edges and a mark at the preview's time (or the time
   slider's while Stop time is on), so a change of From, To or Seconds shows
@@ -1910,9 +2194,17 @@ The picked look shows:
   change over time.
 - The items that use the look; a click selects one.
 
+A picked **item effect** shows, instead of parts and layers, its entries
+**Before drawing** in their order (**Add**, **Remove**, **Move up**, **Move
+down**), each with its Only when, the item values it sets (no light), the
+drawing's opacity, the level the item glows like and Each item sets, and the
+**Object light** as the last line. Its preview runs the edited effect on the
+picked item; Apply, Revert and the problems work as for a render style.
+
 Each change of the looks or their folders is a step of the item undo history
 and reaches the game at once. **Save Items** writes
-`Data/Effects/RenderStyles.json` with the items. A file read with a fatal
+`Data/Effects/RenderStyles.json` and `ItemEffects.json` with the items, each
+when it changed. A file read with a fatal
 problem is never written; the editor then shows the looks the game has.
 
 ### Item Tooltip

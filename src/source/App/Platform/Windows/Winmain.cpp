@@ -4,10 +4,12 @@
 #include "Core/Utilities/Random.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/TeardownStack.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Platform/GameWindow.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
+#include "App/Platform/ClientMain.h"
 #include "App/Control/DrawPurityCheck.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Text/Utf8.h"
@@ -30,6 +32,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "GameLogic/Monsters/MonsterNames.h"
+#include "World/GameMaps/MonsterSpawnWorld.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -43,6 +46,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "Scenes/WebzenScene.h"
 #include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
@@ -51,6 +55,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include <SDL3/SDL.h>
+#include "Core/Content/ContentStore.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -172,6 +177,18 @@ extern wchar_t LogInID[];
 extern bool First;
 extern int FirstTime;
 extern BOOL g_bGameServerConnected;
+extern bool LogOut;
+
+// Closing the window skips the menu exit, which is what sends the key configuration (skill and item hotkeys,
+// options, chat box); send it here while still connected. Once is enough: several close events can arrive, and the
+// menu exit has already saved before it logs out and closes the window.
+void SaveOptionsBeforeClose()
+{
+    if (!Destroy && !LogOut)
+    {
+        SaveOptionsIfInGame();
+    }
+}
 
 void CheckHack()
 {
@@ -512,27 +529,13 @@ DWORD GetCheckSum(WORD wKey)
 {
     wKey = DecryptCheckSumKey(wKey);
 
-    wchar_t lpszFile[MAX_PATH];
-
-    wcscpy(lpszFile, L"data\\local\\Gameguard.csr");
-
-    HANDLE hFile =
-        CreateFile(lpszFile, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-    if (INVALID_HANDLE_VALUE == hFile)
+    std::optional<std::string> file = Content::ReadFile(L"data\\local\\Gameguard.csr");
+    if (!file)
     {
         return (0);
     }
 
-    DWORD dwSize = GetFileSize(hFile, nullptr);
-    auto* pbyBuffer = new BYTE[dwSize];
-    DWORD dwNumber;
-    ReadFile(hFile, pbyBuffer, dwSize, &dwNumber, nullptr);
-    CloseHandle(hFile);
-
-    DWORD dwCheckSum = GenerateCheckSum(pbyBuffer, dwSize, wKey);
-    delete[] pbyBuffer;
-
-    return (dwCheckSum);
+    return GenerateCheckSum(reinterpret_cast<BYTE*>(file->data()), static_cast<DWORD>(file->size()), wKey);
 }
 
 BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion)
@@ -579,6 +582,9 @@ extern PATH* path;
 
 void DestroyWindow()
 {
+    // A quit during startup: the load's texture batch must end while the renderer is still up.
+    EndWebzenScene();
+
     // Save game configuration to config.ini
     GameConfig::GetInstance().SetSoundVolume(g_pOption->GetVolumeLevel());
     GameConfig::GetInstance().Save();
@@ -739,6 +745,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         // Just request shutdown; the main loop exits on Destroy and the teardown
         // (sound, GL, window) runs after it. SDL owns the window now, so the GL
         // context and window must not be torn down from inside a message.
+        SaveOptionsBeforeClose();
         Destroy = true;
         if (SocketClient != nullptr)
         {
@@ -981,14 +988,6 @@ void RecordCpuUsage()
     }
 }
 
-// unlimited as default (same behavior as original)
-int g_MaxMessagePerCycle = -1;
-
-void SetMaxMessagePerCycle(int messages)
-{
-    constexpr int custom_min = 3;
-    g_MaxMessagePerCycle = (messages > 0) ? std::max<int>(messages, custom_min) : messages;
-}
 
 #ifdef _WIN32
 // Transitional bridge (issue #442): SDL owns message dispatch and default
@@ -1116,7 +1115,6 @@ void HandleMouseButton(const SDL_Event& e)
             if (!MouseLButton)
                 MouseLButtonPush = true;
             MouseLButton = true;
-            Core::Input::RecordLeftMouseButtonPressEdge();
             if (e.button.clicks >= 2)
                 MouseLButtonDBClick = true;
             SetCapture(g_hWnd);
@@ -1229,8 +1227,8 @@ void HandleFocusChange(bool active)
             MouseMButtonPop = false;
             MouseMButtonPush = false;
             MouseWheel = 0;
-            Core::Input::ClearLeftMouseButtonPressEdge();
         }
+        Core::Input::ClearPressEdges();
     }
     else
     {
@@ -1411,6 +1409,17 @@ SDL_WindowID ActionWindowId(const SDL_Event& event)
     }
 }
 
+// A right press consumed by the UI still reaches the game when it targets a party card (casting a
+// support skill on that member), and a right release does while the game holds the button, so it can't stick.
+bool PassesRightButtonToGame(const SDL_Event& event)
+{
+    if (event.button.button != SDL_BUTTON_RIGHT)
+        return false;
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_UP)
+        return MouseRButton;
+    return g_pPartyListWindow && g_pPartyListWindow->IsCardHoveredForMemberSkill();
+}
+
 // Physical and scripted input share UI-first routing. Scripted input owns its
 // own legacy held state; it never acquires the OS pointer or replays SDL events.
 bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
@@ -1430,9 +1439,12 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
     case SDL_EVENT_MOUSE_BUTTON_UP:
         if (!synthetic && event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
             Core::Input::Synthetic::CancelForPhysicalButton(event.button.button);
-        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow) || PassesRightButtonToGame(event);
         if (propagates && !synthetic)
+        {
+            Core::Input::RecordPressEdge(event);
             HandleMouseButton(event);
+        }
         return true;
     case SDL_EVENT_TEXT_INPUT:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
@@ -1443,6 +1455,9 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
         return true;
     case SDL_EVENT_KEY_DOWN:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        // Scripted keys keep their own held state (Synthetic::IsKeyHeld).
+        if (propagates && !synthetic)
+            Core::Input::RecordPressEdge(event);
 #if !defined(_WIN32)
         // Physical Windows messages already handle these keys; SDL-only paths
         // (and Windows synthetic events below) must handle them here instead.
@@ -1464,201 +1479,189 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
     }
 }
 
-MSG MainLoop()
+namespace
 {
-    constexpr auto target_resolution = 1;
-    auto precise = timeBeginPeriod(target_resolution);
+// What startup set up, undone newest first by ShutdownClient, after a normal quit and after a failed startup alike.
+Core::TeardownStack g_teardown;
+std::thread g_cpuUsageRecorder;
+bool g_preciseTimer = false;
+} // namespace
 
-    HandleFocusChange(Core::Platform::HasSDLWindowInputFocus(SDL_GetWindowFlags(g_sdlWindow)));
-    Core::Input::Synthetic::SetEventDelivery([](SDL_Event& event, bool& propagates)
-                                             { return RouteActionInput(event, true, propagates); }, g_sdlWindow);
-
-    while (!Destroy)
-    {
-        SDL_Event event;
-        int messageProcessed = 0;
-
-        // Wait for the GPU before reading input, not after: with VSync the frame then uses input as fresh as
-        // the CPU work allows, and the wait isn't counted as the renderer's CPU time.
-        mu::GetRenderer().WaitForSwapchain();
-
-        // Per-frame mouse-state reset (was done per-message in WndProc): clear a
-        // stale double-click and a pop whose position the cursor has moved off.
-        MouseLButtonDBClick = false;
-        if (MouseLButtonPop && (g_iMousePopPosition_x != MouseX || g_iMousePopPosition_y != MouseY))
-            MouseLButtonPop = false;
-
-        // The Windows hook bridges F10, Enter and posted game-shutdown messages.
-        // SDL dispatches child EDIT controls itself; mouse/window events and
-        // the editor's input are routed below.
-        while (SDL_PollEvent(&event))
-        {
+// One SDL event, as SDL_AppEvent hands them over; false once the client should quit.
+bool HandleClientEvent(SDL_Event& event)
+{
 #ifdef _EDITOR
-            // Feed every event to the editor's ImGui SDL3 backend (issue #442).
-            // Guard on an active context: editor init can fail or be shut down.
-            if (ImGui::GetCurrentContext() != nullptr)
-                ImGui_ImplSDL3_ProcessEvent(&event);
-            // What the editor takes (a click or a key on one of its windows) does
-            // not reach RmlUi or the game under it.
-            if (g_MuEditorCore.ClaimsEvent(event))
-            {
-                ++messageProcessed;
-                if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
-                {
-                    break;
-                }
-                continue;
-            }
+    // Feed every event to the editor's ImGui SDL3 backend (issue #442).
+    // Guard on an active context: editor init can fail or be shut down.
+    if (ImGui::GetCurrentContext() != nullptr)
+        ImGui_ImplSDL3_ProcessEvent(&event);
+    // What the editor takes (a click or a key on one of its windows) does
+    // not reach RmlUi or the game under it.
+    if (g_MuEditorCore.ClaimsEvent(event))
+        return !Destroy;
 #endif
-            switch (event.type)
-            {
-            case SDL_EVENT_QUIT:
-                Destroy = true;
-                break;
-            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-                // Titlebar X / Alt+F4: request shutdown directly on SDL's close
-                // event, without relying on a subsequent SDL_EVENT_QUIT (#535).
-                Destroy = true;
-                break;
-            case SDL_EVENT_MOUSE_MOTION:
-            case SDL_EVENT_MOUSE_BUTTON_DOWN:
-            case SDL_EVENT_MOUSE_BUTTON_UP:
-            {
-                bool propagates = true;
-                RouteActionInput(event, false, propagates);
-                break;
-            }
-            case SDL_EVENT_MOUSE_WHEEL:
-                if (Core::Input::RouteToUi(event, g_sdlWindow))
-                {
-                    // SDL does not pre-correct flipped (natural) scrolling; invert.
-                    MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
-                                                                                   : static_cast<int>(event.wheel.y);
-                }
-                break;
-            case SDL_EVENT_WINDOW_RESIZED:
-                HandleWindowResize(event.window.data1, event.window.data2);
-                break;
-            case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
-                HandleContentScaleChange();
-                break;
-            case SDL_EVENT_WINDOW_FOCUS_GAINED:
-                HandleFocusChange(true);
-                break;
+    switch (event.type)
+    {
+    case SDL_EVENT_QUIT:
+        SaveOptionsBeforeClose();
+        Destroy = true;
+        break;
+    case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+        // Titlebar X / Alt+F4: request shutdown directly on SDL's close
+        // event, without relying on a subsequent SDL_EVENT_QUIT (#535).
+        SaveOptionsBeforeClose();
+        Destroy = true;
+        break;
+    case SDL_EVENT_MOUSE_MOTION:
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+    {
+        bool propagates = true;
+        RouteActionInput(event, false, propagates);
+        break;
+    }
+    case SDL_EVENT_MOUSE_WHEEL:
+        if (Core::Input::RouteToUi(event, g_sdlWindow))
+        {
+            // SDL does not pre-correct flipped (natural) scrolling; invert.
+            MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
+                                                                           : static_cast<int>(event.wheel.y);
+        }
+        break;
+    case SDL_EVENT_WINDOW_RESIZED:
+        HandleWindowResize(event.window.data1, event.window.data2);
+        break;
+    case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+        HandleContentScaleChange();
+        break;
+    case SDL_EVENT_WINDOW_FOCUS_GAINED:
+        HandleFocusChange(true);
+        break;
 #ifndef _WIN32
-            case SDL_EVENT_WINDOW_MOUSE_ENTER:
-                // Wayland can deliver the first pointer-enter after the startup
-                // cursor-hide, dropping it and leaving the OS cursor over the
-                // game's own; re-apply the hide on every enter (issue #462).
-                MuApplyCursorVisibility();
-                break;
+    case SDL_EVENT_WINDOW_MOUSE_ENTER:
+        // Wayland can deliver the first pointer-enter after the startup
+        // cursor-hide, dropping it and leaving the OS cursor over the
+        // game's own; re-apply the hide on every enter (issue #462).
+        MuApplyCursorVisibility();
+        break;
 #endif
-            case SDL_EVENT_WINDOW_FOCUS_LOST:
-                HandleFocusChange(false);
-                break;
-            case SDL_EVENT_TEXT_INPUT:
-            case SDL_EVENT_KEY_UP:
-            case SDL_EVENT_KEY_DOWN:
-            {
-                bool propagates = true;
-                RouteActionInput(event, false, propagates);
-                break;
-            }
-            case SDL_EVENT_TEXT_EDITING:
-                // IsTextInputActive() is driven by RmlUiSystemInterface::ActivateKeyboard/
-                // DeactivateKeyboard, which WidgetTextInput's own Focus/Blur handling calls.
-                if (RmlUiRuntime::Instance().IsTextInputActive())
-                    RmlUiRuntime::Instance().ProcessTextEditing(event);
-                break;
-            default:
-                break;
-            }
-
-            ++messageProcessed;
-            if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
-            {
-                break;
-            }
-        }
-
-        // Process server packets handed over from the network thread. Replaces
-        // the old WM_RECEIVE_BUFFER message round-trip; runs on the main thread.
-        Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback);
-
-        // Run a pending reconnect teardown between frames (self-guards on its
-        // pending flag). Replaces the old WM_START_RECONNECT round-trip.
-        ReconnectManager::Instance().Begin();
-
-        // Fire any due timers. Replaces the Win32 SetTimer/WM_TIMER dispatch.
-        Core::Time::FrameTimerScheduler::Instance().Tick();
-
-        // Serve the control socket, after this frame's packets have been
-        // processed so a command sees the newest game state, and before
-        // rendering so an act's step is drawn in the same frame. Does nothing
-        // when the socket was never opened.
-        App::Control::ControlServer::Instance().Poll();
-
-        if (CheckRenderNextFrame())
-        {
-            if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
-            {
-#ifdef _EDITOR
-                // F12 key toggle for editor, from the game window or the editor's
-                // own: the key itself, not the game's keys (IsKeyDown leaves out
-                // what is pressed in the editor's windows).
-                static bool wasF12Pressed = false;
-                const bool f12Down = Core::Input::Synthetic::IsKeyHeld(VK_F12) ||
-                                     SDL_GetKeyboardState(nullptr)[Core::Input::VkToScancode(VK_F12)];
-                if (f12Down)
-                {
-                    if (!wasF12Pressed)
-                    {
-                        g_MuEditorCore.ToggleEditor();
-                        fwprintf(stderr, L"[Editor] Toggled: %s\n", g_MuEditorCore.IsEnabled() ? L"ON" : L"OFF");
-                        fflush(stderr);
-                        wasF12Pressed = true;
-                    }
-                }
-                else
-                {
-                    wasF12Pressed = false;
-                }
-
-                // Update editor UI (must be before RenderScene)
-                g_MuEditorCore.Update();
-#endif
-
-                RequestDiagnosticFrameCapture();
-                ApplyPendingVSyncPreference();
-                // Between frames: a texture replaced mid-frame would drop the frame's draws.
-                Bitmaps.UpdateTextureFiltering();
-                // The player's Mood strength, at most one map light rebuild per frame however often
-                // it moved (options open or closed).
-                Render::Look::ApplyPendingTuning();
-                RenderProfiledFrame();
-#ifdef _EDITOR
-                // The editor's own windows, now that the game's frame went to the GPU.
-                g_MuEditorCore.RenderPlatformWindows();
-#endif
-                ConsumeDiagnosticFrameCapture();
-            }
-        }
-        else
-        {
-            // SDL_PollEvent above already drained pending events, so just pace
-            // the frame.
-            WaitForNextActivity(precise == TIMERR_NOERROR);
-        }
-
-    } // while (!Destroy)
-
-    Core::Input::Synthetic::SetEventDelivery(nullptr, nullptr);
-    if (precise == TIMERR_NOERROR)
+    case SDL_EVENT_WINDOW_FOCUS_LOST:
+        HandleFocusChange(false);
+        break;
+    case SDL_EVENT_TEXT_INPUT:
+    case SDL_EVENT_KEY_UP:
+    case SDL_EVENT_KEY_DOWN:
     {
-        timeEndPeriod(target_resolution);
+        bool propagates = true;
+        RouteActionInput(event, false, propagates);
+        break;
+    }
+    case SDL_EVENT_TEXT_EDITING:
+        // IsTextInputActive() is driven by RmlUiSystemInterface::ActivateKeyboard/
+        // DeactivateKeyboard, which WidgetTextInput's own Focus/Blur handling calls.
+        if (RmlUiRuntime::Instance().IsTextInputActive())
+            RmlUiRuntime::Instance().ProcessTextEditing(event);
+        break;
+    default:
+        break;
     }
 
-    return MSG{};
+    return !Destroy;
+}
+
+// One frame, as SDL_AppIterate calls it after handing over the frame's events; false once the client should quit.
+bool IterateClient()
+{
+    // Nothing runs, not even the packets or the timers; the events still arrive, so the window can close.
+    if (FramesPaused())
+    {
+        SDL_Delay(10);
+        return !Destroy;
+    }
+
+    // Process server packets handed over from the network thread. Replaces
+    // the old WM_RECEIVE_BUFFER message round-trip; runs on the main thread.
+    Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback);
+
+    // Run a pending reconnect teardown between frames (self-guards on its
+    // pending flag). Replaces the old WM_START_RECONNECT round-trip.
+    ReconnectManager::Instance().Begin();
+
+    // Fire any due timers. Replaces the Win32 SetTimer/WM_TIMER dispatch.
+    Core::Time::FrameTimerScheduler::Instance().Tick();
+
+    // Serve the control socket, after this frame's packets have been
+    // processed so a command sees the newest game state, and before
+    // rendering so an act's step is drawn in the same frame. Does nothing
+    // when the socket was never opened.
+    App::Control::ControlServer::Instance().Poll();
+
+    if (CheckRenderNextFrame())
+    {
+        if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
+        {
+#ifdef _EDITOR
+            // F12 key toggle for editor, from the game window or the editor's
+            // own: the key itself, not the game's keys (IsKeyDown leaves out
+            // what is pressed in the editor's windows).
+            static bool wasF12Pressed = false;
+            const bool f12Down = Core::Input::Synthetic::IsKeyHeld(VK_F12) ||
+                                 SDL_GetKeyboardState(nullptr)[Core::Input::VkToScancode(VK_F12)];
+            if (f12Down)
+            {
+                if (!wasF12Pressed)
+                {
+                    g_MuEditorCore.ToggleEditor();
+                    fwprintf(stderr, L"[Editor] Toggled: %s\n", g_MuEditorCore.IsEnabled() ? L"ON" : L"OFF");
+                    fflush(stderr);
+                    wasF12Pressed = true;
+                }
+            }
+            else
+            {
+                wasF12Pressed = false;
+            }
+
+            // Update editor UI (must be before RenderScene)
+            g_MuEditorCore.Update();
+#endif
+
+            RequestDiagnosticFrameCapture();
+            ApplyPendingVSyncPreference();
+            // Between frames: a texture replaced mid-frame would drop the frame's draws.
+            Bitmaps.UpdateTextureFiltering();
+            // The player's Mood strength, at most one map light rebuild per frame however often
+            // it moved (options open or closed).
+            Render::Look::ApplyPendingTuning();
+            // Load work runs here, between frames: a load inside a frame loses what the frame drew before it.
+            PrepareSceneBeforeFrame();
+            // The first frame has something to draw now.
+            if ((SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_HIDDEN) != 0)
+                SDL_ShowWindow(g_sdlWindow);
+            RenderProfiledFrame();
+#ifdef _EDITOR
+            // The editor's own windows, now that the game's frame went to the GPU.
+            g_MuEditorCore.RenderPlatformWindows();
+#endif
+            ConsumeDiagnosticFrameCapture();
+        }
+    }
+    else
+    {
+        // SDL handed this frame's events over before calling, so just pace the frame.
+        WaitForNextActivity(g_preciseTimer);
+    }
+
+    // Per-frame mouse-state reset (was done per-message in WndProc), before the next frame's events: clear a
+    // stale double-click and a pop whose position the cursor has moved off.
+    MouseLButtonDBClick = false;
+    if (MouseLButtonPop && (g_iMousePopPosition_x != MouseX || g_iMousePopPosition_y != MouseY))
+        MouseLButtonPop = false;
+
+    // Wait for the GPU before SDL reads the next frame's input, not after: with VSync the frame then uses input
+    // as fresh as the CPU work allows, and the wait isn't counted as the renderer's CPU time.
+    mu::GetRenderer().WaitForSwapchain();
+    return !Destroy;
 }
 
 namespace
@@ -1681,51 +1684,47 @@ FontSizes CalculateFontSizes()
 }
 
 #ifdef _WIN32
-// Absolute path of a bundled font file (relative to ./fonts) next to the exe.
-// The curated names in kBundledFonts are ASCII, so the byte-wise widen is safe.
-std::wstring BundledFontFullPath(const char* relative)
-{
-    wchar_t exePath[MAX_PATH] = {};
-    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-    std::wstring path(exePath);
-    path.resize(path.find_last_of(L"\\/") + 1); // keep the directory + separator
-    while (*relative)
-        path.push_back(static_cast<wchar_t>(static_cast<unsigned char>(*relative++)));
-    return path;
-}
+// The bundled faces added to GDI; it keeps its own copy of each file's bytes.
+std::vector<HANDLE> g_bundledFontFaces;
 #endif
+
+// Mirrors RegisterBundledFonts so the process leaves no private faces behind.
+void UnregisterBundledFonts()
+{
+#ifdef _WIN32
+    for (auto it = g_bundledFontFaces.rbegin(); it != g_bundledFontFaces.rend(); ++it)
+        RemoveFontMemResourceEx(*it);
+    g_bundledFontFaces.clear();
+#endif
+}
 
 // Privately register the TTFs bundled in ./fonts so GDI resolves their face
 // names even when they are not installed system-wide — parity with the
-// non-Windows GdiText shim, which reads ./fonts directly. FR_PRIVATE scopes the
-// faces to this process, leaving the system font list untouched. No-op off Windows,
+// non-Windows GdiText shim, which reads ./fonts directly. Memory fonts are
+// private to this process, leaving the system font list untouched. No-op off Windows,
 // where bundled fonts are resolved by GdiText. Shares the kBundledFonts table.
 bool RegisterBundledFonts()
 {
 #ifdef _WIN32
-    std::vector<std::wstring> registeredPaths;
-    const auto rollback = [&registeredPaths]()
+    const auto registerPath = [](const char* relativePath)
     {
-        for (auto it = registeredPaths.rbegin(); it != registeredPaths.rend(); ++it)
-            RemoveFontResourceExW(it->c_str(), FR_PRIVATE, nullptr);
-    };
-    const auto registerPath = [&registeredPaths, &rollback](const char* relativePath)
-    {
-        const std::wstring path = BundledFontFullPath(relativePath);
-        if (!std::filesystem::is_regular_file(path))
+        std::optional<std::string> bytes = Content::ReadFile(relativePath);
+        if (!bytes)
         {
-            mu::log::Get("render")->error("GDI -- bundled font missing path='{}'", WideToUtf8(path));
-            rollback();
+            mu::log::Get("render")->error("GDI -- bundled font missing path='{}'", relativePath);
+            UnregisterBundledFonts();
             return false;
         }
-        if (AddFontResourceExW(path.c_str(), FR_PRIVATE, nullptr) == 0)
+        DWORD faces = 0;
+        const HANDLE font = AddFontMemResourceEx(bytes->data(), static_cast<DWORD>(bytes->size()), nullptr, &faces);
+        if (font == nullptr)
         {
-            mu::log::Get("render")->error("GDI -- AddFontResourceExW failed path='{}' error={}", WideToUtf8(path),
+            mu::log::Get("render")->error("GDI -- AddFontMemResourceEx failed path='{}' error={}", relativePath,
                                           GetLastError());
-            rollback();
+            UnregisterBundledFonts();
             return false;
         }
-        registeredPaths.push_back(path);
+        g_bundledFontFaces.push_back(font);
         return true;
     };
 
@@ -1738,19 +1737,6 @@ bool RegisterBundledFonts()
         return false;
 #endif
     return true;
-}
-
-// Mirrors RegisterBundledFonts so the process leaves no private faces behind.
-void UnregisterBundledFonts()
-{
-#ifdef _WIN32
-    for (const auto& font : kBundledFonts)
-    {
-        RemoveFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
-        RemoveFontResourceExW(BundledFontFullPath(font.bold).c_str(), FR_PRIVATE, nullptr);
-    }
-    RemoveFontResourceExW(BundledFontFullPath(kBundledFixedFont.regular).c_str(), FR_PRIVATE, nullptr);
-#endif
 }
 
 HFONT CreateFontForFamily(int size, int weight, std::string_view family)
@@ -1891,50 +1877,6 @@ void UpdateResolutionDependentSystems()
     CSceneUICoordinator::Instance().RepositionSceneUI();
 }
 
-static void ShutdownRuntime(std::thread& cpuUsageRecorder, std::optional<Core::Log::Sdl::ScopedLogOutput>& sdlLogOutput)
-{
-    // The recorder polls process state until Destroy is set.
-    Destroy = true;
-
-    // Closes the control socket and removes its file, so a later client with
-    // the same name does not find a live-looking socket.
-    App::Control::ControlServer::Instance().Stop();
-    if (cpuUsageRecorder.joinable())
-    {
-        cpuUsageRecorder.join();
-    }
-
-    DestroySound();
-#ifdef _EDITOR
-    g_MuEditorCore.Shutdown();
-#endif
-
-    // Complete the final submitted frame before UI and bitmap owners release
-    // textures referenced by it. This keeps Metal teardown deterministic. Do
-    // this while the window is still visible: the compositor can stop
-    // servicing a hidden/occluded window's swapchain, leaving this wait
-    // stuck on a present fence that only signals once something (e.g. a
-    // focus change) forces the compositor to redraw (#535).
-    mu::WaitForSDLGpuIdle();
-
-    // Hide the window before the teardown below, which pumps no messages and
-    // can take a noticeable moment (asset/UI release, ...). Left visible, the
-    // OS flags it as unresponsive and closing needs a second click to force
-    // the resulting ghost window away (#535).
-    if (g_sdlWindow != nullptr)
-    {
-        SDL_HideWindow(g_sdlWindow);
-    }
-
-    UnregisterBundledFonts();
-    DestroyWindow();
-    ShutdownRendererWindow();
-    SDL_Quit();
-    // SDL_Quit() may still log, so the bridge outlives it and dies before mu::log.
-    sdlLogOutput.reset();
-    mu::log::Shutdown();
-}
-
 static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD (&fileVersion)[4])
 {
     g_ErrorReport.Write(L"\r\n");
@@ -1952,23 +1894,46 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.AddSeparator();
 }
 
-static void SetWorkingDirectoryToBasePath()
+// The client folder; empty when it can't be told.
+static std::filesystem::path ClientFolder()
 {
 #if defined(__APPLE__)
     // The working directory hasn't moved yet, so a relative start path still leads to the client here and is kept
     // absolute for every later caller (WinApiShims.h).
     if (const std::filesystem::path executable = Core::Platform::GetExecutablePath(); !executable.empty())
     {
-        std::error_code error;
-        std::filesystem::current_path(executable.parent_path(), error);
+        return executable.parent_path();
     }
 #else
     if (const char* basePath = SDL_GetBasePath(); basePath != nullptr)
     {
-        std::error_code error;
-        std::filesystem::current_path(basePath, error);
+        return std::filesystem::path(reinterpret_cast<const char8_t*>(basePath));
     }
 #endif
+    return {};
+}
+
+static void SetWorkingDirectoryToBasePath()
+{
+    if (const std::filesystem::path folder = ClientFolder(); !folder.empty())
+    {
+        std::error_code error;
+        std::filesystem::current_path(folder, error);
+    }
+}
+
+// The game's content is read from the client folder, named the same way on every platform (Core/Content). Returns
+// the line for the error report: where content is read from, or why the working directory is read instead.
+static std::string OpenContent()
+{
+    const std::string root = reinterpret_cast<const char*>(ClientFolder().u8string().c_str());
+    SDL_Storage* storage = SDL_OpenTitleStorage(root.empty() ? nullptr : root.c_str(), 0);
+    if (storage == nullptr)
+    {
+        return "cannot open " + root + " (" + SDL_GetError() + "), reading the working directory";
+    }
+    Content::Open(storage);
+    return root;
 }
 
 // The language the player reads: SetLocale falls back to en for a locale it doesn't know.
@@ -2010,18 +1975,16 @@ static void InitializeWorkingDirectoryAndLog()
     mu::log::Init();
 }
 
-#ifdef _WIN32
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
-#else
-// Off Windows the Linux entry point (main.cpp) calls this directly.
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
-#endif
+// Everything up to the first frame, as SDL_AppInit calls it; false when the client can't start. Each step that
+// succeeds pushes how to undo it, so ShutdownClient undoes a failed startup and a normal quit the same way.
+bool StartClient(char* szCmdLine)
 {
     InitializeWorkingDirectoryAndLog();
-    // Installed before SDL starts so init failures are captured; every early
-    // return restores it, and ShutdownRuntime() releases it before mu::log closes.
-    std::optional<Core::Log::Sdl::ScopedLogOutput> sdlLogOutput;
+    g_teardown.Push([] { mu::log::Shutdown(); });
+    // Installed before SDL starts so init failures are captured; SDL_Quit may still log, so it outlives SDL.
+    static std::optional<Core::Log::Sdl::ScopedLogOutput> sdlLogOutput;
     sdlLogOutput.emplace();
+    g_teardown.Push([] { sdlLogOutput.reset(); });
 
     wchar_t lpszExeVersion[256] = L"unknown";
 
@@ -2049,7 +2012,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         }
     }
 
+    const std::string contentRoot = OpenContent();
+    g_teardown.Push([] { Content::Close(); });
+
     WriteStartupDiagnostics(lpszExeVersion, wVersion);
+    g_ErrorReport.Write(L"> Content: %hs\r\n", contentRoot.c_str());
     InitializeDotNetBridge();
 
     g_ErrorReport.Write(L"> To read config.ini.\r\n");
@@ -2108,6 +2075,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     MouseY = static_cast<int>(UI::Scaling::LogicalY(screenTransform, g_fWindowMouseY));
 
     pMultiLanguage = new CMultiLanguage(g_strSelectedML);
+    g_teardown.Push([] { SAFE_DELETE(pMultiLanguage); });
 
     if (g_iChatInputType == 1)
         ShowCursor(FALSE);
@@ -2116,7 +2084,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // display-mode change and restores it on teardown.
     g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
-    g_hInst = hInstance;
+#ifdef _WIN32
+    g_hInst = GetModuleHandleW(nullptr);
+#endif
 
 #if defined(_EDITOR) && defined(__linux__)
     // The editor's own windows need a video driver that places windows and
@@ -2146,8 +2116,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         g_ErrorReport.Write(L"> SDL video init failed. Requested driver: %ls. SDL error: %ls\r\n",
                             requestedDriver.c_str(), videoInitError.c_str());
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
-        return 0;
+        return false;
     }
+    g_teardown.Push([] { SDL_Quit(); });
 
 #ifndef _WIN32
     // Install POSIX crash-diagnostic signal handlers. After SDL_Init (R8
@@ -2159,7 +2130,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     SetWorkingDirectoryToBasePath();
 #endif
 
-    const SDL_WindowFlags windowFlags = Core::Platform::BuildSDLWindowFlags(g_bUseWindowMode != TRUE, false);
+    // Hidden until the first frame is about to draw (IterateClient), so the setup below shows no black window.
+    const SDL_WindowFlags windowFlags =
+        Core::Platform::BuildSDLWindowFlags(g_bUseWindowMode != TRUE, false) | SDL_WINDOW_HIDDEN;
 
     g_sdlWindow =
         SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
@@ -2167,14 +2140,16 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     {
         g_ErrorReport.Write(L"> SDL_CreateWindow failed.\r\n");
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
-        return 0;
+        return false;
     }
     Core::Platform::SetGameWindow(g_sdlWindow);
+    // Also shuts down the renderer, which is created into this window below.
+    g_teardown.Push([] { ShutdownRendererWindow(); });
 
     RefreshWindowContentScale();
 
 #if defined(__linux__)
-    SDL_Surface* applicationIcon = SDL_LoadPNG(Core::Platform::GameWindowIconFile);
+    SDL_Surface* applicationIcon = SDL_LoadPNG_IO(Content::OpenIO(Core::Platform::GameWindowIconFile).release(), true);
     if (applicationIcon != nullptr)
     {
         SDL_SetWindowIcon(g_sdlWindow, applicationIcon);
@@ -2202,10 +2177,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
                                 static_cast<float>(initialFontSizes.fixed)))
     {
         g_ErrorReport.Write(L"SDL_gpu renderer init failed.\r\n");
-        ShutdownRendererWindow();
         MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"SDL_gpu Renderer Error.",
                    MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
+        return false;
     }
 
     // Before the first texture loads, so Enhanced filtering builds mip chains at load.
@@ -2240,7 +2214,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_ErrorReport.Write(L"> SDL_gpu init success.\r\n");
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteGpuInfo();
+    const auto& renderer = mu::GetRenderer();
+    g_ErrorReport.WriteGpuInfo(renderer.GetGPUDeviceName(), renderer.GetGPUDriverName(),
+                               renderer.GetGPUDriverVersion());
     g_ErrorReport.AddSeparator();
 
     // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
@@ -2312,8 +2288,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_ErrorReport.WriteSoundCardInfo();
 
-    // SDL_CreateWindow already shows the window.
-
     // Initialize translations with the saved UI locale (defaults to "en").
     // The options window and the editor's language box switch it later.
     {
@@ -2325,10 +2299,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
     I18N::RegisterLocaleObserver(&LogUiLanguageChange, nullptr);
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
+    g_MonsterDataHandler.SetMonstersChangedCallback(&World::Monsters::ApplyLiveSetup);
 
 #ifdef _EDITOR
     // Initialize MU Editor with the live SDL GPU window.
     g_MuEditorCore.Initialize(g_sdlWindow);
+    g_teardown.Push([] { g_MuEditorCore.Shutdown(); });
 
     // Check for --editor command line flag (in szCmdLine on every platform;
     // GetCommandLineW is an empty stub off Windows)
@@ -2364,15 +2340,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.
     const bool fontsRegistered = RegisterBundledFonts();
+    g_teardown.Push([] { UnregisterBundledFonts(); });
     const bool fontsCreated = CreateNewFonts(CalculateFontSizes());
     if (!fontsRegistered || !fontsCreated)
     {
 #ifdef NDEBUG
         mu::log::Get("render")->error("Bundled font roles unavailable; aborting Release startup");
-        UnregisterBundledFonts();
-        ShutdownRendererWindow();
-        SDL_Quit();
-        return FALSE;
+        return false;
 #else
         mu::log::Get("render")->warn("NON-PARITY developer font fallback -- bundled GDI roles unavailable");
 #endif
@@ -2407,6 +2381,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         }
     }
     AudioPlayer::Initialize();
+    g_teardown.Push([] { DestroySound(); });
 
     {
         int value = AudioPlayer::ClampVolume(GameConfig::GetInstance().GetSoundVolume());
@@ -2477,12 +2452,55 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 #endif // _WIN32
 
+    // Saves the settings and releases the game's objects, after the wait below.
+    g_teardown.Push([] { DestroyWindow(); });
+    g_teardown.Push(
+        []
+        {
+            // Complete the final submitted frame before UI and bitmap owners release
+            // textures referenced by it. This keeps Metal teardown deterministic. Do
+            // this while the window is still visible: the compositor can stop
+            // servicing a hidden/occluded window's swapchain, leaving this wait
+            // stuck on a present fence that only signals once something (e.g. a
+            // focus change) forces the compositor to redraw (#535).
+            mu::WaitForSDLGpuIdle();
+            // Hide the window before the teardown after this, which pumps no messages and
+            // can take a noticeable moment (asset/UI release, ...). Left visible, the
+            // OS flags it as unresponsive and closing needs a second click to force
+            // the resulting ghost window away (#535).
+            if (g_sdlWindow != nullptr)
+                SDL_HideWindow(g_sdlWindow);
+        });
+
     // Opened only when the launcher set the path; silent otherwise.
     App::Control::ControlServer::Instance().Start(Core::Text::ToUtf8(lpszExeVersion));
+    // Closes the control socket and removes its file, so a later client with
+    // the same name does not find a live-looking socket.
+    g_teardown.Push([] { App::Control::ControlServer::Instance().Stop(); });
 
-    std::thread cpuUsageRecorder(RecordCpuUsage);
-    const MSG msg = MainLoop();
-    ShutdownRuntime(cpuUsageRecorder, sdlLogOutput);
+    constexpr UINT timerResolution = 1;
+    g_preciseTimer = timeBeginPeriod(timerResolution) == TIMERR_NOERROR;
+    if (g_preciseTimer)
+        g_teardown.Push([] { timeEndPeriod(timerResolution); });
 
-    return msg.wParam;
+    HandleFocusChange(Core::Platform::HasSDLWindowInputFocus(SDL_GetWindowFlags(g_sdlWindow)));
+    Core::Input::Synthetic::SetEventDelivery([](SDL_Event& event, bool& propagates)
+                                             { return RouteActionInput(event, true, propagates); }, g_sdlWindow);
+    g_teardown.Push([] { Core::Input::Synthetic::SetEventDelivery(nullptr, nullptr); });
+
+    g_cpuUsageRecorder = std::thread(RecordCpuUsage);
+    g_teardown.Push(
+        []
+        {
+            // The recorder polls process state until Destroy is set.
+            Destroy = true;
+            g_cpuUsageRecorder.join();
+        });
+    return true;
+}
+
+// After the last frame, or after StartClient failed, as SDL_AppQuit calls it.
+void ShutdownClient()
+{
+    g_teardown.Unwind();
 }

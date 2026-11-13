@@ -390,31 +390,6 @@ void MapProcess::RenderFrontSideVisual()
     }
 }
 
-CHARACTER* MapProcess::CreateMonster(int iType, int PosX, int PosY, int Key)
-{
-    for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
-    {
-        auto tempiter = iter;
-        ++iter;
-        Weak_Ptr(BaseMap) basemap = *tempiter;
-
-        if (basemap.expired() == false)
-        {
-            CHARACTER* p = basemap.lock()->CreateMonster(iType, PosX, PosY, Key);
-            if (p)
-            {
-                return p;
-            }
-        }
-        else
-        {
-            m_MapList.erase(tempiter);
-        }
-    }
-
-    return NULL;
-}
-
 bool MapProcess::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)

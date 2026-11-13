@@ -264,11 +264,11 @@ void CreateLogInScene()
 
     CSceneUICoordinator::Instance().CreateLoginScene();
 
-    // The in-game reconnect logs in again on the game server it lost; otherwise the
-    // login starts at the connect server's list.
-    const ReconnectManager& reconnect = ReconnectManager::Instance();
+    // The in-game reconnect logs in again on the game server it lost, over the connection
+    // that found it back; otherwise the login starts at the connect server's list.
+    ReconnectManager& reconnect = ReconnectManager::Instance();
     if (reconnect.IsActive())
-        ConnectForLogin(reconnect.GetServerIp(), reconnect.GetServerPort());
+        ConnectForLogin(reconnect.GetServerIp(), reconnect.GetServerPort(), reconnect.TakeStandby());
     else
         ConnectForLogin(szServerIpAddress, g_ServerPort);
 
@@ -343,11 +343,9 @@ void PlayLogInSceneMusic()
 
 void NewMoveLogInScene()
 {
+    // PrepareSceneBeforeFrame creates the scene, between frames.
     if (!InitLogIn)
-    {
-        InitLogIn = true;
-        CreateLogInScene();
-    }
+        return;
 
     PlayLogInSceneMusic();
 

@@ -35,6 +35,7 @@
 #include "Data/GameData/LookData/LookEffects.h"
 #include "Data/GameData/LookData/LookJson.h"
 #include "I18N/All.h"
+#include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Items/LookDrawing.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -76,6 +77,17 @@ constexpr float PartWidth = 200.0f;
 constexpr float EffectNoteColumn = 170.0f;
 constexpr ImVec4 NotFreeColor{1.0f, 0.4f, 0.4f, 1.0f};
 constexpr float MaxPreviewSeconds = 60.0f;
+// A kept draft's key: an item effect and a render style can have the same name.
+std::string DraftKey(Data::Looks::LookKind kind, const std::string& name)
+{
+    return kind == Data::Looks::LookKind::ItemEffect ? "effect " + name : name;
+}
+
+std::size_t RootIndexOf(Data::Looks::LookKind kind)
+{
+    return kind == Data::Looks::LookKind::ItemEffect ? ItemEffectsRootIndex : RenderStylesRootIndex;
+}
+
 // The problems of a look are about "looks[0]", the only one checked.
 constexpr std::string_view CheckedLookField = "looks[0].";
 
@@ -190,6 +202,63 @@ private:
 };
 } // namespace
 
+namespace MuEditor::Looks
+{
+std::optional<LookDefinition> ForItem(const LookDefinition& look, Data::Looks::LookKind kind, int itemType)
+{
+    const Data::Items::ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
+    if (model == nullptr)
+    {
+        return std::nullopt;
+    }
+    const bool effect = kind == Data::Looks::LookKind::ItemEffect;
+    const std::string& named = effect ? model->itemEffect : model->renderStyle;
+    const std::map<std::string, std::string>& values = effect ? model->itemEffectValues : model->renderStyleValues;
+    if (named != look.name || values.empty() || !Data::Looks::SetsEachItem(look))
+    {
+        return std::nullopt;
+    }
+    // A value that can't be one draws as the look has it; the look's problems name it.
+    std::vector<Data::Items::ItemDataIssue> issues;
+    return Data::Looks::ResolveForItem(look, values, "", issues, kind);
+}
+
+const LookDefinition* ForItemKept(ItemPreviewLook& kept, const LookDefinition& look, Data::Looks::LookKind kind,
+                                  int itemType)
+{
+    const int modelsVersion = g_ItemModelDatabase.GetVersion();
+    if (!kept.from || *kept.from != look || kept.kind != kind || kept.itemType != itemType ||
+        kept.modelsVersion != modelsVersion)
+    {
+        kept.from = look;
+        kept.kind = kind;
+        kept.itemType = itemType;
+        kept.modelsVersion = modelsVersion;
+        kept.forItem = ForItem(look, kind, itemType);
+        if (kept.forItem)
+        {
+            // The textures the item's values name, which the look itself may not.
+            Render::Items::Looks::PrepareDraftTextures(*kept.forItem);
+        }
+    }
+    return kept.forItem ? &*kept.forItem : nullptr;
+}
+
+LookDefinition WithoutHiddenLayers(const LookDefinition& look, const std::vector<std::uint8_t>& hidden)
+{
+    LookDefinition shown = look;
+    shown.layers.clear();
+    for (std::size_t index = 0; index < look.layers.size(); ++index)
+    {
+        if (index >= hidden.size() || hidden[index] == 0)
+        {
+            shown.layers.push_back(look.layers[index]);
+        }
+    }
+    return shown;
+}
+} // namespace MuEditor::Looks
+
 CMuStyleEditorUI& CMuStyleEditorUI::GetInstance()
 {
     static CMuStyleEditorUI instance;
@@ -199,6 +268,8 @@ CMuStyleEditorUI& CMuStyleEditorUI::GetInstance()
 CMuStyleEditorUI::CMuStyleEditorUI() : m_tree({&m_renderStyles, &m_itemEffects}, DragPayloadType, FolderPopupId)
 {
     m_renderStyles.SetUnappliedCheck([this](const std::string& name) { return HasUnappliedChanges(name); });
+    m_itemEffects.SetUnappliedCheck([this](const std::string& name)
+                                    { return HasUnappliedChanges(name, Data::Looks::LookKind::ItemEffect); });
 }
 
 void CMuStyleEditorUI::Render(bool* open)
@@ -253,14 +324,50 @@ void CMuStyleEditorUI::ShowRenderStyle(const std::string& name)
     ImGui::SetWindowFocus(MuEditor::WindowIds::StyleEditor);
 }
 
+void CMuStyleEditorUI::ShowItemEffect(const std::string& name)
+{
+    g_MuEditorCore.GetToolWindows().styleEditor = true;
+    if (m_itemEffects.Has(name))
+    {
+        m_tree.PickEntry(ItemEffectsRootIndex, name);
+    }
+    else
+    {
+        m_tree.SetPick(ItemEffectsRootIndex, {});
+    }
+    m_tree.OpenRoot(ItemEffectsRootIndex);
+    ImGui::SetWindowFocus(MuEditor::WindowIds::StyleEditor);
+}
+
 bool CMuStyleEditorUI::IsRenderStylesPicked() const
 {
     return m_tree.GetPick().root == RenderStylesRootIndex;
 }
 
+Data::Looks::LookKind CMuStyleEditorUI::PickedKind() const
+{
+    return m_tree.GetPick().root == ItemEffectsRootIndex ? Data::Looks::LookKind::ItemEffect
+                                                         : Data::Looks::LookKind::RenderStyle;
+}
+
+MuEditor::Looks::LooksRoot& CMuStyleEditorUI::RootOf(Data::Looks::LookKind kind)
+{
+    return kind == Data::Looks::LookKind::ItemEffect ? m_itemEffects : m_renderStyles;
+}
+
+const MuEditor::Looks::LooksRoot& CMuStyleEditorUI::RootOf(Data::Looks::LookKind kind) const
+{
+    return kind == Data::Looks::LookKind::ItemEffect ? m_itemEffects : m_renderStyles;
+}
+
+MuEditor::Looks::LookEdits& CMuStyleEditorUI::EditsOf(Data::Looks::LookKind kind)
+{
+    return MuEditor::Looks::LookEdits::Of(kind);
+}
+
 const LookDefinition* CMuStyleEditorUI::GetPickedFileLook() const
 {
-    return IsRenderStylesPicked() && !GetPickedLook().empty() ? g_LookEdits.Find(GetPickedLook()) : nullptr;
+    return !GetPickedLook().empty() ? EditsOf(PickedKind()).Find(GetPickedLook()) : nullptr;
 }
 
 void CMuStyleEditorUI::RenderFileBar()
@@ -273,7 +380,7 @@ void CMuStyleEditorUI::RenderFileBar()
         ImGui::SameLine();
         ImGui::TextUnformatted(I18N::Editor::UnsavedChanges);
     }
-    if (!g_LookEdits.IsComplete())
+    if (!g_LookEdits.IsComplete() || !g_ItemEffectEdits.IsComplete())
     {
         RenderNote(I18N::Editor::TheLookFileHasAFatalProblem);
     }
@@ -284,16 +391,15 @@ void CMuStyleEditorUI::RenderToolbar()
     const MuEditor::NamedTreeTexts texts = TreeTexts();
     const LookDefinition* look = GetPickedFileLook();
     const bool folderPicked = m_tree.IsFolderPicked();
-    const bool unused = look != nullptr && m_renderStyles.CountUsers(look->name) == 0;
+    const Data::Looks::LookKind kind = PickedKind();
+    const bool unused = look != nullptr && RootOf(kind).CountUsers(look->name) == 0;
 
     m_tree.RenderNewFolderButton(I18N::Editor::NewFolder);
     ImGui::SameLine();
-    ImGui::BeginDisabled(!IsRenderStylesPicked());
     if (ImGui::Button(I18N::Editor::NewLook))
     {
         OpenNameDialog(NameDialog::New, "");
     }
-    ImGui::EndDisabled();
     ImGui::SameLine();
     ImGui::BeginDisabled(look == nullptr);
     if (ImGui::Button(I18N::Editor::Copy))
@@ -326,9 +432,9 @@ void CMuStyleEditorUI::RenderToolbar()
         {
             const std::string name = look->name;
             m_tree.Later(
-                [this, name]
+                [this, name, kind]
                 {
-                    g_LookEdits.RemoveLook(I18N::Editor::RemoveALook, name);
+                    EditsOf(kind).RemoveLook(I18N::Editor::RemoveALook, name);
                     m_tree.SetPick(m_tree.GetPick().root, m_tree.GetPick().folder);
                 });
         }
@@ -377,9 +483,12 @@ void CMuStyleEditorUI::RenderNameDialog()
     }
     MuEditor::Items::InputString(I18N::Editor::LookName, m_name);
     const std::string name = MuEditor::SourceText::Trimmed(m_name);
-    // The render styles' names: a look of the file or one in code may not have it.
-    const bool usable = Data::Items::Json::IsName(name) && !m_renderStyles.Has(name);
-    RenderNote(I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherRenderStyleHas);
+    // The names of the root's kind: a look of the file or one in code may not have it.
+    const Data::Looks::LookKind kind = PickedKind();
+    const bool usable = Data::Items::Json::IsName(name) && !RootOf(kind).Has(name);
+    RenderNote(kind == Data::Looks::LookKind::ItemEffect
+                   ? I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherItemEffectHas
+                   : I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherRenderStyleHas);
     ImGui::BeginDisabled(!usable);
     if (ImGui::Button(I18N::Editor::OK))
     {
@@ -387,31 +496,37 @@ void CMuStyleEditorUI::RenderNameDialog()
         const std::string from = m_nameFrom;
         const Data::Colors::ColorFolderPath folder = m_tree.GetPick().folder;
         m_tree.Later(
-            [this, dialog, from, name, folder]
+            [this, dialog, from, name, folder, kind]
             {
-                const LookDefinition* source = g_LookEdits.Find(from);
+                MuEditor::Looks::LookEdits& edits = EditsOf(kind);
+                const LookDefinition* source = edits.Find(from);
                 if (dialog == NameDialog::New)
                 {
-                    // A new look draws the item plainly, as one texture layer.
-                    g_LookEdits.AddLook(I18N::Editor::NewLook, {name, {Layer{}}, {}}, folder);
+                    // A new render style draws the item plainly, as one texture layer; a new item effect does nothing.
+                    LookDefinition fresh{name};
+                    if (kind == Data::Looks::LookKind::RenderStyle)
+                    {
+                        fresh.layers.emplace_back();
+                    }
+                    edits.AddLook(I18N::Editor::NewLook, std::move(fresh), folder);
                 }
                 else if (source != nullptr && dialog == NameDialog::Copy)
                 {
                     LookDefinition copy = *source;
                     copy.name = name;
-                    g_LookEdits.AddLook(I18N::Editor::CopyALook, std::move(copy), folder);
+                    edits.AddLook(I18N::Editor::CopyALook, std::move(copy), folder);
                 }
                 else if (source != nullptr && dialog == NameDialog::Rename)
                 {
                     LookDefinition renamed = *source;
                     renamed.name = name;
-                    g_LookEdits.SetLook(I18N::Editor::RenameALook, from, std::move(renamed));
+                    edits.SetLook(I18N::Editor::RenameALook, from, std::move(renamed));
                     RenameDraft(from, name);
                 }
-                if (g_LookEdits.Find(name) != nullptr)
+                if (edits.Find(name) != nullptr)
                 {
-                    m_tree.PickEntry(RenderStylesRootIndex, name);
-                    m_tree.OpenRoot(RenderStylesRootIndex);
+                    m_tree.PickEntry(RootIndexOf(kind), name);
+                    m_tree.OpenRoot(RootIndexOf(kind));
                 }
             });
         ImGui::CloseCurrentPopup();
@@ -448,17 +563,14 @@ void CMuStyleEditorUI::RenderPicked()
 
 void CMuStyleEditorUI::RenderRoot()
 {
-    if (!IsRenderStylesPicked())
-    {
-        ImGui::TextUnformatted(I18N::Editor::ItemEffects);
-        RenderNote(I18N::Editor::ItemEffectsRootNote);
-        return;
-    }
+    const Data::Looks::LookKind kind = PickedKind();
+    const bool effects = kind == Data::Looks::LookKind::ItemEffect;
     const std::string file =
-        (Data::Effects::GetEffectDataDirectory() / Data::Looks::GetRenderStylesFileName()).generic_string();
-    ImGui::TextUnformatted(I18N::Editor::RenderStyles);
-    RenderNote(I18N::Format(I18N::Editor::RenderStylesRootNote, {file}).c_str());
-    const std::vector<ItemDataIssue>& issues = g_LookEdits.GetIssues();
+        (Data::Effects::GetEffectDataDirectory() / Data::Looks::GetLookFileName(kind)).generic_string();
+    ImGui::TextUnformatted(effects ? I18N::Editor::ItemEffects : I18N::Editor::RenderStyles);
+    RenderNote(
+        I18N::Format(effects ? I18N::Editor::ItemEffectsRootNote : I18N::Editor::RenderStylesRootNote, {file}).c_str());
+    const std::vector<ItemDataIssue>& issues = EditsOf(kind).GetIssues();
     if (!issues.empty())
     {
         ImGui::Separator();
@@ -472,14 +584,11 @@ void CMuStyleEditorUI::RenderRoot()
 void CMuStyleEditorUI::RenderCodeLook(const std::string& name, bool itemEffect)
 {
     ImGui::TextUnformatted((name + " " + I18N::Editor::CodeMark).c_str());
-    if (!itemEffect)
-    {
-        RenderPreview(nullptr);
-    }
+    RenderPreview(nullptr);
     // Below the preview, which stays where it is.
     if (ImGui::BeginChild("##Look"))
     {
-        RenderNote(itemEffect ? I18N::Editor::ItemEffectsRootNote : I18N::Editor::CodeLookNote);
+        RenderNote(I18N::Editor::CodeLookNote);
         RenderUsers(UsersOf(name, itemEffect));
     }
     ImGui::EndChild();
@@ -499,17 +608,26 @@ void CMuStyleEditorUI::RenderLook(const LookDefinition& look)
     if (ImGui::BeginChild("##Look"))
     {
         RenderChecks();
-        ImGui::Checkbox(I18N::Editor::ShowTheLayers, &m_showLayers);
-        if (m_showLayers)
+        const bool effect = m_draftKind == Data::Looks::LookKind::ItemEffect;
+        if (effect)
         {
-            RenderLayers();
+            RenderItemEffect();
         }
         else
         {
-            RenderParts();
+            MuEditor::Looks::Fields::LookOptions(m_draft);
+            ImGui::Checkbox(I18N::Editor::ShowTheLayers, &m_showLayers);
+            if (m_showLayers)
+            {
+                RenderLayers();
+            }
+            else
+            {
+                RenderParts();
+            }
         }
         ImGui::Separator();
-        RenderUsers(UsersOf(name, false));
+        RenderUsers(UsersOf(name, effect));
     }
     ImGui::EndChild();
     RenderConfirm();
@@ -543,7 +661,7 @@ void CMuStyleEditorUI::RenderApply(const LookDefinition& look)
 void CMuStyleEditorUI::OpenApply(const LookDefinition& look)
 {
     // D26: a change to a look reaches all its items; they are listed before it is applied.
-    m_confirmUsers = UsersOf(look.name, false);
+    m_confirmUsers = UsersOf(look.name, m_draftKind == Data::Looks::LookKind::ItemEffect);
     const int itemType = g_ItemSelection.GetItemType();
     m_applyItem =
         g_ItemDatabase.Find(itemType) != nullptr && g_ItemModelDatabase.Find(itemType) != nullptr ? itemType : -1;
@@ -567,7 +685,7 @@ void CMuStyleEditorUI::OpenApply(const LookDefinition& look)
 std::string CMuStyleEditorUI::UnusedLookName(const std::string& base) const
 {
     std::string name = base;
-    for (int suffix = 2; m_renderStyles.Has(name); ++suffix)
+    for (int suffix = 2; RootOf(m_draftKind).Has(name); ++suffix)
     {
         name = base + std::to_string(suffix);
     }
@@ -661,10 +779,12 @@ bool CMuStyleEditorUI::RenderApplyCopy()
     ImGui::SetNextItemWidth(width);
     MuEditor::Items::InputString(I18N::Editor::LookName, m_copyName);
     const std::string copy = MuEditor::SourceText::Trimmed(m_copyName);
-    bool usable = Data::Items::Json::IsName(copy) && !m_renderStyles.Has(copy);
+    bool usable = Data::Items::Json::IsName(copy) && !RootOf(m_draftKind).Has(copy);
     if (!usable)
     {
-        RenderNote(I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherRenderStyleHas);
+        RenderNote(m_draftKind == Data::Looks::LookKind::ItemEffect
+                       ? I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherItemEffectHas
+                       : I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherRenderStyleHas);
     }
     if (m_applyTo == ApplyTo::NewItem)
     {
@@ -693,18 +813,20 @@ bool CMuStyleEditorUI::RenderApplyCopy()
 
 void CMuStyleEditorUI::Apply()
 {
-    if (g_LookEdits.Find(m_draftOf) == nullptr)
+    MuEditor::Looks::LookEdits& edits = EditsOf(m_draftKind);
+    if (edits.Find(m_draftOf) == nullptr)
     {
         return;
     }
-    g_LookEdits.SetLook(I18N::Editor::ChangeALook, m_draftOf, m_draft);
+    edits.SetLook(I18N::Editor::ChangeALook, m_draftOf, m_draft);
     m_draftLoaded = m_draft;
 }
 
 void CMuStyleEditorUI::ApplyCopy(ApplyTo to, const std::string& copyName, int itemType, int newItemType,
                                  const std::string& itemName)
 {
-    if (g_LookEdits.Find(m_draftOf) == nullptr)
+    MuEditor::Looks::LookEdits& edits = EditsOf(m_draftKind);
+    if (edits.Find(m_draftOf) == nullptr)
     {
         return;
     }
@@ -712,12 +834,12 @@ void CMuStyleEditorUI::ApplyCopy(ApplyTo to, const std::string& copyName, int it
     copy.name = copyName;
     if (to == ApplyTo::ThisItem)
     {
-        g_LookEdits.ApplyToItemOnly(I18N::Editor::OnlyThisItemACopyOfTheLook, m_draftOf, std::move(copy), itemType);
+        edits.ApplyToItemOnly(I18N::Editor::OnlyThisItemACopyOfTheLook, m_draftOf, std::move(copy), itemType);
     }
     else
     {
-        g_LookEdits.ApplyToNewItem(I18N::Editor::ANewItemWithTheLook, m_draftOf, std::move(copy), itemType, newItemType,
-                                   itemName);
+        edits.ApplyToNewItem(I18N::Editor::ANewItemWithTheLook, m_draftOf, std::move(copy), itemType, newItemType,
+                             itemName);
         if (g_ItemDatabase.Find(newItemType) != nullptr)
         {
             g_ItemSelection.Select(newItemType);
@@ -725,9 +847,9 @@ void CMuStyleEditorUI::ApplyCopy(ApplyTo to, const std::string& copyName, int it
     }
     // The look keeps what it had; the editor goes on with the copy.
     m_draft = m_draftLoaded;
-    if (g_LookEdits.Find(copyName) != nullptr)
+    if (edits.Find(copyName) != nullptr)
     {
-        m_tree.PickEntry(RenderStylesRootIndex, copyName);
+        m_tree.PickEntry(RootIndexOf(m_draftKind), copyName);
     }
 }
 
@@ -783,6 +905,79 @@ void CMuStyleEditorUI::RenderLayers()
     else
     {
         MuEditor::Looks::Fields::ItemValues(m_draft.itemValuesAfter, parts);
+    }
+    ImGui::PopID();
+    ImGui::PopID();
+    ImGui::PopID();
+}
+
+void CMuStyleEditorUI::RenderItemEffect()
+{
+    std::vector<Data::Looks::ItemValuesBefore>& entries = m_draft.itemValuesBefore;
+    ImGui::TextUnformatted(I18N::Editor::BeforeDrawing);
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::Add))
+    {
+        const std::size_t at = std::min(m_line + 1, entries.size());
+        entries.insert(entries.begin() + static_cast<std::ptrdiff_t>(at), Data::Looks::ItemValuesBefore{});
+        m_line = at;
+    }
+    const bool entry = m_line < entries.size();
+    ImGui::BeginDisabled(!entry);
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::Remove) && entry)
+    {
+        entries.erase(entries.begin() + static_cast<std::ptrdiff_t>(m_line));
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::MoveUp) && entry && m_line > 0)
+    {
+        std::swap(entries[m_line], entries[m_line - 1]);
+        --m_line;
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::MoveDown) && entry && m_line + 1 < entries.size())
+    {
+        std::swap(entries[m_line], entries[m_line + 1]);
+        ++m_line;
+    }
+    ImGui::EndDisabled();
+    RenderNote(I18N::Editor::BeforeDrawingNote);
+
+    const float height = LayerListLines * ImGui::GetFrameHeightWithSpacing();
+    if (ImGui::BeginChild("##Entries", ImVec2(0.0f, height), ImGuiChildFlags_Borders))
+    {
+        for (std::size_t index = 0; index < entries.size(); ++index)
+        {
+            ImGui::PushID(static_cast<int>(index));
+            const std::string line =
+                std::to_string(index + 1) + ". " + MuEditor::Looks::Fields::DescribeItemValuesBefore(entries[index]);
+            if (ImGui::Selectable(line.c_str(), m_line == index))
+            {
+                m_line = index;
+            }
+            ImGui::PopID();
+        }
+        const std::string light =
+            std::string(I18N::Editor::ObjectLight) + ": " + (m_draft.objectLight ? "" : I18N::Editor::None);
+        if (ImGui::Selectable(light.c_str(), m_line >= entries.size()))
+        {
+            m_line = entries.size();
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::PushID("Entry");
+    ImGui::PushID(m_draftOf.c_str());
+    ImGui::PushID(static_cast<int>(m_line));
+    const std::vector<LookPart> parts = MuEditor::Looks::PartsOf(g_ItemSelection.GetItemType());
+    if (m_line < entries.size())
+    {
+        MuEditor::Looks::Fields::ItemValuesBeforeEntry(entries[m_line], parts);
+    }
+    else
+    {
+        MuEditor::Looks::Fields::ObjectLight(m_draft.objectLight);
     }
     ImGui::PopID();
     ImGui::PopID();
@@ -1145,19 +1340,8 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
     RenderNote(I18N::Format(I18N::Editor::ThePreviewDraws0, {g_ItemDatabase.GetLogName(itemType)}).c_str());
     m_preview.SetDrawAsDoppelganger(m_asDoppelganger);
     // The look as the fields have it, without the layers whose eye is off.
-    LookDefinition shown;
-    if (look != nullptr)
-    {
-        shown.name = look->name;
-        shown.itemValuesAfter = look->itemValuesAfter;
-        for (std::size_t index = 0; index < look->layers.size(); ++index)
-        {
-            if (index >= m_hiddenLayers.size() || m_hiddenLayers[index] == 0)
-            {
-                shown.layers.push_back(look->layers[index]);
-            }
-        }
-    }
+    const LookDefinition shown =
+        look != nullptr ? MuEditor::Looks::WithoutHiddenLayers(*look, m_hiddenLayers) : LookDefinition{};
     // All views at the same moment.
     const WorldTimeScope time(m_stopTime ? std::optional<double>(m_seconds * 1000.0) : std::nullopt);
     if (look == nullptr)
@@ -1168,7 +1352,20 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
     }
     // The item as it is (with its own look or none), then the look as applied and as the fields have it on the picked
     // item, whatever look it names (design L41).
-    const LookDefinition* applied = g_LookEdits.Find(look->name);
+    const bool effect = m_draftKind == Data::Looks::LookKind::ItemEffect;
+    const LookDefinition* applied = EditsOf(m_draftKind).Find(look->name);
+    // An item that names this look and sets values of it draws the look with them, as the game does (design L12).
+    if (applied != nullptr)
+    {
+        if (const LookDefinition* forItem =
+                MuEditor::Looks::ForItemKept(m_appliedForItem, *applied, m_draftKind, itemType))
+        {
+            applied = forItem;
+        }
+    }
+    const LookDefinition* editedForItem =
+        MuEditor::Looks::ForItemKept(m_editedForItem, effect ? *look : shown, m_draftKind, itemType);
+    const LookDefinition* edited = editedForItem != nullptr ? editedForItem : effect ? look : &shown;
     const int slot = Data::Items::ToModelSlot(itemType);
     m_preview.RenderSideBySide(
         itemType, 3, [this](int view, float width) { RenderViewHeader(view, width); },
@@ -1187,9 +1384,15 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
                 }
                 return;
             }
-            const LookDefinition* drawn = view == 1 ? applied : &shown;
+            const LookDefinition* drawn = view == 1 ? applied : edited;
             if (drawn == nullptr)
             {
+                draw();
+                return;
+            }
+            if (effect)
+            {
+                const Render::Items::ItemEffects::PreviewEffect preview(slot, *drawn);
                 draw();
                 return;
             }
@@ -1218,7 +1421,8 @@ void CMuStyleEditorUI::RenderViewHeader(int view, float width)
 
 void CMuStyleEditorUI::UpdateDraft(const LookDefinition& look)
 {
-    if (m_draftOf != look.name)
+    const MuEditor::Looks::LookEdits& edits = EditsOf(PickedKind());
+    if (m_draftOf != look.name || m_draftKind != PickedKind())
     {
         // The changes not applied stay with their look while another one is picked.
         KeepDraft();
@@ -1228,16 +1432,17 @@ void CMuStyleEditorUI::UpdateDraft(const LookDefinition& look)
             LoadDraft(look);
         }
     }
-    else if (m_draftVersion != g_LookEdits.GetVersion() && m_draft == m_draftLoaded)
+    else if (m_draftVersion != edits.GetVersion() && m_draft == m_draftLoaded)
     {
         LoadDraft(look);
     }
-    m_draftVersion = g_LookEdits.GetVersion();
+    m_draftVersion = edits.GetVersion();
 }
 
-bool CMuStyleEditorUI::HasUnappliedChanges(const std::string& name) const
+bool CMuStyleEditorUI::HasUnappliedChanges(const std::string& name, Data::Looks::LookKind kind) const
 {
-    return (name == m_draftOf && m_draft != m_draftLoaded) || m_keptDrafts.contains(name);
+    return (name == m_draftOf && kind == m_draftKind && m_draft != m_draftLoaded) ||
+           m_keptDrafts.contains(DraftKey(kind, name));
 }
 
 void CMuStyleEditorUI::ForgetDraftsForTest()
@@ -1255,17 +1460,18 @@ void CMuStyleEditorUI::KeepDraft()
 {
     if (!m_draftOf.empty() && m_draft != m_draftLoaded)
     {
-        m_keptDrafts[m_draftOf] = {m_draft, m_draftLoaded, m_hiddenLayers, m_line};
+        m_keptDrafts[DraftKey(m_draftKind, m_draftOf)] = {m_draft, m_draftLoaded, m_hiddenLayers, m_line};
     }
 }
 
 bool CMuStyleEditorUI::TakeKeptDraft(const std::string& name)
 {
-    const auto kept = m_keptDrafts.find(name);
+    const auto kept = m_keptDrafts.find(DraftKey(PickedKind(), name));
     if (kept == m_keptDrafts.end())
     {
         return false;
     }
+    m_draftKind = PickedKind();
     m_draft = std::move(kept->second.draft);
     m_draftLoaded = std::move(kept->second.loaded);
     m_hiddenLayers = std::move(kept->second.hiddenLayers);
@@ -1277,15 +1483,16 @@ bool CMuStyleEditorUI::TakeKeptDraft(const std::string& name)
 
 void CMuStyleEditorUI::RenameDraft(const std::string& from, const std::string& to)
 {
-    if (m_draftOf == from)
+    const Data::Looks::LookKind kind = PickedKind();
+    if (m_draftOf == from && m_draftKind == kind)
     {
         m_draftOf = to;
         m_draft.name = to;
         m_draftLoaded.name = to;
     }
-    if (auto kept = m_keptDrafts.extract(from))
+    if (auto kept = m_keptDrafts.extract(DraftKey(kind, from)))
     {
-        kept.key() = to;
+        kept.key() = DraftKey(kind, to);
         kept.mapped().draft.name = to;
         kept.mapped().loaded.name = to;
         m_keptDrafts.insert(std::move(kept));
@@ -1297,6 +1504,7 @@ void CMuStyleEditorUI::LoadDraft(const LookDefinition& look)
     m_draft = look;
     m_draftLoaded = look;
     m_draftOf = look.name;
+    m_draftKind = PickedKind();
     m_hiddenLayers.assign(m_draft.layers.size(), 0);
     m_line = std::min(m_line, m_draft.layers.size());
 }
@@ -1322,7 +1530,8 @@ void CMuStyleEditorUI::SwapLayers(std::size_t first, std::size_t second)
 
 void CMuStyleEditorUI::CheckDraft()
 {
-    if (m_checked && m_checkedDraft == m_draft && m_checkedModels == g_ItemModelDatabase.GetVersion())
+    if (m_checked && m_checkedDraft == m_draft && m_checkedKind == m_draftKind &&
+        m_checkedModels == g_ItemModelDatabase.GetVersion())
     {
         return;
     }
@@ -1334,17 +1543,20 @@ void CMuStyleEditorUI::CheckDraft()
     }
     m_checked = true;
     m_checkedDraft = m_draft;
+    m_checkedKind = m_draftKind;
     m_checkedModels = g_ItemModelDatabase.GetVersion();
     // The textures the edited look names, for its preview: looked for when it changes, not each frame.
     Render::Items::Looks::PrepareDraftTextures(m_draft);
     m_draftIssues.clear();
     // The look as the file would have it, read back: what a save would refuse is fatal.
-    const std::string source(Data::Looks::GetRenderStylesFileName());
-    Data::Looks::RenderStylesFile file;
-    Data::Looks::ReadRenderStylesFile(Data::Looks::WriteRenderStylesJson({m_draft}), source, file, m_draftIssues);
+    const std::string source(Data::Looks::GetLookFileName(m_draftKind));
+    Data::Looks::LookFile file;
+    Data::Looks::ReadLookFile(Data::Looks::WriteLookFileJson(m_draftKind, {m_draft}), source, m_draftKind, file,
+                              m_draftIssues);
     if (!Data::Items::HasFatal(m_draftIssues))
     {
-        Data::Looks::CheckRenderStyles(file.looks, source, MuEditor::Looks::MakeEditorCheckInput(), m_draftIssues);
+        Data::Looks::CheckLooks(m_draftKind, file.looks, source, MuEditor::Looks::MakeEditorCheckInput(),
+                                m_draftIssues);
     }
     // The source is the file for all of them.
     for (ItemDataIssue& issue : m_draftIssues)

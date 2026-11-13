@@ -9,11 +9,12 @@
 
 // The glow of the item model files:
 //
-//   "glow": { "level": 8, "color": "ice", "meshes": [1], "shineColor": "orange", "shineHiddenMesh": 0,
-//             "ancientColor": "gold", "excellent": false }
+//   "glow": { "level": 8, "color": "ice", "meshes": [1], "glowAgainInWhite": 1, "shineColor": "orange",
+//             "shineHiddenMesh": 0, "shineBelowPlus3": "seal", "ancientColor": "gold", "excellent": false }
 //
-// The colors are names from the glow color list; that they are in it is
-// checked when the models are loaded (ValidateItemModelGlowColors). Values
+// The colors are names from the glow color list, the shine below +3 one from
+// the shine list; that they are in them is checked when the models are loaded
+// (ValidateItemModelGlowColors, ValidateItemModelShines). Values
 // equal to their default (ItemGlow) are left out, and so is "glow" without
 // other values.
 namespace Data::Items::GlowJson
@@ -24,6 +25,7 @@ constexpr const char* GlowKey = "glow";
 constexpr const char* LevelKey = "level";
 constexpr const char* MeshesKey = "meshes";
 constexpr const char* ShineMeshesKey = "shineMeshes";
+constexpr const char* ShineBelowPlus3Key = "shineBelowPlus3";
 
 // Levels above 15 do not glow; arrows +15 glow like 31.
 constexpr int MaxLevel = 31;

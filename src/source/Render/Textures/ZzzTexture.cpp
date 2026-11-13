@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Platform/ErrorDialog.h"
 #include "Core/Text/Utf8.h"
@@ -22,6 +23,7 @@ CGlobalBitmap Bitmaps;
 
 bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality, bool bottomUp)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     const auto fileCloser = [](FILE* fp)
     {
         if (fp != nullptr)
@@ -84,6 +86,7 @@ std::wstring NormalizeExtension(const wchar_t* Ext)
 
 void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer, int Size)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     if (filename == nullptr || Ext == nullptr)
     {
         return;
@@ -181,7 +184,7 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     fileName += newFileName;
     fileName += L".OZJ";
 
-    auto compressedFile = _wfopen(fileName.c_str(), L"rb");
+    const Content::Stream compressedFile = Content::OpenIO(fileName);
     if (compressedFile == nullptr)
     {
         wchar_t Text[256];
@@ -192,19 +195,16 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
         return false;
     }
 
-    fseek(compressedFile, 0, SEEK_END);
-    const auto fileSize = ftell(compressedFile);
+    const auto fileSize = SDL_GetIOSize(compressedFile.get());
     if (fileSize < 24)
     {
-        fclose(compressedFile);
         return false;
     }
 
-    fseek(compressedFile, 24, SEEK_SET);
+    SDL_SeekIO(compressedFile.get(), 24, SDL_IO_SEEK_SET);
     const auto jpegSize = fileSize - 24;
     std::vector<unsigned char> jpegBuf(static_cast<size_t>(jpegSize));
-    const bool complete = DataFileIO::ReadExact(compressedFile, jpegBuf.data(), jpegBuf.size());
-    fclose(compressedFile);
+    const bool complete = DataFileIO::ReadExact(compressedFile.get(), jpegBuf.data(), jpegBuf.size());
     if (!complete)
     {
         return false;
@@ -249,27 +249,24 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
 
 namespace
 {
+void ReportBitmapLoadFailure(const wchar_t* path)
+{
+    wchar_t szErrorMsg[256] = {
+        0,
+    };
+    mu_swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", path);
+#ifdef FOR_WORK
+    PopUpErrorCheckMsgBox(szErrorMsg);
+#else  // FOR_WORK
+    PopUpErrorCheckMsgBox(szErrorMsg, true);
+#endif // FOR_WORK
+}
+
 bool LoadDataBitmap(const wchar_t* szFullPath, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck,
                     bool keepPixels)
 {
-    if (bCheck)
-    {
-        if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels))
-        {
-            wchar_t szErrorMsg[256] = {
-                0,
-            };
-            mu_swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", szFullPath);
-#ifdef FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg);
-#else  // FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg, true);
-#endif // FOR_WORK
-            return false;
-        }
-        return true;
-    }
-    return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels);
+    return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels,
+                             bCheck ? &ReportBitmapLoadFailure : nullptr);
 }
 } // namespace
 

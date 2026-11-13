@@ -145,17 +145,6 @@ void TitleSceneUI::ReleaseSceneUI()
 
 void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 {
-    // Each loading update gets its own frame so the progress bar is visible.
-    // When called inside the game loop, temporarily close the caller frame,
-    // present this loading update, then reopen the caller frame.
-    const bool wasFrameActive = mu::GetRenderer().IsFrameActive();
-    if (wasFrameActive)
-    {
-        mu::GetRenderer().EndFrame();
-    }
-
-    mu::GetRenderer().BeginFrame();
-
     ::BeginOpengl();
     mu::GetRenderer().ClearScreen();
     ::BeginBitmap();
@@ -167,8 +156,8 @@ void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
         s_asprTitle[i].Render();
     }
 
-    // Not rendered here -- RmlUiRuntime's SetPreSubmitCallback fires automatically before this
-    // function's own EndFrame() submits below, same as every other RmlUi document (see this
+    // Not rendered here -- RmlUiRuntime's SetPreSubmitCallback fires automatically before the
+    // frame is submitted, same as every other RmlUi document (see this
     // file's own comment at CreateSceneUI()'s gauge setup). SetMax()/SetValue() own the
     // normalization (clamped, divide-by-zero-safe -- ElementProgress::GetMax() floors to 1
     // internally), no manual fraction math needed.
@@ -184,11 +173,4 @@ void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
     g_MuEditorCore.Render();
 #endif
-
-    mu::GetRenderer().EndFrame();
-
-    if (wasFrameActive)
-    {
-        mu::GetRenderer().BeginFrame();
-    }
 }

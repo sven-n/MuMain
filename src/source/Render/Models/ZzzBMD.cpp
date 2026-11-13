@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/Random.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include <cstdint>
@@ -20,6 +21,7 @@
 #include <span>
 #include <tuple>
 #include <utility>
+#include <SDL3/SDL_iostream.h>
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include "Engine/Object/ZzzInfomation.h"
@@ -3558,7 +3560,7 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     wchar_t ModelPath[260] = {};
     _snwprintf(ModelPath, std::size(ModelPath), L"%ls%ls", DirName, ModelFileName);
 
-    FILE* fp = _wfopen(ModelPath, L"rb");
+    Content::Stream fp = Content::OpenIO(ModelPath);
     if (!fp)
     {
         //// wprintf(L"[Open2] ERROR: Unable to open file: %ls\n", ModelPath);
@@ -3566,20 +3568,16 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         return false;
     }
 
-    fseek(fp, 0, SEEK_END);
-    int dataSize = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    int dataSize = static_cast<int>(SDL_GetIOSize(fp.get()));
 
     std::unique_ptr<unsigned char[]> fileData(new(std::nothrow) unsigned char[dataSize]);
     if (!fileData)
     {
-        fclose(fp);
         m_bCompletedAlloc = false;
         return false;
     }
 
-    const size_t bytesRead = fread(fileData.get(), 1, dataSize, fp);
-    fclose(fp);
+    const size_t bytesRead = SDL_ReadIO(fp.get(), fileData.get(), dataSize);
 
     // *** Check the "BMD" header *** (and its version byte); a file cut short has neither.
     constexpr int HeaderSize = 4;
@@ -3813,6 +3811,7 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
 
 bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     wchar_t ModelName[64];
     wcscpy(ModelName, DirName);
     wcscat(ModelName, ModelFileName);

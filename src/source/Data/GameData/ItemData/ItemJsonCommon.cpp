@@ -4,8 +4,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <fstream>
-#include <iterator>
 #include <limits>
 
 namespace Data::Items::Json
@@ -214,28 +212,6 @@ bool ReadFileVersion(std::string_view text, const std::string& source, int maxFo
         return false;
     }
     return ReadFormatVersion(root, source, maxFormatVersion, issues);
-}
-
-std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
-{
-    constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
-    // Only a regular file: on Linux a folder opens, and reading it throws.
-    std::error_code error;
-    if (!std::filesystem::is_regular_file(path, error))
-    {
-        return std::nullopt;
-    }
-    std::ifstream file(path, std::ios::binary);
-    if (!file)
-    {
-        return std::nullopt;
-    }
-    std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    if (text.starts_with(Utf8ByteOrderMark))
-    {
-        text.erase(0, Utf8ByteOrderMark.size());
-    }
-    return text;
 }
 
 bool ReadFileHeader(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,

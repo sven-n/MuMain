@@ -15,6 +15,7 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemOptionDefinition.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ItemDropModel.h"
@@ -40,8 +41,6 @@ constexpr float LevelFieldWidth = 40.0f;
 constexpr float SetComboWidth = 200.0f;
 constexpr float LayoutComboWidth = 240.0f;
 constexpr int MaxLevel = Data::Items::ItemLevelCount - 1;
-// Every excellent option: the label only asks whether the item has one.
-constexpr BYTE AllExcellentOptions = 0x3F;
 // The option level the preview gives: the label only asks whether the item has one.
 constexpr BYTE PreviewOptionLevel = 1;
 
@@ -406,7 +405,7 @@ ITEM CMuItemTooltipUI::MakePreviewItem(int itemType) const
     params.WithOption = m_option;
     params.OptionLevel = m_option ? PreviewOptionLevel : 0;
     params.HasExcellentOption = m_excellent;
-    params.ExcellentFlags = m_excellent ? AllExcellentOptions : 0;
+    params.ExcellentFlags = m_excellent ? Data::Items::AllExcellentOptionFlags : 0;
     params.IsAncient = m_set > 0;
     params.AncientDiscriminator = static_cast<BYTE>(m_set);
     ITEM item;

@@ -84,6 +84,8 @@ MonsterModelDefinition FullModel()
                   {"step 1", MONSTER01_WALK, {1.0f, 2.0f}},
                   {"swing", MONSTER01_ATTACK1, {3.25f, 4.0f}}};
     model.timers = {{"hair swing", MONSTER01_WALK, 500}, {"blink", MONSTER01_STOP1, 2000}};
+    // In the order the code registers them, not sorted (Q-MN37).
+    model.namedBones = {{"Rabbit_2", 16}, {"Rabbit_1", 3}};
     model.bitmaps = {{"Monster/bv01_2.jpg", "BITMAP_MONSTER_SKIN", true, true}, {"Monster/iui02.tga", "BITMAP_ROBE+3"}};
     Data::Monsters::MonsterModelPart part;
     part.effect = "totemGolemPart1";
@@ -249,6 +251,15 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
         {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "a", "animation": "walk", "everyMs": 5}, )"
                                       R"({"name": "a", "animation": "stop1", "everyMs": 5}])"),
          "model MONSTER_MODEL_HOUND timers[1].name", "another timer"},
+        // The named bones (Q-MN37).
+        {Model("MONSTER_MODEL_HOUND", R"("namedBones": [3, 16])"), "model MONSTER_MODEL_HOUND namedBones",
+         "bones by name"},
+        {Model("MONSTER_MODEL_HOUND", R"("namedBones": {"": 3})"), "model MONSTER_MODEL_HOUND namedBones",
+         "must not be empty"},
+        {Model("MONSTER_MODEL_HOUND", R"("namedBones": {"Head": -1})"), "model MONSTER_MODEL_HOUND namedBones.Head",
+         "from 0 to"},
+        {Model("MONSTER_MODEL_HOUND", R"("namedBones": {"Head": 1.5})"), "model MONSTER_MODEL_HOUND namedBones.Head",
+         "from 0 to"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "step 1", "frames": [1, 2]}])"),
          "model MONSTER_MODEL_HOUND cues[0]", "name, animation and frames"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "", "animation": "walk", "frames": [1, 2]}])"),

@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
 #include "Data/GameData/MonsterData/MonsterGroup.h"
+#include "Data/GameData/MonsterData/UnknownMonsterLook.h"
 
 #include <span>
 #include <string>
@@ -31,6 +32,10 @@
 // value may be empty where the monster's is not: "model": "", "soundSet": "",
 // "attacks": null, "mapVariants": [] and "randomVariants": [].
 //
+// "unknownMonsters" holds how the game shows a monster it cannot show as
+// itself (UnknownMonsterLook.h, D64); a file without it has the look's
+// defaults.
+//
 // Version 1 listed each number with its values ("number" next to "name");
 // such a file is read as a monster for each entry.
 namespace Data::Monsters
@@ -42,14 +47,19 @@ constexpr int MonstersFormatVersion = 2;
 // its own values; a number that is there twice is an error.
 void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
                       std::vector<Items::ItemDataIssue>& issues);
+// The same, with the unknown monsters' look of the file.
+void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
+                      UnknownMonsterLook& unknown, std::vector<Items::ItemDataIssue>& issues);
 
 // The entries of the numbers the text has, as ReadMonstersJson reads them.
 void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterDefinition>& numbers,
                       std::vector<Items::ItemDataIssue>& issues);
 
 // The text of the file with these monsters, sorted by their first number, and
-// their numbers sorted.
+// their numbers sorted; without the unknown monsters' look.
 std::string WriteMonstersJson(std::span<const MonsterGroup> monsters);
+// The same, with the unknown monsters' look (the file the game reads).
+std::string WriteMonstersJson(std::span<const MonsterGroup> monsters, const UnknownMonsterLook& unknown);
 
 // The text of the file with a monster for each entry.
 std::string WriteMonstersJson(std::span<const MonsterDefinition> numbers);

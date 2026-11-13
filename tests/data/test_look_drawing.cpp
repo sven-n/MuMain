@@ -10,8 +10,10 @@
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/LookData/LookEffects.h"
 #include "Data/GameData/LookData/LookStore.h"
+#include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Items/LookDrawing.h"
 #include "Render/Models/DrawLook.h"
@@ -24,6 +26,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -102,7 +105,7 @@ std::vector<int> Meshes(const std::vector<MeshDraw>& draws)
 class TestSword
 {
 public:
-    explicit TestSword(const char* style)
+    explicit TestSword(const char* style, std::map<std::string, std::string> values = {})
     {
         Data::Items::ItemModelDefinition entry;
         entry.group = 0;
@@ -110,6 +113,7 @@ public:
         // A model entry needs a file to count (ItemModelDefinition::Exists).
         entry.file = "Data/Item/Sword01.bmd";
         entry.renderStyle = style;
+        entry.renderStyleValues = std::move(values);
         g_ItemModelDatabase.Build(std::span(&entry, 1), Data::Effects::GlowColorList{});
 
         REQUIRE(m_glowing.parsingTScriptA(m_glowingName));
@@ -383,6 +387,25 @@ TEST_CASE("Values that change over time take the clock, as the looks in code wro
     CHECK(look.blendMeshLight == pulse);
 }
 
+TEST_CASE("A zigzag folds back at its To, a falling one the same way downwards, and one from a value to the same "
+          "value stays there [looks]")
+{
+    const Shape up{.kind = ShapeKind::Zigzag, .from = 0.0, .to = 1.0, .seconds = 2.0};
+    const Shape down{.kind = ShapeKind::Zigzag, .from = 0.0, .to = -1.0, .seconds = 2.0};
+    const Shape flat{.kind = ShapeKind::Zigzag, .from = 0.5, .to = 0.5, .seconds = 2.0};
+    CHECK(Render::Items::Looks::ShapeAtClock(up, 500.0) == doctest::Approx(0.25));
+    CHECK(Render::Items::Looks::ShapeAtClock(up, 2500.0) == doctest::Approx(0.75));
+    for (const double time : {0.0, 500.0, 1500.0, 2500.0, 3999.0, TestTime})
+    {
+        CAPTURE(time);
+        const float rising = Render::Items::Looks::ShapeAtClock(up, time);
+        CHECK(rising >= 0.f);
+        CHECK(rising <= 1.f);
+        CHECK(Render::Items::Looks::ShapeAtClock(down, time) == -rising);
+        CHECK(Render::Items::Looks::ShapeAtClock(flat, time) == 0.5f);
+    }
+}
+
 TEST_CASE("A random value takes Random::DrawRand of the object, with the next salt for each one [looks]")
 {
     const Shape random{.kind = ShapeKind::Random, .from = 0.0, .to = 0.9, .step = 0.1};
@@ -418,6 +441,49 @@ TEST_CASE("A layer's light stays for the layers after it, and a tint takes the m
     CHECK(sword.model.BodyLight[0] == 0.4f);
 }
 
+TEST_CASE("A look drawn mesh by mesh starts each mesh in the drawing's light, and a layer's light stays for the "
+          "layers after it also on a mesh it doesn't draw [looks]")
+{
+    const LayerLight red{.color = {1.f, 0.f, 0.f}};
+    const auto light = [](const MeshDraw& draw)
+    { return std::make_tuple(draw.mesh, draw.bodyLight[0], draw.bodyLight[1], draw.bodyLight[2]); };
+    SUBCASE("The light a layer leaves on one mesh doesn't reach the first layers of the next")
+    {
+        const LookStoreScope looks(
+            {{"testLook",
+              {Layer{.meshes = {{0, 1}}}, Layer{.meshes = {{0}}, .light = red},
+               Layer{.kind = LayerKind::Reflection, .where = Where::UnderHoles, .meshes = {{0, 1}}}},
+              {}}});
+        TestSword sword("testLook");
+        Vector(0.5f, 0.5f, 0.5f, sword.model.BodyLight);
+        DrawLook look;
+        const std::vector<MeshDraw> draws = sword.Draw(look);
+        REQUIRE(draws.size() == 5);
+        CHECK(light(draws[0]) == std::make_tuple(0, 0.5f, 0.5f, 0.5f));
+        CHECK(light(draws[1]) == std::make_tuple(0, 1.f, 0.f, 0.f));
+        CHECK(light(draws[2]) == std::make_tuple(0, 1.f, 0.f, 0.f));
+        CHECK(light(draws[3]) == std::make_tuple(1, 0.5f, 0.5f, 0.5f));
+        CHECK(light(draws[4]) == std::make_tuple(1, 1.f, 0.f, 0.f));
+    }
+    SUBCASE("A layer's light reaches the layers after it on a mesh it doesn't draw, also when it draws nothing")
+    {
+        Layer none{.light = red};
+        none.meshes.none = true;
+        const LookStoreScope looks(
+            {{"testLook",
+              {none, Layer{.meshes = {{0}}},
+               Layer{.kind = LayerKind::Reflection, .where = Where::UnderHoles, .meshes = {{0}}}},
+              {}}});
+        TestSword sword("testLook");
+        Vector(0.5f, 0.5f, 0.5f, sword.model.BodyLight);
+        DrawLook look;
+        const std::vector<MeshDraw> draws = sword.Draw(look);
+        REQUIRE(draws.size() == 2);
+        CHECK(light(draws[0]) == std::make_tuple(0, 1.f, 0.f, 0.f));
+        CHECK(light(draws[1]) == std::make_tuple(0, 1.f, 0.f, 0.f));
+    }
+}
+
 TEST_CASE("A layer's scrolling mesh is the model's while it draws, and the item values can leave one [looks]")
 {
     const LookStoreScope looks(
@@ -439,6 +505,196 @@ TEST_CASE("A layer's scrolling mesh is the model's while it draws, and the item 
         DrawLook look;
         sword.Draw(look);
         CHECK(sword.model.StreamMesh == 1);
+    }
+}
+
+TEST_CASE("An item effect that is data sets the item values of its entries whose Only when holds, in their order, "
+          "and the object's light in the update (design L13, L45) [looks]")
+{
+    LookDefinition effect{"byLevel", {}, {}};
+    effect.itemValuesBefore = {
+        {.onlyWhen = {.level = std::pair<int, int>{1, 15}}, .glowsLikeLevel = 7},
+        // Reads the level the entry before set.
+        {.onlyWhen = {.level = std::pair<int, int>{7, 7}}, .values = {.glowMesh = 1, .glowStrength = 0.5f}},
+        {.onlyWhen = {.level = std::pair<int, int>{0, 0}}, .values = {.hiddenMesh = 1}, .drawingOpacity = 2.f}};
+    effect.objectLight = std::array<Number, 3>{0.5f, 0.25f, 1.f};
+    BMD model;
+    OBJECT object;
+    {
+        DrawLook look;
+        float alpha = 1.f;
+        int level = 3;
+        Render::Items::Looks::ApplyItemEffect(effect, &model, &object, look, alpha, level);
+        CHECK(level == 7);
+        CHECK(look.level == 7);
+        CHECK(look.blendMesh == 1);
+        CHECK(look.blendMeshLight == 0.5f);
+        CHECK(look.hiddenMesh == -1);
+        CHECK(alpha == 1.f);
+    }
+    {
+        DrawLook look;
+        float alpha = 1.f;
+        int level = 0;
+        Render::Items::Looks::ApplyItemEffect(effect, &model, &object, look, alpha, level);
+        CHECK(level == 0);
+        CHECK(look.hiddenMesh == 1);
+        CHECK(alpha == 2.f);
+    }
+    Render::Items::Looks::SpawnItemEffect(effect, &object);
+    CHECK(object.Light[0] == 0.5f);
+    CHECK(object.Light[1] == 0.25f);
+    CHECK(object.Light[2] == 1.f);
+}
+
+TEST_CASE("An item names an item effect that is data before one still in code (design L14) [looks]")
+{
+    // wingsOfDarkness stays code until its things on bones move (step 3): it spawns and sets no value.
+    LookDefinition effect{"wingsOfDarkness", {}, {}};
+    effect.itemValuesBefore = {{.values = {.glowStrength = 0.25f}}};
+    g_LookStore.SetItemEffects({effect});
+    REQUIRE(Render::Items::ItemEffects::ExistsInCode("wingsOfDarkness"));
+    ItemModelDatabaseScope database;
+    Data::Items::ItemModelDefinition entry;
+    entry.group = 0;
+    entry.number = 0;
+    entry.file = "Data/Item/Sword01.bmd";
+    entry.itemEffect = "wingsOfDarkness";
+    g_ItemModelDatabase.Build(std::span(&entry, 1), Data::Effects::GlowColorList{});
+    BMD model;
+    OBJECT object;
+    DrawLook look;
+    float alpha = 1.f;
+    int level = 0;
+    CHECK(Render::Items::ItemEffects::Apply(&model, &object, look, MODEL_SWORD, alpha, level) ==
+          Render::Items::ItemEffects::Result::Applied);
+    CHECK(look.blendMeshLight == 0.25f);
+    CHECK_FALSE(Render::Items::ItemEffects::Spawns(MODEL_SWORD));
+    g_LookStore.SetItemEffects({});
+    look = {};
+    look.blendMeshLight = 0.5f;
+    Render::Items::ItemEffects::Apply(&model, &object, look, MODEL_SWORD, alpha, level);
+    CHECK(look.blendMeshLight == 0.5f);
+    CHECK(Render::Items::ItemEffects::Spawns(MODEL_SWORD));
+}
+
+TEST_CASE("An item says whether its render style draws alone (design L47) [looks]")
+{
+    LookDefinition alone{"alone", {Layer{}}, {}};
+    alone.drawsAlone = true;
+    const LookStoreScope looks({alone, {"withOthers", {Layer{}}, {}}});
+    {
+        TestSword sword("alone");
+        CHECK(Render::Items::Styles::DrawsAlone(MODEL_SWORD));
+    }
+    {
+        TestSword sword("withOthers");
+        CHECK_FALSE(Render::Items::Styles::DrawsAlone(MODEL_SWORD));
+    }
+    CHECK_FALSE(Render::Items::Styles::DrawsAlone(MODEL_PLAYER));
+
+    // A part model's style too (design L28).
+    const ItemModelDatabaseScope restoreModels;
+    Data::Items::PartModel head;
+    head.model.name = "grade15Head";
+    head.model.file = "Data/Item/Sword01.bmd";
+    head.renderStyle = "alone";
+    g_ItemModelDatabase.SetPartModels(std::span(&head, 1));
+    CHECK(Render::Items::Styles::DrawsAlone(MODEL_15GRADE_ARMOR_OBJ_HEAD));
+    g_ItemModelDatabase.SetPartModels({});
+}
+
+TEST_CASE("A layer of no mesh draws nothing until an item's values give it meshes (design L12) [looks]")
+{
+    const LookStoreScope looks(
+        {{"someItems",
+          {Layer{.meshes = {{0}}}, Layer{.meshes = {.none = true}, .eachItem = {{"meshes", "more"}}}},
+          {}}});
+    {
+        TestSword sword("someItems");
+        DrawLook look;
+        CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0});
+    }
+    {
+        TestSword sword("someItems", {{"more", "[1]"}});
+        DrawLook look;
+        CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0, 1});
+    }
+}
+
+TEST_CASE("A layer can draw in the model's light at a brightness, a grey of it for a black light (design L16) "
+          "[looks]")
+{
+    const LookStoreScope looks(
+        {{"cloak", {Layer{.meshes = {{0}}, .light = LayerLight{.brightness = Number{0.8f}}}}, {}}});
+    TestSword sword("cloak");
+    Vector(0.5f, 0.25f, 0.f, sword.model.BodyLight);
+    DrawLook look;
+    std::vector<MeshDraw> draws = sword.Draw(look);
+    REQUIRE(draws.size() == 1);
+    CHECK(draws[0].bodyLight[0] == 0.5f * (0.8f / 0.5f));
+    CHECK(draws[0].bodyLight[1] == 0.25f * (0.8f / 0.5f));
+    Vector(0.f, 0.f, 0.f, sword.model.BodyLight);
+    draws = sword.Draw(look);
+    CHECK(draws[0].bodyLight[2] == 0.8f);
+}
+
+TEST_CASE("A layer's value can be the item's times a shape (design L16) [looks]")
+{
+    const Shape twice{.kind = ShapeKind::Ramp, .from = 2.0, .to = 2.0, .seconds = 1.0, .timesItem = true};
+    const LookStoreScope looks({{"times", {Layer{.meshes = {{0}}, .opacity = twice}}, {}}});
+    TestSword sword("times");
+    DrawLook look;
+    look.alpha = 0.25f;
+    const std::vector<MeshDraw> draws = sword.Draw(look);
+    REQUIRE(draws.size() == 1);
+    CHECK(draws[0].alpha == 0.5f);
+}
+
+TEST_CASE("A layer can be only for a character without a buff (design L11) [looks]")
+{
+    const LookStoreScope looks({{"arrows",
+                                 {Layer{.meshes = {{0}}, .onlyWhen = {.buff = LookBuff::InfinityArrow}},
+                                  Layer{.meshes = {{1}}, .onlyWhen = {.withoutBuff = LookBuff::InfinityArrow}}},
+                                 {}}});
+    TestSword sword("arrows");
+    DrawLook look;
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{1});
+    sword.object.m_BuffMap.RegisterBuff(eBuff_InfinityArrow);
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0});
+    sword.object.m_BuffMap.UnRegisterBuff(eBuff_InfinityArrow);
+}
+
+TEST_CASE("A look can leave a light on the model, a color or a tint of the light it was handed (design L46) "
+          "[looks]")
+{
+    const LookStoreScope looks({{"gray",
+                                 {Layer{.meshes = {{0}}, .light = LayerLight{.color = {1.f, 0.7f, 0.4f}}}},
+                                 {.light = LayerLight{.color = {0.7f, 0.7f, 0.7f}}}},
+                                {"tinted",
+                                 {Layer{.meshes = {{0}}, .light = LayerLight{.color = {1.f, 0.7f, 0.4f}}}},
+                                 {.light = LayerLight{.tint = true, .color = {1.f, 1.f, 0.5f}}}}});
+    {
+        TestSword sword("gray");
+        Vector(0.5f, 0.5f, 0.5f, sword.model.BodyLight);
+        DrawLook look;
+        const std::vector<MeshDraw> draws = sword.Draw(look);
+        REQUIRE(draws.size() == 1);
+        // The layer draws in its own light; the look leaves its gray after it.
+        CHECK(draws[0].bodyLight[1] == 0.7f);
+        CHECK(draws[0].bodyLight[2] == 0.4f);
+        CHECK(sword.model.BodyLight[0] == 0.7f);
+        CHECK(sword.model.BodyLight[1] == 0.7f);
+        CHECK(sword.model.BodyLight[2] == 0.7f);
+    }
+    {
+        TestSword sword("tinted");
+        Vector(0.5f, 0.5f, 0.5f, sword.model.BodyLight);
+        DrawLook look;
+        sword.Draw(look);
+        CHECK(sword.model.BodyLight[0] == 0.5f);
+        CHECK(sword.model.BodyLight[1] == 0.5f);
+        CHECK(sword.model.BodyLight[2] == 0.25f);
     }
 }
 
@@ -507,4 +763,90 @@ TEST_CASE("A texture missing when its look was prepared is found when the look i
     }
     Bitmaps.UnloadImage(texture, true);
     Render::Sprites::SetGpuUploadsSkipped(false);
+}
+
+TEST_CASE("A render style not for a drawing leaves the item to the plain drawing, and one only for a monster's hands "
+          "draws without the mark (design L11) [looks]")
+{
+    LookDefinition notForCopies{"notForCopies", {Layer{}}, {}};
+    notForCopies.notFor.doppelganger = true;
+    LookDefinition inHands{"inHands", {Layer{.blend = Blend::AsDrawing}}, {}};
+    inHands.notFor.outsideMonsterHands = true;
+    const LookStoreScope looks({notForCopies, inHands});
+    const auto drawsOf = [](TestSword& sword, int renderType, bool& drawn)
+    {
+        RecordingDrawer drawer;
+        DrawLook look;
+        {
+            const DrawerScope scope(drawer);
+            drawn = Render::Items::Styles::Render(&sword.model, &sword.object, look, MODEL_SWORD, 1.f, renderType);
+        }
+        return drawer.draws;
+    };
+    bool drawn = false;
+    {
+        TestSword sword("notForCopies");
+        CHECK_FALSE(drawsOf(sword, RENDER_TEXTURE, drawn).empty());
+        CHECK(drawn);
+        CHECK(drawsOf(sword, RENDER_TEXTURE | RENDER_DOPPELGANGER, drawn).empty());
+        CHECK_FALSE(drawn);
+    }
+    {
+        TestSword sword("inHands");
+        CHECK(drawsOf(sword, RENDER_TEXTURE, drawn).empty());
+        CHECK_FALSE(drawn);
+        const std::vector<MeshDraw> draws = drawsOf(sword, RENDER_TEXTURE | RENDER_EXTRA, drawn);
+        CHECK(drawn);
+        REQUIRE_FALSE(draws.empty());
+        for (const MeshDraw& draw : draws)
+        {
+            CHECK((draw.flags & RENDER_EXTRA) == 0);
+        }
+    }
+}
+
+TEST_CASE("A layer draws only while its Only when holds: the place, the level, the item's hidden mesh and a buff "
+          "(design L11) [looks]")
+{
+    const LookStoreScope looks({{"conditions",
+                                 {Layer{.meshes = {{0}}, .onlyWhen = {.place = Place::Worn}},
+                                  Layer{.meshes = {{1}}, .onlyWhen = {.place = Place::InventoryAndGround}},
+                                  Layer{.meshes = {{0}}, .onlyWhen = {.level = std::pair<int, int>{7, 9}}},
+                                  Layer{.meshes = {{1}}, .onlyWhen = {.hiddenMesh = 1}},
+                                  Layer{.meshes = {{0}}, .onlyWhen = {.buff = LookBuff::InfinityArrow}}},
+                                 {}}});
+    TestSword sword("conditions");
+    DrawLook look;
+    // Worn, at +0, without a hidden mesh or a buff.
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0});
+    sword.model.HideSkin = true;
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{1});
+    sword.model.HideSkin = false;
+    look.level = 8;
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0, 0});
+    look.level = 10;
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0});
+    look.level = 0;
+    look.hiddenMesh = 1;
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0, 1});
+    look.hiddenMesh = -1;
+    sword.object.m_BuffMap.RegisterBuff(eBuff_InfinityArrow);
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0, 0});
+    sword.object.m_BuffMap.UnRegisterBuff(eBuff_InfinityArrow);
+}
+
+TEST_CASE("An item that sets values of its look draws the look with them, another item with the look's own (design "
+          "L12) [looks]")
+{
+    const LookStoreScope looks({{"partsPerItem", {Layer{.meshes = {{0}}, .eachItem = {{"meshes", "parts"}}}}, {}}});
+    {
+        TestSword sword("partsPerItem", {{"parts", "[1, 2]"}});
+        DrawLook look;
+        CHECK(Meshes(sword.Draw(look)) == std::vector<int>{1, 2});
+    }
+    {
+        TestSword sword("partsPerItem");
+        DrawLook look;
+        CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0});
+    }
 }

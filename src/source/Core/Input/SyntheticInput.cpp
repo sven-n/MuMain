@@ -161,7 +161,7 @@ void ApplyButtonDown()
             MouseLButtonPush = true;
         }
         MouseLButton = true;
-        Core::Input::RecordLeftMouseButtonPressEdge();
+        Core::Input::RecordButtonPressEdge(VK_LBUTTON);
         return;
     }
     MouseRButtonPop = false;
@@ -206,7 +206,7 @@ void RetractButton()
         MouseLButton = false;
         MouseLButtonPush = false;
         MouseLButtonPop = false;
-        Core::Input::ClearLeftMouseButtonPressEdge();
+        Core::Input::ClearButtonPressEdge(VK_LBUTTON);
         return;
     }
     MouseRButton = false;

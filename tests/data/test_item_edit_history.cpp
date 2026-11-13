@@ -87,6 +87,12 @@ public:
                 // No render style file.
                 {},
                 {},
+                // No monster table.
+                {},
+                {},
+                {},
+                {},
+                {},
                 [this] { return m_nameCases; },
                 [this](const Data::Items::ItemNameCases& cases) { m_nameCases = cases; }};
     }

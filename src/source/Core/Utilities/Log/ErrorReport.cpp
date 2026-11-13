@@ -10,7 +10,6 @@
 #include "Core/Utilities/PlatformInfo.h"
 #include "Core/Utilities/VersionFiles.h"
 #include "MuGitCommit.h"
-#include "Render/Renderer/MuRenderer.h"
 
 #include <string>
 #include <thread>
@@ -151,12 +150,11 @@ void CErrorReport::WriteSystemInfo(void)
 
 // Once the renderer is up: the GPU, the graphics API SDL picked, and the driver version where the API reports
 // one (Vulkan and Direct3D 12 do, Metal doesn't).
-void CErrorReport::WriteGpuInfo(void)
+void CErrorReport::WriteGpuInfo(const char* deviceName, const char* driverName, const char* driverVersion)
 {
-    const auto& renderer = mu::GetRenderer();
-    Write(L"GPU \t\t\t: %hs\r\n", OrUnknown(renderer.GetGPUDeviceName()));
-    Write(L"GPU API \t\t: %hs\r\n", OrUnknown(renderer.GetGPUDriverName()));
-    Write(L"GPU driver \t\t: %hs\r\n", OrUnknown(renderer.GetGPUDriverVersion()));
+    Write(L"GPU \t\t\t: %hs\r\n", OrUnknown(deviceName));
+    Write(L"GPU API \t\t: %hs\r\n", OrUnknown(driverName));
+    Write(L"GPU driver \t\t: %hs\r\n", OrUnknown(driverVersion));
 }
 
 void CErrorReport::WriteFontInfo(void)

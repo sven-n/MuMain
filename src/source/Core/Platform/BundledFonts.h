@@ -2,11 +2,10 @@
 //
 // Single source of truth shared by every platform: the non-Windows GdiText shim
 // reads bundled files directly, while Windows privately registers the same files
-// with GDI. Family names match the options UI and config; paths are relative to
-// the runtime directory normalized during startup.
+// with GDI. Family names match the options UI and config; paths are game
+// content, relative to the client folder.
 #pragma once
 
-#include <filesystem>
 #include <string_view>
 
 struct BundledFont
@@ -50,13 +49,6 @@ inline constexpr BundledFont kBundledFallbackFonts[] = {
     {"Nanum Gothic", "fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Regular.ttf"},
     kNotoSansScFont,
 };
-
-[[nodiscard]] inline std::filesystem::path ResolveBundledFontPath(const std::filesystem::path& relativePath)
-{
-    std::error_code error;
-    const std::filesystem::path runtimeDirectory = std::filesystem::current_path(error);
-    return error ? relativePath : runtimeDirectory / relativePath;
-}
 
 [[nodiscard]] constexpr const BundledFont& ResolveBundledFont(std::string_view configuredFamily)
 {

@@ -88,6 +88,18 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_teardown_stack
+    SOURCES
+        test_teardown_stack.cpp
+)
+
+mu_add_test(
+    NAME test_staged_load
+    SOURCES
+        test_staged_load.cpp
+)
+
+mu_add_test(
     NAME test_mu_logger
     SOURCES
         test_mu_logger_static_init.cpp
@@ -179,4 +191,16 @@ mu_add_test(
     SOURCES
         test_number_parse.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
+)
+
+mu_add_test(
+    NAME test_content
+    SOURCES
+        test_content_path.cpp
+        test_content_store.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Content/ContentPath.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Content/ContentStore.cpp
+    LINK_LIBS
+        SDL3::SDL3
+        mu_test_path_resolve
 )

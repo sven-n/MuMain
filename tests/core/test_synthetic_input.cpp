@@ -13,6 +13,7 @@
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Input/UiInputRouter.h"
 #include "Core/Platform/WinCompat.h"
+#include "UI/Core/WindowCommon.h"
 
 #include <cstdint>
 #include <SDL3/SDL.h>
@@ -255,7 +256,7 @@ TEST_CASE(
     WindowHeight = 960;
     const auto frame = [&]
     {
-        Core::Input::ClearLeftMouseButtonPressEdge();
+        Core::Input::ClearPressEdges();
         BeginFrame();
         g_pNewKeyInput->ScanAsyncKeyState();
         input.Update();
@@ -770,4 +771,66 @@ TEST_CASE("Type handler rejects invalid arguments before scheduling and refuses 
         App::Control::Request::Parse(R"({"cmd":"type","text":"x"})"), act);
     CHECK(response.find(R"("error":"busy")") != std::string::npos);
     CHECK(act == nullptr);
+}
+
+namespace
+{
+SDL_Event KeyEvent(SDL_EventType type, SDL_Scancode scancode, bool repeat = false)
+{
+    SDL_Event event{};
+    event.type = type;
+    event.key.scancode = scancode;
+    event.key.down = type == SDL_EVENT_KEY_DOWN;
+    event.key.repeat = repeat;
+    return event;
+}
+
+SDL_Event ButtonEvent(SDL_EventType type, Uint8 button)
+{
+    SDL_Event event{};
+    event.type = type;
+    event.button.button = button;
+    event.button.down = type == SDL_EVENT_MOUSE_BUTTON_DOWN;
+    return event;
+}
+} // namespace
+
+TEST_CASE("A key pressed and released between two frames is pressed for one frame [core][input]")
+{
+    // Two scans settle whatever an earlier case left in the tracker.
+    Core::Input::ClearPressEdges();
+    g_pNewKeyInput->ScanAsyncKeyState();
+    g_pNewKeyInput->ScanAsyncKeyState();
+
+    Core::Input::RecordPressEdge(KeyEvent(SDL_EVENT_KEY_DOWN, SDL_SCANCODE_I));
+    Core::Input::RecordPressEdge(KeyEvent(SDL_EVENT_KEY_UP, SDL_SCANCODE_I));
+    g_pNewKeyInput->ScanAsyncKeyState();
+    CHECK(g_pNewKeyInput->IsPress('I'));
+    CHECK_FALSE(g_pNewKeyInput->IsPress('O'));
+    Core::Input::ClearPressEdges();
+
+    g_pNewKeyInput->ScanAsyncKeyState();
+    CHECK_FALSE(g_pNewKeyInput->IsPress('I'));
+    CHECK_FALSE(g_pNewKeyInput->IsRepeat('I'));
+    CHECK(g_pNewKeyInput->IsRelease('I'));
+    CHECK_FALSE(Core::Input::IsKeyDown('I'));
+}
+
+TEST_CASE("A key repeat is not a new press [core][input]")
+{
+    Core::Input::ClearPressEdges();
+    Core::Input::RecordPressEdge(KeyEvent(SDL_EVENT_KEY_DOWN, SDL_SCANCODE_RETURN, true));
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_RETURN));
+}
+
+TEST_CASE("A mouse button clicked between two frames is down for one frame [core][input]")
+{
+    Core::Input::ClearPressEdges();
+    Core::Input::RecordPressEdge(ButtonEvent(SDL_EVENT_MOUSE_BUTTON_DOWN, SDL_BUTTON_RIGHT));
+    Core::Input::RecordPressEdge(ButtonEvent(SDL_EVENT_MOUSE_BUTTON_UP, SDL_BUTTON_RIGHT));
+    CHECK(Core::Input::IsKeyDown(VK_RBUTTON));
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_LBUTTON));
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_MBUTTON));
+    Core::Input::ClearPressEdges();
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_RBUTTON));
 }

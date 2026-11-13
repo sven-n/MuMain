@@ -1,0 +1,31 @@
+# Scene setup and teardown that loads or deletes textures runs before the frame begins:
+# inside a frame, a deleted texture drops all of that frame's game draws.
+if(NOT DEFINED MU_SCENE_MANAGER_SOURCE)
+    message(FATAL_ERROR "MU_SCENE_MANAGER_SOURCE is required")
+endif()
+file(READ "${MU_SCENE_MANAGER_SOURCE}" source)
+
+function(function_body name out)
+    string(FIND "${source}" "\n${name}\n{" start)
+    if(start EQUAL -1)
+        message(FATAL_ERROR "Could not find ${name}")
+    endif()
+    string(SUBSTRING "${source}" ${start} -1 rest)
+    string(FIND "${rest}" "\n}\n" end)
+    string(SUBSTRING "${rest}" 0 ${end} body)
+    set(${out} "${body}" PARENT_SCOPE)
+endfunction()
+
+function_body("void PrepareSceneBeforeFrame()" prepare)
+function_body("void RenderScene(HDC hDC)" render)
+
+foreach(call IN ITEMS "EndWebzenScene();" "CreateLogInScene();" "CreateCharacterScene();")
+    string(FIND "${prepare}" "${call}" in_prepare)
+    if(in_prepare EQUAL -1)
+        message(FATAL_ERROR "PrepareSceneBeforeFrame must call ${call}")
+    endif()
+    string(FIND "${render}" "${call}" in_render)
+    if(NOT in_render EQUAL -1)
+        message(FATAL_ERROR "RenderScene runs inside the frame and must not call ${call}")
+    endif()
+endforeach()

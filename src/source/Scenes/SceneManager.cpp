@@ -16,6 +16,7 @@
 #include <cmath>
 #include <iterator>
 #include <thread>
+#include <SDL3/SDL_timer.h>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
@@ -105,7 +106,7 @@ namespace
         MouseLButtonPush = false;
         MouseRButtonPush = false;
         MouseMButtonPush = false;
-        Core::Input::ClearLeftMouseButtonPressEdge();
+        Core::Input::ClearPressEdges();
     }
 }
 
@@ -233,6 +234,21 @@ void SetTargetFps(double targetFps)
     }
 
     g_frameTiming.SetTargetFps(targetFps);
+}
+
+namespace
+{
+Uint64 s_framesPausedUntilMs = 0;
+} // namespace
+
+void PauseFrames(unsigned int seconds)
+{
+    s_framesPausedUntilMs = SDL_GetTicks() + seconds * Uint64{1000};
+}
+
+bool FramesPaused()
+{
+    return SDL_GetTicks() < s_framesPausedUntilMs;
 }
 
 double GetTargetFps()
@@ -773,7 +789,12 @@ static void UpdateLoginSceneReconnect()
  */
 static void CheckServerConnection()
 {
-    if (SocketClient != nullptr && SocketClient->IsConnected())
+    if (SocketClient != nullptr && SocketClient->State() != Network::ConnectionState::Closed)
+    {
+        return;
+    }
+
+    if (SocketClient != nullptr && SocketClient->FailedToOpen() && FinishFailedConnect())
     {
         return;
     }
@@ -1259,6 +1280,26 @@ void MainScene(HDC hDC)
         wchar_t errorMessage[256] = {};
         mbstowcs(errorMessage, e.what(), 255);
         g_ErrorReport.Write(L"Exception in MainScene: %ls\r\n", errorMessage);
+    }
+}
+
+void PrepareSceneBeforeFrame()
+{
+    PumpWebzenScene();
+    // Deleting textures inside a frame drops that frame's game draws, so the title goes before it begins.
+    if (SceneFlag != WEBZEN_SCENE)
+    {
+        EndWebzenScene();
+    }
+    if (SceneFlag == LOG_IN_SCENE && !InitLogIn)
+    {
+        InitLogIn = true;
+        CreateLogInScene();
+    }
+    else if (SceneFlag == CHARACTER_SCENE && !InitCharacterScene && CurrentProtocolState >= RECEIVE_CHARACTERS_LIST)
+    {
+        InitCharacterScene = true;
+        CreateCharacterScene();
     }
 }
 

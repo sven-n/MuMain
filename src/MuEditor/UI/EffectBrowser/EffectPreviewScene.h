@@ -56,6 +56,8 @@ struct EffectPreviewRequest
     PreviewShowOn showOn = PreviewShowOn::Nothing;
     // With PreviewShowOn::Item.
     int itemType = -1;
+    // Instead of the item's model, this model slot (a part model, design L50), drawn at +0.
+    int modelSlot = -1;
     int itemLevel = 0;
     bool itemExcellent = false;
     bool itemAncient = false;

@@ -2,8 +2,6 @@
 
 #include <optional>
 
-#include "Network/Reconnect/ReachabilityProbe.h"
-
 // The two servers the login screen talks to: the connect server sends the server
 // list, the chosen game server takes the login.
 enum class LoginServer
@@ -17,9 +15,6 @@ enum class LoginServer
 class LoginSceneReconnectLink
 {
 public:
-    // The background check's answer; the game's link runs a ReachabilityProbe.
-    using ProbeResult = ReachabilityProbe::Result;
-
     virtual ~LoginSceneReconnectLink() = default;
 
     virtual bool IsConnected() const = 0;
@@ -37,13 +32,9 @@ public:
     // The server list is on screen, over a connection to the connect server.
     virtual bool IsServerListShown() const = 0;
 
-    // Checks in the background whether the server accepts connections again. False
-    // when no check could be started.
-    virtual bool StartProbe(LoginServer server) = 0;
-    virtual ProbeResult PollProbe() = 0;
-    virtual void StopProbe() = 0;
-
-    // Opens the connection; the server's greeting arrives later.
+    // Starts connecting and returns at once: the server's greeting arrives later, or the
+    // connection closes first when the server can't be reached. False when no connect
+    // could start.
     virtual bool Connect(LoginServer server) = 0;
 
     virtual void SendServerListRequest() = 0;

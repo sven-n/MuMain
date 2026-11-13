@@ -1,7 +1,7 @@
 // The original keyboard-state array, text-input buffer, and
 // MuStartTextInput()/MuStopTextInput() lifecycle functions were deleted -- confirmed
 // zero readers/callers anywhere (their only writer, Core::Platform::SDLEventLoop, was itself dead:
-// zero call sites; the live input loop is Winmain.cpp::MainLoop()'s own inline SDL_PollEvent loop,
+// zero call sites; the live input path is Winmain.cpp's HandleClientEvent(), fed by SDL's main callbacks,
 // which already calls SDL_StartTextInput()/SDL_StopTextInput() directly rather than through these
 // functions).
 //

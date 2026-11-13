@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "LoadData.h"
 
+#include "Core/Content/ContentStore.h"
 #include "Render/Sprites/GlobalBitmap.h"
 
 #include "Render/Models/ZzzBMD.h"
@@ -66,10 +67,8 @@ bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
         // An optional slot may have no file; only one that is there and fails to load is reported.
         if (optional)
         {
-            FILE* fp = _wfopen((std::wstring(Dir) + Name).c_str(), L"rb");
-            if (!fp)
+            if (Content::Probe(std::wstring(Dir) + Name) != Content::Found::File)
                 return false;
-            fclose(fp);
         }
 
         MU_LOG_ERROR(mu::log::Get("data"), "AccessModel failed: {}{} (Type={})", mu_wchar_to_utf8(Dir),

@@ -46,6 +46,7 @@
 #include "SdlGpuValidation.h"
 #include "SingleSampleTwins.h"
 #include "WorldPipelineSet.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/PostProcessing/BloomSource.h"
@@ -64,10 +65,10 @@
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
-#include <fstream>
 #include <limits>
 #include <span>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -95,6 +96,8 @@ constexpr int k_MaxQuads = 4096;
 // Initial vertex capacity. CPU staging grows so stress frames keep late UI draws.
 constexpr Uint32 k_InitialVertexBufferSize = 64u * 1024u * 1024u;
 constexpr Uint32 k_InitialBoneBufferSize = 64u * 1024u;
+// Never read by a shader; only its handle matters (see CreateStorageRebindDummyBuffer).
+constexpr Uint32 k_StorageRebindDummyBufferSize = 16u;
 // Number of blend pipelines: 8 blend modes + 1 disabled.
 constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
@@ -195,6 +198,12 @@ static_assert(offsetof(FogUniform, fogPadding) == 24, "FogUniform HLSL cbuffer l
 static_assert(offsetof(FogUniform, fogColor) == 32, "FogUniform HLSL float4 register alignment");
 static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuffer)");
 
+// Whether SDL picked its Metal backend; `driver` is SDL_GetGPUDeviceDriver's name.
+[[nodiscard]] static bool IsMetalDriver(const char* driver)
+{
+    return driver && std::string_view(driver) == "metal";
+}
+
 // ---------------------------------------------------------------------------
 // Returns the absolute path to a compiled shader blob given GPU driver name,
 // shader stage, and shader base name. Uses MU_SHADER_DIR (CMake compile def).
@@ -209,7 +218,7 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
     {
         ext = "dxil";
     }
-    else if (driver && std::string(driver) == "metal")
+    else if (IsMetalDriver(driver))
     {
         ext = "msl";
     }
@@ -218,17 +227,12 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 #define MU_SHADER_DIR ""
 #endif
     // Primary: cmake build-output path (works for local dev builds).
-    // Fallback: shaders/ next to the executable (works for CI artifacts and installs).
+    // Fallback: shaders/ in the game's content (works for CI artifacts and installs).
     std::string filename = std::string(name) + "." + stage + "." + ext;
     std::filesystem::path cmakePath = std::filesystem::path(MU_SHADER_DIR) / filename;
-    if (!cmakePath.empty() && std::filesystem::exists(cmakePath))
+    if (!cmakePath.empty() && Content::Probe(cmakePath) == Content::Found::File)
     {
         return cmakePath.string();
-    }
-    const char* basePath = SDL_GetBasePath();
-    if (basePath != nullptr)
-    {
-        return (std::filesystem::path(basePath) / "shaders" / filename).string();
     }
     return (std::filesystem::path("shaders") / filename).string();
 }
@@ -243,7 +247,7 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
     {
         return SDL_GPU_SHADERFORMAT_DXIL;
     }
-    if (driver && std::string(driver) == "metal")
+    if (IsMetalDriver(driver))
     {
         return SDL_GPU_SHADERFORMAT_MSL;
     }
@@ -257,27 +261,18 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 [[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* driver)
 {
     const std::string path = GetShaderBlobPath(driver, stage, name);
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file.is_open())
+    const std::optional<std::string> file = Content::ReadFile(path);
+    if (!file)
     {
         mu::log::Get("render")->error("SDL_gpu -- shader blob not found: {}", path);
         return {};
     }
-    const auto fileSize = static_cast<std::streamsize>(file.tellg());
-    if (fileSize <= 0)
+    if (file->empty())
     {
         mu::log::Get("render")->error("SDL_gpu -- shader blob empty: {}", path);
         return {};
     }
-    file.seekg(0, std::ios::beg);
-    std::vector<Uint8> blob(static_cast<size_t>(fileSize));
-    file.read(reinterpret_cast<char*>(blob.data()), fileSize);
-    if (!file)
-    {
-        mu::log::Get("render")->error("SDL_gpu -- shader blob read error: {}", path);
-        return {};
-    }
-    return blob;
+    return std::vector<Uint8>(file->begin(), file->end());
 }
 
 // ---------------------------------------------------------------------------
@@ -766,6 +761,8 @@ static std::uint64_t s_submittedFrames = 0u;
 // Per-frame packed float4 bone rows. Three rows represent one affine 3x4 bone transform.
 static SDL_GPUTransferBuffer* s_boneTransferBuf = nullptr;
 static SDL_GPUBuffer* s_boneGpuBuf = nullptr;
+// Metal only: bound before the real storage buffers so SDL sees a changed handle.
+static SDL_GPUBuffer* s_storageRebindDummyBuf = nullptr;
 static Uint32 s_boneCapacity = 0u;
 static std::vector<float> s_boneRowScratch;
 static const float* s_lastBonePalette = nullptr;
@@ -1112,6 +1109,24 @@ static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUI
     SDL_BindGPUIndexBuffer(s_renderPass, &indexBinding, elementSize);
 }
 
+// A skinned draw's bones, plus the terrain heights for its ground shadow.
+// SDL 3.4.8's Metal backend binds vertex storage buffers at draw time only while needVertexStorageBufferBind is
+// set, and a draw whose pipeline has no storage buffers clears that flag without binding anything. A skinned draw
+// after such a plain draw keeps the same bone buffer handle, so SDL never sets the flag again and Metal reads the
+// bones from whatever sits in that slot, stretching monsters across the void. Binding a different buffer first
+// marks the slot as changed.
+static void BindReplayVertexStorageBuffers(bool shadow, Render::SdlGpuReplayState& state)
+{
+    SDL_GPUBuffer* const storageBuffers[] = {s_boneGpuBuf, s_terrainHeightGpuBuf};
+    const std::span<SDL_GPUBuffer* const> bound{storageBuffers, shadow ? 2u : 1u};
+    if (!state.SelectVertexStorageBuffers(bound))
+        return;
+
+    if (s_storageRebindDummyBuf)
+        SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &s_storageRebindDummyBuf, 1);
+    SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, bound.data(), static_cast<Uint32>(bound.size()));
+}
+
 // Passes outside the frame's main pass draw with one sample even while anti-aliasing is on: the
 // offscreen captures and render targets, the post-RmlUi pass and FlushRenderCommands render into
 // single-sample textures. Each multisampled pipeline maps to its single-sample twin, built with
@@ -1230,12 +1245,7 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     }
 
     if (skinned)
-    {
-        SDL_GPUBuffer* const storageBuffers[] = {s_boneGpuBuf, s_terrainHeightGpuBuf};
-        const std::span<SDL_GPUBuffer* const> bound{storageBuffers, shadow ? 2u : 1u};
-        if (state.SelectVertexStorageBuffers(bound))
-            SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, bound.data(), static_cast<Uint32>(bound.size()));
-    }
+        BindReplayVertexStorageBuffers(shadow, state);
 
     Uint32 firstIndex = 0u;
     if (command.type == RenderCmdType::DrawIndexedQuads)
@@ -2104,6 +2114,8 @@ public:
             return false;
         }
 
+        CreateStorageRebindDummyBuffer(driverName);
+
         // Create initial depth texture at window size.
         // BeginFrame() will recreate it if the swapchain dimensions differ.
         {
@@ -2252,6 +2264,7 @@ public:
         }
 
         DestroyQuadIndexBuffer();
+        DestroyStorageRebindDummyBuffer();
         DestroyVertexBuffers();
         DestroyBoneBuffers();
         DestroyTerrainHeightBuffers();
@@ -3552,6 +3565,13 @@ public:
         }
 
         s_submitTime = std::chrono::steady_clock::now();
+        // The frame may draw bitmaps whose uploads are still in an open upload batch.
+        if (!s_bitmapGpuResources.Flush())
+        {
+            mu::log::Get("render")->error("SDL_gpu -- bitmap upload batch failed at {}: {}",
+                                          s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
+        }
+
         if (s_frameReadbackTexture)
         {
             if (!renderPassCompleted)
@@ -8118,6 +8138,32 @@ private:
         return true;
     }
 
+    // Only the Metal backend needs the storage-buffer rebind (see BindReplayVertexStorageBuffers). Without the buffer,
+    // skinned draws still work everywhere else; on Metal they may read stale bones after a plain draw.
+    static void CreateStorageRebindDummyBuffer(const char* driverName)
+    {
+        if (!IsMetalDriver(driverName))
+            return;
+
+        SDL_GPUBufferCreateInfo info{};
+        info.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+        info.size = k_StorageRebindDummyBufferSize;
+        s_storageRebindDummyBuf = SDL_CreateGPUBuffer(s_device, &info);
+        if (!s_storageRebindDummyBuf)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- storage rebind buffer creation failed: {}", SDL_GetError());
+        }
+    }
+
+    static void DestroyStorageRebindDummyBuffer()
+    {
+        if (s_storageRebindDummyBuf)
+        {
+            SDL_ReleaseGPUBuffer(s_device, s_storageRebindDummyBuf);
+            s_storageRebindDummyBuf = nullptr;
+        }
+    }
+
     static void DestroyQuadIndexBuffer()
     {
         if (s_quadIdxBuf)
@@ -8324,6 +8370,25 @@ void ReleaseBitmapTexture(SDL_GPUDevice* device, SDL_GPUTexture* texture)
 const char* BitmapUploadDriverName()
 {
     return s_device ? SDL_GetGPUDeviceDriver(s_device) : "no device";
+}
+
+double BitmapUploadFenceWaitSeconds()
+{
+    return s_bitmapGpuResources.FenceWaitSeconds();
+}
+
+void BeginBitmapUploadBatch()
+{
+    s_bitmapGpuResources.BeginBatch();
+}
+
+void EndBitmapUploadBatch()
+{
+    if (!s_bitmapGpuResources.EndBatch())
+    {
+        mu::log::Get("render")->error("SDL_gpu -- bitmap upload batch failed at {}: {}",
+                                      s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
+    }
 }
 
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).

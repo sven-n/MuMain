@@ -14,6 +14,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "I18N/All.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Core/UIManager.h"
@@ -173,13 +174,13 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope s
     {
         values.resistances[resistance] = attribute->Resistance[resistance] ? item.Level + 1 : 0;
     }
-    values.excellent = item.ExcellentFlags > 0;
+    values.excellent = GameLogic::Items::HasExcellentOptions(item);
     values.ancient = item.AncientDiscriminator > 0;
     values.socketItem = g_SocketItemMgr.IsSocketItem(&item);
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(item.Type);
     values.upperTierWings = definition != nullptr && (definition->wingTier == Data::Items::WingTier::Second ||
                                                       definition->wingTier == Data::Items::WingTier::Third);
-    values.skillLuckOrOption = item.HasSkill || item.HasLuck || item.OptionLevel > 0;
+    values.skillLuckOrOption = item.HasSkill || item.HasLuck || GameLogic::Items::HasAdditionalOption(item);
     wchar_t setName[64]{};
     values.setItem = g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator);
     // As the original client (RequireClass): an item that some class can use only from its second or third class

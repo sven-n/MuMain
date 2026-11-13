@@ -67,6 +67,10 @@ src/bin/Data/Monsters/**/*.tmp
 # Map data (JSON), e.g. the light mood of the world maps.
 !src/bin/Data/Maps/
 !src/bin/Data/Maps/**
+# Buff data (JSON), the buffs and debuffs the game shows.
+!src/bin/Data/Buffs/
+!src/bin/Data/Buffs/**
+src/bin/Data/Buffs/**/*.tmp
 # Render data (JSON), e.g. the look profile of the Enhanced features.
 !src/bin/Data/Render/
 !src/bin/Data/Render/**

@@ -5,16 +5,16 @@
 // See IPlatformAudio.h for the interface contract.
 
 #include "MiniAudioBackend.h"
-#include "Core/Platform/PathResolve.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Text/Utf8Path.h"
 
+#include <SDL3/SDL_iostream.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstring>
-#include <filesystem>
-#include <system_error>
 #include <utility>
 
 // S_OK, S_FALSE are now provided by PlatformTypes.h (via PCH)
@@ -58,18 +58,76 @@ void NormalizeSeparators(std::string& path)
     std::replace(path.begin(), path.end(), '\\', '/');
 }
 
-// Converts a sound effect path to UTF-8 and resolves it for the current platform.
+// Converts a sound effect path to UTF-8 with forward slashes.
 // SFX paths use Windows backslashes (e.g. L"Data\\Sound\\nBlackSmith.wav"); forward
-// slashes work on Windows too, and other platforms also resolve the file name case.
+// slashes work on Windows too.
 std::string ResolveSoundEffectPath(const wchar_t* filename)
 {
     std::string utf8Path = AudioPathToUtf8(filename);
     NormalizeSeparators(utf8Path);
-#ifndef _WIN32
-    utf8Path = MuResolvePath(utf8Path.c_str());
-#endif
     return utf8Path;
 }
+
+// The resource manager opens sounds and music through these, so they are read from the game's content; a file's
+// bytes stay in its stream until the resource manager closes it.
+ma_result ContentOpen(ma_vfs*, const char* path, ma_uint32 openMode, ma_vfs_file* file)
+{
+    if ((openMode & MA_OPEN_MODE_WRITE) != 0)
+    {
+        return MA_ACCESS_DENIED;
+    }
+    Content::Stream stream = Content::OpenIO(Core::Text::PathFromUtf8(path));
+    if (!stream)
+    {
+        return MA_DOES_NOT_EXIST;
+    }
+    *file = stream.release();
+    return MA_SUCCESS;
+}
+
+ma_result ContentClose(ma_vfs*, ma_vfs_file file)
+{
+    SDL_CloseIO(static_cast<SDL_IOStream*>(file));
+    return MA_SUCCESS;
+}
+
+ma_result ContentRead(ma_vfs*, ma_vfs_file file, void* destination, size_t size, size_t* read)
+{
+    const size_t got = SDL_ReadIO(static_cast<SDL_IOStream*>(file), destination, size);
+    if (read != nullptr)
+    {
+        *read = got;
+    }
+    return (got == 0 && size > 0) ? MA_AT_END : MA_SUCCESS;
+}
+
+ma_result ContentSeek(ma_vfs*, ma_vfs_file file, ma_int64 offset, ma_seek_origin origin)
+{
+    const SDL_IOWhence whence = origin == ma_seek_origin_start ? SDL_IO_SEEK_SET
+                                : origin == ma_seek_origin_end ? SDL_IO_SEEK_END
+                                                               : SDL_IO_SEEK_CUR;
+    return SDL_SeekIO(static_cast<SDL_IOStream*>(file), offset, whence) < 0 ? MA_ERROR : MA_SUCCESS;
+}
+
+ma_result ContentTell(ma_vfs*, ma_vfs_file file, ma_int64* cursor)
+{
+    *cursor = SDL_TellIO(static_cast<SDL_IOStream*>(file));
+    return MA_SUCCESS;
+}
+
+ma_result ContentInfo(ma_vfs*, ma_vfs_file file, ma_file_info* info)
+{
+    const Sint64 size = SDL_GetIOSize(static_cast<SDL_IOStream*>(file));
+    if (size < 0)
+    {
+        return MA_ERROR;
+    }
+    info->sizeInBytes = static_cast<ma_uint64>(size);
+    return MA_SUCCESS;
+}
+
+ma_vfs_callbacks g_contentVfs{ContentOpen, nullptr,     ContentClose, ContentRead,
+                              nullptr,     ContentSeek, ContentTell,  ContentInfo};
 
 // Same-track guard shared by PlayMusic()/StopMusic(). m_currentMusicName holds
 // the separators-normalized track name, NOT the filesystem-resolved path: the
@@ -99,6 +157,11 @@ mu::IPlatformAudio* g_platformAudio = nullptr;
 
 namespace mu
 {
+
+ma_vfs* ContentAudioFiles()
+{
+    return &g_contentVfs;
+}
 
 // ---------------------------------------------------------------------------
 // Destructor — ensure resources are released even if Shutdown() was not called
@@ -157,7 +220,9 @@ bool MiniAudioBackend::Initialize()
         return true;
     }
 
-    ma_result result = ma_engine_init(nullptr, &m_engine);
+    ma_engine_config config = ma_engine_config_init();
+    config.pResourceManagerVFS = ContentAudioFiles();
+    ma_result result = ma_engine_init(&config, &m_engine);
     if (result != MA_SUCCESS)
     {
         mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::Initialize -- ma_engine_init failed ({})",
@@ -590,16 +655,12 @@ bool MiniAudioBackend::HasFailedMusicTrack(const char* name) const
 
 bool MiniAudioBackend::StartMusicStream(const std::string& identity)
 {
-#ifdef _WIN32
     const std::string& filePath = identity;
-#else
-    const std::string filePath = MuResolvePath(identity.c_str());
-#endif
-    std::error_code error;
-    if (!std::filesystem::is_regular_file(Core::Text::PathFromUtf8(filePath), error))
+    const Content::Found found = Content::Probe(Core::Text::PathFromUtf8(filePath));
+    if (found != Content::Found::File)
     {
-        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- unavailable music file '{}' ({})",
-            filePath, error ? error.message() : "not a regular file");
+        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- unavailable music file '{}' ({})", filePath,
+                                     found == Content::Found::Unknown ? "cannot be checked" : "not a regular file");
         return false;
     }
 

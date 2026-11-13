@@ -50,10 +50,6 @@ public: // Object
     virtual void RenderFrontSideVisual() {}
 
 public: // Character
-    virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key)
-    {
-        return NULL;
-    }
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b)
     {
         return false;

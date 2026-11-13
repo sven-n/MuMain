@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "GlobalBitmapPath.h"
+#include "Render/Sprites/TextureDecode.h"
+#include "Core/Content/ContentStore.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -301,6 +303,10 @@ void CGlobalBitmap::Init()
 
 BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
 {
+    if (m_pending)
+    {
+        FlushPending(uiBitmapIndex);
+    }
     BITMAP_t* pBitmap = nullptr;
     if (false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))
     {
@@ -319,6 +325,10 @@ BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
 }
 BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
 {
+    if (m_pending)
+    {
+        FlushPending(uiBitmapIndex);
+    }
     BITMAP_t* pBitmap = nullptr;
     if (false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))
     {
@@ -334,6 +344,7 @@ BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
 
 BITMAP_t* CGlobalBitmap::FindTexture(const std::wstring& filename)
 {
+    FlushPending(filename);
     for (auto& pair : m_mapBitmap)
     {
         BITMAP_t* pBitmap = pair.second.get();
@@ -345,6 +356,7 @@ BITMAP_t* CGlobalBitmap::FindTexture(const std::wstring& filename)
 
 BITMAP_t* CGlobalBitmap::FindTextureByName(const std::wstring& name)
 {
+    FlushAllPending();
     for (auto& pair : m_mapBitmap)
     {
         BITMAP_t* pBitmap = pair.second.get();
@@ -428,6 +440,7 @@ bool CGlobalBitmap::Convert_Format(const std::wstring& filename)
 
 bool CGlobalBitmap::Save_Image(const std::wstring& src, const std::wstring& dest, int cDumpHeader)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     const auto srcPath = Render::Sprites::NarrowBitmapPath(src);
     const auto destPath = Render::Sprites::NarrowBitmapPath(dest);
 

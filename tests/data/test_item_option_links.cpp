@@ -175,6 +175,39 @@ TEST_CASE("An item's links name definitions, one of each byte, and every definit
     CHECK(issues.empty());
 }
 
+// The excellent byte of wings and the Horn of Fenrir means something else, and no horn is excellent, so they can't link
+// excellent options.
+TEST_CASE("Wings and horn mounts link no excellent options [data][items]")
+{
+    ItemOptionDefinition excellent;
+    excellent.name = "excellent";
+    excellent.type = ItemOptionType::Excellent;
+    excellent.file = "Excellent.json";
+    const ItemOptionDatabase options({MakeLuck("luck"), excellent}, MakeTexts());
+    ItemDefinition wing = MakeItem(12, 3, {"luck", "excellent"});
+    wing.slot = ItemSlot::Wings;
+    ItemDefinition horn = MakeItem(13, 37, {"excellent"});
+    horn.tags.Set(ItemTag::HornMount);
+    const ItemDefinition sword = MakeItem(0, 0, {"luck", "excellent"});
+    ItemDefinition wingWithLuck = MakeItem(12, 4, {"luck"});
+    wingWithLuck.slot = ItemSlot::Wings;
+    std::vector<ItemDataIssue> issues;
+    // The Horn of Uniria's byte holds nothing, but it isn't excellent either.
+    ItemDefinition uniria = MakeItem(13, 2, {"excellent"});
+    uniria.tags.Set(ItemTag::HornMount);
+    ValidateItemOptionLinks(std::vector<ItemDefinition>{wing, horn, sword, wingWithLuck, uniria}, options, issues);
+    const auto linksIssue = [&](int group, int number)
+    {
+        return std::any_of(issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
+                           { return issue.group == group && issue.number == number && issue.field == "options"; });
+    };
+    CHECK(linksIssue(12, 3));
+    CHECK(linksIssue(13, 37));
+    CHECK_FALSE(linksIssue(0, 0));
+    CHECK_FALSE(linksIssue(12, 4));
+    CHECK(linksIssue(13, 2));
+}
+
 TEST_CASE("An edited item's option list follows the option rules while it is the one they give [data][items]")
 {
     OptionRule ammunition;
@@ -225,4 +258,60 @@ TEST_CASE("The item database resolves an item's links when the item or the optio
     REQUIRE(database.GetOptionLinks(MakeItemType(0, 1)).size() == 1);
     CHECK(database.GetOptionLinks(MakeItemType(0, 1))[0] == 0);
     CHECK(database.GetOptionLinks(-1).empty());
+}
+
+// The excellent options' effects: the slots the stat code, the price and the mixes read, with a value where the code
+// before the definitions wrote one.
+TEST_CASE("The excellent options' effects are the client's excellent slots [data][items]")
+{
+    using Type = ItemOptionType;
+    CHECK(FindItemOptionEffect(Type::Excellent, "maximumHealth", ItemOptionAdd::Percent) ==
+          ItemOptionEffect{AT_IMPROVE_LIFE, false});
+    CHECK(FindItemOptionEffect(Type::Excellent, "moneyAmountRate", ItemOptionAdd::Percent) ==
+          ItemOptionEffect{AT_IMPROVE_GAIN_GOLD, false});
+    CHECK(FindItemOptionEffect(Type::Excellent, "physicalBaseDmg", ItemOptionAdd::Add) ==
+          ItemOptionEffect{AT_IMPROVE_DAMAGE_LEVEL, true});
+    CHECK(FindItemOptionEffect(Type::Excellent, "wizardryBaseDmgIncrease", ItemOptionAdd::Percent) ==
+          ItemOptionEffect{AT_IMPROVE_MAGIC_PERCENT, true});
+    CHECK(FindItemOptionEffect(Type::Excellent, "attackSpeedAny", ItemOptionAdd::Add) ==
+          ItemOptionEffect{AT_IMPROVE_ATTACK_SPEED, true});
+    // The same attribute of another type is another effect.
+    CHECK(FindItemOptionEffect(Type::Option, "physicalBaseDmg", ItemOptionAdd::Add) ==
+          ItemOptionEffect{AT_IMPROVE_DAMAGE, true});
+    CHECK(FindItemOptionEffect(Type::Excellent, "maximumMana", ItemOptionAdd::Percent) ==
+          ItemOptionEffect{AT_IMPROVE_MANA, false});
+}
+
+// A term on a hero attribute the client doesn't read is shown and adds nothing, with a warning.
+TEST_CASE("A term on a hero attribute the client doesn't read loads with a warning [data][items]")
+{
+    ItemOptionDefinition luck = MakeLuck("luck");
+    luck.options[0].value.per = {{"level", 0, 20}, {"horseLevel", 2, 0}};
+    std::vector<ItemDataIssue> issues;
+    ValidateItemOptions(std::vector<ItemOptionDefinition>{luck}, MakeTexts(), "OptionTexts.json", issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[0].options[0].per[1].attribute"));
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[0].options[0].per[0].attribute"));
+}
+
+// A text with {divisor} on an option whose terms have no divisor would show 0 there, and on one with several only the
+// first one's: both load with a warning.
+TEST_CASE("A {divisor} text on an option without one divisor term loads with a warning [data][items]")
+{
+    ItemOptionTexts texts = MakeTexts();
+    texts.texts["luckCriticalDamage"].Set(Data::LocalizedString::NeutralLocale, "Damage +level/{divisor}");
+    ItemOptionDefinition luck = MakeLuck("luck");
+    std::vector<ItemDataIssue> issues;
+    ValidateItemOptions(std::vector<ItemOptionDefinition>{luck}, texts, "OptionTexts.json", issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[0].options[0].text"));
+
+    luck.options[0].value.per = {{"level", 0, 20}};
+    issues.clear();
+    ValidateItemOptions(std::vector<ItemOptionDefinition>{luck}, texts, "OptionTexts.json", issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[0].options[0].text"));
+
+    // Two terms with a divisor: the line shows only the first one's.
+    luck.options[0].value.per = {{"level", 0, 20}, {"masterLevel", 0, 10}};
+    issues.clear();
+    ValidateItemOptions(std::vector<ItemOptionDefinition>{luck}, texts, "OptionTexts.json", issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "definitions[0].options[0].text"));
 }

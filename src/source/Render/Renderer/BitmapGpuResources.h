@@ -20,7 +20,13 @@ class BitmapGpuResources final
 public:
     static constexpr std::size_t kSlotCount = 3;
     static constexpr std::uint64_t kBytesPerPixel = 4;
+#if defined(__APPLE__)
+    // SDL's Metal backend (up to 3.4.20 at least) ignores pixels_per_row and reads tightly packed rows
+    // (libsdl-org/SDL#16474). Drop this once the SDL submodule includes libsdl-org/SDL#16610.
+    static constexpr std::uint64_t kRowAlignment = kBytesPerPixel;
+#else
     static constexpr std::uint64_t kRowAlignment = 256;
+#endif
     static_assert(Sprites::kBitmapMaximumWidth > 0 && Sprites::kBitmapMaximumHeight > 0);
     static_assert(static_cast<std::uint64_t>(Sprites::kBitmapMaximumWidth) <=
                   (std::numeric_limits<std::uint64_t>::max() - kRowAlignment + 1) / kBytesPerPixel);
@@ -92,6 +98,13 @@ public:
     Result Upload(std::span<const std::uint8_t> pixels, int width, int height, SDL_GPUFilter filter,
                   SDL_GPUSamplerAddressMode wrap, std::span<const Textures::MipLevel> mips = {},
                   bool generateMips = false);
+    // Between BeginBatch and EndBatch, uploads share a submission until a slot is
+    // full, so a load waits on a fence per slot instead of one per texture. A
+    // texture is ready on the GPU once its submission is in: Flush submits the
+    // open one, and the frame submit must come after it.
+    void BeginBatch();
+    bool EndBatch();
+    bool Flush();
     // Call before destroying the device, after clearing non-owning sampler registries.
     bool Shutdown();
     const std::string& LastError() const
@@ -107,6 +120,11 @@ public:
     {
         return m_faulted;
     }
+    // Time spent waiting for a slot's previous upload to finish.
+    double FenceWaitSeconds() const
+    {
+        return m_fenceWaitSeconds;
+    }
 
 private:
     struct Slot
@@ -119,6 +137,7 @@ private:
     bool OnOwnerThread() const;
     void Fail(const char* stage, bool gpuError);
     bool Retire(Slot& slot);
+    bool SubmitOpen();
     void LoseSlot(Slot& slot);
     void AdvanceSlot();
     void ReleaseHandles();
@@ -130,7 +149,12 @@ private:
     std::array<Slot, kSlotCount> m_slots{};
     std::array<SDL_GPUSampler*, 4> m_samplers{};
     std::size_t m_next = 0;
+    // The command buffer staging into m_slots[m_next], and how much of that slot it used.
+    SDL_GPUCommandBuffer* m_open = nullptr;
+    std::uint64_t m_openUsed = 0;
+    bool m_batching = false;
     bool m_faulted = false;
+    double m_fenceWaitSeconds = 0.0;
     std::string m_stage;
     std::string m_error;
 };

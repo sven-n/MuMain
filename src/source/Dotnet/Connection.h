@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "Core/Platform/PlatformLibrary.h"
+#include "Network/ConnectionLifecycle.h"
 
 class PacketFunctions_ChatServer;
 class PacketFunctions_ConnectServer;
@@ -20,16 +21,6 @@ class PacketFunctions_ClientToServer;
 // MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so".
 // POSIX loaders do not search the executable directory for a bare filename, so resolve the
 // library beside the running executable. Windows keeps its native executable-directory search.
-// Defined in Connection.cpp (not anonymous namespace) to prevent per-TU copies if ever
-// included by a second translation unit. (Story 3.4.1 MEDIUM-4 fix)
-//
-// SIOF mitigation (Story 3.3.1 MEDIUM-3): both g_dotnetLibPath and
-// munique_client_library_handle are declared `extern` here and defined in Connection.cpp,
-// after the #include of this header. C++ guarantees initialization order within a single
-// translation unit follows definition order, so g_dotnetLibPath is fully initialized
-// before munique_client_library_handle calls Load(). An `inline` handle variable would
-// initialize at the point of #include "Connection.h" in Connection.cpp — before
-// g_dotnetLibPath is defined — causing dlopen("") and a NULL handle.
 inline std::string ManagedLibraryPath()
 {
     const auto libraryName = "MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT);
@@ -47,8 +38,11 @@ inline std::string ManagedLibraryPath()
 #endif
 }
 
-extern const std::string g_dotnetLibPath;
-extern const mu::platform::LibraryHandle munique_client_library_handle;
+// Null until LoadManagedLibrary, and after it when the library is missing.
+extern mu::platform::LibraryHandle munique_client_library_handle;
+
+// Loads the network library once, at startup after the client has chosen its folders; later calls do nothing.
+void LoadManagedLibrary();
 
 namespace DotNetBridge
 {
@@ -91,33 +85,53 @@ class Connection
 private:
     static void OnPacketReceivedS(int32_t handle, int32_t size, BYTE* data);
     static void OnDisconnectedS(int32_t handle);
+    static void OnOpenedS(int32_t handle);
 
     std::unique_ptr<PacketFunctions_ChatServer> _chatServer;
     std::unique_ptr<PacketFunctions_ConnectServer> _connectServer;
     std::unique_ptr<PacketFunctions_ClientToServer> _gameServer;
 
-    // Atomic: the disconnect callback clears it on a thread-pool thread while the game reads it.
+    // Atomic: a packet callback reads it on a thread-pool thread while the game thread clears it.
     std::atomic<int32_t> _handle = 0;
     int32_t _id = 0;
+    Network::ConnectionLifecycle _lifecycle;
     void (*_packetHandler)(int32_t, const BYTE*, int32_t);
+    bool _receiving = false;
     bool _firstPacketLogged = false;
 
     void Unregister();
-    void OnDisconnected();
+    void Apply(Network::ConnectionEvent event);
     void OnPacketReceived(const BYTE* data, const int32_t length);
 
 public:
+    // Starts connecting and returns at once; State() tells how it goes. Sends made while connecting go out once
+    // the connection opens. Without startReceiving, what the server sends waits until StartReceiving().
     Connection(const char16_t* host, int32_t port, bool isEncrypted,
-               void (*packetHandler)(int32_t, const BYTE*, int32_t));
+               void (*packetHandler)(int32_t, const BYTE*, int32_t), bool startReceiving = true);
     ~Connection();
 
     // The handle is registered for this object; a copy would unregister it when destroyed.
     Connection(const Connection&) = delete;
     Connection& operator=(const Connection&) = delete;
 
-    bool IsConnected();
+    // Changes only on the game thread, as the packet queue delivers the network's events.
+    Network::ConnectionState State() const
+    {
+        return _lifecycle.State();
+    }
+
+    bool FailedToOpen() const
+    {
+        return _lifecycle.FailedToOpen();
+    }
+
+    void StartReceiving();
     void Send(const BYTE* data, const int32_t length);
     void Close();
+
+    // Applies an opened or closed event the packet queue delivered for a connection's handle; game thread only.
+    // A connection destroyed since then is no longer registered and gets nothing; false then.
+    static bool ApplyQueuedEvent(int32_t handle, Network::ConnectionEvent event);
 
     int32_t GetHandle() const
     {

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -39,16 +40,15 @@ const wchar_t* JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& fi
                                   LEVEL_COUNT * sizeof(int) + // HarmonyJewelLevel
                                   LEVEL_COUNT * sizeof(int);  // Zen
 
-    FILE* fp = ::_wfopen(filename.c_str(), L"rb");
-    if (fp != NULL)
+    const Content::Stream fp = Content::OpenIO(filename);
+    if (fp != nullptr)
     {
         int nEntries = MAXHARMONYJEWELOPTIONTYPE * MAXHARMONYJEWELOPTIONINDEX;
         size_t nSize = ENTRY_SIZE * nEntries;
 
         std::vector<BYTE> tempBuffer(nSize);
 
-        const bool complete = DataFileIO::ReadExact(fp, tempBuffer.data(), nSize);
-        ::fclose(fp);
+        const bool complete = DataFileIO::ReadExact(fp.get(), tempBuffer.data(), nSize);
         if (!complete)
         {
             return L"file corrupted.";

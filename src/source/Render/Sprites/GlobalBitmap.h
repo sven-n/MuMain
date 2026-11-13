@@ -15,6 +15,14 @@
 #include "Core/Time/Timer.h"
 #include "Render/Textures/TexturePackFiles.h"
 
+namespace Render::Sprites
+{
+struct MipLevels;
+struct PendingTextureLoads;
+struct TextureDecodeRequest;
+struct TextureDecodeResult;
+} // namespace Render::Sprites
+
 struct SDL_GPUTexture;
 struct SDL_GPUSampler;
 
@@ -158,8 +166,13 @@ class CGlobalBitmap
     std::vector<std::uint32_t> m_mipChainRequests;
     double m_textureLoadSeconds = 0.0;
     double m_mipChainSeconds = 0.0;
+    double m_fileReadSeconds = 0.0;
+    double m_uploadSeconds = 0.0;
     // The files of the active texture pack; empty for the original textures.
     Render::Textures::TexturePackFiles m_texturePack;
+    // Set while a load batch is open.
+    std::unique_ptr<Render::Sprites::PendingTextureLoads> m_pending;
+    int m_batchDepth = 0;
 #ifdef DEBUG_BITMAP_CACHE
     CTimer2				m_DebugOutputTimer;
 #endif // DEBUG_BITMAP_CACHE
@@ -167,15 +180,25 @@ class CGlobalBitmap
     void Init();
 
 public:
+    using LoadFailureReporter = void (*)(const wchar_t* filename);
+
     CGlobalBitmap();
     virtual ~CGlobalBitmap();
 
     GLuint LoadImage(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     // keepPixels: the game draws on the texture through Buffer (a canvas), so Buffer stays
-    // at the original size, also for an upscaled file.
+    // at the original size, also for an upscaled file. reportFailure, when set, is told
+    // about a failed load.
+    // Inside a load batch the file is only queued and the call returns true: it decodes
+    // on a worker, and a failure is reported when it commits. A canvas loads at once.
     bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST,
                    GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
-                   bool keepPixels = false);
+                   bool keepPixels = false, LoadFailureReporter reportFailure = nullptr);
+    // A load batch decodes the files it loads on worker threads. Asking for a bitmap
+    // still decoding waits for it; the batch commits the rest, in order, when it ends.
+    // Batches nest: the outermost one counts, and so do its decode threads (0: one fewer than the hardware's).
+    void BeginLoadBatch(unsigned decodeThreads = 0);
+    void EndLoadBatch();
     // Like LoadImage(filename, ...), but never shares an existing by-filename match -- always
     // creates its own independent entry, even if the same file is already resident under a
     // numbered slot (e.g. BITMAP_LOG_IN+7). Needed by callers that cache the resolved GPU
@@ -244,7 +267,7 @@ public:
         return m_textureFilteringEnabled;
     }
     // Logs how many textures are world (and how many of those have a mip
-    // chain) and screen-space, their GPU size, and the time spent loading.
+    // chain) and screen-space, their GPU size, and the time spent loading, by stage.
     void LogTextureFilteringSummary(const char* context) const;
 
     inline BITMAP_t& operator [] (GLuint uiBitmapIndex) { return *GetTexture(uiBitmapIndex); }
@@ -260,21 +283,21 @@ protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
-    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
-                       bool worldTexture, bool padToPowerOfTwo = true, bool keepPixels = false);
-    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
-                 bool worldTexture, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
-                 bool keepPixels = false);
     // Uploads the RGBA8 pixels of a bitmap (Components 4: they have alpha) and adds
     // it under its BitmapIndex; the bitmap keeps its pixels.
     bool UploadBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<const std::uint8_t> rgba, GLuint uiFilter,
                       GLuint uiWrapMode);
-    // Decode a file OpenJpegTurbo/OpenTga read and upload it as the texture.
-    bool LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file, GLuint uiFilter,
-                      GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo, bool keepPixels);
-    bool LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file, GLuint uiFilter,
-                     GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo, bool premultiplyAlpha,
-                     bool keepPixels);
+    void QueueLoad(Render::Sprites::TextureDecodeRequest&& request);
+    // Commits the queued load of the index, if there is one, waiting for its decode.
+    void FlushPending(GLuint uiBitmapIndex);
+    void FlushPending(const std::wstring& filename);
+    void FlushAllPending();
+    // Reports a decoded file's errors and uploads it as the texture.
+    bool CommitTexture(const Render::Sprites::TextureDecodeRequest& request,
+                       Render::Sprites::TextureDecodeResult&& result);
+    // Uploads `pixels` as the bitmap's texture and adds it under its BitmapIndex.
+    bool CommitBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<const std::uint8_t> pixels, int width, int height,
+                      const Render::Sprites::MipLevels& mips, GLuint uiFilter, GLuint uiWrapMode, bool keepPixels);
     void RegisterFilteredSampler(const BITMAP_t& bitmap);
     SDL_GPUSampler* GetFilteredSampler(bool wrapRepeat);
     void ReleaseFilteredSamplers();
@@ -290,3 +313,19 @@ protected:
 };
 
 extern CGlobalBitmap Bitmaps;
+
+// Opens a load batch on Bitmaps for its lifetime.
+class TextureLoadBatch final
+{
+public:
+    TextureLoadBatch()
+    {
+        Bitmaps.BeginLoadBatch();
+    }
+    ~TextureLoadBatch()
+    {
+        Bitmaps.EndLoadBatch();
+    }
+    TextureLoadBatch(const TextureLoadBatch&) = delete;
+    TextureLoadBatch& operator=(const TextureLoadBatch&) = delete;
+};

@@ -78,7 +78,7 @@ const BuffStateValueControl::BuffStateValueInfo BuffStateValueControl::GetValue(
     {
         const BuffInfo buffinfo = g_BuffInfo(bufftype);
 
-        if (buffinfo.s_ItemType != 255)
+        if (buffinfo.HasItem())
         {
             SetValue(bufftype, tempvalueinfo);
         }
@@ -95,38 +95,11 @@ const BuffStateValueControl::BuffStateValueInfo BuffStateValueControl::GetValue(
 
 void BuffStateValueControl::GetBuffInfoString(std::list<std::wstring>& outstr, eBuffState bufftype)
 {
-    BuffStateValueInfo tempvalueinfo;
-    tempvalueinfo = GetValue(bufftype);
-
     const BuffInfo buffinfo = g_BuffInfo(bufftype);
 
     outstr = buffinfo.s_BuffDescriptlist;
     outstr.push_front(L"\n");
     outstr.push_front(buffinfo.s_BuffName);
-
-    /*
-        if( tempvalueinfo.s_Value1 != 0 && tempvalueinfo.s_Value2 != 0 )
-        {
-            outstr.push_back(buffinfo.s_BuffName);
-            outstr.push_back(( format( buffinfo.s_BuffDescript ) % tempvalueinfo.s_Value1 % tempvalueinfo.s_Value2
-       ).str());
-        }
-        else if( tempvalueinfo.s_Value1 != 0 && tempvalueinfo.s_Value2 == 0 )
-        {
-            outstr.push_back(buffinfo.s_BuffName);
-            outstr.push_back(( format( buffinfo.s_BuffDescript ) % tempvalueinfo.s_Value1 ).str());
-        }
-        else if( tempvalueinfo.s_Value1 == 0 && tempvalueinfo.s_Value2 != 0 )
-        {
-            outstr.push_back(buffinfo.s_BuffName);
-            outstr.push_back(( format( buffinfo.s_BuffDescript ) % tempvalueinfo.s_Value2 ).str());
-        }
-        else if( tempvalueinfo.s_Value1 != 0 && tempvalueinfo.s_Value2 != 0 )
-        {
-            outstr.push_back(buffinfo.s_BuffName);
-            outstr.push_back(( format( buffinfo.s_BuffDescript ) ).str());
-        }
-    */
 }
 
 void BuffStateValueControl::GetBuffValueString(std::wstring& outstr, eBuffState bufftype)

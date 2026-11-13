@@ -319,9 +319,10 @@ names stay English; items that teach a skill name it after a colon
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
-5. To show item, monster and NPC names in the new language, add them to the
-   item data and the monster list; see [Item names](#item-names) and
-   [Monster and NPC names](#monster-and-npc-names).
+5. To show item, monster and NPC names and buff names and descriptions in the
+   new language, add them to the item data, the monster list and the buffs;
+   see [Item names](#item-names), [Monster and NPC names](#monster-and-npc-names)
+   and [Buff names](#buff-names).
 
 ## Item names
 
@@ -545,6 +546,30 @@ missing attribute amounts. These shared tooltips also appear in shops and other
 item windows. Item names still depend on **Translate item names** and the item's
 available name translations.
 
+The storage and expanded-vault windows translate their titles, fees, Zen deposit
+and withdrawal controls, vault locking and password prompts, and related error
+messages.
+
+The player-trade window translates its title, partner and item warnings, Zen
+offer prompt, incoming request, cancellation reasons and reinforced-item
+restriction.
+
+Personal stores translate their owner labels, opening and closing controls,
+price and currency dialogs, sale and purchase confirmations, restrictions and
+status notices.
+
+NPC shops translate the merchant title, purchase confirmation, real-time tax
+rate and reinforced-item selling restriction; their repair and ordinary selling
+messages reuse the inventory translations.
+
+The main HUD translates life, mana, AG, SD and experience tooltips, its character,
+friends, party, guild, command, menu and item-shop buttons, the MU Helper controls,
+and buff duration and cancellation prompts.
+
+The character information window translates level and reset counts, available
+points, combat, defense, magic and curse statistics, HP and MP, and its quest,
+pet and master-skill controls.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
@@ -635,6 +660,13 @@ export writes the names of every monster, in English where a language has
 none. Names in other languages exist only in the monster list. The rules
 are in
 [monster-data.md → Import and export of NpcName txt](monster-data.md#import-and-export-of-npcname-txt).
+
+## Buff names
+
+Buff names and descriptions are not in the `.resx` files either. They are in
+`src/bin/Data/Buffs/Buffs.json` ([buff-data.md](buff-data.md)): each buff's
+`displayName` and `description` hold the texts by language code. The game
+shows them in the UI language and falls back to English.
 
 ## Migration history
 

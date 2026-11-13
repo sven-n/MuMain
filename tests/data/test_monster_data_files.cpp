@@ -65,7 +65,7 @@ TEST_CASE("Shipped monster list: written in the writer's format [data][monsters]
     const auto text = Data::ReadTextFile(file);
 
     REQUIRE(text.has_value());
-    CHECK(Data::Monsters::WriteMonstersJson(loaded.groups) == *text);
+    CHECK(Data::Monsters::WriteMonstersJson(loaded.groups, loaded.unknown) == *text);
 }
 
 TEST_CASE("Shipped monster list: the names the old name file test asked for [data][monsters]")
@@ -109,7 +109,10 @@ TEST_CASE("Shipped monster list: names are plain text, the Kalima gates too [dat
     CHECK(FindMonster(loaded.monsters, 158)->names.GetNeutral() == "Gate to Kalima 7");
 }
 
-TEST_CASE("Shipped monster list: OpenMU's statues 658-668 have its English names and their old kind [data][monsters]")
+// The renewed Illusion Temple's statues (P2, Q-MN42b): the Cursed Statue 658
+// is attacked, the ten Stone Statues are NPCs.
+TEST_CASE("Shipped monster list: OpenMU's statues 658-668 have its English names, 658 the monster kind "
+          "[data][monsters]")
 {
     const Data::Monsters::MonsterDataLoadResult loaded =
         Data::Monsters::LoadMonstersFile(ClientData / "Monsters" / "Monsters.json");
@@ -122,7 +125,8 @@ TEST_CASE("Shipped monster list: OpenMU's statues 658-668 have its English names
         CAPTURE(number);
         const MonsterDefinition* monster = FindMonster(loaded.monsters, number);
         REQUIRE(monster != nullptr);
-        CHECK(Data::Monsters::ToObjectKind(monster->kind) == Data::Monsters::GetLegacyObjectKind(number));
+        CHECK(monster->kind ==
+              (number == 658 ? Data::Monsters::MonsterKind::Monster : Data::Monsters::MonsterKind::Npc));
     }
 }
 
@@ -195,12 +199,12 @@ TEST_CASE("Monster data: saving writes what loads back, and refuses errors [data
     std::vector<MonsterDefinition> monsters = {monster};
     std::vector<ItemDataIssue> issues;
 
-    CHECK(Data::Monsters::SaveMonstersFile(file, Data::Monsters::MakeOneNumberGroups(monsters), issues));
+    CHECK(Data::Monsters::SaveMonstersFile(file, Data::Monsters::MakeOneNumberGroups(monsters), {}, issues));
     CHECK(Data::Monsters::LoadMonstersFile(file).monsters == monsters);
 
     monsters[0].names.Set("en", "Budge||Dragon");
     issues.clear();
-    CHECK_FALSE(Data::Monsters::SaveMonstersFile(file, Data::Monsters::MakeOneNumberGroups(monsters), issues));
+    CHECK_FALSE(Data::Monsters::SaveMonstersFile(file, Data::Monsters::MakeOneNumberGroups(monsters), {}, issues));
     CHECK(HasFatal(issues));
     CHECK(Data::Monsters::LoadMonstersFile(file).monsters[0].names.GetNeutral() == "Budge Dragon");
     CHECK_FALSE(std::filesystem::exists(file.string() + ".tmp"));
