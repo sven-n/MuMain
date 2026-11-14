@@ -15,10 +15,8 @@ sudo apt-get install -y \
   build-essential cmake ninja-build pkg-config \
   clang zlib1g-dev curl ca-certificates
 
-# OpenGL / GLEW / GLU / turbojpeg
-sudo apt-get install -y \
-  libgl1-mesa-dev libglu1-mesa-dev libglew-dev libegl1-mesa-dev \
-  libturbojpeg0-dev
+# turbojpeg
+sudo apt-get install -y libturbojpeg0-dev
 
 # Crypto++ (the ciphers of version 14 models)
 sudo apt-get install -y libcrypto++-dev
@@ -32,7 +30,7 @@ sudo apt-get install -y \
   libx11-dev libxext-dev libxrandr-dev libxi-dev libxcursor-dev \
   libxfixes-dev libxrender-dev libxss-dev libxtst-dev libxkbcommon-dev \
   libdrm-dev libgbm-dev \
-  libwayland-dev libdecor-0-dev wayland-protocols \
+  libwayland-dev libdecor-0-dev wayland-protocols libegl-dev \
   libasound2-dev libpulse-dev libdbus-1-dev libudev-dev
 ```
 

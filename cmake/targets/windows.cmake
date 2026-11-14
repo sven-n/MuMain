@@ -8,7 +8,7 @@ set(MU_TARGET_ADAPTERS
   "GameShop/FileDownloader/Adapters/CurlShopDownload.cpp"
   "Core/Utilities/Adapters/CpuUsageWin32.cpp")
 set(MU_TARGET_DEPENDENCIES OpenSSL CURL Cryptopp TurboJPEG)
-set(MU_TARGET_SYSTEM_LIBRARIES imm32 vfw32 dxguid opengl32 glu32 winmm ws2_32 version shlwapi crypt32)
+set(MU_TARGET_SYSTEM_LIBRARIES imm32 vfw32 dxguid winmm ws2_32 version shlwapi crypt32)
 if(CMAKE_CXX_COMPILER MATCHES "mingw32")
   list(APPEND MU_TARGET_SYSTEM_LIBRARIES gdi32 user32 ole32 oleaut32 uuid comdlg32 advapi32)
 endif()
