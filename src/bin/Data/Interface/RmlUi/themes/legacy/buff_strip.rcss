@@ -233,3 +233,23 @@
 	pointer-events: auto;
 	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
 }
+
+/* Remaining duration: a 2dp bar along the icon's bottom edge. The fill's width is bound
+   per-instance (data-style-width, buff_strip.rml); the track is hidden for buffs the server
+   sends no duration for. */
+.buff-time-track {
+	position: absolute;
+	left: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	height: 2dp;
+	background-color: rgba(0, 0, 0, 160);
+	pointer-events: none;
+}
+
+.buff-time-fill {
+	/* RmlUi's default display is inline, which ignores width; the fill must be a block. */
+	display: block;
+	height: 100%;
+	background-color: token(semantic-success);
+}

@@ -103,6 +103,7 @@ void BuffTimeControl::RegisterBuffTime(eBuffState bufftype, DWORD curbufftime)
     BuffTimeInfo  buffinfo;
     buffinfo.s_BuffType = bufftype;
     buffinfo.s_CurBuffTime = curbufftime * 1000;
+    buffinfo.s_MaxBuffTime = buffinfo.s_CurBuffTime;
     buffinfo.s_EventBuffTime = GetTickCount();
 
     m_BuffTimeList.insert(std::make_pair(bufftimetype, buffinfo));
@@ -172,6 +173,30 @@ const DWORD BuffTimeControl::GetBuffTime(DWORD type)
         return bufftimeinfo.s_CurBuffTime;
     }
     return 0;
+}
+
+bool BuffTimeControl::GetBuffRemainingFraction(eBuffState bufftype, float& fraction)
+{
+    for (BuffTimeInfoMap::iterator iter = m_BuffTimeList.begin(); iter != m_BuffTimeList.end(); ++iter)
+    {
+        BuffTimeInfo& bufftimeinfo = (*iter).second;
+
+        if (bufftimeinfo.s_BuffType != bufftype)
+            continue;
+
+        if (bufftimeinfo.s_MaxBuffTime == 0)
+            return false;
+
+        // s_CurBuffTime only moves on the 900ms scheduler tick; subtract the live delta from the
+        // tick's anchor so the bar shrinks smoothly between ticks instead of in 0.9s steps.
+        DWORD elapsed = GetTickCount() - bufftimeinfo.s_EventBuffTime;
+        DWORD remaining = elapsed < bufftimeinfo.s_CurBuffTime ? bufftimeinfo.s_CurBuffTime - elapsed : 0;
+
+        fraction = remaining / static_cast<float>(bufftimeinfo.s_MaxBuffTime);
+        return true;
+    }
+
+    return false;
 }
 
 void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isSecond)
