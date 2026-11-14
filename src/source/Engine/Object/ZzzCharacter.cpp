@@ -202,6 +202,8 @@ namespace
 #include "Render/Lighting/LightMoodSetting.h"
 #include "Render/Effects/EffectDraw.h"
 
+#include <unordered_map>
+
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
 CHARACTER* Hero;
@@ -4074,7 +4076,37 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         CreateParticle(BITMAP_LIGHT, Position, o->Angle, Light);
     }
 
-    if ((int)c->AttackTime > 0)
+    // A skill's effect comes when its attack counter reaches g_iLimitAttackTime. With a high
+    // attack speed the next attack starts the counter again before that (a Dark Lord's Fire Scream at attack speed
+    // 3000 showed 1 effect for 25 casts), and the effect was lost. Such a restart releases the last attack's
+    // effect now, as its own skill; then the new attack goes on from where it stood.
+    // The counter and skill each character's last frame left, kept here rather than in CHARACTER (whose
+    // layout older code depends on).
+    struct LastAttack
+    {
+        float time = 0.f;
+        WORD skill = 0;
+    };
+    static std::unordered_map<const CHARACTER*, LastAttack> s_lastAttack;
+    LastAttack& last = s_lastAttack[c];
+    bool resumeAttack = false;
+    float resumeAttackTime = 0.f;
+    WORD resumeSkill = 0;
+    int resumeDamage = 0;
+    BYTE resumeAttackFlag = 0;
+    if (last.time > 0.f && c->AttackTime > 0.f && c->AttackTime < last.time && (int)last.time < g_iLimitAttackTime &&
+        last.skill != 0)
+    {
+        resumeAttack = true;
+        resumeAttackTime = c->AttackTime;
+        resumeSkill = c->Skill;
+        resumeDamage = c->Damage;
+        resumeAttackFlag = c->AttackFlag;
+        c->Skill = last.skill;
+        c->AttackTime = static_cast<float>(g_iLimitAttackTime);
+    }
+
+    if (!resumeAttack && (int)c->AttackTime > 0)
     {
         AttackStage(c, o);
         AttackEffect(c);
@@ -5237,6 +5269,17 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         c->Damage = 0;
         c->AttackFlag = ATTACK_FAIL;
     }
+
+    // After a lost effect was released, the new attack it gave way to.
+    if (resumeAttack)
+    {
+        c->AttackTime = resumeAttackTime;
+        c->Skill = resumeSkill;
+        c->Damage = resumeDamage;
+        c->AttackFlag = resumeAttackFlag;
+    }
+    last.time = c->AttackTime;
+    last.skill = c->AttackTime > 0.f ? c->Skill : 0;
 
     if (c->m_iDeleteTime > 0)
     {
