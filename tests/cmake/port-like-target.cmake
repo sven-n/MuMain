@@ -12,7 +12,8 @@ include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/targets/${MU_TARGET}.cmake")
 set(MU_TARGET_ADAPTERS
   "Core/Platform/Adapters/CredentialsUnavailable.cpp"
   "GameShop/FileDownloader/Adapters/ShopDownloadUnavailable.cpp"
-  "Core/Utilities/Adapters/CpuUsageUnavailable.cpp")
+  "Core/Utilities/Adapters/CpuUsageUnavailable.cpp"
+  "Render/Renderer/Adapters/GpuDeviceSdlChoice.cpp")
 set(MU_TARGET_DEPENDENCIES Cryptopp TurboJPEG)
 
 if(NOT MU_PORT_LIKE_EXECUTABLE)

@@ -184,7 +184,7 @@ A target file sets:
 | Variable | Meaning |
 |----------|---------|
 | `MU_PLATFORM_SOURCES` | Which of `Core/Platform/win32` or `posix` the game library compiles. |
-| `MU_TARGET_ADAPTERS` | The platform service adapters, from the `Adapters/` folders under `src/source`: saved logins, shop downloads, CPU usage. Each service has an "unavailable" adapter for a target without it. |
+| `MU_TARGET_ADAPTERS` | The platform service adapters, from the `Adapters/` folders under `src/source`: saved logins, shop downloads, CPU usage. Each service has an "unavailable" adapter for a target without it. Also the GPU device adapter, which adds the target's own device creation properties: `GpuDevicePreferVulkan.cpp` (Windows) or `GpuDeviceSdlChoice.cpp` (none). |
 | `MU_TARGET_DEPENDENCIES` | The libraries the target links, by provider name: `OpenSSL`, `CURL`, `Cryptopp`, `TurboJPEG`. |
 | `MU_TARGET_SYSTEM_LIBRARIES` | System libraries and frameworks. |
 | `MU_MANAGED_LIBRARY_FILE`, `MU_MANAGED_LIBRARY_BY_NAME`, `MU_DOTNET_RID`, `MU_DOTNET_PLATFORM`, `MU_DOTNET_EXTRA_ARGS` | The network library: its file name, how it's found, and how .NET builds it. Needed only while the exports come from the NativeAOT library. |

@@ -40,7 +40,7 @@ function(require_shader_load_assignment handle asset stage stage_enum)
 endfunction()
 
 string(FIND "${renderer_source}" "[[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily" init_start)
-string(FIND "${renderer_source}" "[[nodiscard]] static bool LoadShaders(const char* driverName)" load_start)
+string(FIND "${renderer_source}" "[[nodiscard]] static bool LoadShaders()" load_start)
 string(FIND "${renderer_source}" "static void ReleaseShaders()" release_start)
 string(FIND "${renderer_source}" "[[nodiscard]] static SDL_GPUDepthStencilState MakeDepthStencilState" depth_state_start)
 string(FIND "${renderer_source}" "[[nodiscard]] static PipelineBuildResult BuildBlendPipeline" build_start)
