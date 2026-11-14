@@ -5,6 +5,7 @@
 #include "I18N/All.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "InGameShopSystem.h"
+#include "ShopPages.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Network/Server/WSclient.h" // SocketClient
 #include "UI/Core/WindowCommon.h"
@@ -324,7 +325,7 @@ void CInGameShopSystem::PrePage()
 
 int CInGameShopSystem::GetTotalPages()
 {
-    return (m_plistSelectPackage->size() / INGAMESHOP_DISPLAY_ITEMLIST_SIZE) + 1;
+    return GameShop::CountPages(GetSizePackageAsSelectedCategory(), INGAMESHOP_DISPLAY_ITEMLIST_SIZE);
 }
 
 int CInGameShopSystem::GetSelectPage()

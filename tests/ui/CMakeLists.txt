@@ -78,6 +78,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME shop_pages_tests
+    SOURCES
+        test_shop_pages.cpp
+)
+
+mu_add_test(
     NAME shop_script_list_tests
     SOURCES
         test_shop_script_list.cpp
@@ -387,6 +393,7 @@ mu_add_test(
     NAME rml_styling_regression_tests
     SOURCES
         test_rml_styling_regressions.cpp
+        test_rml_in_game_shop_hits.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient mu_test_rml_layout_fixture
 )
