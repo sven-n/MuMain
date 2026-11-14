@@ -194,6 +194,9 @@ standing hero stays in `ZzzInterface.cpp`.
   an NPC on the player skeleton) standing plays its Hello, another NPC its second animation, anyone else nods. Again
   only after the hero has gone (off screen or 8 tiles away), and at most every 10 s. The hero, if it can turn its head
   to them (60 degrees), looks at them and nods back after 1.6 to 2.8 s. Only on this screen: the server isn't told.
+- **Dance:** `/dance` (case-insensitive, optional whitespace and arguments) or the translated Dance word in chat plays
+  `PLAYER_POINT_DANCE`; the client sends `AT_POINT_DANCE` and the server relays it, so observers dance too. The
+  action puts the weapons on the back, outside the safe zone as well.
 
 ## The player's skeleton (`Data/Player/player.bmd`, 60 bones)
 

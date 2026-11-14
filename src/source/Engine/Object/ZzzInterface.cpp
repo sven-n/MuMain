@@ -2008,7 +2008,8 @@ bool CanUseChatEmote()
         return false;
     }
 
-    const bool riding = GameLogic::Items::IsRideableMountModel(Hero->Helper.Type) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR;
+    const bool riding =
+        GameLogic::Items::IsRideableMountModel(Hero->Helper.Type) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR;
     return Hero->SafeZone || !riding;
 }
 

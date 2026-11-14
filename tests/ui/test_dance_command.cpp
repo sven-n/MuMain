@@ -34,3 +34,15 @@ TEST_CASE("the dance word is a whole word and not a slash command [ui][chat]")
     CHECK_FALSE(ContainsDanceWord(L"/" + word));
     CHECK_FALSE(ContainsDanceWord(word + L"r"));
 }
+
+TEST_CASE("the dance word matches inside kana and CJK sentences [ui][chat]")
+{
+    using UI::Chat::ContainsWord;
+
+    CHECK(ContainsWord(L"一緒にダンス", L"ダンス"));
+    CHECK(ContainsWord(L"ダンスしよう", L"ダンス"));
+    CHECK(ContainsWord(L"一起舞蹈吧", L"舞蹈"));
+    CHECK(ContainsWord(L"Танец", L"Танец"));
+    CHECK_FALSE(ContainsWord(L"Танцевать", L"Танец"));
+    CHECK_FALSE(ContainsWord(L"Dancer", L"Dance"));
+}

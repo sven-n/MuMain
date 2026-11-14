@@ -60,24 +60,31 @@ std::wstring_view TrimLeft(std::wstring_view text)
     }
     return text;
 }
+
+// Only letters and digits of space-separated scripts are word characters here.
+// Kana and CJK write without spaces; treating them as boundaries keeps ダンス and
+// 舞蹈 findable inside 「一緒にダンス」 and 「一起舞蹈吧」.
+bool IsSpaceSeparatedWordCharacter(wchar_t character)
+{
+    return (character >= L'0' && character <= L'9') || (character >= L'A' && character <= L'Z') ||
+           (character >= L'a' && character <= L'z') || (character >= 0x00C0 && character <= 0x024F) ||
+           (character >= 0x0400 && character <= 0x04FF);
+}
 } // namespace
 
 bool IsDanceCommand(std::wstring_view text)
 {
     text = TrimLeft(text);
-    if (text.size() < DanceCommand.size() ||
-        _wcsnicmp(text.data(), DanceCommand.data(), DanceCommand.size()) != 0)
+    if (text.size() < DanceCommand.size() || _wcsnicmp(text.data(), DanceCommand.data(), DanceCommand.size()) != 0)
     {
         return false;
     }
 
-    return text.size() == DanceCommand.size() ||
-           std::iswspace(static_cast<wint_t>(text[DanceCommand.size()]));
+    return text.size() == DanceCommand.size() || std::iswspace(static_cast<wint_t>(text[DanceCommand.size()]));
 }
 
-bool ContainsDanceWord(std::wstring_view text)
+bool ContainsWord(std::wstring_view text, std::wstring_view word)
 {
-    const std::wstring_view word = I18N::Game::Dance;
     if (word.empty() || word.size() > text.size())
     {
         return false;
@@ -93,14 +100,13 @@ bool ContainsDanceWord(std::wstring_view text)
         if (position > 0)
         {
             const wchar_t previous = text[position - 1];
-            if (previous == L'/' || std::iswalnum(static_cast<wint_t>(previous)))
+            if (previous == L'/' || IsSpaceSeparatedWordCharacter(previous))
             {
                 continue;
             }
         }
 
-        if (position + word.size() < text.size() &&
-            std::iswalnum(static_cast<wint_t>(text[position + word.size()])))
+        if (position + word.size() < text.size() && IsSpaceSeparatedWordCharacter(text[position + word.size()]))
         {
             continue;
         }
@@ -111,15 +117,13 @@ bool ContainsDanceWord(std::wstring_view text)
     return false;
 }
 
+bool ContainsDanceWord(std::wstring_view text)
+{
+    return ContainsWord(text, I18N::Game::Dance);
+}
+
 void CheckChatText(wchar_t* Text)
 {
-    // Slash commands go through CheckCommand; a malformed /dance command must not
-    // fall through and trigger a word emote from its arguments.
-    if (IsDanceCommand(Text))
-    {
-        return;
-    }
-
     CHARACTER* c = Hero;
     OBJECT* o = &c->Object;
     if (FindText(Text, I18N::Game::Hello) || FindText(Text, I18N::Game::Hi) || FindText(Text, I18N::Game::Welcome) || FindText(Text, I18N::Game::Welcome) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks))
