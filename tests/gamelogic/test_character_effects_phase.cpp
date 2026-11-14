@@ -1869,3 +1869,99 @@ TEST_CASE("Dark Side's fingerprint follows a dummy's step, not only how many dum
     monk.IsDummyRender(placed, target, frame, 1);
     CHECK(monk.DarksideStateHash() != before);
 }
+
+void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o); // defined in WSclient.cpp
+
+namespace
+{
+int LiveAuraJoints(const OBJECT* target)
+{
+    int live = 0;
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        const JOINT& joint = Joints[i];
+        live += joint.Live && joint.Type == MODEL_SPEARSKILL && joint.Target == target &&
+                        (joint.SubType == 4 || joint.SubType == 9)
+                    ? 1
+                    : 0;
+    }
+    return live;
+}
+
+// The character index the aura's joints carry: MoveJoint reads that character's Helper and SafeZone.
+bool AuraJointsBelongTo(const OBJECT* target, int characterIndex)
+{
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        const JOINT& joint = Joints[i];
+        if (joint.Live && joint.Type == MODEL_SPEARSKILL && joint.Target == target &&
+            (joint.SubType == 4 || joint.SubType == 9) && joint.m_iChaIndex != characterIndex)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void ClearJoints()
+{
+    for (int i = 0; i < MAX_JOINTS; ++i)
+        Joints[i].Live = false;
+}
+} // namespace
+
+TEST_CASE("Greater Damage alone spawns no swirling aura, Greater Defense and the Elf Soldier buff spawn it [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER& c = scope.character();
+    OBJECT* o = &c.Object;
+    o->Kind = KIND_PLAYER;
+    for (auto& weapon : c.Weapon)
+        weapon.LinkBone = 33;
+    ClearJoints();
+    FenrirScope::ClearSpawns();
+
+    SUBCASE("Greater Damage")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Attack);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    SUBCASE("Greater Defense")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        CHECK(LiveAuraJoints(o) == 5);
+        CHECK(AuraJointsBelongTo(o, 1));
+    }
+
+    SUBCASE("Elf Soldier buff")
+    {
+        g_CharacterRegisterBuff(o, eBuff_HelpNpc);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        CHECK(LiveAuraJoints(o) == 5);
+        CHECK(AuraJointsBelongTo(o, 1));
+    }
+
+    SUBCASE("Greater Defense ends while the Elf Soldier buff stays")
+    {
+        g_CharacterRegisterBuff(o, eBuff_HelpNpc);
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        ClearBuffPhysicalEffect(eBuff_Defense, o);
+        CHECK(LiveAuraJoints(o) == 5);
+    }
+
+    SUBCASE("Greater Defense on a cloaked player")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        g_CharacterRegisterBuff(o, eBuff_Cloaking);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    g_CharacterClearBuff(o);
+    ClearJoints();
+    FenrirScope::ClearSpawns();
+}
