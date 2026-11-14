@@ -93,6 +93,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME command_effects_tests
+    SOURCES
+        test_command_effects.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Character/CommandEffects.cpp
+)
+
+mu_add_test(
     NAME tooltip_placement_tests
     SOURCES
         test_tooltip_placement.cpp

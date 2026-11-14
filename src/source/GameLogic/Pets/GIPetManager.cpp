@@ -5,6 +5,7 @@
 #include "I18N/All.h"
 
 #include "GIPetManager.h"
+#include "GameLogic/Character/CommandEffects.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -562,9 +563,12 @@ static std::uint8_t g_tabBar = 0;
         {
         case PET_TYPE_DARK_SPIRIT:
             pPetInfo->m_dwExp2 = ((10 + Level) * Level * Level * Level * 100);
-            pPetInfo->m_wDamageMin = (180 + (pPetInfo->m_wLevel * 15) + (Charisma / 8));
-            pPetInfo->m_wDamageMax = (200 + (pPetInfo->m_wLevel * 15) + (Charisma / 4));
-            pPetInfo->m_wAttackSpeed = (20 + (pPetInfo->m_wLevel * 4 / 5) + (Charisma / 50));
+            pPetInfo->m_wDamageMin =
+                (180 + (pPetInfo->m_wLevel * 15) + GameLogic::Character::GetCommandRavenMinimumDamage(Charisma));
+            pPetInfo->m_wDamageMax =
+                (200 + (pPetInfo->m_wLevel * 15) + GameLogic::Character::GetCommandRavenMaximumDamage(Charisma));
+            pPetInfo->m_wAttackSpeed =
+                (20 + (pPetInfo->m_wLevel * 4 / 5) + GameLogic::Character::GetCommandRavenAttackSpeed(Charisma));
             pPetInfo->m_wAttackSuccess = (1000 + pPetInfo->m_wLevel) + (pPetInfo->m_wLevel * 15);
             break;
 

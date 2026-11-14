@@ -9504,4 +9504,16 @@
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Łącznie: +%d</value>
   </data>
+  <data name="Attack rate (PvM): +%d" xml:space="preserve">
+    <value>Celność (PvM): +%d</value>
+  </data>
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
+    <value>Obrażenia {item:13,5:gen}: +%d~%d</value>
+  </data>
+  <data name="Dark Raven attack speed: +%d" xml:space="preserve">
+    <value>Szybkość ataku {item:13,5:gen}: +%d</value>
+  </data>
+  <data name="Guild members as guild master: %d" xml:space="preserve">
+    <value>Członkowie gildii jako mistrz gildii: %d</value>
+  </data>
 </root>

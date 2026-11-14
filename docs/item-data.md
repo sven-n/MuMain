@@ -1139,6 +1139,24 @@ As with the rate, the buff counts when the hero has the skill, with the
 hero's energy and command; a buff from a party member is counted only that
 way, since its value comes from that member's energy and command.
 
+### Command
+
+A Dark Lord's command row in the character window has a hint too: with the
+pointer over the row, it lists what the command adds, each part rounded down.
+The attack rate and the Dark Raven follow the server's formulas (OpenMU's
+`ClassDarkLord`); the guild size follows the original client's rule:
+
+| Part | Adds |
+|---|---|
+| Attack rate (PvM) | 1 per 10 command |
+| Dark Raven damage | 1 per 8 command to the minimum, 1 per 4 to the maximum |
+| Dark Raven attack speed | 1 per 50 command |
+| Guild members as guild master | 1 per 10 levels plus 1 per 10 command, at most 80 |
+
+The command counts with what items and buffs add to it, as on the server.
+The guild window shows the same member limit. It is the client's rule only:
+OpenMU does not check the guild size, so a server can allow more members.
+
 ### Option rules
 
 `Options/OptionRules.json` says which definitions an item's data gives it.

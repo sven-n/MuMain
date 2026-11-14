@@ -9106,4 +9106,16 @@
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Total: +%d</value>
   </data>
+  <data name="Attack rate (PvM): +%d" xml:space="preserve">
+    <value>Taxa de ataque (PvM): +%d</value>
+  </data>
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
+    <value>Dano do {item:13,5}: +%d~%d</value>
+  </data>
+  <data name="Dark Raven attack speed: +%d" xml:space="preserve">
+    <value>Velocidade de ataque do {item:13,5}: +%d</value>
+  </data>
+  <data name="Guild members as guild master: %d" xml:space="preserve">
+    <value>Membros da guilda como mestre: %d</value>
+  </data>
 </root>

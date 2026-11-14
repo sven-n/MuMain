@@ -4,6 +4,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/Character/CommandHint.h"
 #include "UI/Character/CriticalHitTexts.h"
 #include "UI/Character/DamageHint.h"
 #include "UI/RmlBridge/RmlElementTooltip.h"
@@ -102,6 +103,7 @@ namespace mu::ui::window
             NoLineHint = -1,
             DamageHint = 0,
             CriticalDamageRateHint = 1,
+            CommandHint = 2,
         };
 
         // One derived-stat display line below an attribute's label/value row (attack, defense,
@@ -127,6 +129,10 @@ namespace mu::ui::window
         // The critical damage rate's line under the strength's lines, the damage line's colour while the hero's own
         // Increase Critical Damage is on, and the hint of the line the pointer is over.
         void BuildCriticalHits();
+        // The hint of the command row, the Dark Lord's only.
+        void BuildCommandHint();
+        // Shows the hint of the line the pointer is over.
+        void ShowLineHint();
 
         struct CharacterInfoRmlModel
         {
@@ -156,6 +162,8 @@ namespace mu::ui::window
             Rml::String vitValueText, vitValueSource;
             Rml::String eneValueText, eneValueSource;
             Rml::String cmdValueText, cmdValueSource;
+            // The command row's LineHint.
+            int cmdHint = CommandHint;
 
             std::vector<StatLine> strLines;
             std::vector<StatLine> agiLines;
@@ -170,6 +178,8 @@ namespace mu::ui::window
         };
 
         void BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model);
+        // The attribute labels and the buttons' tooltips, which don't change while the window is open.
+        void SetStaticTexts(CharacterInfoRmlModel& model);
         UI::RmlBridge::ThemedView<CharacterInfoRmlModel> m_RmlView{"character_info",
             [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/character_info.rml"}}};
@@ -183,5 +193,7 @@ namespace mu::ui::window
 
         // The critical damage rate line and the hints, formatted again only when what they show changes.
         UI::Character::CriticalHitTexts m_CriticalHitTexts;
+        // What the Dark Lord's command adds, formatted again only when it changes.
+        UI::Character::CommandHintTexts m_CommandHintTexts;
     };
 }

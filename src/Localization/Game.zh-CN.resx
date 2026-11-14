@@ -1242,4 +1242,16 @@
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>合计：+%d</value>
   </data>
+  <data name="Attack rate (PvM): +%d" xml:space="preserve">
+    <value>攻击成功率 (PvM)：+%d</value>
+  </data>
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
+    <value>暗黑乌鸦攻击力：+%d~%d</value>
+  </data>
+  <data name="Dark Raven attack speed: +%d" xml:space="preserve">
+    <value>暗黑乌鸦攻击速度：+%d</value>
+  </data>
+  <data name="Guild members as guild master: %d" xml:space="preserve">
+    <value>作为战盟盟主的成员上限：%d</value>
+  </data>
 </root>
