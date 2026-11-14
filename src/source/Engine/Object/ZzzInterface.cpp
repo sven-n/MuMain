@@ -2000,6 +2000,17 @@ bool CheckMacroLimit(wchar_t* Text)
     return  false;
 }
 
+bool CanUseChatEmote()
+{
+    if (Hero == nullptr)
+    {
+        return false;
+    }
+
+    const bool riding = GameLogic::Items::IsRideableMountModel(Hero->Helper.Type) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR;
+    return Hero->SafeZone || !riding;
+}
+
 bool CheckCommand(wchar_t* Text, bool bMacroText)
 {
     ConsoleCommandResult result;
@@ -2025,6 +2036,15 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
     if (result.status == ConsoleCommandStatus::Handled)
     {
+        return true;
+    }
+
+    if (UI::Chat::IsDanceCommand(Text))
+    {
+        if (CanUseChatEmote())
+        {
+            SetActionClass(Hero, &Hero->Object, PLAYER_POINT_DANCE, AT_POINT_DANCE);
+        }
         return true;
     }
 
@@ -3526,9 +3546,7 @@ void SendMacroChat(wchar_t* Text)
     if (!CheckCommand(Text, true))
     {
         // Not while riding, outside the safe zone; the Horn of Fenrir was never in this check.
-        const bool riding =
-            GameLogic::Items::IsRideableMountModel(Hero->Helper.Type) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR;
-        if (!riding || Hero->SafeZone)
+        if (CanUseChatEmote())
         {
             // Send animation for specific texts
             UI::Chat::CheckChatText(Text);

@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "UI/Chat/ChatInput.h"
 #include "UI/HUD/ChatInputBox.h"
 #include "Core/Input/SyntheticInput.h"
@@ -395,7 +395,7 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
                     }
                     else
                     {
-                        if (Hero->SafeZone || !GameLogic::Items::IsRideableMountModel(Hero->Helper.Type))
+                        if (CanUseChatEmote())
                         {
                             UI::Chat::CheckChatText(szChatText);
                         }
