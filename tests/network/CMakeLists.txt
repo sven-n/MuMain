@@ -225,6 +225,14 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Commands/ChatCommandCatalog.cpp
 )
 
+mu_add_test(
+    NAME test_warp_list
+    SOURCES
+        test_warp_list.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Warps/ServerWarpList.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Warps/WarpListMerge.cpp
+)
+
 if(DOTNET_EXECUTABLE)
     # Each build folder builds the self-checks into its own folder: two build folders testing at once would
     # otherwise write the same bin/ and obj/ next to the projects.
