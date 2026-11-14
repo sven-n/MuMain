@@ -26,8 +26,8 @@ build output's `src` folder, e.g.:
 <build-dir>/src
 ```
 
-so the client finds its assets, `config.ini`, and
-`MUnique.Client.Library.so`. CLion's default build directory is
+so the client finds its assets and
+`MUnique.Client.Library.so` (`config.ini` is in the [user folder](../README.md#where-settings-and-logs-live)). CLion's default build directory is
 `cmake-build-release/` (or `-debug`) inside the project.
 
 If GL is slow under WSLg, add `MESA_LOADER_DRIVER_OVERRIDE=d3d12` to the run

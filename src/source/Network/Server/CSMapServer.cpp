@@ -106,7 +106,7 @@ void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
 
     // SaveOptions sends through the socket, so it goes before DeleteSocket.
     SaveOptions();
-    SaveMacro(L"Data\\Macro.txt");
+    SaveMacro();
     DeleteSocket();
 
     std::this_thread::sleep_for(kReconnectDelay);

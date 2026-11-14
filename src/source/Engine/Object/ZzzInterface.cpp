@@ -2825,7 +2825,7 @@ void CheckGate()
                                 if (gt->Map == WD_30BATTLECASTLE || gt->Map == WD_31HUNTING_GROUND)
                                 {
                                     SaveOptions();
-                                    SaveMacro(L"Data\\Macro.txt");
+                                    SaveMacro();
                                 }
 
                                 SelectedItem = -1;

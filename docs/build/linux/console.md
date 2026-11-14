@@ -105,11 +105,12 @@ cd build-linux/src
 ./Main
 ```
 
-Run from `build-linux/src` so the client finds its assets, `config.ini`, and
+Run from `build-linux/src` so the client finds its assets and
 `MUnique.Client.Library.so` (loaded from the working directory). Set the server
-in `config.ini` (`ServerIP` / `ServerPort`).
+in `config.ini` (`ServerIP` / `ServerPort`), which the first start creates in
+`~/.local/share/MuMain/<install>/` (see [where settings and logs live](../README.md#where-settings-and-logs-live)).
 
-SDL diagnostics are also written to `MuError.log`; set `SDL_LOGGING` to control their verbosity.
+SDL diagnostics are also written to `MuError.log` in that folder; set `SDL_LOGGING` to control their verbosity.
 
 ### Hardware OpenGL under WSLg
 

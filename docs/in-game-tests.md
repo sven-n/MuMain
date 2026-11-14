@@ -332,7 +332,7 @@ The character wears a see-through cape. After entering the world the
 scenario holds the clouds still (`$clouds speed 0`, for the session only):
 their shadows drift with the clock, so they would lie elsewhere in every run.
 Monsters may walk into the Dungeon and Kalima pictures. The clients of this scenario start
-with a config of their own, not the `config.ini` next to `Main`: a
+with a config of their own, not the `config.ini` in the user folder: a
 1920x1080 window, the Enhanced look with every feature on and 4x
 anti-aliasing, and no player tuning, so the pictures show the shipped look
 whoever runs them. The player's own `config.ini` is left alone. (Developer

@@ -120,6 +120,44 @@ parse_arguments() {
     done
 }
 
+# An install's own folder name, as InstallFolderName (UserFolder.cpp) makes it: the folder's name, its unusual
+# characters as '_', and the low 32 bits of the FNV-1a 64 hash of its path's bytes.
+install_folder_name() {
+    local dir="$1" byte name
+    local -i hash=-3750763034362895579 # 14695981039346656037 as a signed 64-bit number
+    while [[ "${#dir}" -gt 1 && "$dir" == */ ]]; do
+        dir="${dir%/}"
+    done
+    for byte in $(printf '%s' "$dir" | od -An -tu1 -v); do
+        hash=$(((hash ^ byte) * 1099511628211))
+    done
+    name="$(printf '%s' "${dir##*/}" | LC_ALL=C sed 's/[^A-Za-z0-9 ._-]/_/g' | LC_ALL=C cut -c1-32)"
+    if [[ -z "$name" || "$name" == .* ]]; then
+        name="MuMain"
+    fi
+    printf '%s-%08x\n' "$name" $((hash & 0xFFFFFFFF))
+}
+
+# The client's user folder, where it writes MuError.log: MU_USER_FOLDER, else SDL's folder for the [Client] Name of
+# the shipped defaults next to the client, else for the install's own name.
+client_user_folder() {
+    local name client_dir
+    if [[ -n "${MU_USER_FOLDER:-}" ]]; then
+        printf '%s\n' "$MU_USER_FOLDER"
+        return 0
+    fi
+    client_dir="$(cd "$(dirname "$1")" && pwd -P)"
+    name="$(awk -F= '{ sub(/\r$/, "") } tolower($0) ~ /^[ \t]*\[client\][ \t]*$/ { in_client = 1; next }
+        /^[ \t]*\[/ { in_client = 0 }
+        in_client && tolower($1) ~ /^[ \t]*name[ \t]*$/ { gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2; exit }' \
+        "$client_dir/config.ini.template" 2>/dev/null)"
+    # The client's own rule (UserFolder.cpp): a plain folder name, else the install's own.
+    if [[ ! "$name" =~ ^[A-Za-z0-9\ ._-]{1,64}$ || "$name" == .* ]]; then
+        name="$(install_folder_name "$client_dir")"
+    fi
+    printf '%s/MuMain/%s\n' "${XDG_DATA_HOME:-$HOME/.local/share}" "$name"
+}
+
 select_client() {
     local candidate
 
@@ -155,7 +193,7 @@ prepare_output_directory() {
     wayland_debug_file="$out_dir/wayland-debug.log"
     stderr_file="$out_dir/stderr.log"
     validation_file="$out_dir/vulkan-validation.log"
-    muerror_source="$(dirname "$client_path")/MuError.log"
+    muerror_source="$(client_user_folder "$client_path")/MuError.log"
     muerror_copy="$out_dir/MuError.log"
     muerror_previous_copy="$out_dir/MuError.log.previous"
     summary_file="$out_dir/summary.txt"

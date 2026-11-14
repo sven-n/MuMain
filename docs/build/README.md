@@ -184,7 +184,7 @@ A target file sets:
 | Variable | Meaning |
 |----------|---------|
 | `MU_PLATFORM_SOURCES` | Which of `Core/Platform/win32` or `posix` the game library compiles. |
-| `MU_TARGET_ADAPTERS` | The platform service adapters, from the `Adapters/` folders under `src/source`: saved logins, shop downloads, CPU usage. Each service has an "unavailable" adapter for a target without it. Also the GPU device adapter, which adds the target's own device creation properties: `GpuDevicePreferVulkan.cpp` (Windows) or `GpuDeviceSdlChoice.cpp` (none). |
+| `MU_TARGET_ADAPTERS` | The platform service adapters, from the `Adapters/` folders under `src/source`: saved logins, shop downloads, CPU usage. Each service has an "unavailable" adapter for a target without it. Also the GPU device adapter, which adds the target's own device creation properties: `GpuDevicePreferVulkan.cpp` (Windows) or `GpuDeviceSdlChoice.cpp` (none); and the user folder adapter, `UserFolderSdl.cpp` (SDL's per-user folder). |
 | `MU_TARGET_DEPENDENCIES` | The libraries the target links, by provider name: `OpenSSL`, `CURL`, `Cryptopp`, `TurboJPEG`. |
 | `MU_TARGET_SYSTEM_LIBRARIES` | System libraries and frameworks. |
 | `MU_MANAGED_LIBRARY_FILE`, `MU_MANAGED_LIBRARY_BY_NAME`, `MU_DOTNET_RID`, `MU_DOTNET_PLATFORM`, `MU_DOTNET_EXTRA_ARGS` | The network library: its file name, how it's found, and how .NET builds it. Needed only while the exports come from the NativeAOT library. |
@@ -255,10 +255,38 @@ library next to the executable, so the build output directory is runnable:
   Main (or Main.exe)
   MUnique.Client.Library.so (or .dll)
   Data/ ...                          <-- copied assets
-  config.ini                         <-- seeded from config.ini.template
+  config.ini.template                <-- the shipped defaults, read-only
 ```
 
 Run the client from that directory so it finds its assets and the library.
+
+### Where settings and logs live
+
+The client never writes next to the executable: that folder can be read-only (Program Files, a signed
+app bundle). `config.ini`, `MuError.log` (and its rotations), the chat macros (`Macro.txt`) and
+`Screenshots/` are in the player's user folder:
+
+| OS | Folder |
+|----|--------|
+| Windows | `%APPDATA%\MuMain\<name>\` |
+| Linux | `~/.local/share/MuMain/<name>/` (`$XDG_DATA_HOME` when set) |
+| macOS | `~/Library/Application Support/MuMain/<name>/` |
+
+- `<name>` is the install's own: its folder's name and a hash of its path, such as
+  `RelWithDebInfo-3f9a2c1b`. Every install, and so every server's client a player has, keeps its own
+  settings and remembered login, as when they were next to the executable. A distributor can set a
+  fixed `[Client] Name` in `config.ini.template` instead, so the settings stay when the client moves.
+- The first start creates `config.ini` there: a copy of the `config.ini` an older client kept next to
+  the executable, or else of `config.ini.template`. Later starts never overwrite it, and the old file
+  is no longer read. `Data/Macro.txt` moves the same way.
+- `MuError.log` names the folder in its first lines (the home folder shown as `~`).
+- `MU_USER_FOLDER` names another folder, for example to run two clients with separate settings. The
+  tests set it to their own folder.
+- One profile serves every game account of the OS user: settings that belong to a character (skill
+  and potion hotkeys, auto-attack, the chat box, MuHelper) are kept by the server. The remembered
+  login is the last account that ticked "Remember me".
+- A target picks another folder through its adapter (`Core/Platform/UserFolder.h`, in
+  `MU_TARGET_ADAPTERS`).
 
 ## Hosted releases
 

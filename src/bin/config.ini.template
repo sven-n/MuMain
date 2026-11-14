@@ -1,3 +1,8 @@
+[Client]
+; The folder in the player's application data that holds config.ini, MuError.log, the chat macros and
+; the screenshots. Empty: one of the install's own, named after its folder and path. A distributor can
+; set a fixed name (letters, digits, space, - _ .), so the settings stay when the client is moved.
+Name=
 [LOGIN]
 RememberMe=0
 SavePassword=0
