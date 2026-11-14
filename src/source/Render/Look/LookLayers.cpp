@@ -25,7 +25,21 @@ void LookLayers::UseFiles(LookFiles files)
     m_live = files;
     m_loaded = std::move(files);
     m_developerEdits = {};
+    ++m_filesGeneration;
     Changed(true);
+}
+
+LookEditResult LookLayers::Replace(const Data::Maps::LookProfileData& profile)
+{
+    LookEditResult result = ReplaceLookProfile(m_live, profile);
+    if (!result.applied)
+    {
+        return result;
+    }
+    // Marked before the change is announced: the mood rebuild below already reads the edit.
+    m_developerEdits = DeveloperEditsBetween(m_loaded.lookData, m_live.lookData);
+    Changed(result.moodChanged);
+    return result;
 }
 
 const Data::Maps::LookValues& LookLayers::Active(int world)
@@ -119,6 +133,19 @@ LookEditResult LookLayers::Reset(std::optional<std::string_view> name, int world
             maps.push_back(world);
         }
         m_developerEdits.Clear(*value, maps);
+        // An environment's value the reset leaves (it restores the default and the entry only) stays marked.
+        const DeveloperLookEdits differing = DeveloperEditsBetween(m_loaded.lookData, m_live.lookData);
+        for (std::size_t index = 0; index < differing.defaults.size(); ++index)
+        {
+            m_developerEdits.defaults[index] = m_developerEdits.defaults[index] || differing.defaults[index];
+        }
+        for (const auto& [world, flags] : differing.worlds)
+        {
+            for (std::size_t index = 0; index < flags.size(); ++index)
+            {
+                m_developerEdits.worlds[world][index] = m_developerEdits.worlds[world][index] || flags[index];
+            }
+        }
     }
     Changed(result.moodChanged);
     return result;

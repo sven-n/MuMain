@@ -8,6 +8,8 @@
 #include <cmath>
 #include <iomanip>
 #include <locale>
+#include <optional>
+#include <set>
 #include <sstream>
 
 namespace Render::Look
@@ -339,6 +341,55 @@ bool DeveloperLookEdits::Covers(const Data::Maps::LookProfileData& profile, int 
     return !map || !(map->overrides[value].has_value() ||
                      (map->environment && *map->environment < profile.environments.size() &&
                       profile.environments[*map->environment].overrides[value].has_value()));
+}
+
+namespace
+{
+// What the entry of `world`, or else its environment, sets `value` to.
+std::optional<double> EntryValue(const Data::Maps::LookProfileData& profile, int world, LookValue value)
+{
+    const Data::Maps::MapLookOverrides* map = profile.FindMap(world);
+    if (!map)
+    {
+        return std::nullopt;
+    }
+    if (map->overrides[value])
+    {
+        return map->overrides[value];
+    }
+    if (map->environment && *map->environment < profile.environments.size())
+    {
+        return profile.environments[*map->environment].overrides[value];
+    }
+    return std::nullopt;
+}
+} // namespace
+
+DeveloperLookEdits DeveloperEditsBetween(const Data::Maps::LookProfileData& files,
+                                         const Data::Maps::LookProfileData& live)
+{
+    DeveloperLookEdits edits;
+    std::set<int> worlds;
+    for (const Data::Maps::LookProfileData* profile : {&files, &live})
+    {
+        for (const Data::Maps::MapLookOverrides& entry : profile->maps)
+        {
+            worlds.insert(entry.maps.begin(), entry.maps.end());
+        }
+    }
+    for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
+    {
+        const auto index = static_cast<std::size_t>(info.value);
+        edits.defaults[index] = files.defaultOverrides[info.value] != live.defaultOverrides[info.value];
+        for (const int world : worlds)
+        {
+            if (EntryValue(files, world, info.value) != EntryValue(live, world, info.value))
+            {
+                edits.worlds[world][index] = true;
+            }
+        }
+    }
+    return edits;
 }
 
 TuningGroupSet TuningGroupsApplying(const LookFeatures& features)

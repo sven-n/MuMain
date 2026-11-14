@@ -113,6 +113,10 @@ struct LookEditResult
 [[nodiscard]] LookEditResult ResetLookValues(LookFiles& files, const LookFiles& loaded,
                                              std::optional<std::string_view> name, int world);
 
+// Makes `profile` the edited profile, all or nothing: refused for a file that cannot be edited or a
+// profile that breaks a rule.
+[[nodiscard]] LookEditResult ReplaceLookProfile(LookFiles& files, const Data::Maps::LookProfileData& profile);
+
 struct LookSaveResult
 {
     bool saved = false;

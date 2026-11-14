@@ -57,6 +57,10 @@ public:
     LookEditResult Set(std::span<const LookEdit> edits, std::optional<int> world, std::string_view mapName = {});
     // `$look reset`: every value, or `name` in the default and `world`'s entry, with their edit marks.
     LookEditResult Reset(std::optional<std::string_view> name, int world);
+    // The Graphics Look window's change, undo or redo: `profile` becomes the live profile when the
+    // files can be edited and it passes ValidateLookProfile. The developer's marks then follow what
+    // differs from the loaded files.
+    LookEditResult Replace(const Data::Maps::LookProfileData& profile);
     // `$look save` wrote the live files: a reset goes back to them, and the edits saved in them are
     // no longer marked, so the player's values apply over them again.
     void MarkSaved();
@@ -64,6 +68,16 @@ public:
     [[nodiscard]] const LookFiles& Live() const
     {
         return m_live;
+    }
+    // The files as loaded or last saved.
+    [[nodiscard]] const LookFiles& Loaded() const
+    {
+        return m_loaded;
+    }
+    // Changes with every UseFiles: other files are live, so an edit history of the old ones ends.
+    [[nodiscard]] std::uint32_t FilesGeneration() const
+    {
+        return m_filesGeneration;
     }
     [[nodiscard]] const DeveloperLookEdits& DeveloperEdits() const
     {
@@ -81,6 +95,7 @@ private:
     TuningGroupSet m_applying{};
     DeveloperLookEdits m_developerEdits;
     std::uint32_t m_revision = 0;
+    std::uint32_t m_filesGeneration = 0;
     bool m_cacheValid = false;
     int m_cacheWorld = 0;
     Data::Maps::LookValues m_values = Data::Maps::BuiltInLookValues();

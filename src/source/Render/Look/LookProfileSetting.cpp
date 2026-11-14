@@ -231,6 +231,30 @@ bool ResetLive(std::optional<std::string_view> name)
     return true;
 }
 
+LookEditResult ReplaceLive(const Data::Maps::LookProfileData& profile)
+{
+    LookEditResult result = s_state.layers.Replace(profile);
+    if (result.applied)
+    {
+        mu::log::Get("render")->info("Graphics Look: the live profile changed");
+    }
+    else
+    {
+        mu::log::Get("render")->warn("Graphics Look: change refused: {}", result.error);
+    }
+    return result;
+}
+
+const LookFiles& LoadedFiles()
+{
+    return s_state.layers.Loaded();
+}
+
+std::uint32_t LiveFilesGeneration()
+{
+    return s_state.layers.FilesGeneration();
+}
+
 bool LoadLive(std::string_view candidate)
 {
     DiskLookFileSystem fileSystem;
@@ -264,8 +288,9 @@ bool SaveLive()
         mu::log::Get("render")->error("$look save failed: {}", result.message);
         return false;
     }
-    // What was saved is now what a reset goes back to.
+    // What was saved is now what a reset goes back to, and the shipped file has it (also from a candidate).
     s_state.layers.MarkSaved();
+    s_state.source = "shipped";
     ++s_state.saves;
     mu::log::Get("render")->info("$look save: {}", result.message);
     return true;

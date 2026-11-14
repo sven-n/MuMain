@@ -129,7 +129,7 @@ std::unique_ptr<DataCheckArea> CreateLookCheckArea()
             Render::Look::DiskLookFileSystem files;
             return Render::Look::LoadLookFiles(files, Data::Maps::LookProfileFile, Data::Maps::LightMoodFile).issues;
         },
-        &ToolWindows::devEditor, WindowIds::DevEditor);
+        &ToolWindows::graphicsLook, WindowIds::GraphicsLook);
 }
 
 std::unique_ptr<DataCheckArea> CreateItemOptionCheckArea()

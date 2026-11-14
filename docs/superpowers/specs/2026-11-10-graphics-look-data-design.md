@@ -19,15 +19,17 @@ the variants of one map, and a writer that writes unchanged data as it was.
 
 ## Scope
 
-- **GL1 (now):** the format: the light mood's values move into
+- **GL1 (done, #1113):** the format: the light mood's values move into
   `Data/Render/Look.json` as `mood.*` values, on every layer; map entries
   list their maps; the writer is canonical; version 1 files are upgraded when
   read; nothing looks different. The Dev Editor's Look panel and the `$look`
   commands keep working on the new format.
-- **GL2:** the Graphics Look tool window, replacing the Dev Editor's Look
-  panel: scopes (default, environment, map), the maps an environment is used
-  by, Undo/Redo, Data Checks, and edits only through the look's edit
-  operations.
+- **GL2 (now):** the Graphics Look tool window, replacing the Dev Editor's
+  Look panel: scopes (default, environment, map), the maps an environment is
+  used by, Undo/Redo, Data Checks, and edits only through the look's edit
+  operations. Environments are added, renamed, and removed while no map uses
+  them; which maps share an entry stays as the file has it until the maps
+  area's map groups.
 - **Later, with the stages of #990 that need them:** the time-of-day and zone
   layers, named grading tables, effect lights on the effect types
   (`dynamicLight`, area FX1), materials per mesh on model entries (items 13,
@@ -70,7 +72,7 @@ the variants of one map, and a writer that writes unchanged data as it was.
 | D-GL7 | **Version 1 is upgraded when read:** a version 1 `Look.json` is read with the `LightMood.json` beside it, also version 1, as today (a `mood.*` value in a version 1 `Look.json` is an error): each mood entry becomes the `mood.*` values of its map's entry, every value it named kept, also one equal to the default (Q-GL3). Without a valid `LightMood.json`, the version 1 file applies with the Classic mood and cannot be saved (Q-GL4). Save writes version 2 into `Look.json` only. With a version 2 `Look.json`, a `LightMood.json` beside it is not read, and Data Checks warns that it can be deleted. The same applies to the candidate folders of `$look load`; a version 1 candidate without its own `LightMood.json` shows the shipped moods and cannot be saved. |
 | D-GL8 | **Nothing looks different:** the shipped version 2 file is converted from the version 1 pair, and a test resolves every map number from 0 to 255 in both and compares every look and mood value. |
 | D-GL9 | **Players keep their controls:** `[EnhancedTuning]` reads the look values a player may change and `mood.strengthPercent`, as today. The `mood.*` values are not player values: a `mood.base` line is ignored with a warning, as an unknown key is. |
-| D-GL10 | **The Dev Editor's Look panel and `$look` keep their scopes** (default, current map) until GL2. A change on the current map changes its entry; when the entry lists several maps, the panel names them, and the command's reply too. A map without an entry gets one with only that map. |
+| D-GL10 | **The Dev Editor's Look panel and `$look` keep their scopes** (default, current map) until GL2. A change on the current map changes its entry; when the entry lists several maps, the panel names them, and the command's reply too. A map without an entry gets one with only that map. GL2 replaces the panel with the Graphics Look window; `$look` keeps these scopes. |
 | D-GL11 | **Docs:** the file's format, layers and rules are in `docs/enhanced-look.md` ("The Enhanced values"); the mood values' meaning stays in `docs/light-mood.md`; which map has which environment stays in `docs/enhanced-look-map-environments.md`. |
 
 ## Steps

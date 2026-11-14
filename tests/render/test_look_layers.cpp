@@ -2,10 +2,12 @@
 
 #include "doctest.h"
 
+#include "Data/GameData/MapData/LookProfileEdits.h"
 #include "Render/Look/LookFileSystem.h"
 #include "Render/Look/LookLayers.h"
 #include "Render/Look/TuningControls.h"
 
+#include <cstdint>
 #include <map>
 #include <optional>
 #include <string>
@@ -460,4 +462,82 @@ TEST_CASE("a refused post-processing keeps the player's bloom stored but unappli
     CHECK(Bloom(layers, Lorencia) == 1.0);
     CHECK(layers.Personal()[LookValue::BloomStrength] == 0.5);
     CHECK(layers.ApplyingGroups() == Render::Look::TuningGroupSet{true, true, true, false, true});
+}
+
+TEST_CASE("a replaced profile goes live and marks what differs from the files, and an invalid one changes "
+          "nothing [render][look][tuning]")
+{
+    LookLayers layers;
+    layers.UseFiles(Files());
+    layers.SetApplyingGroups(AllGroups);
+    layers.SetPersonal(PersonalBloom(0.5));
+    const std::uint32_t files = layers.FilesGeneration();
+    const Data::Maps::LookProfileData loaded = layers.Live().lookData;
+
+    // The Graphics Look window gives Blood Castle an environment of its own.
+    Data::Maps::LookProfileData edited = loaded;
+    REQUIRE(Data::Maps::AddEnvironment(edited, "dark").applied);
+    const Data::Maps::LookValueEdit bloom{LookValue::BloomStrength, 0.2};
+    REQUIRE(Data::Maps::ApplyLookEdits(edited, {&bloom, 1}, Data::Maps::LookScope::Environment(0)).applied);
+    REQUIRE(Data::Maps::SetMapEnvironment(edited, BloodCastle2, 0).applied);
+
+    const Render::Look::LookEditResult replaced = layers.Replace(edited);
+    REQUIRE_MESSAGE(replaced.applied, replaced.error);
+    CHECK_FALSE(replaced.moodChanged);
+    CHECK(layers.Live().lookData == edited);
+    CHECK(Bloom(layers, BloodCastle3) == 0.2);
+    CHECK(Bloom(layers, Lorencia) == 0.5);
+    CHECK(layers.DeveloperEdits().Covers(edited, BloodCastle3, LookValue::BloomStrength));
+
+    // Back to the files' profile (an undo): no marks, the player's value again.
+    REQUIRE(layers.Replace(loaded).applied);
+    CHECK(layers.DeveloperEdits() == Render::Look::DeveloperLookEdits{});
+    CHECK(Bloom(layers, BloodCastle3) == 0.5);
+
+    // Figures below base: refused, nothing changes.
+    Data::Maps::LookProfileData broken = loaded;
+    broken.defaultOverrides[LookValue::MoodFigures] = 0.5;
+    const Render::Look::LookEditResult refused = layers.Replace(broken);
+    CHECK_FALSE(refused.applied);
+    CHECK_FALSE(refused.error.empty());
+    CHECK(layers.Live().lookData == loaded);
+
+    // A mood change rebuilds the map light.
+    Data::Maps::LookProfileData sunnier = loaded;
+    sunnier.defaultOverrides[LookValue::MoodSun] = 0.9;
+    CHECK(layers.Replace(sunnier).moodChanged);
+    CHECK(layers.FilesGeneration() == files);
+    layers.UseFiles(Files());
+    CHECK(layers.FilesGeneration() != files);
+}
+
+TEST_CASE("a named $look reset keeps the mark of an environment value it leaves [render][look][tuning]")
+{
+    LookLayers layers;
+    layers.UseFiles(Files());
+    layers.SetApplyingGroups(AllGroups);
+    layers.SetPersonal(PersonalBloom(0.5));
+
+    Data::Maps::LookProfileData edited = layers.Live().lookData;
+    REQUIRE(Data::Maps::AddEnvironment(edited, "dark").applied);
+    const Data::Maps::LookValueEdit bloom{LookValue::BloomStrength, 0.2};
+    REQUIRE(Data::Maps::ApplyLookEdits(edited, {&bloom, 1}, Data::Maps::LookScope::Environment(0)).applied);
+    REQUIRE(Data::Maps::SetMapEnvironment(edited, BloodCastle2, 0).applied);
+    REQUIRE(layers.Replace(edited).applied);
+
+    // The reset restores the default and Blood Castle's entry; the environment's bloom stays the developer's.
+    REQUIRE(layers.Reset(std::string_view("bloom.strength"), BloodCastle3).applied);
+    CHECK(Bloom(layers, BloodCastle3) == 0.2);
+}
+
+TEST_CASE("a profile replaced on an unusable file is refused [render][look][tuning]")
+{
+    LookLayers layers;
+    Render::Look::LookFiles files = Files();
+    files.lookUsable = false;
+    layers.UseFiles(files);
+    Data::Maps::LookProfileData edited = layers.Live().lookData;
+    edited.defaultOverrides[LookValue::BloomStrength] = 0.4;
+    CHECK_FALSE(layers.Replace(edited).applied);
+    CHECK(layers.Live().lookData != edited);
 }
