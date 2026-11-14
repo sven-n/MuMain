@@ -49,7 +49,7 @@ void ObjectModelOrigin(const OBJECT* o, vec3_t origin);
 void PlaceObjectBounds(OBJECT* o, const vec3_t origin);
 // Places an object's model where its draw poses and draws it.
 void PlaceObjectModel(const OBJECT* o, BMD* b);
-// Skins an object's meshes as its draw would, for BMD::SpawnMeshEffects's spawns: characters pass Translate true
+// Skins an object's meshes as its draw would, for mesh-effect spawns and cloth: characters pass Translate true
 // (their own model-space pose), effects false (their world pose).
 void SkinObjectMeshes(OBJECT* o, BMD* b, bool Translate);
 // The spawns, state and cloth of a player transformation's draw (RenderPartObjectBody), for a character the last

@@ -37,12 +37,15 @@
 #include "RepeatedDraws.h"
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <cwchar>
 #include <functional>
 #include <memory>
 #include <new>
 #include <vector>
+
+extern float BoneScale;
 
 namespace
 {
@@ -98,6 +101,51 @@ struct CharacterScope
     CHARACTER& character()
     {
         return characters[1];
+    }
+};
+
+// A skeleton's cloth mesh before any draw has prepared the shared BMD's skin.
+struct MagicSkeletonScope : CharacterScope
+{
+    static constexpr int MeshIndex = 2;
+    static constexpr int PinBone = 18;
+    std::array<Mesh_t, MeshIndex + 1> meshes{};
+    std::array<Vertex_t, 2> vertices{};
+    float previousBoneScale = BoneScale;
+    const float (*previousActiveBones)[3][4] = g_pActiveBoneTransform;
+
+    MagicSkeletonScope() : CharacterScope(MODEL_MAGIC_SKELETON)
+    {
+        BMD& model = Models[MODEL_MAGIC_SKELETON];
+        model.NumMeshs = static_cast<short>(meshes.size());
+        model.Meshs = meshes.data();
+        meshes[MeshIndex].NumVertices = static_cast<short>(vertices.size());
+        meshes[MeshIndex].Vertices = vertices.data();
+        vertices[0].Node = PinBone;
+        vertices[1].Node = 48; // The vertex whose null palette read appeared in the crash dump.
+        for (int bone = 0; bone < MAX_BONES; ++bone)
+            for (int axis = 0; axis < 3; ++axis)
+                bones[bone][axis][axis] = 1.f;
+        BoneScale = 1.f;
+        CHARACTER& c = character();
+        c.MonsterIndex = MONSTER_MAGIC_SKELETON_1;
+        c.GuildMarkIndex = -1;
+        c.Object.EnableBoneMatrix = true;
+        c.Object.Alpha = 1.f;
+        PlaceObjectModel(&c.Object, &model);
+        Engine::Object::Pose::Record(&c.Object, &model, false);
+    }
+
+    ~MagicSkeletonScope()
+    {
+        OBJECT& o = character().Object;
+        // Keep this test independent of the existing base-array deletion bug in DeleteCloth.
+        delete[] static_cast<CPhysicsClothMesh*>(o.m_pCloth);
+        o.m_pCloth = nullptr;
+        Models[MODEL_MAGIC_SKELETON].Meshs = nullptr;
+        Models[MODEL_MAGIC_SKELETON].NumMeshs = 0;
+        BoneScale = previousBoneScale;
+        SetActiveBoneTransform(previousActiveBones);
     }
 };
 
@@ -523,6 +571,52 @@ TEST_CASE("A drawn caped monster's cloth is made and simulated by the update, no
     CHECK(o.m_byNumCloth == 1);
     CHECK(((CPhysicsCloth*)o.m_pCloth)[0].GetOwner() == &o);
     DeleteCloth(&c, &o);
+}
+
+TEST_CASE("Magic Skeleton cloth is skinned before its first draw and follows the current pose [effects]")
+{
+    MagicSkeletonScope scope;
+    OBJECT& o = scope.character().Object;
+    BMD& model = Models[o.Type];
+    REQUIRE(model.m_pCurrentBoneTransform == nullptr);
+    Vector(1000.f, 2000.f, 300.f, o.Position);
+
+    UpdateCharacterEffects();
+
+    REQUIRE(o.m_pCloth != nullptr);
+    auto* cloth = static_cast<CPhysicsClothMesh*>(o.m_pCloth);
+    CHECK(cloth->GetNumVertices() == 2);
+    CHECK(cloth->GetOwner() == &o);
+    vec3_t pinned;
+    cloth->GetPosition(0, &pinned);
+    CHECK(pinned[0] == doctest::Approx(o.Position[0]));
+    CHECK(pinned[1] == doctest::Approx(o.Position[1]));
+
+    // Another instance of this model was skinned last; the update must replace its palette.
+    auto otherBones = std::make_unique<vec34_t[]>(MAX_BONES);
+    OBB_t obb{};
+    model.TransformCheap(otherBones.get(), o.BoundingBoxMin, o.BoundingBoxMax, &obb, true);
+    constexpr float BoneMovement = 75.f;
+    o.BoneTransform[MagicSkeletonScope::PinBone][0][3] = BoneMovement;
+
+    UpdateCharacterEffects();
+
+    CHECK(model.m_pCurrentBoneTransform == o.BoneTransform);
+    cloth->GetPosition(0, &pinned);
+    CHECK(pinned[0] == doctest::Approx(o.Position[0] + BoneMovement));
+}
+
+TEST_CASE("A Magic Skeleton without a cloth mesh stays safe across repeated updates [effects]")
+{
+    MagicSkeletonScope scope;
+    OBJECT& o = scope.character().Object;
+    Models[o.Type].NumMeshs = MagicSkeletonScope::MeshIndex;
+
+    UpdateCharacterEffects();
+    UpdateCharacterEffects();
+
+    CHECK(o.m_pCloth == nullptr);
+    CHECK(o.m_byNumCloth == 0);
 }
 
 TEST_CASE("A GM's transformation spawns its lights from the update, and none while cloaked [effects]")
