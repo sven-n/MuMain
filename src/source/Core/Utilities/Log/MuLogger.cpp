@@ -134,9 +134,10 @@ void Init(const std::filesystem::path& logDirectory)
     spdlog::sink_ptr sink;
     try
     {
-        sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(file.string(), 5 * 1024 * 1024, 3);
+        // The native name (wide on Windows): string() would throw for a folder name outside the ANSI code page.
+        sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(file.native(), 5 * 1024 * 1024, 3);
     }
-    catch (const spdlog::spdlog_ex& exception)
+    catch (const std::exception& exception)
     {
         fileError = exception.what();
         sink = std::make_shared<spdlog::sinks::stderr_sink_mt>();
@@ -154,7 +155,11 @@ void Init(const std::filesystem::path& logDirectory)
     if (dropped > 0)
         core->warn("{} log lines from before the log opened were dropped", dropped);
     if (!fileError.empty())
-        core->warn("No log file: {} could not be opened ({}); logging to stderr", file.string(), fileError);
+    {
+        const std::u8string name = file.u8string();
+        core->warn("No log file: {} could not be opened ({}); logging to stderr", std::string(name.begin(), name.end()),
+                   fileError);
+    }
     state.early = std::make_shared<EarlySink>();
 
     state.explicitlyInitialized = true;

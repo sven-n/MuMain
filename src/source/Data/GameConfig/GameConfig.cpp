@@ -11,6 +11,9 @@
 
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
+#include "Core/Content/ContentStore.h"
+#include "Core/Platform/UserFolder.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/WinIni.h"  // private-profile (.ini) API
 #include "Core/Platform/PlatformCrypto.h"
@@ -52,9 +55,38 @@ GameConfig::GameConfig()
 #else
     const char* overridePath = nullptr;
 #endif
-    m_configPath = GameConfigValidation::ResolveConfigPath(exePath, overridePath);
+    m_configPath = GameConfigValidation::ResolveConfigPath(Core::Platform::UserFolder(), overridePath);
+    if (overridePath == nullptr || overridePath[0] == '\0')
+    {
+        SeedFromExecutableFolder(std::filesystem::path(exePath) / CfgFiles::CfgFileName);
+    }
 
     Load();
+}
+
+void GameConfig::SeedFromExecutableFolder(const std::filesystem::path& legacyConfig) const
+{
+    using Core::Platform::Seeded;
+    const Seeded seeded = Core::Platform::SeedUserFile(m_configPath, legacyConfig,
+                                                       Content::ReadFile(Core::Platform::ShippedDefaultsFile));
+    const auto log = mu::log::Get("core");
+    switch (seeded)
+    {
+    case Seeded::FromLegacy:
+        log->info("config.ini: copied from the one next to the executable; that one is no longer read");
+        break;
+    case Seeded::FromDefaults:
+        log->info("config.ini: created from {}", Core::Platform::ShippedDefaultsFile);
+        break;
+    case Seeded::Nothing:
+        log->warn("config.ini: no {} to create it from; using built-in defaults", Core::Platform::ShippedDefaultsFile);
+        break;
+    case Seeded::Failed:
+        log->error("config.ini: could not be created in the user folder");
+        break;
+    case Seeded::Existing:
+        break;
+    }
 }
 
 void GameConfig::Load()

@@ -468,7 +468,7 @@ native_validation = step(native_job, "build-windows", "Validate artifacts")
 for required in (
     '"$runtimeDirectory/Main.exe"',
     '"$runtimeDirectory/MUnique.Client.Library.dll"',
-    '"$runtimeDirectory/config.ini"',
+    '"$runtimeDirectory/config.ini.template"',
     '"$runtimeDirectory/shaders"',
     '"$runtimeDirectory/Data"',
     '"$runtimeDirectory/fonts"',
@@ -608,7 +608,7 @@ for required in (
     'runtime_directory="out/build/linux-ci/src/Release"',
     '"$runtime_directory/Main"',
     '"$runtime_directory/MUnique.Client.Library.so"',
-    '"$runtime_directory/config.ini"',
+    '"$runtime_directory/config.ini.template"',
     '"$runtime_directory/shaders"',
 ):
     check(required in linux_validation, f"Linux validation missing {required}")
@@ -908,7 +908,7 @@ for required in (
     'runtime_directory="out/build/macos-ci/src/Release/Main.app/Contents/MacOS"',
     '"$runtime_directory/Main"',
     '"$runtime_directory/MUnique.Client.Library.dylib"',
-    '"$runtime_directory/config.ini"',
+    '"$runtime_directory/config.ini.template"',
     '"$runtime_directory/shaders"',
 ):
     check(required in macos_validation, f"macOS validation missing {required}")

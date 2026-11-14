@@ -4,11 +4,12 @@ src/source/Core/Platform/Audio/MiniAudioBackend.cpp	audio file	2	miniaudio opens
 src/source/Core/Platform/Dpapi.h	fopen	1	platform shim: the Win32/CRT file calls themselves
 src/source/Core/Platform/LocalSocket.cpp	Win32 file	1	control socket file, not content
 src/source/Core/Platform/SecureCrt.h	fopen	2	platform shim: the Win32/CRT file calls themselves
+src/source/Core/Platform/UserFolder.cpp	filesystem probe	2	per-user files in the user folder, not content
 src/source/Core/Platform/WinApiShims.h	fopen	2	platform shim: the Win32/CRT file calls themselves
 src/source/Core/Platform/WinFile.h	Win32 file	2	platform shim: the Win32/CRT file calls themselves
 src/source/Core/Platform/WinFileFind.h	Win32 file	1	platform shim: the Win32/CRT file calls themselves
 src/source/Core/Platform/WinFileFind.h	fopen	2	platform shim: the Win32/CRT file calls themselves
-src/source/Core/Platform/WinIni.cpp	fopen	2	per-user file, not content (#1074)
+src/source/Core/Platform/WinIni.cpp	fopen	2	per-user file in the user folder, not content
 src/source/Core/Utilities/PlatformInfo.cpp	fopen	1	system information (/etc/os-release), not content
 src/source/Data/DataHandler/CommonDataSaver.cpp	Win32 file	3	writes content (editor saver backups)
 src/source/Data/DataHandler/CommonDataSaver.inl	fopen	2	writes content (editor saver, backs up the original)
@@ -19,21 +20,21 @@ src/source/Data/DataHandler/SkillData/SkillDataExportAsCSV.cpp	fopen	1	editor ex
 src/source/Data/DataHandler/SkillData/SkillDataExportS6E3.cpp	fopen	1	editor export, writes a file
 src/source/Data/DataHandler/TextFile.cpp	filesystem probe	1	writes content (keeps the old bytes to roll back)
 src/source/Data/DataHandler/TextFile.cpp	ifstream	1	writes content (keeps the old bytes to roll back)
-src/source/Data/GameConfig/PersonalTuning.cpp	filesystem probe	2	per-user file, not content (#1074)
-src/source/Data/GameConfig/PersonalTuning.cpp	ifstream	1	per-user file, not content (#1074)
+src/source/Data/GameConfig/PersonalTuning.cpp	filesystem probe	2	per-user file in the user folder, not content
+src/source/Data/GameConfig/PersonalTuning.cpp	ifstream	1	per-user file in the user folder, not content
 src/source/Engine/Object/ZzzObject.cpp	fopen	4	writes content (editor: objects file saver)
-src/source/Engine/Object/ZzzOpenData.cpp	fopen	2	per-user file, not content (#1074): macros
-src/source/GameShop/InGameShopSystem.cpp	filesystem probe	2	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/BannerInfo.cpp	filesystem probe	1	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/BannerInfoList.cpp	ifstream	1	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/BannerInfoList.cpp	stream open	1	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/FTPFileDownLoader.cpp	Win32 file	1	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/ListManager.cpp	Win32 file	1	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/ShopList.cpp	ifstream	4	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/ShopList.cpp	stream open	6	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/interface/PathMethod/Path.cpp	fstream	1	shop download cache, per-user (#1074)
-src/source/GameShop/ShopListManager/interface/PathMethod/Path.cpp	ifstream	1	shop download cache, per-user (#1074)
+src/source/Engine/Object/ZzzOpenData.cpp	fopen	2	per-user file in the user folder, not content: chat macros
+src/source/GameShop/InGameShopSystem.cpp	filesystem probe	2	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/BannerInfo.cpp	filesystem probe	1	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/BannerInfoList.cpp	ifstream	1	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/BannerInfoList.cpp	stream open	1	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/FTPFileDownLoader.cpp	Win32 file	1	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/ListManager.cpp	Win32 file	1	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/ShopList.cpp	ifstream	4	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/ShopList.cpp	stream open	6	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/interface/PathMethod/Path.cpp	fstream	1	shop download cache, per-user: waits for a cache location
+src/source/GameShop/ShopListManager/interface/PathMethod/Path.cpp	ifstream	1	shop download cache, per-user: waits for a cache location
 src/source/Render/Models/ZzzBMD.cpp	fopen	1	writes content (editor: model saver)
-src/source/Render/Sprites/GlobalBitmap.cpp	ifstream	1	shop download cache, per-user (#1074)
+src/source/Render/Sprites/GlobalBitmap.cpp	ifstream	1	shop download cache, per-user: waits for a cache location
 src/source/Render/Terrain/ZzzLodTerrain.cpp	fopen	6	writes content (editor: terrain savers)
 src/source/Render/Textures/ZzzTexture.cpp	fopen	3	writes content (texture converter)

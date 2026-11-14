@@ -223,6 +223,11 @@ target_include_directories(glm SYSTEM INTERFACE "${glm_SOURCE_DIR}")
 set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+# The log lives under the player's profile folder, whose name may be outside the ANSI code page: open it by its wide
+# name on Windows. spdlog has the option only there.
+if(WIN32)
+    set(SPDLOG_WCHAR_FILENAMES ON CACHE BOOL "" FORCE)
+endif()
 FetchContent_Declare(spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
     GIT_TAG        v1.17.0
