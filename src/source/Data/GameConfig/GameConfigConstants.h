@@ -166,7 +166,7 @@ namespace CfgDefaults
     inline constexpr wchar_t CfgDefaultTexturePack[] = L""; // The original textures
     inline constexpr bool CfgDefaultUseS6PlayerModels = true;
 
-    // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
+    // "default" = the target's pick (its GPU device adapter: Vulkan on Windows to avoid
     // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:
     // "vulkan", "direct3d12" (alias "d3d12"), "metal" -- forces that SDL_gpu driver on any
     // platform, falling back to auto-pick with a warning log if it's unavailable.

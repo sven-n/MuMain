@@ -1,7 +1,7 @@
 // MuRendererSDLGpu.cpp: SDL_gpu backend implementation of IMuRenderer.
 //
 // MuRendererSDLGpu replaces the OpenGL immediate-mode backend (MuRendererGL)
-// with SDL_gpu — selecting Metal on macOS, Vulkan on Linux, D3D12 on Windows.
+// with SDL_gpu — the driver comes from config.ini, the target's adapter (GpuDevice.h) or SDL's own pick.
 //
 // DESIGN NOTES (4.3.2 updates):
 //   - No #ifdef _WIN32 in this file — SDL_gpu handles platform selection internally.
@@ -34,6 +34,8 @@
 #include "BitmapUpload.h"
 #include "D3D12Diagnostics.h"
 #include "DrawCommandHistory.h"
+#include "GpuDevice.h"
+#include "GpuShaderFormats.h"
 #include "MuRenderer.h"
 #include "QuadTopology.h"
 #include "RangeAllocator.h"
@@ -205,24 +207,14 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 }
 
 // ---------------------------------------------------------------------------
-// Returns the absolute path to a compiled shader blob given GPU driver name,
-// shader stage, and shader base name. Uses MU_SHADER_DIR (CMake compile def).
-// driver: "vulkan" | "direct3d12" | "metal"
+// Returns the path to a compiled shader blob given its file extension (the
+// device's Render::ShaderFormat), shader stage, and shader base name. Uses
+// MU_SHADER_DIR (CMake compile def).
 // stage:  "vert" | "frag"
 // name:   e.g., "basic_textured", "basic_colored", "shadow_volume"
 // ---------------------------------------------------------------------------
-[[nodiscard]] std::string GetShaderBlobPath(const char* driver, const char* stage, const char* name)
+[[nodiscard]] std::string GetShaderBlobPath(const char* ext, const char* stage, const char* name)
 {
-    const char* ext = "spv";
-    if (driver && std::string(driver) == "direct3d12")
-    {
-        ext = "dxil";
-    }
-    else if (IsMetalDriver(driver))
-    {
-        ext = "msl";
-    }
-
 #ifndef MU_SHADER_DIR
 #define MU_SHADER_DIR ""
 #endif
@@ -238,29 +230,12 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 }
 
 // ---------------------------------------------------------------------------
-// Returns the SDL_GPUShaderFormat constant name for the given driver.
-// Only used internally — returns the correct enum value for SDL_CreateGPUShader.
-// ---------------------------------------------------------------------------
-[[nodiscard]] static SDL_GPUShaderFormat GetShaderFormat(const char* driver)
-{
-    if (driver && std::string(driver) == "direct3d12")
-    {
-        return SDL_GPU_SHADERFORMAT_DXIL;
-    }
-    if (IsMetalDriver(driver))
-    {
-        return SDL_GPU_SHADERFORMAT_MSL;
-    }
-    return SDL_GPU_SHADERFORMAT_SPIRV;
-}
-
-// ---------------------------------------------------------------------------
 // Loads a compiled shader blob from disk into a byte vector.
 // Returns empty vector on failure (caller logs via mu::log).
 // ---------------------------------------------------------------------------
-[[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* driver)
+[[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* ext)
 {
-    const std::string path = GetShaderBlobPath(driver, stage, name);
+    const std::string path = GetShaderBlobPath(ext, stage, name);
     const std::optional<std::string> file = Content::ReadFile(path);
     if (!file)
     {
@@ -280,6 +255,8 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 // ---------------------------------------------------------------------------
 
 static SDL_GPUDevice* s_device = nullptr;
+// The device's shader format, picked once at Init.
+static const Render::ShaderFormat* s_shaderFormat = nullptr;
 static Render::Renderer::BitmapGpuResources s_bitmapGpuResources;
 static SDL_Window* s_window = nullptr;
 
@@ -1937,43 +1914,26 @@ public:
             return false;
         }
 
-        // "default" (or empty) means this app's own platform-aware pick; Windows prefers Vulkan
-        // (SDL's own default D3D12 pick doesn't vsync-cap FPS correctly -- see the
-        // FPS_ANIMATION_FACTOR/CCreditWin fix commits), other platforms pass straight through to
-        // SDL's own auto-pick. Any other value forces that specific SDL_gpu driver name
-        // ("vulkan"/"direct3d12"/"metal") on any platform. config.ini's [Render] Backend key
-        // (GameConfig::GetRenderBackend()) is the source of this value; GameConfigValidation
-        // already normalized case/whitespace/the "d3d12" alias.
-        std::string requestedBackend(renderBackend);
-        if (requestedBackend.empty() || requestedBackend == "default")
-        {
-#ifdef _WIN32
-            requestedBackend = "vulkan";
-#else
-            requestedBackend.clear();
-#endif
-        }
-        const char* requestedDriverName = requestedBackend.empty() ? nullptr : requestedBackend.c_str();
-
-        // SDL_CreateGPUDevice() with a specific driver name has no built-in fallback (fails
-        // outright if that driver isn't available), so retry with nullptr (SDL's own auto-pick)
-        // if the requested one fails -- still works on a machine without it, just loses whatever
-        // benefit the requested backend had until that's addressed directly.
+        // config.ini's [Render] Backend (already normalized by GameConfigValidation) names a driver, or
+        // "default" leaves the choice to the target's adapter and then to SDL.
+        const SDL_PropertiesID deviceProps = SDL_CreateProperties();
+        Render::FillGpuDeviceProperties(deviceProps, renderBackend, Render::kGpuValidationEnabled);
+        const std::string requestedDriverName =
+            SDL_GetStringProperty(deviceProps, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, "");
         mu::log::Get("render")->info("SDL_gpu -- validation: {}, requested backend: {}",
                                      Render::kGpuValidationEnabled ? "enabled" : "disabled",
-                                     requestedDriverName ? requestedDriverName : "(SDL auto-pick)");
-        s_device =
-            SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-                                Render::kGpuValidationEnabled, requestedDriverName);
+                                     requestedDriverName.empty() ? "(SDL auto-pick)" : requestedDriverName);
+        s_device = SDL_CreateGPUDeviceWithProperties(deviceProps);
 
-        if (!s_device && requestedDriverName != nullptr)
+        // A named driver has no fallback in SDL, so a machine without it retries with SDL's own pick.
+        if (!s_device && !requestedDriverName.empty())
         {
             mu::log::Get("render")->warn("SDL_gpu -- '{}' device creation failed ({}), falling back to "
                                          "SDL's own auto-picked driver", requestedDriverName, SDL_GetError());
-            s_device = SDL_CreateGPUDevice(
-                SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-                Render::kGpuValidationEnabled, nullptr);
+            SDL_ClearProperty(deviceProps, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING);
+            s_device = SDL_CreateGPUDeviceWithProperties(deviceProps);
         }
+        SDL_DestroyProperties(deviceProps);
 
         if (!s_device)
         {
@@ -1981,9 +1941,19 @@ public:
             return false;
         }
 
-        mu::log::Get("render")->info("SDL_gpu -- device driver: {}", SDL_GetGPUDeviceDriver(s_device));
-
         const char* driverName = SDL_GetGPUDeviceDriver(s_device);
+        s_shaderFormat = Render::PickShaderFormat(SDL_GetGPUShaderFormats(s_device));
+        if (!s_shaderFormat)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- the '{}' driver accepts none of the shader formats this build "
+                                          "ships ({})",
+                                          driverName, Render::ShaderFormatNames());
+            SDL_DestroyGPUDevice(s_device);
+            s_device = nullptr;
+            return false;
+        }
+        mu::log::Get("render")->info("SDL_gpu -- device driver: {}, shader format: {}", driverName,
+                                     s_shaderFormat->extension);
         ConfigureD3D12Diagnostics(driverName);
 
         // Claim the window for the GPU device.
@@ -1995,9 +1965,8 @@ public:
             return false;
         }
 
-        // Load real HLSL shader blobs from MU_SHADER_DIR.
-        // Driver name used to select the correct blob format (SPIR-V/DXIL/MSL).
-        if (!LoadShaders(driverName))
+        // Load real HLSL shader blobs from MU_SHADER_DIR, in the device's shader format.
+        if (!LoadShaders())
         {
             mu::log::Get("render")->error("SDL_gpu -- shader loading failed; cannot build pipelines");
             SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
@@ -6076,20 +6045,20 @@ private:
     // -----------------------------------------------------------------------
     // Loads all 6 HLSL shader blobs from MU_SHADER_DIR and creates
     // SDL_GPUShader handles for pipeline creation.
-    // driverName: SDL_GetGPUDeviceDriver(s_device) result.
+    // Blobs are in the device's shader format (s_shaderFormat, picked at Init).
     // Returns false if the primary shader (basic_textured.vert) cannot be loaded
     // (fatal for 2D rendering). Other shaders log warnings but are non-fatal.
     // -----------------------------------------------------------------------
-    [[nodiscard]] static bool LoadShaders(const char* driverName)
+    [[nodiscard]] static bool LoadShaders()
     {
-        const SDL_GPUShaderFormat fmt = GetShaderFormat(driverName);
+        const Render::ShaderFormat& shaderFormat = *s_shaderFormat;
 
         // Helper lambda: load blob + create shader.
         // Returns nullptr on failure (fatal=true logs error and propagates).
         auto createShader = [&](const char* name, const char* stage, SDL_GPUShaderStage shaderStage, Uint32 numSamplers,
                                 Uint32 numStorageBuffers, Uint32 numUniformBuffers, bool fatal) -> SDL_GPUShader*
         {
-            const std::vector<Uint8> blob = LoadShaderBlob(name, stage, driverName);
+            const std::vector<Uint8> blob = LoadShaderBlob(name, stage, shaderFormat.extension);
             if (blob.empty())
             {
                 if (fatal)
@@ -6107,9 +6076,8 @@ private:
             SDL_GPUShaderCreateInfo info{};
             info.code = blob.data();
             info.code_size = blob.size();
-            // spirv-cross renames "main" to "main0" in MSL because Metal reserves "main".
-            info.entrypoint = (fmt == SDL_GPU_SHADERFORMAT_MSL) ? "main0" : "main";
-            info.format = fmt;
+            info.entrypoint = shaderFormat.entrypoint;
+            info.format = shaderFormat.format;
             info.stage = shaderStage;
             info.num_samplers = numSamplers;
             info.num_storage_textures = 0;
@@ -6233,7 +6201,7 @@ private:
         s_fragShaderAmbientOcclusionBlur =
             createShader("post_ao_blur", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 1, /*fatal=*/false);
 
-        mu::log::Get("render")->info("SDL_gpu -- shaders loaded for driver: {}", driverName ? driverName : "unknown");
+        mu::log::Get("render")->info("SDL_gpu -- shaders loaded, format: {}", shaderFormat.extension);
         return true;
     }
 
@@ -7620,8 +7588,7 @@ private:
     // their destruction until that frame has finished.
     static void RebuildForSampleCount(int sampleCount)
     {
-        const char* driverName = SDL_GetGPUDeviceDriver(s_device);
-        if (!LoadShaders(driverName))
+        if (!LoadShaders())
         {
             mu::log::Get("render")->error("SDL_gpu -- shader loading failed; anti-aliasing stays at {}x",
                                           s_sampleCount);

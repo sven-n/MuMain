@@ -186,6 +186,16 @@ mu_add_test(
         test_sdl_gpu_validation.cpp
 )
 
+# The shipped shader formats and the device's creation properties; the test brings its own target adapter.
+mu_add_test(
+    NAME gpu_shader_formats_tests
+    SOURCES
+        test_gpu_shader_formats.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/GpuDevice.cpp
+    LINK_LIBS
+        SDL3::SDL3
+)
+
 mu_add_test(
     NAME aura_joint_lifecycle_tests
     SOURCES
