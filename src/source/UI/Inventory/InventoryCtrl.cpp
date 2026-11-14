@@ -209,16 +209,27 @@ int mu::ui::window::CPickedItem::GetSourceLinealPos()
     return -1;
 }
 
+POINT mu::ui::window::CPickedItem::TopLeftAtPointer(const CInventoryCtrl* grid) const
+{
+    const POINT pointer = CInventoryCtrl::PointerPos();
+    return TopLeftIn(grid, pointer.x, pointer.y);
+}
+
+void mu::ui::window::CPickedItem::TargetCellIn(const CInventoryCtrl* grid, int& column, int& row) const
+{
+    const POINT itemTopLeft = TopLeftAtPointer(grid);
+    grid->Geometry().ItemCellOf(static_cast<float>(itemTopLeft.x), static_cast<float>(itemTopLeft.y), column, row);
+}
+
 bool mu::ui::window::CPickedItem::GetTargetPos(CInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY)
 {
-    if (pDest != nullptr)
-    {
-        const POINT pointer = pDest->PointerPos();
-        const POINT itemTopLeft = TopLeftIn(pDest, pointer.x, pointer.y);
+    if (pDest == nullptr)
+        return false;
 
-        return pDest->GetSquarePosAtPt(itemTopLeft.x, itemTopLeft.y, iTargetColumnX, iTargetRowY);
-    }
-    return false;
+    TargetCellIn(pDest, iTargetColumnX, iTargetRowY);
+    const UI::Items::GridGeometry& geometry = pDest->Geometry();
+    return iTargetColumnX >= 0 && iTargetColumnX < geometry.Columns() && iTargetRowY >= 0 &&
+           iTargetRowY < geometry.Rows();
 }
 
 int mu::ui::window::CPickedItem::GetTargetLinealPos(CInventoryCtrl* pDest)
@@ -1131,8 +1142,7 @@ void mu::ui::window::CInventoryCtrl::UpdateCells()
 
     // The picked item's own position is in its owner window's space; every placed window has its
     // own, so take the item's box from the pointer in this grid's space.
-    const POINT pointer = PointerPos();
-    const POINT itemTopLeft = ms_pPickedItem->TopLeftIn(this, pointer.x, pointer.y);
+    const POINT itemTopLeft = ms_pPickedItem->TopLeftAtPointer(this);
     const SIZE pickedSize = ms_pPickedItem->SizeIn(this);
     RECT rcPickedItem{itemTopLeft.x, itemTopLeft.y, itemTopLeft.x + pickedSize.cx, itemTopLeft.y + pickedSize.cy};
     RECT rcInventory, rcIntersect;
@@ -1144,7 +1154,7 @@ void mu::ui::window::CInventoryCtrl::UpdateCells()
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
     int iColumnX = 0, iRowY = 0;
     int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
-    m_Geometry.CellOf(static_cast<float>(itemTopLeft.x), static_cast<float>(itemTopLeft.y), iColumnX, iRowY);
+    ms_pPickedItem->TargetCellIn(this, iColumnX, iRowY);
 
     bool bWarning = false;
     if (iColumnX < 0 && iColumnX >= -nItemColumn)

@@ -174,15 +174,26 @@ bool CInventoryExtension::InventoryProcess()
         return false;
     }
 
-    for (auto* extension : m_extensions)
+    CInventoryCtrl* extension = TargetExtension();
+    return extension != nullptr && g_pMyInventory->HandleInventoryActions(extension);
+}
+
+CInventoryCtrl* CInventoryExtension::TargetExtension() const
+{
+    CPickedItem* pickedItem = CInventoryCtrl::GetPickedItem();
+    for (int i = 0; i < CharacterAttribute->InventoryExtensions; i++)
     {
-        if (extension->ContainsPointer())
-        {
-            return g_pMyInventory->HandleInventoryActions(extension);
-        }
+        CInventoryCtrl* extension = m_extensions[i];
+        if (extension == nullptr)
+            continue;
+
+        const bool isTarget =
+            pickedItem != nullptr ? pickedItem->GetTargetLinealPos(extension) >= 0 : extension->ContainsPointer();
+        if (isTarget)
+            return extension;
     }
 
-    return false;
+    return nullptr;
 }
 
 bool CInventoryExtension::UpdateKeyEvent()

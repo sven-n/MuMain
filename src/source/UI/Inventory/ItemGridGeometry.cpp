@@ -39,6 +39,16 @@ void GridGeometry::CellOf(float x, float y, int& column, int& row) const
     row = static_cast<int>(dy / m_PitchY) - (dy < 0.f ? 1 : 0);
 }
 
+bool GridGeometry::ItemCellAt(float left, float top, int& column, int& row) const
+{
+    return CellAt(left + m_PitchX / 2.f, top + m_PitchY / 2.f, column, row);
+}
+
+void GridGeometry::ItemCellOf(float left, float top, int& column, int& row) const
+{
+    CellOf(left + m_PitchX / 2.f, top + m_PitchY / 2.f, column, row);
+}
+
 GridRect GridGeometry::CellsRect(int column, int row, int width, int height) const
 {
     return {m_Left + column * m_PitchX, m_Top + row * m_PitchY, width * m_PitchX, height * m_PitchY};
