@@ -1330,6 +1330,9 @@
   <data name="Tuning Locked Session Value" xml:space="preserve">
     <value>Set for this session by a developer command.</value>
   </data>
+  <data name="Tuning Preview Authoring" xml:space="preserve">
+    <value>The look is being edited and shows as authored, without these settings; $look preview player shows them again.</value>
+  </data>
   <data name="Tuning Save Failed" xml:space="preserve">
     <value>Your graphics tuning could not be saved; the change is shown but not saved:</value>
   </data>
@@ -9324,6 +9327,9 @@
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Retrying in %d seconds...</value>
   </data>
+  <data name="Reconnected after connection lost" xml:space="preserve">
+    <value>Reconnected: the connection to the server was lost.</value>
+  </data>
   <data name="Reconnect" xml:space="preserve">
     <value>Reconnect</value>
   </data>
@@ -9413,6 +9419,12 @@
   </data>
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls of %ls</value>
+  </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Unknown monster %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>I am a bug: %d</value>
   </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>Would you like to cancel %ls?</value>

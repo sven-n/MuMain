@@ -183,3 +183,12 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values [netw
         REQUIRE(result == L"localhost");
     }
 }
+
+TEST_CASE("the config file is the one beside the executable unless MU_CONFIG_PATH names another [network][server-config]")
+{
+    const std::filesystem::path directory = std::filesystem::path("game") / "client";
+    CHECK(GameConfigValidation::ResolveConfigPath(directory, nullptr) == directory / "config.ini");
+    CHECK(GameConfigValidation::ResolveConfigPath(directory, "") == directory / "config.ini");
+    CHECK(GameConfigValidation::ResolveConfigPath(directory, "runs/viewer-config.ini") ==
+          std::filesystem::path("runs/viewer-config.ini"));
+}

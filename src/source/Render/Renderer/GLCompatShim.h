@@ -12,6 +12,75 @@ using MUCompatGLfloat = float;
 using MUCompatGLdouble = double;
 using MUCompatGLubyte = unsigned char;
 
+// The GL type and constant names the game code, the bitmap loaders and this shim use, so no desktop GL header
+// is needed.
+// Spelled as GL.h spells them: a file that also sees GL.h gets identical redefinitions.
+using GLuint = MUCompatGLuint;
+using GLfloat = MUCompatGLfloat;
+
+#define GL_ADD 0x0104
+#define GL_ALPHA_TEST 0x0BC0
+#define GL_ALWAYS 0x0207
+#define GL_BLEND 0x0BE2
+#define GL_CCW 0x0901
+#define GL_CLAMP 0x2900
+#define GL_CLAMP_TO_EDGE 0x812F
+#define GL_COLOR_BUFFER_BIT 0x00004000
+#define GL_CULL_FACE 0x0B44
+#define GL_CW 0x0900
+#define GL_DECR 0x1E03
+#define GL_DEPTH_BUFFER_BIT 0x00000100
+#define GL_DEPTH_TEST 0x0B71
+#define GL_ENABLE_BIT 0x00002000
+#define GL_EXP 0x0800
+#define GL_EXP2 0x0801
+#define GL_FALSE 0
+#define GL_FILL 0x1B02
+#define GL_FOG 0x0B60
+#define GL_FOG_COLOR 0x0B66
+#define GL_FRONT 0x0404
+#define GL_GREATER 0x0204
+#define GL_INCR 0x1E02
+#define GL_KEEP 0x1E00
+#define GL_LEQUAL 0x0203
+#define GL_LESS 0x0201
+#define GL_LIGHTING 0x0B50
+#define GL_LINE 0x1B01
+#define GL_LINEAR 0x2601
+#define GL_LINES 0x0001
+#define GL_LINE_BIT 0x00000004
+#define GL_LINE_LOOP 0x0002
+#define GL_MODELVIEW 0x1700
+#define GL_MODELVIEW_MATRIX 0x0BA6
+#define GL_MODULATE 0x2100
+#define GL_NEAREST 0x2600
+#define GL_ONE 1
+#define GL_ONE_MINUS_DST_COLOR 0x0307
+#define GL_ONE_MINUS_SRC_ALPHA 0x0303
+#define GL_ONE_MINUS_SRC_COLOR 0x0301
+#define GL_PROJECTION 0x1701
+#define GL_PROJECTION_MATRIX 0x0BA7
+#define GL_QUADS 0x0007
+#define GL_QUAD_STRIP 0x0008
+#define GL_REPEAT 0x2901
+#define GL_RGB 0x1907
+#define GL_RGBA 0x1908
+#define GL_SRC_ALPHA 0x0302
+#define GL_SRC_COLOR 0x0300
+#define GL_STENCIL_TEST 0x0B90
+#define GL_TEXTURE_2D 0x0DE1
+#define GL_TEXTURE_ENV 0x2300
+#define GL_TEXTURE_ENV_MODE 0x2200
+#define GL_TEXTURE_MAG_FILTER 0x2800
+#define GL_TEXTURE_MIN_FILTER 0x2801
+#define GL_TEXTURE_WRAP_S 0x2802
+#define GL_TEXTURE_WRAP_T 0x2803
+#define GL_TRIANGLES 0x0004
+#define GL_TRIANGLE_FAN 0x0006
+#define GL_TRUE 1
+#define GL_UNSIGNED_BYTE 0x1401
+#define GL_ZERO 0
+
 void mu_glBegin(MUCompatGLenum mode);
 void mu_glEnd();
 void mu_glVertex2f(MUCompatGLfloat x, MUCompatGLfloat y);

@@ -1,0 +1,28 @@
+{
+  "formatVersion": 1,
+  "shines": [
+    {
+      "name": "harmony",
+      "light": 1,
+      "passes": [
+        {"kind": "reflection", "motion": "fastSweep", "opacity": 1.5, "brightness": 1.5},
+        {"kind": "reflection", "motion": "swirl"}
+      ]
+    },
+    {
+      "name": "seal",
+      "light": 0.9,
+      "passes": [
+        {"kind": "reflection", "motion": "fastSweep", "opacity": 1.5, "brightness": 1.5},
+        {"kind": "reflection", "motion": "swirl"}
+      ]
+    },
+    {
+      "name": "cursedCastleWater",
+      "passes": [
+        {"kind": "texture", "opacity": 0.5, "brightness": 0.5},
+        {"kind": "reflection", "motion": "swirl"}
+      ]
+    }
+  ]
+}

@@ -5,25 +5,25 @@
 
 #include <spdlog/sinks/ostream_sink.h>
 
+#include <filesystem>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#ifndef _WIN32
-#include <filesystem>
-#include <string>
+#include "Dotnet/Connection.h"
+#include "Dotnet/SymbolSources/ManagedLibrarySource.h"
 
+#ifndef _WIN32
 #include "Core/Platform/SecureCrt.h"
 #include "Core/Platform/WinApiShims.h"
-#include "Dotnet/Connection.h"
 #endif
 
 TEST_CASE("Connection library loader handles missing libraries [network][dotnet]")
 {
     const auto handle = mu::platform::Load("NonExistent.Client.Library.xyz");
     CHECK(handle == nullptr);
-    CHECK(mu::platform::GetSymbol(handle, "ConnectionManager_Connect") == nullptr);
+    CHECK(mu::platform::GetSymbol(handle, "ConnectionManager_BeginConnect") == nullptr);
     mu::platform::Unload(handle);
 }
 
@@ -95,15 +95,41 @@ TEST_CASE("A symbol the library lacks is found as null without an error line [ne
     mu::platform::Unload(handle);
 }
 
-#ifndef _WIN32
-TEST_CASE("Connection library path follows the executable [network][dotnet]")
+TEST_CASE("The network library loads at startup, once, not during static initialisation [network][dotnet]")
 {
-    constexpr DWORD executablePathCapacity = 4096;
-    wchar_t executablePath[executablePathCapacity] = {};
-    REQUIRE(GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) != 0);
+    // Nothing in this test binary loads it before this line.
+    CHECK(munique_client_library_handle == nullptr);
 
-    const auto libraryName = "MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT);
-    const auto expectedPath = std::filesystem::path(mu_narrow_path(executablePath)).parent_path() / libraryName;
-    CHECK(std::filesystem::path(ManagedLibraryPath()) == expectedPath);
+    std::string firstLog;
+    {
+        const PlatformLogCapture log;
+        LoadManagedLibrary();
+        firstLog = log.Text();
+    }
+    const auto handle = munique_client_library_handle;
+    // Loaded, or its failure logged: the test binary may not have the library beside it.
+    CHECK((handle != nullptr || !firstLog.empty()));
+
+    const PlatformLogCapture log;
+    LoadManagedLibrary();
+    CHECK(munique_client_library_handle == handle);
+    CHECK(log.Text().empty());
 }
-#endif
+
+TEST_CASE("The library is found by its configured name, or beside the executable [network][dotnet]")
+{
+    if constexpr (MU_MANAGED_LIBRARY_BY_NAME)
+    {
+        CHECK(ManagedLibraryPath() == MU_MANAGED_LIBRARY_FILE);
+    }
+    else
+    {
+        constexpr DWORD executablePathCapacity = 4096;
+        wchar_t executablePath[executablePathCapacity] = {};
+        REQUIRE(GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) != 0);
+
+        const auto expectedPath =
+            std::filesystem::path(mu_narrow_path(executablePath)).parent_path() / MU_MANAGED_LIBRARY_FILE;
+        CHECK(std::filesystem::path(ManagedLibraryPath()) == expectedPath);
+    }
+}

@@ -219,11 +219,6 @@ internal static class CppEmitter
             // is not currently registered.
             void UnregisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept;
 
-            // Calls every registered LocaleObserver, as SetLocale does after
-            // switching. For texts that changed without a locale switch, e.g.
-            // item names in texts after "Translate item names" changed.
-            void NotifyLocaleObservers() noexcept;
-
             // A text of an item text group (ResxGen --item-text-groups) that names
             // an item with {item:group,number} in at least one locale
             // (docs/translation-system.md, "Texts that name items").
@@ -342,11 +337,7 @@ internal static class CppEmitter
 
                 // Item names in texts first: observers copy texts.
                 ExpandItemTexts();
-                NotifyLocaleObservers();
-            }
 
-            void NotifyLocaleObservers() noexcept
-            {
                 // Snapshot the registry so observers that unregister themselves
                 // (e.g. via a destructor triggered as a side effect of the
                 // callback) don't shift indices mid-iteration.

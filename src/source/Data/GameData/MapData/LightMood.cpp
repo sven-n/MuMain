@@ -76,13 +76,14 @@ std::string Field(const std::string& object, const char* key)
     return object + "." + key;
 }
 
-// Reads the values the object has into `mood`; the default needs all of them.
+// Reads the values the object has into `mood`, marking them in `named`; the default needs all of them.
 bool ReadMoodValues(const OrderedJson& json, const std::string& object, bool needsAll, LightMood& mood,
-                    IssueList& issues)
+                    std::array<bool, LightMoodValueCount>& named, IssueList& issues)
 {
     bool valid = true;
-    for (const LightMoodValueInfo& value : MoodValues)
+    for (std::size_t index = 0; index < MoodValues.size(); ++index)
     {
+        const LightMoodValueInfo& value = MoodValues[index];
         const auto field = json.find(value.key);
         if (field == json.end())
         {
@@ -100,6 +101,7 @@ bool ReadMoodValues(const OrderedJson& json, const std::string& object, bool nee
             continue;
         }
         mood.*value.member = field->get<double>();
+        named[index] = true;
     }
     return valid;
 }
@@ -168,7 +170,8 @@ bool ReadDefault(const OrderedJson& root, LightMood& mood, IssueList& issues)
         return false;
     }
     WarnUnknownKeys(*json, DefaultKey, true, {}, issues);
-    return ReadMoodValues(*json, DefaultKey, true, mood, issues) && CheckRanges(mood, DefaultKey, issues);
+    std::array<bool, LightMoodValueCount> named{};
+    return ReadMoodValues(*json, DefaultKey, true, mood, named, issues) && CheckRanges(mood, DefaultKey, issues);
 }
 
 bool ReadWorld(const OrderedJson& json, const std::string& object, int& world, IssueList& issues)
@@ -195,7 +198,7 @@ bool ReadMap(const OrderedJson& json, size_t index, const LightMood& defaultMood
         issues.Fatal(entry, "must be an object with a world and its values");
         return false;
     }
-    MapLightMood map{0, defaultMood};
+    MapLightMood map{0, defaultMood, {}};
     if (!ReadWorld(json, entry, map.world, issues))
     {
         return false;
@@ -207,7 +210,7 @@ bool ReadMap(const OrderedJson& json, size_t index, const LightMood& defaultMood
         return false;
     }
     WarnUnknownKeys(json, object, true, {WorldKey, NameKey}, issues);
-    if (!ReadMoodValues(json, object, false, map.mood, issues) || !CheckRanges(map.mood, object, issues))
+    if (!ReadMoodValues(json, object, false, map.mood, map.named, issues) || !CheckRanges(map.mood, object, issues))
     {
         return false;
     }
@@ -247,6 +250,70 @@ const LightMoodValueInfo* FindLightMoodValue(std::string_view key)
     const auto value = std::find_if(MoodValues.begin(), MoodValues.end(),
                                     [key](const LightMoodValueInfo& entry) { return key == entry.key; });
     return value != MoodValues.end() ? &*value : nullptr;
+}
+
+LookValue MoodLookValue(std::size_t index)
+{
+    // LightMoodValueInfos and the mood look values share their order (a doctest compares the names).
+    return static_cast<LookValue>(static_cast<std::size_t>(LookValue::MoodBase) + index);
+}
+
+LightMood MoodOf(const LookValues& values)
+{
+    LightMood mood;
+    for (std::size_t index = 0; index < MoodValues.size(); ++index)
+    {
+        mood.*MoodValues[index].member = values[MoodLookValue(index)];
+    }
+    return mood;
+}
+
+void UpgradeLightMood(LookProfileData& profile, const LightMoodData& moods)
+{
+    for (std::size_t index = 0; index < MoodValues.size(); ++index)
+    {
+        profile.defaultOverrides[MoodLookValue(index)] = moods.defaultMood.*MoodValues[index].member;
+    }
+    for (const MapLightMood& map : moods.maps)
+    {
+        MapLookOverrides* entry = profile.FindMap(map.world);
+        if (!entry)
+        {
+            profile.maps.push_back({{map.world}, {}, std::nullopt, {}});
+            entry = &profile.maps.back();
+        }
+        for (std::size_t index = 0; index < MoodValues.size(); ++index)
+        {
+            if (map.named[index])
+            {
+                entry->overrides[MoodLookValue(index)] = map.mood.*MoodValues[index].member;
+            }
+        }
+    }
+}
+
+LightMoodData MoodsOf(const LookProfileData& profile)
+{
+    LookValues defaults = BuiltInLookValues();
+    profile.defaultOverrides.ApplyTo(defaults);
+    LightMoodData moods;
+    moods.defaultMood = MoodOf(defaults);
+    for (int world = 0; world <= MaxLookProfileWorld; ++world)
+    {
+        const LightMood mood = MoodOf(profile.ForWorld(world));
+        if (mood == moods.defaultMood)
+        {
+            continue;
+        }
+        // Named: only what differs, so an upgrade from these moods leaves the rest to the default.
+        std::array<bool, LightMoodValueCount> named{};
+        for (std::size_t index = 0; index < MoodValues.size(); ++index)
+        {
+            named[index] = mood.*MoodValues[index].member != moods.defaultMood.*MoodValues[index].member;
+        }
+        moods.maps.push_back({world, mood, named});
+    }
+    return moods;
 }
 
 const LightMood& LightMoodData::ForWorld(int world) const

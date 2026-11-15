@@ -2,8 +2,10 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "LoadData.h"
 
+#include "Core/Content/ContentStore.h"
 #include "Render/Sprites/GlobalBitmap.h"
 
 #include "Render/Models/ZzzBMD.h"
@@ -66,10 +68,8 @@ bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
         // An optional slot may have no file; only one that is there and fails to load is reported.
         if (optional)
         {
-            FILE* fp = _wfopen((std::wstring(Dir) + Name).c_str(), L"rb");
-            if (!fp)
+            if (Content::Probe(std::wstring(Dir) + Name) != Content::Found::File)
                 return false;
-            fclose(fp);
         }
 
         MU_LOG_ERROR(mu::log::Get("data"), "AccessModel failed: {}{} (Type={})", mu_wchar_to_utf8(Dir),
@@ -78,8 +78,7 @@ bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
         if (wcscmp(FileName, L"Monster") == 0 || wcscmp(FileName, L"Player") == 0 || wcscmp(FileName, L"PlayerTest") == 0 || wcscmp(FileName, L"Angel") == 0)
         {
             const std::wstring Text = Name + L" file does not exist.";
-            MessageBox(g_hWnd, Text.c_str(), NULL, MB_OK);
-            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+            Core::Platform::ShowFatalError(L"Error", Text.c_str());
         }
     }
     return Success;

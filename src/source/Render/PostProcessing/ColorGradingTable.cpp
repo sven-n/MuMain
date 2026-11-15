@@ -1,10 +1,11 @@
 #include "Render/PostProcessing/ColorGradingTable.h"
 
+#include "Core/Content/ContentStore.h"
+
 #include <SDL3/SDL.h>
 
 #include <cstring>
 #include <memory>
-#include <system_error>
 
 namespace Render::PostProcessing
 {
@@ -44,13 +45,12 @@ std::filesystem::path GetGradingTablePath(int mapNumber)
 
 GradingTableLoad LoadGradingTable(const std::filesystem::path& path)
 {
-    std::error_code error;
-    if (!std::filesystem::is_regular_file(path, error))
+    if (Content::Probe(path) != Content::Found::File)
     {
         return {GradingTableStatus::Missing, {}, {}};
     }
 
-    const SurfacePointer loaded{SDL_LoadPNG(path.string().c_str())};
+    const SurfacePointer loaded{SDL_LoadPNG_IO(Content::OpenIO(path).release(), true)};
     if (!loaded)
     {
         return Invalid(std::string("not a readable PNG: ") + SDL_GetError());

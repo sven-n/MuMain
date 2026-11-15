@@ -1,7 +1,8 @@
 ﻿#include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "SocketSystem.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "I18N/All.h"
 
 #include "Engine/Object/ZzzInventory.h"
@@ -624,14 +625,13 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 
 void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(szFileName);
     if (!fp)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", szFileName);
         g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return;
     }
 

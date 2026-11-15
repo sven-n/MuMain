@@ -5,8 +5,10 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonFormat.h"
+#include "ItemModelJsonFormat.h"
 #include "ItemTooltipLines.h"
 #include "ItemType.h"
+#include "PartModelSlots.h"
 #include "Core/Text/Utf8.h"
 
 #include <algorithm>
@@ -1207,6 +1209,42 @@ void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNam
     }
 }
 
+void ValidatePartModels(std::span<const PartModel> parts, LookNameExists renderStyleExists,
+                        std::vector<ItemDataIssue>& issues)
+{
+    const auto warn = [&issues](const std::string& field, std::string message)
+    {
+        issues.push_back({ItemDataIssueSeverity::Warning, PartModelsFileName, ItemDataIssue::NoItem,
+                          ItemDataIssue::NoItem, field, std::move(message)});
+    };
+    for (const PartModel& part : parts)
+    {
+        const std::string& name = part.model.name;
+        if (std::ranges::find(PartModelSlots, std::string_view(name), &PartModelSlot::name) == std::end(PartModelSlots))
+        {
+            warn(name + ".name", "is no part model slot; the game draws no model of this name");
+        }
+        if (renderStyleExists != nullptr && !part.renderStyle.empty() && !renderStyleExists(part.renderStyle))
+        {
+            warn(name + ".renderStyle",
+                 "there is no look named \"" + part.renderStyle + "\"; the model is drawn plainly");
+        }
+    }
+    // Without a list (no models loaded) every slot would be missing.
+    if (parts.empty())
+    {
+        return;
+    }
+    for (const PartModelSlot& slot : PartModelSlots)
+    {
+        if (std::ranges::find(parts, slot.name,
+                              [](const PartModel& part) { return std::string_view(part.model.name); }) == parts.end())
+        {
+            warn(std::string(slot.name), "has no entry; the game draws nothing in this slot");
+        }
+    }
+}
+
 void ValidateDirectlySharedModelFiles(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
 {
     std::map<std::string, int, std::less<>> entriesByFile;
@@ -1258,6 +1296,21 @@ void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
                 issues.push_back({ItemDataIssueSeverity::Fatal, "", model.group, model.number, field,
                                   "\"" + *name + "\" is not in " + colorList});
             }
+        }
+    }
+}
+
+void ValidateItemModelShines(std::span<const ItemModelDefinition> models, std::span<const Effects::Shine> shines,
+                             std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemModelDefinition& model : models)
+    {
+        const std::string& name = model.glow.shineBelowPlus3;
+        if (!name.empty() &&
+            std::ranges::none_of(shines, [&](const Effects::Shine& shine) { return shine.name == name; }))
+        {
+            issues.push_back({ItemDataIssueSeverity::Fatal, "", model.group, model.number, "glow.shineBelowPlus3",
+                              "\"" + name + "\" is not in " + Effects::ShinesFile});
         }
     }
 }

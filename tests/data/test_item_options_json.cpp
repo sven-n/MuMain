@@ -132,7 +132,7 @@ TEST_CASE("Option definition file errors stop the start [data][items]")
     };
 
     fatal(R"({"type": "luck", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}", "definitions[0].name");
-    fatal(R"({"name": "luck", "type": "excellent", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}",
+    fatal(R"({"name": "luck", "type": "wing", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}",
           "definitions[0].type");
     fatal(R"({"name": "luck", "type": "luck", )" + std::string(LuckOption) + "}", "definitions[0].displayName");
     fatal(R"({"name": "luck", "type": "luck", "displayName": {"de": "Glück"}, )" + std::string(LuckOption) + "}",
@@ -315,4 +315,126 @@ TEST_CASE("The item stat file's profile rules have neither item numbers nor tags
     issues.clear();
     ReadItemStatsJson(statFile(R"({"profile": "default", "tags": ["!ammunition"]})"), "ItemStats.json", file, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "profileRules[0].tags[0]"));
+}
+
+// An additional option definition: its options numbered (OpenMU's ItemOption.Number, which the option type the server
+// sends picks), several of them in one definition, each with a value per level.
+TEST_CASE("Option definitions of type option read their numbered options and write them back [data][items]")
+{
+    constexpr const char* OptionFile = R"({
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "wingOption",
+      "type": "option",
+      "displayName": {
+        "en": "Wing option"
+      },
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 2, "attribute": "physicalBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    }
+  ]
+}
+)";
+    std::vector<ItemOptionDefinition> definitions;
+    std::vector<ItemDataIssue> issues;
+    ReadItemOptionsJson(OptionFile, "Options/Option.json", "Option.json", definitions, issues);
+    CHECK(issues.empty());
+    REQUIRE(definitions.size() == 1);
+    const ItemOptionDefinition& wing = definitions[0];
+    CHECK(wing.type == ItemOptionType::Option);
+    REQUIRE(wing.options.size() == 2);
+    CHECK(wing.options[0].number == 0);
+    CHECK(wing.options[0].add == ItemOptionAdd::Percent);
+    CHECK(wing.options[0].value.isList);
+    CHECK(wing.options[0].value.At(3) == 3);
+    CHECK(wing.options[1].number == 2);
+    CHECK(wing.options[1].attribute == "physicalBaseDmg");
+    CHECK(wing.options[1].value.At(4) == 16);
+    CHECK(wing.options[1].value.At(7) == 16);
+    CHECK(WriteItemOptionsJson(definitions) == OptionFile);
+
+    const auto option = [](const std::string& options)
+    {
+        return R"({"name": "o", "type": "option", "displayName": {"en": "O"}, "options": [)" + options + "]}";
+    };
+    // Each option has a number, and no two have the same.
+    CHECK(HasIssue(ReadDefinition(option(R"({"attribute": "a", "add": {"values": [1]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": 0, "attribute": "a", "add": {"values": [1]}, "text": "t"}, )"
+                                         R"({"number": 0, "attribute": "b", "add": {"values": [1]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[1].number"));
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": -1, "attribute": "a", "add": {"values": [1]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    // The number is the option type the server sends in four bits: 15 at most.
+    CHECK_FALSE(
+        HasFatal(ReadDefinition(option(R"({"number": 15, "attribute": "a", "add": {"values": [1]}, "text": "t"})"))));
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": 16, "attribute": "a", "add": {"values": [1]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+}
+
+// An excellent definition: its options numbered 1 to 6 (the excellent byte's bit number - 1), a value with a term on a
+// hero attribute ("level" / 20).
+TEST_CASE("Option definitions of type excellent read their numbered options and terms and write them back [data][items]")
+{
+    constexpr const char* ExcellentFile = R"({
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "excellentAttack",
+      "type": "excellent",
+      "displayName": {
+        "en": "Excellent attack"
+      },
+      "options": [
+        {"number": 5, "attribute": "physicalBaseDmg", "add": {"values": 0, "per": [{"attribute": "level", "divisor": 20}]}, "text": "increaseDamageLevel20"},
+        {"number": 6, "attribute": "excellentDamageChance", "percent": {"values": 10, "per": [{"attribute": "masterLevel", "times": 2}]}, "text": "excellentDamageRate"}
+      ]
+    }
+  ]
+}
+)";
+    std::vector<ItemOptionDefinition> definitions;
+    std::vector<ItemDataIssue> issues;
+    ReadItemOptionsJson(ExcellentFile, "Options/Excellent.json", "Excellent.json", definitions, issues);
+    CHECK(issues.empty());
+    REQUIRE(definitions.size() == 1);
+    const ItemOptionDefinition& excellent = definitions[0];
+    CHECK(excellent.type == ItemOptionType::Excellent);
+    REQUIRE(excellent.options.size() == 2);
+    CHECK(excellent.options[0].number == 5);
+    REQUIRE(excellent.options[0].value.per.size() == 1);
+    CHECK(excellent.options[0].value.per[0] == ItemOptionTerm{"level", 0, 20});
+    CHECK(excellent.options[1].value.per[0] == ItemOptionTerm{"masterLevel", 2, 0});
+    CHECK(excellent.options[1].value.At(1) == 10);
+    CHECK(WriteItemOptionsJson(definitions) == ExcellentFile);
+
+    const auto option = [](const std::string& options)
+    {
+        return R"({"name": "e", "type": "excellent", "displayName": {"en": "E"}, "options": [)" + options + "]}";
+    };
+    // The numbers are the byte's bits 1 to 6.
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": 0, "attribute": "a", "add": {"values": 1}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": 7, "attribute": "a", "add": {"values": 1}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    // A term has an attribute and exactly one of times and divisor, each a whole number from 1.
+    const auto term = [&option](const std::string& per)
+    {
+        return ReadDefinition(
+            option(R"({"number": 1, "attribute": "a", "add": {"values": 0, "per": )" + per + R"(}, "text": "t"})"));
+    };
+    CHECK(HasIssue(term(R"([])"), ItemDataIssueSeverity::Fatal, "definitions[0].options[0].add.per"));
+    CHECK(HasIssue(term(R"([{"divisor": 20}])"), ItemDataIssueSeverity::Fatal,
+                   "definitions[0].options[0].add.per[0].attribute"));
+    CHECK(HasIssue(term(R"([{"attribute": "level"}])"), ItemDataIssueSeverity::Fatal,
+                   "definitions[0].options[0].add.per[0]"));
+    CHECK(HasIssue(term(R"([{"attribute": "level", "times": 2, "divisor": 20}])"), ItemDataIssueSeverity::Fatal,
+                   "definitions[0].options[0].add.per[0]"));
+    CHECK(HasIssue(term(R"([{"attribute": "level", "divisor": 0}])"), ItemDataIssueSeverity::Fatal,
+                   "definitions[0].options[0].add.per[0].divisor"));
+    CHECK(HasIssue(term(R"([{"attribute": "level", "divisor": 20, "round": "up"}])"), ItemDataIssueSeverity::Warning,
+                   "definitions[0].options[0].add.per[0].round"));
 }

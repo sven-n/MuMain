@@ -2,12 +2,13 @@
 
 #include "Data/GameConfig/PersonalTuning.h"
 
+#include "Core/Text/AsciiText.h"
+
 #ifndef _WIN32
 #include "Core/Platform/PathResolve.h"
 #endif
 
 #include <algorithm>
-#include <cctype>
 #include <cmath>
 #include <fstream>
 #include <iterator>
@@ -24,27 +25,8 @@ using Data::Maps::LookValueInfo;
 
 constexpr const char* TemporarySuffix = ".tmp";
 
-std::string_view Trim(std::string_view text)
-{
-    const auto blank = [](char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; };
-    while (!text.empty() && blank(text.front()))
-    {
-        text.remove_prefix(1);
-    }
-    while (!text.empty() && blank(text.back()))
-    {
-        text.remove_suffix(1);
-    }
-    return text;
-}
-
-bool EqualsIgnoringCase(std::string_view left, std::string_view right)
-{
-    return left.size() == right.size() &&
-           std::equal(
-               left.begin(), left.end(), right.begin(), [](char a, char b)
-               { return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)); });
-}
+using Core::Text::EqualsIgnoringAsciiCase;
+using Core::Text::TrimAsciiWhitespace;
 
 // The section a line opens, if it is a section header. The first line can carry a UTF-8 BOM.
 std::optional<std::string_view> SectionName(std::string_view line)
@@ -53,18 +35,18 @@ std::optional<std::string_view> SectionName(std::string_view line)
     {
         line.remove_prefix(3);
     }
-    const std::string_view trimmed = Trim(line);
+    const std::string_view trimmed = TrimAsciiWhitespace(line);
     if (trimmed.size() < 2 || trimmed.front() != '[' || trimmed.back() != ']')
     {
         return std::nullopt;
     }
-    return Trim(trimmed.substr(1, trimmed.size() - 2));
+    return TrimAsciiWhitespace(trimmed.substr(1, trimmed.size() - 2));
 }
 
 bool IsTuningHeader(std::string_view line)
 {
     const std::optional<std::string_view> name = SectionName(line);
-    return name && EqualsIgnoringCase(*name, PersonalTuningSection);
+    return name && EqualsIgnoringAsciiCase(*name, PersonalTuningSection);
 }
 
 // The lines of `text`, each with its line break.
@@ -150,7 +132,8 @@ void ReadEntry(std::string_view key, std::string_view text, PersonalTuning& tuni
         return;
     }
     const std::optional<LookValue> value = Data::Maps::FindLookValue(key);
-    if (!value)
+    // The light mood's values are the map's own light, not a player's (only its strength is).
+    if (!value || Data::Maps::IsMoodValue(*value))
     {
         issues.Ignored(key, "is not a tuning value");
         return;
@@ -188,6 +171,10 @@ std::vector<KeyChange> Changes(const PersonalTuning& from, const PersonalTuning&
     std::vector<KeyChange> changes;
     for (const LookValueInfo& info : Data::Maps::LookValueInfos())
     {
+        if (Data::Maps::IsMoodValue(info.value))
+        {
+            continue;
+        }
         const std::optional<double>& value = to.look[info.value];
         if (value != from.look[info.value])
         {
@@ -207,13 +194,13 @@ std::vector<KeyChange> Changes(const PersonalTuning& from, const PersonalTuning&
 // The key of an entry line, if the line is one.
 std::optional<std::string_view> EntryKey(std::string_view line)
 {
-    const std::string_view trimmed = Trim(line);
+    const std::string_view trimmed = TrimAsciiWhitespace(line);
     const std::size_t equals = trimmed.find('=');
     if (trimmed.empty() || trimmed.front() == ';' || trimmed.front() == '#' || equals == std::string_view::npos)
     {
         return std::nullopt;
     }
-    return Trim(trimmed.substr(0, equals));
+    return TrimAsciiWhitespace(trimmed.substr(0, equals));
 }
 
 std::filesystem::path ResolveConfigFile(const std::filesystem::path& configFile)
@@ -287,10 +274,10 @@ PersonalTuning ReadPersonalTuning(std::string_view configText, std::vector<std::
     {
         if (const std::optional<std::string_view> name = SectionName(line))
         {
-            inSection = EqualsIgnoringCase(*name, PersonalTuningSection);
+            inSection = EqualsIgnoringAsciiCase(*name, PersonalTuningSection);
             continue;
         }
-        const std::string_view trimmed = Trim(line);
+        const std::string_view trimmed = TrimAsciiWhitespace(line);
         if (!inSection || trimmed.empty() || trimmed.front() == ';' || trimmed.front() == '#')
         {
             continue;
@@ -301,7 +288,8 @@ PersonalTuning ReadPersonalTuning(std::string_view configText, std::vector<std::
             list.Ignored(trimmed, "has no value");
             continue;
         }
-        ReadEntry(Trim(trimmed.substr(0, equals)), Trim(trimmed.substr(equals + 1)), tuning, list);
+        ReadEntry(TrimAsciiWhitespace(trimmed.substr(0, equals)), TrimAsciiWhitespace(trimmed.substr(equals + 1)),
+                  tuning, list);
     }
     return tuning;
 }
@@ -401,7 +389,7 @@ std::string UpdatePersonalTuningSection(std::string_view configText, const Perso
         {
             continue; // the key goes, or a later copy of a key already written
         }
-        if (!Trim(line).empty())
+        if (!TrimAsciiWhitespace(line).empty())
         {
             hasLines = true;
             sectionEnd = section.size();

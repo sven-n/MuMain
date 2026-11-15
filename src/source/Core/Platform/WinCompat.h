@@ -515,12 +515,9 @@ typedef struct _OVERLAPPED
 
 // Window messages (winuser.h). App-defined WM_USER+n messages live elsewhere.
 #define WM_USER 0x0400
-#define WM_DESTROY 0x0002
 #define WM_SIZE 0x0005
 #define WM_ACTIVATE 0x0006
 #define WM_PAINT 0x000F
-#define WM_CLOSE 0x0010
-#define WM_QUIT 0x0012
 #define WM_ERASEBKGND 0x0014
 #define WM_SETCURSOR 0x0020
 #define WM_CHAR 0x0102
@@ -529,13 +526,6 @@ typedef struct _OVERLAPPED
 #define WM_IME_NOTIFY 0x0282
 #define WM_IME_CONTROL 0x0283
 #define WM_DISPLAYCHANGE 0x007E
-
-// MessageBox flags (winuser.h).
-#define MB_OK 0x00000000
-#define MB_YESNO 0x00000004
-#define MB_ICONERROR 0x00000010
-#define MB_ICONSTOP 0x00000010
-#define MB_ICONEXCLAMATION 0x00000030
 
 // Window styles (winuser.h). SDL owns the real window; these let the legacy
 // Win32 window/resolution code compile (it is stubbed out at the call level).

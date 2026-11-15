@@ -70,7 +70,8 @@ Enhanced tuning sliders) show it while the pointer is over the row.
 
 ## What it stores in `config.ini`
 
-Settings are written next to the executable as `config.ini`. The options
+Settings are written to `config.ini` in the player's user folder (see
+[where settings and logs live](build/README.md#where-settings-and-logs-live)). The options
 window writes to these sections:
 
 - `[Window]` - width, height, windowed flag.

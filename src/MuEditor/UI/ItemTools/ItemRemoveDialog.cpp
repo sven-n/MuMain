@@ -20,6 +20,9 @@ namespace
 {
 constexpr char PopupId[] = "###ItemRemoveDialog";
 constexpr ImVec4 RemoveColor{0.7f, 0.2f, 0.2f, 1.0f};
+// Red as Data Checks shows an error; the text wraps at this many font sizes (an auto-resized popup has no width).
+constexpr ImVec4 WarningColor{1.0f, 0.4f, 0.4f, 1.0f};
+constexpr float WrapEms = 30.0f;
 } // namespace
 
 void CItemRemoveDialog::Open(int itemType)
@@ -52,6 +55,13 @@ void CItemRemoveDialog::Render()
     }
     ImGui::TextUnformatted(I18N::Editor::WhatUsesItStaysAtItsNumber);
     UsageView::RenderUsesAtNumber(m_usage);
+    if (!m_usage.monsters.empty())
+    {
+        // They name an item that is gone (D60).
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * WrapEms);
+        ImGui::TextColored(WarningColor, "%s", I18N::Editor::WearersOfARemovedItem);
+        ImGui::PopTextWrapPos();
+    }
     ImGui::Separator();
 
     const bool held = IsHeldByCharacter(m_itemType);

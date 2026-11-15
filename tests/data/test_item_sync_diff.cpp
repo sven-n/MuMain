@@ -210,8 +210,8 @@ TEST_CASE("A name in a language the client does not show, or one the file lacks,
     CHECK(sides.Diff().IsEmpty());
 }
 
-TEST_CASE("An item the game holds keeps its size and slot or is not added, and a known difference stays unchecked "
-          "[data][items][editor]")
+TEST_CASE("An item the game holds keeps its size and slot or is not added, and a difference wrong in the server "
+          "stays unchecked [data][items][editor]")
 {
     Sides sides;
     ItemDefinition& kris = sides.FileItem(KrisType);
@@ -224,7 +224,9 @@ TEST_CASE("An item the game holds keeps its size and slot or is not added, and a
     heldNew.number = 100;
     sides.file.items.push_back(heldNew);
     KnownDifferences known;
-    known.fields.insert({0, 0, "repairable"});
+    known.Set(0, 0, "repairable", WrongSide::Server);
+    // Wrong in the client does not check a locked field.
+    known.Set(0, 0, "width", WrongSide::Client);
 
     const ItemSyncDiff diff =
         sides.Diff(&known, [](int itemType)
@@ -237,7 +239,7 @@ TEST_CASE("An item the game holds keeps its size and slot or is not added, and a
     CHECK_FALSE(width->checked);
     const SyncField* repairable = FindField(*row, "repairable");
     REQUIRE(repairable != nullptr);
-    CHECK(repairable->known);
+    CHECK(repairable->wrongSide == WrongSide::Server);
     CHECK_FALSE(repairable->checked);
     const SyncItem* removed = FindRow(diff, ShortSwordType);
     REQUIRE(removed != nullptr);
@@ -279,6 +281,267 @@ TEST_CASE("A drop level OpenMU cannot keep is not taken by default [data][items]
     REQUIRE(level != nullptr);
     CHECK_FALSE(level->inexact.empty());
     CHECK_FALSE(level->checked);
+
+    // Nor when the client is marked wrong: OpenMU's 255 is not the drop level.
+    KnownDifferences known;
+    known.Set(row->group, row->number, "level", WrongSide::Client);
+    const ItemSyncDiff marked = sides.Diff(&known);
+    const SyncField* markedLevel = FindField(*FindRow(marked, ITEM_HORN_OF_FENRIR), "level");
+    REQUIRE(markedLevel != nullptr);
+    CHECK(markedLevel->wrongSide == WrongSide::Client);
+    CHECK_FALSE(markedLevel->checked);
+    SyncItem changed = *row;
+    SetWrongSide(changed, "level", WrongSide::Client);
+    CHECK_FALSE(FindField(changed, "level")->checked);
+}
+
+TEST_CASE("A difference wrong in the server starts unchecked, one wrong in the client as without a mark "
+          "[data][items][editor]")
+{
+    Sides sides;
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    ++kris.width;
+    kris.repairable = !kris.repairable;
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == ShortSwordType; });
+    ItemDefinition added = kris;
+    added.number = 100;
+    sides.file.items.push_back(added);
+    sides.file.formulas->excellentDropLevelBonus = sides.client.formulas->excellentDropLevelBonus + 1;
+    KnownDifferences known;
+    known.Set(0, 0, "width", WrongSide::Server);
+    known.Set(0, 0, "repairable", WrongSide::Client);
+    // The removal starts unchecked and the new item checked, unless marked otherwise.
+    known.Set(0, 1, "", WrongSide::Client);
+    known.Set(0, 100, "", WrongSide::Server);
+    known.Set("dropLevelBonus.excellent", WrongSide::Server);
+
+    const ItemSyncDiff diff = sides.Diff(&known);
+    const SyncItem* row = FindRow(diff, KrisType);
+    REQUIRE(row != nullptr);
+    CHECK_FALSE(FindField(*row, "width")->checked);
+    CHECK(FindField(*row, "repairable")->checked);
+    CHECK(GetRowWrongSide(*row) == WrongSide::None);
+    const SyncItem* removed = FindRow(diff, ShortSwordType);
+    REQUIRE(removed != nullptr);
+    CHECK_FALSE(removed->checked);
+    CHECK(GetRowWrongSide(*removed) == WrongSide::Client);
+    const SyncItem* newItem = FindRow(diff, MakeItemType(0, 100));
+    REQUIRE(newItem != nullptr);
+    CHECK_FALSE(newItem->checked);
+    const SyncFormula* bonus = FindFormula(diff, "dropLevelBonus.excellent");
+    REQUIRE(bonus != nullptr);
+    CHECK(bonus->wrongSide == WrongSide::Server);
+    CHECK_FALSE(bonus->checked);
+
+    // Leaving wrong in server, also for wrong in client, gives the default as a new comparison
+    // would; otherwise wrong in client leaves a box as it is.
+    ItemSyncDiff marked = diff;
+    SyncItem& kept = marked.items[static_cast<size_t>(row - diff.items.data())];
+    SetWrongSide(kept, "width", WrongSide::Client);
+    SetWrongSide(kept, "repairable", WrongSide::Client);
+    CHECK(GetRowWrongSide(kept) == WrongSide::Client);
+    CHECK(FindField(kept, "width")->checked);
+    CHECK(FindField(kept, "repairable")->checked);
+    SetRowChecked(kept, false);
+    SetWrongSide(kept, "width", WrongSide::None);
+    CHECK_FALSE(FindField(kept, "width")->checked);
+    CHECK(GetRowWrongSide(kept) == WrongSide::None);
+    SetWrongSide(kept, "width", WrongSide::Server);
+    SetWrongSide(kept, "width", WrongSide::None);
+    CHECK(FindField(kept, "width")->checked);
+    SyncItem& removal = marked.items[static_cast<size_t>(removed - diff.items.data())];
+    SetWrongSide(removal, "", WrongSide::None);
+    CHECK_FALSE(removal.checked);
+    SetRowChecked(removal, true);
+    SetWrongSide(removal, "", WrongSide::Client);
+    CHECK(removal.checked);
+    SyncItem& addition = marked.items[static_cast<size_t>(newItem - diff.items.data())];
+    SetWrongSide(addition, "", WrongSide::None);
+    CHECK(addition.checked);
+    SyncFormula& formula = marked.formulas[static_cast<size_t>(bonus - diff.formulas.data())];
+    SetWrongSide(formula, WrongSide::Client);
+    CHECK(formula.checked);
+
+    // A click keeps the mark for the next comparisons too.
+    KnownDifferences clicked;
+    MarkWrongSide(clicked, formula, WrongSide::Server);
+    CHECK_FALSE(formula.checked);
+    CHECK(clicked.Find("dropLevelBonus.excellent") == WrongSide::Server);
+    MarkWrongSide(clicked, kept, "width", WrongSide::Server);
+    CHECK_FALSE(FindField(kept, "width")->checked);
+    CHECK(clicked.Find(0, 0, "width") == WrongSide::Server);
+}
+
+TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones that differ later "
+          "[data][items][editor]")
+{
+    Sides sides;
+    ++sides.FileItem(KrisType).width;
+    KnownDifferences known;
+    known.Set(0, 0, EveryFieldOfItem, WrongSide::Server);
+    known.Set(0, 0, "height", WrongSide::Client);
+    const ItemSyncDiff before = sides.Diff(&known);
+    const SyncItem* row = FindRow(before, KrisType);
+    REQUIRE(row != nullptr);
+    CHECK(GetRowWrongSide(*row) == WrongSide::Server);
+    CHECK(FindField(*row, "width")->wrongSide == WrongSide::Server);
+    CHECK_FALSE(FindField(*row, "width")->checked);
+
+    // A field that differs later has the item's mark, unless it has its own.
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    kris.repairable = !kris.repairable;
+    ++kris.height;
+    ItemSyncDiff after = sides.Diff(&known);
+    SyncItem& changed = after.items[static_cast<size_t>(FindRow(after, KrisType) - after.items.data())];
+    CHECK(FindField(changed, "repairable")->wrongSide == WrongSide::Server);
+    CHECK_FALSE(FindField(changed, "repairable")->checked);
+    CHECK(FindField(changed, "height")->wrongSide == WrongSide::Client);
+    CHECK(FindField(changed, "height")->checked);
+    // Its fields have different sides, so the item names none.
+    CHECK(GetRowWrongSide(changed) == WrongSide::None);
+    const std::vector<const SyncItem*> rows = {&changed};
+    CHECK(WriteSyncRowsMarkdown(rows, "Items", "", true).find("| Server |") == std::string::npos);
+
+    // Marking the whole item takes out the fields' own marks; the fields that leave wrong in the
+    // server get their default.
+    MarkWrongSide(known, changed, "", WrongSide::Client);
+    CHECK(known.fields.size() == 1);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
+    CHECK(FindField(changed, "repairable")->checked);
+    CHECK(FindField(changed, "height")->checked);
+
+    // A field's own mark counts for it instead; the item's mark stays for the others.
+    MarkWrongSide(known, changed, "width", WrongSide::Server);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
+    CHECK(known.Find(0, 0, "width") == WrongSide::Server);
+    CHECK(known.Find(0, 0, "height") == WrongSide::None);
+    CHECK_FALSE(FindField(changed, "width")->markOfItem);
+    CHECK(FindField(changed, "height")->markOfItem);
+    CHECK(GetRowWrongSide(changed) == WrongSide::None);
+    // Without its own mark, the field has the item's again.
+    MarkWrongSide(known, changed, "width", WrongSide::None);
+    CHECK(FindField(changed, "width")->wrongSide == WrongSide::Client);
+    CHECK(FindField(changed, "width")->markOfItem);
+    MarkWrongSide(known, changed, "width", WrongSide::Server);
+
+    // Clearing the whole item clears its fields; the one wrong in the server gets its box back.
+    MarkWrongSide(known, changed, "", WrongSide::None);
+    CHECK(known.fields.empty());
+    CHECK(
+        std::ranges::all_of(changed.fields, [](const SyncField& field) { return field.wrongSide == WrongSide::None; }));
+    CHECK(FindField(changed, "width")->checked);
+}
+
+TEST_CASE("A field's mark leaves the other fields' own marks and its item's mark [data][items][editor]")
+{
+    Sides sides;
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    ++kris.width;
+    ++kris.height;
+    KnownDifferences known;
+    known.Set(0, 0, EveryFieldOfItem, WrongSide::Server);
+    known.Set(0, 0, "height", WrongSide::Client);
+    ItemSyncDiff diff = sides.Diff(&known);
+    SyncItem& row = diff.items[static_cast<size_t>(FindRow(diff, KrisType) - diff.items.data())];
+    CHECK(GetRowWrongSide(row) == WrongSide::None);
+    MarkWrongSide(known, row, "width", WrongSide::Client);
+    CHECK(known.Find(0, 0, "height") == WrongSide::Client);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Server);
+    CHECK(FindField(row, "height")->wrongSide == WrongSide::Client);
+    // Every field has its own mark of the same side now.
+    CHECK(GetRowWrongSide(row) == WrongSide::Client);
+
+    // A field that differs later has the item's mark.
+    kris.repairable = !kris.repairable;
+    const ItemSyncDiff later = sides.Diff(&known);
+    const SyncField* repairable = FindField(*FindRow(later, KrisType), "repairable");
+    REQUIRE(repairable != nullptr);
+    CHECK(repairable->wrongSide == WrongSide::Server);
+    CHECK(repairable->markOfItem);
+}
+
+TEST_CASE("A diff takes the marks read again from the file [data][items][editor]")
+{
+    Sides sides;
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    ++kris.width;
+    kris.repairable = !kris.repairable;
+    sides.file.formulas->excellentDropLevelBonus = sides.client.formulas->excellentDropLevelBonus + 1;
+    KnownDifferences before;
+    before.Set(0, 0, "width", WrongSide::Server);
+    ItemSyncDiff diff = sides.Diff(&before);
+    // A box checked by hand stays when its mark does not change.
+    SyncItem& row = diff.items[static_cast<size_t>(FindRow(diff, KrisType) - diff.items.data())];
+    for (SyncField& field : row.fields)
+    {
+        field.checked = field.field == "width";
+    }
+
+    KnownDifferences now;
+    now.Set(0, 0, EveryFieldOfItem, WrongSide::Server);
+    now.Set(0, 0, "width", WrongSide::Server);
+    now.Set("dropLevelBonus.excellent", WrongSide::Server);
+    ApplyMarks(diff, now);
+    const ItemSyncDiff fresh = sides.Diff(&now);
+    const SyncItem& freshRow = *FindRow(fresh, KrisType);
+    CHECK(row.wrongSide == freshRow.wrongSide);
+    for (const SyncField& field : row.fields)
+    {
+        const SyncField* freshField = FindField(freshRow, field.field);
+        REQUIRE(freshField != nullptr);
+        CHECK(field.wrongSide == freshField->wrongSide);
+        CHECK(field.markOfItem == freshField->markOfItem);
+    }
+    CHECK(FindField(row, "width")->checked);
+    CHECK_FALSE(FindField(row, "repairable")->checked);
+    CHECK(FindFormula(diff, "dropLevelBonus.excellent")->wrongSide == WrongSide::Server);
+    CHECK_FALSE(FindFormula(diff, "dropLevelBonus.excellent")->checked);
+
+    // Marks no longer in the file go.
+    ApplyMarks(diff, KnownDifferences{});
+    CHECK(GetRowWrongSide(row) == WrongSide::None);
+    CHECK(FindField(row, "width")->checked);
+    CHECK(FindFormula(diff, "dropLevelBonus.excellent")->wrongSide == WrongSide::None);
+}
+
+TEST_CASE("The mark of an item only one side had does not mark its fields once both have it "
+          "[data][items][editor]")
+{
+    Sides sides;
+    ++sides.FileItem(KrisType).width;
+    KnownDifferences known;
+    // E.g. a version 1 Known of an item the server lacked, which the server has now.
+    known.Set(0, 0, AddedOrRemovedItemField, WrongSide::Server);
+    const ItemSyncDiff diff = sides.Diff(&known);
+    const SyncItem* row = FindRow(diff, KrisType);
+    REQUIRE(row != nullptr);
+    CHECK(row->change == SyncChange::Changed);
+    CHECK(GetRowWrongSide(*row) == WrongSide::None);
+    CHECK(FindField(*row, "width")->wrongSide == WrongSide::None);
+    CHECK(FindField(*row, "width")->checked);
+
+    // Marking the changed item as a whole keeps the other mark, for when the item is new or
+    // removed again.
+    SyncItem changed = *row;
+    known.Set(0, 0, "width", WrongSide::Server);
+    MarkWrongSide(known, changed, "", WrongSide::Client);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
+    CHECK(known.Find(0, 0, "width") == WrongSide::None);
+    CHECK(known.Find(0, 0, AddedOrRemovedItemField) == WrongSide::Server);
+
+    // Nor does marking the item removed take out the marks of the changed item.
+    known.Set(0, 0, "width", WrongSide::Server);
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == KrisType; });
+    ItemSyncDiff removedDiff = sides.Diff(&known);
+    SyncItem& removed =
+        removedDiff.items[static_cast<size_t>(FindRow(removedDiff, KrisType) - removedDiff.items.data())];
+    REQUIRE(removed.change == SyncChange::Removed);
+    MarkWrongSide(known, removed, "", WrongSide::None);
+    CHECK(known.Find(0, 0, AddedOrRemovedItemField) == WrongSide::None);
+    CHECK(known.Find(0, 0, "width") == WrongSide::Server);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
 }
 
 TEST_CASE("The formulas differ by drop level bonus, table, term and whole profile [data][items][editor]")
@@ -553,25 +816,49 @@ TEST_CASE("Copy as Markdown writes the rows as a table [data][items][editor]")
     added.change = SyncChange::New;
     added.name = "Sphere (4)";
     added.fields.resize(2);
+    added.wrongSide = WrongSide::Server;
     SyncItem removed;
     removed.group = 14;
     removed.number = 15;
     removed.change = SyncChange::Removed;
     removed.name = "Zen | Gold\nCoin";
-    const std::vector<const SyncItem*> rows = {&added, &removed};
+    // A Changed row names the side every one of its fields is marked with.
+    SyncItem changed;
+    changed.group = 13;
+    changed.number = 50;
+    changed.name = "Illusion Sorcerer Covenant";
+    changed.fields.resize(2);
+    for (SyncField& field : changed.fields)
+    {
+        field.wrongSide = WrongSide::Client;
+    }
+    const std::vector<const SyncItem*> rows = {&added, &removed, &changed};
 
-    const std::string onlyInClient = "Items only in the client (2)\n\n"
-                                     "| Group | Number | Item |\n"
-                                     "|---|---|---|\n"
-                                     "| 12 | 73 | Sphere (4) |\n"
-                                     "| 14 | 15 | Zen \\| Gold Coin |\n";
-    CHECK(WriteSyncRowsMarkdown(rows, "Items only in the client (2)", "") == onlyInClient);
-    CHECK(WriteSyncRowsMarkdown(rows, "Items that differ (2)", "In the client") ==
-          "Items that differ (2)\n\n"
-          "| In the client | Group | Number | Item | Fields |\n"
+    const std::string onlyInClient = "Items only in the client (3)\n\n"
+                                     "| Group | Number | Item | Wrong in |\n"
+                                     "|---|---|---|---|\n"
+                                     "| 12 | 73 | Sphere (4) | Server |\n"
+                                     "| 14 | 15 | Zen \\| Gold Coin |  |\n"
+                                     "| 13 | 50 | Illusion Sorcerer Covenant | Client |\n";
+    CHECK(WriteSyncRowsMarkdown(rows, "Items only in the client (3)", "", true) == onlyInClient);
+    CHECK(WriteSyncRowsMarkdown(rows, "Items that differ (3)", "In the client", true) ==
+          "Items that differ (3)\n\n"
+          "| In the client | Group | Number | Item | Fields | Wrong in |\n"
+          "|---|---|---|---|---|---|\n"
+          "| Added | 12 | 73 | Sphere (4) | 2 | Server |\n"
+          "| Removed | 14 | 15 | Zen \\| Gold Coin | 0 |  |\n"
+          "| Changed | 13 | 50 | Illusion Sorcerer Covenant | 2 | Client |\n");
+    // A comparison of two files has no marks, so no column for them.
+    CHECK(WriteSyncRowsMarkdown(rows, "Items that differ (3)", "From A to B", false) ==
+          "Items that differ (3)\n\n"
+          "| From A to B | Group | Number | Item | Fields |\n"
           "|---|---|---|---|---|\n"
           "| Added | 12 | 73 | Sphere (4) | 2 |\n"
-          "| Removed | 14 | 15 | Zen \\| Gold Coin | 0 |\n");
+          "| Removed | 14 | 15 | Zen \\| Gold Coin | 0 |\n"
+          "| Changed | 13 | 50 | Illusion Sorcerer Covenant | 2 |\n");
+    // Fields marked with different sides name none.
+    changed.fields.back().wrongSide = WrongSide::Server;
+    CHECK(GetRowWrongSide(changed) == WrongSide::None);
 }
 
 // Update from server compares the downloaded text as Import compares a file, and Apply compares
@@ -1084,14 +1371,97 @@ TEST_CASE("An item the file has twice is a locked row of the import [data][items
     g_ItemEdits.GetHistory().Clear();
 }
 
-TEST_CASE("The known differences are written and read back [data][items][editor]")
+TEST_CASE("Applying a marked difference takes out its mark [data][items][editor]")
+{
+    Sides sides;
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    ++kris.width;
+    kris.repairable = !kris.repairable;
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == ShortSwordType; });
+    sides.file.formulas->excellentDropLevelBonus = sides.client.formulas->excellentDropLevelBonus + 1;
+    KnownDifferences known;
+    known.Set(0, 0, "width", WrongSide::Client);
+    known.Set(0, 0, "repairable", WrongSide::Server);
+    known.Set(0, 1, "", WrongSide::Client);
+    // Marks of the removed item from while it was changed.
+    known.Set(0, 1, EveryFieldOfItem, WrongSide::Server);
+    known.Set(0, 1, "width", WrongSide::Server);
+    known.Set("dropLevelBonus.excellent", WrongSide::Client);
+    // A mark of an item that does not differ stays.
+    known.Set(0, 2, "", WrongSide::Client);
+    ItemSyncDiff diff = sides.Diff(&known);
+    // The removal is checked by hand; the excellent drop level bonus is not applied.
+    diff.items[static_cast<size_t>(FindRow(diff, ShortSwordType) - diff.items.data())].checked = true;
+    std::ranges::find(diff.formulas, "dropLevelBonus.excellent", &SyncFormula::entry)->checked = false;
+
+    CHECK(ForgetAppliedMarks(diff, known));
+    CHECK(known.Find(0, 0, "width") == WrongSide::None);
+    CHECK(known.Find(0, 0, "repairable") == WrongSide::Server);
+    CHECK(known.Find(0, 1, "") == WrongSide::None);
+    CHECK(known.Find(0, 1, EveryFieldOfItem) == WrongSide::None);
+    CHECK(known.Find(0, 1, "width") == WrongSide::None);
+    CHECK(known.Find("dropLevelBonus.excellent") == WrongSide::Client);
+    CHECK(known.Find(0, 2, "") == WrongSide::Client);
+    CHECK_FALSE(ForgetAppliedMarks(diff, known));
+
+    // A changed item's whole-item mark goes once all its fields were applied.
+    known.Set(0, 0, EveryFieldOfItem, WrongSide::Client);
+    ItemSyncDiff partly = sides.Diff(&known);
+    SyncItem& row = partly.items[static_cast<size_t>(FindRow(partly, KrisType) - partly.items.data())];
+    row.fields.front().checked = false;
+    ForgetAppliedMarks(partly, known);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
+    SetRowChecked(row, true);
+    CHECK(ForgetAppliedMarks(partly, known));
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::None);
+    // Wrong in the server, but checked by hand and applied.
+    CHECK(known.Find(0, 0, "repairable") == WrongSide::None);
+}
+
+TEST_CASE("An item the file has twice shows its mark [data][items][editor]")
+{
+    Sides sides;
+    // A file read with an item twice lists it among its repeated items, not its items.
+    sides.file.repeatedItems.emplace_back(0, 0);
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == KrisType; });
+    KnownDifferences known;
+    // Both sides have it: the mark of a changed item.
+    known.Set(0, 0, EveryFieldOfItem, WrongSide::Server);
+    ItemSyncDiff diff = sides.Diff(&known);
+    SyncItem& row = diff.items[static_cast<size_t>(FindRow(diff, KrisType) - diff.items.data())];
+    CHECK_FALSE(row.locked.empty());
+    CHECK(GetRowWrongSide(row) == WrongSide::Server);
+    const std::vector<const SyncItem*> rows = {&row};
+    CHECK(WriteSyncRowsMarkdown(rows, "Items", "", true).find("| Server |") != std::string::npos);
+
+    // Clicking it again clears it; a locked row stays unchecked whatever its mark.
+    MarkWrongSide(known, row, "", WrongSide::None);
+    CHECK(known.fields.empty());
+    MarkWrongSide(known, row, "", WrongSide::Client);
+    CHECK_FALSE(row.checked);
+    const ItemSyncDiff again = sides.Diff(&known);
+    CHECK(GetRowWrongSide(*FindRow(again, KrisType)) == WrongSide::Client);
+}
+
+TEST_CASE("The wrong sides of the differences are written and read back [data][items][editor]")
 {
     KnownDifferences known;
-    known.fields.insert({13, 4, "repairable"});
-    known.fields.insert({13, 4, ""});
-    known.fields.insert({7, 62, ""});
-    known.formulas.insert("default.requirements.leadership");
+    known.Set(13, 50, "width", WrongSide::Server);
+    known.Set(13, 50, "height", WrongSide::Client);
+    known.Set(13, 4, "", WrongSide::Server);
+    known.Set(7, 62, "", WrongSide::Client);
+    known.Set("default.requirements.leadership", WrongSide::Server);
+    known.Set("dropLevelBonus.excellent", WrongSide::Client);
     const std::string text = WriteKnownDifferencesJson(known);
+    CHECK(text.find(R"({"group": 13, "number": 50, "wrongInClient": ["height"], "wrongInServer": ["width"]})") !=
+          std::string::npos);
+    // An entry without a side is no mark: it is not written.
+    KnownDifferences unmarked = known;
+    unmarked.fields[{1, 2, "width"}] = WrongSide::None;
+    unmarked.formulas["tables.damageIncreaseWeapons"] = WrongSide::None;
+    CHECK(WriteKnownDifferencesJson(unmarked) == text);
     const std::filesystem::path directory = std::filesystem::temp_directory_path() /
                                             ("mu_test_known_differences_" + std::to_string(std::random_device{}()));
     std::filesystem::create_directories(directory);
@@ -1102,8 +1472,66 @@ TEST_CASE("The known differences are written and read back [data][items][editor]
     CHECK(issues.empty());
     CHECK(LoadKnownDifferences(directory / "missing.json", issues) == KnownDifferences{});
     CHECK(issues.empty());
+
+    // Clearing a mark takes the entry out.
+    known.Set(13, 50, "height", WrongSide::None);
+    known.Set("dropLevelBonus.excellent", WrongSide::None);
+    CHECK(known.Find(13, 50, "height") == WrongSide::None);
+    CHECK_FALSE(known.fields.contains({13, 50, "height"}));
+    CHECK_FALSE(known.formulas.contains("dropLevelBonus.excellent"));
     std::error_code ignored;
     std::filesystem::remove_all(directory, ignored);
+}
+
+TEST_CASE("A known differences file of version 1 reads as wrong in the server [data][items][editor]")
+{
+    const std::filesystem::path directory = std::filesystem::temp_directory_path() /
+                                            ("mu_test_known_differences_" + std::to_string(std::random_device{}()));
+    std::filesystem::create_directories(directory);
+    const std::filesystem::path file = directory / "KnownDifferences.json";
+    std::ofstream(file, std::ios::binary) << R"({
+  "formatVersion": 1,
+  "items": [
+    { "group": 13, "number": 4, "fields": [ "repairable", "" ] }
+  ],
+  "formulas": [ "default.requirements.leadership" ]
+})";
+    std::vector<ItemDataIssue> issues;
+    const KnownDifferences known = LoadKnownDifferences(file, issues);
+    CHECK(issues.empty());
+    CHECK(known.Find(13, 4, "repairable") == WrongSide::Server);
+    CHECK(known.Find(13, 4, "") == WrongSide::Server);
+    CHECK(known.Find("default.requirements.leadership") == WrongSide::Server);
+    CHECK(known.fields.size() == 2);
+    std::error_code ignored;
+    std::filesystem::remove_all(directory, ignored);
+}
+
+TEST_CASE("A known differences entry of version 2 that cannot be read is reported [data][items][editor]")
+{
+    TemporaryFolder folder;
+    const std::filesystem::path file = folder.Path() / "KnownDifferences.json";
+    // A side that is not a list, an entry of version 1, a list with a number in it and formulas
+    // of version 1.
+    WriteFile(file, R"({
+  "formatVersion": 2,
+  "items": [
+    {"group": 13, "number": 4, "wrongInClient": "repairable"},
+    {"group": 13, "number": 5, "fields": ["repairable"]},
+    {"group": 13, "number": 6, "wrongInServer": ["width"]},
+    {"group": 13, "number": 7, "wrongInServer": ["width", 5]}
+  ],
+  "formulas": ["default.requirements.leadership"]
+})");
+    std::vector<ItemDataIssue> issues;
+    const KnownDifferences known = LoadKnownDifferences(file, issues);
+    REQUIRE(issues.size() == 4);
+    CHECK(std::ranges::all_of(issues, [](const ItemDataIssue& issue)
+                              { return issue.severity == ItemDataIssueSeverity::Fatal; }));
+    CHECK(issues[3].field == "formulas");
+    // What can be read still is.
+    CHECK(known.fields.size() == 1);
+    CHECK(known.Find(13, 6, "width") == WrongSide::Server);
 }
 
 #endif // _EDITOR

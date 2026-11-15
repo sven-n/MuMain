@@ -15,6 +15,7 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/MonsterData/MonsterDataValidation.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
@@ -748,8 +749,8 @@ TEST_CASE("Monster checks: generic own attacks of a monster with attacks, and ma
     CHECK(about(145, "monster 145 mapVariants[0].attacks") == issues.end());
 }
 
-TEST_CASE("Monster checks: the shipped list warns about the 13 numbers of P26 and Erkanne's map variant "
-          "[editor][monsters]")
+TEST_CASE("Monster checks: the shipped list warns about the 13 numbers of P26 and the variants on maps the "
+          "numbers are not on [editor][monsters]")
 {
     // Read only: the client folder of the sources.
     ClientDataScope scope(std::filesystem::path(MU_TEST_DATA_DIR).parent_path());
@@ -769,9 +770,39 @@ TEST_CASE("Monster checks: the shipped list warns about the 13 numbers of P26 an
     // In the order of their monsters' first numbers.
     std::ranges::sort(generic);
     CHECK(generic == std::vector{331, 332, 335, 336, 337, 338, 434, 435, 436, 437, 438, 439, 531});
-    // On map 79, where OpenMU places it nowhere: the attacks PR kept the
-    // code's case.
-    CHECK(variants == std::vector{507});
+    // On maps where OpenMU places them nowhere: Erkanne's on 79 (the attacks
+    // PR kept the code's case) and the Crywolf bodies of world 35, which no
+    // server has (Q-MN35 kept them as variants).
+    std::ranges::sort(variants);
+    CHECK(variants == std::vector{310, 315, 316, 317, 507});
+    for (const ItemDataIssue& issue : issues)
+    {
+        if (issue.number == 316)
+            CHECK(issue.message.find("does not appear") != std::string::npos);
+    }
+}
+
+// The shipped list keeps one old behaviour of the setup: the Wolf Status (204)
+// is dropped when it appears (P24), a warning in Data Checks.
+TEST_CASE("Monster checks: the shipped list warns only about the Wolf Status being dropped (P24) [editor][monsters]")
+{
+    // Read only: the client folder of the sources.
+    ClientDataScope scope(std::filesystem::path(MU_TEST_DATA_DIR).parent_path());
+    std::vector<ItemDataIssue> issues;
+    REQUIRE(g_MonsterDataHandler.Revert(issues));
+    g_MonsterEdits.OnDataReplaced();
+    std::vector<const Data::Monsters::MonsterDefinition*> monsters;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        if (const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+            monsters.push_back(monster);
+    }
+    issues.clear();
+    Data::Monsters::ValidateMonsterSetups(monsters, "Monsters.json", issues);
+    std::vector<int> numbers;
+    for (const ItemDataIssue& issue : issues)
+        numbers.push_back(issue.number);
+    CHECK(numbers == std::vector{204});
 }
 
 #endif // _EDITOR

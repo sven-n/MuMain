@@ -1,6 +1,6 @@
 #include "TexturePack.h"
 
-#include "Render/Sprites/GlobalBitmapPath.h"
+#include "Core/Content/ContentStore.h"
 #include "Render/Textures/AssetPath.h"
 
 #include <algorithm>
@@ -17,17 +17,13 @@ bool IsNameCharacter(wchar_t c)
     return letter || digit || c == L'-' || c == L'_';
 }
 
-// Copied from the native spelling one character at a time: a valid name is
-// ASCII, and any other name fails IsValidName however it widens.
-std::optional<std::wstring> PackName(const std::filesystem::directory_entry& entry)
+// Copied one byte at a time: a valid name is ASCII, and any other name fails IsValidName however it widens.
+std::optional<std::wstring> PackName(const Content::Entry& entry)
 {
-    std::error_code error;
-    if (!entry.is_directory(error))
+    if (!entry.folder)
         return std::nullopt;
 
-    const std::filesystem::path folderName = entry.path().filename();
-    const auto& native = folderName.native();
-    std::wstring name(native.begin(), native.end());
+    std::wstring name(entry.name.begin(), entry.name.end());
     if (!IsValidName(name))
         return std::nullopt;
     return name;
@@ -50,21 +46,17 @@ std::wstring PackFolder(std::wstring_view pack)
 std::vector<std::wstring> ListPacks(const std::filesystem::path& folder)
 {
     std::vector<std::wstring> packs;
-    std::error_code error;
-    for (std::filesystem::directory_iterator it(folder, error), end; !error && it != end; it.increment(error))
+    for (const Content::Entry& entry : Content::ListFolder(folder))
     {
-        if (auto name = PackName(*it))
+        if (auto name = PackName(entry))
             packs.push_back(std::move(*name));
     }
-    std::sort(packs.begin(), packs.end());
     return packs;
 }
 
 std::vector<std::wstring> ListInstalledPacks()
 {
-    // Resolved as the loader resolves the pack folder, so on a case-sensitive
-    // filesystem a "data/texturepacks" folder is listed as well as loaded.
-    return ListPacks(Render::Sprites::NarrowBitmapPath(std::wstring(PacksFolder)));
+    return ListPacks(std::filesystem::path(std::wstring(PacksFolder)));
 }
 
 bool SameName(std::wstring_view a, std::wstring_view b)

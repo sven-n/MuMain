@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Data/GameData/EffectData/Shines.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 
 #include <array>
@@ -34,7 +35,14 @@ int GetLevel(int modelType, int level);
 // Whether excellent items with this model glow.
 bool HasExcellentGlow(int modelType);
 
-// Draws the glow pass of items +7 and up.
+// The shine below +3 the glow of the model names (design L30), or nullptr for the models drawn plainly below +3.
+const Data::Effects::Shine* FindShineBelowPlus3(int modelType);
+
+// The model drawing's flags of a pass of a shine below +3, without the drawing's own.
+int RenderTypeOf(const Data::Effects::ShinePass& pass);
+
+// Draws the glow pass of items +7 and up; a model whose glow draws a mesh again in white then keeps that mesh as its
+// glowing mesh (`look`).
 void RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture);
 
 // Draws the shine of items +11 and up, or the glow of ancient items.

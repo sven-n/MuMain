@@ -124,6 +124,63 @@ TEST_CASE("A mesh an item's model lacks is a warning about that item, a look no 
     CHECK(issues.size() == 7);
 }
 
+TEST_CASE("The values an item sets for its look are checked against the look: one it lacks is a warning, one that "
+          "can't be the field's is fatal, both about the item (design L12) [looks][checks]")
+{
+    const LookDefinition look{"seedSphere", {Layer{.eachItem = {{"light", "color"}}}}, {}};
+    ItemModelDefinition fire = Model(12, 60, "seedSphere");
+    fire.renderStyleValues = {{"color", "[0.9, 0.1, 0.2]"}, {"shine", "1"}};
+    ItemModelDefinition water = Model(12, 61, "seedSphere");
+    water.renderStyleValues = {{"color", R"("blue")"}};
+    const std::vector<ItemDataIssue> issues = Check({look}, {fire, water});
+    INFO(Describe(issues));
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "renderStyleValues.shine") == 1);
+    const auto fatal = std::ranges::find_if(issues, [](const ItemDataIssue& issue)
+                                            { return issue.severity == ItemDataIssueSeverity::Fatal; });
+    REQUIRE(fatal != issues.end());
+    CHECK(fatal->group == 12);
+    CHECK(fatal->number == 61);
+    CHECK(fatal->field.starts_with("looks[0].layers[0].light"));
+}
+
+TEST_CASE("A texture an item's values name is checked, about the item (design L12) [looks][checks]")
+{
+    const LookDefinition look{
+        "inventoryTexture",
+        {Layer{.meshes = {{0}}, .texture = "Player/Own.tga", .eachItem = {{"texture", "inventoryTexture"}}}},
+        {}};
+    ItemModelDefinition found = Model(8, 39, "inventoryTexture");
+    found.renderStyleValues = {{"inventoryTexture", R"("Player/Found.tga")"}};
+    ItemModelDefinition missing = Model(8, 40, "inventoryTexture");
+    missing.renderStyleValues = {{"inventoryTexture", R"("Player/Missing.tga")"}};
+    const std::vector<ItemDataIssue> issues = Check({look}, {found, missing}, {"Player/Own.tga", "Player/Found.tga"});
+    INFO(Describe(issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].group == 8);
+    CHECK(issues[0].number == 40);
+    CHECK(issues[0].field == "looks[0].layers[0].texture");
+}
+
+TEST_CASE("The meshes an item's values name are checked on its model, and a mesh of the look the item's values "
+          "replace is not (design L12) [looks][checks]")
+{
+    const LookDefinition look{"inventoryMesh", {Layer{.meshes = {{3}}, .eachItem = {{"meshes", "parts"}}}}, {}};
+    ItemModelDefinition own = Model(7, 1, "inventoryMesh");
+    own.renderStyleValues = {{"parts", "[5]"}};
+    ItemModelDefinition fits = Model(7, 2, "inventoryMesh");
+    fits.renderStyleValues = {{"parts", "[1]"}};
+    const ItemModelDefinition plain = Model(7, 3, "inventoryMesh");
+    const std::vector<ItemDataIssue> issues = Check({look}, {own, fits, plain});
+    INFO(Describe(issues));
+    REQUIRE(issues.size() == 2);
+    CHECK(issues[0].number == 1);
+    CHECK(issues[0].message.find("mesh 5 is not in this item's model") != std::string::npos);
+    CHECK(issues[0].message.find("(a value of this item)") != std::string::npos);
+    CHECK(issues[1].number == 3);
+    CHECK(issues[1].message.find("mesh 3 is not in this item's model") != std::string::npos);
+}
+
 TEST_CASE("A model that is not loaded skips the mesh checks [looks][checks]")
 {
     const std::vector<LookDefinition> looks{{"a", {Layer{.meshes = {{9}}}}, {}}};
@@ -150,6 +207,7 @@ TEST_CASE("The shipped render styles name textures that exist, and items use eac
     REQUIRE_FALSE(Data::Items::HasFatal(models.issues));
     std::vector<ItemDataIssue> issues;
     const RenderStyleCheckInput input{.models = models.models,
+                                      .partModels = models.partModels,
                                       .textureExists =
                                           [&](const std::string& texture)
                                       {
@@ -162,6 +220,47 @@ TEST_CASE("The shipped render styles name textures that exist, and items use eac
                                       },
                                       .meshCount = [](int) { return 0; }};
     CheckRenderStyles(shipped.looks, Source, input, issues);
+    INFO(Describe(issues));
+    CHECK(issues.empty());
+}
+
+TEST_CASE("Item effects are checked against the items that name them: meshes, values, users (design L23) "
+          "[looks][checks]")
+{
+    LookDefinition effect{"pulse"};
+    effect.itemValuesBefore.push_back(
+        {.onlyWhen = {.hiddenMesh = 4}, .values = {.glowMesh = 3, .hiddenMesh = 1}, .glowsLikeLevel = 7});
+    const LookDefinition unused{"quiet"};
+    ItemModelDefinition model = Model(0, 5, "");
+    model.itemEffect = "pulse";
+    model.itemEffectValues = {{"color", "1"}};
+    const std::vector<ItemModelDefinition> models{model};
+    std::vector<ItemDataIssue> issues;
+    const RenderStyleCheckInput input{.models = models, .meshCount = [](int) { return 2; }};
+    CheckItemEffects(std::vector{effect, unused}, Source, input, issues);
+    INFO(Describe(issues));
+    // Meshes 3 and 4 are not in the item's model of two meshes; mesh 1 is.
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].itemValuesBefore[0].glowMesh") == 1);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].itemValuesBefore[0].onlyWhen.hiddenMesh") == 1);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].itemValuesBefore[0].hiddenMesh") == 0);
+    // A value the effect doesn't let each item set, about the item.
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "itemEffectValues.color") == 1);
+    // An effect no item uses; a render style of the item's doesn't count.
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[1].name") == 1);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].name") == 0);
+}
+
+TEST_CASE("The shipped item effects are used by items [looks][checks]")
+{
+    const std::filesystem::path data = MU_TEST_DATA_DIR;
+    RenderStylesLoadResult shipped = LoadLookFile(data / "Effects", LookKind::ItemEffect);
+    REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
+    const Data::Items::ItemModelDataLoadResult models =
+        Data::Items::LoadItemModelDataDirectory(data / "Items" / "Models");
+    REQUIRE_FALSE(Data::Items::HasFatal(models.issues));
+    std::vector<ItemDataIssue> issues;
+    const RenderStyleCheckInput input{.models = models.models, .meshCount = [](int) { return 0; }};
+    CheckItemEffects(shipped.looks, Source, input, issues);
     INFO(Describe(issues));
     CHECK(issues.empty());
 }

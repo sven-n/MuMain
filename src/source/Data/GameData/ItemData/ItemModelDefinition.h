@@ -77,11 +77,16 @@ struct ItemGlow
     // The glow of items +7 and up.
     std::string color = DefaultColor;
     ItemGlowMeshes meshes;
+    // The glow of items +7 and up draws this mesh again after the others, in white light (the Deadly Staff); the
+    // drawing after it keeps the mesh as its glowing mesh.
+    std::optional<int> glowAgainInWhite;
     // The shine of items +11 and up tints the light of the item with this
     // color, or is plain white.
     std::string shineColor = DefaultShineColor;
     bool shineWhite = false;
     ItemGlowMeshes shineMeshes;
+    // The shine of items +0 to +2, a name from the shine list (Data/Effects/Shines.json); empty: none.
+    std::string shineBelowPlus3;
     // The shine of ancient items.
     std::string ancientColor = DefaultAncientColor;
     // Whether excellent items glow; wings and capes do not.
@@ -150,6 +155,11 @@ struct ItemModelDefinition
     // bones, a pulsing glow mesh, its own drawing, ...): the name of an item
     // effect (Render/Items/ItemEffects). Empty: none.
     std::string itemEffect;
+    // The values this item sets for the fields its render style lets each item set (design L12): a value's name and
+    // the value as the look file writes it (JSON text). The look says what each one must be.
+    std::map<std::string, std::string> renderStyleValues;
+    // The same for the item effect's fields.
+    std::map<std::string, std::string> itemEffectValues;
 
     bool Exists() const
     {

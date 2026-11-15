@@ -45,17 +45,6 @@ bool CGMDuelArena::CreateObject(OBJECT* o)
     return false;
 }
 
-CHARACTER* CGMDuelArena::CreateMonster(int iType, int PosX, int PosY, int Key)
-{
-    CHARACTER* pCharacter = NULL;
-
-    // 	switch (iType)
-    // 	{
-    // 	}
-
-    return pCharacter;
-}
-
 bool CGMDuelArena::MoveObject(OBJECT* o)
 {
     if (IsDuelArena() == false)

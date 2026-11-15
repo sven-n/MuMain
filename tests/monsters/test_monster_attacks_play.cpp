@@ -18,6 +18,7 @@
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
+#include "GameLogic/Monsters/MonsterSetupApply.h"
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -469,6 +470,43 @@ TEST_CASE("Monster attacks: the Berserker skill starts an Empire Guardian boss's
         Attack(raymond, ATMON_SKILL_EMPIREGUARDIAN_BERSERKER);
         // In its rage, each attack plays appear.
         CHECK(Attack(raymond, NoMonsterSkill) == MONSTER01_APEAR);
+    }
+}
+
+// A new Empire Guardian boss starts without the rage of the one before it:
+// the spawn hook EmpireGuardianRageReset of its entry (Q-MN36d).
+TEST_CASE("Monster attacks: a new Empire Guardian boss starts without the rage before [monsters][attacks]")
+{
+    struct Boss
+    {
+        int number;
+        int world;
+    };
+    for (const Boss boss :
+         {Boss{MONSTER_RAYMOND, WD_69EMPIREGUARDIAN1}, Boss{MONSTER_LUCAS, WD_69EMPIREGUARDIAN1},
+          Boss{MONSTER_FRED, WD_69EMPIREGUARDIAN1}, Boss{MONSTER_DEVIL_LORD, WD_69EMPIREGUARDIAN1},
+          Boss{MONSTER_HAMMERIZE, WD_70EMPIREGUARDIAN2}, Boss{MONSTER_DUAL_BERSERKER, WD_71EMPIREGUARDIAN3},
+          Boss{MONSTER_JERRY, WD_72EMPIREGUARDIAN4}})
+    {
+        INFO("monster " << boss.number);
+        AttackScope scope(boss.world);
+        CHARACTER& raged = scope.Create(boss.number);
+        Attack(raged, ATMON_SKILL_EMPIREGUARDIAN_BERSERKER);
+        REQUIRE(Attack(raged, NoMonsterSkill) == MONSTER01_APEAR);
+        // The same key: the boss appears again in its slot.
+        CHARACTER& next = scope.Create(boss.number);
+        CHECK(Attack(next, NoMonsterSkill) != MONSTER01_APEAR);
+    }
+
+    // Jerint's adviser ends Jerry's rage, too.
+    {
+        AttackScope scope(WD_72EMPIREGUARDIAN4);
+        CHARACTER& jerry = scope.Create(MONSTER_JERRY);
+        Attack(jerry, ATMON_SKILL_EMPIREGUARDIAN_BERSERKER);
+        REQUIRE(Attack(jerry, NoMonsterSkill) == MONSTER01_APEAR);
+        constexpr int AdviserKey = MonsterRecorder::CreationScope::TestMonsterKey + 4;
+        REQUIRE(CreateMonster(static_cast<EMonsterType>(MONSTER_ADVISER_JERINTEU), 104, 100, AdviserKey) != nullptr);
+        CHECK(Attack(jerry, NoMonsterSkill) != MONSTER01_APEAR);
     }
 }
 

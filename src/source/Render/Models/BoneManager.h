@@ -6,6 +6,8 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
@@ -23,6 +25,9 @@ CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::wstring& name);
 int GetBoneNumber(OBJECT* pObject, const std::wstring& name);
 bool GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position);
 bool GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position);
+// The names the character has registered with their bones, in the order of
+// registering.
+std::vector<std::pair<std::wstring, int>> ListBones(const CHARACTER* pCharacter);
 } // namespace BoneManager
 
 class CBoneManager
@@ -51,6 +56,7 @@ public:
     int GetBoneNumber(OBJECT* pObject, const std::wstring& name);
     bool GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position);
     bool GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position);
+    std::vector<std::pair<std::wstring, int>> ListBones(const CHARACTER* pCharacter) const;
 
     static CBoneManager* GetInstance();
 

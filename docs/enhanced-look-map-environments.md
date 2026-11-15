@@ -1,6 +1,6 @@
 # Enhanced look: map environments
 
-Which environment each map has in `Data/Render/Look.json` and why. The environments themselves (what they set) are in [enhanced-look.md](enhanced-look.md#environments). Classic uses none of this.
+Which environment each map has in `Data/Render/Look.json` and why. Maps in one row with several numbers are the variants of one map; they share one entry of the file, except Devil Square 5–7 (32), whose own entry keeps the default's `mood.sun` but is not read: the client loads Devil Square 5–7 as world 9 and takes world 9's entry ([enhanced-look.md](enhanced-look.md#the-enhanced-values-datarenderlookjson), "Map entries"). The environments themselves (what they set) are in [enhanced-look.md](enhanced-look.md#environments). Classic uses none of this.
 
 **Physical** describes the scene: outdoor, indoor, underground, underwater, aerial or mixed. **Policy** is the lighting it calls for:
 

@@ -4,7 +4,13 @@
 #include "ItemEffects.h"
 #include "ItemModelTable.h"
 
+#include "LookDrawing.h"
+
 #include "Core/Globals/_enum.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/LookData/LookJson.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -12,6 +18,7 @@
 
 #include <algorithm>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace Render
@@ -46,151 +53,6 @@ struct ItemEffect
 Result ApplyNothing(BMD*, const OBJECT*, DrawLook&, int, float&, int&)
 {
     return Result::Applied;
-}
-
-Result ApplyBillOfBalrog(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    Vector(0.5f, 0.5f, 1.5f, b->BodyLight);
-    b->StreamMesh = 0;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh, BITMAP_CHROME);
-    b->StreamMesh = -1;
-    return Result::Applied;
-}
-
-Result ApplyMeshesPerLevel(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->StreamMesh = 0;
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    switch (Level)
-    {
-    case 2:
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-        Vector(0.75f, 0.65f, 0.5f, b->BodyLight);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV, BITMAP_CHROME);
-        break;
-    case 3:
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-        Vector(0.75f, 0.65f, 0.5f, b->BodyLight);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV, BITMAP_CHROME);
-        b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV, BITMAP_CHROME);
-        break;
-    }
-    b->StreamMesh = -1;
-    return Result::Drawn;
-}
-
-Result ApplyFirecracker(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    b->StreamMesh = 0;
-    look.blendMeshLight = 1.f;
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    Vector(1.f, 0.f, 0.f, b->BodyLight);
-    b->LightEnable = true;
-    b->RenderMesh(1, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->StreamMesh = -1;
-    return Result::Drawn;
-}
-
-Result ApplyGmGift(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->LightEnable = true;
-    Vector(0.1f, 0.6f, 0.4f, b->BodyLight);
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return Result::Drawn;
-}
-
-Result ApplyDarkLordScroll(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    b->BeginRender(look.alpha);
-    look.blendMeshLight = 1.f;
-    b->RenderMesh(0, RENDER_TEXTURE, Alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
-    look.blendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(2, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 2, 1 - look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV, look.hiddenMesh);
-    b->EndRender();
-    return Result::Drawn;
-}
-
-Result ApplySpirit(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    switch (Level)
-    {
-    case 0:
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 0, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV, look.hiddenMesh);
-        break;
-
-    case 1:
-        Vector(0.3f, 0.8f, 1.f, b->BodyLight);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 0, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV, look.hiddenMesh);
-        break;
-    }
-    return Result::Drawn;
-}
-
-Result ApplyPotion(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    if (Level > 0)
-        Level = 7;
-    return Result::Applied;
-}
-
-Result ApplyFruits(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    switch (Level)
-    {
-    case 0:
-        Vector(0.0f, 0.5f, 1.0f, b->BodyLight);
-        break;
-    case 1:
-        Vector(1.0f, 0.2f, 0.0f, b->BodyLight);
-        break;
-    case 2:
-        Vector(1.0f, 0.8f, 0.0f, b->BodyLight);
-        break;
-    case 3:
-        Vector(0.6f, 0.8f, 0.4f, b->BodyLight);
-        break;
-    }
-    b->RenderBody(RENDER_METAL, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh, BITMAP_CHROME + 1);
-    b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV, look.hiddenMesh, BITMAP_CHROME + 1);
-    return Result::Drawn;
-}
-
-Result ApplyDevilsEye(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    float sine = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
-
-    look.blendMesh = 1;
-    look.blendMeshLight = sine;
-    look.blendMeshV = (int)WorldTime % 2000 * 0.0005f;
-    Alpha = 2.0f;
-    return Result::Applied;
-}
-
-// The eye's pulse, which the ground item's next draw adds to its light.
-void SpawnDevilsEye(BMD* b, OBJECT* o, vec34_t* bones)
-{
-    float Luminosity = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
-    Vector(Luminosity / 5.0f, Luminosity / 5.0f, Luminosity / 5.0f, o->Light);
 }
 
 void SpawnDevilsKey(BMD* b, OBJECT* o, vec34_t* bones)
@@ -236,56 +98,6 @@ void SpawnRena(BMD* b, OBJECT* o, vec34_t* bones)
 
     Vector(Luminosity * 1.f, Luminosity * 0.5f, Luminosity * 0.f, EffLight);
     CreateSprite(BITMAP_SPARK + 1, o->Position, 2.5f, EffLight, o);
-}
-
-Result ApplyWingsOfDragon(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    look.blendMeshLight = (float)(sinf(WorldTime * 0.001f) + 1.f) / 4.f;
-    return Result::Applied;
-}
-
-Result ApplyWingsOfSoul(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    look.blendMeshLight = (float)sinf(WorldTime * 0.001f) + 1.1f;
-    return Result::Applied;
-}
-
-Result ApplyRedSpirit(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    look.blendMeshLight = sinf(WorldTime * 0.001f) * 0.4f + 0.6f;
-    return Result::Applied;
-}
-
-Result ApplyStaffOfKundun(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    look.blendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-    return Result::Applied;
-}
-
-Result ApplyDivineSet(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    look.blendMeshLight = 1.f;
-    return Result::Applied;
-}
-
-Result ApplyHiddenMeshByLevel(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    switch (Level)
-    {
-    case 0:
-        look.hiddenMesh = 1;
-        break;
-    case 1:
-        look.hiddenMesh = 0;
-        break;
-    }
-    return Result::Applied;
-}
-
-Result ApplyHideMesh1(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
-{
-    look.hiddenMesh = 1;
-    return Result::Applied;
 }
 
 void SpawnWingsOfDarkness(BMD* b, OBJECT* o, vec34_t* bones)
@@ -539,25 +351,9 @@ void SpawnWingOfDimension(BMD* b, OBJECT* o, vec34_t* bones)
 // ------------------------------------------------ the names
 
 const ItemEffect ItemEffects[] = {
-    {"billOfBalrog", ApplyBillOfBalrog},
-    {"meshesPerLevel", ApplyMeshesPerLevel},
-    {"firecracker", ApplyFirecracker},
-    {"gmGift", ApplyGmGift},
-    {"darkLordScroll", ApplyDarkLordScroll},
-    {"spirit", ApplySpirit},
-    {"potion", ApplyPotion},
-    {"fruits", ApplyFruits},
-    {"devilsEye", ApplyDevilsEye, SpawnDevilsEye},
     {"devilsKey", ApplyNothing, SpawnDevilsKey},
     {"devilsInvitation", ApplyNothing, SpawnDevilsInvitation},
     {"rena", ApplyNothing, SpawnRena},
-    {"wingsOfDragon", ApplyWingsOfDragon},
-    {"wingsOfSoul", ApplyWingsOfSoul},
-    {"redSpirit", ApplyRedSpirit},
-    {"staffOfKundun", ApplyStaffOfKundun},
-    {"divineSet", ApplyDivineSet},
-    {"hiddenMeshByLevel", ApplyHiddenMeshByLevel},
-    {"hideMesh1", ApplyHideMesh1},
     {"wingsOfDarkness", ApplyNothing, SpawnWingsOfDarkness},
     {"wingOfStorm", ApplyNothing, SpawnWingOfStorm},
     {"wingOfEternal", ApplyNothing, SpawnWingOfEternal},
@@ -573,53 +369,145 @@ const ItemEffect* FindEffect(std::string_view name)
     return found != std::end(ItemEffects) ? found : nullptr;
 }
 
+// The item effect of an item: one still in code, or one that is data as the item has it.
+struct ItemEffectOf
+{
+    const ItemEffect* code = nullptr;
+    const Data::Looks::LookDefinition* data = nullptr;
+};
+
+// An item effect that is data as an item that sets values of it has it (design L12); those are made again with the
+// effect table, after a change of the item models or of the looks.
+const Data::Looks::LookDefinition* DataEffectOfItem(const Data::Items::ItemModelDefinition& model,
+                                                    const Data::Looks::LookDefinition& effect)
+{
+    if (model.itemEffectValues.empty() || !Data::Looks::SetsEachItem(effect))
+    {
+        return &effect;
+    }
+    static ItemLooks<Data::Looks::LookDefinition> itemEffects;
+    // A value that can't be one keeps the look's; Data Checks names the problem.
+    std::vector<Data::Items::ItemDataIssue> issues;
+    return itemEffects.Keep(
+        Data::Items::MakeItemType(model.group, model.number),
+        Data::Looks::ResolveForItem(effect, model.itemEffectValues, "", issues, Data::Looks::LookKind::ItemEffect));
+}
+
 // The effect of every item type, taken from the item model database after
-// each build of it.
-ItemModelTable<const ItemEffect*> g_itemEffects{[](const Data::Items::ItemModelDefinition& model)
-                                                {
-                                                    // Names that are not effects are drawn without one; the
-                                                    // model loader reports them.
-                                                    return model.itemEffect.empty() ? nullptr
-                                                                                    : FindEffect(model.itemEffect);
-                                                }};
+// each build of it and after each change of the looks that are data.
+ItemModelTable<ItemEffectOf> g_itemEffects{[](const Data::Items::ItemModelDefinition& model) -> ItemEffectOf
+                                           {
+                                               if (model.itemEffect.empty())
+                                               {
+                                                   return {};
+                                               }
+                                               if (const Data::Looks::LookDefinition* data =
+                                                       Data::Looks::g_LookStore.FindItemEffect(model.itemEffect))
+                                               {
+                                                   return {nullptr, DataEffectOfItem(model, *data)};
+                                               }
+                                               // Names that are not effects are drawn without one; the
+                                               // model loader reports them.
+                                               return {FindEffect(model.itemEffect), nullptr};
+                                           },
+                                           [] { return Data::Looks::g_LookStore.GetVersion(); }};
+
+#ifdef _EDITOR
+// PreviewEffect's model and effect, while one lives.
+int s_previewModel = -1;
+const Data::Looks::LookDefinition* s_previewEffect = nullptr;
+#endif
+
+// The model's effect, or the one the Style Editor previews on it.
+ItemEffectOf EffectOfModel(int modelType)
+{
+#ifdef _EDITOR
+    if (s_previewEffect != nullptr && modelType == s_previewModel)
+    {
+        return {nullptr, s_previewEffect};
+    }
+#endif
+    return g_itemEffects.Find(modelType);
+}
 } // namespace
 
+#ifdef _EDITOR
+PreviewEffect::PreviewEffect(int modelType, const Data::Looks::LookDefinition& effect)
+{
+    s_previewModel = modelType;
+    s_previewEffect = &effect;
+}
+
+PreviewEffect::~PreviewEffect()
+{
+    s_previewModel = -1;
+    s_previewEffect = nullptr;
+}
+#endif
+
 bool Exists(std::string_view name)
+{
+    return Data::Looks::g_LookStore.FindItemEffect(name) != nullptr || FindEffect(name) != nullptr;
+}
+
+bool ExistsInCode(std::string_view name)
 {
     return FindEffect(name) != nullptr;
 }
 
 std::span<const std::string_view> GetNames()
 {
-    static const std::vector<std::string_view> names = []
+    static std::vector<std::string_view> names;
+    static int version = -1;
+    if (version != Data::Looks::g_LookStore.GetVersion())
     {
-        std::vector<std::string_view> sorted;
+        version = Data::Looks::g_LookStore.GetVersion();
+        names.clear();
         for (const ItemEffect& effect : ItemEffects)
         {
-            sorted.emplace_back(effect.name);
+            names.emplace_back(effect.name);
         }
-        std::ranges::sort(sorted);
-        return sorted;
-    }();
+        for (const Data::Looks::LookDefinition& look : Data::Looks::g_LookStore.GetItemEffects())
+        {
+            names.emplace_back(look.name);
+        }
+        std::ranges::sort(names);
+        names.erase(std::unique(names.begin(), names.end()), names.end());
+    }
     return names;
 }
 
 Result Apply(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float& alpha, int& level)
 {
-    const ItemEffect* effect = g_itemEffects.Find(modelType);
-    return effect != nullptr ? effect->apply(b, o, look, modelType, alpha, level) : Result::None;
+    const ItemEffectOf effect = EffectOfModel(modelType);
+    if (effect.data != nullptr)
+    {
+        Looks::ApplyItemEffect(*effect.data, b, o, look, alpha, level);
+        return Result::Applied;
+    }
+    return effect.code != nullptr ? effect.code->apply(b, o, look, modelType, alpha, level) : Result::None;
 }
 
 bool Spawns(int modelType)
 {
-    const ItemEffect* effect = g_itemEffects.Find(modelType);
-    return effect != nullptr && effect->spawn != nullptr;
+    const ItemEffectOf effect = EffectOfModel(modelType);
+    if (effect.data != nullptr)
+    {
+        return effect.data->objectLight.has_value();
+    }
+    return effect.code != nullptr && effect.code->spawn != nullptr;
 }
 
 void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])
 {
-    const ItemEffect* effect = g_itemEffects.Find(modelType);
-    if (effect != nullptr && effect->spawn != nullptr)
-        effect->spawn(b, o, bones);
+    const ItemEffectOf effect = EffectOfModel(modelType);
+    if (effect.data != nullptr)
+    {
+        Looks::SpawnItemEffect(*effect.data, o);
+    }
+    else if (effect.code != nullptr && effect.code->spawn != nullptr)
+    {
+        effect.code->spawn(b, o, bones);
+    }
 }
 } // namespace Render::Items::ItemEffects

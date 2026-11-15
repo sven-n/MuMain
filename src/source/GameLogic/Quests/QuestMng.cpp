@@ -3,9 +3,10 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "QuestMng.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "I18N/All.h"
 
 
@@ -41,14 +42,13 @@ void CQuestMng::LoadQuestScript()
 
 void CQuestMng::LoadNPCDialogueScript()
 {
-    FILE* fp = ::_wfopen(QM_NPCDIALOGUE_FILE, L"rb");
-    if (fp == NULL)
+    const Content::Stream fp = Content::OpenIO(QM_NPCDIALOGUE_FILE);
+    if (fp == nullptr)
     {
         wchar_t szMessage[256];
         mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_NPCDIALOGUE_FILE);
         g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
         return;
     }
 
@@ -57,7 +57,7 @@ void CQuestMng::LoadNPCDialogueScript()
     DWORD dwIndex = 0;
     SNPCDialogue sNPCDialogue;
 
-    while (0 != ::fread(abyBuffer, nSize, 1, fp))
+    while (DataFileIO::ReadExact(fp.get(), abyBuffer, nSize))
     {
         ::BuxConvert(abyBuffer, nSize);
 
@@ -66,20 +66,17 @@ void CQuestMng::LoadNPCDialogueScript()
 
         m_mapNPCDialogue.insert(std::make_pair(dwIndex, sNPCDialogue));
     }
-
-    ::fclose(fp);
 }
 
 void CQuestMng::LoadQuestProgressScript()
 {
-    FILE* fp = ::_wfopen(QM_QUESTPROGRESS_FILE, L"rb");
-    if (fp == NULL)
+    const Content::Stream fp = Content::OpenIO(QM_QUESTPROGRESS_FILE);
+    if (fp == nullptr)
     {
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_QUESTPROGRESS_FILE);
         g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
         return;
     }
 
@@ -88,7 +85,7 @@ void CQuestMng::LoadQuestProgressScript()
     DWORD dwIndex = 0;
     SQuestProgress sQuestProgress;
 
-    while (0 != ::fread(abyBuffer, nSize, 1, fp))
+    while (DataFileIO::ReadExact(fp.get(), abyBuffer, nSize))
     {
         ::BuxConvert(abyBuffer, nSize);
 
@@ -97,20 +94,17 @@ void CQuestMng::LoadQuestProgressScript()
 
         m_mapQuestProgress.insert(std::make_pair(dwIndex, sQuestProgress));
     }
-
-    ::fclose(fp);
 }
 
 void CQuestMng::LoadQuestWordsScript()
 {
-    Core::Utilities::FileHandle fp(::_wfopen(QM_QUESTWORDS_FILE, L"rb"));
+    const Content::Stream fp = Content::OpenIO(QM_QUESTWORDS_FILE);
     if (!fp)
     {
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_QUESTWORDS_FILE);
         g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
         return;
     }
 
@@ -127,7 +121,7 @@ void CQuestMng::LoadQuestWordsScript()
     char rawWords[1024] { };
     wchar_t szWords[1024] { };
 
-    while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp.get()))
+    while (DataFileIO::ReadExact(fp.get(), &sQuestWordsHeader, nSize))
     {
         ::BuxConvert(reinterpret_cast<BYTE*>(&sQuestWordsHeader), nSize);
 

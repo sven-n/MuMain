@@ -37,3 +37,16 @@ typedef void(CORECLR_DELEGATE_CALLTYPE* SendPatchCheckRequest)(int32_t, BYTE , B
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPatchVersionOkay)(int32_t);
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendClientNeedsPatch)(int32_t, BYTE , const char16_t* );
+
+// The exports the senders above look up; the bridge resolves them all at startup.
+inline constexpr const char* kManagedExports_ConnectServer[] = {
+    "SendConnectionInfoRequest075",
+    "SendConnectionInfoRequest",
+    "SendConnectionInfo",
+    "SendServerListRequest",
+    "SendServerListRequestOld",
+    "SendHello",
+    "SendPatchCheckRequest",
+    "SendPatchVersionOkay",
+    "SendClientNeedsPatch",
+};

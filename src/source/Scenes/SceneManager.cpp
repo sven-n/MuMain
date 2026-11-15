@@ -8,7 +8,9 @@
 #include "Audio/SoundSource.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Platform/UserFolder.h"
 #include <cstdio>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -16,6 +18,7 @@
 #include <cmath>
 #include <iterator>
 #include <thread>
+#include <SDL3/SDL_timer.h>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
@@ -105,7 +108,7 @@ namespace
         MouseLButtonPush = false;
         MouseRButtonPush = false;
         MouseMButtonPush = false;
-        Core::Input::ClearLeftMouseButtonPressEdge();
+        Core::Input::ClearPressEdges();
     }
 }
 
@@ -235,29 +238,67 @@ void SetTargetFps(double targetFps)
     g_frameTiming.SetTargetFps(targetFps);
 }
 
+namespace
+{
+Uint64 s_framesPausedUntilMs = 0;
+} // namespace
+
+void PauseFrames(unsigned int seconds)
+{
+    s_framesPausedUntilMs = SDL_GetTicks() + seconds * Uint64{1000};
+}
+
+bool FramesPaused()
+{
+    return SDL_GetTicks() < s_framesPausedUntilMs;
+}
+
 double GetTargetFps()
 {
     return g_frameTiming.GetTargetFps();
 }
 
+// Where a screenshot without a path of its own goes, in the user folder.
+static constexpr char ScreenshotFolderName[] = "Screenshots";
+// "Screen(11_15-14_05)-0001.jpg" and its terminator, with room to spare.
+static constexpr std::size_t ScreenshotNameCapacity = 64;
+
+static std::wstring InScreenshotFolder(const wchar_t* fileName)
+{
+    const std::filesystem::path folder = Core::Platform::UserFolder() / ScreenshotFolderName;
+    std::error_code error;
+    std::filesystem::create_directories(folder, error);
+    return (folder / fileName).wstring();
+}
+
 /**
- * @brief Generates a timestamped filename and message for screenshot capture.
- * @param outFileName Buffer to receive the filename
+ * @brief Generates a timestamped file path and message for screenshot capture.
+ * @param outFileName Buffer to receive the file's path
+ * @param fileNameSize Its size, in characters
  * @param outMessage Buffer to receive the log message
  * @param messageSize Its size, in characters
+ * @return false when the path doesn't fit the buffer
  */
-static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage, size_t messageSize)
+static bool GenerateScreenshotFilename(wchar_t* outFileName, size_t fileNameSize, wchar_t* outMessage,
+                                       size_t messageSize)
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
-    mu_swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg",
-        st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-    mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
+    wchar_t name[ScreenshotNameCapacity];
+    mu_swprintf(name, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
+    outFileName[0] = L'\0';
+    if (!Core::Text::AppendWideString(outFileName, fileNameSize, InScreenshotFolder(name).c_str()))
+    {
+        mu::log::Get("core")->warn("Screenshot: the screenshot folder's path is too long");
+        return false;
+    }
+    mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, name);
 
     // The server list's screenshot template, " [Valhalla / MaxiDK]", as much of it as fits.
     const std::wstring server =
         L" " + g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::Screenshot, Hero->ID);
     Core::Text::AppendWideString(outMessage, messageSize, server.c_str());
+    return true;
 }
 
 /**
@@ -279,7 +320,7 @@ static std::wstring GenerateScriptedScreenshotFilename()
                 st.wSecond, scriptedCaptureCount);
     scriptedCaptureCount = (scriptedCaptureCount + 1) % 10000;
 
-    return fileName;
+    return InScreenshotFolder(fileName);
 }
 
 static ScreenshotCaptureState g_screenshotCapture;
@@ -415,7 +456,10 @@ static bool BeginScreenshotCapture(const std::wstring& fileName, const std::wstr
 static void RequestScreenshot()
 {
     wchar_t screenshotText[256];
-    GenerateScreenshotFilename(GrabFileName, screenshotText, std::size(screenshotText));
+    if (!GenerateScreenshotFilename(GrabFileName, std::size(GrabFileName), screenshotText, std::size(screenshotText)))
+    {
+        return;
+    }
 
     if (BeginScreenshotCapture(GrabFileName, screenshotText))
     {
@@ -773,7 +817,12 @@ static void UpdateLoginSceneReconnect()
  */
 static void CheckServerConnection()
 {
-    if (SocketClient != nullptr && SocketClient->IsConnected())
+    if (SocketClient != nullptr && SocketClient->State() != Network::ConnectionState::Closed)
+    {
+        return;
+    }
+
+    if (SocketClient != nullptr && SocketClient->FailedToOpen() && FinishFailedConnect())
     {
         return;
     }
@@ -1259,6 +1308,26 @@ void MainScene(HDC hDC)
         wchar_t errorMessage[256] = {};
         mbstowcs(errorMessage, e.what(), 255);
         g_ErrorReport.Write(L"Exception in MainScene: %ls\r\n", errorMessage);
+    }
+}
+
+void PrepareSceneBeforeFrame()
+{
+    PumpWebzenScene();
+    // Deleting textures inside a frame drops that frame's game draws, so the title goes before it begins.
+    if (SceneFlag != WEBZEN_SCENE)
+    {
+        EndWebzenScene();
+    }
+    if (SceneFlag == LOG_IN_SCENE && !InitLogIn)
+    {
+        InitLogIn = true;
+        CreateLogInScene();
+    }
+    else if (SceneFlag == CHARACTER_SCENE && !InitCharacterScene && CurrentProtocolState >= RECEIVE_CHARACTERS_LIST)
+    {
+        InitCharacterScene = true;
+        CreateCharacterScene();
     }
 }
 

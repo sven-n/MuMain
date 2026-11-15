@@ -59,54 +59,14 @@ bool GMEmpireGuardian2::CreateObject(OBJECT* o)
     return false;
 }
 
-CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int Key)
+bool GMEmpireGuardian2::ResetRage(std::string_view boss)
 {
-    CHARACTER* pCharacter = g_EmpireGuardian1.CreateMonster(iType, PosX, PosY, Key);
-
-    if (NULL != pCharacter)
+    if (boss == "Bermont")
     {
-        return pCharacter;
-    }
-
-    switch (iType)
-    {
-    case MONSTER_HAMMERIZE:
-    {
-        OpenMonsterModel(MONSTER_MODEL_HAMMERIZE);
-        pCharacter = CreateCharacter(Key, MODEL_HAMMERIZE, PosX, PosY);
-
-        pCharacter->Object.Scale = 1.3f;
-
         m_bCurrentIsRage_Bermont = false;
+        return true;
     }
-    break;
-    case MONSTER_ATICLES_HEAD:
-    {
-        OpenMonsterModel(MONSTER_MODEL_ATICLES_HEAD);
-        pCharacter = CreateCharacter(Key, MODEL_ATICLES_HEAD, PosX, PosY);
-
-        pCharacter->Object.Scale = 1.35f;
-    }
-    break;
-    case MONSTER_DARK_GHOST:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DARK_GHOST);
-        pCharacter = CreateCharacter(Key, MODEL_DARK_GHOST, PosX, PosY);
-
-        OBJECT* pObject = &pCharacter->Object;
-        pObject->Scale = 1.3f;
-
-        MoveEye(pObject, &Models[pObject->Type], 79, 33);
-        CreateJoint(BITMAP_JOINT_ENERGY, pObject->Position, pObject->Position, pObject->Angle, 22, pObject, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, pObject->Position, pObject->Position, pObject->Angle, 23, pObject, 30.f);
-    }
-    break;
-
-    default:
-        return pCharacter;
-    }
-
-    return pCharacter;
+    return false;
 }
 
 bool GMEmpireGuardian2::MoveObject(OBJECT* o)

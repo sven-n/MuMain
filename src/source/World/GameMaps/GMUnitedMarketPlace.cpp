@@ -51,27 +51,6 @@ bool GMUnitedMarketPlace::CreateObject(OBJECT* o)
     return false;
 }
 
-CHARACTER* GMUnitedMarketPlace::CreateMonster(int iType, int PosX, int PosY, int Key)
-{
-    CHARACTER* pCharacter = NULL;
-
-    //	switch (iType)
-    // 	{
-    // 	case 526:
-    // 		{
-    // 			OpenMonsterModel(MONSTER_MODEL_AEGIS_3);
-    // 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+185, PosX, PosY);
-    // 			wcscpy(pCharacter->ID, L"석상");
-    // 			pCharacter->Object.m_bRenderShadow = false;
-    // 			pCharacter->Object.Scale = 0.6f;
-    // 			pCharacter->Object.LifeTime = 100;
-    // 		}
-    // 		break;
-    // 	}
-
-    return pCharacter;
-}
-
 bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 {
     if (IsUnitedMarketPlace() == false)

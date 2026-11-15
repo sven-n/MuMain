@@ -778,7 +778,7 @@ static std::uint8_t g_tabBar = 0;
             }
             else
             {
-                GetSpecialOptionText(shown.Type, TextList[TextNum], shown.Special[i], shown.SpecialValue[i], 0);
+                GetSpecialOptionText(TextList[TextNum], shown.Special[i], shown.SpecialValue[i], 0);
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
                 TextBold[TextNum] = false;
                 ++TextNum;

@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "I18N/All.h"
 #include "Render/Look/TuningControls.h"
 #include "Render/Look/TuningSession.h"
 #include "UI/Options/TuningRows.h"
@@ -204,6 +205,8 @@ TEST_CASE("both option themes bind the same tuning groups, rows, sliders and res
         // One slider template per row list: pointer, drag, keys and every way an interaction ends.
         const std::size_t lists = Count(markup, "data-for=\"row : tuning_");
         CHECK(lists == 8);
+        // The note that the look shows as authored, without the player's values.
+        CHECK(Count(markup, "data-class-hidden=\"tuning_preview_note == ''\">{{tuning_preview_note}}") == 1);
         for (const char* binding :
              {"data-event-mousedown=\"option_tuning_pointer(row.control)\"",
               "data-event-drag=\"option_tuning_pointer(row.control)\"",
@@ -218,4 +221,12 @@ TEST_CASE("both option themes bind the same tuning groups, rows, sliders and res
         CHECK(Count(markup, "option_reset_all_tuning") == 1);
         CHECK(Count(markup, "{{tuning_save_message}}") == 1);
     }
+}
+
+TEST_CASE("the tuning says while the look shows as authored that its values are left out [ui][options][tuning]")
+{
+    I18N::SetLocale("en");
+    CHECK(UI::Options::TuningPreviewNote(Render::Look::LookPreview::Player).empty());
+    CHECK(UI::Options::TuningPreviewNote(Render::Look::LookPreview::Authoring).find("$look preview player") !=
+          std::string::npos);
 }

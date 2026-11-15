@@ -27,6 +27,7 @@ namespace
 {
 // Keeps the table's column widths and hidden columns.
 constexpr char TableId[] = "##MonsterTranslations";
+constexpr char TalkTableId[] = "##MonsterTalkTexts";
 // Pixel width before the editor UI scale.
 constexpr float TooltipWrapWidth = 420.0f;
 
@@ -129,18 +130,36 @@ MuMonsterTranslationsUI& MuMonsterTranslationsUI::GetInstance()
 void MuMonsterTranslationsUI::Render(bool* open)
 {
     m_grid.BeginFrame();
+    m_talkGrid.BeginFrame();
 
     // One of the monster tools: their docking, undo keys and selection.
     if (ToolWindow::Begin(I18N::Editor::MonsterTranslations, WindowIds::MonsterTranslations, open))
     {
-        m_grid.UpdateCountsAndLabels(m_rows);
         RenderFileActions();
-        m_grid.RenderToolbar(m_rows);
-        ImGui::Separator();
-        m_grid.RenderTable(m_rows, TableId);
+        if (ImGui::BeginTabBar("##Texts"))
+        {
+            if (ImGui::BeginTabItem(I18N::Editor::Names))
+            {
+                m_grid.UpdateCountsAndLabels(m_rows);
+                m_grid.RenderToolbar(m_rows);
+                ImGui::Separator();
+                m_grid.RenderTable(m_rows, TableId);
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem(I18N::Editor::TalkTexts))
+            {
+                m_talkGrid.UpdateCountsAndLabels(m_talkRows);
+                m_talkGrid.RenderToolbar(m_talkRows);
+                ImGui::Separator();
+                m_talkGrid.RenderTable(m_talkRows, TalkTableId);
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
     }
     ToolWindow::End();
     m_grid.CommitEditNotDrawn(m_rows);
+    m_talkGrid.CommitEditNotDrawn(m_talkRows);
 }
 
 void MuMonsterTranslationsUI::RenderFileActions()

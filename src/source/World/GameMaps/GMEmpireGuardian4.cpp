@@ -66,86 +66,19 @@ bool GMEmpireGuardian4::CreateObject(OBJECT* o)
     return false;
 }
 
-CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int Key)
+bool GMEmpireGuardian4::ResetRage(std::string_view boss)
 {
-    CHARACTER* pCharacter = g_EmpireGuardian1.CreateMonster(iType, PosX, PosY, Key);
-
-    if (NULL != pCharacter)
+    if (boss == "Gaion")
     {
-        return pCharacter;
-    }
-
-    switch (iType)
-    {
-    case MONSTER_GAYION_THE_GLADIATOR:
-    {
-        OpenMonsterModel(MONSTER_MODEL_GAYION);
-        pCharacter = CreateCharacter(Key, MODEL_GAYION, PosX, PosY);
-        memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
-        std::wstring(L"Gayion The Gladiator").copy(pCharacter->ID, 19);
-
-        gLoadData.AccessModel(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\",
-                              L"Boss_Karane_sword_left01");
-        gLoadData.AccessModel(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\",
-                              L"Boss_Karane_sword_left02");
-        gLoadData.AccessModel(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\",
-                              L"Boss_Karane_sword_right01");
-        gLoadData.AccessModel(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\",
-                              L"Boss_Karane_sword_right02");
-        gLoadData.AccessModel(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\",
-                              L"Boss_Karane_sword_main01");
-
-        gLoadData.OpenTexture(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
-        gLoadData.OpenTexture(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
-        gLoadData.OpenTexture(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
-        gLoadData.OpenTexture(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
-        gLoadData.OpenTexture(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
-
-        pCharacter->Object.Scale = 1.40f;
-
         m_bCurrentIsRage_BossGaion = false;
+        return true;
     }
-    break;
-    case MONSTER_JERRY:
-    case MONSTER_ADVISER_JERINTEU:
+    if (boss == "Jerint")
     {
-        OpenMonsterModel(MONSTER_MODEL_JERRY);
-        pCharacter = CreateCharacter(Key, MODEL_JERRY, PosX, PosY);
-        memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
-        std::wstring(L"Jerry The Adviseru").copy(pCharacter->ID, 19);
-        pCharacter->Object.Scale = 1.45f;
-
         m_bCurrentIsRage_Jerint = false;
+        return true;
     }
-    break;
-    case MONSTER_STAR_GATE:
-    {
-        OpenMonsterModel(MONSTER_MODEL_STAR_GATE);
-        pCharacter = CreateCharacter(Key, MODEL_STAR_GATE, PosX, PosY);
-        memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
-        std::wstring(L"Star Gate").copy(pCharacter->ID, 10);
-        pCharacter->Object.m_bRenderShadow = false;
-        pCharacter->Object.Scale = 1.25f;
-    }
-    break;
-
-    case MONSTER_RUSH_GATE:
-    {
-        OpenMonsterModel(MONSTER_MODEL_RUSH_GATE);
-        pCharacter = CreateCharacter(Key, MODEL_RUSH_GATE, PosX, PosY);
-        memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
-        std::wstring(L"Rush Gate").copy(pCharacter->ID, 10);
-        pCharacter->Object.m_bRenderShadow = false;
-        pCharacter->Object.LifeTime = 100;
-        pCharacter->Object.Scale = 1.25f;
-    }
-    break;
-
-    default:
-        return pCharacter;
-    }
-
-    return pCharacter;
+    return false;
 }
 
 bool GMEmpireGuardian4::MoveObject(OBJECT* o)

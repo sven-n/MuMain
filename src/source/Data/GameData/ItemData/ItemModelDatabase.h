@@ -3,6 +3,7 @@
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <span>
@@ -71,6 +72,15 @@ public:
     }
     // Returns nullptr for names that are not shared models.
     const SharedItemModel* FindSharedModel(std::string_view name) const;
+
+    // The part models (PartModels.json, design L28), as loaded.
+    void SetPartModels(std::span<const PartModel> partModels);
+    std::span<const PartModel> GetPartModels() const
+    {
+        return m_partModels;
+    }
+    // nullptr for a name no part model has.
+    const PartModel* FindPartModel(std::string_view name) const;
     // Adds the shared model or replaces the one of its name; the model
     // entries that name it are not changed. For the item editor.
     void SetSharedModel(const SharedItemModel& sharedModel);
@@ -99,6 +109,7 @@ private:
     std::vector<ItemModelDefinition> m_models;
     std::vector<ItemGlowColors> m_glowColors;
     std::vector<SharedItemModel> m_sharedModels;
+    std::vector<PartModel> m_partModels;
     int m_modelCount = 0;
     int m_version = 0;
 };

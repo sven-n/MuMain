@@ -27,6 +27,9 @@ namespace
 constexpr char PopupId[] = "###ItemMoveDialog";
 constexpr float FieldWidth = 220.0f;
 constexpr ImVec4 NotFreeColor{1.0f, 0.4f, 0.4f, 1.0f};
+// The note under the question about the monsters wraps at this many font
+// sizes (an auto-resized popup has no width).
+constexpr float WrapEms = 30.0f;
 } // namespace
 
 void CItemMoveDialog::Open(int itemType)
@@ -91,14 +94,40 @@ void CItemMoveDialog::Render()
     {
         ImGui::TextDisabled("%s", I18N::Editor::TheItemIsWornOrInAnItemWindowItIsNotMovedOrRemoved);
     }
-    ImGui::BeginDisabled(!free || held);
-    if (ImGui::Button(I18N::Editor::Move))
+    // The monsters that wear it name its number: the move asks whether they
+    // follow it (D60, Q-MN41).
+    const bool worn = !m_usage.monsters.empty();
+    if (worn)
     {
-        if (g_ItemEdits.MoveItem(I18N::Editor::MoveItem, m_itemType, target))
+        ImGui::TextUnformatted(I18N::Editor::UpdateThemToTheNewNumberAsWell);
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * WrapEms);
+        ImGui::TextDisabled("%s", I18N::Editor::WearersAfterAMoveOnly);
+        ImGui::PopTextWrapPos();
+    }
+    ImGui::BeginDisabled(!free || held);
+    const auto move = [&](bool updateMonsters)
+    {
+        if (g_ItemEdits.MoveItem(I18N::Editor::MoveItem, m_itemType, target, updateMonsters))
         {
             g_ItemSelection.Select(target);
         }
         ImGui::CloseCurrentPopup();
+    };
+    if (!worn && ImGui::Button(I18N::Editor::Move))
+    {
+        move(false);
+    }
+    if (worn && ImGui::Button(I18N::Editor::MoveAndUpdateThem))
+    {
+        move(true);
+    }
+    if (worn)
+    {
+        ImGui::SameLine();
+        if (ImGui::Button(I18N::Editor::MoveOnly))
+        {
+            move(false);
+        }
     }
     ImGui::EndDisabled();
     ImGui::SameLine();

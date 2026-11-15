@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/LookData/LookDefinition.h"
 
 #include <functional>
@@ -17,6 +18,8 @@ struct RenderStyleCheckInput
 {
     // The model entries; those that name a look are its users.
     std::span<const Items::ItemModelDefinition> models;
+    // The part models (design L28); those that name a look use it too.
+    std::span<const Items::PartModel> partModels;
     // Whether the game finds the texture file a layer names ("Effect/Chrome01.jpg").
     std::function<bool(const std::string& texture)> textureExists;
     // The number of meshes of an item's model (by item type); 0 when the model is not loaded, which skips its mesh
@@ -29,6 +32,15 @@ struct RenderStyleCheckInput
 // item's model doesn't have (warning, about that item), a look no item uses (warning).
 void CheckRenderStyles(std::span<const LookDefinition> looks, const std::string& source,
                        const RenderStyleCheckInput& input, std::vector<Items::ItemDataIssue>& issues);
+
+// Appends the problems of the item effects `looks`: a mesh number an item's model doesn't have (warning, about that
+// item), a value an item sets that the effect doesn't let it set, an effect no item uses (warning).
+void CheckItemEffects(std::span<const LookDefinition> looks, const std::string& source,
+                      const RenderStyleCheckInput& input, std::vector<Items::ItemDataIssue>& issues);
+
+// CheckRenderStyles or CheckItemEffects, by the kind of the looks.
+void CheckLooks(LookKind kind, std::span<const LookDefinition> looks, const std::string& source,
+                const RenderStyleCheckInput& input, std::vector<Items::ItemDataIssue>& issues);
 
 // "Effect/Chrome01.jpg" as the file the game reads, "Data/Effect/Chrome01.OZJ" (.tga: .OZT); empty when the game
 // loads no texture of that kind.

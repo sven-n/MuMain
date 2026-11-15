@@ -20,9 +20,11 @@ namespace
 // clang-format off
 constexpr ESound SoundIdsOfMonsters[] = {
     SOUND_TRAP01,
+    SOUND_ASSASSIN,
     SOUND_THUNDERS01,
     SOUND_EXPLOTION01,
     SOUND_METEORITE01,
+    SOUND_CHAOS_FALLING_STONE,
     SOUND_FLAME,
     SOUND_BLOODATTACK,
     SOUND_CHAOS_THUNDER01,
@@ -72,6 +74,7 @@ constexpr ESound SoundIdsOfMonsters[] = {
     SOUND_MONSTER_LVATTACK2,
     SOUND_MONSTER_LVDEATH,
     SOUND_DARKLORD_DEAD,
+    SOUND_BC_EROHIM_ENTER,
     SOUND_AIDA_BLUEGOLEM_MOVE1,
     SOUND_AIDA_BLUEGOLEM_MOVE2,
     SOUND_AIDA_BLUEGOLEM_ATTACK1,
@@ -158,6 +161,7 @@ constexpr ESound SoundIdsOfMonsters[] = {
     SOUND_KANTURU_2ND_DRED_ATTACK1,
     SOUND_KANTURU_2ND_DRED_ATTACK2,
     SOUND_KANTURU_2ND_DRED_DIE,
+    SOUND_KANTURU_3RD_NIGHTMARE_TELE,
     SOUND_3RD_CHANGE_UP_BG_FIREPILLAR,
     SOUND_ELBELAND_RABBITSTRANGE_ATTACK01,
     SOUND_ELBELAND_RABBITSTRANGE_DEATH01,
@@ -339,5 +343,10 @@ std::optional<int> FindMonsterSoundId(std::string_view name)
         return std::nullopt;
     }
     return static_cast<int>(*id);
+}
+
+std::string_view GetFirstMonsterSoundName()
+{
+    return Audio::SoundIds::NameOf(SoundIdsOfMonsters[0]);
 }
 } // namespace Data::Monsters

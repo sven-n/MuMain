@@ -3,7 +3,8 @@
 #include "ItemGlow.h"
 #include "ItemDisplay.h"
 #include "ItemModelLookup.h"
-#include "ItemRenderStyles.h"
+#include "ItemModelTable.h"
+#include "LookDrawing.h"
 
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/w_ObjectInfo.h"
@@ -146,19 +147,42 @@ bool HasExcellentGlow(int modelType)
     return Get(modelType).excellent;
 }
 
+const Data::Effects::Shine* FindShineBelowPlus3(int modelType)
+{
+    // The name is looked up when the item models or the shines change, not per draw.
+    static ItemModelTable<const Data::Effects::Shine*> shines(
+        [](const ItemModelDefinition& model) -> const Data::Effects::Shine*
+        {
+            const std::string& name = model.glow.shineBelowPlus3;
+            return name.empty() ? nullptr : g_Shines.Find(name);
+        },
+        [] { return g_Shines.GetVersion(); });
+    return shines.Find(modelType);
+}
+
+int RenderTypeOf(const Data::Effects::ShinePass& pass)
+{
+    return (pass.reflection ? Looks::RenderFlagOf(pass.motion) : RENDER_TEXTURE) | RENDER_BRIGHT;
+}
+
 void RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture)
 {
-    if (Styles::RenderGlow(b, o, look, modelType, alpha, renderType, texture))
-    {
-        return;
-    }
     if (IsPhoenixSoulInventoryModel(modelType))
     {
         RenderPhoenixSoulInventoryMesh(b, o, look, alpha, renderType,
                                        (renderType & RENDER_METAL) ? PhoenixSoulInventoryMetalDraws : 1);
         return;
     }
-    RenderMeshes(b, o, look, Get(modelType).meshes, alpha, renderType, texture);
+    const ItemGlow& glow = Get(modelType);
+    RenderMeshes(b, o, look, glow.meshes, alpha, renderType, texture);
+    if (glow.glowAgainInWhite)
+    {
+        const int mesh = *glow.glowAgainInWhite;
+        look.blendMesh = mesh;
+        Vector(1.f, 1.f, 1.f, b->BodyLight);
+        b->RenderMesh(mesh, renderType, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+    }
 }
 
 void RenderShine(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture)

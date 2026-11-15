@@ -16,8 +16,6 @@ namespace M39Kanturu3rd {
     bool RenderKanturu3rdObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
     void RenderKanturu3rdAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
-    CHARACTER* CreateKanturu3rdMonster(int iType, int PosX, int PosY, int Key);
-
     bool MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b);
     void MoveKanturu3rdBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
 

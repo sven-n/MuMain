@@ -8,7 +8,10 @@
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/DataHandler/LookData/LookDataHandler.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Render/Items/ItemRenderStyles.h"
+#include "Render/Items/LookDrawing.h"
 #include "Render/Models/DrawLook.h"
 #include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
@@ -17,11 +20,14 @@
 #include "Render/Sprites/TextureScript.h"
 
 #include <cstdint>
+#include <filesystem>
 #include <span>
+#include <utility>
 #include <vector>
 
-// The chrome of the Magic Gladiator sets (stormCrow, thunderHawk, hurricane), drawn mesh by mesh: under a texture
-// with holes, over the others, with RenderBody's texture scripts.
+// The chrome of the Magic Gladiator sets (stormCrow, thunderHawk, hurricane), looks in Data/Effects/RenderStyles.json
+// with a reflection under the holes (design L8): drawn mesh by mesh, under a texture with holes, over the others, with
+// RenderBody's texture scripts.
 namespace
 {
 using Render::ModelDrawing::MeshDraw;
@@ -55,7 +61,8 @@ struct DrawerScope
     }
 };
 
-// Two textures of a 2 x 2 RGBA image, one with a pixel the alpha test drops, one solid; loaded without a GPU.
+// Two textures of a 2 x 2 RGBA image, one with a pixel the alpha test drops, one solid, and the chrome the looks name
+// (Effect/bab2.jpg); loaded without a GPU.
 class TestTextures
 {
 public:
@@ -64,12 +71,14 @@ public:
         Render::Sprites::SetGpuUploadsSkipped(true);
         withHoles = Load(L"Data\\Item\\test_set_holes.tga", true);
         solid = Load(L"Data\\Item\\test_set_solid.tga", false);
+        chrome = Load(L"Data\\Effect\\bab2.jpg", false);
     }
 
     ~TestTextures()
     {
         Bitmaps.UnloadImage(withHoles, true);
         Bitmaps.UnloadImage(solid, true);
+        Bitmaps.UnloadImage(chrome, true);
         Render::Sprites::SetGpuUploadsSkipped(false);
     }
 
@@ -78,6 +87,7 @@ public:
 
     GLuint withHoles = 0;
     GLuint solid = 0;
+    GLuint chrome = 0;
 
 private:
     static GLuint Load(const wchar_t* name, bool hole)
@@ -91,19 +101,38 @@ private:
     }
 };
 
+// The shipped looks in g_LookStore, their textures found (the test textures' chrome), for one test.
+struct ShippedLooksScope
+{
+    ShippedLooksScope()
+    {
+        Data::Looks::RenderStylesLoadResult shipped =
+            Data::Looks::LoadRenderStyleFile(std::filesystem::path(MU_TEST_DATA_DIR) / "Effects");
+        REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
+        Data::Looks::g_LookStore.SetRenderStyles(std::move(shipped.looks));
+        Render::Items::Looks::PrepareTextures();
+    }
+    ~ShippedLooksScope()
+    {
+        Data::Looks::g_LookStore.SetRenderStyles({});
+    }
+    ShippedLooksScope(const ShippedLooksScope&) = delete;
+    ShippedLooksScope& operator=(const ShippedLooksScope&) = delete;
+};
+
 // A Storm Crow armor whose meshes are: 0 with holes, 1 solid with an alpha channel, 2 with holes but glowing by its
 // texture script (_R), 3 hidden by its texture script (_H), 4 with holes and the draw's hidden mesh.
 class TestSet
 {
 public:
-    explicit TestSet(const TestTextures& textures)
+    explicit TestSet(const TestTextures& textures, const char* style = "stormCrow")
     {
         Data::Items::ItemModelDefinition entry;
         entry.group = ArmorGroup;
         entry.number = ITEM_STORM_CROW_ARMOR - ITEM_ARMOR;
         // A model entry needs a file to count (ItemModelDefinition::Exists).
         entry.file = "Data/Player/ArmorMale16.bmd";
-        entry.renderStyle = "stormCrow";
+        entry.renderStyle = style;
         g_ItemModelDatabase.Build(std::span(&entry, 1), Data::Effects::GlowColorList{});
 
         REQUIRE(m_glowing.parsingTScriptA(m_glowingName));
@@ -167,11 +196,13 @@ bool IsChrome(const MeshDraw& draw)
 {
     return (draw.flags & RENDER_CHROME) != 0;
 }
+
 } // namespace
 
 TEST_CASE("The set chrome goes under a texture with holes and over a solid or glowing one [render][items][set_chrome]")
 {
     const TestTextures textures;
+    const ShippedLooksScope looks;
     REQUIRE(Bitmaps.FindTexture(textures.withHoles) != nullptr);
     CHECK(Bitmaps.FindTexture(textures.withHoles)->hasHoles);
     CHECK_FALSE(Bitmaps.FindTexture(textures.solid)->hasHoles);
@@ -184,6 +215,7 @@ TEST_CASE("The set chrome goes under a texture with holes and over a solid or gl
     CHECK(draws[0].mesh == 0);
     CHECK(IsChrome(draws[0]));
     CHECK((draws[0].flags & RENDER_TWOSIDED) != 0);
+    CHECK(draws[0].texture == static_cast<int>(textures.chrome));
     CHECK(draws[1].mesh == 0);
     CHECK_FALSE(IsChrome(draws[1]));
     // A solid texture with an alpha channel: the chrome added over it.
@@ -203,6 +235,7 @@ TEST_CASE("The set chrome goes under a texture with holes and over a solid or gl
 TEST_CASE("A see-through set gets every chrome over its texture, a doppelganger none [render][items][set_chrome]")
 {
     const TestTextures textures;
+    const ShippedLooksScope looks;
     TestSet set(textures);
     set.look.alpha = 0.5f;
 
@@ -222,4 +255,36 @@ TEST_CASE("A see-through set gets every chrome over its texture, a doppelganger 
                                                   RENDER_TEXTURE | RENDER_DOPPELGANGER));
     }
     CHECK(drawer.draws.empty());
+}
+
+TEST_CASE("The Thunder Hawk's chrome is drawn in a tint of the model's light, which the look leaves as it found it "
+          "[render][items][set_chrome]")
+{
+    const TestTextures textures;
+    const ShippedLooksScope looks;
+    TestSet set(textures, "thunderHawk");
+    Vector(0.6f, 0.7f, 0.8f, set.model.BodyLight);
+
+    const std::vector<MeshDraw> draws = set.Draw(RENDER_TEXTURE);
+
+    REQUIRE(draws.size() == 6);
+    for (const MeshDraw& draw : draws)
+    {
+        CAPTURE(draw.mesh);
+        if (IsChrome(draw))
+        {
+            CHECK(draw.texture == static_cast<int>(textures.chrome));
+            CHECK(draw.bodyLight[0] == 0.85f * 0.6f);
+            CHECK(draw.bodyLight[1] == 0.85f * 0.7f);
+            CHECK(draw.bodyLight[2] == 1.2f * 0.8f);
+        }
+        else
+        {
+            CHECK(draw.bodyLight[0] == 0.6f);
+            CHECK(draw.bodyLight[2] == 0.8f);
+        }
+    }
+    CHECK(set.model.BodyLight[0] == 0.6f);
+    CHECK(set.model.BodyLight[1] == 0.7f);
+    CHECK(set.model.BodyLight[2] == 0.8f);
 }

@@ -38,6 +38,12 @@ In areas that are already data-driven (items, monsters, effects, ...), new or
 changed behaviour is a data field that every entry of that kind can use, never
 a special case in code.
 
+## Reading game content
+
+Code reads shipped content (`Data/`, fonts, shaders) through `Core/Content`, never with
+`fopen`, streams or `std::filesystem` directly, so ports can serve it from anywhere. See
+[`docs/content-access.md`](docs/content-access.md); a test fails on new direct file calls.
+
 ## Build setup
 
 The project uses CMake. Supported build environments and setup steps are

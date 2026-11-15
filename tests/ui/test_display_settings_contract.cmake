@@ -236,13 +236,13 @@ foreach(required_text IN ITEMS
     require_text(console_source "${required_text}" "muConsoleDebug.cpp must persist deferred VSync requests")
 endforeach()
 
-string(FIND "${winmain_source}" "                ApplyPendingVSyncPreference();" apply_position)
-string(FIND "${winmain_source}" "                RenderProfiledFrame();" begin_position)
+string(FIND "${winmain_source}" "            ApplyPendingVSyncPreference();" apply_position)
+string(FIND "${winmain_source}" "            RenderProfiledFrame();" begin_position)
 if(apply_position EQUAL -1 OR begin_position EQUAL -1 OR NOT apply_position LESS begin_position)
     message(FATAL_ERROR "Pending VSync must be applied before BeginFrame")
 endif()
 
-string(FIND "${winmain_source}" "                Bitmaps.UpdateTextureFiltering();" filtering_position)
+string(FIND "${winmain_source}" "            Bitmaps.UpdateTextureFiltering();" filtering_position)
 if(filtering_position EQUAL -1 OR NOT filtering_position LESS begin_position)
     message(FATAL_ERROR "Texture filtering switches and mip chain builds must run before BeginFrame")
 endif()

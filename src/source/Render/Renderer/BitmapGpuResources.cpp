@@ -3,6 +3,7 @@
 #include <SDL3/SDL_error.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <vector>
 
@@ -102,13 +103,54 @@ bool BitmapGpuResources::Initialize(SDL_GPUDevice* device)
     return true;
 }
 
+bool BitmapGpuResources::SubmitOpen()
+{
+    Slot& slot = m_slots[m_next];
+    // SDL consumes the command even on a failed submit. An uncertain slot is
+    // never reused; only device teardown may reclaim it after that failure.
+    SDL_GPUFence* fence = m_calls.submit(m_open);
+    m_open = nullptr;
+    if (!fence)
+    {
+        Fail("submit bitmap upload and acquire fence", true);
+        LoseSlot(slot);
+        return false;
+    }
+    slot.fence = fence;
+    AdvanceSlot();
+    return true;
+}
+
+void BitmapGpuResources::BeginBatch()
+{
+    m_batching = true;
+}
+
+bool BitmapGpuResources::EndBatch()
+{
+    m_batching = false;
+    return Flush();
+}
+
+bool BitmapGpuResources::Flush()
+{
+    if (!m_open || !OnOwnerThread())
+    {
+        return !m_open;
+    }
+    return SubmitOpen();
+}
+
 bool BitmapGpuResources::Retire(Slot& slot)
 {
     if (!slot.fence)
     {
         return true;
     }
-    if (!m_calls.wait(m_device, true, &slot.fence, 1))
+    const auto start = std::chrono::steady_clock::now();
+    const bool waited = m_calls.wait(m_device, true, &slot.fence, 1);
+    m_fenceWaitSeconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    if (!waited)
     {
         Fail("wait for upload fence", true);
         LoseSlot(slot);
@@ -217,17 +259,37 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
                                                            : static_cast<Uint32>(mips.size() + 1);
 
     SDL_GPUTexture* texture = nullptr;
+    const auto fail = [&]
+    {
+        if (texture)
+        {
+            m_calls.releaseTexture(m_device, texture);
+        }
+        return Failure();
+    };
     std::size_t next = 0;
     while (next < pieces.size())
     {
-        auto& slot = m_slots[m_next];
-        if (!Retire(slot))
+        // A batch keeps staging into the open slot while the next piece fits.
+        if (m_open && AlignUp(m_openUsed, kLevelAlignment) + pieces[next].pitch * pieces[next].rows > kSlotCapacity &&
+            !SubmitOpen())
         {
-            if (texture)
+            return fail();
+        }
+        auto& slot = m_slots[m_next];
+        if (!m_open)
+        {
+            if (!Retire(slot))
             {
-                m_calls.releaseTexture(m_device, texture);
+                return fail();
             }
-            return Failure();
+            m_open = m_calls.acquire(m_device);
+            if (!m_open)
+            {
+                Fail("acquire bitmap upload command buffer", true);
+                return fail();
+            }
+            m_openUsed = 0;
         }
 
         if (!texture)
@@ -247,7 +309,7 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
             if (!texture)
             {
                 Fail("create bitmap texture", true);
-                return Failure();
+                return fail();
             }
         }
 
@@ -255,17 +317,15 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
         if (!mapped)
         {
             Fail("map bitmap transfer buffer", true);
-            m_calls.releaseTexture(m_device, texture);
-            return Failure();
+            return fail();
         }
-        // As many consecutive pieces as fit the slot; a single piece always does.
+        // As many consecutive pieces as fit the slot; a single piece always fits an empty one.
         auto* target = static_cast<std::uint8_t*>(mapped);
         const std::size_t first = next;
-        std::uint64_t used = 0;
         while (next < pieces.size())
         {
             StagedPiece& piece = pieces[next];
-            const std::uint64_t offset = next == first ? 0 : AlignUp(used, kLevelAlignment);
+            const std::uint64_t offset = m_openUsed == 0 ? 0 : AlignUp(m_openUsed, kLevelAlignment);
             if (offset + piece.pitch * piece.rows > kSlotCapacity)
             {
                 break;
@@ -276,25 +336,20 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
                             static_cast<std::size_t>(piece.rowBytes));
             }
             piece.offset = offset;
-            used = offset + piece.pitch * piece.rows;
+            m_openUsed = offset + piece.pitch * piece.rows;
             ++next;
         }
         m_calls.unmap(m_device, slot.transfer);
 
-        SDL_GPUCommandBuffer* command = m_calls.acquire(m_device);
-        if (!command)
-        {
-            Fail("acquire bitmap upload command buffer", true);
-            m_calls.releaseTexture(m_device, texture);
-            return Failure();
-        }
-        SDL_GPUCopyPass* pass = m_calls.beginCopy(command);
+        SDL_GPUCopyPass* pass = m_calls.beginCopy(m_open);
         if (!pass)
         {
+            // shortcut: this also drops the uploads of earlier textures in the open batch; SDL fails here only on a
+            // lost device, when those textures are lost anyway.
             Fail("begin bitmap upload copy pass", true);
-            m_calls.cancel(command);
-            m_calls.releaseTexture(m_device, texture);
-            return Failure();
+            m_calls.cancel(m_open);
+            m_open = nullptr;
+            return fail();
         }
         for (std::size_t index = first; index < next; ++index)
         {
@@ -316,21 +371,14 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
         m_calls.endCopy(pass);
         if (generateMips && levelCount > 1 && next == pieces.size())
         {
-            m_calls.generateMipmaps(command, texture);
+            m_calls.generateMipmaps(m_open, texture);
         }
 
-        // SDL consumes the command even on a failed submit. An uncertain slot is
-        // never reused; only device teardown may reclaim it after that failure.
-        SDL_GPUFence* fence = m_calls.submit(command);
-        if (!fence)
+        // Outside a batch every upload submits; a batch submits when the slot is full or the batch ends.
+        if ((!m_batching || next < pieces.size()) && !SubmitOpen())
         {
-            Fail("submit bitmap upload and acquire fence", true);
-            m_calls.releaseTexture(m_device, texture);
-            LoseSlot(slot);
-            return Failure();
+            return fail();
         }
-        slot.fence = fence;
-        AdvanceSlot();
     }
     m_stage.clear();
     m_error.clear();
@@ -377,9 +425,13 @@ bool BitmapGpuResources::Shutdown()
         // Preserve owner-thread diagnostics; lifecycle calls are externally serialized.
         return false;
     }
-    bool retired = true;
+    bool retired = Flush();
     for (auto& slot : m_slots)
     {
+        if (!retired)
+        {
+            break;
+        }
         if (!slot.lost && !Retire(slot))
         {
             retired = false;
@@ -393,6 +445,8 @@ bool BitmapGpuResources::Shutdown()
     m_device = nullptr;
     m_thread = {};
     m_next = 0;
+    m_openUsed = 0;
+    m_batching = false;
     m_faulted = false;
     return retired;
 }

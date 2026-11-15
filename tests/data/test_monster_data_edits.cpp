@@ -230,6 +230,29 @@ TEST_CASE("Monster data: the editor saves the table and reverts to the file [dat
     }
 }
 
+// Revert all reads the unknown monsters' look back too, as Revert does: an
+// edit of it is dropped, not saved by the next save.
+TEST_CASE("Monster data: revert all puts back the unknown monsters' look [data][monsters][editor]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    const std::array monsters = {BudgeDragon()};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterDatabase.SetUnknownLook({});
+    std::vector<ItemDataIssue> issues;
+    REQUIRE(g_MonsterDataHandler.SaveAll(issues));
+    Data::Monsters::UnknownMonsterLook edited;
+    edited.marks = false;
+    edited.messageSeconds = 30;
+    g_MonsterDatabase.SetUnknownLook(edited);
+
+    REQUIRE(g_MonsterDataHandler.RevertAll(issues));
+
+    CHECK(g_MonsterDatabase.GetUnknownLook().marks);
+    CHECK(g_MonsterDatabase.GetUnknownLook().messageSeconds == 10);
+    g_MonsterDatabase.Build({}, "en");
+}
+
 TEST_CASE("Monster data: a save of the three lists that one refuses lists the problems of what they name of each "
           "other too [data][monsters][editor]")
 {

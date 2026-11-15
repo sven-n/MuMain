@@ -13,10 +13,10 @@
 // or _EDITOR offer them (Render::Look::HandleDeveloperCommand).
 //
 //   $look show [<name>]            effective values and where each comes from
-//   $look set [map] <name> <v>     the default profile, or the current map's entry
+//   $look set [map] <name> <v>     the default profile, or the entry of the current map (shared by its variants)
 //   $look reset [<name>]           back to the values loaded from the files
 //   $look load [<candidate>]       Data/Render/Candidates/<candidate>/, or the shipped files
-//   $look save                     writes Data/Render/Look.json and Data/Maps/LightMood.json
+//   $look save                     writes Data/Render/Look.json
 //
 // Aliases of `$look set <name>` (the default profile):
 //   $lighting rim <v>              lighting.rim.strength
@@ -72,6 +72,7 @@ enum class LookVerb : std::uint8_t
     Reset,
     Load,
     Save,
+    Preview,
 };
 
 struct LookCommand
@@ -80,12 +81,12 @@ struct LookCommand
     // Set: the current map's entry instead of the default.
     bool map = false;
     // Show, set, reset: the value's name (empty: every value); load: the candidate (empty: the
-    // shipped files).
+    // shipped files); preview: "authoring" or "player".
     std::string name;
     double value = 0.0;
 };
 
-// A `$look show|set|reset|load|save` command; nothing for any other text (also `$look classic`).
+// A `$look show|set|reset|load|save|preview` command; nothing for any other text (also `$look classic`).
 // A candidate name is letters, digits, '-', '_' and '.', never "." or "..".
 [[nodiscard]] std::optional<LookCommand> ParseLookCommand(std::wstring_view command);
 

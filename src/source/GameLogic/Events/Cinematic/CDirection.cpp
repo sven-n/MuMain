@@ -144,6 +144,16 @@ bool CDirection::DirectionCameraMove()
 
 void CDirection::DeleteMonster()
 {
+    // Every monster of the model walks at its own speed again (P27); a model
+    // released since keeps its new data.
+    for (const auto& [model, speed] : m_savedWalkSpeeds)
+    {
+        BMD& walking = Models[model];
+        if (walking.Actions != nullptr && walking.NumActions > MONSTER01_WALK)
+            walking.Actions[MONSTER01_WALK].PlaySpeed = speed;
+    }
+    m_savedWalkSpeeds.clear();
+
     const int count = static_cast<int>(stl_Monster.size());
     if (count == 0)
         return;
@@ -181,40 +191,19 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
     c->Weapon[1].Type = -1;
     c->Object.Alpha = 0.0f;
 
-    int Index = 0;
+    // The walk speed of the model the monster's entry gave it (MN4), until the
+    // cutscene removes its monsters (P27).
+    // A model without a walk (an empty one, or one whose file is missing) has
+    // none to change.
+    BMD* b = &Models[c->Object.Type];
 
-    switch (Type)
+    if (AniSpeed >= 0.0f && b->Actions != nullptr && b->NumActions > MONSTER01_WALK)
     {
-    case 344:
-        Index = MODEL_BALRAM;
-        break;
-    case 341:
-        Index = MODEL_SORAM;
-        break;
-    case 440:
-    case 340:
-        Index = MODEL_DARK_ELF_1;
-        break;
-    case 345:
-        Index = MODEL_DEATH_SPIRIT;
-        break;
-    case 348:
-        Index = MODEL_BALLISTA;
-        break;
-    case 349:
-        Index = MODEL_BALGASS;
-        break;
-    case 361:
-        Index = MODEL_DARK_SKULL_SOLDIER_5;
-        break;
-    default:
-        break;
-    }
-
-    BMD* b = &Models[Index];
-
-    if (AniSpeed >= 0.0f)
+        const int model = c->Object.Type;
+        if (std::ranges::none_of(m_savedWalkSpeeds, [&](const auto& saved) { return saved.first == model; }))
+            m_savedWalkSpeeds.emplace_back(model, b->Actions[MONSTER01_WALK].PlaySpeed);
         b->Actions[MONSTER01_WALK].PlaySpeed = AniSpeed;
+    }
 
     if (SummonAni)
     {

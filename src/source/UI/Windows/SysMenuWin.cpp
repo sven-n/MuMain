@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "I18N/All.h"
 
@@ -109,7 +110,7 @@ void CSysMenuWin::ExitGame()
 {
     g_ErrorReport.Write(L"> Menu - Exit game.");
     g_ErrorReport.WriteCurrentTime();
-    ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+    Core::Platform::RequestQuit();
 }
 
 void CSysMenuWin::SelectServer()

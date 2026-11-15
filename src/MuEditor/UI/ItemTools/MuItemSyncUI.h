@@ -19,14 +19,14 @@
 
 // The Item Sync window (phase 7, section 9's Item Sync): Import and Export of the item exchange
 // file with OpenMU. Import lists how the file differs from the client's items and item formulas
-// (ItemSyncDiff); after a confirmation that says what changes, the checked rows are applied as
-// one step of the undo history. The known differences (Data/Items/Sync/KnownDifferences.json)
-// stay unchecked; a row can be added to them or taken out. Export writes the client's items and
-// formulas into a file without a diff (OpenMU's import page shows one); a file that is there is
-// replaced after a confirmation that says what changes in it. Compare two files lists, read-only,
-// what changes from one exchange file to another (e.g. a client export and a server export); its
-// rows can be marked as known differences too. Update from server downloads OpenMU's file from its
-// admin panel (ItemSyncServer.h) and goes on as Import.
+// (ItemSyncDiff); after a confirmation that says what changes, the checked rows are applied as one
+// step of the undo history. A difference can be marked wrong in the client (the box stays as it
+// is) or wrong in the server (unchecked); the marks are kept in Data/Items/Sync/KnownDifferences.json. Export
+// writes the client's items and formulas into a file without a diff (OpenMU's import page shows
+// one); a file that is there is replaced after a confirmation that says what changes in it. Compare
+// two files lists, read-only, what changes from one exchange file to another (e.g. a client export
+// and a server export), without marks. Update from server downloads OpenMU's file from its admin
+// panel (ItemSyncServer.h) and goes on as Import.
 class CMuItemSyncUI
 {
 public:
@@ -162,8 +162,10 @@ private:
     void RenderExportPopup();
     void RenderMessages();
     bool WriteExport();
-    void SetKnown(int group, int number, const std::string& field, bool known);
-    void SetKnownFormula(const std::string& entry, bool known);
+    // Marks the wrong side of a row's field (an empty one: the item as a whole) in the known
+    // differences and the diff, and saves them.
+    void SetWrongSide(MuEditor::Items::SyncItem& row, const std::string& field, MuEditor::Items::WrongSide side);
+    void SetFormulaWrongSide(MuEditor::Items::SyncFormula& row, MuEditor::Items::WrongSide side);
     void SaveKnownDifferences();
 
     // The path field, and the file the diff is of: Apply uses that one. From the server, the
@@ -187,7 +189,14 @@ private:
     Data::Items::ItemExchangeFile m_fileA;
     std::optional<MuEditor::Items::ItemSyncDiff> m_diff;
     MuEditor::Items::KnownDifferences m_known;
+    // Read when the window opens: a file fixed while it was closed is read again.
     bool m_knownLoaded = false;
+    // ImGui's frame count when the window was last shown; -1 before.
+    int m_lastShownFrame = -1;
+    // False while the file has something that could not be read: the marks are not saved then.
+    bool m_knownSavable = true;
+    // That the marks were not saved; apart from m_messages, which a new comparison clears.
+    std::string m_marksNotSaved;
     // g_ItemDatabase.GetVersion() when the diff was made (a formula change counts there too).
     int m_diffVersion = 0;
     // The row of m_diff->items whose fields are shown, or -1, and what uses the item when the

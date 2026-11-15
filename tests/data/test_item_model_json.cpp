@@ -208,6 +208,37 @@ TEST_CASE("A model's mesh names write by number on one line and read back (desig
     CHECK(result.models[0].meshNames == staff.meshNames);
 }
 
+TEST_CASE("The values an item sets for its render style write on one line and read back as they were (design L12) "
+          "[data][items]")
+{
+    ItemModelDefinition sphere = MakeDarkHorse();
+    sphere.renderStyle = "seedSphere";
+    sphere.renderStyleValues = {{"color", "[0.9,0.1,0.2]"}, {"glassMeshes", "[1]"}};
+    const std::string text = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{sphere});
+    CHECK(text.find(R"("renderStyleValues": {"color": [0.9, 0.1, 0.2], "glassMeshes": [1]})") != std::string::npos);
+
+    const ReadResult result = Read(text);
+    CHECK(result.issues.empty());
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0].renderStyleValues == sphere.renderStyleValues);
+
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyleValues": [1]})",
+                        "renderStyleValues"));
+
+    ItemModelDefinition glowing = MakeDarkHorse();
+    glowing.itemEffect = "glowing";
+    glowing.itemEffectValues = {{"glowMesh", "2"}};
+    const std::string effectText = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{glowing});
+    CHECK(effectText.find(R"("itemEffect": "glowing",)") != std::string::npos);
+    CHECK(effectText.find(R"("itemEffectValues": {"glowMesh": 2})") != std::string::npos);
+    const ReadResult effectRead = Read(effectText);
+    CHECK(effectRead.issues.empty());
+    REQUIRE(effectRead.models.size() == 1);
+    CHECK(effectRead.models[0].itemEffectValues == glowing.itemEffectValues);
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyleValues": {"two words": 1}})",
+                        "renderStyleValues.two words"));
+}
+
 TEST_CASE("A mesh name that can't be one is a warning that leaves it out [data][items]")
 {
     const ReadResult result = Read(GroupFile(13, R"({"number": 4, "file": "Data/Item/DarkHorseHorn.bmd",

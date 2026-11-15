@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Core/Content/ContentStore.h"
 #include <string>
 
 // External references
@@ -33,6 +34,7 @@ extern SKILL_ATTRIBUTE* SkillAttribute;
 
 bool SkillDataExportAsCSV::ExportToCsv(wchar_t* fileName)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     FILE* csvFp = _wfopen(fileName, L"w");
     if (!csvFp)
     {

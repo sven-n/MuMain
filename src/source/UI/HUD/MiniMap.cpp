@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "I18N/All.h"
@@ -194,9 +195,7 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
     wchar_t Fname[300];
     int i = 0;
     mu_swprintf(Fname, L"Data\\%ls\\mini_map.ozt", Filename);
-    FILE* pFile = _wfopen(Fname, L"rb");
-
-    if (pFile == NULL)
+    if (Content::Probe(Fname) != Content::Found::File)
     {
         m_bSuccess = false;
         m_WorldName.clear();
@@ -205,7 +204,6 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
     else
     {
         m_bSuccess = true;
-        fclose(pFile);
         // The texture itself is loaded by the document (mini_map.rml's .map).
         m_WorldName = Filename;
     }
@@ -217,16 +215,15 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
         m_Mini_Map_Data[i].Kind = 0;
     }
 
-    FILE* fp = _wfopen(Fname, L"rb");
+    const Content::Stream fp = Content::OpenIO(Fname);
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
         int Size = sizeof(MINI_MAP_FILE);
         BYTE* Buffer = new BYTE[Size * MAX_MINI_MAP_DATA + 45];
         DWORD dwCheckSum;
-        const bool complete = DataFileIO::ReadExact(fp, Buffer, (Size * MAX_MINI_MAP_DATA) + 45) &&
-                              DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
-        fclose(fp);
+        const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, (Size * MAX_MINI_MAP_DATA) + 45) &&
+                              DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
 
         if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, (Size * MAX_MINI_MAP_DATA) + 45, 0x2BC1))
         {

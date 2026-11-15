@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/UnknownMonsterLook.h"
 
 #include <array>
 #include <bitset>
@@ -22,6 +23,29 @@ public:
     // Replaces all monsters, in place. Monsters with a number outside 0-1023 are
     // skipped (the file's reader reports them). The names are shown in `locale`.
     void Build(std::span<const MonsterDefinition> monsters, std::string_view locale);
+
+    // How the game shows a monster it cannot show as itself (D64), from the
+    // file's settings.
+    void SetUnknownLook(const UnknownMonsterLook& look)
+    {
+        m_unknownLook = look;
+    }
+    const UnknownMonsterLook& GetUnknownLook() const
+    {
+        return m_unknownLook;
+    }
+
+    // The talk texts several NPCs share, by name (the list's talkTexts); a
+    // change counts as one of the monsters (GetVersion).
+    void SetTalkTexts(const MonsterTalkTexts& texts)
+    {
+        m_talkTexts = texts;
+        ++m_version;
+    }
+    const MonsterTalkTexts& GetTalkTexts() const
+    {
+        return m_talkTexts;
+    }
 
     // Shows the names in another language: a missing translation shows English.
     void SetDisplayLocale(std::string_view locale);
@@ -80,6 +104,8 @@ private:
     std::array<NameBuffer, MonsterNumberCount> m_displayNames{};
     std::array<NameBuffer, MonsterNumberCount> m_englishNames{};
     std::string m_displayLocale = std::string(LocalizedString::NeutralLocale);
+    UnknownMonsterLook m_unknownLook;
+    MonsterTalkTexts m_talkTexts;
     int m_version = 0;
     int m_builds = 0;
 };

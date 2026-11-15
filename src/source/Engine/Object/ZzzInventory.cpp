@@ -43,6 +43,7 @@
 #include "GameLogic/Items/ItemStats.h"
 #include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Render/Items/LookDrawing.h"
 #include <chrono>
 #include <cstring>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -1070,8 +1071,8 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     {
         maxDurability += 20;
     }
-    else if (ip->ExcellentFlags > 0 && !GameLogic::Items::IsSecondOrThirdTierWing(ip) &&
-             !GameLogic::Items::IsDivineArchangelWeapon(ip))
+    // Excellent, not the Divine Archangel weapons. The Horn of Fenrir's byte is its kind, no excellent options.
+    else if (GameLogic::Items::HasExcellentOptions(*ip) && !GameLogic::Items::IsDivineArchangelWeapon(ip))
     {
         maxDurability += 15;
     }
@@ -1091,12 +1092,21 @@ std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int te
     {
         return std::nullopt;
     }
-    const int value = GameLogic::Items::GetSlotOptionValue(item, *slotOption);
+    Engine::Items::OptionLines::LineValues values;
+    values.value = GameLogic::Items::GetSlotOptionValue(item, *slotOption);
+    for (const Data::Items::ItemOptionTerm& term : slotOption->option->value.per)
+    {
+        if (term.divisor > 0)
+        {
+            values.divisor = term.divisor;
+            break;
+        }
+    }
     const int lastRow = std::min(rowLimit, MaxTextListRows);
     int row = textNum;
     for (const std::string& name : slotOption->option->texts)
     {
-        if (row < lastRow && Engine::Items::OptionLines::Write(name, value, TextList[row], std::size(TextList[row])))
+        if (row < lastRow && Engine::Items::OptionLines::Write(name, values, TextList[row], std::size(TextList[row])))
         {
             TextListColor[row] = TEXT_COLOR_BLUE;
             TextBold[row] = false;
@@ -1106,7 +1116,7 @@ std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int te
     return row - textNum;
 }
 
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana)
+void GetSpecialOptionText(wchar_t* Text, WORD Option, WORD Value, int iMana)
 {
     switch (Option)
     {
@@ -1178,10 +1188,7 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int 
         mu_swprintf(Text, I18N::Game::AdditionalDefenseD, Value);
         break;
     case AT_LIFE_REGENERATION:
-        if (!(ITEM_LOCHS_FEATHER <= Type && Type <= ITEM_INVISIBILITY_CLOAK))
-        {
-            mu_swprintf(Text, I18N::Game::AutomaticHPRecoveryD, Value);
-        }
+        mu_swprintf(Text, I18N::Game::AutomaticHPRecoveryD, Value);
         break;
     case AT_IMPROVE_LIFE:
         mu_swprintf(Text, I18N::Game::IncreaseMaxHP4);
@@ -1642,7 +1649,7 @@ static std::wstring StandardItemName(const ITEM& item, int level, bool full)
     if (full && g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator))
         name = setName;
     name += ItemAttribute[item.Type].Name;
-    if (full && item.ExcellentFlags > 0)
+    if (full && GameLogic::Items::HasExcellentOptions(item))
         name = std::wstring(I18N::Game::Excellent) + L" " + name;
     if (level > 0)
         name += L" +" + std::to_wstring(level);
@@ -1656,7 +1663,7 @@ static int StandardItemNameColor(const ITEM& item, int level)
         return TEXT_COLOR_GREEN_BLUE;
     if (g_SocketItemMgr.IsSocketItem(&item))
         return TEXT_COLOR_VIOLET;
-    if (item.SpecialNum > 0 && item.ExcellentFlags > 0)
+    if (GameLogic::Items::HasExcellentOptions(item))
         return TEXT_COLOR_GREEN;
     if (level >= 7)
         return TEXT_COLOR_YELLOW;
@@ -2164,11 +2171,6 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
     int iMana;
     for (int i = 0; i < ip->SpecialNum; i++)
     {
-        if (ITEM_SAPPHIRE_RING <= ip->Type && ITEM_SAPPHIRE_NECKLACE >= ip->Type)
-        {
-            break;
-        }
-
         if (const std::optional<int> rows = WriteDefinitionOptionLines(*ip, i, TextNum, MaxTextListRows))
         {
             TextNum += *rows;
@@ -2176,7 +2178,7 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
         }
 
         gSkillManager.GetSkillInformation(ip->Special[i], 1, NULL, &iMana, NULL);
-        GetSpecialOptionText(ip->Type, TextList[TextNum], ip->Special[i], ip->SpecialValue[i], iMana);
+        GetSpecialOptionText(TextList[TextNum], ip->Special[i], ip->SpecialValue[i], iMana);
 
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false; TextNum++;
@@ -2194,12 +2196,6 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
             mu_swprintf(TextList[TextNum], I18N::Game::DarkLordExclusiveSkill);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
-        else if (ip->Special[i] == AT_IMPROVE_DAMAGE && GameLogic::Items::IsMagicSwordType(ip->Type))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::AdditionalWizardryDmgD, ip->SpecialValue[i]);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false; TextNum++;
-        }
     }
 
     // The blank row after the options.
@@ -2208,7 +2204,7 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
 
     if (ip->Type == ITEM_HORN_OF_FENRIR)
     {
-        GetSpecialOptionText(0, TextList[TextNum], AT_SKILL_PLASMA_STORM_FENRIR, 0, 0);
+        GetSpecialOptionText(TextList[TextNum], AT_SKILL_PLASMA_STORM_FENRIR, 0, 0);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false; TextNum++; SkipNum++;
         if (ip->ExcellentFlags == 0x01)
@@ -2866,7 +2862,7 @@ void BuildGroundItemLabelDescriptor(const OBJECT* o, const ITEM* ip, GroundItemL
             AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::KnightSpecificSkill);
         }
     }
-    if (ip->OptionLevel > 0)
+    if (GameLogic::Items::HasAdditionalOption(*ip))
     {
         AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::Option);
     }
@@ -3116,7 +3112,7 @@ void AppendItemOptionKeywords(const ITEM& item, std::wstring& options)
     {
         options += I18N::Game::Skill;
     }
-    if (item.OptionLevel)
+    if (GameLogic::Items::HasAdditionalOption(item))
     {
         options += I18N::Game::Option;
     }
@@ -3162,6 +3158,8 @@ constexpr float SelectedItemTurnSpeed = 0.45f;
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target,
                         int Select, bool PickUp)
 {
+    // A look's layers can be only for the inventory.
+    const Render::Items::Looks::InventoryDrawing inventory;
     int Level = ItemLevel;
     vec3_t Direction, Position;
 
