@@ -71,6 +71,8 @@
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/Inventory/InventoryContents.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
+#include "GameLogic/Warps/ServerWarpList.h"
+#include "Network/MoveCommandData.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Character/CSParts.h"
 #include "Engine/Physics/PhysicsManager.h"
@@ -1059,6 +1061,9 @@ void InitGame()
     UI::Chat::ResetLogFilter();
 
     UI::Guild::ClearNotices();
+
+    // A warp list of the previous server doesn't apply to the next one; it sends its own, if any.
+    SEASON3B::CMoveCommandData::GetInstance()->RestoreDataFileWarpList();
 }
 
 BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
@@ -13920,12 +13925,24 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         break;
     case 0xF5:
     {
-        // The chat commands which are available to this player. It's only sent
-        // by servers which know the request, so an unknown sub code is no error.
+        // Messages of OpenMU for the open source client, so an unknown sub code is no error.
         const auto subcode = bIsC1C3 ? ReceiveBuffer[3] : ReceiveBuffer[4];
         if (subcode == 0x01)
         {
+            // The chat commands which are available to this player.
             GameLogic::Commands::Catalog().AddFromPacket(ReceiveBuffer, Size);
+        }
+        else if (subcode == 0x09)
+        {
+            // The warp list of the server, which replaces the one of the data files until the next connection.
+            if (const auto warps = GameLogic::Warps::ReadServerWarpList(ReceiveBuffer, Size))
+            {
+                SEASON3B::CMoveCommandData::GetInstance()->ApplyServerWarpList(*warps);
+            }
+            else
+            {
+                g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x09] (too short: %d bytes)", Size);
+            }
         }
         else
         {

@@ -3,6 +3,7 @@
 #include "MoveCommandData.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Content/ContentStore.h"
+#include "GameLogic/Warps/WarpListMerge.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -52,33 +53,65 @@ bool CMoveCommandData::Create(const std::wstring& filename)
         {
             return false;
         }
-        // Value-initialised: the flags stay false until the move window sets them.
-        auto* pMoveInfoData = new MOVEINFODATA{};
+        MOVEREQINFO info{};
 
         // cppcheck-suppress dangerousTypeCast
         BuxConvert((BYTE*)&moveReqInfo, sizeof moveReqInfo);
-        pMoveInfoData->_ReqInfo.index = moveReqInfo.index;
-        pMoveInfoData->_ReqInfo.iGateNum = moveReqInfo.iGateNum;
-        pMoveInfoData->_ReqInfo.iReqLevel = moveReqInfo.iReqLevel;
-        pMoveInfoData->_ReqInfo.iReqZen = moveReqInfo.iReqZen;
-        pMoveInfoData->_ReqInfo.m_iReqMaxLevel = moveReqInfo.m_iReqMaxLevel;
-        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szMainMapName, moveReqInfo.szMainMapName,
+        info.index = moveReqInfo.index;
+        info.iGateNum = moveReqInfo.iGateNum;
+        info.iReqLevel = moveReqInfo.iReqLevel;
+        info.iReqZen = moveReqInfo.iReqZen;
+        info.m_iReqMaxLevel = moveReqInfo.m_iReqMaxLevel;
+        CMultiLanguage::ConvertFromUtf8(info.szMainMapName, moveReqInfo.szMainMapName,
                                         sizeof moveReqInfo.szMainMapName);
-        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szSubMapName, moveReqInfo.szSubMapName,
-                                        sizeof moveReqInfo.szSubMapName);
+        CMultiLanguage::ConvertFromUtf8(info.szSubMapName, moveReqInfo.szSubMapName, sizeof moveReqInfo.szSubMapName);
 
-        m_listMoveInfoData.push_back(pMoveInfoData);
+        m_dataFileWarps.push_back(info);
     }
 
+    SetList(m_dataFileWarps);
     return true;
 }
 
 void CMoveCommandData::Release()
 {
-    auto li = m_listMoveInfoData.begin();
-    for (; li != m_listMoveInfoData.end(); li++)
-        delete (*li);
     m_listMoveInfoData.clear();
+    m_entries.clear();
+    m_dataFileWarps.clear();
+}
+
+void CMoveCommandData::SetList(const std::vector<MOVEREQINFO>& warps)
+{
+    m_listMoveInfoData.clear();
+    for (const auto& info : warps)
+    {
+        auto& entry = m_entries[info.index];
+        if (!entry)
+        {
+            // Value-initialised: the flags stay false until the move window sets them.
+            entry = std::make_unique<MOVEINFODATA>();
+        }
+
+        entry->_ReqInfo = info;
+        m_listMoveInfoData.push_back(entry.get());
+    }
+
+    ++m_listVersion;
+}
+
+void CMoveCommandData::ApplyServerWarpList(const std::vector<GameLogic::Warps::ServerWarp>& serverWarps)
+{
+    SetList(GameLogic::Warps::MergeWarpList(m_dataFileWarps, serverWarps));
+}
+
+void CMoveCommandData::RestoreDataFileWarpList()
+{
+    SetList(m_dataFileWarps);
+}
+
+uint32_t CMoveCommandData::GetListVersion() const
+{
+    return m_listVersion;
 }
 
 bool CMoveCommandData::OpenMoveReqScript(const std::wstring& filename)
