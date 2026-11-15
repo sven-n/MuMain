@@ -286,8 +286,8 @@ TEST_CASE("player values apply only while their feature is in effect [render][lo
     Data::Maps::LookOverrides personal;
     personal[LookValue::HighlightKnee] = 0.6;
     personal[LookValue::BloomStrength] = 0.5;
-    const Data::Maps::LookValues off = Render::Look::ResolveLookValues(profile, Lorencia, personal,
-                                                                       Render::Look::TuningGroupsApplying(noLighting));
+    const Data::Maps::LookValues off =
+        Render::Look::ResolveLookValues(profile, Lorencia, personal, Render::Look::TuningGroupsApplying(noLighting));
     // The knee (Enhanced lighting) is the map's again; bloom (its feature still on) stays the player's.
     CHECK(off[LookValue::HighlightKnee] == profile.ForWorld(Lorencia)[LookValue::HighlightKnee]);
     CHECK(off[LookValue::BloomStrength] == 0.5);

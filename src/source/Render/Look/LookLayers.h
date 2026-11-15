@@ -11,9 +11,10 @@
 #include <vector>
 
 // The live look profile and light mood with the player's values (of the groups whose feature is in
-// effect) layered over them, unless the Authoring preview leaves them out. Every change invalidates the effective values before anything reads them again: the light mood's
-// rebuild, which reads the look values, sees the change it was started for. Render/Look/
-// LookProfileSetting.h keeps the client's one instance.
+// effect) layered over them, unless the Authoring preview leaves them out. Every change invalidates
+// the effective values before anything reads them again: the light mood's rebuild, which reads the
+// look values, sees the change it was started for. Render/Look/LookProfileSetting.h keeps the
+// client's one instance.
 namespace Render::Look
 {
 
