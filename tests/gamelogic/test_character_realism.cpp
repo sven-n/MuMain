@@ -15,6 +15,7 @@
 #include "Render/Models/HeadTurn.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "../data/MovementTestScopes.h"
 #include "../data/TestModelSlots.h"
 
 #include <algorithm>
@@ -122,6 +123,7 @@ SpringRun RunSpring(float start, double fps, float seconds, float frequency, flo
 
 TEST_CASE("A spring settles at 0, overshooting a little only when damped below 1 [gamelogic][spring]")
 {
+    const EnhancedMovementSwitch option(true);
     const SpringRun settled = RunSpring(10.f, 60.0, 3.f, 2.f, 0.6f);
     CHECK(std::fabs(settled.value) < 0.01f);
 
@@ -136,6 +138,7 @@ TEST_CASE("A spring settles at 0, overshooting a little only when damped below 1
 
 TEST_CASE("A spring swings about the same at 25 and at 240 frames a second [gamelogic][spring]")
 {
+    const EnhancedMovementSwitch option(true);
     for (const float seconds : {0.12f, 0.2f, 0.6f})
     {
         CAPTURE(seconds);
@@ -147,6 +150,7 @@ TEST_CASE("A spring swings about the same at 25 and at 240 frames a second [game
 
 TEST_CASE("A flying player banks into a turn by up to 8 degrees, pivoting about its waist [gamelogic][flight]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(25.0);
     CHARACTER& flyer = FreshPlayer();
     OBJECT& o = flyer.Object;
@@ -181,6 +185,7 @@ TEST_CASE("A flying player banks into a turn by up to 8 degrees, pivoting about 
 
 TEST_CASE("A flight bank fades in over the same time at 25 and at 250 frames a second [gamelogic][flight]")
 {
+    const EnhancedMovementSwitch option(true);
     std::array<float, 2> banks{};
     const std::array fpses{25.0, 250.0};
     for (std::size_t i = 0; i < fpses.size(); ++i)
@@ -203,6 +208,7 @@ TEST_CASE("A flight bank fades in over the same time at 25 and at 250 frames a s
 
 TEST_CASE("A hovering player drifts up to 30 units above its height and never below it [gamelogic][flight]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(25.0);
     CHARACTER& flyer = FreshPlayer();
     OBJECT& o = flyer.Object;
@@ -226,6 +232,7 @@ TEST_CASE("A hovering player drifts up to 30 units above its height and never be
 
 TEST_CASE("A flying player that lands is back where it started, upright [gamelogic][flight]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(25.0);
     CHARACTER& flyer = FreshPlayer();
     OBJECT& o = flyer.Object;
@@ -263,6 +270,7 @@ TEST_CASE("A flying player that lands is back where it started, upright [gamelog
 TEST_CASE(
     "The wings trail behind a sudden turn by at most 12 degrees and settle within about a second [gamelogic][turnlag]")
 {
+    const EnhancedMovementSwitch option(true);
     for (const double fps : std::array{25.0, 60.0, 240.0})
     {
         CAPTURE(fps);
@@ -302,6 +310,7 @@ TEST_CASE(
 
 TEST_CASE("Without a turn the wings don't trail, and a non-player has no lag [gamelogic][turnlag]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(60.0);
     CHARACTER& player = FreshPlayer();
     player.Object.Angle[2] = 200.f;
@@ -323,6 +332,7 @@ TEST_CASE("Without a turn the wings don't trail, and a non-player has no lag [ga
 
 TEST_CASE("A sudden turn is drawn catching up from where the body was, at any frame rate [gamelogic][snapturn]")
 {
+    const EnhancedMovementSwitch option(true);
     for (const double fps : std::array{25.0, 60.0, 144.0, 240.0, 1000.0})
     {
         CAPTURE(fps);
@@ -359,6 +369,7 @@ TEST_CASE("A sudden turn is drawn catching up from where the body was, at any fr
 
 TEST_CASE("A turn of less than 30 degrees in a frame is not a sudden turn [gamelogic][snapturn]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(60.0);
     CHARACTER& walker = FreshPlayer();
     UpdateSnapTurn(&walker);
@@ -377,6 +388,7 @@ TEST_CASE("A turn of less than 30 degrees in a frame is not a sudden turn [gamel
 
 TEST_CASE("The back takes the spine's share of a head turn [gamelogic][turning]")
 {
+    const EnhancedMovementSwitch option(true);
     namespace HeadTurn = Render::Models::HeadTurn;
     CHECK(HeadTurn::BackDegrees(0.f) == 0.f);
     for (const float yaw : {60.f, -60.f, 25.f})
@@ -391,6 +403,7 @@ TEST_CASE("The back takes the spine's share of a head turn [gamelogic][turning]"
 
 TEST_CASE("A head turns toward its target within its limit, and up or down toward it [gamelogic][lookat]")
 {
+    const EnhancedMovementSwitch option(true);
     OBJECT looker;
     Vector(1000.f, 1000.f, 0.f, looker.Position);
     looker.Angle[2] = 0.f;
@@ -488,6 +501,7 @@ const CHARACTER* LookNow(CHARACTER& c)
 
 TEST_CASE("A player in a combat zone looks at the nearest monster in front of it [gamelogic][lookat]")
 {
+    const EnhancedMovementSwitch option(true);
     LookWorld world;
     CHARACTER& player = world.Place(0, KIND_PLAYER, 100, 100);
     world.Place(1, KIND_MONSTER, 100, 96);
@@ -504,6 +518,7 @@ TEST_CASE("A player in a combat zone looks at the nearest monster in front of it
 
 TEST_CASE("A player doesn't look at a monster behind it or behind a wall [gamelogic][lookat]")
 {
+    const EnhancedMovementSwitch option(true);
     LookWorld world;
     CHARACTER& player = world.Place(0, KIND_PLAYER, 100, 100);
     world.Place(1, KIND_MONSTER, 100, 103);
@@ -520,6 +535,7 @@ TEST_CASE("A player doesn't look at a monster behind it or behind a wall [gamelo
 
 TEST_CASE("A player in a safe zone looks at an NPC rather than a monster [gamelogic][lookat]")
 {
+    const EnhancedMovementSwitch option(true);
     LookWorld world;
     CHARACTER& player = world.Place(0, KIND_PLAYER, 100, 100);
     player.SafeZone = true;
@@ -531,6 +547,7 @@ TEST_CASE("A player in a safe zone looks at an NPC rather than a monster [gamelo
 
 TEST_CASE("A player with nothing else around looks at another player passing by [gamelogic][lookat]")
 {
+    const EnhancedMovementSwitch option(true);
     LookWorld world;
     CHARACTER& player = world.Place(0, KIND_PLAYER, 100, 100);
     // Too far for a passer-by.
@@ -543,6 +560,7 @@ TEST_CASE("A player with nothing else around looks at another player passing by 
 
 TEST_CASE("A player keeps looking at its pick while it stays in sight [gamelogic][lookat]")
 {
+    const EnhancedMovementSwitch option(true);
     LookWorld world;
     CHARACTER& player = world.Place(0, KIND_PLAYER, 100, 100);
     CHARACTER& first = world.Place(1, KIND_MONSTER, 100, 96);
@@ -561,6 +579,7 @@ TEST_CASE("A player keeps looking at its pick while it stays in sight [gamelogic
 
 TEST_CASE("A monster looks at its target in sight, and an NPC at the hero passing by [gamelogic][lookat]")
 {
+    const EnhancedMovementSwitch option(true);
     LookWorld world;
     CHARACTER& hero = world.Place(0, KIND_PLAYER, 100, 100);
     Hero = &hero;
@@ -661,6 +680,7 @@ void LeanFor(CHARACTER& c, float seconds)
 TEST_CASE("A player walking uphill leans forward by half the slope, at most 10 degrees, and standing doesn't "
           "[gamelogic][slope]")
 {
+    const EnhancedMovementSwitch option(true);
     {
         const Slope slope(10.f);
         CHARACTER& walker = PlayerOnSlope();
@@ -698,6 +718,7 @@ TEST_CASE("A player walking uphill leans forward by half the slope, at most 10 d
 TEST_CASE(
     "A mount follows the slope nose up by 1.5 times it, at most 25 degrees, but not in a safe zone [gamelogic][slope]")
 {
+    const EnhancedMovementSwitch option(true);
     {
         const Slope slope(10.f);
         CHARACTER& rider = PlayerOnSlope();
@@ -765,6 +786,7 @@ private:
 
 TEST_CASE("Without Enhanced Movement a flying player neither banks nor drifts [gamelogic][flight][option]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(60.0);
     const EnhancedMovementOff off;
     CHARACTER& flyer = FreshPlayer();
@@ -785,6 +807,7 @@ TEST_CASE("Without Enhanced Movement a flying player neither banks nor drifts [g
 
 TEST_CASE("Switching Enhanced Movement off mid-flight eases the bank and the drift out [gamelogic][flight][option]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(60.0);
     CHARACTER& flyer = FreshPlayer();
     OBJECT& o = flyer.Object;
@@ -814,6 +837,7 @@ TEST_CASE("Switching Enhanced Movement off mid-flight eases the bank and the dri
 TEST_CASE("Without Enhanced Movement a sudden turn is drawn at once, and the wings don't trail "
           "[gamelogic][snapturn][turnlag][option]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(60.0);
     const EnhancedMovementOff off;
     CHARACTER& attacker = FreshPlayer();
@@ -832,6 +856,7 @@ TEST_CASE("Without Enhanced Movement a sudden turn is drawn at once, and the win
 
 TEST_CASE("The realism steps' per-frame cost for a character (benchmark) [gamelogic][benchmark]")
 {
+    const EnhancedMovementSwitch option(true);
     constexpr int Calls = 200000;
     const Clock clock(60.0);
     CHARACTER& c = FreshPlayer();
@@ -890,6 +915,7 @@ TEST_CASE("The realism steps' per-frame cost for a character (benchmark) [gamelo
 
 TEST_CASE("A character that greeted may greet again once its cooldown has run out [gamelogic][nod]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(60.0);
     CHARACTER& c = FreshPlayer();
     c.Object.Kind = KIND_NPC;
@@ -952,6 +978,7 @@ bool NodsOrBows(CHARACTER& c, float seconds)
 TEST_CASE("Only a character standing on foot greets the hero, not one walking, fighting, flying or riding "
           "[gamelogic][nod]")
 {
+    const EnhancedMovementSwitch option(true);
     struct Case
     {
         int action;
@@ -977,6 +1004,7 @@ TEST_CASE("Only a character standing on foot greets the hero, not one walking, f
 
 TEST_CASE("A nod under way stops when the character starts walking, and its bow comes off [gamelogic][nod]")
 {
+    const EnhancedMovementSwitch option(true);
     // An NPC without a second animation nods.
     GreetScene scene(KIND_NPC, MONSTER01_STOP1);
     CHARACTER& npc = *scene.other;
@@ -1031,6 +1059,7 @@ TEST_CASE("The hero nods back only while it stands on foot [gamelogic][nod]")
 TEST_CASE("A walker setting off from rest reaches its full speed within MomentumStartSeconds, at any frame rate "
           "[gamelogic][momentum]")
 {
+    const EnhancedMovementSwitch option(true);
     for (const double fps : std::array{25.0, 60.0, 240.0})
     {
         CAPTURE(fps);
@@ -1066,6 +1095,7 @@ TEST_CASE("A walker setting off from rest reaches its full speed within Momentum
 TEST_CASE("Below 10 frames a second a walker keeps its speed, and only standing still starts it over "
           "[gamelogic][momentum]")
 {
+    const EnhancedMovementSwitch option(true);
     // 6 frames a second: each frame is longer than any gap a walk could have in real time. The game's frame step stops
     // at the reference rate's (CalcFPS clamps FPS_ANIMATION_FACTOR to 1), so the world clock runs ahead of it.
     const Clock clock(REFERENCE_FPS);
@@ -1089,6 +1119,7 @@ TEST_CASE("Below 10 frames a second a walker keeps its speed, and only standing 
 
 TEST_CASE("Without Enhanced Movement a walker moves at full speed from the first frame [gamelogic][momentum][option]")
 {
+    const EnhancedMovementSwitch option(true);
     const Clock clock(60.0);
     const EnhancedMovementOff off;
     CHARACTER& walker = FreshPlayer();

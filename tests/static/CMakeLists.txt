@@ -294,6 +294,7 @@ add_test(
         "-DMU_LOOK_SETTING_SOURCE=${MU_SOURCE}/Render/Look/LookPresetSetting.cpp"
         "-DMU_WINMAIN_SOURCE=${MU_SOURCE}/App/Platform/Windows/Winmain.cpp"
         "-DMU_CONSOLE_SOURCE=${MU_SOURCE}/Core/Utilities/Log/muConsoleDebug.cpp"
+        "-DMU_CONFIG_TEMPLATE=${MU_REPO_ROOT}/src/bin/config.ini.template"
         -P "${MU_TESTS}/ui/test_display_settings_contract.cmake"
 )
 

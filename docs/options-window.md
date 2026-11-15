@@ -90,7 +90,7 @@ window writes to these sections:
     (default `1`): the checkboxes of the rows under "Enhanced graphics", each a
     feature of the Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
     Clicking a row's name opens its tuning sliders instead.
-  - `EnhancedMovement` (default `1`): the "Enhanced movement" checkbox in the
+  - `EnhancedMovement` (default `0`): the "Enhanced movement" checkbox in the
     Quality section, in both looks. Off, characters move and are drawn as
     they were before the character realism features (facing snaps instead of
     easing, the head turns alone, no look-at, nods, flight bank, wing lag,

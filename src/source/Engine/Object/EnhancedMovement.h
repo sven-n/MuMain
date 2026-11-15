@@ -3,13 +3,13 @@
 // The Enhanced Movement option ([Render] EnhancedMovement): the character realism features (smooth turning, look-at,
 // nods, flight feel, wing and hair lag, mount lean, the drawn sudden turn, stride matching, setting off from rest,
 // slope lean, foot placement, pose fades). Off, characters move and are drawn as they were before them; whatever a
-// feature had applied fades out or is taken off. Set at start-up from config.ini and by the options window, read every
-// frame.
+// feature had applied fades out or is taken off. Off by default (the player turns it on in the options). Set at
+// start-up from config.ini and by the options window, read every frame.
 namespace Engine::Characters
 {
 namespace Detail
 {
-inline bool s_enhancedMovement = true;
+inline bool s_enhancedMovement = false;
 } // namespace Detail
 
 [[nodiscard]] inline bool EnhancedMovementEnabled()

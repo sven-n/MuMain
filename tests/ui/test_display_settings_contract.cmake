@@ -1,5 +1,5 @@
 foreach(required_var IN ITEMS MU_CONFIG_CONSTANTS MU_CONFIG_HEADER MU_CONFIG_SOURCE MU_LOOK_SETTING_SOURCE
-        MU_WINMAIN_SOURCE MU_CONSOLE_SOURCE)
+        MU_WINMAIN_SOURCE MU_CONSOLE_SOURCE MU_CONFIG_TEMPLATE)
     if(NOT DEFINED ${required_var})
         message(FATAL_ERROR "${required_var} is required")
     endif()
@@ -158,6 +158,16 @@ endforeach()
 require_text(winmain_source
     "g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());"
     "Winmain.cpp must apply translated item names at startup")
+
+# Enhanced Movement changes how every character moves, so players switch it on: off without the key, and off in the
+# template the client copies into a new player's folder.
+require_text(config_constants "CfgDefaultEnhancedMovement = false;"
+    "GameConfigConstants.h must turn Enhanced Movement off by default")
+file(READ "${MU_CONFIG_TEMPLATE}" config_template)
+string(REGEX MATCH "EnhancedMovement=[0-9]+" template_enhanced_movement "${config_template}")
+if(NOT template_enhanced_movement STREQUAL "EnhancedMovement=0")
+    message(FATAL_ERROR "config.ini.template must set EnhancedMovement=0, not: ${template_enhanced_movement}")
+endif()
 
 # A missing or invalid Look counts as CfgDefaultLook, which is Classic: Enhanced is opt-in.
 require_text(config_constants "CfgDefaultLook[] = L\"Classic\""

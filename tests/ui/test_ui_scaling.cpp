@@ -871,32 +871,39 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
         std::string key;
         bool (GameConfig::*get)() const;
         void (GameConfig::*set)(bool);
+        // Without its key: the graphics switches are on, Enhanced Movement is off (the player turns it on).
+        bool byDefault;
     };
     const std::array<Switch, 6> switches{{
-        {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting},
-        {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights},
-        {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood},
-        {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing},
-        {"EnhancedMovement", &GameConfig::GetEnhancedMovement, &GameConfig::SetEnhancedMovement},
-        {"Sunlight", &GameConfig::GetSunlight, &GameConfig::SetSunlight},
+        {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting, true},
+        {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights, true},
+        {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood, true},
+        {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing, true},
+        {"EnhancedMovement", &GameConfig::GetEnhancedMovement, &GameConfig::SetEnhancedMovement, false},
+        {"Sunlight", &GameConfig::GetSunlight, &GameConfig::SetSunlight, true},
     }};
     const UserConfigFile file;
     GameConfig& config = GameConfig::GetInstance();
 
-    // Without the keys every switch is on.
+    // Without the keys every switch has its default.
     file.Write("[Render]\nVSync=1\n");
     config.Load();
     for (const Switch& each : switches)
     {
         CAPTURE(each.key);
-        CHECK((config.*each.get)());
+        CHECK((config.*each.get)() == each.byDefault);
     }
 
     for (const Switch& off : switches)
     {
         CAPTURE(off.key);
-        // Loading: the key the file sets to 0 turns off its switch and no other.
-        file.Write("[Render]\n" + off.key + "=0\n");
+        // Loading: the key the file sets to 0 turns off its switch and no other (the others set to 1).
+        std::string ini = "[Render]\n";
+        for (const Switch& each : switches)
+        {
+            ini += each.key + (&each == &off ? "=0\n" : "=1\n");
+        }
+        file.Write(ini);
         config.Load();
         for (const Switch& each : switches)
         {

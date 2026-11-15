@@ -158,7 +158,7 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultSunlight = true;
     inline constexpr bool CfgDefaultLightMood = true;
     inline constexpr bool CfgDefaultPostProcessing = true;
-    inline constexpr bool CfgDefaultEnhancedMovement = true;
+    inline constexpr bool CfgDefaultEnhancedMovement = false;
 
     inline constexpr bool CfgDefaultDisableEffects = false;
     inline constexpr bool CfgDefaultDisableParticles = false;

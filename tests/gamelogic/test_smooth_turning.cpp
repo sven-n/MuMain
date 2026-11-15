@@ -258,6 +258,7 @@ TEST_CASE("A gentle walking turn eases while the walker already travels the new 
 TEST_CASE("A standing turn starts only for a real change and gives way to anything else that turns the character "
           "[gamelogic][turning]")
 {
+    const EnhancedMovementSwitch option(true);
     static CHARACTER standing;
     standing.Initialize();
     standing.Object.Angle[2] = 90.f;

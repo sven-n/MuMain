@@ -188,6 +188,7 @@ TEST_CASE("Feet on flat ground leave the bones as animated [data][animation][fee
 TEST_CASE("A foot over lower ground reaches down to it, the body lowered and the legs bent, not stretched "
           "[data][animation][feet]")
 {
+    const EnhancedMovementSwitch option(true);
     PlayerModel player;
     const BMD& model = player.model;
     const int legs[2][3] = {

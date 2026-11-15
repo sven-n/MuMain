@@ -357,7 +357,7 @@ namespace mu::ui::window
             Rml::String lookSunlightLabel;
             Rml::String lookLightMoodLabel;
             Rml::String lookPostProcessingLabel;
-            bool enhancedMovement = true;
+            bool enhancedMovement = false;
             Rml::String enhancedMovementLabel;
             // The player's tuning, per group (Render::Look::TuningGroup): its common and its "More
             // settings" rows, whether it is expanded, and why its sliders do not apply (empty when
