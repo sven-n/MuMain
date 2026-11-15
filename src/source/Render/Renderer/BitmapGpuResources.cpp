@@ -374,8 +374,8 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
             m_calls.generateMipmaps(m_open, texture);
         }
 
-        // Outside a batch every upload submits; a batch submits when the slot is full or the batch ends.
-        if ((!m_batching || next < pieces.size()) && !SubmitOpen())
+        // Uploads share the open submission until the slot is full or Flush (the frame submit) takes it.
+        if (next < pieces.size() && !SubmitOpen())
         {
             return fail();
         }

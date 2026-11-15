@@ -251,6 +251,7 @@ TEST_CASE("bitmap owner uses only three uncycled slots for repeated uploads")
         CHECK(fake.destination.w == 65);
         CHECK(fake.destination.h == 2);
         fake.Calls().releaseTexture(Device(), result.texture);
+        CHECK(owner.Flush()); // the frame submit: one submission per upload
     }
     CHECK(fake.transfers == 3);
     CHECK(fake.samplers == 4);
@@ -306,6 +307,7 @@ TEST_CASE("bitmap owner checks dimensions and copies exact rows")
                               [](std::uint8_t byte) { return byte == 0; }));
         }
         fake.Calls().releaseTexture(Device(), result.texture);
+        CHECK(owner.Flush());
     }
     std::vector<std::uint8_t> maximum(Owner::kSlotCapacity, 0x2a);
     auto maxResult = owner.Upload(maximum, 1024, 1024, filter, wrap);
@@ -337,7 +339,18 @@ TEST_CASE("bitmap owner fails one upload on GPU errors and faults only without a
         fake.failBegin = stage == 3;
         fake.failSubmit = stage == 4;
         std::array<std::uint8_t, 4> pixels{};
-        CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
+        if (stage == 4)
+        {
+            // The submit happens at the flush: the upload is staged, the flush fails.
+            auto staged = owner.Upload(pixels, 1, 1, filter, wrap);
+            REQUIRE(staged);
+            fake.Calls().releaseTexture(Device(), staged.texture);
+            CHECK_FALSE(owner.Flush());
+        }
+        else
+        {
+            CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
+        }
         CHECK_FALSE(owner.IsFaulted());
         CHECK(owner.LastError() == "original SDL error");
         CHECK(fake.canceled == (stage == 3));
@@ -355,7 +368,11 @@ TEST_CASE("bitmap owner fails one upload on GPU errors and faults only without a
         std::array<std::uint8_t, 4> pixels{};
         for (std::size_t lost = 1; lost <= Owner::kSlotCount; ++lost)
         {
-            CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
+            // Each submit happens at the flush, which loses the staged slot.
+            auto staged = owner.Upload(pixels, 1, 1, filter, wrap);
+            REQUIRE(staged);
+            fake.Calls().releaseTexture(Device(), staged.texture);
+            CHECK_FALSE(owner.Flush());
             CHECK(owner.IsFaulted() == (lost == Owner::kSlotCount));
         }
         fake.failSubmit = false;
@@ -373,11 +390,13 @@ TEST_CASE("bitmap owner fails one upload on GPU errors and faults only without a
     auto result = owner.Upload(pixels, 1, 1, filter, wrap);
     REQUIRE(result);
     fake.Calls().releaseTexture(Device(), result.texture);
+    CHECK(owner.Flush());
     for (int i = 0; i < 2; ++i)
     {
         result = owner.Upload(pixels, 1, 1, filter, wrap);
         REQUIRE(result);
         fake.Calls().releaseTexture(Device(), result.texture);
+        CHECK(owner.Flush());
     }
     fake.failWait = true;
     CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
@@ -550,7 +569,9 @@ TEST_CASE("a full 1024x1024 mip chain uploads through the fixed staging slots")
     REQUIRE(result);
     CHECK(fake.textures == 1);
     CHECK(fake.textureLevels == 11);
-    // Level 0 fills a slot by itself; the ten smaller levels share the next one.
+    // Level 0 fills a slot by itself; the ten smaller levels share the next one until the flush.
+    CHECK(fake.fences == 1);
+    CHECK(owner.Flush());
     CHECK(fake.fences == 2);
     REQUIRE(fake.uploads.size() == 11);
     for (std::size_t level = 0; level < fake.uploads.size(); ++level)
@@ -619,6 +640,56 @@ TEST_CASE("bitmap uploads in a batch share a submission until the slot is full")
     CHECK(owner.EndBatch());
     CHECK(fake.waits == 3);
     CHECK_FALSE(fake.overwrite);
+    CHECK(owner.Shutdown());
+    CHECK(fake.fences == 0);
+}
+
+TEST_CASE("uploads outside a batch share a submission until the frame flushes them")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> small(std::size_t{65} * 2u * 4u, 0x5a);
+    for (int i = 0; i < 3; ++i)
+    {
+        auto result = owner.Upload(small, 65, 2, filter, wrap);
+        REQUIRE(result);
+        CHECK(fake.source.offset == static_cast<Uint32>(i) * 1024u);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(fake.fences == 0);
+    CHECK(fake.waits == 0);
+    CHECK(owner.Flush());
+    CHECK(fake.fences == 1);
+    CHECK(owner.Shutdown());
+    CHECK(fake.fences == 0);
+}
+
+TEST_CASE("runtime uploads carry a submission across frames and an upload larger than the open slot")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> small(std::size_t{65} * 2u * 4u, 0x5a);
+    for (int frame = 0; frame < 4; ++frame)
+    {
+        auto result = owner.Upload(small, 65, 2, filter, wrap);
+        REQUIRE(result);
+        CHECK(fake.source.offset == 0u); // each frame opens a fresh slot after its flush
+        fake.Calls().releaseTexture(Device(), result.texture);
+        CHECK(owner.Flush());
+    }
+    CHECK(fake.fences == 3);
+    CHECK_FALSE(owner.IsFaulted());
+    // A 1024x1024 RGBA image is exactly one slot: it fills the open slot by itself.
+    std::vector<std::uint8_t> large(Owner::kSlotCapacity, 0x3c);
+    auto big = owner.Upload(large, 1024, 1024, filter, wrap);
+    REQUIRE(big);
+    CHECK(fake.source.offset == 0u);
+    CHECK(fake.uploads.size() == 5u); // four small frames plus the large image
+    fake.Calls().releaseTexture(Device(), big.texture);
+    CHECK(owner.Flush());
+    CHECK_FALSE(owner.IsFaulted());
     CHECK(owner.Shutdown());
     CHECK(fake.fences == 0);
 }
