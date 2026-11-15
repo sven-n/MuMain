@@ -383,7 +383,7 @@ Read-only diagnostics:
 
 - Real-time **window** and **OpenGL viewport** dimensions.
 - Screen-rate scale factors.
-- Window mode (windowed / fullscreen).
+- Window mode (windowed / borderless fullscreen / fullscreen).
 - A warning if the viewport and window dimensions disagree.
 - A **Copy debug info to clipboard** button - handy for bug reports.
 

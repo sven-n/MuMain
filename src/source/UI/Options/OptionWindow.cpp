@@ -50,10 +50,9 @@
 extern int m_MusicOnOff;
 extern int m_SoundOnOff;
 extern unsigned int WindowWidth, WindowHeight;
-extern BOOL g_bUseWindowMode;
 void ReinitializeFonts();
 std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions();
-void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
+void MuApplyWindowResolution(unsigned int width, unsigned int height, WindowMode mode);
 float ConvertX(float x);
 float ConvertY(float y);
 
@@ -124,6 +123,25 @@ const std::vector<int>& UI::Options::UIScalePercentChoices()
     // default) is one of them so "back to normal" is a single click.
     static const std::vector<int> choices = {75, 80, 90, 100, 125, 150};
     return choices;
+}
+
+const std::vector<WindowMode>& UI::Options::WindowModeChoices()
+{
+    static const std::vector<WindowMode> choices = {WindowMode::Windowed, WindowMode::Borderless,
+                                                    WindowMode::Fullscreen};
+    return choices;
+}
+
+int UI::Options::FindWindowModeIndex(WindowMode mode)
+{
+    const auto& choices = WindowModeChoices();
+    const auto match = std::find(choices.begin(), choices.end(), mode);
+    return match == choices.end() ? 0 : static_cast<int>(std::distance(choices.begin(), match));
+}
+
+bool UI::Options::ResolutionChoosable(WindowMode mode)
+{
+    return mode != WindowMode::Borderless;
 }
 
 int UI::Options::FindClosestUIScaleIndex(int percent)
@@ -316,7 +334,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
     m_iResolutionIndex = 0;
-    m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_windowMode = GameConfig::GetInstance().GetWindowMode();
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
@@ -391,8 +409,6 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("slide_help_label", &model.slideHelpLabel);
     c.Bind("render_all_effects", &model.renderAllEffects);
     c.Bind("render_all_effects_label", &model.renderAllEffectsLabel);
-    c.Bind("windowed_mode", &model.windowedMode);
-    c.Bind("windowed_mode_label", &model.windowedModeLabel);
 
     c.Bind("sound_volume", &model.soundVolume);
     c.Bind("sound_volume_label", &model.soundVolumeLabel);
@@ -406,6 +422,12 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("resolution_index", &model.resolutionIndex);
     c.Bind("resolution_row_label", &model.resolutionRowLabel);
     c.Bind("resolution_value_label", &model.resolutionValueLabel);
+    c.Bind("resolution_locked", &model.resolutionLocked);
+    c.Bind("window_mode_labels", &model.windowModeLabels);
+    c.Bind("window_mode_index", &model.windowModeIndex);
+    c.Bind("window_mode_row_label", &model.windowModeRowLabel);
+    c.Bind("window_mode_value_label", &model.windowModeValueLabel);
+    c.Bind("window_mode_tooltip", &model.windowModeTooltip);
     c.Bind("language_labels", &model.languageLabels);
     c.Bind("language_index", &model.languageIndex);
     c.Bind("language_row_label", &model.languageRowLabel);
@@ -540,9 +562,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.BindEventCallback("option_toggle_slide_help",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSlideHelp(); });
     c.BindEventCallback("option_toggle_render_all_effects",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRenderAllEffects(); });
-    c.BindEventCallback("option_toggle_windowed_mode",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleRenderAllEffects(); });
     c.BindEventCallback("option_toggle_translate_item_names",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleTranslateItemNames(); });
@@ -805,7 +826,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
-    m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_windowMode = GameConfig::GetInstance().GetWindowMode();
 
     m_bVsyncEnabled = GameConfig::GetInstance().GetVSyncEnabled();
     m_iFpsCapIndex = FindCurrentFpsCapIndex();
@@ -861,6 +882,8 @@ void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
     if (dropdownId < 0 || dropdownId >= DropdownCount)
         return;
+    if (dropdownId == DropdownResolution && !UI::Options::ResolutionChoosable(m_windowMode))
+        return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
     // was open as a side effect -- see model.openDropdown's own comment for why a single field
@@ -901,6 +924,9 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
     case DropdownTexturePack:
         RmlTexturePackChanged(optionIndex);
         break;
+    case DropdownWindowMode:
+        RmlWindowModeChanged(optionIndex);
+        break;
     default:
         break;
     }
@@ -925,12 +951,6 @@ void mu::ui::window::COptionWindow::RmlToggleSlideHelp()
 void mu::ui::window::COptionWindow::RmlToggleRenderAllEffects()
 {
     m_bRenderAllEffects = !m_bRenderAllEffects;
-}
-
-void mu::ui::window::COptionWindow::RmlToggleWindowedMode()
-{
-    m_bWindowedMode = !m_bWindowedMode;
-    ApplyWindowModeToggle();
 }
 
 void mu::ui::window::COptionWindow::RmlSoundVolumeChanged(int value)
@@ -994,6 +1014,20 @@ void mu::ui::window::COptionWindow::RmlResolutionChanged(int index)
         return;
     m_iResolutionIndex = index;
     ApplyResolution();
+}
+
+void mu::ui::window::COptionWindow::RmlWindowModeChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    const auto& choices = UI::Options::WindowModeChoices();
+    if (index < 0 || index >= static_cast<int>(choices.size()))
+        return;
+    if (choices[index] == m_windowMode)
+        return;
+    m_windowMode = choices[index];
+    ApplyWindowMode();
 }
 
 void mu::ui::window::COptionWindow::RmlLanguageChanged(int index)
@@ -1439,7 +1473,7 @@ void mu::ui::window::COptionWindow::ApplyPendingUIScale()
     // GameConfig::SetWindowSize()/Save() the way ApplyResolution() is: the window size does not
     // change here, and persisting it from this path would write back whatever size the resize
     // settled on instead of the user's own [Window] setting.
-    MuApplyWindowResolution(WindowWidth, WindowHeight, g_bUseWindowMode != FALSE);
+    MuApplyWindowResolution(WindowWidth, WindowHeight, m_windowMode);
 
     // The clamp may have coerced the request (a choice outside GameConfig's bounds can't happen
     // today, but the ladder and the clamp are independent constants), so re-seed from what was
@@ -1669,13 +1703,16 @@ void mu::ui::window::COptionWindow::ApplyResolution()
     {
         return;
     }
+    if (!UI::Options::ResolutionChoosable(m_windowMode))
+    {
+        return;
+    }
 
     const auto [newWidth, newHeight] = m_resolutions[m_iResolutionIndex];
 
     // Resize through SDL (MuApplyWindowResolution), not raw Win32 SetWindowPos -- SDL clamps a
     // non-resizable window straight back to its current size otherwise.
-    MuApplyWindowResolution(static_cast<unsigned int>(newWidth), static_cast<unsigned int>(newHeight),
-                            g_bUseWindowMode != FALSE);
+    MuApplyWindowResolution(static_cast<unsigned int>(newWidth), static_cast<unsigned int>(newHeight), m_windowMode);
 
     // SDL may have coerced the request; WindowWidth/Height now hold the actual result, so
     // persist that and snap the selection to it.
@@ -1695,19 +1732,58 @@ void mu::ui::window::COptionWindow::SyncResolutionComboToWindow()
     m_iResolutionIndex = listed;
 }
 
-// Switches windowed/fullscreen through SDL (MuApplyWindowResolution), not raw Win32 calls --
+// Switches the window mode through SDL (MuApplyWindowResolution), not raw Win32 calls --
 // driving the OS directly left SDL's state inconsistent with later resolution changes.
-void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
+void mu::ui::window::COptionWindow::ApplyWindowMode()
 {
-    g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
-    GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetWindowMode(m_windowMode);
 
-    MuApplyWindowResolution(WindowWidth, WindowHeight, m_bWindowedMode);
+    // The saved resolution, not the current size: coming back from borderless, the window has the
+    // desktop's size, and the player's own resolution is the one to return to.
+    MuApplyWindowResolution(static_cast<unsigned int>(config.GetWindowWidth()),
+                            static_cast<unsigned int>(config.GetWindowHeight()), m_windowMode);
 
-    // The mode switch may have coerced the size, so save after applying it.
+    // The mode switch may have coerced the size, so save after applying it. Borderless keeps the
+    // saved resolution for the other modes: its desktop size is not the player's choice.
     SyncResolutionComboToWindow();
-    GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
-    GameConfig::GetInstance().Save();
+    if (UI::Options::ResolutionChoosable(m_windowMode))
+        config.SetWindowSize(WindowWidth, WindowHeight);
+    config.Save();
+}
+
+// Rebuilt every sync for the localized mode names, as the FPS Limit row's "Uncapped".
+void mu::ui::window::COptionWindow::SyncWindowModeRow(OptionRmlModel& model)
+{
+    // In UI::Options::WindowModeChoices() order.
+    static const wchar_t* const* const modeNames[] = {&I18N::Game::Windowed, &I18N::Game::BorderlessFullscreen,
+                                                      &I18N::Game::Fullscreen};
+    std::vector<Rml::String> labels;
+    for (const wchar_t* const* name : modeNames)
+        labels.push_back(StringUtils::WideToNarrow(*name));
+    const int index = UI::Options::FindWindowModeIndex(m_windowMode);
+    if (model.windowModeLabels != labels)
+    {
+        model.windowModeLabels = std::move(labels);
+        m_RmlView.MarkDirty("window_mode_labels");
+    }
+    if (model.windowModeIndex != index)
+    {
+        model.windowModeIndex = index;
+        m_RmlView.MarkDirty("window_mode_index");
+    }
+    const Rml::String& value = model.windowModeLabels[static_cast<size_t>(index)];
+    if (model.windowModeValueLabel != value)
+    {
+        model.windowModeValueLabel = value;
+        m_RmlView.MarkDirty("window_mode_value_label");
+    }
+    const bool resolutionLocked = !UI::Options::ResolutionChoosable(m_windowMode);
+    if (model.resolutionLocked != resolutionLocked)
+    {
+        model.resolutionLocked = resolutionLocked;
+        m_RmlView.MarkDirty("resolution_locked");
+    }
 }
 
 void mu::ui::window::COptionWindow::SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text)
@@ -1767,7 +1843,8 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
     SyncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);
     SyncLabel(model.renderAllEffectsLabel, "render_all_effects_label", I18N::Game::RenderFullEffects);
-    SyncLabel(model.windowedModeLabel, "windowed_mode_label", I18N::Game::WindowedMode);
+    SyncLabel(model.windowModeRowLabel, "window_mode_row_label", I18N::Game::DisplayMode);
+    SyncLabel(model.windowModeTooltip, "window_mode_tooltip", I18N::Game::DisplayModeTooltip);
     SyncLabel(model.soundVolumeLabel, "sound_volume_label", I18N::Game::SoundVolume);
     SyncLabel(model.musicVolumeLabel, "music_volume_label", I18N::Game::MusicVolume);
     SyncLabel(model.renderLevelLabel, "render_level_label", I18N::Game::EffectLimitation);
@@ -1807,8 +1884,11 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (model.autoAttack != m_bAutoAttack) { model.autoAttack = m_bAutoAttack; m_RmlView.MarkDirty("auto_attack"); }
     if (model.whisperSound != m_bWhisperSound) { model.whisperSound = m_bWhisperSound; m_RmlView.MarkDirty("whisper_sound"); }
     if (model.slideHelp != m_bSlideHelp) { model.slideHelp = m_bSlideHelp; m_RmlView.MarkDirty("slide_help"); }
-    if (model.renderAllEffects != m_bRenderAllEffects) { model.renderAllEffects = m_bRenderAllEffects; m_RmlView.MarkDirty("render_all_effects"); }
-    if (model.windowedMode != m_bWindowedMode) { model.windowedMode = m_bWindowedMode; m_RmlView.MarkDirty("windowed_mode"); }
+    if (model.renderAllEffects != m_bRenderAllEffects)
+    {
+        model.renderAllEffects = m_bRenderAllEffects;
+        m_RmlView.MarkDirty("render_all_effects");
+    }
 
     if (model.soundVolume != m_iVolumeLevel) { model.soundVolume = m_iVolumeLevel; m_RmlView.MarkDirty("sound_volume"); }
     if (model.musicVolume != m_iMusicLevel) { model.musicVolume = m_iMusicLevel; m_RmlView.MarkDirty("music_volume"); }
@@ -1825,6 +1905,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     if (model.resolutionIndex != m_iResolutionIndex) { model.resolutionIndex = m_iResolutionIndex; m_RmlView.MarkDirty("resolution_index"); }
     syncDropdownValue(model.resolutionValueLabel, "resolution_value_label", model.resolutionLabels, model.resolutionIndex);
+    SyncWindowModeRow(model);
 
     if (model.languageLabels.empty())
     {

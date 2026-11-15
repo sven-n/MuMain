@@ -165,6 +165,9 @@ int RandomTable[100];
 BOOL g_bMinimizedEnabled = FALSE;
 int g_iScreenSaverOldValue = 60 * 15;
 
+// TRUE while the game shares the desktop (Windowed or Borderless): the cursor is free to leave the window
+// and the game keeps running when another window has the focus. g_bUseFullscreenMode is TRUE in exclusive
+// Fullscreen only, when the monitor's mode was changed. Both follow SetWindowModeGlobals().
 BOOL g_bUseWindowMode = TRUE;
 BOOL g_bUseFullscreenMode = FALSE;
 bool g_bDisableAnimationTaskPool = true;
@@ -1305,16 +1308,47 @@ static bool VideoDriverPositionsTopLevelWindows()
     return driver == nullptr || driver != kWaylandVideoDriver;
 }
 
-static void CenterWindowAfterResize(SDL_Window* window)
+// Centred on `display`, the one the player was looking at, not the primary display.
+static void CenterWindowAfterResize(SDL_Window* window, SDL_DisplayID display)
 {
     if (!VideoDriverPositionsTopLevelWindows())
         return;
 
-    if (!SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED))
+    const int centered = static_cast<int>(SDL_WINDOWPOS_CENTERED_DISPLAY(display));
+    if (!SDL_SetWindowPosition(window, centered, centered))
         mu::log::Get("platform")->warn("SDL_SetWindowPosition failed: {}", SDL_GetError());
 }
 
-// Resolution change through SDL (issue #462). SDL owns the window on every
+static void SetWindowModeGlobals(WindowMode mode)
+{
+    g_bUseWindowMode = mode == WindowMode::Fullscreen ? FALSE : TRUE;
+    g_bUseFullscreenMode = mode == WindowMode::Fullscreen ? TRUE : FALSE;
+}
+
+// The display the window is on, or the primary display before the window is placed on one.
+static SDL_DisplayID WindowDisplay(SDL_Window* window)
+{
+    const SDL_DisplayID display = SDL_GetDisplayForWindow(window);
+    return display != 0 ? display : SDL_GetPrimaryDisplay();
+}
+
+// What SDL switches the monitor to when the window goes fullscreen: in Fullscreen the closest real
+// mode to width x height, so the monitor changes resolution; otherwise, or when no mode matches,
+// none, which covers the display at the desktop's own mode (borderless).
+static void RequestFullscreenDisplayMode(SDL_Window* window, SDL_DisplayID display, WindowMode mode, int width,
+                                         int height)
+{
+    SDL_DisplayMode closest;
+    if (mode == WindowMode::Fullscreen &&
+        SDL_GetClosestFullscreenDisplayMode(display, width, height, 0.0f, false, &closest))
+    {
+        SDL_SetWindowFullscreenMode(window, &closest);
+        return;
+    }
+    SDL_SetWindowFullscreenMode(window, nullptr);
+}
+
+// Resolution and window mode change through SDL (issue #462). SDL owns the window on every
 // platform, so resize it via SDL rather than the OS. The old Windows path in
 // ApplyResolution() drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
 // which fought SDL: it pins the min/max tracking size of a non-resizable
@@ -1323,7 +1357,7 @@ static void CenterWindowAfterResize(SDL_Window* window)
 // SDL_SetWindowSize resizes regardless of the resizable flag and drives the
 // same HandleWindowResize update synchronously, so callers can Save() config
 // right after and see the size the window actually ended up with.
-void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed)
+void MuApplyWindowResolution(unsigned int width, unsigned int height, WindowMode mode)
 {
     if (!g_sdlWindow || width == 0 || height == 0)
         return;
@@ -1340,30 +1374,28 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     SDL_GetWindowSize(g_sdlWindow, &currentW, &currentH);
     const bool leavingFullscreen = (SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_FULLSCREEN) != 0;
     const bool repositions = currentW != w || currentH != h || leavingFullscreen;
+    // Every mode stays on the display the window is on now.
+    const SDL_DisplayID display = WindowDisplay(g_sdlWindow);
 
-    if (windowed)
+    SetWindowModeGlobals(mode);
+    if (mode == WindowMode::Windowed)
     {
         SDL_SetWindowFullscreen(g_sdlWindow, false);
         SDL_SetWindowSize(g_sdlWindow, w, h);
         if (repositions)
-            CenterWindowAfterResize(g_sdlWindow);
+            CenterWindowAfterResize(g_sdlWindow, display);
     }
     else
     {
-        // Pick the closest real fullscreen mode so the monitor switches
-        // resolution; fall back to borderless desktop if none matches.
-        SDL_DisplayMode mode;
-        const SDL_DisplayID display = SDL_GetDisplayForWindow(g_sdlWindow);
-        if (SDL_GetClosestFullscreenDisplayMode(display, w, h, 0.0f, false, &mode))
-            SDL_SetWindowFullscreenMode(g_sdlWindow, &mode);
-        else
-            SDL_SetWindowFullscreenMode(g_sdlWindow, nullptr);
-        SDL_SetWindowSize(g_sdlWindow, w, h);
+        RequestFullscreenDisplayMode(g_sdlWindow, display, mode, w, h);
+        // Borderless covers the display at the desktop's size; the windowed size is left as it is.
+        if (mode == WindowMode::Fullscreen)
+            SDL_SetWindowSize(g_sdlWindow, w, h);
         SDL_SetWindowFullscreen(g_sdlWindow, true);
     }
 
     // The request is not a guarantee: the closest fullscreen mode can differ
-    // from what was asked, the borderless fallback is desktop-sized, and mode
+    // from what was asked, borderless and the fallback are desktop-sized, and mode
     // switches are asynchronous on some window managers. Settle the request,
     // then resize the game to the size the window really got - callers persist
     // WindowWidth/Height, and config must record what happened, not what was
@@ -2041,8 +2073,8 @@ bool StartClient(char* szCmdLine)
     // Apply window settings from INI
     WindowWidth = GameConfig::GetInstance().GetWindowWidth();
     WindowHeight = GameConfig::GetInstance().GetWindowHeight();
-    g_bUseWindowMode = GameConfig::GetInstance().GetWindowMode() ? TRUE : FALSE;
-    g_bUseFullscreenMode = !g_bUseWindowMode;
+    const WindowMode windowMode = GameConfig::GetInstance().GetWindowMode();
+    SetWindowModeGlobals(windowMode);
 
     // Apply audio settings from INI — volume 0 = off, >0 = on
     m_SoundOnOff = (GameConfig::GetInstance().GetSoundVolume() > 0) ? 1 : 0;
@@ -2075,8 +2107,8 @@ bool StartClient(char* szCmdLine)
     if (g_iChatInputType == 1)
         ShowCursor(FALSE);
 
-    // Fullscreen is requested via an SDL window flag below; SDL handles the
-    // display-mode change and restores it on teardown.
+    // Fullscreen and borderless are requested via an SDL window flag and display mode below; SDL
+    // handles the display-mode change and restores it on teardown.
     g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
 #ifdef _WIN32
@@ -2127,7 +2159,7 @@ bool StartClient(char* szCmdLine)
 
     // Hidden until the first frame is about to draw (IterateClient), so the setup below shows no black window.
     const SDL_WindowFlags windowFlags =
-        Core::Platform::BuildSDLWindowFlags(g_bUseWindowMode != TRUE, false) | SDL_WINDOW_HIDDEN;
+        Core::Platform::BuildSDLWindowFlags(windowMode != WindowMode::Windowed, false) | SDL_WINDOW_HIDDEN;
 
     g_sdlWindow =
         SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
@@ -2138,6 +2170,9 @@ bool StartClient(char* szCmdLine)
         return false;
     }
     Core::Platform::SetGameWindow(g_sdlWindow);
+    // Taken when the window is shown; the first resize event then reports the size it really got.
+    RequestFullscreenDisplayMode(g_sdlWindow, WindowDisplay(g_sdlWindow), windowMode, static_cast<int>(WindowWidth),
+                                 static_cast<int>(WindowHeight));
     // Also shuts down the renderer, which is created into this window below.
     g_teardown.Push([] { ShutdownRendererWindow(); });
 

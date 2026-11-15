@@ -16,8 +16,8 @@ backing config object. There is no separate per-scene options dialog.
 
 What was added on top of that:
 
-- **Resolution and windowed/fullscreen toggle apply without restarting.**
-  Switch them at any time from the options window.
+- **Resolution and display mode apply without restarting.**
+  Switch them at any time from the options window; see [Display mode](#display-mode).
 - **Volume and render-level sliders round to the nearest level** instead of
   truncating, so the slider endpoints actually reach 0 (mute) and the
   configured maximum.
@@ -26,7 +26,7 @@ What was added on top of that:
 - **Resolution changes go through SDL** (PR
   [#530](https://github.com/sven-n/MuMain/pull/530)), which makes the live
   apply actually work in windowed mode on Windows. Windowed resizes re-center
-  the window on the display, except on Wayland, where the compositor places
+  the window on the display it is on, except on Wayland, where the compositor places
   windows (see [Linux - Terminal](build/linux/console.md#wayland)).
   Fullscreen picks the closest real display mode (or borderless desktop when
   nothing matches), and the combo and `config.ini` record the mode that
@@ -40,13 +40,32 @@ What was added on top of that:
   with the active layout up to the dock scale, shrinking only when needed to
   fit an existing control.
 
+## Display mode
+
+The Display tab's **Display mode** row has three choices:
+
+- **Windowed** - a framed window at the chosen resolution.
+- **Borderless fullscreen** - a frameless window that covers the whole display
+  at the desktop's own resolution. The monitor never changes mode, so switching
+  to another window (Alt+Tab) is instant, and the mouse can leave the game for
+  another monitor. The Resolution row shows the desktop resolution, dimmed: it
+  does not apply in this mode, and the resolution chosen for the other modes is
+  kept for when you switch back.
+- **Fullscreen** - the monitor switches to the chosen resolution (exclusive
+  fullscreen). The mouse stays inside the game while it has the focus, and the
+  game slows down to save power while another window has it.
+
+Every change applies at once and stays on the display the game is on. The
+game always uses the size the window really got, so the UI reflows to the
+desktop size in borderless and to the closest real display mode in fullscreen.
+
 ## Layout
 
 The window has five tabs:
 
 | Tab | Settings |
 |---|---|
-| Display | Resolution, windowed mode, VSync, FPS limit, UI scale |
+| Display | Resolution, display mode, VSync, FPS limit, UI scale |
 | Graphics | Quality: Enhanced graphics, Enhanced movement, anti-aliasing, anisotropic filtering, render level. Effects: the effect toggles. Shadows: the shadow toggles |
 | Audio | Sound and music volume, whisper sound |
 | Gameplay | Auto attack, slide help |
@@ -74,7 +93,12 @@ Settings are written to `config.ini` in the player's user folder (see
 [where settings and logs live](build/README.md#where-settings-and-logs-live)). The options
 window writes to these sections:
 
-- `[Window]` - width, height, windowed flag.
+- `[Window]` - `Width` and `Height` (the chosen resolution; borderless runs at
+  the desktop's and leaves them as they are) and `Mode`: `Windowed` (default),
+  `Borderless` or `Fullscreen`, in any case. A `config.ini` from before `Mode`
+  existed keeps its choice: without `Mode`, `Windowed=1` is read as Windowed and
+  `Windowed=0` as Fullscreen, and the next save writes `Mode` and removes
+  `Windowed`.
 - `[Render]` - set from the Display and Graphics tabs, each applied at once:
   - `VSync`: `$vsync on` and `$vsync off` update it too; startup and
     fullscreen/resolution changes reapply it before the next frame begins.

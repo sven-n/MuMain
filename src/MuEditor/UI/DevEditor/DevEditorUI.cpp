@@ -592,10 +592,41 @@ void CDevEditorUI::RenderGraphicsTab()
     }
 }
 
+namespace
+{
+const char* WindowModeName(WindowMode mode)
+{
+    switch (mode)
+    {
+    case WindowMode::Borderless:
+        return I18N::Editor::BorderlessFullscreen;
+    case WindowMode::Fullscreen:
+        return I18N::Editor::Fullscreen;
+    case WindowMode::Windowed:
+        break;
+    }
+    return I18N::Editor::Windowed;
+}
+
+// In English, for bug reports.
+const char* WindowModeReportName(WindowMode mode)
+{
+    switch (mode)
+    {
+    case WindowMode::Borderless:
+        return "Borderless fullscreen";
+    case WindowMode::Fullscreen:
+        return "Fullscreen";
+    case WindowMode::Windowed:
+        break;
+    }
+    return "Windowed";
+}
+} // namespace
+
 void CDevEditorUI::RenderGraphicsDebugInfo()
 {
     extern unsigned int WindowWidth, WindowHeight;
-    extern BOOL g_bUseWindowMode;
     extern HWND g_hWnd;
     extern int OpenglWindowWidth, OpenglWindowHeight;
     extern float g_fScreenRate_x, g_fScreenRate_y;
@@ -603,8 +634,8 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
     ImGui::Text("%s: %u x %u", I18N::Editor::CurrentResolution, WindowWidth, WindowHeight);
     ImGui::Text("%s: %d x %d", I18N::Editor::OpenGLViewport, OpenglWindowWidth, OpenglWindowHeight);
     ImGui::Text("%s: %.2f x %.2f", I18N::Editor::ScreenRate, g_fScreenRate_x, g_fScreenRate_y);
-    ImGui::Text("%s: %s", I18N::Editor::WindowMode,
-                g_bUseWindowMode ? I18N::Editor::Windowed : I18N::Editor::Fullscreen);
+    const WindowMode windowMode = GameConfig::GetInstance().GetWindowMode();
+    ImGui::Text("%s: %s", I18N::Editor::WindowMode, WindowModeName(windowMode));
 
     int clientWidth = 0, clientHeight = 0;
     float calculatedScaleX = 0, calculatedScaleY = 0;
@@ -629,29 +660,23 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
     {
         char debugInfo[1024];
         sprintf_s(debugInfo,
-            "=== Graphics Debug Info ===\n"
-            "Current Resolution: %u x %u\n"
-            "OpenGL Viewport: %d x %d\n"
-            "Screen Rate: %.2f x %.2f\n"
-            "Window Mode: %s\n"
-            "Actual Window Client: %d x %d\n"
-            "Calculated Scale from Client: %.2f x %.2f\n"
-            "Mismatch: %s\n"
-            "UI Reference System: %d x %d\n"
-            "Expected UI Scale: WindowWidth/%d = %.2f, WindowHeight/%d = %.2f\n"
-            "Aspect Ratio: %.3f\n",
-            WindowWidth, WindowHeight,
-            OpenglWindowWidth, OpenglWindowHeight,
-            g_fScreenRate_x, g_fScreenRate_y,
-            g_bUseWindowMode ? "Windowed" : "Fullscreen",
-            clientWidth, clientHeight,
-            calculatedScaleX, calculatedScaleY,
-            (WindowWidth != OpenglWindowWidth || WindowHeight != OpenglWindowHeight) ? "YES" : "NO",
-            REFERENCE_WIDTH, REFERENCE_HEIGHT,
-            REFERENCE_WIDTH, (float)WindowWidth / (float)REFERENCE_WIDTH,
-            REFERENCE_HEIGHT, (float)WindowHeight / (float)REFERENCE_HEIGHT,
-            (float)WindowWidth / (float)WindowHeight
-        );
+                  "=== Graphics Debug Info ===\n"
+                  "Current Resolution: %u x %u\n"
+                  "OpenGL Viewport: %d x %d\n"
+                  "Screen Rate: %.2f x %.2f\n"
+                  "Window Mode: %s\n"
+                  "Actual Window Client: %d x %d\n"
+                  "Calculated Scale from Client: %.2f x %.2f\n"
+                  "Mismatch: %s\n"
+                  "UI Reference System: %d x %d\n"
+                  "Expected UI Scale: WindowWidth/%d = %.2f, WindowHeight/%d = %.2f\n"
+                  "Aspect Ratio: %.3f\n",
+                  WindowWidth, WindowHeight, OpenglWindowWidth, OpenglWindowHeight, g_fScreenRate_x, g_fScreenRate_y,
+                  WindowModeReportName(windowMode), clientWidth, clientHeight, calculatedScaleX, calculatedScaleY,
+                  (WindowWidth != OpenglWindowWidth || WindowHeight != OpenglWindowHeight) ? "YES" : "NO",
+                  REFERENCE_WIDTH, REFERENCE_HEIGHT, REFERENCE_WIDTH, (float)WindowWidth / (float)REFERENCE_WIDTH,
+                  REFERENCE_HEIGHT, (float)WindowHeight / (float)REFERENCE_HEIGHT,
+                  (float)WindowWidth / (float)WindowHeight);
         ImGui::SetClipboardText(debugInfo);
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::DebugInfoCopiedToClipboard);
     }

@@ -17,6 +17,9 @@ namespace CfgKeys
     // Window
     inline constexpr wchar_t CfgKeyWidth[]      = L"Width";
     inline constexpr wchar_t CfgKeyHeight[]     = L"Height";
+    // Windowed, Borderless or Fullscreen (WindowMode).
+    inline constexpr wchar_t CfgKeyWindowMode[] = L"Mode";
+    // The window mode of older clients, 1 a window and 0 fullscreen: read when Mode is missing, removed on save.
     inline constexpr wchar_t CfgKeyWindowed[]   = L"Windowed";
 
     // Audio — volume 0 = off, >0 = on (no separate Enabled flag).
@@ -100,7 +103,7 @@ namespace CfgDefaults
 {
     inline constexpr int  CfgDefaultWindowWidth  = 1024;
     inline constexpr int  CfgDefaultWindowHeight = 768;
-    inline constexpr bool CfgDefaultWindowed     = true;
+    inline constexpr wchar_t CfgDefaultWindowMode[] = L"Windowed";
 
     inline constexpr int  CfgDefaultSoundVolume = 5;
     inline constexpr int  CfgDefaultMusicVolume = 5;

@@ -1024,8 +1024,20 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>Translate item names</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>Windowed mode</value>
+  <data name="Display mode" xml:space="preserve">
+    <value>Display mode</value>
+  </data>
+  <data name="Windowed" xml:space="preserve">
+    <value>Windowed</value>
+  </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Borderless fullscreen</value>
+  </data>
+  <data name="Fullscreen" xml:space="preserve">
+    <value>Fullscreen</value>
+  </data>
+  <data name="Display mode tooltip" xml:space="preserve">
+    <value>Borderless fullscreen covers the screen at the desktop resolution and switches to other windows at once. Fullscreen changes the monitor to the chosen resolution.</value>
   </data>
   <data name="Enhanced graphics" xml:space="preserve">
     <value>Enhanced graphics</value>

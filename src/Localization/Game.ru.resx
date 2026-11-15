@@ -1024,8 +1024,20 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>Переводить названия предметов</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>Оконный режим</value>
+  <data name="Display mode" xml:space="preserve">
+    <value>Режим отображения</value>
+  </data>
+  <data name="Windowed" xml:space="preserve">
+    <value>В окне</value>
+  </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Полноэкранный без рамки</value>
+  </data>
+  <data name="Fullscreen" xml:space="preserve">
+    <value>Полноэкранный</value>
+  </data>
+  <data name="Display mode tooltip" xml:space="preserve">
+    <value>Полноэкранный без рамки занимает экран в разрешении рабочего стола и мгновенно переключается на другие окна. Полноэкранный переключает монитор на выбранное разрешение.</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Закрывать</value>

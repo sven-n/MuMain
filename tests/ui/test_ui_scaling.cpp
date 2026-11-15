@@ -6,6 +6,8 @@
 #include <array>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -1028,4 +1030,147 @@ TEST_CASE(
     CHECK_FALSE(classic.lightMood);
     CHECK_FALSE(classic.postProcessing);
     CHECK_FALSE(classic.antialiasing);
+}
+
+namespace
+{
+// The [Window] value of `key` in the config.ini GameConfig uses, empty when the key is missing.
+std::wstring ReadWindowKey(const wchar_t* key)
+{
+    std::array<wchar_t, 64> buffer{};
+    GetPrivateProfileStringW(CfgSections::CfgSectionWindow, key, L"", buffer.data(), static_cast<DWORD>(buffer.size()),
+                             GameConfig::GetInstance().GetConfigPath().wstring().c_str());
+    return buffer.data();
+}
+
+std::string ReadText(const std::filesystem::path& file)
+{
+    std::ifstream stream(file, std::ios::binary);
+    REQUIRE_MESSAGE(stream.good(), file.generic_string());
+    return {std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
+}
+} // namespace
+
+TEST_CASE("the window mode reads Windowed, Borderless or Fullscreen in any case [config][window]")
+{
+    using GameConfigValidation::FormatWindowMode;
+    using GameConfigValidation::ParseWindowMode;
+
+    CHECK(ParseWindowMode(L"Windowed") == WindowMode::Windowed);
+    CHECK(ParseWindowMode(L" borderless ") == WindowMode::Borderless);
+    CHECK(ParseWindowMode(L"FULLSCREEN") == WindowMode::Fullscreen);
+    CHECK_FALSE(ParseWindowMode(L"").has_value());
+    CHECK_FALSE(ParseWindowMode(L"1").has_value());
+    CHECK_FALSE(ParseWindowMode(L"Exclusive").has_value());
+    for (const WindowMode mode : {WindowMode::Windowed, WindowMode::Borderless, WindowMode::Fullscreen})
+    {
+        CHECK(ParseWindowMode(FormatWindowMode(mode)) == mode);
+    }
+}
+
+TEST_CASE("an older config.ini's Windowed key picks the window mode when Mode is missing [config][window]")
+{
+    using GameConfigValidation::ResolveWindowMode;
+
+    // Mode wins whenever it is valid.
+    CHECK(ResolveWindowMode(L"Borderless", true) == WindowMode::Borderless);
+    CHECK(ResolveWindowMode(L"Windowed", false) == WindowMode::Windowed);
+    // Without it, Windowed=1 is a window and Windowed=0 the monitor's mode, as older clients did.
+    CHECK(ResolveWindowMode(L"", true) == WindowMode::Windowed);
+    CHECK(ResolveWindowMode(L"", false) == WindowMode::Fullscreen);
+    CHECK(ResolveWindowMode(L"Exclusive", false) == WindowMode::Fullscreen);
+    // Neither key: the default.
+    CHECK(ResolveWindowMode(L"", std::nullopt) ==
+          *GameConfigValidation::ParseWindowMode(CfgDefaults::CfgDefaultWindowMode));
+    CHECK(ResolveWindowMode(L"", std::nullopt) == WindowMode::Windowed);
+}
+
+TEST_CASE("the window mode loads and saves through [Window] Mode and retires Windowed [config][window]")
+{
+    const UserConfigFile file;
+    GameConfig& config = GameConfig::GetInstance();
+
+    file.Write("[Window]\nWidth=1280\nHeight=720\n");
+    config.Load();
+    CHECK(config.GetWindowMode() == WindowMode::Windowed);
+
+    // An older client's config.ini keeps its choice, and saving moves it to Mode.
+    for (const auto& [legacy, expected] :
+         {std::pair{"0", WindowMode::Fullscreen}, std::pair{"1", WindowMode::Windowed}})
+    {
+        CAPTURE(legacy);
+        file.Write(std::string("[Window]\nWidth=1280\nHeight=720\nWindowed=") + legacy + "\n");
+        config.Load();
+        CHECK(config.GetWindowMode() == expected);
+        // Loading alone leaves the file as it is, so the choice survives until Mode is written.
+        CHECK(ReadWindowKey(CfgKeys::CfgKeyWindowed) == std::wstring(legacy, legacy + 1));
+        config.Save();
+        CHECK(ReadWindowKey(CfgKeys::CfgKeyWindowMode) == GameConfigValidation::FormatWindowMode(expected));
+        CHECK(ReadWindowKey(CfgKeys::CfgKeyWindowed).empty());
+        config.Load();
+        CHECK(config.GetWindowMode() == expected);
+    }
+
+    // Mode wins over a leftover Windowed key.
+    file.Write("[Window]\nMode=Borderless\nWindowed=1\n");
+    config.Load();
+    CHECK(config.GetWindowMode() == WindowMode::Borderless);
+
+    // Every mode survives a save and a restart, and leaves the resolution alone.
+    for (const WindowMode mode : {WindowMode::Windowed, WindowMode::Borderless, WindowMode::Fullscreen})
+    {
+        CAPTURE(GameConfigValidation::FormatWindowMode(mode));
+        config.SetWindowSize(1600, 900);
+        config.SetWindowMode(mode);
+        config.Save();
+        config.SetWindowMode(mode == WindowMode::Windowed ? WindowMode::Fullscreen : WindowMode::Windowed);
+        config.Load();
+        CHECK(config.GetWindowMode() == mode);
+        CHECK(config.GetWindowWidth() == 1600);
+        CHECK(config.GetWindowHeight() == 900);
+    }
+}
+
+TEST_CASE("a new player's config.ini starts windowed through [Window] Mode [config][window]")
+{
+    const std::string ini = ReadText(std::filesystem::path(MU_BIN_DIR) / "config.ini.template");
+    CHECK(ini.find("\nMode=Windowed") != std::string::npos);
+    CHECK(ini.find("\nWindowed=") == std::string::npos);
+}
+
+TEST_CASE("the display mode row offers windowed, borderless and fullscreen [ui][options][window]")
+{
+    const auto& choices = UI::Options::WindowModeChoices();
+    REQUIRE(choices.size() == 3);
+    CHECK(choices[0] == WindowMode::Windowed);
+    CHECK(choices[1] == WindowMode::Borderless);
+    CHECK(choices[2] == WindowMode::Fullscreen);
+    for (size_t i = 0; i < choices.size(); ++i)
+    {
+        CHECK(UI::Options::FindWindowModeIndex(choices[i]) == static_cast<int>(i));
+    }
+
+    // Borderless runs at the desktop's resolution; the other modes use the chosen one.
+    CHECK(UI::Options::ResolutionChoosable(WindowMode::Windowed));
+    CHECK_FALSE(UI::Options::ResolutionChoosable(WindowMode::Borderless));
+    CHECK(UI::Options::ResolutionChoosable(WindowMode::Fullscreen));
+}
+
+TEST_CASE("both option window themes show the display mode row and lock the resolution [ui][options][window]")
+{
+    const std::filesystem::path rmlDir = std::filesystem::path(MU_BIN_DIR) / "Data/Interface/RmlUi";
+    for (const char* theme : {"option_window.rml", "themes/modern/option_window.rml"})
+    {
+        CAPTURE(theme);
+        const std::string markup = ReadText(rmlDir / theme);
+        for (const char* required :
+             {"{{window_mode_row_label}}", "{{window_mode_value_label}}", "data-for=\"label : window_mode_labels\"",
+              "it_index == window_mode_index", "option_toggle_dropdown(9)", "option_dropdown_option_click(9, it_index)",
+              "window_mode_tooltip", "data-class-locked=\"resolution_locked\""})
+        {
+            CAPTURE(required);
+            CHECK(markup.find(required) != std::string::npos);
+        }
+        CHECK(markup.find("windowed_mode") == std::string::npos);
+    }
 }
