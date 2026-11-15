@@ -1,6 +1,7 @@
 #include "Core/Platform/UserFolder.h"
 
 #include "Core/Content/ContentStore.h"
+#include "Core/Text/AsciiText.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include <SDL3/SDL_error.h>
@@ -17,34 +18,8 @@ namespace Core::Platform
 {
 namespace
 {
-std::string_view Trim(std::string_view text)
-{
-    while (!text.empty() && std::isspace(static_cast<unsigned char>(text.front())))
-    {
-        text.remove_prefix(1);
-    }
-    while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back())))
-    {
-        text.remove_suffix(1);
-    }
-    return text;
-}
-
-bool EqualsIgnoringCase(std::string_view a, std::string_view b)
-{
-    if (a.size() != b.size())
-    {
-        return false;
-    }
-    for (std::size_t i = 0; i < a.size(); ++i)
-    {
-        if (std::tolower(static_cast<unsigned char>(a[i])) != std::tolower(static_cast<unsigned char>(b[i])))
-        {
-            return false;
-        }
-    }
-    return true;
-}
+using Core::Text::EqualsIgnoringAsciiCase;
+using Core::Text::TrimAsciiWhitespace;
 
 // Letters, digits, space, '-', '_' and '.', not starting with '.': one folder name on every file system.
 bool IsPlainFolderName(std::string_view name)
@@ -120,19 +95,19 @@ std::optional<std::string> ClientNameFromDefaults(std::string_view defaultsIni)
     while (!defaultsIni.empty())
     {
         const std::size_t end = defaultsIni.find('\n');
-        const std::string_view line = Trim(defaultsIni.substr(0, end));
+        const std::string_view line = TrimAsciiWhitespace(defaultsIni.substr(0, end));
         defaultsIni.remove_prefix(end == std::string_view::npos ? defaultsIni.size() : end + 1);
 
         if (line.size() >= 2 && line.front() == '[' && line.back() == ']')
         {
-            inClientSection = EqualsIgnoringCase(Trim(line.substr(1, line.size() - 2)), "Client");
+            inClientSection = EqualsIgnoringAsciiCase(TrimAsciiWhitespace(line.substr(1, line.size() - 2)), "Client");
             continue;
         }
         const std::size_t equals = line.find('=');
         if (inClientSection && equals != std::string_view::npos &&
-            EqualsIgnoringCase(Trim(line.substr(0, equals)), "Name"))
+            EqualsIgnoringAsciiCase(TrimAsciiWhitespace(line.substr(0, equals)), "Name"))
         {
-            const std::string_view name = Trim(line.substr(equals + 1));
+            const std::string_view name = TrimAsciiWhitespace(line.substr(equals + 1));
             if (IsPlainFolderName(name))
             {
                 return std::string(name);
