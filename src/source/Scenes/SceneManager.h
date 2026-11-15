@@ -139,7 +139,7 @@ using ScreenshotCompletion = std::function<void(const ScreenshotOutcome&)>;
 constexpr int BestScreenshotQuality = 100;
 
 // Captures the next rendered frame the same way Print Screen does, writing it
-// to `path` (empty: the usual `Screen(...).jpg` beside the executable) as a JPEG
+// to `path` (empty: the usual `Screen(...).jpg` in the user folder's Screenshots/) as a JPEG
 // of `quality` (1 to 100) and calling `onComplete` on the frame the file is
 // finished. Returns false when a capture is already pending or the renderer
 // refused the readback.

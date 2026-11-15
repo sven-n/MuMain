@@ -358,7 +358,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.WriteCurrentTime();
 
         SaveOptions();
-        SaveMacro(L"Data\\Macro.txt");
+        SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {
@@ -389,7 +389,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.WriteCurrentTime();
 
         SaveOptions();
-        SaveMacro(L"Data\\Macro.txt");
+        SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {
@@ -420,7 +420,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.WriteCurrentTime();
 
         SaveOptions();
-        SaveMacro(L"Data\\Macro.txt");
+        SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {

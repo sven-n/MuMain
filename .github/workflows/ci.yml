@@ -497,7 +497,7 @@ jobs:
           $requiredFiles = @(
             "$runtimeDirectory/Main.exe",
             "$runtimeDirectory/MUnique.Client.Library.dll",
-            "$runtimeDirectory/config.ini"
+            "$runtimeDirectory/config.ini.template"
           )
           foreach ($path in $requiredFiles) {
             if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
@@ -898,7 +898,7 @@ jobs:
           for path in \
             "$runtime_directory/Main" \
             "$runtime_directory/MUnique.Client.Library.so" \
-            "$runtime_directory/config.ini" \
+            "$runtime_directory/config.ini.template" \
             "$runtime_directory/shaders"
           do
             if [ ! -e "$path" ]; then
@@ -1092,7 +1092,7 @@ jobs:
           for path in \
             "$runtime_directory/Main" \
             "$runtime_directory/MUnique.Client.Library.dylib" \
-            "$runtime_directory/config.ini" \
+            "$runtime_directory/config.ini.template" \
             "$runtime_directory/shaders"
           do
             if [ ! -e "$path" ]; then

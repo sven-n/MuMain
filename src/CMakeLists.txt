@@ -605,15 +605,12 @@ add_custom_command(
 add_custom_target(CopyAssets DEPENDS "${ASSETS_STAMP}")
 add_dependencies(Main CopyAssets)
 
-# Seed config.ini from the template only when it doesn't already exist
-# next to the executable. The bulk asset copy ships config.ini.template
-# into the build dir on every build; this step turns it into config.ini
-# the first time and then leaves the user's edited copy alone forever.
+# The shipped defaults go next to the executable even without the asset copy: the client creates a missing
+# config.ini in the player's user folder from them (Core/Platform/UserFolder.h).
 add_custom_command(TARGET Main POST_BUILD
-  COMMAND "${CMAKE_COMMAND}"
-    "-DINPUT=${ASSETS_DIR}/config.ini.template"
-    "-DOUTPUT=$<TARGET_FILE_DIR:Main>/config.ini"
-    "-P" "${REPO_ROOT}/cmake/SeedConfigIfMissing.cmake"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "${ASSETS_DIR}/config.ini.template"
+    "$<TARGET_FILE_DIR:Main>/config.ini.template"
   COMMAND "${CMAKE_COMMAND}" -E copy_directory
     "${MU_SHADER_OUTPUT_DIR}"
     "$<TARGET_FILE_DIR:Main>/shaders"

@@ -15,7 +15,9 @@ Content is everything the game ships and only reads:
 
 These are not content and stay on the file system:
 
-- `config.ini`, logs, screenshots, macros, the shop's download cache: per-user files;
+- `config.ini`, logs, screenshots, macros: per-user files in the user folder
+  ([where settings and logs live](build/README.md#where-settings-and-logs-live));
+- the shop's download cache, still under `Data/`;
 - what the editor and the developer tools save.
 
 ## Paths

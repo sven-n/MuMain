@@ -9,6 +9,7 @@
 #include "Core/Platform/ErrorDialog.h"
 #include "Core/Platform/GameWindow.h"
 #include "Core/Platform/Quit.h"
+#include "Core/Platform/UserFolder.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
 #include "App/Platform/ClientMain.h"
@@ -1960,18 +1961,23 @@ static void SelectConnectServer(wchar_t* commandLine)
                         fromCommandLine ? L"the command line" : L"config.ini");
 }
 
-static void InitializeWorkingDirectoryAndLog()
+// The content opens first: the user folder's name comes from the shipped defaults, and the log goes into that folder.
+// Returns OpenContent's line for the error report.
+static std::string InitializeWorkingDirectoryAndLog()
 {
     SetWorkingDirectoryToBasePath();
-    mu::log::Init();
+    std::string contentRoot = OpenContent();
+    mu::log::Init(Core::Platform::UserFolder());
+    return contentRoot;
 }
 
 // Everything up to the first frame, as SDL_AppInit calls it; false when the client can't start. Each step that
 // succeeds pushes how to undo it, so ShutdownClient undoes a failed startup and a normal quit the same way.
 bool StartClient(char* szCmdLine)
 {
-    InitializeWorkingDirectoryAndLog();
+    const std::string contentRoot = InitializeWorkingDirectoryAndLog();
     g_teardown.Push([] { mu::log::Shutdown(); });
+    g_teardown.Push([] { Content::Close(); });
     // Installed before SDL starts so init failures are captured; SDL_Quit may still log, so it outlives SDL.
     static std::optional<Core::Log::Sdl::ScopedLogOutput> sdlLogOutput;
     sdlLogOutput.emplace();
@@ -2002,9 +2008,6 @@ bool StartClient(char* szCmdLine)
             }
         }
     }
-
-    const std::string contentRoot = OpenContent();
-    g_teardown.Push([] { Content::Close(); });
 
     WriteStartupDiagnostics(lpszExeVersion, wVersion);
     g_ErrorReport.Write(L"> Content: %hs\r\n", contentRoot.c_str());

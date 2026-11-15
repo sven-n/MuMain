@@ -1,5 +1,8 @@
 ﻿#include "stdafx.h"
 #include "Core/Platform/Quit.h"
+#include "Core/Platform/UserFolder.h"
+#include "Core/Content/ContentStore.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -1444,9 +1447,26 @@ bool OpenFont()
     return g_pRenderText->Create(g_hDC);
 }
 
-void SaveMacro(const wchar_t* FileName)
+// The chat macros, in the user folder; created once from the Data/Macro.txt an older client wrote into the content.
+static const std::filesystem::path& MacroFile()
 {
-    FILE* fp = _wfopen(FileName, L"wt");
+    static const std::filesystem::path file = []
+    {
+        std::filesystem::path path = Core::Platform::UserFolder() / "Macro.txt";
+        (void)Core::Platform::SeedUserFile(path, {}, Content::ReadFile("Data/Macro.txt"));
+        return path;
+    }();
+    return file;
+}
+
+void SaveMacro()
+{
+    FILE* fp = _wfopen(MacroFile().wstring().c_str(), L"wt");
+    if (fp == nullptr)
+    {
+        mu::log::Get("core")->warn("Chat macros: cannot write Macro.txt in the user folder");
+        return;
+    }
     for (int i = 0; i < 10; i++)
     {
         fwprintf(fp, L"%ls\n", MacroText[i]);
@@ -1454,9 +1474,9 @@ void SaveMacro(const wchar_t* FileName)
     fclose(fp);
 }
 
-void OpenMacro(const wchar_t* FileName)
+void OpenMacro()
 {
-    FILE* fp = _wfopen(FileName, L"rt");
+    FILE* fp = _wfopen(MacroFile().wstring().c_str(), L"rt");
     if (fp == NULL) return;
     for (int i = 0; i < 10; i++)
     {
@@ -2156,7 +2176,7 @@ static void OpenBasicDataStep9()
     mu_swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SocketItemMgr.OpenSocketItemScript(Text);
 
-    OpenMacro(L"Data\\Macro.txt");
+    OpenMacro();
 
     g_csItemOption.OpenItemSetScript();
 

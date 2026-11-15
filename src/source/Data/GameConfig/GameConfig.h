@@ -14,8 +14,8 @@ public:
     void Load();
     void Save();
 
-    // config.ini beside the executable. Its [EnhancedTuning] section is read and written on its own
-    // (Data/GameConfig/PersonalTuning.h); Save() leaves it as it is.
+    // config.ini in the user folder (Core/Platform/UserFolder.h). Its [EnhancedTuning] section is read
+    // and written on its own (Data/GameConfig/PersonalTuning.h); Save() leaves it as it is.
     const std::filesystem::path& GetConfigPath() const
     {
         return m_configPath;
@@ -208,6 +208,10 @@ private:
     GameConfig();
     GameConfig(const GameConfig&) = delete;
     GameConfig& operator=(const GameConfig&) = delete;
+
+    // A missing config.ini: a copy of the one an older client kept next to the executable, else of the shipped
+    // defaults.
+    void SeedFromExecutableFolder(const std::filesystem::path& legacyConfig) const;
 
     std::filesystem::path m_configPath;
 

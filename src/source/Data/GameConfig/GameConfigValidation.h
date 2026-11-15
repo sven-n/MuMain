@@ -36,7 +36,7 @@ LookPreset ValidateLook(std::wstring_view text);
 // the renderer's device creation, which falls back to SDL's own pick when the named driver fails.
 std::wstring ValidateRenderBackend(const std::wstring& value, const std::wstring& defaultValue);
 
-// config.ini beside the executable, or `overridePath` when it is set and not empty (developer
+// config.ini in `userFolder`, or `overridePath` when it is set and not empty (developer
 // builds pass MU_CONFIG_PATH here, so a scripted client can run with settings of its own).
-std::filesystem::path ResolveConfigPath(const std::filesystem::path& executableDirectory, const char* overridePath);
+std::filesystem::path ResolveConfigPath(const std::filesystem::path& userFolder, const char* overridePath);
 }
