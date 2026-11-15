@@ -128,6 +128,7 @@
 		     checkbox switches the feature. Each group starts collapsed; specialist rows wait under its
 		     own "More settings". A slider previews while pressed, dragged or stepped by an arrow key
 		     and is saved on release, when it loses focus or when the window closes. -->
+		<div class="option-tuning-reason" data-class-hidden="tuning_preview_note == ''">{{tuning_preview_note}}</div>
 		<div class="option-row option-checkbox-row option-sub-row option-tuning-group-row" data-class-locked="look_features_locked">
 			<span class="option-row-label option-tuning-group-label" data-event-click="option_toggle_tuning_group(0)"><span class="option-tuning-chevron" data-class-expanded="tuning_expanded_0"></span>{{look_lighting_label}}</span>
 			<div class="checkbox-box" data-class-checked="look_lighting" data-event-click="option_toggle_enhanced_feature(0)">

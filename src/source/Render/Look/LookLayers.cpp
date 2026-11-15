@@ -2,7 +2,6 @@
 
 #include "Render/Look/LookLayers.h"
 
-#include <algorithm>
 #include <utility>
 
 namespace Render::Look
@@ -24,21 +23,42 @@ void LookLayers::UseFiles(LookFiles files)
 {
     m_live = files;
     m_loaded = std::move(files);
-    m_developerEdits = {};
     ++m_filesGeneration;
+    Changed(true);
+}
+
+bool LookLayers::StartAuthoring()
+{
+    if (m_preview == LookPreview::Authoring)
+    {
+        return false;
+    }
+    m_preview = LookPreview::Authoring;
+    return true;
+}
+
+TuningGroupSet LookLayers::Applying() const
+{
+    return m_preview == LookPreview::Authoring ? TuningGroupSet{} : m_applying;
+}
+
+void LookLayers::SetPreview(LookPreview preview)
+{
+    if (preview == m_preview)
+    {
+        return;
+    }
+    m_preview = preview;
     Changed(true);
 }
 
 LookEditResult LookLayers::Replace(const Data::Maps::LookProfileData& profile)
 {
     LookEditResult result = ReplaceLookProfile(m_live, profile);
-    if (!result.applied)
+    if (result.applied)
     {
-        return result;
+        Changed(StartAuthoring() || result.moodChanged);
     }
-    // Marked before the change is announced: the mood rebuild below already reads the edit.
-    m_developerEdits = DeveloperEditsBetween(m_loaded.lookData, m_live.lookData);
-    Changed(result.moodChanged);
     return result;
 }
 
@@ -46,7 +66,7 @@ const Data::Maps::LookValues& LookLayers::Active(int world)
 {
     if (!m_cacheValid || world != m_cacheWorld)
     {
-        m_values = ResolveLookValues(m_live.lookData, world, m_personal, m_developerEdits, m_applying);
+        m_values = ResolveLookValues(m_live.lookData, world, m_personal, Applying());
         m_cacheWorld = world;
         m_cacheValid = true;
     }
@@ -81,10 +101,11 @@ Data::Maps::LookValues LookLayers::Inherited(int world) const
 std::vector<LookValueState> LookLayers::Describe(int world, std::optional<std::string_view> name) const
 {
     std::vector<LookValueState> states = DescribeLookValues(m_live, world, name);
+    const TuningGroupSet applying = Applying();
     for (LookValueState& state : states)
     {
         const std::optional<Data::Maps::LookValue> value = Data::Maps::FindLookValue(state.name);
-        if (value && PersonalValueApplies(m_live.lookData, world, m_personal, m_developerEdits, m_applying, *value))
+        if (value && PersonalValueApplies(m_personal, applying, *value))
         {
             state.value = *m_personal[*value];
             state.source = LookValueSource::Personal;
@@ -96,67 +117,26 @@ std::vector<LookValueState> LookLayers::Describe(int world, std::optional<std::s
 LookEditResult LookLayers::Set(std::span<const LookEdit> edits, std::optional<int> world, std::string_view mapName)
 {
     LookEditResult result = SetLookValues(m_live, edits, world, mapName);
-    if (!result.applied)
+    if (result.applied)
     {
-        return result;
+        Changed(StartAuthoring() || result.moodChanged);
     }
-    // Marked before the change is announced: the mood rebuild below already reads the edit. A map
-    // edit is on every map of the entry, so it is marked on each.
-    for (const LookEdit& edit : edits)
-    {
-        if (const std::optional<Data::Maps::LookValue> value = Data::Maps::FindLookValue(edit.name))
-        {
-            m_developerEdits.Mark(*value, world ? std::optional(result.entryMaps) : std::nullopt);
-        }
-    }
-    Changed(result.moodChanged);
     return result;
 }
 
 LookEditResult LookLayers::Reset(std::optional<std::string_view> name, int world)
 {
     LookEditResult result = ResetLookValues(m_live, m_loaded, name, world);
-    if (!result.applied)
+    if (result.applied)
     {
-        return result;
+        Changed(StartAuthoring() || result.moodChanged);
     }
-    // Cleared before the change is announced: the mood rebuild below reads the player's values again.
-    if (!name)
-    {
-        m_developerEdits = {};
-    }
-    else if (const std::optional<Data::Maps::LookValue> value = Data::Maps::FindLookValue(*name))
-    {
-        std::vector<int> maps = result.entryMaps;
-        if (std::find(maps.begin(), maps.end(), world) == maps.end())
-        {
-            maps.push_back(world);
-        }
-        m_developerEdits.Clear(*value, maps);
-        // An environment's value the reset leaves (it restores the default and the entry only) stays marked.
-        const DeveloperLookEdits differing = DeveloperEditsBetween(m_loaded.lookData, m_live.lookData);
-        for (std::size_t index = 0; index < differing.defaults.size(); ++index)
-        {
-            m_developerEdits.defaults[index] = m_developerEdits.defaults[index] || differing.defaults[index];
-        }
-        for (const auto& [world, flags] : differing.worlds)
-        {
-            for (std::size_t index = 0; index < flags.size(); ++index)
-            {
-                m_developerEdits.worlds[world][index] = m_developerEdits.worlds[world][index] || flags[index];
-            }
-        }
-    }
-    Changed(result.moodChanged);
     return result;
 }
 
 void LookLayers::MarkSaved()
 {
     m_loaded = m_live;
-    // The developer's values are the files' own now, which the player's go over again.
-    m_developerEdits = {};
-    Changed(true);
 }
 
 } // namespace Render::Look

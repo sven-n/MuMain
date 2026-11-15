@@ -482,6 +482,7 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("tuning_reset_group_label", &model.tuningResetGroupLabel);
     c.Bind("tuning_reset_all_label", &model.tuningResetAllLabel);
     c.Bind("tuning_save_message", &model.tuningSaveMessage);
+    c.Bind("tuning_preview_note", &model.tuningPreviewNote);
     c.Bind("antialiasing_labels", &model.antialiasingLabels);
     c.Bind("antialiasing_index", &model.antialiasingIndex);
     c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
@@ -1264,6 +1265,8 @@ void mu::ui::window::COptionWindow::SyncTuningModel(OptionRmlModel& model)
 
     const Render::Look::TuningSession& session = Render::Look::PersonalTuningSession();
     syncText(model.tuningSaveMessage, "tuning_save_message", UI::Options::TuningSaveMessage(session));
+    syncText(model.tuningPreviewNote, "tuning_preview_note",
+             UI::Options::TuningPreviewNote(Render::Look::ActivePreview()));
 
     std::array<std::vector<TuningRowModel>, TuningGroupCount> rows;
     std::array<std::vector<TuningRowModel>, TuningGroupCount> moreRows;

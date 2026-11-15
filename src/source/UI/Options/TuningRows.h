@@ -91,5 +91,8 @@ struct TuningRow
 [[nodiscard]] std::string TuningResetAllLabel();
 // The visible failure of the last save, empty while what applies is saved or about to be.
 [[nodiscard]] std::string TuningSaveMessage(const Render::Look::TuningSession& session);
+// Above the tuning while a developer previews the look as authored, which leaves these values out; empty
+// otherwise (always in players' builds).
+[[nodiscard]] std::string TuningPreviewNote(Render::Look::LookPreview preview);
 
 } // namespace UI::Options

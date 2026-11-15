@@ -130,6 +130,37 @@ void Type(ImGuiID id, const char* text)
     RenderWindow();
 }
 
+// The slider of `value` in the selected scope's rows.
+ImGuiID SliderId(LookValue value)
+{
+    return ImGui::GetIDWithSeed(Data::Maps::Info(value).name, nullptr,
+                                ImGui::GetIDWithSeed(static_cast<int>(value), PaneId("##LookScope")));
+}
+
+// Types into the slider's text field (its Ctrl+click): every keystroke moves the value, as a drag does.
+void TypeIntoSlider(LookValue value, const char* text)
+{
+    ImGui::ActivateItemByID(SliderId(value));
+    ImGui::GetCurrentContext()->NavNextActivateFlags |= ImGuiActivateFlags_PreferInput;
+    RenderWindow();
+    ImGui::GetIO().AddInputCharactersUTF8(text);
+    RenderWindow();
+}
+
+// Enter ends the slider's edit, as letting go of a drag does.
+void PressEnter()
+{
+    ImGui::GetIO().AddKeyEvent(ImGuiKey_Enter, true);
+    RenderWindow();
+    ImGui::GetIO().AddKeyEvent(ImGuiKey_Enter, false);
+    RenderWindow();
+}
+
+ImGuiID ToolbarId(const char* label)
+{
+    return ImGui::GetIDWithSeed(label, nullptr, ImGui::FindWindowByName(MuEditor::WindowIds::GraphicsLook)->ID);
+}
+
 // The window on the folder's file, with the default selected and nothing to undo.
 void Start()
 {
@@ -278,6 +309,70 @@ TEST_CASE("Graphics Look window: a value set on a shared map entry goes to the e
     REQUIRE(entry != nullptr);
     CHECK(entry->overrides[LookValue::GradingStrength].has_value());
     CHECK(entry->maps == std::vector<int>{11, 12});
+}
+
+TEST_CASE("Graphics Look window: a slider shows its value while it moves and is one undo step when let go "
+          "[editor][look]")
+{
+    I18N::SetLocale("en");
+    LookFolder folder;
+    TestImGuiContext context;
+    Start();
+
+    TypeIntoSlider(LookValue::BloomStrength, "0.25");
+    CHECK(Live().defaultOverrides[LookValue::BloomStrength] == 0.25);
+    CHECK_FALSE(g_MuGraphicsLookUI.CanUndo());
+    PressEnter();
+    CHECK(Live().defaultOverrides[LookValue::BloomStrength] == 0.25);
+    REQUIRE(g_MuGraphicsLookUI.CanUndo());
+    CHECK(g_MuGraphicsLookUI.GetUndoLabel().find("bloom.strength 0.25") != std::string::npos);
+    g_MuGraphicsLookUI.Undo();
+    RenderWindow();
+    CHECK(Live().defaultOverrides[LookValue::BloomStrength] == 1.0);
+    CHECK_FALSE(g_MuGraphicsLookUI.CanUndo());
+
+    // Escape puts the value back: nothing to undo.
+    TypeIntoSlider(LookValue::BloomStrength, "0.4");
+    CHECK(Live().defaultOverrides[LookValue::BloomStrength] == 0.4);
+    ImGui::GetIO().AddKeyEvent(ImGuiKey_Escape, true);
+    RenderWindow();
+    ImGui::GetIO().AddKeyEvent(ImGuiKey_Escape, false);
+    RenderWindow();
+    CHECK(Live().defaultOverrides[LookValue::BloomStrength] == 1.0);
+    CHECK_FALSE(g_MuGraphicsLookUI.CanUndo());
+
+    // A mood value shows while it moves too; figures below base never show, and letting go is refused.
+    TypeIntoSlider(LookValue::MoodFigures, "0.9");
+    CHECK(Live().defaultOverrides[LookValue::MoodFigures] == 0.9);
+    PressEnter();
+    REQUIRE(g_MuGraphicsLookUI.CanUndo());
+    const std::string moodStep = g_MuGraphicsLookUI.GetUndoLabel();
+    TypeIntoSlider(LookValue::MoodFigures, "0.5");
+    CHECK(Live().defaultOverrides[LookValue::MoodFigures] == 0.9);
+    PressEnter();
+    CHECK(Live().defaultOverrides[LookValue::MoodFigures] == 0.9);
+    CHECK(g_MuGraphicsLookUI.GetUndoLabel() == moodStep);
+}
+
+TEST_CASE("Graphics Look window: an edit previews the look as authored until Player is chosen [editor][look]")
+{
+    I18N::SetLocale("en");
+    LookFolder folder;
+    TestImGuiContext context;
+    Render::Look::SetLivePreview(Render::Look::LookPreview::Player);
+    Start();
+
+    Press(SetHereId(LookValue::GradingStrength));
+    CHECK(Render::Look::ActivePreview() == Render::Look::LookPreview::Authoring);
+    Press(ToolbarId(I18N::Editor::LookPreviewPlayer));
+    CHECK(Render::Look::ActivePreview() == Render::Look::LookPreview::Player);
+    // An undo is an edit too.
+    g_MuGraphicsLookUI.Undo();
+    RenderWindow();
+    CHECK(Render::Look::ActivePreview() == Render::Look::LookPreview::Authoring);
+    Press(ToolbarId(I18N::Editor::LookPreviewPlayer));
+    Press(ToolbarId(I18N::Editor::LookPreviewAuthoring));
+    CHECK(Render::Look::ActivePreview() == Render::Look::LookPreview::Authoring);
 }
 
 #endif // _EDITOR
