@@ -62,6 +62,10 @@ void FinishPendingTurn(CHARACTER* c);
 // arrived: then the server is to hear the new facing (an attack, a sit or a walk that cut it short tell the server
 // themselves).
 bool FollowCursorTurn(CHARACTER* c, bool mayTurn, float cursorAngle, bool& turning);
+// Whether the standing hero starts turning toward the cursor now (TurnToCursor, before a turn is under way): the cursor
+// has stayed well behind where he faces (past what the head follows) for a moment, counted in `awaySeconds`, while it
+// may turn him (`mayTurn`) and he stands in the stance SetPlayerStop gave him (TurnStance): not during an emote.
+bool CursorTurnDue(const CHARACTER* c, bool mayTurn, float cursorAngle, float& awaySeconds);
 
 // One frame along the character's path: sets its MoveHeading toward the next point (and, with Turn, turns its
 // facing toward it); true when the path's end is reached.

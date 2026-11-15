@@ -1963,10 +1963,7 @@ int StandTime = 0;
 
 namespace
 {
-// The standing hero turns to face the cursor when it stays this far from where he faces (past what the head and
-// shoulders follow) for this long, stepping around (StartStandingTurn); a passing cursor turns only the head.
-constexpr float CursorTurnDegrees = 90.f;
-constexpr float CursorTurnDelaySeconds = 0.5f;
+// How long the cursor has stayed well behind the standing hero (CursorTurnDue).
 float s_cursorAwaySeconds = 0.f;
 // A turn toward the cursor is under way: it follows the cursor, and the server hears the new facing when it ends.
 bool s_turningToCursor = false;
@@ -2943,19 +2940,10 @@ void TurnToCursor(CHARACTER* c, int heroX, int heroY, bool lookAtMouse)
             SendRequestAction(Hero->Object, AT_STAND1);
         }
     }
-    else if (mayTurn && FarAngle(o->Angle[2], cursorAngle) > CursorTurnDegrees)
+    else if (CursorTurnDue(c, mayTurn, cursorAngle, s_cursorAwaySeconds))
     {
-        s_cursorAwaySeconds += Engine::Characters::FrameSeconds();
-        if (s_cursorAwaySeconds >= CursorTurnDelaySeconds)
-        {
-            s_cursorAwaySeconds = 0.f;
-            StartStandingTurn(c, cursorAngle);
-            s_turningToCursor = c->TurnPending;
-        }
-    }
-    else
-    {
-        s_cursorAwaySeconds = 0.f;
+        StartStandingTurn(c, cursorAngle);
+        s_turningToCursor = c->TurnPending;
     }
 }
 

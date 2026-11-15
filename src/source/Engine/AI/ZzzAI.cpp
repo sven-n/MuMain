@@ -592,6 +592,33 @@ bool FollowCursorTurn(CHARACTER* c, bool mayTurn, float cursorAngle, bool& turni
 
 namespace
 {
+// The standing hero turns to face the cursor when it stays this far from where he faces (past what the head and
+// shoulders follow) for this long, stepping around (StartStandingTurn); a passing cursor turns only the head.
+constexpr float CursorTurnDegrees = 90.f;
+constexpr float CursorTurnDelaySeconds = 0.5f;
+} // namespace
+
+bool CursorTurnDue(const CHARACTER* c, bool mayTurn, float cursorAngle, float& awaySeconds)
+{
+    // Only standing in the stance SetPlayerStop gave him: an emote (or anything else played on the spot) plays to its
+    // end first, since the turn's steps would replace it.
+    const bool standing = c->Object.CurrentAction == c->TurnStance;
+    if (!mayTurn || !standing || FarAngle(c->Object.Angle[2], cursorAngle) <= CursorTurnDegrees)
+    {
+        awaySeconds = 0.f;
+        return false;
+    }
+    awaySeconds += Engine::Characters::FrameSeconds();
+    if (awaySeconds < CursorTurnDelaySeconds)
+    {
+        return false;
+    }
+    awaySeconds = 0.f;
+    return true;
+}
+
+namespace
+{
 // Without Enhanced Movement: the facing snaps toward the next point on a turn of 45 degrees or more, and otherwise
 // turns half the way.
 void SnapTowardsPathPoint(OBJECT* o, float x, float y)

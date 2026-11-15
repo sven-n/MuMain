@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "MovementTestScopes.h"
 #include "TestModelSlots.h"
 
 #include "Engine/AI/ZzzAI.h"
@@ -441,10 +442,8 @@ TEST_CASE("Emotes play through with Enhanced Movement on and go back to standing
 {
     PlayerModel player;
     BMD& model = player.model;
-    const bool wasEnabled = Engine::Characters::EnhancedMovementEnabled();
-    Engine::Characters::SetEnhancedMovementEnabled(true);
-    const float savedFactor = FPS_ANIMATION_FACTOR;
-    FPS_ANIMATION_FACTOR = 1.f;
+    const EnhancedMovementSwitch option(true);
+    const AnimationFactor factor(1.f);
     // The emotes' speeds, as the game sets them when it opens the player model (OpenPlayers).
     for (int emote = PLAYER_GREETING1; emote <= PLAYER_SALUTE1 && emote < model.NumActions; ++emote)
     {
@@ -499,9 +498,69 @@ TEST_CASE("Emotes play through with Enhanced Movement on and go back to standing
         CHECK_FALSE(c.TurnPending);
         CHECK(o.Angle[2] == 90.f);
     }
+}
 
-    FPS_ANIMATION_FACTOR = savedFactor;
-    Engine::Characters::SetEnhancedMovementEnabled(wasEnabled);
+TEST_CASE("An emote plays to its end before the hero turns toward a cursor behind him [data][animation][emote]")
+{
+    PlayerModel player;
+    BMD& model = player.model;
+    const EnhancedMovementSwitch option(true);
+    const AnimationFactor factor(1.f);
+    model.Actions[PLAYER_GREETING1].PlaySpeed = 0.4f;
+    REQUIRE(model.NumActions > PLAYER_GREETING1);
+    REQUIRE(model.Actions[PLAYER_GREETING1].NumAnimationKeys > 1);
+
+    CHARACTER& c = StandingPlayer();
+    OBJECT& o = c.Object;
+    c.Wing.Type = -1;
+    c.Weapon[0].Type = -1;
+    c.Weapon[1].Type = -1;
+    SetPlayerStop(&c);
+    const int stance = o.CurrentAction;
+    o.Angle[2] = 90.f;
+    // The hero greets ("hello"), and the cursor is behind him meanwhile.
+    SetAction(&o, PLAYER_GREETING1);
+    constexpr float CursorAngle = 270.f;
+
+    float awaySeconds = 0.f;
+    bool turning = false;
+    bool cutShort = false;
+    int frames = 0;
+    for (; frames < 2000 && o.CurrentAction == PLAYER_GREETING1; ++frames)
+    {
+        // TurnToCursor's start of a turn, then the frame's turn and animation.
+        if (!turning && CursorTurnDue(&c, true, CursorAngle, awaySeconds))
+        {
+            StartStandingTurn(&c, CursorAngle);
+            turning = c.TurnPending;
+        }
+        FinishPendingTurn(&c);
+        model.CurrentAction = o.CurrentAction;
+        if (!CharacterAnimation(&c, &o))
+        {
+            PlayerStopAnimationSetting(&c, &o);
+            break;
+        }
+        cutShort = cutShort || o.CurrentAction != PLAYER_GREETING1;
+    }
+    // The greeting played to its end, facing where it was, then stood.
+    CHECK_FALSE(cutShort);
+    CHECK_FALSE(turning);
+    const Action_t& action = model.Actions[PLAYER_GREETING1];
+    CHECK(static_cast<float>(frames) >= (static_cast<float>(action.NumAnimationKeys) - 2.f) / action.PlaySpeed);
+    CHECK(o.CurrentAction == stance);
+    CHECK(o.Angle[2] == 90.f);
+
+    // Standing again, the cursor still behind: now he turns toward it.
+    for (int frame = 0; frame < 600 && !turning; ++frame)
+    {
+        if (CursorTurnDue(&c, true, CursorAngle, awaySeconds))
+        {
+            StartStandingTurn(&c, CursorAngle);
+            turning = c.TurnPending;
+        }
+    }
+    CHECK(turning);
 }
 
 TEST_CASE("A walker's steps play at the eased pace it moves at while setting off [data][animation][momentum]")
