@@ -2,6 +2,7 @@
 
 #include "Render/Look/LookFiles.h"
 
+#include <cstdint>
 #include <optional>
 #include <span>
 #include <string>
@@ -9,7 +10,7 @@
 #include <vector>
 
 // Live tuning of the look profile and the light mood in developer builds: the `$look` commands
-// (Render/Look/LookTuningCommand.h) and the DevEditor's Look panel call these. Every change
+// (Render/Look/LookTuningCommand.h) and the editor's Graphics Look window call these. Every change
 // applies from the next frame on and is logged; a refused one changes nothing and logs why.
 #if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
 namespace Render::Look
@@ -28,6 +29,14 @@ bool SetLive(std::span<const LookEdit> edits, bool currentMap);
 // Back to the values loaded from the files: every value, or one name in the default and the
 // active world's entry.
 bool ResetLive(std::optional<std::string_view> name);
+// The Graphics Look window's change, undo or redo: `profile` becomes the live profile, unless the
+// files cannot be edited or it breaks a rule (the result says why).
+LookEditResult ReplaceLive(const Data::Maps::LookProfileData& profile);
+// The live files as loaded or last saved: the live profile differs from it while there are
+// unsaved changes.
+[[nodiscard]] const LookFiles& LoadedFiles();
+// Changes whenever other files become live (start-up, `$look load`).
+[[nodiscard]] std::uint32_t LiveFilesGeneration();
 // Makes Data/Render/Candidates/<candidate>/ the live values, or the shipped files again (empty).
 bool LoadLive(std::string_view candidate);
 // Writes the live values into the shipped files.

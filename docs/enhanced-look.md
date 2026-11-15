@@ -175,7 +175,7 @@ its look is fixed in the code. To change how Enhanced looks:
 Every value can be set for the whole game or for one map; a player's own
 value (see "Tuning it yourself") then applies over it. Developer builds
 change any value live and save it back to the file (`$look set`, `$look
-save`, or the DevEditor's Look panel; see "Developer commands"), so a change
+save`, or the editor's Graphics Look window; see "Developer commands"), so a change
 can be judged in the game before it is kept. A server or a player who wants a
 different Enhanced ships different data files; the code stays the same.
 
@@ -375,7 +375,7 @@ player's:
 | Command | Effect |
 |---|---|
 | `$look show [<name>]` | every effective value and where it comes from (render log) |
-| `$look set [map] <name> <value>` | changes a value of the default profile, or of the current map's entry; when the entry lists several maps, the reply names them ("the entry is shared, maps … all get it") and the Dev Editor's Look panel shows them under "Shared by maps" |
+| `$look set [map] <name> <value>` | changes a value of the default profile, or of the current map's entry; when the entry lists several maps, the reply names them ("the entry is shared, maps … all get it") |
 | `$look reset [<name>]` | back to the values loaded from the file |
 | `$look load [<candidate>]` | loads `Data/Render/Candidates/<candidate>/Look.json` (a version 1 candidate with its `LightMood.json`; without one it shows the shipped moods and cannot be saved), or the shipped file again |
 | `$look save` | writes `Data/Render/Look.json` |
@@ -385,7 +385,32 @@ Shorter forms of `$look set`: `$lighting rim <v>`, `$lighting specular <v>`,
 `$dynlights wrap <w>`, `$dynlights smooth <s>`,
 `$dynlights spell <gain> <range> <fade>`, `$dynlights cap <c>`,
 `$dynlights reach <cells>`, `$dynlights shadow <opacity>`, `$dynlights shadowangle <degrees>`, `$dynlights shadowlights <n>`, `$bloom falloff <f>`, `$bloom <strength>`, `$ao <strength>`, `$ao radius <r>`, `$sun <strength>`, `$sun softness <f>`, `$sun resolution <texels>`, `$dynlights flatsun <f>`, `$clouds <strength>`, `$clouds scale <units>`, `$clouds speed <units/s>`, `$clouds cover <f>`, `$sky <f>`, `$rim sun <f>`.
-The DevEditor has the same values in its Look panel.
+
+### The Graphics Look window
+
+Editor builds edit the same file in **Windows > Graphics look** (also from the
+Dev Editor's Graphics tab and from a problem in Data Checks' **Graphics look**
+area). On the left are its scopes: the default, the environments with the
+number of maps using each, and the map entries; **Current map** selects the
+entry of the map you're on. On the right, every value of the selected scope:
+**Set here** gives the scope a value of its own, the slider changes it (one
+change per drag) and clearing the box takes it from the layer below again,
+which the row names (the default, an environment, or built in).
+
+- A map entry also picks its environment. A map without an entry gets one on
+  its first change.
+- Environments are added under a name no other has, renamed (their maps keep
+  them), and removed only while no map uses them.
+- A scope that more than one map uses (an environment, or an entry the
+  variants of a map share) names its maps; its values stay off until **Edit
+  for all of them**, once per scope and session.
+- Every change goes through the profile's edit operations and is refused,
+  with the reason, when it would break a rule (mood figures below base).
+- The editor bar's Undo and Redo (and Ctrl+Z, Ctrl+Y) take changes back; a
+  `$look` change shows there as one step named `$look`. **Revert** reads the
+  file again and starts a fresh history, as `$look load` does.
+- **Save** writes `Data/Render/Look.json`, off while the file is unusable or
+  can't be saved (a version 1 file without its mood file).
 
 Feature overrides, to compare one feature on and off. They last for the
 session, are never saved, and choosing a look (checkbox, `$look`) or a

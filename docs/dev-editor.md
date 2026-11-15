@@ -139,8 +139,8 @@ since the last check.
 A click on a problem selects what it is about and opens its tool: the item
 or monster tool of its field, Item Formulas for the item stat file, the
 Server List, the Effect Browser, the Map Editor for the map sounds, the Style
-Editor on the look (and the item a problem is about), or the Dev Editor for the
-graphics look. An arrow key onto a problem only selects it.
+Editor on the look (and the item a problem is about), or the Graphics Look
+window for the graphics look. An arrow key onto a problem only selects it.
 
 ### Sound Mixer
 

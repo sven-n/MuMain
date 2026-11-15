@@ -307,6 +307,15 @@ LookEditResult ResetLookValues(LookFiles& files, const LookFiles& loaded, std::o
     return ResultOf(Data::Maps::ResetLookValue(files.lookData, loaded.lookData, *value, world));
 }
 
+LookEditResult ReplaceLookProfile(LookFiles& files, const Data::Maps::LookProfileData& profile)
+{
+    if (!files.lookUsable)
+    {
+        return {false, UnusableError};
+    }
+    return ResultOf(Data::Maps::ReplaceLookProfile(files.lookData, profile));
+}
+
 LookSaveResult SaveLookFiles(LookFileSystem& fileSystem, const LookFiles& state, const std::filesystem::path& lookFile)
 {
     LookSaveResult result;

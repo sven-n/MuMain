@@ -180,12 +180,14 @@ target_compile_definitions(monster_data_tests PRIVATE
 # GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
 mu_allow_gcc13_stringop_overflow(monster_data_tests test_monster_npc_name_files.cpp)
 
-# The look profile of the Enhanced rendering features (Data/Render/Look.json), its edit operations
-# and the player's own tuning of it ([EnhancedTuning] of config.ini). look_v1 holds the last shipped
-# pair of format 1 files, which the shipped file must match on every map.
+# The look profile of the Enhanced rendering features (Data/Render/Look.json), its edit operations,
+# the player's own tuning of it ([EnhancedTuning] of config.ini) and the Graphics Look window's
+# undo history. look_v1 holds the last shipped pair of format 1 files, which the shipped file must
+# match on every map.
 mu_add_test(
     NAME look_profile_data_tests
     SOURCES
+        test_look_edit_history.cpp
         test_look_profile_json.cpp
         test_look_profile_edits.cpp
         test_personal_tuning.cpp
@@ -196,6 +198,18 @@ target_compile_definitions(look_profile_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_LOOK_V1_DIR="${CMAKE_CURRENT_SOURCE_DIR}/look_v1"
 )
+
+# The editor's Graphics Look window, drawn and clicked; it needs the client globals of Winmain.cpp.
+if(ENABLE_EDITOR)
+    mu_add_test(
+        NAME graphics_look_window_tests
+        SOURCES
+            test_graphics_look_window.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+endif()
 
 # Reads the item and item model files shipped in src/bin/Data through the real
 # loader. The loader pulls in client globals defined in Winmain.cpp, so it is

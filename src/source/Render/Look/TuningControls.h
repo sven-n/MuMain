@@ -156,6 +156,11 @@ struct DeveloperLookEdits
     bool operator==(const DeveloperLookEdits&) const = default;
 };
 
+// The marks of a whole profile replaced at once (the Graphics Look window): a default value that
+// differs from `files`, and on a map a value its entry or environment gives differently.
+[[nodiscard]] DeveloperLookEdits DeveloperEditsBetween(const Data::Maps::LookProfileData& files,
+                                                       const Data::Maps::LookProfileData& live);
+
 // The tuning groups whose player values apply, by Render::Look::TuningGroup. A group applies while
 // its feature is in effect, so a feature switched off (or the Classic look) keeps the player's values
 // without showing them; dynamic lights also need Enhanced lighting.

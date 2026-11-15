@@ -45,6 +45,7 @@
 #include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
+#include "../MuEditor/UI/GraphicsLook/MuGraphicsLookUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "Network/Server/ServerListManager.h"
 #include "../UI/Common/MuEditorUI.h"
@@ -959,6 +960,10 @@ void CMuEditorCore::Render()
         if (m_windows.serverList)
         {
             g_MuServerListUI.Render(&m_windows.serverList);
+        }
+        if (m_windows.graphicsLook)
+        {
+            g_MuGraphicsLookUI.Render(&m_windows.graphicsLook);
         }
         RenderItemTools();
         RenderMonsterTools();
