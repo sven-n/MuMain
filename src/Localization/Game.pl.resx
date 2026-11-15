@@ -1037,7 +1037,9 @@
     <value>Pełny ekran</value>
   </data>
   <data name="Display mode tooltip" xml:space="preserve">
-    <value>Pełny ekran bez ramki wypełnia ekran w rozdzielczości pulpitu i od razu przełącza do innych okien. Pełny ekran przełącza monitor na wybraną rozdzielczość.</value>
+    <value>Pełny ekran bez ramki wypełnia ekran w rozdzielczości pulpitu
+i od razu przełącza do innych okien.
+Pełny ekran przełącza monitor na wybraną rozdzielczość.</value>
   </data>
   <data name="Enhanced graphics" xml:space="preserve">
     <value>Ulepszona grafika</value>

@@ -30,6 +30,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/NPCs/NPCShop.h"
 #include "UI/Options/OptionWindow.h"
+#include "UI/RmlBridge/RmlDocumentHints.h"
 #include "UI/Scaling/UITransform.h"
 
 using UI::Scaling::FontRole;
@@ -1173,4 +1174,13 @@ TEST_CASE("both option window themes show the display mode row and lock the reso
         }
         CHECK(markup.find("windowed_mode") == std::string::npos);
     }
+}
+
+TEST_CASE("a document hint starts a new line at each line break [ui][hints][window]")
+{
+    using UI::RmlBridge::DocumentHints::HintLines;
+    CHECK(HintLines("One line") == std::vector<Rml::String>{"One line"});
+    CHECK(HintLines("First\nSecond\nThird") == std::vector<Rml::String>{"First", "Second", "Third"});
+    CHECK(HintLines("Trailing\n") == std::vector<Rml::String>{"Trailing", ""});
+    CHECK(HintLines("") == std::vector<Rml::String>{""});
 }

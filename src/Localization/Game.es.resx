@@ -1037,7 +1037,9 @@
     <value>Pantalla completa</value>
   </data>
   <data name="Display mode tooltip" xml:space="preserve">
-    <value>Pantalla completa sin bordes cubre la pantalla con la resolución del escritorio y cambia a otras ventanas al instante. Pantalla completa cambia el monitor a la resolución elegida.</value>
+    <value>Pantalla completa sin bordes cubre la pantalla con la resolución
+del escritorio y cambia a otras ventanas al instante.
+Pantalla completa cambia el monitor a la resolución elegida.</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Cerca</value>

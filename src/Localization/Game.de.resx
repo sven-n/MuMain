@@ -1037,7 +1037,9 @@
     <value>Vollbild</value>
   </data>
   <data name="Display mode tooltip" xml:space="preserve">
-    <value>Randloses Vollbild füllt den Bildschirm in der Desktop-Auflösung und wechselt sofort zu anderen Fenstern. Vollbild stellt den Monitor auf die gewählte Auflösung um.</value>
+    <value>Randloses Vollbild füllt den Bildschirm in der Desktop-Auflösung
+und wechselt sofort zu anderen Fenstern.
+Vollbild stellt den Monitor auf die gewählte Auflösung um.</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Schließen</value>

@@ -1037,7 +1037,9 @@
     <value>Tela cheia</value>
   </data>
   <data name="Display mode tooltip" xml:space="preserve">
-    <value>Tela cheia sem bordas cobre a tela na resolução da área de trabalho e troca para outras janelas na hora. Tela cheia muda o monitor para a resolução escolhida.</value>
+    <value>Tela cheia sem bordas cobre a tela na resolução da área de trabalho
+e troca para outras janelas na hora.
+Tela cheia muda o monitor para a resolução escolhida.</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Fechar</value>

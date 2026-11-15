@@ -1037,7 +1037,10 @@
     <value>Fullscreen</value>
   </data>
   <data name="Display mode tooltip" xml:space="preserve">
-    <value>Borderless fullscreen covers the screen at the desktop resolution and switches to other windows at once. Fullscreen changes the monitor to the chosen resolution.</value>
+    <value>Borderless fullscreen covers the screen at the desktop resolution
+and switches to other windows at once.
+Fullscreen changes the monitor to the chosen resolution.</value>
+    <comment>Each line break starts a new line of the hint; keep the lines about as long as these.</comment>
   </data>
   <data name="Enhanced graphics" xml:space="preserve">
     <value>Enhanced graphics</value>
