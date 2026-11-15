@@ -632,6 +632,54 @@ std::string Scene(const Request& request, std::unique_ptr<Act>&)
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
+namespace
+{
+// Frames longer than this count as slow, as MuTimer's hitches do.
+constexpr double kSlowFrameMs = 50.0;
+
+struct FrameRecord
+{
+    std::optional<std::chrono::steady_clock::time_point> last;
+    double longestMs = 0.0;
+    std::uint64_t frames = 0;
+    std::uint64_t slow = 0;
+};
+FrameRecord g_frames;
+} // namespace
+
+void RecordFrame()
+{
+    const auto now = std::chrono::steady_clock::now();
+    if (g_frames.last)
+    {
+        const double ms = std::chrono::duration<double, std::milli>(now - *g_frames.last).count();
+        g_frames.longestMs = std::max(g_frames.longestMs, ms);
+        ++g_frames.frames;
+        g_frames.slow += ms > kSlowFrameMs ? 1 : 0;
+    }
+    g_frames.last = now;
+}
+
+std::string FrameTimes(const Request& request, std::unique_ptr<Act>&)
+{
+    bool reset = false;
+    if (request.Has("reset") && !request.GetStrictBool("reset", reset))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`reset` is true or false");
+    }
+    json result;
+    result["frames"] = g_frames.frames;
+    result["longest_ms"] = g_frames.longestMs;
+    result["slow"] = g_frames.slow;
+    if (reset)
+    {
+        g_frames.longestMs = 0.0;
+        g_frames.frames = 0;
+        g_frames.slow = 0;
+    }
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
 std::string State(const Request& request, std::unique_ptr<Act>&)
 {
     json result;

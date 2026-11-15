@@ -809,7 +809,6 @@ void CGlobalBitmap::BeginLoadBatch(unsigned decodeThreads)
         {
             m_pending->threads = decodeThreads;
         }
-        mu::BeginBitmapUploadBatch();
     }
 }
 
@@ -821,7 +820,7 @@ void CGlobalBitmap::EndLoadBatch()
     }
     const auto start = std::chrono::steady_clock::now();
     FlushAllPending();
-    mu::EndBitmapUploadBatch();
+    mu::FlushBitmapUploads();
     const std::size_t queued = m_pending->queued;
     const unsigned threads = m_pending->pool ? m_pending->pool->ThreadCount() : 0u;
     m_pending.reset();

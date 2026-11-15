@@ -3534,12 +3534,13 @@ public:
         }
 
         s_submitTime = std::chrono::steady_clock::now();
-        // The frame may draw bitmaps whose uploads are still in an open upload batch.
+        // The frame may draw bitmaps whose uploads are still in the open upload slot.
         if (!s_bitmapGpuResources.Flush())
         {
             mu::log::Get("render")->error("SDL_gpu -- bitmap upload batch failed at {}: {}",
                                           s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
         }
+        s_bitmapGpuResources.TrimIdleSlots();
 
         if (s_frameReadbackTexture)
         {
@@ -8344,14 +8345,14 @@ double BitmapUploadFenceWaitSeconds()
     return s_bitmapGpuResources.FenceWaitSeconds();
 }
 
-void BeginBitmapUploadBatch()
+bool BitmapUploadsOverStagingCap()
 {
-    s_bitmapGpuResources.BeginBatch();
+    return s_bitmapGpuResources.OverStagingCap();
 }
 
-void EndBitmapUploadBatch()
+void FlushBitmapUploads()
 {
-    if (!s_bitmapGpuResources.EndBatch())
+    if (!s_bitmapGpuResources.Flush())
     {
         mu::log::Get("render")->error("SDL_gpu -- bitmap upload batch failed at {}: {}",
                                       s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
