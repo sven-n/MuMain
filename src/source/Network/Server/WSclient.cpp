@@ -2245,6 +2245,9 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer)
     c->Path.PathNum = 0;
     c->Path.CurrentPath = 0;
     c->Path.CurrentPathFloat = 0;
+    // It slides to the server's tile (PushingCharacter) from where it is drawn, without the sideways shift of a flying
+    // bank.
+    Engine::Characters::ForgetFlightPivotShift(c);
     SetPlayerStop(c);
 }
 

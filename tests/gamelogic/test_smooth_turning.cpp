@@ -509,3 +509,33 @@ TEST_CASE("A position from the server keeps no flight pivot shift, through the n
     CHECK(flyer.Object.Position[0] == 10.5f * TERRAIN_SCALE);
     CHECK(flyer.Object.Position[1] == 10.5f * TERRAIN_SCALE);
 }
+
+TEST_CASE("A knock-back's slide to its tile leaves no flight hover or pivot shift behind [gamelogic][flight]")
+{
+    const AnimationFactor factor(1.f);
+    static CHARACTER flyer;
+    flyer.Initialize();
+    // Hovering and banked when the server's knock-back (or position correction) slides it to tile (10, 10).
+    flyer.Motion.FlightHoverApplied = 20.f;
+    flyer.Motion.FlightPivotShift[0] = 9.f;
+    flyer.Motion.FlightPivotShift[1] = -4.f;
+    flyer.Object.Position[0] = 12.5f * TERRAIN_SCALE + 9.f;
+    flyer.Object.Position[1] = 11.5f * TERRAIN_SCALE - 4.f;
+    flyer.TargetX = 10;
+    flyer.TargetY = 10;
+    flyer.JumpTime = 1;
+    for (int frame = 0; frame < 100 && flyer.JumpTime > 0; ++frame)
+    {
+        PushingCharacter(&flyer, &flyer.Object);
+    }
+    REQUIRE(flyer.JumpTime == 0);
+    // The height and the position are the terrain's and the tile centre's: nothing of the flight in them.
+    CHECK(flyer.Motion.FlightHoverApplied == 0.f);
+    CHECK(flyer.Motion.FlightPivotShift[0] == 0.f);
+    CHECK(flyer.Motion.FlightPivotShift[1] == 0.f);
+    // So the next walk starts from the tile centre.
+    flyer.Path.PathNum = 0;
+    MovePath(&flyer);
+    CHECK(flyer.Object.Position[0] == 10.5f * TERRAIN_SCALE);
+    CHECK(flyer.Object.Position[1] == 10.5f * TERRAIN_SCALE);
+}

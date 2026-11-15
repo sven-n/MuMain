@@ -3155,7 +3155,11 @@ void  PushingCharacter(CHARACTER* c, OBJECT* o)
             o->Position[0] += (((float)c->TargetX + 0.5f) * TERRAIN_SCALE - o->Position[0]) * Speed * FPS_ANIMATION_FACTOR;
             o->Position[1] += (((float)c->TargetY + 0.5f) * TERRAIN_SCALE - o->Position[1]) * Speed * FPS_ANIMATION_FACTOR;
             if (o->Type != MODEL_BALL)
+            {
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+                // The height starts over from the terrain: no flight hover in it (UpdateFlightFeel adds it back).
+                c->Motion.FlightHoverApplied = 0.f;
+            }
             c->JumpTime += FPS_ANIMATION_FACTOR;
             if (c->JumpTime > 15)
             {
@@ -3163,8 +3167,13 @@ void  PushingCharacter(CHARACTER* c, OBJECT* o)
                 c->PositionY = c->TargetY;
                 o->Position[0] = ((float)c->TargetX + 0.5f) * TERRAIN_SCALE;
                 o->Position[1] = ((float)c->TargetY + 0.5f) * TERRAIN_SCALE;
+                // On the tile centre: no flying bank's sideways shift in the position any more.
+                Engine::Characters::ForgetFlightPivotShift(c);
                 if (o->Type != MODEL_BALL)
+                {
                     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+                    c->Motion.FlightHoverApplied = 0.f;
+                }
 
                 if (o->Type == MODEL_CRUST)
                     SetPlayerStop(c);
