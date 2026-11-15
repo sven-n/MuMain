@@ -98,10 +98,12 @@ public:
     Result Upload(std::span<const std::uint8_t> pixels, int width, int height, SDL_GPUFilter filter,
                   SDL_GPUSamplerAddressMode wrap, std::span<const Textures::MipLevel> mips = {},
                   bool generateMips = false);
-    // Between BeginBatch and EndBatch, uploads share a submission until a slot is
-    // full, so a load waits on a fence per slot instead of one per texture. A
-    // texture is ready on the GPU once its submission is in: Flush submits the
-    // open one, and the frame submit must come after it.
+    // Uploads share the open submission until a slot is full, so a load waits on
+    // a fence per slot instead of one per texture; this holds outside a batch too.
+    // A texture is ready on the GPU once its submission is in: Flush submits the
+    // open one, and the frame submit must come after it. Outside a batch, Upload
+    // can succeed before its submission is in, so a submit or fence failure is
+    // reported by Flush (called before the frame submit), not by Upload.
     void BeginBatch();
     bool EndBatch();
     bool Flush();
