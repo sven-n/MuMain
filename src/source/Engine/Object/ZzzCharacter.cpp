@@ -5585,6 +5585,17 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
     b->BodyScale = o->Scale;
     b->CurrentAction = o->CurrentAction;
 
+    // The head moves below only while the character is drawn and free to; a nod goes on (and ends) either way.
+    const bool headMoves = o->Visible && !g_isCharacterBuff(o, eDeBuff_Harden) && !g_isCharacterBuff(o, eDeBuff_Stun) &&
+                           !g_isCharacterBuff(o, eDeBuff_Sleep) && !g_isCharacterBuff(o, eBuff_Att_up_Ourforces) &&
+                           !g_isCharacterBuff(o, eBuff_Hp_up_Ourforces) &&
+                           !g_isCharacterBuff(o, eBuff_Def_up_Ourforces);
+    if (!headMoves)
+    {
+        Engine::Characters::RemoveNod(c);
+        Engine::Characters::UpdateNod(c);
+    }
+
     if (o->Visible)
     {
         int Index = TERRAIN_INDEX_REPEAT((c->PositionX), (c->PositionY));
@@ -5593,11 +5604,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         else
             c->SafeZone = false;
 
-        if (!g_isCharacterBuff(o, eDeBuff_Harden) && !g_isCharacterBuff(o, eDeBuff_Stun)
-            && !g_isCharacterBuff(o, eDeBuff_Sleep)
-            && !g_isCharacterBuff(o, eBuff_Att_up_Ourforces)
-            && !g_isCharacterBuff(o, eBuff_Hp_up_Ourforces)
-            && !g_isCharacterBuff(o, eBuff_Def_up_Ourforces))
+        if (headMoves)
         {
             // Someone to look at (UpdateLookAt) comes before the idle glances; the hero's head is MoveHero's.
             const bool enhancedMovement = Engine::Characters::EnhancedMovementEnabled();
