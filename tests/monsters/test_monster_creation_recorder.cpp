@@ -5,18 +5,23 @@
 // leaves, and records every monster of the list in each kind of slot.
 
 #include "MonsterCreationRecorder.h"
+#include "../data/MovementTestScopes.h"
 
 #include "doctest.h"
 
 #include "Core/Globals/_enum.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Engine/Object/Movement/FlightFeel.h"
+#include "Engine/Object/Movement/Greetings.h"
+#include "Engine/Object/Movement/SlopeLean.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/BoneManager.h"
 #include "Render/Models/ZzzBMD.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 #include <optional>
 #include <string>
@@ -232,6 +237,54 @@ TEST_CASE("Monster creation: a spawn does not keep what the slot's last characte
     CHECK(gate->Weapon[0].LinkBone == 0);
     CHECK(gate->Weapon[1].LinkBone == 0);
     castle.SetServerMap(0, 0);
+}
+
+// A used slot's last character leaned on a slope, banked, bowed and was turning, all of it added onto its angle as it
+// went: a new character there starts with none of it, so it doesn't keep the rest as a tilt.
+TEST_CASE("Monster creation: a spawn keeps none of the slot's last movement state and stands upright "
+          "[monsters][creation][movement]")
+{
+    const EnhancedMovementSwitch option(true);
+    const AnimationFactor factor(1.f);
+    MonsterRecorder::CreationScope scope(0);
+    CHARACTER& before = MonsterRecorder::PrepareCreationSlot(CreationSlot::Dirty);
+    before.Motion.Reset();
+    before.Motion.SlopePitch = -15.f;
+    before.Motion.FlightBank = 20.f;
+    before.Motion.NodBowApplied = 5.f;
+    before.Motion.SnapTurnOffset = 30.f;
+    before.Motion.SnapTurnFacing = 45.f;
+    before.Motion.FadeLastAction = PLAYER_FLY;
+    before.MoveHeading = 123.f;
+    before.TurnPending = true;
+    before.TurnAction = PLAYER_WALK_MALE;
+    before.TurnSpeed = 90.f;
+    before.TurnArrived = true;
+    CHARACTER* hound = scope.Create(MONSTER_HOUND);
+    REQUIRE(hound == &before);
+
+    CHECK(hound->MoveHeading == hound->Object.Angle[2]);
+    CHECK_FALSE(hound->TurnPending);
+    CHECK(hound->TurnAction == -1);
+    CHECK(hound->TurnSpeed == 0.f);
+    CHECK_FALSE(hound->TurnArrived);
+    CHECK(hound->Motion.SlopePitch == 0.f);
+    CHECK(hound->Motion.FlightBank == 0.f);
+    CHECK(hound->Motion.NodBowApplied == 0.f);
+    CHECK(hound->Motion.SnapTurnOffset == 0.f);
+    CHECK(std::isnan(hound->Motion.SnapTurnFacing));
+    CHECK(hound->Motion.FadeLastAction == -1);
+
+    // A few frames of the lean, the bank and the nod: it stays upright.
+    for (int frame = 0; frame < 60; ++frame)
+    {
+        Engine::Characters::UpdateFlightFeel(hound);
+        Engine::Characters::UpdateSlopeLean(hound);
+        Engine::Characters::RemoveNod(hound);
+        Engine::Characters::UpdateNod(hound);
+    }
+    CHECK(hound->Object.Angle[0] == doctest::Approx(0.f));
+    CHECK(hound->Object.Angle[1] == doctest::Approx(0.f));
 }
 
 TEST_CASE("Monster recorder: every monster of the list is recorded in each kind of slot [monsters][creation]")

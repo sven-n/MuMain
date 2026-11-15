@@ -115,6 +115,9 @@ public:
 
 public:
     void			Initialize();
+    // A new character in this slot (Initialize, CreateCharacterPointer): none of the last one's movement state, its
+    // turn or the lean, bank, bow and hover it added, so nothing of it stays as a tilt. Facing Object.Angle[2].
+    void ResetMovement();
     void            ClearDisplayName();
     void			Destroy();
     void			InitPetInfo(int iPetType);

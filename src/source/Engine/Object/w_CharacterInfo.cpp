@@ -16,6 +16,18 @@ CHARACTER::~CHARACTER()
     Destroy();
 }
 
+void CHARACTER::ResetMovement()
+{
+    MoveHeading = Object.Angle[2];
+    TurnPending = false;
+    TurnLeftAt = 0.f;
+    TurnAction = -1;
+    TurnSpeed = 0.f;
+    TurnStance = -1;
+    TurnArrived = false;
+    Motion.Reset();
+}
+
 void CHARACTER::Initialize()
 {
     Object.Initialize();
@@ -78,14 +90,7 @@ void CHARACTER::Initialize()
     ClearDisplayName();
 
     Movement = 0;
-    MoveHeading = 0.f;
-    TurnPending = false;
-    TurnLeftAt = 0.f;
-    TurnAction = -1;
-    TurnSpeed = 0.f;
-    TurnStance = -1;
-    TurnArrived = false;
-    Motion.Reset();
+    ResetMovement();
     MovementType = 0;
     CollisionTime = 0;
     GuildMarkIndex = 0;

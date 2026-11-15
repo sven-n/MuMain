@@ -12777,6 +12777,10 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     }
 
     Vector(0.f, 0.f, Rotation, o->Angle);
+    // The angle and the position start over above; the head's nod and the rest of the last character's movement go
+    // with them.
+    Engine::Characters::RemoveNod(c);
+    c->ResetMovement();
     Vector(0.f, 0.f, 0.f, c->Light);
     Vector(0.f, 0.f, 0.f, o->Light);
     {

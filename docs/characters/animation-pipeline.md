@@ -28,7 +28,8 @@ drift. Paths are under `src/source/`.
   `SafeZone`, the equipment parts (`BodyPart[6]`, `Weapon[2]`, `Wing`, `Helper`, each a `PART_t` with its own model,
   `LinkBone` and animation frame), smooth turning's state (`MoveHeading`, `TurnPending`, `TurnSpeed`, ...) and, in
   **`Motion`** (`CharacterMotion`, `Engine/Object/Movement/CharacterMotion.h`), the other movement features' state
-  (`FlightBank`, `TurnLag`, `LookTarget`, `SnapTurnOffset`, the nods, the pose fade, ...), reset with the character.
+  (`FlightBank`, `TurnLag`, `LookTarget`, `SnapTurnOffset`, the nods, the pose fade, ...), reset with the character
+  (`CHARACTER::ResetMovement`, from `Initialize` and from `CreateCharacterPointer` when a new character takes the slot).
 - **`CharactersClient`**: 400 usable slots (plus a sentinel), at a random offset into a bigger allocation
   (`Winmain.cpp`). **`Hero`** is an ordinary slot, picked at random on map join. `CharacterOfObject(o)` maps an
   `OBJECT*` back to its slot.
