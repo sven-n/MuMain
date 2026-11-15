@@ -4,8 +4,11 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/Movement/FlightFeel.h"
+#include "Engine/Object/Movement/Greetings.h"
+#include "Engine/Object/Movement/SlopeLean.h"
 #include "Engine/Object/Movement/MovementTuning.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Render/Models/HeadTurn.h"
 #include "../data/MovementTestScopes.h"
 #include "../data/TestModelSlots.h"
@@ -538,4 +541,49 @@ TEST_CASE("A knock-back's slide to its tile leaves no flight hover or pivot shif
     MovePath(&flyer);
     CHECK(flyer.Object.Position[0] == 10.5f * TERRAIN_SCALE);
     CHECK(flyer.Object.Position[1] == 10.5f * TERRAIN_SCALE);
+}
+
+namespace
+{
+// Hero pointed at a test's character, and back after the test.
+class HeroScope
+{
+public:
+    explicit HeroScope(CHARACTER* hero) : m_saved(Hero)
+    {
+        Hero = hero;
+    }
+    ~HeroScope()
+    {
+        Hero = m_saved;
+    }
+    HeroScope(const HeroScope&) = delete;
+    HeroScope& operator=(const HeroScope&) = delete;
+
+private:
+    CHARACTER* m_saved;
+};
+} // namespace
+
+TEST_CASE("A change of map leaves no slope lean or nod's bow behind as a tilt [gamelogic][turning]")
+{
+    const EnhancedMovementSwitch option(true);
+    const AnimationFactor factor(1.f);
+    static CHARACTER hero;
+    hero.Initialize();
+    const HeroScope heroScope(&hero);
+    // Riding on a hill and bowing: both are in the pitch.
+    hero.Motion.SlopePitch = -12.f;
+    hero.Motion.NodBowApplied = 5.f;
+    hero.Object.Angle[0] = -7.f;
+    // The Move command to another map: LoadWorld sets the hero upright for the fall onto it.
+    g_Direction.HeroFallingDownInit();
+    // On flat ground, the lean and the bow ease out without tilting it.
+    for (int frame = 0; frame < 120; ++frame)
+    {
+        Engine::Characters::UpdateSlopeLean(&hero);
+        Engine::Characters::RemoveNod(&hero);
+        Engine::Characters::UpdateNod(&hero);
+    }
+    CHECK(hero.Object.Angle[0] == doctest::Approx(0.f));
 }

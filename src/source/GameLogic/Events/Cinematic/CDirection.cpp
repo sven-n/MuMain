@@ -390,7 +390,11 @@ void CDirection::HeroFallingDownInit()
     {
         Hero->Object.m_bActionStart = false;
         Hero->Object.Gravity = 0.0f;
+        // Upright, with the slope lean and a nod's bow taken off too (they are part of the pitch), so they don't come
+        // back as a tilt when they ease out on the new map.
         Hero->Object.Angle[0] = 0.0f;
+        Hero->Motion.SlopePitch = 0.f;
+        Hero->Motion.NodBowApplied = 0.f;
     }
 }
 
