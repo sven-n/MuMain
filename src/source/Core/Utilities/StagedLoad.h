@@ -17,14 +17,15 @@ public:
 
     explicit StagedLoad(std::vector<Step> steps) : m_steps(std::move(steps)) {}
 
-    // Runs steps until the budget is spent, always at least one; true once every step has run.
-    bool Pump(std::chrono::milliseconds budget)
+    // Runs steps until the budget is spent or `holdBack` says the rest should wait for the next frame (checked
+    // between steps), always at least one; true once every step has run.
+    bool Pump(std::chrono::milliseconds budget, const std::function<bool()>& holdBack = {})
     {
         const auto start = std::chrono::steady_clock::now();
         while (m_next < m_steps.size())
         {
             m_steps[m_next++]();
-            if (std::chrono::steady_clock::now() - start >= budget)
+            if (std::chrono::steady_clock::now() - start >= budget || (holdBack && holdBack()))
                 break;
         }
         return m_next == m_steps.size();

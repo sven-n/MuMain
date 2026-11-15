@@ -74,6 +74,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `ping` | build identifier, the git `commit` the client was built from (`commit_changed` when tracked files differed from it), and the current scene |
 | `scene` | which screen the client is on: `login`, `character_list`, `world`, … |
 | `state` | the character and everything around it (see below) |
+| `frames` (`reset`) | frame times since the last reset: `frames` counted, `longest_ms`, and `slow` (over 50 ms); `{"reset":true}` answers and then starts counting again. A frame is the time between two of the socket's per-frame polls |
 | `nearby` | the objects the client can see, with their monster numbers |
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |

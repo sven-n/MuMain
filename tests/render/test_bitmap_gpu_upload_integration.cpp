@@ -262,6 +262,10 @@ bool RunLifetime(SDL_GPUDevice* device, int lifetime)
             const int height = maximum ? kMaxDimension : (i % 2 ? kSmallHeight : kUploadHeight);
             auto pixels = Pattern({width, height}, lifetime + interval * kIterations + i);
             mappedWidth = width;
+            // The poisoning map writes from the start of the slot: the small image starts a slot of its own, so the
+            // uploads staged before it in the open slot are not overwritten.
+            if (width == kSmallWidth)
+                good = good && owner.Flush();
             auto result =
                 owner.Upload(pixels, width, height, SDL_GPU_FILTER_LINEAR, SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE);
             if (!result)
@@ -285,6 +289,8 @@ bool RunLifetime(SDL_GPUDevice* device, int lifetime)
             if (checkpoint)
             {
                 ++checkpoints;
+                // Uploads stay in the open slot until a flush, as the renderer does before every frame.
+                good = good && owner.Flush();
                 for (std::size_t size = 0; size < kSizes.size(); ++size)
                 {
                     if (latestPixels[size].empty())
@@ -311,7 +317,9 @@ bool RunLifetime(SDL_GPUDevice* device, int lifetime)
         }
         const int creations = transferCreates - createsAtStart;
         const int samplers = samplerCreates - samplersAtStart;
-        good = good && creations == static_cast<int>(Owner::kSlotCount) && samplers == 4 &&
+        // The ring grows only while the GPU is still copying every slot, up to its ceiling.
+        good = good && creations >= static_cast<int>(Owner::kMinimumSlotCount) &&
+               creations <= static_cast<int>(Owner::kMaximumSlotCount) && samplers == 4 &&
                destinations.allocations == 3 && destinations.requests == uploads;
         std::printf("lifetime=%d interval=%d uploads=%d checkpoints=%d staging_creates=%d staging_high_water=%d "
                     "sampler_creates=%d destination_allocations=%d destination_requests=%d fd_peak=%d "
@@ -335,6 +343,7 @@ bool RunLifetime(SDL_GPUDevice* device, int lifetime)
     const auto pixels = Pattern({kSmallWidth, kSmallHeight}, lifetime);
     const auto result = defaultOwner.Upload(pixels, kSmallWidth, kSmallHeight, SDL_GPU_FILTER_NEAREST,
                                             SDL_GPU_SAMPLERADDRESSMODE_REPEAT);
+    defaultOwner.Flush();
     SDL_GPUTransferBufferCreateInfo smokeInfo{};
     smokeInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD;
     smokeInfo.size = static_cast<Uint32>(Owner::kSlotCapacity);
@@ -357,6 +366,7 @@ bool RunLifetime(SDL_GPUDevice* device, int lifetime)
     const auto mipped =
         defaultOwner.Upload(top, Render::Sprites::kBitmapMaximumWidth, Render::Sprites::kBitmapMaximumWidth,
                             SDL_GPU_FILTER_LINEAR, SDL_GPU_SAMPLERADDRESSMODE_REPEAT, chain);
+    defaultOwner.Flush();
     bool mips = mipped && smokeReadback &&
                 CheckDownload(device, mipped.texture, smokeReadback,
                               {Render::Sprites::kBitmapMaximumWidth, Render::Sprites::kBitmapMaximumWidth}, top);
@@ -375,6 +385,7 @@ bool RunLifetime(SDL_GPUDevice* device, int lifetime)
     const auto banded = Pattern(kBanded, lifetime * 100 + 50);
     const auto bandedResult = defaultOwner.Upload(banded, kBanded.width, kBanded.height, SDL_GPU_FILTER_LINEAR,
                                                   SDL_GPU_SAMPLERADDRESSMODE_REPEAT, {}, true);
+    defaultOwner.Flush();
     SDL_GPUTransferBufferCreateInfo bandedInfo{};
     bandedInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD;
     bandedInfo.size = static_cast<Uint32>(kBanded.width) * 4u * static_cast<Uint32>(kBanded.height);

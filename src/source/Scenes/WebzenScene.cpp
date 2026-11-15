@@ -9,6 +9,7 @@
 #include "Core/Platform/ScopedSystemCursor.h"
 #include "Core/Utilities/StagedLoad.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Render/Renderer/BitmapUpload.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -167,7 +168,7 @@ void PumpWebzenScene()
     }
 
     const Uint64 passStart = SDL_GetTicks();
-    const bool done = s_load->steps.Pump(StartupStepBudget);
+    const bool done = s_load->steps.Pump(StartupStepBudget, mu::BitmapUploadsOverStagingCap);
     s_load->longestPassMs = std::max(s_load->longestPassMs, SDL_GetTicks() - passStart);
     if (!done)
     {
