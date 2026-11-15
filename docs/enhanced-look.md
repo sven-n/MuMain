@@ -408,7 +408,7 @@ just because they are look values:
 |---|---|---|
 | Quality | `sun.resolution`, `dynamic.shadowLights` | what the renderer may spend |
 | Preference | `bloom.strength`, `grading.strength`, `ao.strength`, `dynamic.effectGain`, `dynamic.effectFade`, `dynamic.shadowOpacity`, `sun.shadow`, `clouds.strength`, mood strength | how strong an effect looks to them: a bounded adjustment |
-| Art direction | `lighting.*`, `dynamic.wrap`, `dynamic.mapSmoothing`, `dynamic.effectRange`, `dynamic.effectRangeMax`, `dynamic.effectCap`, `bloom.levelFalloff`, `ao.radius`, `sun.softness`, `dynamic.flatSunShadow`, `clouds.scale`, `clouds.speed`, `clouds.cover`, `sky.fill` | the look itself; these sliders leave the Options window before D1 (step GL2.2 of the graphics look design), and their saved values are then ignored |
+| Art direction | `lighting.*`, `dynamic.wrap`, `dynamic.mapSmoothing`, `dynamic.effectRange`, `dynamic.effectRangeMax`, `dynamic.effectCap`, `bloom.levelFalloff`, `ao.radius`, `sun.softness`, `dynamic.flatSunShadow`, `clouds.scale`, `clouds.speed`, `clouds.cover`, `sky.fill` | the look itself; these sliders leave the Options window when the style choices of #990's Stage 7 (warmth, contrast, night darkness) arrive (step GL2.2 of the graphics look design), and their saved values are then ignored |
 
 A new value is a player control only as Quality or Preference. Art direction
 stays in `Data/Render/Look.json`, and diagnostics are developer commands.
