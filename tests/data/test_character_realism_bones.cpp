@@ -20,6 +20,7 @@
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -397,8 +398,7 @@ TEST_CASE("A pose fade with the head turned fades the neck and the spine too, tu
     PlayerModel player;
     BMD& model = player.model;
     REQUIRE(model.HeadTurnBones[0] == model.BoneHead);
-    const bool wasEnabled = Engine::Characters::EnhancedMovementEnabled();
-    Engine::Characters::SetEnhancedMovementEnabled(true);
+    std::optional<EnhancedMovementSwitch> option(std::in_place, true);
 
     vec3_t angle = {0.f, 0.f, 0.f};
     // Looking to a side, as the hero's head follows the cursor.
@@ -418,7 +418,7 @@ TEST_CASE("A pose fade with the head turned fades the neck and the spine too, tu
     static float standing[MAX_BONES][3][4];
     model.Animation(standing, 0.f, 0.f, PLAYER_STOP_MALE, angle, head, false, false, nullptr, PLAYER_STOP_MALE);
 
-    Engine::Characters::SetEnhancedMovementEnabled(wasEnabled);
+    option.reset();
 
     for (const short bone : model.HeadTurnBones)
     {
@@ -573,11 +573,9 @@ TEST_CASE("A walker's steps play at the eased pace it moves at while setting off
     {
         model.Actions[walk].PlaySpeed = 0.3f;
     }
-    const bool wasEnabled = Engine::Characters::EnhancedMovementEnabled();
-    Engine::Characters::SetEnhancedMovementEnabled(true);
-    const float savedFactor = FPS_ANIMATION_FACTOR;
+    const EnhancedMovementSwitch option(true);
     // 100 frames a second: a start takes several frames.
-    FPS_ANIMATION_FACTOR = static_cast<float>(REFERENCE_FPS / 100.0);
+    const AnimationFactor factor(static_cast<float>(REFERENCE_FPS / 100.0));
 
     // How far the walk's keys go in one frame, for a walker moving at `pace` of its speed now.
     const auto keysInAFrame = [&](float pace)
@@ -610,7 +608,4 @@ TEST_CASE("A walker's steps play at the eased pace it moves at while setting off
     REQUIRE(pace < 1.f);
     CHECK(walker.Motion.MomentumSpeed == pace);
     CHECK(keysInAFrame(pace) == doctest::Approx(full * pace));
-
-    FPS_ANIMATION_FACTOR = savedFactor;
-    Engine::Characters::SetEnhancedMovementEnabled(wasEnabled);
 }
