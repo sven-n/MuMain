@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <doctest.h>
 #include "ClientFolderScope.h"
-#include "ExecutableConfigFile.h"
+#include "UserConfigFile.h"
 #include "TestModelSlots.h"
 #include "PlayerTextureScope.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
@@ -91,7 +91,7 @@ struct BodyClientFolder
 
 TEST_CASE("S6 selector defaults and explicit choices survive save and restart [player-selector]")
 {
-    const ExecutableConfigFile file;
+    const UserConfigFile file;
     GameConfig& config = GameConfig::GetInstance();
     file.Write("[Render]\n");
     config.Load();

@@ -4,8 +4,9 @@
 #include <cstdlib>
 #include <filesystem>
 
-// A test's settings and log stay beside its own executable, never in the developer's user folder
-// (Core/Platform/UserFolder.h).
+// A test binary's settings and log stay in a folder of its own beside it, never in the developer's user folder
+// (Core/Platform/UserFolder.h): binaries in one output folder run side by side, and one config.ini would be theirs
+// all.
 int main(int argc, char** argv)
 {
     // An empty value counts as unset, as the client reads it.
@@ -13,7 +14,8 @@ int main(int argc, char** argv)
     if (argc > 0 && (folderVariable == nullptr || folderVariable[0] == '\0'))
     {
         std::error_code error;
-        const std::filesystem::path folder = std::filesystem::absolute(argv[0], error).parent_path();
+        const std::filesystem::path executable = std::filesystem::absolute(argv[0], error);
+        const std::filesystem::path folder = executable.parent_path() / (executable.stem().string() + ".user");
 #ifdef _WIN32
         _wputenv_s(L"MU_USER_FOLDER", folder.wstring().c_str());
 #else

@@ -1,7 +1,6 @@
 #include "stdafx.h"
-#include "ExecutableConfigFile.h"
+#include "UserConfigFile.h"
 
-#include "Core/Platform/WinCompat.h"
 #include "Core/Platform/WinIni.h"
 #include "Data/GameConfig/GameConfig.h"
 
@@ -9,17 +8,14 @@
 #include <iterator>
 #include <system_error>
 
-ExecutableConfigFile::ExecutableConfigFile()
+UserConfigFile::UserConfigFile() : m_path(GameConfig::GetInstance().GetConfigPath())
 {
-    wchar_t executable[MAX_PATH] = {};
-    GetModuleFileNameW(nullptr, executable, MAX_PATH);
-    m_path = std::filesystem::path(executable).parent_path() / L"config.ini";
     std::ifstream file(m_path, std::ios::binary);
     m_existed = file.is_open();
     m_content.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 }
 
-ExecutableConfigFile::~ExecutableConfigFile()
+UserConfigFile::~UserConfigFile()
 {
     if (m_existed)
     {
@@ -34,13 +30,13 @@ ExecutableConfigFile::~ExecutableConfigFile()
     GameConfig::GetInstance().Load();
 }
 
-void ExecutableConfigFile::Write(const std::string& text) const
+void UserConfigFile::Write(const std::string& text) const
 {
     std::ofstream file(m_path, std::ios::trunc);
     file << text;
 }
 
-int ExecutableConfigFile::ReadRender(const std::string& key) const
+int UserConfigFile::ReadRender(const std::string& key) const
 {
     const std::wstring wideKey(key.begin(), key.end());
     return static_cast<int>(GetPrivateProfileIntW(L"Render", wideKey.c_str(), 2, m_path.wstring().c_str()));

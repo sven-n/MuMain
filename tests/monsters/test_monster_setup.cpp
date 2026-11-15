@@ -1102,7 +1102,9 @@ TEST_CASE("Monster setup: a monster in the Crywolf hero contract loses its state
 // MODEL_STORAGE and MODEL_NPC_BREEDER, on the entry and its map variants.
 TEST_CASE("Monster setup: the shipped crywolfContract entries are the old code's models [monsters][creation]")
 {
-    constexpr std::array<std::string_view, 10> OldModels{
+    // Static: MSVC doesn't capture a constexpr local in the lambda below but makes a copy at each use, so find() and
+    // end() would point into different arrays and every model would match.
+    static constexpr std::array<std::string_view, 10> OldModels{
         "MODEL_CRYWOLF_ALTAR1", "MODEL_CRYWOLF_ALTAR2", "MODEL_CRYWOLF_ALTAR3", "MODEL_CRYWOLF_ALTAR4",
         "MODEL_CRYWOLF_ALTAR5", "MODEL_SMITH",          "MODEL_NPC_SERBIS",     "MODEL_MERCHANT_MAN",
         "MODEL_STORAGE",        "MODEL_NPC_BREEDER"};

@@ -1447,13 +1447,16 @@ bool OpenFont()
     return g_pRenderText->Create(g_hDC);
 }
 
-// The chat macros, in the user folder; created once from the Data/Macro.txt an older client wrote into the content.
+// The chat macros, in the user folder; created once from the file an older client wrote into the content.
+static constexpr char MacroFileName[] = "Macro.txt";
+static constexpr char LegacyMacroFile[] = "Data/Macro.txt";
+
 static const std::filesystem::path& MacroFile()
 {
     static const std::filesystem::path file = []
     {
-        std::filesystem::path path = Core::Platform::UserFolder() / "Macro.txt";
-        (void)Core::Platform::SeedUserFile(path, {}, Content::ReadFile("Data/Macro.txt"));
+        std::filesystem::path path = Core::Platform::UserFolder() / MacroFileName;
+        (void)Core::Platform::SeedUserFile(path, {}, Content::ReadFile(LegacyMacroFile));
         return path;
     }();
     return file;

@@ -3,15 +3,15 @@
 #include <filesystem>
 #include <string>
 
-// GameConfig loads and saves config.ini beside the executable; this puts the file back as it was
+// The config.ini GameConfig loads and saves (in the user folder); this puts the file back as it was
 // and reloads it.
-class ExecutableConfigFile
+class UserConfigFile
 {
 public:
-    ExecutableConfigFile();
-    ~ExecutableConfigFile();
-    ExecutableConfigFile(const ExecutableConfigFile&) = delete;
-    ExecutableConfigFile& operator=(const ExecutableConfigFile&) = delete;
+    UserConfigFile();
+    ~UserConfigFile();
+    UserConfigFile(const UserConfigFile&) = delete;
+    UserConfigFile& operator=(const UserConfigFile&) = delete;
 
     void Write(const std::string& text) const;
     // 2 when the key is missing.
