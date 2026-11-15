@@ -502,6 +502,13 @@ void StartStandingTurn(CHARACTER* c, float angle)
         c->TurnPending = false;
         return;
     }
+    // A new turn starts from standing, with no steps yet: a turn still stepping stops here first (its steps aren't this
+    // turn's stance).
+    if (c->TurnPending && c->TurnAction != -1 && c->Object.CurrentAction == c->TurnAction)
+    {
+        SetPlayerStop(c);
+    }
+    c->TurnAction = -1;
     c->TurnLeftAt = c->Object.Angle[2];
     c->TurnStance = c->Object.CurrentAction;
     c->TurnArrived = false;
@@ -606,8 +613,9 @@ bool MovePath(CHARACTER* c, bool Turn)
 {
     bool Success = false;
     PATH_t* p = &c->Path;
-    // Walking again: the turn the last walk left is this walk's now.
+    // Walking again: the turn the last walk left is this walk's now, and a standing turn's steps are over.
     c->TurnPending = false;
+    c->TurnAction = -1;
     c->TurnArrived = false;
     // The path is followed from the character's own position: without the sideways shift a flying bank adds for its
     // pivot (UpdateFlightFeel puts it back), which would otherwise turn the heading and so the bank, rocking it.

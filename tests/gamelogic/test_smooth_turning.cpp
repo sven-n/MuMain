@@ -7,6 +7,7 @@
 #include "Engine/Object/Movement/MovementTuning.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/HeadTurn.h"
+#include "../data/MovementTestScopes.h"
 #include "../data/TestModelSlots.h"
 
 #include <array>
@@ -192,44 +193,6 @@ CHARACTER& WalkerOnPath(float facing)
     return walker;
 }
 
-// FPS_ANIMATION_FACTOR set for a test and put back after it.
-class AnimationFactor
-{
-public:
-    explicit AnimationFactor(float factor) : m_saved(FPS_ANIMATION_FACTOR)
-    {
-        FPS_ANIMATION_FACTOR = factor;
-    }
-    ~AnimationFactor()
-    {
-        FPS_ANIMATION_FACTOR = m_saved;
-    }
-    AnimationFactor(const AnimationFactor&) = delete;
-    AnimationFactor& operator=(const AnimationFactor&) = delete;
-
-private:
-    float m_saved;
-};
-
-// Enhanced Movement switched for a test and put back after it.
-class EnhancedMovementSwitch
-{
-public:
-    explicit EnhancedMovementSwitch(bool enabled) : m_saved(Engine::Characters::EnhancedMovementEnabled())
-    {
-        Engine::Characters::SetEnhancedMovementEnabled(enabled);
-    }
-    ~EnhancedMovementSwitch()
-    {
-        Engine::Characters::SetEnhancedMovementEnabled(m_saved);
-    }
-    EnhancedMovementSwitch(const EnhancedMovementSwitch&) = delete;
-    EnhancedMovementSwitch& operator=(const EnhancedMovementSwitch&) = delete;
-
-private:
-    bool m_saved;
-};
-
 // Where a walker facing `facing` off its path is after one frame along it, with Enhanced Movement on or off.
 struct WalkStep
 {
@@ -360,6 +323,91 @@ TEST_CASE("A standing turn doesn't replace an action set before its first step: 
         CHECK(turner.Object.Angle[2] == 90.f);
         turner.Dead = 0;
     }
+}
+
+TEST_CASE("A walk that cuts a standing turn short leaves none of its steps: the next standing turn steps and arrives "
+          "[gamelogic][turning]")
+{
+    const EnhancedMovementSwitch option(true);
+    const AnimationFactor factor(1.f);
+    // Empty model slots: the turn's steps and its end set actions on the character's model.
+    const TestModelSlots models;
+    // A model with the walk, so the turn's steps do change the action.
+    Models[0].NumActions = MONSTER01_WALK + 1;
+    CHARACTER& c = StandingTurner(MONSTER01_STOP1);
+    // The turn's first step.
+    FinishPendingTurn(&c);
+    REQUIRE(c.TurnPending);
+    REQUIRE(c.TurnAction != -1);
+
+    // It walks off before arriving: a path north to its end, as MoveHero walks the hero (MovePath, and at the end
+    // SetPlayerStop), then the frame's FinishPendingTurn (MoveCharacterClient).
+    c.MoveSpeed = 10;
+    PATH_t& path = c.Path;
+    path.PathNum = 3;
+    for (int i = 0; i < 3; ++i)
+    {
+        path.PathX[i] = 10;
+        path.PathY[i] = static_cast<unsigned char>(10 + i);
+    }
+    path.CurrentPath = 0;
+    path.CurrentPathFloat = 0;
+    c.Object.Position[0] = 10.5f * TERRAIN_SCALE;
+    c.Object.Position[1] = 10.5f * TERRAIN_SCALE;
+    c.Movement = true;
+    bool walked = false;
+    for (int frame = 0; frame < 600 && !walked; ++frame)
+    {
+        walked = MovePath(&c);
+        if (walked)
+        {
+            c.Movement = false;
+            SetPlayerStop(&c);
+        }
+        else
+        {
+            MoveCharacterPosition(&c, c.MoveHeading);
+        }
+        FinishPendingTurn(&c);
+    }
+    REQUIRE(walked);
+
+    // Later the server turns it again (ReceiveAction: SetPlayerStop, then StartStandingTurn).
+    const float target = std::fmod(c.Object.Angle[2] + 180.f, 360.f);
+    StartStandingTurn(&c, target);
+    REQUIRE(c.TurnPending);
+    FinishPendingTurn(&c);
+    // It steps around rather than being dropped on its first frame.
+    CHECK(c.TurnPending);
+    for (int frame = 0; frame < 600 && c.TurnPending; ++frame)
+    {
+        FinishPendingTurn(&c);
+    }
+    CHECK(c.TurnArrived);
+    CHECK(FarAngle(c.Object.Angle[2], target) == doctest::Approx(0.f).epsilon(0.01));
+}
+
+TEST_CASE("A new standing turn while one still steps starts from standing and arrives [gamelogic][turning]")
+{
+    const EnhancedMovementSwitch option(true);
+    const AnimationFactor factor(1.f);
+    const TestModelSlots models;
+    // A model with the walk, so the turn's steps do change the action.
+    Models[0].NumActions = MONSTER01_WALK + 1;
+    CHARACTER& c = StandingTurner(MONSTER01_STOP1);
+    FinishPendingTurn(&c);
+    REQUIRE(c.TurnAction != -1);
+    // A second direction within the same turn (two AT_STAND1 close together, or the hero's next turn toward the
+    // cursor), before the first one arrived.
+    StartStandingTurn(&c, 0.f);
+    CHECK(c.Object.CurrentAction == MONSTER01_STOP1);
+    CHECK(c.TurnAction == -1);
+    for (int frame = 0; frame < 600 && c.TurnPending; ++frame)
+    {
+        FinishPendingTurn(&c);
+    }
+    CHECK(c.TurnArrived);
+    CHECK(FarAngle(c.Object.Angle[2], 0.f) == doctest::Approx(0.f).epsilon(0.01));
 }
 
 TEST_CASE("A turn toward the cursor tells the server its facing only when it arrives [gamelogic][turning]")
