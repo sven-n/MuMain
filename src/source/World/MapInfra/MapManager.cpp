@@ -1230,7 +1230,8 @@ void CMapManager::LoadWorld(int Map)
         }
     }
 
-    if (iMapWorld != 74 && iMapWorld != 75)
+    // A map also loads without the interface (tools and tests).
+    if (iMapWorld != 74 && iMapWorld != 75 && g_pNewUIMiniMap != nullptr)
     {
         g_pNewUIMiniMap->UnloadImages();
         g_pNewUIMiniMap->LoadImages(WorldName);

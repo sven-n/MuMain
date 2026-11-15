@@ -7,6 +7,7 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <set>
 #include <string>
@@ -20,6 +21,20 @@ class ContentMemoryStorage
 public:
     using Files = std::map<std::string, std::string>;
 
+    // The names of the files read, filled from the threads that read them.
+    struct ReadLog
+    {
+        std::mutex mutex;
+        std::set<std::string> files;
+
+        // What was read since the last call.
+        std::set<std::string> Take()
+        {
+            const std::scoped_lock lock(mutex);
+            return std::exchange(files, {});
+        }
+    };
+
     // A storage over `files`, which the test may still change; storages may share them.
     static SDL_Storage* Open(std::shared_ptr<Files> files)
     {
@@ -28,11 +43,13 @@ public:
         return OpenSelf(self);
     }
 
-    // A storage over the files under `root`: their names are listed now, their bytes read when asked for.
-    static SDL_Storage* OpenFolder(const std::filesystem::path& root)
+    // A storage over the files under `root`: their names are listed now, their bytes read when asked for. With
+    // `reads`, the name of each file read is added to it.
+    static SDL_Storage* OpenFolder(const std::filesystem::path& root, std::shared_ptr<ReadLog> reads = nullptr)
     {
         auto* self = new ContentMemoryStorage;
         self->m_root = root;
+        self->m_reads = std::move(reads);
         std::error_code error;
         for (const auto& entry : std::filesystem::recursive_directory_iterator(root, error))
         {
@@ -173,6 +190,11 @@ private:
             {
                 return SDL_SetError("%s: cannot be read", path);
             }
+            if (self.m_reads)
+            {
+                const std::scoped_lock lock(self.m_reads->mutex);
+                self.m_reads->files.insert(path);
+            }
             return true;
         };
         return iface;
@@ -181,4 +203,5 @@ private:
     std::shared_ptr<Files> m_files;
     std::filesystem::path m_root;
     std::map<std::string, Uint64> m_sizes;
+    std::shared_ptr<ReadLog> m_reads;
 };

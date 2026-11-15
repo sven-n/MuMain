@@ -478,6 +478,15 @@ std::optional<int> CGlobalBitmap::GetLoadWorld(GLuint uiBitmapIndex) const
 }
 #endif
 
+std::vector<GLuint> CGlobalBitmap::LoadedIndices() const
+{
+    std::vector<GLuint> indices;
+    indices.reserve(m_mapBitmap.size());
+    for (const auto& [index, bitmap] : m_mapBitmap)
+        indices.push_back(index);
+    return indices;
+}
+
 void CGlobalBitmap::UnloadAllImages()
 {
     FlushAllPending();
