@@ -208,6 +208,8 @@ mu_add_test(
     # Saves the config.ini beside the executable, as theme_file_interface_tests does.
     RESOURCE_LOCK ui_executable_config_ini
 )
+# config.ini.template, the config a new player starts with.
+target_compile_definitions(ui_scaling_tests PRIVATE MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin")
 
 mu_add_test(
     NAME mu_helper_tests

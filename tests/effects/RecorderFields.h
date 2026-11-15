@@ -11,7 +11,7 @@
 #include "Render/Effects/ZzzEffect.h"
 
 // Keep in step with OBJECT (w_ObjectInfo.h), PARTICLE and JOINT (_struct.h),
-// CHARACTER and its parts (w_CharacterInfo.h).
+// CHARACTER and its parts (w_CharacterInfo.h, CharacterMotion.h).
 // clang-format off
 #define RECORDER_OBJECT_FIELDS(F)                                                                                    \
     F(Live) F(bBillBoard) F(m_bCollisionCheck) F(m_bRenderShadow) F(EnableShadow) F(LightEnable) F(m_bActionStart)   \
@@ -29,7 +29,8 @@
     F(SetTrailRight) F(Matrix)                                                                                       \
     F(BoneTransform) F(Pose.Type) F(Pose.CurrentAction) F(Pose.PriorAction) F(Pose.AnimationFrame)                   \
     F(Pose.PriorAnimationFrame) F(Pose.Angle) F(Pose.HeadAngle) F(Pose.World) F(Pose.Origin) F(Pose.Scale)           \
-    F(Pose.Height) F(DrawnFrame) F(OBB.StartPos) F(OBB.XAxis) F(OBB.YAxis) F(OBB.ZAxis) F(Owner) F(Prior)            \
+    F(Pose.Height) F(Pose.Movement) F(DrawnFrame) F(OBB.StartPos) F(OBB.XAxis) F(OBB.YAxis) F(OBB.ZAxis)             \
+    F(Owner) F(Prior)                                                                                                \
     F(Next) F(m_BuffMap)                                                                                             \
     F(m_sTargetIndex) F(m_bpcroom) F(m_v3PrePos1) F(m_v3PrePos2) F(m_Interpolates)
 
@@ -55,7 +56,8 @@
     F(GuildType) F(GuildRelationShip) F(GuildSkill) F(GuildMasterKillCount) F(BackupCurrentSkill) F(GuildTeam)       \
     F(m_byGensInfluence) F(PK) F(AttackFlag) F(TargetAngle) F(Dead) F(Skill) F(SwordCount) F(AttackRotation)         \
     F(byExtensionSkill) F(m_byDieType) F(TargetX) F(TargetY) F(SkillX) F(SkillY) F(Appear) F(CurrentSkill)           \
-    F(CastRenderTime) F(m_byFriend) F(MonsterSkill) F(ID) F(Movement) F(MovementType) F(CollisionTime)               \
+    F(CastRenderTime) F(m_byFriend) F(MonsterSkill) F(ID) F(Movement) F(MovementType) F(MoveHeading) F(TurnPending)  \
+    F(TurnLeftAt) F(TurnAction) F(TurnSpeed) F(TurnStance) F(TurnArrived) F(Motion) F(CollisionTime)                 \
     F(GuildMarkIndex) F(Key) F(TargetCharacter) F(Level) F(MonsterIndex) F(Damage) F(Hit) F(MoveSpeed)               \
     F(AttackSpeed) F(MagicSpeed) F(Action) F(LongRangeAttack) F(SelectItem) F(Item) F(FreezeType) F(PriorPositionX)  \
     F(PriorPositionY) F(PositionX) F(PositionY) F(m_iFenrirSkillTarget) F(LastAttackEffectTime) F(m_iDeleteTime)     \
@@ -68,6 +70,14 @@
 #define RECORDER_PART_FIELDS(F)                                                                                      \
     F(Type) F(Level) F(ExcellentFlags) F(AncientDiscriminator) F(LinkBone) F(CurrentAction) F(PriorAction)           \
     F(AnimationFrame) F(PriorAnimationFrame) F(PlaySpeed) F(m_byNumCloth) F(m_pCloth)
+
+// CHARACTER::Motion, the movement features' state (CharacterMotion.h).
+#define RECORDER_MOTION_FIELDS(F)                                                                                    \
+    F(FlightBank) F(FlightHover) F(FlightHoverApplied) F(FlightPivotShift) F(TurnLag) F(TurnLagSpeed)                \
+    F(TurnLagFacing) F(MomentumStart) F(MomentumSpeed) F(MomentumFrame) F(SlopePitch) F(NodLeft) F(NodApplied)       \
+    F(NodBowApplied) F(NodCooldown) F(WatchedHeroSeconds) F(NoddedAtHero) F(GreetLeft) F(LookTarget)                 \
+    F(LookScanSeconds) F(SnapTurnOffset) F(SnapTurnSpeed) F(SnapTurnFacing) F(FadeAction) F(FadeFrame) F(FadeLeft)   \
+    F(FadeSeconds) F(FadeLastAction) F(FadeLastFrame)
 
 // Without its SpinLock, which no game code leaves held.
 #define RECORDER_PATH_FIELDS(F)                                                                                      \
@@ -84,13 +94,14 @@
 // Windows build without iterator debugging (OBJECT holds a std::map and
 // std::vectors, whose size depends on it).
 #if defined(_MSC_VER) && defined(_WIN64) && defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL == 0
-static_assert(sizeof(OBJECT) == 776, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
+static_assert(sizeof(OBJECT) == 808, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
 static_assert(sizeof(PARTICLE) == 136, "PARTICLE changed: update RECORDER_PARTICLE_FIELDS");
 static_assert(sizeof(JOINT) == 9800, "JOINT changed: update RECORDER_JOINT_FIELDS");
-static_assert(sizeof(CHARACTER) == 1896, "CHARACTER changed: update RECORDER_CHARACTER_FIELDS");
+static_assert(sizeof(CHARACTER) == 2080, "CHARACTER changed: update RECORDER_CHARACTER_FIELDS");
 static_assert(sizeof(PART_t) == 48, "PART_t changed: update RECORDER_PART_FIELDS");
 static_assert(sizeof(PATH_t) == 48, "PATH_t changed: update RECORDER_PATH_FIELDS");
 static_assert(sizeof(PET_INFO) == 24, "PET_INFO changed: update RECORDER_PET_INFO_FIELDS");
+static_assert(sizeof(CharacterMotion) == 120, "CharacterMotion changed: update RECORDER_MOTION_FIELDS");
 #endif
 
 namespace RecorderFields
@@ -142,6 +153,14 @@ template <typename Visitor> void VisitFields(PET_INFO& target, const PET_INFO& r
 {
 #define RECORDER_VISIT(name) visitor(#name, target.name, reference.name);
     RECORDER_PET_INFO_FIELDS(RECORDER_VISIT)
+#undef RECORDER_VISIT
+}
+
+template <typename Visitor>
+void VisitFields(CharacterMotion& target, const CharacterMotion& reference, Visitor&& visitor)
+{
+#define RECORDER_VISIT(name) visitor(#name, target.name, reference.name);
+    RECORDER_MOTION_FIELDS(RECORDER_VISIT)
 #undef RECORDER_VISIT
 }
 } // namespace RecorderFields

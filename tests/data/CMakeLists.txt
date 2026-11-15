@@ -261,6 +261,7 @@ mu_add_test(
     NAME test_character_bones
     SOURCES
         test_character_bones.cpp
+        test_character_realism_bones.cpp
         test_player_body_models.cpp
         ClientFolderScope.cpp
         PlayerTextureScope.cpp

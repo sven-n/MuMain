@@ -25,6 +25,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_smooth_turning
+    SOURCES
+        test_smooth_turning.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_earthquake_falloff
     SOURCES
         test_earthquake_falloff.cpp
@@ -164,6 +173,15 @@ mu_add_test(
         test_skill_list_hotkeys.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME test_character_realism
+    SOURCES
+        test_character_realism.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
 )
 
 mu_add_test(

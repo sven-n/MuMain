@@ -36,6 +36,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/Movement/FlightFeel.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -2249,6 +2250,9 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer)
     c->Path.PathNum = 0;
     c->Path.CurrentPath = 0;
     c->Path.CurrentPathFloat = 0;
+    // It slides to the server's tile (PushingCharacter) from where it is drawn, without the sideways shift of a flying
+    // bank.
+    Engine::Characters::ForgetFlightPivotShift(c);
     SetPlayerStop(c);
 }
 
@@ -2278,6 +2282,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     OBJECT* o = &Hero->Object;
     o->Position[0] = ((float)(Hero->PositionX) + 0.5f) * TERRAIN_SCALE;
     o->Position[1] = ((float)(Hero->PositionY) + 0.5f) * TERRAIN_SCALE;
+    Engine::Characters::ForgetFlightPivotShift(Hero);
 
     if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
     {
@@ -3590,16 +3595,28 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     }
     // if(c->Helper.Type == MODEL_HELPER+37) return;
 
-    c->Object.Angle[2] = ((float)(Data->Angle) - 1.f) * 45.f;
+    const float angle = ((float)(Data->Angle) - 1.f) * 45.f;
+    // Standing, another character turns toward the new direction with its feet stepping around; any other action
+    // (an attack, a skill) faces it at once.
+    const bool standing = Data->Action == AT_STAND1 || Data->Action == AT_STAND2;
+    if (!standing || c == Hero)
+    {
+        c->Object.Angle[2] = angle;
+    }
     c->Movement = false;
 
     c->Object.Position[0] = c->TargetX * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
     c->Object.Position[1] = c->TargetY * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
+    Engine::Characters::ForgetFlightPivotShift(c);
     switch (Data->Action)
     {
     case AT_STAND1:
     case AT_STAND2:
         SetPlayerStop(c);
+        if (c != Hero)
+        {
+            StartStandingTurn(c, angle);
+        }
         break;
     case AT_ATTACK1:
     case AT_ATTACK2:

@@ -160,7 +160,8 @@ template <typename T> void Add(Dump& dump, const std::string& path, const T& val
             Add(dump, path + "[" + std::to_string(i) + "]", value[i]);
     }
     else if constexpr (std::is_same_v<T, OBJECT> || std::is_same_v<T, PART_t> || std::is_same_v<T, PATH_t> ||
-                       std::is_same_v<T, PET_INFO> || std::is_same_v<T, PARTICLE> || std::is_same_v<T, JOINT>)
+                       std::is_same_v<T, PET_INFO> || std::is_same_v<T, PARTICLE> || std::is_same_v<T, JOINT> ||
+                       std::is_same_v<T, CharacterMotion>)
     {
         AddStruct(dump, path, value);
     }
@@ -244,7 +245,8 @@ struct DirtyFiller
             for (std::uint32_t& element : value)
                 Set(element);
         }
-        else if constexpr (std::is_same_v<T, OBJECT> || std::is_same_v<T, PART_t> || std::is_same_v<T, PATH_t>)
+        else if constexpr (std::is_same_v<T, OBJECT> || std::is_same_v<T, PART_t> || std::is_same_v<T, PATH_t> ||
+                           std::is_same_v<T, CharacterMotion>)
         {
             VisitFields(value, value, *this);
         }
