@@ -281,7 +281,8 @@ app bundle). `config.ini`, `MuError.log` (and its rotations), the chat macros (`
   is no longer read. `Data/Macro.txt` moves the same way.
 - `MuError.log` names the folder in its first lines (the home folder shown as `~`).
 - `MU_USER_FOLDER` names another folder, for example to run two clients with separate settings. The
-  tests set it to their own folder.
+  tests set it to a folder of each test binary's own beside it (`<binary>.user`), so binaries running side by
+  side never share a `config.ini`.
 - One profile serves every game account of the OS user: settings that belong to a character (skill
   and potion hotkeys, auto-attack, the chat box, MuHelper) are kept by the server. The remembered
   login is the last account that ticked "Remember me".

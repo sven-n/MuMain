@@ -16,7 +16,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Data/GameConfig/GameConfigValidation.h"
-#include "../data/ExecutableConfigFile.h"
+#include "../data/UserConfigFile.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/Look/LookPreset.h"
 #include "UI/Social/SocialWorkspace.h"
@@ -879,7 +879,7 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
         {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing},
         {"Sunlight", &GameConfig::GetSunlight, &GameConfig::SetSunlight},
     }};
-    const ExecutableConfigFile file;
+    const UserConfigFile file;
     GameConfig& config = GameConfig::GetInstance();
 
     // Without the keys every switch is on.
