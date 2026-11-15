@@ -10,9 +10,8 @@
 #include <string_view>
 #include <vector>
 
-// The live look profile and light mood with everything layered over them: the player's values (of
-// the groups whose feature is in effect) and the values a developer changed this session, per scope.
-// Every change invalidates the effective values before anything reads them again: the light mood's
+// The live look profile and light mood with the player's values (of the groups whose feature is in
+// effect) layered over them, unless the Authoring preview leaves them out. Every change invalidates the effective values before anything reads them again: the light mood's
 // rebuild, which reads the look values, sees the change it was started for. Render/Look/
 // LookProfileSetting.h keeps the client's one instance.
 namespace Render::Look
@@ -26,7 +25,7 @@ public:
 
     explicit LookLayers(MoodRebuild rebuildMood = {});
 
-    // New files (start-up, `$look load`): live and loaded both, no developer edits, mood rebuilt.
+    // New files (start-up, `$look load`): live and loaded both, mood rebuilt. The preview stays.
     void UseFiles(LookFiles files);
 
     // The effective values on `world`, cached until a change or another world.
@@ -48,21 +47,30 @@ public:
         return m_applying;
     }
 
+    // What the effective values preview. A change rebuilds the mood: the player's values and light mood
+    // strength come or go.
+    void SetPreview(LookPreview preview);
+    [[nodiscard]] LookPreview Preview() const
+    {
+        return m_preview;
+    }
+
     // The values on `world` without the player's.
     [[nodiscard]] Data::Maps::LookValues Inherited(int world) const;
-    // Every value (or one) on `world` with where it comes from, a player's value included.
+    // Every value (or one) on `world` with where it comes from, a player's value included while it applies.
     [[nodiscard]] std::vector<LookValueState> Describe(int world, std::optional<std::string_view> name) const;
+
+    // The edits below switch the Player preview to Authoring: a developer editing the look sees the
+    // profile as authored, not covered by their own player values.
 
     // `$look set` (no `world`) or `$look set map` on `world`: refused edits change nothing.
     LookEditResult Set(std::span<const LookEdit> edits, std::optional<int> world, std::string_view mapName = {});
-    // `$look reset`: every value, or `name` in the default and `world`'s entry, with their edit marks.
+    // `$look reset`: every value, or `name` in the default and `world`'s entry.
     LookEditResult Reset(std::optional<std::string_view> name, int world);
     // The Graphics Look window's change, undo or redo: `profile` becomes the live profile when the
-    // files can be edited and it passes ValidateLookProfile. The developer's marks then follow what
-    // differs from the loaded files.
+    // files can be edited and it passes ValidateLookProfile.
     LookEditResult Replace(const Data::Maps::LookProfileData& profile);
-    // `$look save` wrote the live files: a reset goes back to them, and the edits saved in them are
-    // no longer marked, so the player's values apply over them again.
+    // `$look save` wrote the live files: a reset goes back to them.
     void MarkSaved();
 
     [[nodiscard]] const LookFiles& Live() const
@@ -79,13 +87,13 @@ public:
     {
         return m_filesGeneration;
     }
-    [[nodiscard]] const DeveloperLookEdits& DeveloperEdits() const
-    {
-        return m_developerEdits;
-    }
 
 private:
     void Changed(bool moodChanged);
+    // An applied edit: the Player preview becomes Authoring; true when it did.
+    bool StartAuthoring();
+    // The groups whose player values apply in the preview.
+    [[nodiscard]] TuningGroupSet Applying() const;
 
     MoodRebuild m_rebuildMood;
     LookFiles m_live;
@@ -93,7 +101,7 @@ private:
     Data::Maps::LookOverrides m_personal;
     // None applies until the look's features are applied (Classic keeps the player's values unseen).
     TuningGroupSet m_applying{};
-    DeveloperLookEdits m_developerEdits;
+    LookPreview m_preview = LookPreview::Player;
     std::uint32_t m_revision = 0;
     std::uint32_t m_filesGeneration = 0;
     bool m_cacheValid = false;

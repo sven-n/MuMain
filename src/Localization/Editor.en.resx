@@ -529,6 +529,27 @@
   <data name="Look Not Saved" xml:space="preserve">
     <value>Not saved; see the console.</value>
   </data>
+  <data name="Look Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Look Preview Authoring" xml:space="preserve">
+    <value>As authored</value>
+  </data>
+  <data name="Look Preview Authoring Help" xml:space="preserve">
+    <value>The look profile as edited, without your own Options values and light mood strength. An edit switches to it.</value>
+  </data>
+  <data name="Look Preview Player" xml:space="preserve">
+    <value>As players see it</value>
+  </data>
+  <data name="Look Preview Player Help" xml:space="preserve">
+    <value>Your own Options values and light mood strength over the look profile, as a player with them sees it.</value>
+  </data>
+  <data name="Look Previewing 0" xml:space="preserve">
+    <value>on {0}</value>
+  </data>
+  <data name="Look Applies On Release" xml:space="preserve">
+    <value>applies when released</value>
+  </data>
   <data name="Look Not Read Again" xml:space="preserve">
     <value>Not read again; see the console. The changes are as they were.</value>
   </data>

@@ -31,6 +31,11 @@ full mood, values between blend; it wins over the player's Mood strength until
 a look is chosen), and `$lightmood knee <k>` (the look
 profile's `lighting.highlightKnee`).
 
+While a developer edits the look, the Authoring preview shows every map's
+mood at full strength, whatever the Mood strength or `$lightmood <0-100>` set;
+`$look preview player` shows them again ([enhanced-look.md](enhanced-look.md),
+"The preview").
+
 ## The moods: `mood.*` in `Data/Render/Look.json`
 
 The mood's values are look values named `mood.<value>`, in the same file and

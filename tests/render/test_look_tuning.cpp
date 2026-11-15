@@ -551,6 +551,11 @@ TEST_CASE("$look commands parse their verb, scope, name and value [render][look]
     CHECK(ParseLookCommand(L"$look load")->name.empty());
     CHECK(ParseLookCommand(L"$look load chosen-b")->name == "chosen-b");
     CHECK(ParseLookCommand(L"$look save")->verb == LookVerb::Save);
+    const auto preview = ParseLookCommand(L"$look preview authoring");
+    REQUIRE(preview.has_value());
+    CHECK(preview->verb == LookVerb::Preview);
+    CHECK(preview->name == "authoring");
+    CHECK(ParseLookCommand(L"$look preview player")->name == "player");
 
     // Not these commands: the preset, a bad value or candidate, extra words.
     CHECK_FALSE(ParseLookCommand(L"$look classic").has_value());
@@ -560,6 +565,8 @@ TEST_CASE("$look commands parse their verb, scope, name and value [render][look]
     CHECK_FALSE(ParseLookCommand(L"$look load ../x").has_value());
     CHECK_FALSE(ParseLookCommand(L"$look load ..").has_value());
     CHECK_FALSE(ParseLookCommand(L"$look save now").has_value());
+    CHECK_FALSE(ParseLookCommand(L"$look preview").has_value());
+    CHECK_FALSE(ParseLookCommand(L"$look preview editor").has_value());
     CHECK_FALSE(ParseLookCommand(L"$looks show").has_value());
 
     // The aliases set the same names.

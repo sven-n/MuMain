@@ -13,7 +13,9 @@
 #include "World/MapInfra/MapManager.h"
 
 #include "imgui.h"
+#include "imgui_internal.h"
 
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 #include <string_view>
@@ -51,6 +53,38 @@ std::string MapName(int world)
 {
     const wchar_t* name = gMapManager.GetMapName(world);
     return name ? Core::Text::ToUtf8(name) : std::string();
+}
+
+// Shown only when the drag ends: the sun shadow's resolution makes a new shadow map. A value the
+// light mood reads rebuilds the static map light (a few ms), as Options' Mood strength does while dragged.
+bool AppliesOnRelease(LookValue value)
+{
+    return value == LookValue::SunShadowResolution;
+}
+
+// The value table's names grouped by their prefix ("lighting", "mood", ...), each group in the
+// order its first value has in the table and its values in table order.
+std::vector<std::vector<std::size_t>> ValueGroups()
+{
+    std::vector<std::vector<std::size_t>> groups;
+    std::vector<std::string_view> prefixes;
+    const auto& infos = Data::Maps::LookValueInfos();
+    for (std::size_t index = 0; index < infos.size(); ++index)
+    {
+        const std::string_view name = infos[index].name;
+        const std::string_view prefix = name.substr(0, name.find('.'));
+        const auto found = std::find(prefixes.begin(), prefixes.end(), prefix);
+        if (found == prefixes.end())
+        {
+            prefixes.push_back(prefix);
+            groups.push_back({index});
+        }
+        else
+        {
+            groups[static_cast<std::size_t>(found - prefixes.begin())].push_back(index);
+        }
+    }
+    return groups;
 }
 
 // A slider moves in steps of a thousandth, so the file keeps short numbers.
@@ -152,6 +186,11 @@ CMuGraphicsLookUI& CMuGraphicsLookUI::GetInstance()
 
 void CMuGraphicsLookUI::Render(bool* open)
 {
+    // A drag whose slider went (the window hidden, another item taken) never ends: put the profile back.
+    if (m_dragBase && ImGui::GetActiveID() != m_dragId)
+    {
+        CancelDrag();
+    }
     if (!BeginWindow(open))
     {
         return;
@@ -216,15 +255,16 @@ void CMuGraphicsLookUI::FollowLive()
         m_history.Clear();
         m_seen = live;
         m_filesGeneration = generation;
-        m_draggedValue.reset();
+        DropDrag();
         m_nameShownFor.reset();
         return;
     }
     if (live != m_seen)
     {
-        // A `$look` command (or a change made while the window was closed).
-        m_history.Record("$look", m_seen, live);
+        // A `$look` command (or a change made while the window was closed); a drag shown live starts again from it.
+        m_history.Record("$look", m_dragBase ? *m_dragBase : m_seen, live);
         m_seen = live;
+        DropDrag();
     }
 }
 
@@ -261,6 +301,42 @@ void CMuGraphicsLookUI::RenderToolbar()
     {
         ImGui::SameLine();
         ImGui::TextUnformatted(I18N::Editor::UnsavedChanges);
+    }
+    RenderPreview();
+}
+
+void CMuGraphicsLookUI::RenderPreview()
+{
+    using Render::Look::LookPreview;
+    const bool authoring = Render::Look::ActivePreview() == LookPreview::Authoring;
+    ImGui::Text("%s:", I18N::Editor::LookPreview);
+    ImGui::SameLine();
+    if (ImGui::RadioButton(I18N::Editor::LookPreviewAuthoring, authoring) && !authoring)
+    {
+        Render::Look::SetLivePreview(LookPreview::Authoring);
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::LookPreviewAuthoringHelp);
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton(I18N::Editor::LookPreviewPlayer, !authoring) && authoring)
+    {
+        Render::Look::SetLivePreview(LookPreview::Player);
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::LookPreviewPlayerHelp);
+    }
+    const int world = gMapManager.WorldActive;
+    if (world >= 0)
+    {
+        const std::string name = MapName(world);
+        ImGui::SameLine();
+        ImGui::TextDisabled(
+            "%s", I18N::Format(I18N::Editor::LookPreviewing0,
+                               {(name.empty() ? std::string() : name + " ") + "[" + std::to_string(world) + "]"})
+                      .c_str());
     }
 }
 
@@ -473,74 +549,144 @@ bool CMuGraphicsLookUI::RenderSharedWarning(const std::vector<int>& maps)
 
 void CMuGraphicsLookUI::RenderValues()
 {
-    const LookOverrides* own = OwnValues(m_seen, m_scope);
+    // A copy: a row's change replaces m_seen while the rows below still read it.
+    const LookOverrides* found = OwnValues(m_seen, m_scope);
+    const std::optional<LookOverrides> own = found ? std::optional<LookOverrides>(*found) : std::nullopt;
     const Data::Maps::LookValues values = ValuesOf(m_seen, m_scope);
     const std::string mapName = m_scope.kind == LookScope::Kind::Map ? MapName(m_scope.world) : std::string();
-    std::string_view group;
     const auto& infos = Data::Maps::LookValueInfos();
-    for (std::size_t index = 0; index < infos.size(); ++index)
+    static const std::vector<std::vector<std::size_t>> groups = ValueGroups();
+    for (const std::vector<std::size_t>& group : groups)
     {
-        const Data::Maps::LookValueInfo& info = infos[index];
-        const std::string_view name = info.name;
-        const std::string_view prefix = name.substr(0, name.find('.'));
-        if (prefix != group)
+        const std::string_view first = infos[group.front()].name;
+        ImGui::SeparatorText(std::string(first.substr(0, first.find('.'))).c_str());
+        for (const std::size_t index : group)
         {
-            group = prefix;
-            ImGui::SeparatorText(std::string(group).c_str());
+            RenderValue(index, own ? &*own : nullptr, values, mapName);
         }
-        ImGui::PushID(static_cast<int>(index));
-        bool setHere = own && (*own)[info.value].has_value();
-        if (ImGui::Checkbox("##SetHere", &setHere))
-        {
-            LookProfileData edited = m_seen;
-            if (setHere)
-            {
-                const Data::Maps::LookValueEdit edit{info.value, values[info.value]};
-                const Data::Maps::LookEditOutcome outcome =
-                    Data::Maps::ApplyLookEdits(edited, {&edit, 1}, m_scope, mapName);
-                Change(ScopeName() + ": " + info.name + " " + FormatNumber(values[info.value]), outcome, edited);
-            }
-            else
-            {
-                const Data::Maps::LookEditOutcome outcome = Data::Maps::ClearLookValue(edited, info.value, m_scope);
-                Change(ScopeName() + ": " + info.name + " -", outcome, edited);
-            }
-        }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::SetTooltip("%s", I18N::Editor::LookSetHere);
-        }
-        ImGui::SameLine();
-        ImGui::BeginDisabled(!setHere);
-        float number = m_draggedValue == index ? m_draggedNumber : static_cast<float>(values[info.value]);
-        ImGui::SetNextItemWidth(ImGui::GetFontSize() * SliderWidthInFonts);
-        if (ImGui::SliderFloat(info.name, &number, static_cast<float>(info.min), static_cast<float>(info.max), "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp))
-        {
-            m_draggedValue = index;
-            m_draggedNumber = number;
-        }
-        // One change per drag: a mood value rebuilds the static map light.
-        if (ImGui::IsItemDeactivated())
-        {
-            if (ImGui::IsItemDeactivatedAfterEdit() && m_draggedValue == index)
-            {
-                LookProfileData edited = m_seen;
-                const Data::Maps::LookValueEdit edit{info.value, Rounded(m_draggedNumber)};
-                const Data::Maps::LookEditOutcome outcome =
-                    Data::Maps::ApplyLookEdits(edited, {&edit, 1}, m_scope, mapName);
-                Change(ScopeName() + ": " + info.name + " " + FormatNumber(edit.number), outcome, edited);
-            }
-            m_draggedValue.reset();
-        }
-        ImGui::EndDisabled();
-        if (!setHere)
-        {
-            ImGui::SameLine();
-            ImGui::TextDisabled("%s", InheritedFrom(m_seen, m_scope, info.value).c_str());
-        }
-        ImGui::PopID();
     }
+}
+
+void CMuGraphicsLookUI::RenderValue(std::size_t index, const LookOverrides* own, const Data::Maps::LookValues& values,
+                                    const std::string& mapName)
+{
+    const Data::Maps::LookValueInfo& info = Data::Maps::LookValueInfos()[index];
+    ImGui::PushID(static_cast<int>(index));
+    bool setHere = own && (*own)[info.value].has_value();
+    if (ImGui::Checkbox("##SetHere", &setHere))
+    {
+        LookProfileData edited = m_seen;
+        if (setHere)
+        {
+            const Data::Maps::LookValueEdit edit{info.value, values[info.value]};
+            const Data::Maps::LookEditOutcome outcome =
+                Data::Maps::ApplyLookEdits(edited, {&edit, 1}, m_scope, mapName);
+            Change(ScopeName() + ": " + info.name + " " + FormatNumber(values[info.value]), outcome, edited);
+        }
+        else
+        {
+            const Data::Maps::LookEditOutcome outcome = Data::Maps::ClearLookValue(edited, info.value, m_scope);
+            Change(ScopeName() + ": " + info.name + " -", outcome, edited);
+        }
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::LookSetHere);
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!setHere);
+    float number = m_draggedValue == index ? m_draggedNumber : static_cast<float>(values[info.value]);
+    ImGui::SetNextItemWidth(ImGui::GetFontSize() * SliderWidthInFonts);
+    if (ImGui::SliderFloat(info.name, &number, static_cast<float>(info.min), static_cast<float>(info.max), "%.3f",
+                           ImGuiSliderFlags_AlwaysClamp))
+    {
+        m_draggedValue = index;
+        m_draggedNumber = number;
+        m_dragId = ImGui::GetItemID();
+        PreviewDrag(info.value, mapName);
+    }
+    // One undo step per drag.
+    if (ImGui::IsItemDeactivated())
+    {
+        if (ImGui::IsItemDeactivatedAfterEdit() && m_draggedValue == index)
+        {
+            EndDrag(info.value, mapName);
+        }
+        else
+        {
+            CancelDrag();
+        }
+    }
+    ImGui::EndDisabled();
+    if (m_draggedValue == index && AppliesOnRelease(info.value))
+    {
+        ImGui::SameLine();
+        ImGui::TextDisabled("%s", I18N::Editor::LookAppliesOnRelease);
+    }
+    if (!setHere)
+    {
+        ImGui::SameLine();
+        ImGui::TextDisabled("%s", InheritedFrom(m_seen, m_scope, info.value).c_str());
+    }
+    ImGui::PopID();
+}
+
+void CMuGraphicsLookUI::PreviewDrag(LookValue value, const std::string& mapName)
+{
+    if (!m_dragBase)
+    {
+        m_dragBase = m_seen;
+    }
+    if (AppliesOnRelease(value))
+    {
+        return;
+    }
+    LookProfileData edited = *m_dragBase;
+    const Data::Maps::LookValueEdit edit{value, Rounded(m_draggedNumber)};
+    if (Data::Maps::ApplyLookEdits(edited, {&edit, 1}, m_scope, mapName).applied &&
+        Render::Look::ReplaceLive(edited).applied)
+    {
+        // Followed here, so FollowLive doesn't take the drag for a `$look` change.
+        m_seen = edited;
+    }
+}
+
+void CMuGraphicsLookUI::EndDrag(LookValue value, const std::string& mapName)
+{
+    // The step starts where the drag did.
+    if (m_dragBase)
+    {
+        m_seen = *m_dragBase;
+    }
+    DropDrag();
+    LookProfileData edited = m_seen;
+    const Data::Maps::LookValueEdit edit{value, Rounded(m_draggedNumber)};
+    const Data::Maps::LookEditOutcome outcome = Data::Maps::ApplyLookEdits(edited, {&edit, 1}, m_scope, mapName);
+    Change(ScopeName() + ": " + Data::Maps::Info(value).name + " " + FormatNumber(edit.number), outcome, edited);
+    // A refused end leaves the live profile as the drag showed it: put back the one before.
+    if (Render::Look::LiveFiles().lookData != m_seen)
+    {
+        (void)Render::Look::ReplaceLive(m_seen);
+    }
+}
+
+void CMuGraphicsLookUI::CancelDrag()
+{
+    if (m_dragBase)
+    {
+        m_seen = *m_dragBase;
+        if (Render::Look::LiveFiles().lookData != m_seen)
+        {
+            (void)Render::Look::ReplaceLive(m_seen);
+        }
+    }
+    DropDrag();
+}
+
+void CMuGraphicsLookUI::DropDrag()
+{
+    m_dragBase.reset();
+    m_draggedValue.reset();
 }
 
 void CMuGraphicsLookUI::Change(const std::string& label, const Data::Maps::LookEditOutcome& outcome,
@@ -612,9 +758,9 @@ std::string CMuGraphicsLookUI::ScopeName() const
 
 void CMuGraphicsLookUI::SelectScope(const LookScope& scope)
 {
-    m_scope = scope;
     // A slider of the same value in the new scope has the same ID: its end must not apply the old edit.
-    m_draggedValue.reset();
+    CancelDrag();
+    m_scope = scope;
     m_nameShownFor.reset();
 }
 
@@ -698,7 +844,7 @@ void CMuGraphicsLookUI::Redo()
 void CMuGraphicsLookUI::AfterHistoryStep()
 {
     m_seen = Render::Look::LiveFiles().lookData;
-    m_draggedValue.reset();
+    DropDrag();
     m_nameShownFor.reset();
     KeepScopeValid();
 }

@@ -207,7 +207,8 @@ it.
 
 - **Layers.** A value comes from the first of these that names it: the
   map's entry, its environment, `default`, the built-in value. A player's own
-  value (see "Tuning it yourself") applies over all of them.
+  value (see "Tuning it yourself") replaces the result, except in a
+  developer's Authoring preview (see "Developer commands").
 - **Environments** are kinds of place (see below). A map entry picks one by
   name with `"environment"`; an environment does not list its maps.
 - **Map entries** list their maps by the number of the world the client
@@ -362,15 +363,22 @@ Builds with the control socket (`ENABLE_CONTROL_SOCKET=ON`, the `-mueditor`
 and `-in-game-tests` presets) or the DevEditor have commands for tuning. Players' builds have none
 of them; there only `$look enhanced|classic` exists.
 
-Live tuning of the look profile (session only until `$look save`). A value
-changed this way wins over the player's own value of it where the change
-applies: `$look set` on every map without its own entry for that value,
-`$look set map` on the active map's entry, so on every map that entry lists
-(the reply names them; a map without an entry gets one of its own). `$look reset <name>` clears the change
-in the default and the active map's entry (another map's `set map` change
-stays), `$look reset` and `$look load` clear every change; `$look show` names
-a player's value `player`. `$look save` writes the file's own values, never a
-player's:
+Live tuning of the look profile (session only until `$look save`). `$look set`
+changes the default, `$look set map` the active map's entry, so every map that
+entry lists (the reply names them; a map without an entry gets one of its
+own). `$look reset <name>` restores the default and the active map's entry
+(another map's `set map` change stays), `$look reset` and `$look load` every
+value. `$look save` writes the file's own values, never a player's.
+
+**The preview.** The client starts in the Player preview: the look as players
+see it, with your own Options values (`[EnhancedTuning]`) and light mood
+strength over the profile. The first change (`$look set`, `$look reset`, the
+Graphics Look window, its Undo) switches to the Authoring preview, and the
+render log says so: the profile as edited, without your values, so a change
+always shows. Nothing switches back to the Player preview on its own (not a
+save, a reset or a load); only `$look preview player` (or the window's **As
+players see it**) does.
+`$look show` names the preview, and a player's value `player`:
 
 | Command | Effect |
 |---|---|
@@ -379,12 +387,29 @@ player's:
 | `$look reset [<name>]` | back to the values loaded from the file |
 | `$look load [<candidate>]` | loads `Data/Render/Candidates/<candidate>/Look.json` (a version 1 candidate with its `LightMood.json`; without one it shows the shipped moods and cannot be saved), or the shipped file again |
 | `$look save` | writes `Data/Render/Look.json` |
+| `$look preview authoring\|player` | the look as authored, or as players see it with your own values |
 
 Shorter forms of `$look set`: `$lighting rim <v>`, `$lighting specular <v>`,
 `$lighting diffuse <scale> <ambient> <floor>`, `$lightmood knee <k>`,
 `$dynlights wrap <w>`, `$dynlights smooth <s>`,
 `$dynlights spell <gain> <range> <fade>`, `$dynlights cap <c>`,
 `$dynlights reach <cells>`, `$dynlights shadow <opacity>`, `$dynlights shadowangle <degrees>`, `$dynlights shadowlights <n>`, `$bloom falloff <f>`, `$bloom <strength>`, `$ao <strength>`, `$ao radius <r>`, `$sun <strength>`, `$sun softness <f>`, `$sun resolution <texels>`, `$dynlights flatsun <f>`, `$clouds <strength>`, `$clouds scale <units>`, `$clouds speed <units/s>`, `$clouds cover <f>`, `$sky <f>`, `$rim sun <f>`.
+
+### What the player's controls are
+
+The Options window's tuning sliders (`[EnhancedTuning]`) predate any rule on
+which values a player may set. They are sorted here by what they control, so
+that new values, such as D1's PBR values in #990, are not offered to players
+just because they are look values:
+
+| Kind | Values | What a player's value is for |
+|---|---|---|
+| Quality | `sun.resolution`, `dynamic.shadowLights` | what the renderer may spend |
+| Preference | `bloom.strength`, `grading.strength`, `ao.strength`, `dynamic.effectGain`, `dynamic.effectFade`, `dynamic.shadowOpacity`, `sun.shadow`, `clouds.strength`, mood strength | how strong an effect looks to them: a bounded adjustment |
+| Art direction | `lighting.*`, `dynamic.wrap`, `dynamic.mapSmoothing`, `dynamic.effectRange`, `dynamic.effectRangeMax`, `dynamic.effectCap`, `bloom.levelFalloff`, `ao.radius`, `sun.softness`, `dynamic.flatSunShadow`, `clouds.scale`, `clouds.speed`, `clouds.cover`, `sky.fill` | the look itself; today's sliders stay, so existing settings keep working |
+
+A new value is a player control only as Quality or Preference. Art direction
+stays in `Data/Render/Look.json`, and diagnostics are developer commands.
 
 ### The Graphics Look window
 
@@ -393,9 +418,18 @@ Dev Editor's Graphics tab and from a problem in Data Checks' **Graphics look**
 area). On the left are its scopes: the default, the environments with the
 number of maps using each, and the map entries; **Current map** selects the
 entry of the map you're on. On the right, every value of the selected scope:
-**Set here** gives the scope a value of its own, the slider changes it (one
-change per drag) and clearing the box takes it from the layer below again,
-which the row names (the default, an environment, or built in).
+**Set here** gives the scope a value of its own, the slider changes it and
+clearing the box takes it from the layer below again, which the row names (the
+default, an environment, or built in). The game shows a slider's value while
+you drag it, and letting go makes the drag one undo step. The sun shadow's
+resolution applies only when you let go (the row says so): it makes a new
+shadow map. A value the light mood reads rebuilds the map's baked light while
+you drag, as Mood strength in Options does.
+
+- **Preview** above the scopes shows which preview is on and the map being
+  previewed: **As authored** (the Authoring preview, which every change
+  switches to) or **As players see it** (with your own Options values and light
+  mood strength; see "The preview" above).
 
 - A map entry also picks its environment. A map without an entry gets one on
   its first change.

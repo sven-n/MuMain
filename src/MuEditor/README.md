@@ -107,7 +107,7 @@ Parts the item tools and the monster tools both use:
 - **ServerListStepLabel.h/cpp** - What each undo step did ("Remove Helheim", "Valhalla: channel 3"), for the tooltips of the editor bar's Undo and Redo
 
 ### Graphics Look (UI/GraphicsLook)
-- **MuGraphicsLookUI.h/cpp** - The look profile (Data/Render/Look.json) on every scope: the default, its environments and its map entries; a map entry's environment; a warning before a change many maps share; Save and Revert (Windows > Graphics look)
+- **MuGraphicsLookUI.h/cpp** - The look profile (Data/Render/Look.json) on every scope: the default, its environments and its map entries; a map entry's environment; a warning before a change many maps share; sliders shown live while dragged; the Player or Authoring preview; Save and Revert (Windows > Graphics look)
 - **LookEditHistory.h/cpp** - Its undo history: the whole profile before and after each change (the editor bar's Undo and Redo while the window was used last)
 
 ### Input Management

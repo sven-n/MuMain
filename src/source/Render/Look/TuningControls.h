@@ -7,10 +7,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <map>
 #include <optional>
 #include <string>
-#include <vector>
 
 // The player's tuning controls of the Enhanced look: one per look value a player may change, plus
 // the light mood's strength. Each belongs to the feature it tunes (the options window shows it
@@ -137,29 +135,13 @@ struct TuningControl
 // value between steps, so an inherited value is shown as it is.
 [[nodiscard]] std::string FormatTuningValue(const TuningControl& control, double value);
 
-// Which look values a developer changed this session (`$look set`, `$look set map`, the
-// DevEditor), in the default or in one world's entry: there they win over the player's values until
-// reset.
-struct DeveloperLookEdits
+// What the effective values preview: the look as players see it, their [EnhancedTuning] values
+// and light mood strength included, or the look profile as authored, without them.
+enum class LookPreview : std::uint8_t
 {
-    using Flags = std::array<bool, Data::Maps::LookValueCount>;
-    Flags defaults{};
-    std::map<int, Flags> worlds;
-
-    // A `$look set` (no maps) or a `$look set map` that changed the entry of `entryMaps`.
-    void Mark(Data::Maps::LookValue value, const std::optional<std::vector<int>>& entryMaps);
-    // A `$look reset <name>`: the default and the entry of `entryMaps`, as the reset restores.
-    void Clear(Data::Maps::LookValue value, const std::vector<int>& entryMaps);
-    // True when the developer's value is what `profile` gives `world`: the world's edited entry, or an
-    // edited default that neither an entry of the world nor its environment overrides.
-    [[nodiscard]] bool Covers(const Data::Maps::LookProfileData& profile, int world, Data::Maps::LookValue value) const;
-    bool operator==(const DeveloperLookEdits&) const = default;
+    Player,
+    Authoring,
 };
-
-// The marks of a whole profile replaced at once (the Graphics Look window): a default value that
-// differs from `files`, and on a map a value its entry or environment gives differently.
-[[nodiscard]] DeveloperLookEdits DeveloperEditsBetween(const Data::Maps::LookProfileData& files,
-                                                       const Data::Maps::LookProfileData& live);
 
 // The tuning groups whose player values apply, by Render::Look::TuningGroup. A group applies while
 // its feature is in effect, so a feature switched off (or the Classic look) keeps the player's values
@@ -193,17 +175,13 @@ struct LookFeatureAppliers
 // the player's groups from what the renderer accepted, before the light mood is rebuilt from them.
 void ApplyLookFeatures(const LookFeatures& requested, const LookFeatureAppliers& appliers);
 
-// The effective values on `world`: built-in, the profile's default, the world's entry, then the
-// player's values of the groups in `applying`, except where a developer's value applies.
+// The effective values on `world`: built-in, the profile's default, the world's environment and entry,
+// then the player's values of the groups in `applying` (none in the Authoring preview).
 [[nodiscard]] Data::Maps::LookValues ResolveLookValues(const Data::Maps::LookProfileData& profile, int world,
                                                        const Data::Maps::LookOverrides& personal,
-                                                       const DeveloperLookEdits& developerEdits,
                                                        const TuningGroupSet& applying);
-// True when the player's value of `value` applies on `world` (it exists, its group applies and no
-// developer's value does).
-[[nodiscard]] bool PersonalValueApplies(const Data::Maps::LookProfileData& profile, int world,
-                                        const Data::Maps::LookOverrides& personal,
-                                        const DeveloperLookEdits& developerEdits, const TuningGroupSet& applying,
+// True when the player's value of `value` applies (it exists and its group applies).
+[[nodiscard]] bool PersonalValueApplies(const Data::Maps::LookOverrides& personal, const TuningGroupSet& applying,
                                         Data::Maps::LookValue value);
 
 } // namespace Render::Look
