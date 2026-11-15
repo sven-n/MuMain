@@ -258,10 +258,14 @@ double GetTargetFps()
     return g_frameTiming.GetTargetFps();
 }
 
-// Where a screenshot without a path of its own goes: Screenshots/ in the user folder.
+// Where a screenshot without a path of its own goes, in the user folder.
+static constexpr char ScreenshotFolderName[] = "Screenshots";
+// "Screen(11_15-14_05)-0001.jpg" and its terminator, with room to spare.
+static constexpr std::size_t ScreenshotNameCapacity = 64;
+
 static std::wstring InScreenshotFolder(const wchar_t* fileName)
 {
-    const std::filesystem::path folder = Core::Platform::UserFolder() / "Screenshots";
+    const std::filesystem::path folder = Core::Platform::UserFolder() / ScreenshotFolderName;
     std::error_code error;
     std::filesystem::create_directories(folder, error);
     return (folder / fileName).wstring();
@@ -280,7 +284,7 @@ static bool GenerateScreenshotFilename(wchar_t* outFileName, size_t fileNameSize
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
-    wchar_t name[64];
+    wchar_t name[ScreenshotNameCapacity];
     mu_swprintf(name, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
     outFileName[0] = L'\0';
     if (!Core::Text::AppendWideString(outFileName, fileNameSize, InScreenshotFolder(name).c_str()))

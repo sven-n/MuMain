@@ -21,10 +21,20 @@ namespace
 using Core::Text::EqualsIgnoringAsciiCase;
 using Core::Text::TrimAsciiWhitespace;
 
+// A distributor's [Client] Name, and the install folder's name in a name without one.
+constexpr std::size_t MaxClientNameLength = 64;
+constexpr std::size_t MaxInstallNameLength = 32;
+// FNV-1a, 64 bits; scripts/wayland-diag.sh computes the same.
+constexpr std::uint64_t FnvOffsetBasis = 14695981039346656037ULL;
+constexpr std::uint64_t FnvPrime = 1099511628211ULL;
+// The hash's low 32 bits in an install's name: "-3f9a2c1b".
+constexpr char HashSuffixFormat[] = "-%08x";
+constexpr std::size_t HashSuffixSize = sizeof("-00000000");
+
 // Letters, digits, space, '-', '_' and '.', not starting with '.': one folder name on every file system.
 bool IsPlainFolderName(std::string_view name)
 {
-    if (name.empty() || name.size() > 64 || name.front() == '.')
+    if (name.empty() || name.size() > MaxClientNameLength || name.front() == '.')
     {
         return false;
     }
@@ -131,12 +141,11 @@ std::string InstallFolderName(const std::filesystem::path& clientFolder)
         full.pop_back();
     }
 
-    // FNV-1a over the path's UTF-8 bytes; scripts/wayland-diag.sh computes the same.
-    std::uint64_t hash = 14695981039346656037ULL;
+    std::uint64_t hash = FnvOffsetBasis;
     for (const char8_t byte : full)
     {
         hash ^= static_cast<std::uint8_t>(byte);
-        hash *= 1099511628211ULL;
+        hash *= FnvPrime;
     }
 
     std::string name;
@@ -146,17 +155,17 @@ std::string InstallFolderName(const std::filesystem::path& clientFolder)
         name += std::isalnum(byte) || byte == ' ' || byte == '-' || byte == '_' || byte == '.' ? static_cast<char>(byte)
                                                                                                : '_';
     }
-    if (name.size() > 32)
+    if (name.size() > MaxInstallNameLength)
     {
-        name.resize(32);
+        name.resize(MaxInstallNameLength);
     }
     if (name.empty() || name.front() == '.')
     {
         name = "MuMain";
     }
 
-    char suffix[10];
-    std::snprintf(suffix, sizeof suffix, "-%08x", static_cast<unsigned>(hash & 0xFFFFFFFFULL));
+    char suffix[HashSuffixSize];
+    std::snprintf(suffix, sizeof suffix, HashSuffixFormat, static_cast<unsigned>(hash & 0xFFFFFFFFULL));
     return name + suffix;
 }
 
