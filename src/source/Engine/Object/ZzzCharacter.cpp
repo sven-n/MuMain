@@ -302,7 +302,7 @@ void PlayMonsterSound(CHARACTER* c)
     GameLogic::Monsters::SoundEvents::Play(*c);
 }
 
-void SetPlayerStop(CHARACTER* c)
+void SetPlayerStop(CHARACTER* c, bool playSounds)
 {
     c->Run = 0;
 
@@ -495,6 +495,10 @@ void SetPlayerStop(CHARACTER* c)
     // A walk that just ended may leave a standing turn; it starts from this stance.
     c->TurnStance = o->CurrentAction;
 
+    if (!playSounds)
+    {
+        return;
+    }
     // Every character whose monster names a set, also a player-shaped one;
     // players have none.
     PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Stand);
@@ -507,7 +511,7 @@ void SetPlayerStop(CHARACTER* c)
     }
 }
 
-void SetPlayerWalk(CHARACTER* c)
+void SetPlayerWalk(CHARACTER* c, bool playSounds)
 {
     if (c->SafeZone)
     {
@@ -813,6 +817,10 @@ void SetPlayerWalk(CHARACTER* c)
     else
     {
         SetAction(&c->Object, MONSTER01_WALK);
+    }
+    if (!playSounds)
+    {
+        return;
     }
     PlayMonsterSound(c);
     if (o->Type == MODEL_BALROG)

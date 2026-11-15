@@ -140,8 +140,10 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
 
 void SetAttackSpeed();
 void SetPlayerShock(CHARACTER* c, int Hit);
-void SetPlayerStop(CHARACTER* c);
-void SetPlayerWalk(CHARACTER* c);
+// The standing and the walking action for the character's class, mount and weapons. Without `playSounds`, silently:
+// a standing turn's steps (FinishPendingTurn) aren't a walk of their own, so they play no walk or stand sounds.
+void SetPlayerStop(CHARACTER* c, bool playSounds = true);
+void SetPlayerWalk(CHARACTER* c, bool playSounds = true);
 
 void SetPlayerAttack(CHARACTER* c);
 void SetPlayerDie(CHARACTER* c);

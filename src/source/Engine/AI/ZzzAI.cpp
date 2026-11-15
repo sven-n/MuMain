@@ -506,7 +506,7 @@ void StartStandingTurn(CHARACTER* c, float angle)
     // turn's stance).
     if (c->TurnPending && c->TurnAction != -1 && c->Object.CurrentAction == c->TurnAction)
     {
-        SetPlayerStop(c);
+        SetPlayerStop(c, false);
     }
     c->TurnAction = -1;
     c->TurnLeftAt = c->Object.Angle[2];
@@ -532,7 +532,7 @@ void FinishPendingTurn(CHARACTER* c)
         }
         if (c->TurnAction != -1 && o->CurrentAction == c->TurnAction)
         {
-            SetPlayerStop(c);
+            SetPlayerStop(c, false);
         }
         c->TurnPending = false;
         c->TurnAction = -1;
@@ -555,10 +555,11 @@ void FinishPendingTurn(CHARACTER* c)
         }
         return;
     }
-    // The feet step around while the body turns, rather than the character spinning on the spot.
+    // The feet step around while the body turns, rather than the character spinning on the spot; silently, since the
+    // steps aren't a walk (the walk and stand moments of a monster's sound set would play again).
     if (!stepping)
     {
-        SetPlayerWalk(c);
+        SetPlayerWalk(c, false);
         c->TurnAction = o->CurrentAction;
     }
     TurnTowardsMoveHeading(c);
@@ -568,7 +569,7 @@ void FinishPendingTurn(CHARACTER* c)
     {
         c->TurnAction = -1;
         c->TurnArrived = true;
-        SetPlayerStop(c);
+        SetPlayerStop(c, false);
     }
 }
 
