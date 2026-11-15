@@ -8,6 +8,9 @@ namespace Engine::Characters
 // greetings on and puts this frame's back (each frame, everyone).
 void RemoveNod(CHARACTER* c);
 void UpdateNod(CHARACTER* c);
+// The same while the head doesn't move (off screen, stunned, asleep, under an Ourforces buff): only what is under way
+// plays out (a nod, an NPC's greeting, the cooldown); nobody starts a greeting or a nod back meanwhile.
+void UpdateNod(CHARACTER* c, bool headMoves);
 // Whether `c` stands on foot (a player's standing actions, not flying or riding; an NPC's or a monster's standing
 // ones): the only time it greets or nods.
 bool StandsOnFoot(const CHARACTER* c);

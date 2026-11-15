@@ -5593,7 +5593,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
     if (!headMoves)
     {
         Engine::Characters::RemoveNod(c);
-        Engine::Characters::UpdateNod(c);
+        Engine::Characters::UpdateNod(c, false);
     }
 
     if (o->Visible)

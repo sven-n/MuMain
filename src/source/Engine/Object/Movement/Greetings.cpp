@@ -219,6 +219,11 @@ void RemoveNod(CHARACTER* c)
 
 void UpdateNod(CHARACTER* c)
 {
+    UpdateNod(c, true);
+}
+
+void UpdateNod(CHARACTER* c, bool headMoves)
+{
     const float seconds = FrameSeconds();
     EndGreeting(c, seconds);
     c->Motion.NodCooldown = std::max(0.f, c->Motion.NodCooldown - seconds);
@@ -236,7 +241,15 @@ void UpdateNod(CHARACTER* c)
         BowFor(c, 0.f);
         return;
     }
-    if (c == Hero)
+    if (!headMoves)
+    {
+        // Frozen: it doesn't watch the hero or answer a nod; a nod back still pending is dropped.
+        if (c == Hero)
+        {
+            s_heroNodReplyIn = -1.f;
+        }
+    }
+    else if (c == Hero)
     {
         AnswerNod(c, seconds);
     }

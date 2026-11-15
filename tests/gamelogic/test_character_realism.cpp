@@ -1026,8 +1026,45 @@ TEST_CASE("A nod under way stops when the character starts walking, and its bow 
     CHECK_FALSE(NodsOrBows(npc, 2.f));
 }
 
+TEST_CASE("While its head is frozen a character starts no greeting, and a nod under way plays out [gamelogic][nod]")
+{
+    const EnhancedMovementSwitch option(true);
+    // A player next to the hero, looking at it, stunned (MoveCharacterVisual: the head doesn't move).
+    GreetScene scene(KIND_PLAYER, PLAYER_STOP_MALE);
+    CHARACTER& other = *scene.other;
+    for (int frame = 0; frame < 3 * FramesPerSecond; ++frame)
+    {
+        RemoveNod(&other);
+        UpdateNod(&other, false);
+    }
+    // Well past the time it takes to greet: no greeting, no nod, and its watch didn't count on.
+    CHECK_FALSE(other.Motion.NoddedAtHero);
+    CHECK(other.Object.CurrentAction == PLAYER_STOP_MALE);
+    CHECK(other.Motion.NodLeft == 0.f);
+    CHECK(other.Motion.WatchedHeroSeconds == 0.f);
+
+    // A nod that was under way when it froze plays to its end, and its bow comes off.
+    GreetScene nodding(KIND_NPC, MONSTER01_STOP1);
+    CHARACTER& npc = *nodding.other;
+    for (int frame = 0; frame < 2 * FramesPerSecond && npc.Motion.NodLeft <= 0.f; ++frame)
+    {
+        RemoveNod(&npc);
+        UpdateNod(&npc);
+    }
+    REQUIRE(npc.Motion.NodLeft > 0.f);
+    for (int frame = 0; frame < 2 * FramesPerSecond; ++frame)
+    {
+        RemoveNod(&npc);
+        UpdateNod(&npc, false);
+    }
+    CHECK(npc.Motion.NodLeft == 0.f);
+    CHECK(npc.Motion.NodApplied == 0.f);
+    CHECK(npc.Object.Angle[0] == doctest::Approx(0.f));
+}
+
 TEST_CASE("The hero nods back only while it stands on foot [gamelogic][nod]")
 {
+    const EnhancedMovementSwitch option(true);
     for (const bool walking : {false, true})
     {
         CAPTURE(walking);
