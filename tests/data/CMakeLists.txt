@@ -386,3 +386,8 @@ foreach(data_test IN ITEMS monster_data_tests test_item_database_files)
             FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}"
             SKIP_REGULAR_EXPRESSION "${MU_TEST_SKIPPED}")
 endforeach()
+
+# Every model file of the shipped data is one the model loader can read: a header-only file loads as nothing and logs
+# an error on every load of its map.
+add_test(NAME model_files_are_readable
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/check_model_files.py" "${CMAKE_SOURCE_DIR}/src/bin/Data")
