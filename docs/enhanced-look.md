@@ -378,7 +378,9 @@ render log says so: the profile as edited, without your values, so a change
 always shows. Nothing switches back to the Player preview on its own (not a
 save, a reset or a load); only `$look preview player` (or the window's **As
 players see it**) does.
-`$look show` names the preview, and a player's value `player`:
+While it is on, the Options window says so above its tuning sliders, whose
+values it leaves out. `$look show` names the preview, and a player's value
+`player`:
 
 | Command | Effect |
 |---|---|
@@ -406,7 +408,7 @@ just because they are look values:
 |---|---|---|
 | Quality | `sun.resolution`, `dynamic.shadowLights` | what the renderer may spend |
 | Preference | `bloom.strength`, `grading.strength`, `ao.strength`, `dynamic.effectGain`, `dynamic.effectFade`, `dynamic.shadowOpacity`, `sun.shadow`, `clouds.strength`, mood strength | how strong an effect looks to them: a bounded adjustment |
-| Art direction | `lighting.*`, `dynamic.wrap`, `dynamic.mapSmoothing`, `dynamic.effectRange`, `dynamic.effectRangeMax`, `dynamic.effectCap`, `bloom.levelFalloff`, `ao.radius`, `sun.softness`, `dynamic.flatSunShadow`, `clouds.scale`, `clouds.speed`, `clouds.cover`, `sky.fill` | the look itself; today's sliders stay, so existing settings keep working |
+| Art direction | `lighting.*`, `dynamic.wrap`, `dynamic.mapSmoothing`, `dynamic.effectRange`, `dynamic.effectRangeMax`, `dynamic.effectCap`, `bloom.levelFalloff`, `ao.radius`, `sun.softness`, `dynamic.flatSunShadow`, `clouds.scale`, `clouds.speed`, `clouds.cover`, `sky.fill` | the look itself; these sliders leave the Options window before D1 (step GL2.2 of the graphics look design), and their saved values are then ignored |
 
 A new value is a player control only as Quality or Preference. Art direction
 stays in `Data/Render/Look.json`, and diagnostics are developer commands.

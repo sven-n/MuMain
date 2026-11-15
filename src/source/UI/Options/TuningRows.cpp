@@ -261,4 +261,9 @@ std::string TuningSaveMessage(const Render::Look::TuningSession& session)
     return Text(I18N::Game::TuningSaveFailed) + " " + session.SaveError();
 }
 
+std::string TuningPreviewNote(Render::Look::LookPreview preview)
+{
+    return preview == Render::Look::LookPreview::Authoring ? Text(I18N::Game::TuningPreviewAuthoring) : std::string();
+}
+
 } // namespace UI::Options

@@ -370,6 +370,7 @@ namespace mu::ui::window
             Rml::String tuningResetAllLabel;
             // Shown while the last save failed; empty otherwise.
             Rml::String tuningSaveMessage;
+            Rml::String tuningPreviewNote;
             // [Render] Antialiasing (the Enhanced look's samples) and Anisotropy.
             std::vector<Rml::String> antialiasingLabels;
             int antialiasingIndex = 0;
