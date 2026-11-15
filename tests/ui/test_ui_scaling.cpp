@@ -926,6 +926,32 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
     }
 }
 
+TEST_CASE("a new player's config.ini starts with Enhanced Movement off [config][render][movement]")
+{
+    // The client copies the template into the player's folder on the first start.
+    std::ifstream ini(std::filesystem::path(MU_BIN_DIR) / "config.ini.template");
+    REQUIRE(ini.is_open());
+    std::string section;
+    std::string value;
+    for (std::string line; std::getline(ini, line);)
+    {
+        if (!line.empty() && line.back() == '\r')
+        {
+            line.pop_back();
+        }
+        if (!line.empty() && line.front() == '[')
+        {
+            section = line;
+        }
+        else if (section == "[Render]" && line.rfind("EnhancedMovement=", 0) == 0)
+        {
+            value = line.substr(std::string("EnhancedMovement=").size());
+        }
+    }
+    CHECK(value == "0");
+    CHECK_FALSE(CfgDefaults::CfgDefaultEnhancedMovement);
+}
+
 TEST_CASE(
     "anti-aliasing defaults to CfgDefaultAntialiasing and keeps only off, 2, 4 and 8 [config][render][antialiasing]")
 {
