@@ -175,6 +175,8 @@ constexpr float MountShakeDegrees = 14.f;
 constexpr float MountShakeCyclesPerSecond = 5.f;
 constexpr float MountShakeSeconds = 0.6f;
 constexpr float MountShakeGapSeconds[2] = {4.f, 9.f};
+// The first shake once it stands idle comes sooner: within this long (at random between the two).
+constexpr float MountFirstShakeSeconds[2] = {0.f, 1.5f};
 float s_mountIdleSeconds[MAX_MOUNTS] = {};
 float s_mountShakeElapsed[MAX_MOUNTS] = {};
 float s_mountNextShake[MAX_MOUNTS] = {};
@@ -202,7 +204,7 @@ float StepMountShake(const OBJECT* o, int slot)
     }
     if (idle < MountShakeIdleSeconds)
     {
-        next = Random::RangeFloat(0.f, 1.5f);
+        next = Random::RangeFloat(MountFirstShakeSeconds[0], MountFirstShakeSeconds[1]);
         return 0.f;
     }
     next -= seconds;

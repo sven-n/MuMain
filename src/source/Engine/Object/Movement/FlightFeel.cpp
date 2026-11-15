@@ -19,6 +19,9 @@ constexpr float FlightMaxBankDegrees = 8.f;
 constexpr float FlightHoverHeight = 30.f;
 constexpr float FlightHoverCyclesPerSecond = 0.15f;
 constexpr float FlightEaseSeconds = 0.25f;
+// Each character drifts on its own beat: its key moves its cycle on by this share, so flyers side by side don't rise
+// and fall together.
+constexpr float FlightHoverPhasePerKey = 0.37f;
 // The turning speed that banks fully: a walk's turns are short and rarely reach WalkTurnDegreesPerSecond.
 constexpr float FlightFullBankTurnSpeed = 300.f;
 // The bank pivots this high above the feet (about the waist), as a flying body banks about its middle.
@@ -37,7 +40,7 @@ bool IsRiding(const CHARACTER* c)
             c->Helper.Type == MODEL_DARK_HORSE_ITEM || c->Helper.Type == MODEL_HORN_OF_FENRIR);
 }
 
-bool IsFlying(const OBJECT* o)
+bool IsFlyingOrHovering(const OBJECT* o)
 {
     // Flying on, or hovering in place.
     return o->Type == MODEL_PLAYER &&
@@ -61,7 +64,7 @@ void UpdateFlightFeel(CHARACTER* c)
     OBJECT* o = &c->Object;
     // Off, the bank and the drift fade out as when landing.
     const bool enhancedMovement = EnhancedMovementEnabled();
-    const bool flying = enhancedMovement && IsFlying(o);
+    const bool flying = enhancedMovement && IsFlyingOrHovering(o);
     const bool riding = enhancedMovement && !flying && IsRiding(c);
     if (!flying && !riding && c->Motion.FlightBank == 0.f && c->Motion.FlightHover == 0.f &&
         c->Motion.FlightHoverApplied == 0.f && c->Motion.FlightPivotShift[0] == 0.f &&
@@ -115,7 +118,7 @@ void UpdateFlightFeel(CHARACTER* c)
     // Up and back down once a cycle, each character on its own beat (its key), easing in and out at the top and the
     // bottom (smootherstep, which lingers there longer than a sine), and only upward from its usual height, which near
     // the ground is just above it.
-    const float phase = static_cast<float>(c->Key) * 0.37f;
+    const float phase = static_cast<float>(c->Key) * FlightHoverPhasePerKey;
     const float cycle = static_cast<float>(WorldTime) * 0.001f * FlightHoverCyclesPerSecond + phase;
     const float rise = 1.f - std::fabs(2.f * (cycle - std::floor(cycle)) - 1.f); // 0 to 1 and back, linearly
     const float eased = rise * rise * rise * (rise * (rise * 6.f - 15.f) + 10.f);

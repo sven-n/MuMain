@@ -29,7 +29,7 @@ void UpdateSlopeLean(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
     const bool riding = IsRiding(c);
-    const bool walking = c->Movement && !IsFlying(o);
+    const bool walking = c->Movement && !IsFlyingOrHovering(o);
     float wanted = 0.f;
     // Off, a lean under way eases back upright.
     if (EnhancedMovementEnabled() && o->Type == MODEL_PLAYER && (riding || walking))

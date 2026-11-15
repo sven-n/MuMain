@@ -7,7 +7,7 @@ namespace Engine::Characters
 // Whether a player rides a mount now (outside the safe zones, where it's put away).
 bool IsRiding(const CHARACTER* c);
 // Whether a player flies on or hovers in place (the fly actions).
-bool IsFlying(const OBJECT* o);
+bool IsFlyingOrHovering(const OBJECT* o);
 
 // A flying winged player's bank into a turn and slow up-and-down drift, faded in and out (each frame, everyone).
 void UpdateFlightFeel(CHARACTER* c);

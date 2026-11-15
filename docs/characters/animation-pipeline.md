@@ -164,7 +164,7 @@ is `CHARACTER::Motion`.
 
 | File | What |
 | --- | --- |
-| `FlightFeel` | winged players flying or hovering bank into turns and drift up and down; riders and mounts lean (`MountLeanFromRider`); `IsFlying`, `IsRiding` |
+| `FlightFeel` | winged players flying or hovering bank into turns and drift up and down; riders and mounts lean (`MountLeanFromRider`); `IsFlyingOrHovering`, `IsRiding` |
 | `TurnLag` | the wings and the ponytail trail a turn on a spring |
 | `Wings` | the wings turn with the back and the lag (`PlaceWingsOnBack`, from `RenderLinkObject`) |
 | `SnapTurn` | a sudden turn of the facing drawn as a quick eased turn (`SnapTurnOffset`) |

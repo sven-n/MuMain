@@ -31,6 +31,8 @@ constexpr float IdleGlanceAfterSeconds = 4.f;
 constexpr float IdleGlanceDegrees[2] = {25.f, 55.f};
 constexpr float IdleGlanceHoldSeconds[2] = {1.f, 1.8f};
 constexpr float IdleGlanceGapSeconds[2] = {2.5f, 5.f};
+// The first glance after the mouse rests comes sooner: this long (at random between the two) after the rest above.
+constexpr float FirstIdleGlanceGapSeconds[2] = {0.5f, 1.5f};
 float s_glanceYaw = 0.f;
 float s_glanceLeftSeconds = 0.f;
 float s_nextGlanceSeconds = 0.f;
@@ -42,7 +44,7 @@ float UpdateIdleGlance(float seconds)
     {
         // The mouse moved: any glance ends at once, and the first after the next rest comes soon.
         s_glanceLeftSeconds = 0.f;
-        s_nextGlanceSeconds = Random::RangeFloat(0.5f, 1.5f);
+        s_nextGlanceSeconds = Random::RangeFloat(FirstIdleGlanceGapSeconds[0], FirstIdleGlanceGapSeconds[1]);
         return -1.f;
     }
     if (s_glanceLeftSeconds > 0.f)
