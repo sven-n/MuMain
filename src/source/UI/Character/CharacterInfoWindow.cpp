@@ -203,6 +203,7 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
 
 void mu::ui::window::CCharacterInfoWindow::SetStaticTexts(CharacterInfoRmlModel& model)
 {
+    m_StaticTextsLocale = I18N::GetCurrentLocale();
     model.strLabel = StringUtils::WideToNarrow(I18N::Game::STR);
     model.agiLabel = StringUtils::WideToNarrow(I18N::Game::AGI);
     model.vitLabel = StringUtils::WideToNarrow(I18N::Game::STA);
@@ -216,6 +217,20 @@ void mu::ui::window::CCharacterInfoWindow::SetStaticTexts(CharacterInfoRmlModel&
     model.questTooltip = StringUtils::WideToNarrow(strText);
     model.petTooltip = StringUtils::WideToNarrow(I18N::Game::Pet);
     model.masterLevelTooltip = StringUtils::WideToNarrow(I18N::Game::MasterSkillTreeA);
+}
+
+void mu::ui::window::CCharacterInfoWindow::SyncStaticTexts()
+{
+    if (m_StaticTextsLocale == I18N::GetCurrentLocale())
+    {
+        return;
+    }
+    SetStaticTexts(m_RmlView.GetModel());
+    for (const char* field : {"str_label", "agi_label", "vit_label", "ene_label", "cmd_label", "exit_tooltip",
+                              "quest_tooltip", "pet_tooltip", "masterlevel_tooltip"})
+    {
+        m_RmlView.MarkDirty(field);
+    }
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
@@ -426,6 +441,7 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     auto& model = m_RmlView.GetModel();
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+    SyncStaticTexts();
 
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::canLevelUp, "can_level_up", CharacterAttribute->LevelUpPoint > 0);
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::showCharisma, "show_charisma",
@@ -435,7 +451,6 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     BuildTableTexts();
     BuildAttributeLines();
     BuildCriticalHits();
-    BuildCommandHint();
     ShowLineHint();
 }
 
@@ -461,15 +476,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
     }
 }
 
-void mu::ui::window::CCharacterInfoWindow::BuildCommandHint()
+void mu::ui::window::CCharacterInfoWindow::BuildCommandHint(int command)
 {
-    if (gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
-    {
-        return;
-    }
-    const int command = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-    m_CommandHintTexts.Update(GameLogic::Character::GetCommandEffects(CharacterAttribute->Level, command),
-                              I18N::GetCurrentLocale());
+    m_CommandHintTexts.Update(GameLogic::Character::GetCommandEffects(CharacterAttribute->Level, command));
 }
 
 void mu::ui::window::CCharacterInfoWindow::ShowLineHint()
@@ -1599,5 +1608,6 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueText, "cmd_value_text",
                   StringUtils::WideToNarrow(strCharisma));
         SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueSource, "cmd_value_source", Rml::String(charismaSource));
+        BuildCommandHint(wCharisma);
     }
 }

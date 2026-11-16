@@ -1251,7 +1251,13 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>暗黑乌鸦攻击速度：+%d</value>
   </data>
-  <data name="Guild members as guild master: %d" xml:space="preserve">
-    <value>作为战盟盟主的成员上限：%d</value>
+  <data name="Dark Horse damage: +%d" xml:space="preserve">
+    <value>黑王马攻击力：+%d</value>
+  </data>
+  <data name="Dark Horse attack speed: +%d" xml:space="preserve">
+    <value>黑王马攻击速度：+%d</value>
+  </data>
+  <data name="Guild members as guild master: +%d" xml:space="preserve">
+    <value>作为战盟盟主的成员上限：+%d</value>
   </data>
 </root>

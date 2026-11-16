@@ -4,7 +4,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/Character/CommandHint.h"
+#include "UI/Character/CommandHintTexts.h"
 #include "UI/Character/CriticalHitTexts.h"
 #include "UI/Character/DamageHint.h"
 #include "UI/RmlBridge/RmlElementTooltip.h"
@@ -126,11 +126,11 @@ namespace mu::ui::window
         void BuildSubjectTexts();
         void BuildTableTexts();
         void BuildAttributeLines();
-        // The critical damage rate's line under the strength's lines, the damage line's colour while the hero's own
-        // Increase Critical Damage is on, and the hint of the line the pointer is over.
+        // The critical damage rate's line under the strength's lines and the damage line's colour while the hero's
+        // own Increase Critical Damage is on.
         void BuildCriticalHits();
-        // The hint of the command row, the Dark Lord's only.
-        void BuildCommandHint();
+        // The hint of the command row, the Dark Lord's only, from the command the row shows.
+        void BuildCommandHint(int command);
         // Shows the hint of the line the pointer is over.
         void ShowLineHint();
 
@@ -173,13 +173,15 @@ namespace mu::ui::window
 
             bool masterLevelEnabled = false;
 
-            // Set once at Create() -- static tooltip text, no per-frame update needed.
+            // Set when the model is bound and again after a language switch (SyncStaticTexts).
             Rml::String exitTooltip, questTooltip, petTooltip, masterLevelTooltip;
         };
 
         void BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model);
-        // The attribute labels and the buttons' tooltips, which don't change while the window is open.
+        // The attribute labels and the buttons' tooltips, which change only with the language.
         void SetStaticTexts(CharacterInfoRmlModel& model);
+        // Sets the static texts again when the language differs from the one they were set in.
+        void SyncStaticTexts();
         UI::RmlBridge::ThemedView<CharacterInfoRmlModel> m_RmlView{"character_info",
             [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/character_info.rml"}}};
@@ -195,5 +197,7 @@ namespace mu::ui::window
         UI::Character::CriticalHitTexts m_CriticalHitTexts;
         // What the Dark Lord's command adds, formatted again only when it changes.
         UI::Character::CommandHintTexts m_CommandHintTexts;
+        // The language the static texts were set in.
+        std::string m_StaticTextsLocale;
     };
 }

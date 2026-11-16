@@ -201,3 +201,11 @@ mu_add_test(
     SOURCES
         test_skill_hotkey_configuration.cpp
 )
+
+mu_add_test(
+    NAME test_command_effects
+    SOURCES
+        test_command_effects.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Character/CommandEffects.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Social/GuildSize.cpp
+)

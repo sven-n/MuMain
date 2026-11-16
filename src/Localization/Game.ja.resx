@@ -7741,7 +7741,13 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>ダークスピリットの攻撃速度: +%d</value>
   </data>
-  <data name="Guild members as guild master: %d" xml:space="preserve">
-    <value>ギルドマスター時のギルド人数: %d</value>
+  <data name="Dark Horse damage: +%d" xml:space="preserve">
+    <value>ダークホースの攻撃力: +%d</value>
+  </data>
+  <data name="Dark Horse attack speed: +%d" xml:space="preserve">
+    <value>ダークホースの攻撃速度: +%d</value>
+  </data>
+  <data name="Guild members as guild master: +%d" xml:space="preserve">
+    <value>ギルドマスター時のギルド人数: +%d</value>
   </data>
 </root>

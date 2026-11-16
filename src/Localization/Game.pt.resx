@@ -9115,7 +9115,13 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>Velocidade de ataque do {item:13,5}: +%d</value>
   </data>
-  <data name="Guild members as guild master: %d" xml:space="preserve">
-    <value>Membros da guilda como mestre: %d</value>
+  <data name="Dark Horse damage: +%d" xml:space="preserve">
+    <value>Dano do {item:13,4}: +%d</value>
+  </data>
+  <data name="Dark Horse attack speed: +%d" xml:space="preserve">
+    <value>Velocidade de ataque do {item:13,4}: +%d</value>
+  </data>
+  <data name="Guild members as guild master: +%d" xml:space="preserve">
+    <value>Membros da guilda como mestre: +%d</value>
   </data>
 </root>

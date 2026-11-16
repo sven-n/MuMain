@@ -1143,7 +1143,7 @@ way, since its value comes from that member's energy and command.
 
 A Dark Lord's command row in the character window has a hint too: with the
 pointer over the row, it lists what the command adds, each part rounded down.
-The attack rate and the Dark Raven follow the server's formulas (OpenMU's
+The attack rate and the pets follow the server's formulas (OpenMU's
 `ClassDarkLord`); the guild size follows the original client's rule:
 
 | Part | Adds |
@@ -1151,11 +1151,26 @@ The attack rate and the Dark Raven follow the server's formulas (OpenMU's
 | Attack rate (PvM) | 1 per 10 command |
 | Dark Raven damage | 1 per 8 command to the minimum, 1 per 4 to the maximum |
 | Dark Raven attack speed | 1 per 50 command |
-| Guild members as guild master | 1 per 10 levels plus 1 per 10 command, at most 80 |
+| Dark Horse damage | 1 per 10 command to the minimum; the maximum is half again the minimum |
+| Dark Horse attack speed | 1 per 50 command |
+| Guild members as guild master | 1 per 10 command on top of 1 per 10 levels, at most 80 together |
 
-The command counts with what items and buffs add to it, as on the server.
-The guild window shows the same member limit. It is the client's rule only:
-OpenMU does not check the guild size, so a server can allow more members.
+The command counts with what items and buffs add to it, as on the server. A
+part that adds nothing has no line, and without any part the row has no hint.
+The guild line shows only the members the command adds, so near the cap of 80
+it adds less, and at the cap nothing. The guild window shows the whole limit
+(`GameLogic::Social::GetMaxGuildMembers`: 1 per 10 levels for every class, plus
+the command's part for a Dark Lord). It is the client's rule only: OpenMU does
+not check the guild size, so a server can allow more members.
+
+The hint names the pets by their item names (`{item:13,5}`, `{item:13,4}`),
+so it follows "Translate item names" and the item editor's names. It leaves
+out what the command adds elsewhere: Increase Critical Damage's 1 per 25
+command shows in the damage line's hint while the buff is on, and the
+server's own parts (AG, SD, the Fenrir's damage) are not counted by the client.
+
+The breakdown is a hint rather than lines under the command row, as the other
+attributes have: the row is the window's last, with no room under it.
 
 ### Option rules
 

@@ -9104,7 +9104,7 @@
     <value>Kabuuan: +%d</value>
   </data>
   <data name="Attack rate (PvM): +%d" xml:space="preserve">
-    <value>Attack rate (PvM): +%d</value>
+    <value>Rate ng pag-atake (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
     <value>Damage ng Dark Raven: +%d~%d</value>
@@ -9112,7 +9112,13 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>Bilis ng atake ng Dark Raven: +%d</value>
   </data>
-  <data name="Guild members as guild master: %d" xml:space="preserve">
-    <value>Mga miyembro ng guild bilang guild master: %d</value>
+  <data name="Dark Horse damage: +%d" xml:space="preserve">
+    <value>Damage ng Dark Horse: +%d</value>
+  </data>
+  <data name="Dark Horse attack speed: +%d" xml:space="preserve">
+    <value>Bilis ng atake ng Dark Horse: +%d</value>
+  </data>
+  <data name="Guild members as guild master: +%d" xml:space="preserve">
+    <value>Mga miyembro ng guild bilang guild master: +%d</value>
   </data>
 </root>

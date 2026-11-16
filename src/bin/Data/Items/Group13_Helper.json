@@ -236,6 +236,14 @@
         "pl": "Mroczny Koń",
         "pt": "Cavalo negro"
       },
+      "nameForms": {
+        "de": {
+          "gen": "Dunklen Pferdes"
+        },
+        "pl": {
+          "gen": "Mrocznego Konia"
+        }
+      },
       "tags": ["mount", "flying", "darkLordPet", "valuable"],
       "description": [
         {

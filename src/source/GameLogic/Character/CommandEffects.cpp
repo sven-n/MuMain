@@ -1,6 +1,6 @@
 #include "GameLogic/Character/CommandEffects.h"
 
-#include <algorithm>
+#include "GameLogic/Social/GuildSize.h"
 
 namespace GameLogic::Character
 {
@@ -24,9 +24,20 @@ int GetCommandRavenAttackSpeed(int command)
     return command / CommandPerRavenAttackSpeed;
 }
 
-int GetDarkLordGuildMembers(int level, int command)
+int GetCommandHorseDamage(int command)
 {
-    return std::min(level / LevelPerGuildMember + command / CommandPerGuildMember, MaxDarkLordGuildMembers);
+    return command / CommandPerHorseDamage;
+}
+
+int GetCommandHorseAttackSpeed(int command)
+{
+    return command / CommandPerHorseAttackSpeed;
+}
+
+int GetCommandGuildMembers(int level, int command)
+{
+    constexpr bool DarkLord = true;
+    return Social::GetMaxGuildMembers(DarkLord, level, command) - Social::GetMaxGuildMembers(DarkLord, level, 0);
 }
 
 CommandEffects GetCommandEffects(int level, int command)
@@ -36,7 +47,9 @@ CommandEffects GetCommandEffects(int level, int command)
     effects.ravenMinimumDamage = GetCommandRavenMinimumDamage(command);
     effects.ravenMaximumDamage = GetCommandRavenMaximumDamage(command);
     effects.ravenAttackSpeed = GetCommandRavenAttackSpeed(command);
-    effects.guildMembers = GetDarkLordGuildMembers(level, command);
+    effects.horseDamage = GetCommandHorseDamage(command);
+    effects.horseAttackSpeed = GetCommandHorseAttackSpeed(command);
+    effects.guildMembers = GetCommandGuildMembers(level, command);
     return effects;
 }
 } // namespace GameLogic::Character

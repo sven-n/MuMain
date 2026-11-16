@@ -9112,7 +9112,13 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>Швидкість атаки Темного ворона: +%d</value>
   </data>
-  <data name="Guild members as guild master: %d" xml:space="preserve">
-    <value>Членів гільдії у глави гільдії: %d</value>
+  <data name="Dark Horse damage: +%d" xml:space="preserve">
+    <value>Шкода Темного коня: +%d</value>
+  </data>
+  <data name="Dark Horse attack speed: +%d" xml:space="preserve">
+    <value>Швидкість атаки Темного коня: +%d</value>
+  </data>
+  <data name="Guild members as guild master: +%d" xml:space="preserve">
+    <value>Членів гільдії у глави гільдії: +%d</value>
   </data>
 </root>

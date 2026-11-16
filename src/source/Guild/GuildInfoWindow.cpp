@@ -13,7 +13,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "GameLogic/Character/CommandEffects.h"
+#include "GameLogic/Social/GuildSize.h"
 #include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- CGuildBreakPasswordMsgBoxLayout's own maxLength
 #include "I18N/All.h"
 
@@ -570,17 +570,11 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
             score = line(Text, false, 80.f);
             if (Hero->GuildStatus == G_MASTER)
             {
-                const int Class = gCharacterManager.GetBaseClass(CharacterAttribute->Class);
-                if (Class == CLASS_DARK_LORD)
-                {
-                    const int nCount = GameLogic::Character::GetDarkLordGuildMembers(
-                        CharacterAttribute->Level, CharacterAttribute->Charisma + CharacterAttribute->AddCharisma);
-                    mu_swprintf(Text, I18N::Game::GuildMembersDD, g_nGuildMemberCount, nCount);
-                }
-                else
-                {
-                    mu_swprintf(Text, I18N::Game::GuildMembersDD, g_nGuildMemberCount, CharacterAttribute->Level / 10);
-                }
+                const bool darkLord = gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK_LORD;
+                const int maxMembers = GameLogic::Social::GetMaxGuildMembers(darkLord, CharacterAttribute->Level,
+                                                                             CharacterAttribute->Charisma +
+                                                                                 CharacterAttribute->AddCharisma);
+                mu_swprintf(Text, I18N::Game::GuildMembersDD, g_nGuildMemberCount, maxMembers);
             }
             else
             {

@@ -9112,7 +9112,13 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>Kecepatan serangan gagak gelap: +%d</value>
   </data>
-  <data name="Guild members as guild master: %d" xml:space="preserve">
-    <value>Anggota guild sebagai master guild: %d</value>
+  <data name="Dark Horse damage: +%d" xml:space="preserve">
+    <value>Kerusakan kuda hitam: +%d</value>
+  </data>
+  <data name="Dark Horse attack speed: +%d" xml:space="preserve">
+    <value>Kecepatan serangan kuda hitam: +%d</value>
+  </data>
+  <data name="Guild members as guild master: +%d" xml:space="preserve">
+    <value>Anggota guild sebagai master guild: +%d</value>
   </data>
 </root>
