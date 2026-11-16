@@ -134,6 +134,10 @@ void GameConfig::Load()
     m_antialiasing = GameConfigValidation::ValidateAntialiasing(
         ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
     m_edgeSmoothing = ReadBool(CfgSectionRender, CfgKeyEdgeSmoothing, CfgDefaultEdgeSmoothing);
+    m_renderScale = GameConfigValidation::ValidateRenderScale(
+        ReadInt(CfgSectionRender, CfgKeyRenderScale, CfgDefaultRenderScale));
+    m_sharpness =
+        GameConfigValidation::ValidateSharpness(ReadInt(CfgSectionRender, CfgKeySharpness, CfgDefaultSharpness));
     m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
     m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
     m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
@@ -205,6 +209,8 @@ void GameConfig::Save()
     WriteInt(CfgSectionRender, CfgKeyAnisotropy, m_anisotropy);
     WriteInt(CfgSectionRender, CfgKeyAntialiasing, m_antialiasing);
     WriteBool(CfgSectionRender, CfgKeyEdgeSmoothing, m_edgeSmoothing);
+    WriteInt(CfgSectionRender, CfgKeyRenderScale, m_renderScale);
+    WriteInt(CfgSectionRender, CfgKeySharpness, m_sharpness);
     WriteBool(CfgSectionRender, CfgKeyEnhancedLighting, m_enhancedLighting);
     WriteBool(CfgSectionRender, CfgKeyDynamicLights, m_dynamicLights);
     WriteBool(CfgSectionRender, CfgKeySunlight, m_sunlight);
@@ -307,6 +313,16 @@ void GameConfig::SetAnisotropy(int anisotropy)
 void GameConfig::SetAntialiasing(int samples)
 {
     m_antialiasing = GameConfigValidation::ValidateAntialiasing(samples);
+}
+
+void GameConfig::SetRenderScale(int percent)
+{
+    m_renderScale = GameConfigValidation::ValidateRenderScale(percent);
+}
+
+void GameConfig::SetSharpness(int percent)
+{
+    m_sharpness = GameConfigValidation::ValidateSharpness(percent);
 }
 
 void GameConfig::SetDisableEffects(bool disabled)

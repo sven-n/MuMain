@@ -99,6 +99,10 @@ extern void MuSetAntialiasingPreference(int samples);
 extern void MuSetAntialiasingActive(bool active);
 // Persists [Render] EdgeSmoothing; applied from the next frame while the Enhanced look is active.
 extern void MuSetEdgeSmoothingPreference(bool enabled);
+// Persist [Render] RenderScale (50 to 100) and Sharpness (0 to 100); applied from the next frame while
+// the Enhanced look is active.
+extern void MuSetRenderScalePreference(int percent);
+extern void MuSetSharpnessPreference(int percent);
 
 // Confines the mouse cursor to the window's client area when in fullscreen
 // and the window is active; releases clipping otherwise. Safe to call any

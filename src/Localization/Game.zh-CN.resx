@@ -460,6 +460,18 @@
   <data name="Edge Smoothing Tooltip" xml:space="preserve">
     <value>同时平滑抗锯齿无法处理的部分：高光、轮廓光和细小纹理的闪烁。仅限增强画面模式；画面会略微变软</value>
   </data>
+  <data name="Render Scale" xml:space="preserve">
+    <value>渲染比例</value>
+  </data>
+  <data name="Render Scale Tooltip" xml:space="preserve">
+    <value>以窗口尺寸的一定比例绘制 3D 世界并放大（FSR 1），以提高帧率；界面保持清晰。仅限增强画面模式</value>
+  </data>
+  <data name="Sharpness" xml:space="preserve">
+    <value>锐化</value>
+  </data>
+  <data name="Sharpness Tooltip" xml:space="preserve">
+    <value>锐化 3D 世界（FSR 1），在渲染比例低于 100% 时最有用。仅限增强画面模式</value>
+  </data>
   <data name="Anisotropic filtering" xml:space="preserve">
     <value>各向异性过滤</value>
   </data>

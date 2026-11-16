@@ -363,6 +363,34 @@
 						<span class="opt-row-tip">{{edge_smoothing_tooltip}}</span>
 					</div>
 					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{render_scale_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 9" data-event-click="option_toggle_dropdown(9)">{{render_scale_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 9">
+									<div class="option-dropdown-option" data-for="label : render_scale_labels"
+									     data-class-selected="it_index == render_scale_index"
+									     data-event-click="option_dropdown_option_click(9, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{render_scale_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{sharpness_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 10" data-event-click="option_toggle_dropdown(10)">{{sharpness_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 10">
+									<div class="option-dropdown-option" data-for="label : sharpness_labels"
+									     data-class-selected="it_index == sharpness_index"
+									     data-event-click="option_dropdown_option_click(10, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{sharpness_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-row-tipped">
 						<span class="opt-label">{{anisotropy_row_label}}</span>
 						<div class="opt-control">
 							<div class="option-dropdown">
