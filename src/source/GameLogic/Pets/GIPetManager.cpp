@@ -574,8 +574,8 @@ static std::uint8_t g_tabBar = 0;
 
         case PET_TYPE_DARK_HORSE:
             pPetInfo->m_dwExp2 = ((10 + Level) * Level * Level * Level * 100);
-            pPetInfo->m_wDamageMin =
-                (Strength / 10) + GameLogic::Character::GetCommandHorseDamage(Charisma) + (pPetInfo->m_wLevel * 5);
+            pPetInfo->m_wDamageMin = (Strength / 10) + GameLogic::Character::GetCommandHorseMinimumDamage(Charisma) +
+                                     (pPetInfo->m_wLevel * 5);
             pPetInfo->m_wDamageMax = pPetInfo->m_wDamageMin + (pPetInfo->m_wDamageMin / 2);
             pPetInfo->m_wAttackSpeed =
                 (20 + (pPetInfo->m_wLevel * 4 / 5) + GameLogic::Character::GetCommandHorseAttackSpeed(Charisma));

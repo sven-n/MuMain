@@ -173,15 +173,17 @@ namespace mu::ui::window
 
             bool masterLevelEnabled = false;
 
-            // Set when the model is bound and again after a language switch (SyncStaticTexts).
+            // Set when the model is bound and again after a language switch (SyncChangedTexts).
             Rml::String exitTooltip, questTooltip, petTooltip, masterLevelTooltip;
         };
 
         void BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model);
         // The attribute labels and the buttons' tooltips, which change only with the language.
         void SetStaticTexts(CharacterInfoRmlModel& model);
-        // Sets the static texts again when the language differs from the one they were set in.
-        void SyncStaticTexts();
+        // After a language switch or a refresh of the item texts (OnTextsChanged): sets the static texts again and
+        // has the command hint formatted again. The critical hit texts compare the language themselves.
+        void SyncChangedTexts();
+        static void OnTextsChanged(void* context) noexcept;
         UI::RmlBridge::ThemedView<CharacterInfoRmlModel> m_RmlView{"character_info",
             [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/character_info.rml"}}};
@@ -197,7 +199,7 @@ namespace mu::ui::window
         UI::Character::CriticalHitTexts m_CriticalHitTexts;
         // What the Dark Lord's command adds, formatted again only when it changes.
         UI::Character::CommandHintTexts m_CommandHintTexts;
-        // The language the static texts were set in.
-        std::string m_StaticTextsLocale;
+        // A language switch or a refresh of the item texts since the last sync.
+        bool m_TextsChanged = false;
     };
 }

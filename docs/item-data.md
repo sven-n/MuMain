@@ -1143,31 +1143,38 @@ way, since its value comes from that member's energy and command.
 
 A Dark Lord's command row in the character window has a hint too: with the
 pointer over the row, it lists what the command adds, each part rounded down.
-The attack rate and the pets follow the server's formulas (OpenMU's
-`ClassDarkLord`); the guild size follows the original client's rule:
+The attack rate and the Dark Raven follow the server's formulas (OpenMU's
+`ClassDarkLord`). The Dark Horse and the guild size follow the original
+client's rules, which its pet and guild windows show:
 
-| Part | Adds |
-|---|---|
-| Attack rate (PvM) | 1 per 10 command |
-| Dark Raven damage | 1 per 8 command to the minimum, 1 per 4 to the maximum |
-| Dark Raven attack speed | 1 per 50 command |
-| Dark Horse damage | 1 per 10 command to the minimum; the maximum is half again the minimum |
-| Dark Horse attack speed | 1 per 50 command |
-| Guild members as guild master | 1 per 10 command on top of 1 per 10 levels, at most 80 together |
+| Part | Adds | Rule |
+|---|---|---|
+| Attack rate (PvM) | 1 per 10 command | server |
+| Dark Raven damage | 1 per 8 command to the minimum, 1 per 4 to the maximum | server |
+| Dark Raven attack speed | 1 per 50 command | server |
+| Dark Horse damage | 1 per 10 command to the minimum, half again that to the maximum | client |
+| Dark Horse attack speed | 1 per 50 command | client |
+| Guild members as guild master | 1 per 10 command on top of 1 per 10 levels, at most 80 together | client |
 
 The command counts with what items and buffs add to it, as on the server. A
 part that adds nothing has no line, and without any part the row has no hint.
 The guild line shows only the members the command adds, so near the cap of 80
-it adds less, and at the cap nothing. The guild window shows the whole limit
-(`GameLogic::Social::GetMaxGuildMembers`: 1 per 10 levels for every class, plus
-the command's part for a Dark Lord). It is the client's rule only: OpenMU does
-not check the guild size, so a server can allow more members.
+it adds less, and at the cap nothing. The guild window shows the whole limit:
+1 per 10 levels for every class, plus the command's part for a Dark Lord.
+
+The client's rules are not the server's. OpenMU does not check the guild size,
+so a server can allow more members. It has no Dark Horse damage or attack
+speed either: the command reaches the horse through the Earthshake skill, whose
+damage bonus counts 1 per 5 command.
 
 The hint names the pets by their item names (`{item:13,5}`, `{item:13,4}`),
-so it follows "Translate item names" and the item editor's names. It leaves
-out what the command adds elsewhere: Increase Critical Damage's 1 per 25
-command shows in the damage line's hint while the buff is on, and the
-server's own parts (AG, SD, the Fenrir's damage) are not counted by the client.
+so it follows the language, "Translate item names" and the item editor's
+names. It shows the command's part only, so the pet window can show more: it
+also adds the right-hand weapon's pet damage percentage (a scepter's) to the
+Dark Raven's damage. The hint leaves out what the command adds elsewhere:
+Increase Critical Damage's 1 per 25 command shows in the damage line's hint
+while the buff is on, and the server's own parts (AG, SD, the Fenrir's damage)
+are not counted by the client.
 
 The breakdown is a hint rather than lines under the command row, as the other
 attributes have: the row is the window's last, with no room under it.

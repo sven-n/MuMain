@@ -68,7 +68,7 @@ TEST_CASE("The command row's hint lists what the Dark Lord's command adds [data]
 
     const std::vector<UI::RmlBridge::Tooltip::Line> hint = UI::Character::BuildCommandHint(GetCommandEffects(250, 300));
     CHECK(Texts(hint) == std::vector<std::string>{"Command", "Attack rate (PvM): +30", "Dark Raven damage: +37~75",
-                                                  "Dark Raven attack speed: +6", "Dark Horse damage: +30",
+                                                  "Dark Raven attack speed: +6", "Dark Horse damage: +30~45",
                                                   "Dark Horse attack speed: +6", "Guild members as guild master: +30"});
     CHECK(hint.front().bold);
     CHECK(hint.front().color == UI::RmlBridge::Tooltip::LineColor::Yellow);
@@ -77,7 +77,7 @@ TEST_CASE("The command row's hint lists what the Dark Lord's command adds [data]
     I18N::SetLocale("de");
     const std::vector<std::string> german = Texts(UI::Character::BuildCommandHint(GetCommandEffects(250, 300)));
     CHECK(german[2] == "Schaden des Dunklen Raben: +37~75");
-    CHECK(german[4] == "Schaden des Dunklen Pferdes: +30");
+    CHECK(german[4] == "Schaden des Dunklen Pferdes: +30~45");
 }
 
 // A part that adds nothing has no line, like the damage and critical damage rate hints; without any part the row has
@@ -90,13 +90,13 @@ TEST_CASE("The command row's hint leaves out what the command does not add [data
     // Under 50 command the pets' attack speed gets nothing; at the cap of 80 members the command adds none.
     CHECK(Texts(UI::Character::BuildCommandHint(GetCommandEffects(800, 49))) ==
           std::vector<std::string>{"Command", "Attack rate (PvM): +4", "Dark Raven damage: +6~12",
-                                   "Dark Horse damage: +4"});
+                                   "Dark Horse damage: +4~6"});
     CHECK(UI::Character::BuildCommandHint(GetCommandEffects(400, 0)).empty());
     CHECK(UI::Character::BuildCommandHint(GetCommandEffects(400, 3)).empty());
 }
 
-// The hint is formatted again only when what it shows changes: the command's effects, the language, or the pets'
-// names ("Translate item names", the item editor's names and grammatical forms).
+// The hint is formatted again only when the command's effects change, or when the window invalidates it after a
+// language switch or a refresh of the item texts (the pets' names: "Translate item names", the item editor).
 TEST_CASE("The command hint is built again only when what it shows changes [data][items]")
 {
     CommandHintScope scope;
@@ -110,11 +110,14 @@ TEST_CASE("The command hint is built again only when what it shows changes [data
     CHECK_FALSE(texts.Update(GetCommandEffects(250, 310)));
 
     I18N::SetLocale("es");
+    CHECK_FALSE(texts.Update(GetCommandEffects(250, 310)));
+    texts.Invalidate();
     CHECK(texts.Update(GetCommandEffects(250, 310)));
     CHECK(Texts(texts.Lines())[2] == "Daño del Cuervo Oscuro: +38~77");
     CHECK_FALSE(texts.Update(GetCommandEffects(250, 310)));
 
     g_ItemDataHandler.SetTranslateItemNames(false);
+    texts.Invalidate();
     CHECK(texts.Update(GetCommandEffects(250, 310)));
     CHECK(Texts(texts.Lines())[2] == "Daño del Dark Raven: +38~77");
     CHECK_FALSE(texts.Update(GetCommandEffects(250, 310)));

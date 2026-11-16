@@ -570,10 +570,9 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
             score = line(Text, false, 80.f);
             if (Hero->GuildStatus == G_MASTER)
             {
-                const bool darkLord = gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK_LORD;
-                const int maxMembers = GameLogic::Social::GetMaxGuildMembers(darkLord, CharacterAttribute->Level,
-                                                                             CharacterAttribute->Charisma +
-                                                                                 CharacterAttribute->AddCharisma);
+                const int maxMembers = GameLogic::Social::GetMaxGuildMembers(
+                    gCharacterManager.GetBaseClass(CharacterAttribute->Class), CharacterAttribute->Level,
+                    CharacterAttribute->Charisma + CharacterAttribute->AddCharisma);
                 mu_swprintf(Text, I18N::Game::GuildMembersDD, g_nGuildMemberCount, maxMembers);
             }
             else

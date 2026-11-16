@@ -8,21 +8,20 @@
 
 namespace UI::Character
 {
-// The command row's hint (CommandHint.h), formatted again only when what it shows changes: the command's effects,
-// the language, or a text it shows. Its texts name the pets by their item names ({item:13,5}), which change with
-// "Translate item names", the item editor and a reload of the data, so it follows the item texts' refresh as well as
-// the language. Main thread only, like the observers it registers.
+// The command row's hint (CommandHint.h), formatted again only when what it shows changes: the command's effects, or
+// a text it shows. Its texts name the pets by their item names ({item:13,5}), which change with the language,
+// "Translate item names", the item editor and a reload of the data; the window that shows it calls Invalidate then.
 class CommandHintTexts
 {
 public:
-    CommandHintTexts();
-    ~CommandHintTexts();
-    CommandHintTexts(const CommandHintTexts&) = delete;
-    CommandHintTexts& operator=(const CommandHintTexts&) = delete;
-
-    // Formats the hint again when `effects` differ from what it was built from or a text it shows changed; returns
+    // Formats the hint again when `effects` differ from what it was built from or the texts were invalidated; returns
     // whether it did.
     bool Update(const GameLogic::Character::CommandEffects& effects);
+    // A text the hint shows changed: the next Update formats it again.
+    void Invalidate()
+    {
+        m_BuiltEffects.reset();
+    }
 
     const std::vector<UI::RmlBridge::Tooltip::Line>& Lines() const
     {
@@ -30,10 +29,7 @@ public:
     }
 
 private:
-    static void OnTextsChanged(void* context) noexcept;
-
     std::optional<GameLogic::Character::CommandEffects> m_BuiltEffects;
-    bool m_TextsChanged = false;
     std::vector<UI::RmlBridge::Tooltip::Line> m_Lines;
 };
 } // namespace UI::Character

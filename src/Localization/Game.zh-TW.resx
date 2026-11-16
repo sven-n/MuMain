@@ -9112,8 +9112,8 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>暗鴉攻擊速度: +%d</value>
   </data>
-  <data name="Dark Horse damage: +%d" xml:space="preserve">
-    <value>黑王馬攻擊力: +%d</value>
+  <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
+    <value>黑王馬攻擊力: +%d~%d</value>
   </data>
   <data name="Dark Horse attack speed: +%d" xml:space="preserve">
     <value>黑王馬攻擊速度: +%d</value>

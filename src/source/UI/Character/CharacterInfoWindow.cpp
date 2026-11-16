@@ -16,6 +16,7 @@
 #include "UI/Core/UIManager.h"
 #include "Network/Server/ServerListManager.h"
 #include "I18N/All.h"
+#include "Data/Translation/ItemTextExpansion.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
@@ -93,11 +94,20 @@ namespace
 mu::ui::window::CCharacterInfoWindow::CCharacterInfoWindow()
 {
     m_pNewUIMng = NULL;
+    I18N::RegisterLocaleObserver(&CCharacterInfoWindow::OnTextsChanged, this);
+    Data::Translation::ItemTexts::RegisterTextsChangedObserver(&CCharacterInfoWindow::OnTextsChanged, this);
 }
 
 mu::ui::window::CCharacterInfoWindow::~CCharacterInfoWindow()
 {
+    I18N::UnregisterLocaleObserver(&CCharacterInfoWindow::OnTextsChanged, this);
+    Data::Translation::ItemTexts::UnregisterTextsChangedObserver(&CCharacterInfoWindow::OnTextsChanged, this);
     Release();
+}
+
+void mu::ui::window::CCharacterInfoWindow::OnTextsChanged(void* context) noexcept
+{
+    static_cast<CCharacterInfoWindow*>(context)->m_TextsChanged = true;
 }
 
 bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng)
@@ -203,7 +213,6 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
 
 void mu::ui::window::CCharacterInfoWindow::SetStaticTexts(CharacterInfoRmlModel& model)
 {
-    m_StaticTextsLocale = I18N::GetCurrentLocale();
     model.strLabel = StringUtils::WideToNarrow(I18N::Game::STR);
     model.agiLabel = StringUtils::WideToNarrow(I18N::Game::AGI);
     model.vitLabel = StringUtils::WideToNarrow(I18N::Game::STA);
@@ -219,12 +228,14 @@ void mu::ui::window::CCharacterInfoWindow::SetStaticTexts(CharacterInfoRmlModel&
     model.masterLevelTooltip = StringUtils::WideToNarrow(I18N::Game::MasterSkillTreeA);
 }
 
-void mu::ui::window::CCharacterInfoWindow::SyncStaticTexts()
+void mu::ui::window::CCharacterInfoWindow::SyncChangedTexts()
 {
-    if (m_StaticTextsLocale == I18N::GetCurrentLocale())
+    if (!m_TextsChanged)
     {
         return;
     }
+    m_TextsChanged = false;
+    m_CommandHintTexts.Invalidate();
     SetStaticTexts(m_RmlView.GetModel());
     for (const char* field : {"str_label", "agi_label", "vit_label", "ene_label", "cmd_label", "exit_tooltip",
                               "quest_tooltip", "pet_tooltip", "masterlevel_tooltip"})
@@ -441,7 +452,7 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     auto& model = m_RmlView.GetModel();
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
-    SyncStaticTexts();
+    SyncChangedTexts();
 
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::canLevelUp, "can_level_up", CharacterAttribute->LevelUpPoint > 0);
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::showCharisma, "show_charisma",

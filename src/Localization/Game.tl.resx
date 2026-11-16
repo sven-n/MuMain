@@ -9112,8 +9112,8 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>Bilis ng atake ng Dark Raven: +%d</value>
   </data>
-  <data name="Dark Horse damage: +%d" xml:space="preserve">
-    <value>Damage ng Dark Horse: +%d</value>
+  <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
+    <value>Damage ng Dark Horse: +%d~%d</value>
   </data>
   <data name="Dark Horse attack speed: +%d" xml:space="preserve">
     <value>Bilis ng atake ng Dark Horse: +%d</value>

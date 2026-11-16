@@ -9112,8 +9112,8 @@
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>Скорость атаки Тёмного ворона: +%d</value>
   </data>
-  <data name="Dark Horse damage: +%d" xml:space="preserve">
-    <value>Урон Тёмного коня: +%d</value>
+  <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
+    <value>Урон Тёмного коня: +%d~%d</value>
   </data>
   <data name="Dark Horse attack speed: +%d" xml:space="preserve">
     <value>Скорость атаки Тёмного коня: +%d</value>

@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 #include "GameLogic/Character/CommandEffects.h"
 
 #include "GameLogic/Social/GuildSize.h"
@@ -24,9 +26,15 @@ int GetCommandRavenAttackSpeed(int command)
     return command / CommandPerRavenAttackSpeed;
 }
 
-int GetCommandHorseDamage(int command)
+int GetCommandHorseMinimumDamage(int command)
 {
     return command / CommandPerHorseDamage;
+}
+
+int GetCommandHorseMaximumDamage(int command)
+{
+    const int minimum = GetCommandHorseMinimumDamage(command);
+    return minimum + minimum / 2;
 }
 
 int GetCommandHorseAttackSpeed(int command)
@@ -36,8 +44,8 @@ int GetCommandHorseAttackSpeed(int command)
 
 int GetCommandGuildMembers(int level, int command)
 {
-    constexpr bool DarkLord = true;
-    return Social::GetMaxGuildMembers(DarkLord, level, command) - Social::GetMaxGuildMembers(DarkLord, level, 0);
+    return Social::GetMaxGuildMembers(CLASS_DARK_LORD, level, command) -
+           Social::GetMaxGuildMembers(CLASS_DARK_LORD, level, 0);
 }
 
 CommandEffects GetCommandEffects(int level, int command)
@@ -47,7 +55,8 @@ CommandEffects GetCommandEffects(int level, int command)
     effects.ravenMinimumDamage = GetCommandRavenMinimumDamage(command);
     effects.ravenMaximumDamage = GetCommandRavenMaximumDamage(command);
     effects.ravenAttackSpeed = GetCommandRavenAttackSpeed(command);
-    effects.horseDamage = GetCommandHorseDamage(command);
+    effects.horseMinimumDamage = GetCommandHorseMinimumDamage(command);
+    effects.horseMaximumDamage = GetCommandHorseMaximumDamage(command);
     effects.horseAttackSpeed = GetCommandHorseAttackSpeed(command);
     effects.guildMembers = GetCommandGuildMembers(level, command);
     return effects;
