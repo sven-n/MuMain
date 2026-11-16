@@ -35,6 +35,7 @@ set(shader_specs
     "post_composite.frag|cb0,space3+s0,space2+s1,space2+s2,space2+s3,space2+s4,space2+t0,space2+t1,space2+t2,space2+t3,space2+t4,space2"
     "post_ao.frag|cb0,space3+s0,space2+t0,space2"
     "post_ao_blur.frag|cb0,space3+s0,space2+s1,space2+t0,space2+t1,space2"
+    "post_fxaa.frag|cb0,space3+s0,space2+t0,space2"
     "sun_depth.frag|cb0,space3+s0,space2+t0,space2"
 )
 

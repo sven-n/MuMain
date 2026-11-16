@@ -48,6 +48,29 @@ effects, black elsewhere), `$post view bloom` (the blurred glow) and
 `$post view scene` (back). The views need post-processing on and a bloom
 strength above 0.
 
+## Edge smoothing
+
+Edge smoothing (FXAA) is the last pass over the processed scene, after bloom,
+grading and the HDR tone map and before the interface. It looks for edges by
+the contrast in brightness, follows each edge to where it ends and blends
+across it, and it softens single pixels that are much brighter or darker than
+their neighbours. Multisampling smooths only the edges of triangles; edge
+smoothing also catches what is drawn inside a surface: highlights on metal
+armour, rim light and fine texture that shimmer while the camera moves. The
+price is a little sharpness in fine texture.
+
+It belongs to the Enhanced look and is off unless the player ticks "Edge
+smoothing (FXAA)" under the Anti-aliasing row, or types `$fxaa on`
+(`[Render] EdgeSmoothing` in `config.ini`). It works with any multisample count,
+including none, and with bloom and colour grading switched off: the frame then
+takes the post-processed path with a composite that changes nothing, so it
+looks as without post-processing apart from the smoothed edges. The diagnostic
+views (`$post view source` and `$post view bloom`) are shown unsmoothed.
+
+The pass reads one full-size image in the frame's format, through one sampler,
+so it adds a single sampler slot to the frame whatever the scene holds. If the
+graphics device cannot build it, the log says so and frames stay unsmoothed.
+
 ## Grading tables
 
 A map's table is `Data/Grading/World<N>.png`, where `N` is the map number plus

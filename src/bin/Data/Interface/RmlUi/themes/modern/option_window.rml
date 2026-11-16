@@ -357,6 +357,11 @@
 						</div>
 						<span class="opt-row-tip">{{antialiasing_tooltip}}</span>
 					</div>
+					<div class="opt-row opt-toggle-row opt-row-tipped" data-event-click="option_toggle_edge_smoothing">
+						<span class="opt-label">{{edge_smoothing_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="edge_smoothing"><div class="opt-toggle-knob"></div></div></div>
+						<span class="opt-row-tip">{{edge_smoothing_tooltip}}</span>
+					</div>
 					<div class="opt-row opt-row-tipped">
 						<span class="opt-label">{{anisotropy_row_label}}</span>
 						<div class="opt-control">

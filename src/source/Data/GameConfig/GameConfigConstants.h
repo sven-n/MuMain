@@ -65,6 +65,8 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyAnisotropy[] = L"Anisotropy";
     // Multisample anti-aliasing of the Enhanced look: 0 (off), 2, 4 or 8 samples per pixel.
     inline constexpr wchar_t CfgKeyAntialiasing[] = L"Antialiasing";
+    // Edge smoothing (FXAA) of the Enhanced look, beside the multisampling: 1 on, 0 off.
+    inline constexpr wchar_t CfgKeyEdgeSmoothing[] = L"EdgeSmoothing";
     // The Enhanced look's features the player keeps on; Classic ignores them.
     inline constexpr wchar_t CfgKeyEnhancedLighting[] = L"EnhancedLighting";
     inline constexpr wchar_t CfgKeyDynamicLights[] = L"DynamicLights";
@@ -153,6 +155,8 @@ namespace CfgDefaults
     // The samples the Enhanced look renders with (Classic renders without); a
     // requested count is lowered to what the GPU supports.
     inline constexpr int CfgDefaultAntialiasing = 4;
+    // Off: the Enhanced look stays as it was until a player switches it on.
+    inline constexpr bool CfgDefaultEdgeSmoothing = false;
     inline constexpr bool CfgDefaultEnhancedLighting = true;
     inline constexpr bool CfgDefaultDynamicLights = true;
     inline constexpr bool CfgDefaultSunlight = true;

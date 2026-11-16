@@ -41,6 +41,7 @@
 #include "RangeAllocator.h"
 #include "SdlGpuPixelFormat.h"
 #include "SdlGpuAmbientOcclusion.h"
+#include "SdlGpuEdgeSmoothing.h"
 #include "ShadowPassSelection.h"
 #include "SdlGpuSunShadowMap.h"
 #include "SdlGpuPostProcessing.h"
@@ -52,6 +53,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/PostProcessing/BloomSource.h"
+#include "Render/PostProcessing/EdgeSmoothing.h"
 #include "Render/PostProcessing/SceneBoundary.h"
 #include "Render/Lighting/SunShadow.h"
 #include "Render/Terrain/TerrainHeightGrid.h"
@@ -598,6 +600,10 @@ static mu::SdlGpuPostProcessing s_postProcessing;
 static bool s_postProcessingEnabled = false;
 static mu::PostProcessingLook s_postProcessingLook{};
 static mu::PostProcessingView s_postProcessingView = mu::PostProcessingView::Scene;
+// Edge smoothing (FXAA) of the processed scene, before the UI: it takes the post-processed path too,
+// with a composite that changes nothing when post-processing itself is off.
+static mu::SdlGpuEdgeSmoothing s_edgeSmoothing;
+static bool s_edgeSmoothingEnabled = false;
 static Render::PostProcessing::SceneBoundary s_sceneBoundary;
 static int s_bloomExclusionDepth = 0;
 static int s_worldLitGeometryDepth = 0;
@@ -1306,6 +1312,7 @@ static SDL_GPUShader* s_fragShaderBloomUp = nullptr;        // post_bloom_up.fra
 static SDL_GPUShader* s_fragShaderComposite = nullptr;      // post_composite.frag
 static SDL_GPUShader* s_fragShaderAmbientOcclusion = nullptr;     // post_ao.frag
 static SDL_GPUShader* s_fragShaderAmbientOcclusionBlur = nullptr; // post_ao_blur.frag
+static SDL_GPUShader* s_fragShaderFxaa = nullptr;                 // post_fxaa.frag
 // The scene's ambient occlusion (one sample only), and the scene's projection it reconstructs from.
 static mu::SdlGpuAmbientOcclusion s_ambientOcclusion;
 static float s_sceneProjection[16]{};
@@ -2242,6 +2249,7 @@ public:
         ReleaseShaders();
         ReleaseGroundShadowMask();
         s_ambientOcclusion.Release();
+        s_edgeSmoothing.Release();
         s_postProcessing.Release();
 
         SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
@@ -2456,7 +2464,19 @@ public:
 
     [[nodiscard]] static bool IsPostProcessingActive()
     {
-        return s_postProcessingEnabled && s_postProcessing.IsAvailable();
+        return Render::PostProcessing::UsesPostProcessedFrame(s_postProcessingEnabled, IsEdgeSmoothingActive()) &&
+               s_postProcessing.IsAvailable();
+    }
+
+    [[nodiscard]] static bool IsEdgeSmoothingActive()
+    {
+        return s_edgeSmoothingEnabled && s_edgeSmoothing.IsAvailable() && s_postProcessing.CanCompositeToImage();
+    }
+
+    // The look this frame's composite applies: none of it while only edge smoothing is on.
+    [[nodiscard]] static mu::PostProcessingLook CompositedLook()
+    {
+        return Render::PostProcessing::CompositedLook(s_postProcessingEnabled, s_postProcessingLook);
     }
 
     // The pipeline a bloom source replays with into the bloom pass, or null for
@@ -2906,7 +2926,7 @@ public:
         ReplayView view = FullFrameView();
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::BloomSources, view);
         EndReplayPass();
-        s_postProcessing.RenderBloom(s_cmdBuf, s_postProcessingLook.bloomLevelFalloff);
+        s_postProcessing.RenderBloom(s_cmdBuf, CompositedLook().bloomLevelFalloff);
     }
 
     // The multisampled colour target of the scene and bloom-source passes: the HDR one with the HDR
@@ -2927,6 +2947,7 @@ public:
     {
         SDL_GPUTexture* const multisampled = IsMultisampled() ? s_multisampleColorTexture : nullptr;
         ReplayView view = FullFrameView();
+        const mu::PostProcessingLook look = CompositedLook();
         RenderSunShadowMap(sceneEnd, boneDataReady);
         RenderGroundShadowMask(sceneEnd, boneDataReady);
         const bool sceneView = s_postProcessingView == mu::PostProcessingView::Scene;
@@ -2945,25 +2966,25 @@ public:
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
 
-        if (s_postProcessingLook.bloomStrength > 0.0f && s_postProcessing.EnsureBloomTargets())
+        if (look.bloomStrength > 0.0f && s_postProcessing.EnsureBloomTargets())
         {
             RenderBloomSources(sceneEnd, boneDataReady);
         }
         s_hdrScenePass = false;
 
-        SDL_GPUTexture* const sceneDepth = s_postProcessingLook.ambientOcclusionStrength > 0.0f && sceneView
-                                               ? RenderSceneDepth(sceneEnd, boneDataReady)
-                                               : nullptr;
+        SDL_GPUTexture* const sceneDepth =
+            look.ambientOcclusionStrength > 0.0f && sceneView ? RenderSceneDepth(sceneEnd, boneDataReady) : nullptr;
         SDL_GPUTexture* const ambientOcclusion =
             sceneDepth ? s_ambientOcclusion.Render(s_cmdBuf, sceneDepth, {s_swapW, s_swapH}, s_sceneProjection,
-                                                   s_postProcessingLook.ambientOcclusionRadius)
+                                                   look.ambientOcclusionRadius)
                        : nullptr;
+        const bool smoothed = sceneView && CompositeToSmoothingImage(look, ambientOcclusion);
 
         // The composite covers every pixel: the target's old content is not loaded.
         // A diagnostic view without its image this frame leaves black instead.
         constexpr SDL_FColor black{0.0f, 0.0f, 0.0f, 1.0f};
         SDL_GPUColorTargetInfo uiTarget = mu::GetSdlGpuFrameColorTarget({destination, multisampled}, black);
-        if (s_postProcessingView == mu::PostProcessingView::Scene)
+        if (sceneView)
         {
             uiTarget.load_op = SDL_GPU_LOADOP_DONT_CARE;
         }
@@ -2971,10 +2992,46 @@ public:
         {
             return false;
         }
-        s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, {s_swapW, s_swapH}, s_postProcessingLook,
-                                       s_postProcessingView, ambientOcclusion);
+        if (smoothed)
+        {
+            s_edgeSmoothing.Draw(s_cmdBuf, s_renderPass, {s_swapW, s_swapH},
+                                 Render::PostProcessing::EdgeSmoothingSubpixelStrength);
+        }
+        else
+        {
+            s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, {s_swapW, s_swapH}, look, s_postProcessingView,
+                                           ambientOcclusion);
+        }
         ReplayCommands(sceneEnd, s_renderCmds.size(), boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
+        return true;
+    }
+
+    // With edge smoothing on, the composite into the image the smoothing pass then reads in the UI
+    // pass. False when edge smoothing is off or its pass could not run: the UI pass composites itself.
+    [[nodiscard]] static bool CompositeToSmoothingImage(const mu::PostProcessingLook& look,
+                                                        SDL_GPUTexture* ambientOcclusion)
+    {
+        SDL_GPUTexture* const image =
+            IsEdgeSmoothingActive() ? s_edgeSmoothing.EnsureImage({s_swapW, s_swapH}) : nullptr;
+        if (!image)
+        {
+            return false;
+        }
+        SDL_GPUColorTargetInfo target{};
+        target.texture = image;
+        target.load_op = SDL_GPU_LOADOP_DONT_CARE;
+        target.store_op = SDL_GPU_STOREOP_STORE;
+        // Not loaded: a fresh texture instead of waiting for the frame still reading it.
+        target.cycle = true;
+        SDL_GPURenderPass* const pass = SDL_BeginGPURenderPass(s_cmdBuf, &target, 1, nullptr);
+        if (!pass)
+        {
+            return false;
+        }
+        s_postProcessing.DrawComposite(s_cmdBuf, pass, {s_swapW, s_swapH}, look, s_postProcessingView, ambientOcclusion,
+                                       mu::SdlGpuCompositeTarget::Image);
+        SDL_EndGPURenderPass(pass);
         return true;
     }
 
@@ -3356,11 +3413,13 @@ public:
         // Passes that will not run this frame free their targets, whichever way the frame is drawn.
         {
             const bool scene = split.postProcessed && s_postProcessingView == mu::PostProcessingView::Scene;
-            if (!scene || s_postProcessingLook.ambientOcclusionStrength <= 0.0f)
+            if (!scene || CompositedLook().ambientOcclusionStrength <= 0.0f)
                 s_ambientOcclusion.ReleaseTargets();
             // The bloom views show the bloom too.
-            if (!split.postProcessed || s_postProcessingLook.bloomStrength <= 0.0f)
+            if (!split.postProcessed || CompositedLook().bloomStrength <= 0.0f)
                 s_postProcessing.ReleaseBloomTargets();
+            if (!scene || !IsEdgeSmoothingActive())
+                s_edgeSmoothing.ReleaseImage();
         }
         if (s_mainColorPassOpenedThisFrame && frameColorTexture == FrameColorTexture())
         {
@@ -3368,9 +3427,7 @@ public:
             // sample: the rest follows the same way, without multisampling or post-processing.
             renderPassCompleted = ContinueFlushedFrame(frameColorTexture, boneDataReady);
         }
-        else if (split.postProcessed &&
-                 s_postProcessing.EnsureTargets({s_swapW, s_swapH},
-                                                UsesHdrScene() ? kHdrSceneFormat : SDL_GPU_TEXTUREFORMAT_INVALID))
+        else if (split.postProcessed && s_postProcessing.EnsureTargets({s_swapW, s_swapH}, PostProcessedSceneFormat()))
         {
             renderPassCompleted = ReplayPostProcessedFrame(frameColorTexture, split.sceneEnd, boneDataReady);
         }
@@ -4006,6 +4063,12 @@ public:
     {
         s_postProcessingEnabled = enabled;
         return !enabled || s_postProcessing.IsAvailable();
+    }
+
+    [[nodiscard]] bool SetEdgeSmoothing(bool enabled) override
+    {
+        s_edgeSmoothingEnabled = enabled;
+        return !enabled || !s_device || IsEdgeSmoothingActive();
     }
 
     void SetPostProcessingLook(const mu::PostProcessingLook& look) override
@@ -6201,6 +6264,8 @@ private:
             createShader("post_ao", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
         s_fragShaderAmbientOcclusionBlur =
             createShader("post_ao_blur", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 1, /*fatal=*/false);
+        // Edge smoothing: the processed image (t0) and FxaaUniforms (b0).
+        s_fragShaderFxaa = createShader("post_fxaa", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
 
         mu::log::Get("render")->info("SDL_gpu -- shaders loaded, format: {}", shaderFormat.extension);
         return true;
@@ -6270,7 +6335,7 @@ private:
         for (SDL_GPUShader** shader :
              {&s_vertShaderWorldLit, &s_fragShaderWorldLit, &s_fragShaderShadowMask, &s_vertShaderPostFullscreen,
               &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite, &s_fragShaderAmbientOcclusion,
-              &s_fragShaderAmbientOcclusionBlur, &s_fragShaderSunDepth})
+              &s_fragShaderAmbientOcclusionBlur, &s_fragShaderFxaa, &s_fragShaderSunDepth})
         {
             if (*shader)
             {
@@ -7199,6 +7264,13 @@ private:
     }
 
     // The HDR scene this frame: its pipelines, and with anti-aliasing its multisampled target.
+    // The scene texture's format for a post-processed frame: HDR with post-processing itself on and
+    // the HDR pipelines there; the frame's own (INVALID) when only edge smoothing takes the frame.
+    [[nodiscard]] static SDL_GPUTextureFormat PostProcessedSceneFormat()
+    {
+        return UsesHdrScene() && s_postProcessingEnabled ? kHdrSceneFormat : SDL_GPU_TEXTUREFORMAT_INVALID;
+    }
+
     [[nodiscard]] static bool UsesHdrScene()
     {
         return !s_hdrScenePipelines.empty() && (!IsMultisampled() || EnsureHdrMultisampleColorTexture());
@@ -7355,6 +7427,11 @@ private:
                                      s_sampleCount);
         (void)s_ambientOcclusion.CreatePipelines(
             s_device, {s_vertShaderPostFullscreen, s_fragShaderAmbientOcclusion, s_fragShaderAmbientOcclusionBlur});
+        const bool smoothing =
+            s_edgeSmoothing.CreatePipelines(s_device, {s_vertShaderPostFullscreen, s_fragShaderFxaa},
+                                            SDL_GetGPUSwapchainTextureFormat(s_device, s_window),
+                                            mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1));
+        mu::log::Get("render")->info("SDL_gpu -- edge smoothing {}", smoothing ? "available" : "unavailable");
     }
 
     // The pipelines replaying solid draws into the sun shadow map, with its comparison sampler and far

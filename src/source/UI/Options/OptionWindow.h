@@ -184,6 +184,8 @@ namespace mu::ui::window
         void RmlToggleEnhancedFeature(int feature);
         // Enhanced Movement ([Render] EnhancedMovement), in both looks; read live like the features.
         void RmlToggleEnhancedMovement();
+        // Edge smoothing ([Render] EdgeSmoothing), applied while the Enhanced look is active.
+        void RmlToggleEdgeSmoothing();
         // The player's tuning under each feature (Render/Look/TuningControls.h): a group's label
         // or chevron expands it (never its switch), "More settings" its specialist rows. A slider
         // previews while it is pressed, dragged or stepped by a key and is saved when the pointer
@@ -359,6 +361,9 @@ namespace mu::ui::window
             Rml::String lookPostProcessingLabel;
             bool enhancedMovement = false;
             Rml::String enhancedMovementLabel;
+            bool edgeSmoothing = false;
+            Rml::String edgeSmoothingLabel;
+            Rml::String edgeSmoothingTooltip;
             // The player's tuning, per group (Render::Look::TuningGroup): its common and its "More
             // settings" rows, whether it is expanded, and why its sliders do not apply (empty when
             // they do).

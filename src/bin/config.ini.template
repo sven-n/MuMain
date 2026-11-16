@@ -34,6 +34,7 @@ VSync=1
 Look=Classic
 Anisotropy=8
 Antialiasing=4
+EdgeSmoothing=0
 EnhancedLighting=1
 DynamicLights=1
 LightMood=1

@@ -133,6 +133,7 @@ void GameConfig::Load()
         GameConfigValidation::ValidateAnisotropy(ReadInt(CfgSectionRender, CfgKeyAnisotropy, CfgDefaultAnisotropy));
     m_antialiasing = GameConfigValidation::ValidateAntialiasing(
         ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
+    m_edgeSmoothing = ReadBool(CfgSectionRender, CfgKeyEdgeSmoothing, CfgDefaultEdgeSmoothing);
     m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
     m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
     m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
@@ -203,6 +204,7 @@ void GameConfig::Save()
     WriteString(CfgSectionRender, CfgKeyLook, GameConfigValidation::FormatLook(m_look));
     WriteInt(CfgSectionRender, CfgKeyAnisotropy, m_anisotropy);
     WriteInt(CfgSectionRender, CfgKeyAntialiasing, m_antialiasing);
+    WriteBool(CfgSectionRender, CfgKeyEdgeSmoothing, m_edgeSmoothing);
     WriteBool(CfgSectionRender, CfgKeyEnhancedLighting, m_enhancedLighting);
     WriteBool(CfgSectionRender, CfgKeyDynamicLights, m_dynamicLights);
     WriteBool(CfgSectionRender, CfgKeySunlight, m_sunlight);

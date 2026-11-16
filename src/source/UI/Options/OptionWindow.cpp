@@ -459,6 +459,9 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
     c.Bind("enhanced_movement", &model.enhancedMovement);
     c.Bind("enhanced_movement_label", &model.enhancedMovementLabel);
+    c.Bind("edge_smoothing", &model.edgeSmoothing);
+    c.Bind("edge_smoothing_label", &model.edgeSmoothingLabel);
+    c.Bind("edge_smoothing_tooltip", &model.edgeSmoothingTooltip);
     auto tuningRow = c.RegisterStruct<TuningRowModel>();
     tuningRow.RegisterMember("control", &TuningRowModel::control);
     tuningRow.RegisterMember("label", &TuningRowModel::label);
@@ -591,12 +594,14 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.BindEventCallback("option_toggle_enhanced_movement",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleEnhancedMovement(); });
+    c.BindEventCallback("option_toggle_edge_smoothing", [this](Rml::DataModelHandle, Rml::Event&,
+                                                               const Rml::VariantList&) { RmlToggleEdgeSmoothing(); });
     c.BindEventCallback("option_toggle_enhanced_feature",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-        {
-            if (arguments.size() == 1)
-                RmlToggleEnhancedFeature(arguments[0].Get<int>(-1));
-        });
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                RmlToggleEnhancedFeature(arguments[0].Get<int>(-1));
+                        });
 
     const auto intArgument = [](const Rml::VariantList& arguments)
     { return arguments.size() == 1 ? arguments[0].Get<int>(-1) : -1; };
@@ -1150,6 +1155,11 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedMovement()
     config.SetEnhancedMovement(!config.GetEnhancedMovement());
     config.Save();
     Engine::Characters::SetEnhancedMovementEnabled(config.GetEnhancedMovement());
+}
+
+void mu::ui::window::COptionWindow::RmlToggleEdgeSmoothing()
+{
+    MuSetEdgeSmoothingPreference(!GameConfig::GetInstance().GetEdgeSmoothing());
 }
 
 void mu::ui::window::COptionWindow::RmlToggleTuningGroup(int group)
@@ -1791,6 +1801,8 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
     SyncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
     SyncLabel(model.enhancedMovementLabel, "enhanced_movement_label", I18N::Game::EnhancedMovement);
+    SyncLabel(model.edgeSmoothingLabel, "edge_smoothing_label", I18N::Game::EdgeSmoothing);
+    SyncLabel(model.edgeSmoothingTooltip, "edge_smoothing_tooltip", I18N::Game::EdgeSmoothingTooltip);
     SyncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
     SyncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
     SyncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
@@ -1910,6 +1922,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
         syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
         syncFlag(model.enhancedMovement, "enhanced_movement", Engine::Characters::EnhancedMovementEnabled());
+        syncFlag(model.edgeSmoothing, "edge_smoothing", GameConfig::GetInstance().GetEdgeSmoothing());
         syncFlag(model.lookSunlightLocked, "look_sunlight_locked", !enhancedGraphics || !dynamicLights);
     }
     SyncTuningModel(model);

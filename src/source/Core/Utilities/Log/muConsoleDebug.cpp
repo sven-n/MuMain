@@ -20,6 +20,7 @@
 #include "Render/Lighting/DynamicLightHistory.h"
 #include "Render/PostProcessing/PostProcessingSetting.h"
 #include "Render/Look/LookPresetSetting.h"
+#include "Render/PostProcessing/EdgeSmoothing.h"
 #include "Render/Renderer/Antialiasing.h"
 #include "Render/Look/LookTuning.h"
 #include "Core/Text/Utf8.h"
@@ -523,6 +524,19 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         else
         {
             mu::log::Get("render")->warn("$msaa expects off, 2, 4 or 8");
+        }
+        return Handled();
+    }
+    else if (strCommand.compare(0, 6, L"$fxaa ") == 0)
+    {
+        const auto enabled = Render::PostProcessing::ParseEdgeSmoothingCommand(std::wstring_view(strCommand).substr(6));
+        if (enabled)
+        {
+            MuSetEdgeSmoothingPreference(*enabled);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$fxaa expects on or off");
         }
         return Handled();
     }

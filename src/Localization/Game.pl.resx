@@ -1300,6 +1300,12 @@
   <data name="Anti-aliasing Tooltip" xml:space="preserve">
     <value>Wygładza krawędzie w Ulepszonej grafice; tryb klasyczny zawsze renderuje bez wygładzania</value>
   </data>
+  <data name="Edge Smoothing" xml:space="preserve">
+    <value>Wygładzanie FXAA</value>
+  </data>
+  <data name="Edge Smoothing Tooltip" xml:space="preserve">
+    <value>Wygładza też to, czego nie wygładza wygładzanie krawędzi: migotanie odblasków, poświaty i drobnych tekstur. Tylko w Ulepszonej grafice; obraz staje się nieco mniej ostry</value>
+  </data>
   <data name="Anisotropic filtering" xml:space="preserve">
     <value>Filtrowanie anizotropowe</value>
   </data>

@@ -65,7 +65,7 @@ so a tab can take more rows.
 - **Modern theme:** a full-screen settings page with the tabs on the left.
   The page scrolls when its rows don't fit.
 
-Rows with a hint (UI Scale, Anti-aliasing, Anisotropic filtering and the
+Rows with a hint (UI Scale, Anti-aliasing, Edge smoothing, Anisotropic filtering and the
 Enhanced tuning sliders) show it while the pointer is over the row.
 
 ## What it stores in `config.ini`
@@ -83,6 +83,9 @@ window writes to these sections:
     the Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
   - `Antialiasing` (`0`, `2`, `4`, `8`; default `4`): the Anti-aliasing row,
     the samples of the Enhanced look. Classic always renders without it.
+  - `EdgeSmoothing` (default `0`): the "Edge smoothing (FXAA)" checkbox under
+    it, edge smoothing of the Enhanced look; see
+    [`post-processing.md`](post-processing.md#edge-smoothing).
   - `Anisotropy` (`1` is off, up to `16`; default `8`): the Anisotropic
     filtering row, for every texture with mip levels: world textures in the
     Enhanced look, upscaled textures in both.

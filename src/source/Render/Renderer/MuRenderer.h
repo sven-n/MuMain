@@ -561,6 +561,12 @@ public:
     {
         return !enabled;
     }
+    // Edge smoothing (FXAA) of the 3D scene, before the UI; it works with or without the rest of
+    // post-processing. Returns false when it was requested but this backend could not build it.
+    [[nodiscard]] virtual bool SetEdgeSmoothing(bool enabled)
+    {
+        return !enabled;
+    }
     // The look profile's bloom and grading values; a bloom strength of 0 is no bloom.
     virtual void SetPostProcessingLook(const PostProcessingLook& /*look*/) {}
     // Diagnosis only, not saved: what post-processed frames show (see PostProcessingView).

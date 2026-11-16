@@ -415,11 +415,37 @@ void MuSetAnisotropyPreference(int anisotropy)
 // Whether the active look renders with multisampling (Enhanced does, Classic does not).
 static bool g_antialiasingActive = false;
 
+// Edge smoothing follows the anti-aliasing of the look: on in Enhanced when the player chose it.
+static void ApplyEdgeSmoothing(bool enabled)
+{
+    if (!mu::GetRenderer().SetEdgeSmoothing(enabled))
+    {
+        mu::log::Get("render")->warn("Edge smoothing requested but unavailable; frames stay unsmoothed");
+        return;
+    }
+    mu::log::Get("render")->info("Edge smoothing {}", enabled ? "on" : "off");
+}
+
 void MuSetAntialiasingActive(bool active)
 {
     g_antialiasingActive = active;
     // The renderer rebuilds its pipelines and targets at the next BeginFrame, if the count changed.
     mu::GetRenderer().SetAntialiasingSamples(active ? GameConfig::GetInstance().GetAntialiasing() : 0);
+    ApplyEdgeSmoothing(active && GameConfig::GetInstance().GetEdgeSmoothing());
+}
+
+void MuSetEdgeSmoothingPreference(bool enabled)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetEdgeSmoothing(enabled);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Edge smoothing: {} saved for the Enhanced look; Classic renders without",
+                                     enabled ? "on" : "off");
+        return;
+    }
+    ApplyEdgeSmoothing(enabled);
 }
 
 void MuSetAntialiasingPreference(int samples)

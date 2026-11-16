@@ -108,7 +108,10 @@ mu_add_test(
     SOURCES
         test_post_processing.cpp
         test_color_grading_table.cpp
+        test_edge_smoothing.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/BloomSource.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/EdgeSmoothing.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/ColorGradingTable.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/SceneBoundary.cpp
     LINK_LIBS SDL3::SDL3 mu_test_content mu_test_path_resolve

@@ -136,6 +136,15 @@ public:
         return m_antialiasing;
     }
     void SetAntialiasing(int samples);
+    // Edge smoothing (FXAA) of the Enhanced look.
+    bool GetEdgeSmoothing() const
+    {
+        return m_edgeSmoothing;
+    }
+    void SetEdgeSmoothing(bool enabled)
+    {
+        m_edgeSmoothing = enabled;
+    }
     bool GetEnhancedLighting() const { return m_enhancedLighting; }
     void SetEnhancedLighting(bool enabled) { m_enhancedLighting = enabled; }
     bool GetDynamicLights() const { return m_dynamicLights; }
@@ -255,6 +264,7 @@ private:
     LookPreset m_look;
     int m_anisotropy;
     int m_antialiasing;
+    bool m_edgeSmoothing;
     bool m_enhancedLighting;
     bool m_dynamicLights;
     bool m_sunlight;

@@ -1408,6 +1408,12 @@
   <data name="Anti-aliasing Tooltip" xml:space="preserve">
     <value>Smooths edges in the Enhanced look; Classic always renders without it</value>
   </data>
+  <data name="Edge Smoothing" xml:space="preserve">
+    <value>Edge smoothing (FXAA)</value>
+  </data>
+  <data name="Edge Smoothing Tooltip" xml:space="preserve">
+    <value>Also smooths what anti-aliasing misses: shimmer on highlights, rim light and fine texture. Enhanced look only; costs a little sharpness</value>
+  </data>
   <data name="Anisotropic filtering" xml:space="preserve">
     <value>Anisotropic filtering</value>
   </data>
