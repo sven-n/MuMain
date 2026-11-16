@@ -214,7 +214,7 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
                 for (const wchar_t* const* line : kTradeAlertLines)
                     cfg.lines.push_back({*line, true});
                 cfg.onPrimary = [this] { AlertTrade(); };
-                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+                m_TradeAlertDialogId = mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
             else
             {
@@ -577,6 +577,10 @@ void CTrade::ProcessClosing()
     m_pYourInvenCtrl->RemoveAllItems();
     m_pMyInvenCtrl->RemoveAllItems();
 
+    // An OK on the warning after the window closed would press the trade button of no trade.
+    mu::ui::window::g_pGenericConfirmDialog->Cancel(m_TradeAlertDialogId);
+    m_TradeAlertDialogId = 0;
+
     if (m_bForgetBackUpOnClose)
         InitYourInvenBackUp();
 }
@@ -750,7 +754,8 @@ void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI
         wchar_t szTempID[MAX_USERNAME_SIZE + 1]{ };
         wcsncpy(szTempID, std::wstring(partner.name).c_str(), MAX_USERNAME_SIZE);
 
-        if (!m_bForgetBackUpOnClose && ::wcscmp(m_szYourID, szTempID))
+        // The remembered items belong to the last partner only.
+        if (::wcscmp(m_szYourID, szTempID) != 0)
             InitYourInvenBackUp();
 
         m_bTradeAlert = false;

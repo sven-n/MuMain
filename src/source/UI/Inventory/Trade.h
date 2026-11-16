@@ -14,6 +14,7 @@
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Inventory/TradeUpdates.h"
 
+#include <cstdint>
 #include <vector>
 
 namespace Rml { class ElementDocument; }
@@ -61,6 +62,7 @@ namespace mu::ui::window
         int            m_nMyTradeWait;         // Delay to prevent spamming my confirm button
         bool m_bTradeAlert;                    // An offered item is marked: the confirm button asks first
         bool m_bForgetBackUpOnClose;           // The trade button was pressed: closing forgets the remembered items
+        std::uint64_t m_TradeAlertDialogId = 0; // The open "check the items" warning, closed with the window
 
         // Window frame/title/both nickname displays/both gold strips/both confirm checkboxes/
         // divider/buttons are RmlUi. Both CInventoryCtrl grids stay native since their icons are
