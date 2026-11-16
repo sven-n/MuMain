@@ -100,6 +100,7 @@
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/Log/SdlLogBridge.h"
+#include "Core/Utilities/Log/TargetLogSinks.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "Character/CharMakeWin.h"
@@ -1968,7 +1969,7 @@ static std::string InitializeWorkingDirectoryAndLog()
 {
     SetWorkingDirectoryToBasePath();
     std::string contentRoot = OpenContent();
-    mu::log::Init(Core::Platform::UserFolder());
+    mu::log::Init(Core::Platform::UserFolder(), mu::log::TargetLogSinks());
     return contentRoot;
 }
 
