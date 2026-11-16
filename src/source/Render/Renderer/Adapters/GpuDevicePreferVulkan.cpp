@@ -11,4 +11,9 @@ void AddTargetGpuDeviceProperties(SDL_PropertiesID props)
     SDL_SetStringProperty(props, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, "vulkan");
 }
 
+bool TargetFramesMayWait()
+{
+    return true;
+}
+
 } // namespace Render
