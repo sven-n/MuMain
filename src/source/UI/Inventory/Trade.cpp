@@ -105,7 +105,7 @@ bool CTrade::Create(CManager* pNewUIMng)
 
     LoadImages();
 
-    ::memset(m_szYourID, 0, MAX_USERNAME_SIZE + 1);
+    ::memset(m_szYourID, 0, sizeof(m_szYourID));
     m_bTradeAlert = false;
     m_bForgetBackUpOnClose = false;
 
@@ -762,6 +762,7 @@ void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI
         m_bForgetBackUpOnClose = false;
         m_nYourGuildType = partner.guildKey;
         wcsncpy(m_szYourID, szTempID, MAX_USERNAME_SIZE);
+        m_szYourID[MAX_USERNAME_SIZE] = L'\0';
         m_nYourLevel = partner.level;
         break;
     }
