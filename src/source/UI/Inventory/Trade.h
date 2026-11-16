@@ -161,6 +161,8 @@ namespace mu::ui::window
         }
 
         void ProcessCloseBtn();
+        // Cancels the trade and remembers the partner's offers; the caller may hide the window at once.
+        void CancelTrade();
         void ProcessClosing();
 
         void GetYourID(wchar_t* pszYourID);
@@ -215,6 +217,7 @@ namespace mu::ui::window
         void InitTradeInfo();
         void InitYourInvenBackUp();
         void BackUpYourInven(ITEM* pYourItemObj);
+        void RememberYourOffers();
         void AlertYourTradeInven();
 
         void SendRequestItemToTrade(const UI::Items::Placement::HeldItemMove& move);

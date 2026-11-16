@@ -315,7 +315,7 @@ bool CTrade::UpdateKeyEvent()
     {
         if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            SocketClient->ToGameServer()->SendTradeCancel();
+            CancelTrade();
             g_pNewUISystem->Hide(mu::ui::window::INTERFACE_TRADE);
             PlayBuffer(SOUND_CLICK01);
 
@@ -680,10 +680,22 @@ void CTrade::SendRequestMyGoldInput(int nInputGold)
 void CTrade::ProcessCloseBtn()
 {
     if (CInventoryCtrl::GetPickedItem() == NULL)
-    {
-        m_bForgetBackUpOnClose = false;
-        SocketClient->ToGameServer()->SendTradeCancel();
-    }
+        CancelTrade();
+}
+
+void CTrade::CancelTrade()
+{
+    // The window may hide right after this, before the server's answer: remember the offers now.
+    RememberYourOffers();
+    m_bForgetBackUpOnClose = false;
+    SocketClient->ToGameServer()->SendTradeCancel();
+}
+
+void CTrade::RememberYourOffers()
+{
+    const int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
+    for (int i = 0; i < nYourItems; ++i)
+        BackUpYourInven(m_pYourInvenCtrl->GetItem(i));
 }
 
 bool CTrade::ProcessBtns()
@@ -893,10 +905,7 @@ void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
 
         m_bForgetBackUpOnClose = false;
-
-        int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
-        for (int i = 0; i < nYourItems; ++i)
-            BackUpYourInven(m_pYourInvenCtrl->GetItem(i));
+        RememberYourOffers();
     }
     break;
 
