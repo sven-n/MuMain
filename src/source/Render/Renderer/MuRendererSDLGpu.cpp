@@ -257,7 +257,13 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 static SDL_GPUDevice* s_device = nullptr;
 // The device's shader format, picked once at Init.
 static const Render::ShaderFormat* s_shaderFormat = nullptr;
-static Render::Renderer::BitmapGpuResources s_bitmapGpuResources;
+static Render::Renderer::BitmapGpuResources::Calls BitmapCallsForTarget()
+{
+    Render::Renderer::BitmapGpuResources::Calls calls;
+    calls.waitAtCeiling = Render::TargetFramesMayWait();
+    return calls;
+}
+static Render::Renderer::BitmapGpuResources s_bitmapGpuResources{BitmapCallsForTarget()};
 static SDL_Window* s_window = nullptr;
 
 // Uncapped present mode for VSync off: IMMEDIATE when the window supports it, otherwise
@@ -2257,7 +2263,7 @@ public:
     // Waits on the same frame-in-flight fence as BeginFrame's acquire, so the acquire after it returns at once.
     void WaitForSwapchain() override
     {
-        if (!s_device || !s_window)
+        if (!s_device || !s_window || !Render::TargetFramesMayWait())
         {
             return;
         }
@@ -2380,10 +2386,14 @@ public:
         // the frames in flight are full, and the loop ran on without drawing, several times per displayed frame on
         // Vulkan and Direct3D 12 alike. The game loop already waited in WaitForSwapchain, before reading input, so
         // this returns at once there; it still paces the frames drawn outside it (the title and loading screens).
-        if (!SDL_WaitAndAcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
+        // Where the host paces the frames instead, a frame without a free texture is skipped.
+        const bool mayWait = Render::TargetFramesMayWait();
+        const auto acquire = mayWait ? &SDL_WaitAndAcquireGPUSwapchainTexture : &SDL_AcquireGPUSwapchainTexture;
+        if (!acquire(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
         {
-            mu::log::Get("render")->error("SDL_gpu -- SDL_WaitAndAcquireGPUSwapchainTexture failed: {}",
-                                          SDL_GetError());
+            mu::log::Get("render")->error(
+                "SDL_gpu -- {} failed: {}",
+                mayWait ? "SDL_WaitAndAcquireGPUSwapchainTexture" : "SDL_AcquireGPUSwapchainTexture", SDL_GetError());
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             FailPendingFrameReadback();
@@ -2391,7 +2401,8 @@ public:
         }
 
         // If swapchain texture is null, skip the frame: a hidden window, or on Vulkan a minimized one whose
-        // surface the driver reports as 0x0 (Direct3D 12 keeps rendering a minimized window).
+        // surface the driver reports as 0x0 (Direct3D 12 keeps rendering a minimized window), or no texture free yet
+        // where frames may not wait.
         if (!s_swapchainTexture)
         {
             // A requested readback stays pending for the next frame that renders;
@@ -4093,6 +4104,13 @@ public:
     [[nodiscard]] bool SetColorGradingTable(std::span<const std::uint8_t> rgba) override
     {
         return s_postProcessing.SetGradingTable(rgba);
+    }
+
+    [[nodiscard]] bool CanTurnOffVSync() const override
+    {
+        return s_device && s_window &&
+               (SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_IMMEDIATE) ||
+                SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_MAILBOX));
     }
 
     [[nodiscard]] bool SetVSyncEnabled(bool enabled) override
@@ -8370,7 +8388,8 @@ void FlushBitmapUploads()
 
 void WaitForSDLGpuIdle()
 {
-    if (s_device && !SDL_WaitForGPUIdle(s_device))
+    // Where frames may not wait, neither may teardown: the host keeps the device until the page goes away.
+    if (s_device && Render::TargetFramesMayWait() && !SDL_WaitForGPUIdle(s_device))
     {
         mu::log::Get("render")->error("SDL_gpu -- failed to wait for idle before resource teardown: {}",
                                       SDL_GetError());

@@ -1339,6 +1339,9 @@
   <data name="VSync" xml:space="preserve">
     <value>VSync</value>
   </data>
+  <data name="VSync Always On" xml:space="preserve">
+    <value>Always on here: this display paces every frame itself.</value>
+  </data>
   <data name="FPS Limit" xml:space="preserve">
     <value>FPS Limit</value>
   </data>

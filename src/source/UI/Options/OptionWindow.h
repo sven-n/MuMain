@@ -313,6 +313,9 @@ namespace mu::ui::window
 
             // Video tab additions.
             bool vsyncEnabled = true;
+            // Where VSync can't be turned off (CanDisableVSync): shown on and locked, with the reason.
+            bool vsyncLocked = false;
+            Rml::String vsyncLockedReason;
             Rml::String vsyncLabel;
             std::vector<Rml::String> fpsCapLabels;
             int fpsCapIndex = 0;

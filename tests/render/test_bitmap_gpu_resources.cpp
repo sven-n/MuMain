@@ -776,6 +776,27 @@ TEST_CASE("a busy ring stops growing at its ceiling and waits there")
     owner.Shutdown();
 }
 
+TEST_CASE("where frames may not wait, a busy ring grows past its ceiling instead")
+{
+    Fake fake;
+    Owner::Calls calls = fake.Calls();
+    calls.waitAtCeiling = false;
+    Owner owner(calls);
+    REQUIRE(owner.Initialize(Device()));
+    fake.gpuFinishes = false;
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    for (std::size_t i = 0; i <= Owner::kMaximumSlotCount; ++i)
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        REQUIRE(result);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(fake.transfers == static_cast<int>(Owner::kMaximumSlotCount) + 1);
+    CHECK(fake.waits == 0);
+    CHECK_FALSE(fake.overwrite);
+    owner.Shutdown();
+}
+
 TEST_CASE("a trim that removes the next slot never leaves the ring on a lost one")
 {
     Fake fake;

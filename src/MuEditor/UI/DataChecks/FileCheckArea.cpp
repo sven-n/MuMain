@@ -144,6 +144,7 @@ std::unique_ptr<DataCheckArea> CreateItemOptionCheckArea()
             if (!Data::Items::HasFatal(issues))
             {
                 Data::Items::ValidateOptionDefinitionUse(g_ItemDatabase.GetAllSlots(), options, issues);
+                Data::Items::ValidateAncientBonusNames(options, issues);
             }
             return issues;
         },

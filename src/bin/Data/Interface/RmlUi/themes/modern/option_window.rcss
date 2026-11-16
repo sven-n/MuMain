@@ -520,6 +520,14 @@
 	opacity: 0.45;
 	cursor: default;
 }
+/* A locked row with a tip dims its label and switch, not itself: the tip would inherit the dimming. */
+.opt-toggle-row.opt-row-tipped.locked {
+	opacity: 1;
+}
+.opt-toggle-row.opt-row-tipped.locked .opt-label,
+.opt-toggle-row.opt-row-tipped.locked .opt-control {
+	opacity: 0.45;
+}
 
 /* The player's tuning of each Enhanced feature (OptionWindow.h's tuning rows), under the feature's
    row. The feature's label and chevron expand its sliders; only the switch switches the feature.
