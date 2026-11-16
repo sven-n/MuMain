@@ -963,7 +963,7 @@
         "pl": "Paczka Klejnotów Błogosławieństwa",
         "pt": "Lote de Joias da bênção"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -997,6 +997,7 @@
       "width": 1,
       "height": 1,
       "level": 25,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -1015,7 +1016,7 @@
         "pl": "Paczka Klejnotów Duszy",
         "pt": "Lote de Joias da alma"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -1049,6 +1050,7 @@
       "width": 1,
       "height": 1,
       "level": 30,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -3458,7 +3460,7 @@
         "pl": "Paczka Klejnotów Życia",
         "pt": "Lote de Joias da vida"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -3491,6 +3493,7 @@
       "width": 1,
       "height": 1,
       "level": 72,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -3510,7 +3513,7 @@
         "pl": "Paczka Klejnotów Stworzenia",
         "pt": "Lote de Joias da criação"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -3543,6 +3546,7 @@
       "width": 1,
       "height": 1,
       "level": 78,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -3562,7 +3566,7 @@
         "pl": "Paczka Klejnotów Strażnika",
         "pt": "Lote de Joias do guardião"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -3595,6 +3599,7 @@
       "width": 1,
       "height": 1,
       "level": 75,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -3614,7 +3619,7 @@
         "pl": "Paczka kamieni szlachetnych",
         "pt": "Lote de Pedras preciosas"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -3647,6 +3652,7 @@
       "width": 1,
       "height": 1,
       "level": 25,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -3666,7 +3672,7 @@
         "pl": "Paczka Klejnotów Harmonii",
         "pt": "Lote de Joias da harmonia"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -3699,6 +3705,7 @@
       "width": 1,
       "height": 1,
       "level": 25,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -3718,7 +3725,7 @@
         "pl": "Paczka Klejnotów Chaosu",
         "pt": "Lote de Joias do caos"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -3751,6 +3758,7 @@
       "width": 1,
       "height": 1,
       "level": 12,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -3770,7 +3778,7 @@
         "pl": "Paczka niższych kamieni rafinacji",
         "pt": "Lote de Pedras refinadas inferiores"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -3803,6 +3811,7 @@
       "width": 1,
       "height": 1,
       "level": 25,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,
@@ -3822,7 +3831,7 @@
         "pl": "Paczka wyższych kamieni rafinacji",
         "pt": "Lote de Pedras refinadas superiores"
       },
-      "tags": ["valuable"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -3855,6 +3864,7 @@
       "width": 1,
       "height": 1,
       "level": 25,
+      "repairable": false,
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,

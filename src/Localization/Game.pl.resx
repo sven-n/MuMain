@@ -1069,6 +1069,9 @@
   <data name="Light Mood" xml:space="preserve">
     <value>Ciemniejsze światło mapy</value>
   </data>
+  <data name="Enhanced Movement" xml:space="preserve">
+    <value>Ulepszony ruch</value>
+  </data>
   <data name="Bloom And Colour Grading" xml:space="preserve">
     <value>Poświata i korekcja kolorów</value>
   </data>
@@ -9311,6 +9314,12 @@
   </data>
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls gracza %ls</value>
+  </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Nieznany potwór %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Jestem błędem: %d</value>
   </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>Czy chcesz anulować: %ls?</value>

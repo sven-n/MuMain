@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -32,6 +33,10 @@ LookPreset ValidateLook(std::wstring_view text);
 
 // Trims whitespace, lowercases, and expands the "d3d12" alias to "direct3d12". Does NOT reject
 // unrecognized values -- an unknown string is passed through as-is and left for
-// SDL_CreateGPUDevice's own fail-and-fallback path to handle safely.
+// the renderer's device creation, which falls back to SDL's own pick when the named driver fails.
 std::wstring ValidateRenderBackend(const std::wstring& value, const std::wstring& defaultValue);
+
+// config.ini in `userFolder`, or `overridePath` when it is set and not empty (developer
+// builds pass MU_CONFIG_PATH here, so a scripted client can run with settings of its own).
+std::filesystem::path ResolveConfigPath(const std::filesystem::path& userFolder, const char* overridePath);
 }

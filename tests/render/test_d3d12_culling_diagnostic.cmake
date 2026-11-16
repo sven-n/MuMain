@@ -8,7 +8,7 @@ file(READ "${MU_RENDERER_SOURCE}" renderer_source)
 
 foreach(required_text IN ITEMS
         "MU_D3D12_DISABLE_CULLING"
-        "direct3d12"
+        "Render::D3D12DiagnosticEnabled(driverName, std::getenv(\"MU_D3D12_DISABLE_CULLING\"))"
         "s_disableD3D12Culling"
         "m_cullFaceEnabled && !s_disableD3D12Culling")
     string(FIND "${renderer_source}" "${required_text}" position)

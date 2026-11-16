@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "LookRecorder.h"
+#include "ItemModelDatabaseScope.h"
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/LookData/LookDataHandler.h"
@@ -10,10 +11,14 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/LookData/LookStore.h"
+#include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
+#include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
@@ -157,21 +162,72 @@ Record Moved(Record record, double delta)
 }
 
 // The baseline lines of a render style's items in every situation, as they draw now.
-std::map<std::string, std::string> RecordLook(const std::string& name)
+// A look of the shipped files, by its kind and name; its baseline lines start with the name, and an item effect's
+// with "effect <name>" (a name can be in both lists, design L13).
+struct ShippedLook
+{
+    LookKind kind;
+    std::string name;
+
+    [[nodiscard]] std::string Key() const
+    {
+        return kind == LookKind::ItemEffect ? "effect " + name : name;
+    }
+};
+
+// The render styles and item effects of the shipped files in g_LookStore while it lives; none afterwards.
+struct ShippedLooksScope
+{
+    ShippedLooksScope()
+    {
+        for (const LookKind kind : {LookKind::RenderStyle, LookKind::ItemEffect})
+        {
+            RenderStylesLoadResult shipped = LoadLookFile(DataDirectory / "Effects", kind);
+            REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
+            for (const LookDefinition& look : shipped.looks)
+            {
+                looks.push_back({kind, look.name});
+            }
+            g_LookStore.SetLooks(kind, std::move(shipped.looks));
+        }
+    }
+    ~ShippedLooksScope()
+    {
+        g_LookStore.SetRenderStyles({});
+        g_LookStore.SetItemEffects({});
+    }
+    ShippedLooksScope(const ShippedLooksScope&) = delete;
+    ShippedLooksScope& operator=(const ShippedLooksScope&) = delete;
+
+    std::vector<ShippedLook> looks;
+};
+
+std::map<std::string, std::string> RecordLook(const ShippedLook& look)
 {
     std::map<std::string, std::string> lines;
-    const std::vector<int> items = LookRecorder::ItemsUsing(name);
+    const std::vector<int> items = LookRecorder::ItemsUsing(look.name, look.kind);
     LookRecorder::ShippedItems shipped;
     shipped.Open(items);
     for (const int item : items)
     {
-        for (const Situation& situation : LookRecorder::Situations())
+        for (const Situation& situation : LookRecorder::SituationsFor(look.name, look.kind))
         {
-            lines[name + " " + LookRecorder::DescribeItem(item) + " " + situation.Describe()] =
+            lines[look.Key() + " " + LookRecorder::DescribeItem(item) + " " + situation.Describe()] =
                 LookRecorder::Digest(LookRecorder::RecordItem(item, situation));
         }
     }
     return lines;
+}
+
+// "effect:potion" names the item effect, any other name the render style.
+ShippedLook LookNamed(const std::string& name)
+{
+    constexpr std::string_view Effect = "effect:";
+    if (name.starts_with(Effect))
+    {
+        return {LookKind::ItemEffect, name.substr(Effect.size())};
+    }
+    return {LookKind::RenderStyle, name};
 }
 } // namespace
 
@@ -315,42 +371,40 @@ TEST_CASE("Render styles moved into data draw as their old code did (the baselin
     std::map<std::string, std::string> baseline = ReadBaseline();
     if (const char* write = std::getenv("MU_LOOK_RECORDER_WRITE"))
     {
-        RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
-        REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
-        const LookStoreScope looks(std::move(shipped.looks));
+        const ShippedLooksScope looks;
         for (const std::string& name : SplitNames(write))
         {
-            std::erase_if(baseline, [&](const auto& line) { return line.first.rfind(name + " ", 0) == 0; });
-            baseline.merge(RecordLook(name));
+            const ShippedLook look = LookNamed(name);
+            // A line is "<key> (group,number) <situation>": an item follows the key.
+            std::erase_if(baseline, [&](const auto& line) { return line.first.rfind(look.Key() + " (", 0) == 0; });
+            baseline.merge(RecordLook(look));
         }
         WriteBaseline(baseline);
         MESSAGE("Wrote " << Baseline.string());
         return;
     }
 
-    RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
-    REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
+    const ShippedLooksScope looks;
     std::set<std::string> moved;
-    for (const LookDefinition& look : shipped.looks)
+    for (const ShippedLook& look : looks.looks)
     {
-        moved.insert(look.name);
+        moved.insert(look.Key());
     }
-    const LookStoreScope looks(std::move(shipped.looks));
 
     // Each baseline line belongs to a look in the data, and each look in the data has its lines.
     std::set<std::string> withLines;
     for (const auto& [key, digest] : baseline)
     {
-        const std::string name = key.substr(0, key.find(' '));
+        const std::string name = key.substr(0, key.find(" ("));
         CAPTURE(key);
         CHECK(moved.contains(name));
         withLines.insert(name);
     }
-    for (const std::string& name : moved)
+    for (const ShippedLook& look : looks.looks)
     {
-        CAPTURE(name);
-        CHECK(withLines.contains(name));
-        for (const auto& [key, digest] : RecordLook(name))
+        CAPTURE(look.Key());
+        CHECK(withLines.contains(look.Key()));
+        for (const auto& [key, digest] : RecordLook(look))
         {
             CAPTURE(key);
             const auto line = baseline.find(key);
@@ -367,24 +421,17 @@ TEST_CASE("Every baseline line keeps one of its digests when its numbers move by
     // A sine is off by its last float step on another platform (about 1e-7 near 1), and a multiply and add the compiler
     // fuses (ARM64) by a step of the result. Twice that, up and down by turns, keeps one of the hashes on every line.
     constexpr double PlatformError = 2.0e-7;
-    RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
-    REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
-    std::vector<std::string> names;
-    for (const LookDefinition& look : shipped.looks)
+    const ShippedLooksScope looks;
+    for (const ShippedLook& look : looks.looks)
     {
-        names.push_back(look.name);
-    }
-    const LookStoreScope looks(std::move(shipped.looks));
-    for (const std::string& name : names)
-    {
-        const std::vector<int> items = LookRecorder::ItemsUsing(name);
+        const std::vector<int> items = LookRecorder::ItemsUsing(look.name, look.kind);
         LookRecorder::ShippedItems shippedItems;
         shippedItems.Open(items);
         for (const int item : items)
         {
-            for (const Situation& situation : LookRecorder::Situations())
+            for (const Situation& situation : LookRecorder::SituationsFor(look.name, look.kind))
             {
-                CAPTURE(name + " " + LookRecorder::DescribeItem(item) + " " + situation.Describe());
+                CAPTURE(look.Key() + " " + LookRecorder::DescribeItem(item) + " " + situation.Describe());
                 const Record record = LookRecorder::RecordItem(item, situation);
                 const std::string digest = LookRecorder::Digest(record);
                 CHECK(LookRecorder::SameDigest(LookRecorder::Digest(Moved(record, PlatformError)), digest));
@@ -398,28 +445,24 @@ TEST_CASE("Each render style in the data draws as its code while the code still 
 {
     // A look being moved: added to the data and compared with its code here, field by field, before the code is
     // deleted (then the baseline keeps what the code drew).
-    RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
-    REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
-    std::vector<std::string> moving;
-    for (const LookDefinition& look : shipped.looks)
+    const ShippedLooksScope looks;
+    for (const ShippedLook& look : looks.looks)
     {
-        if (Render::Items::Styles::ExistsInCode(look.name))
+        const bool inCode = look.kind == LookKind::ItemEffect ? Render::Items::ItemEffects::ExistsInCode(look.name)
+                                                              : Render::Items::Styles::ExistsInCode(look.name);
+        if (!inCode)
         {
-            moving.push_back(look.name);
+            continue;
         }
-    }
-    const LookStoreScope looks(std::move(shipped.looks));
-    for (const std::string& name : moving)
-    {
-        const std::vector<int> items = LookRecorder::ItemsUsing(name);
+        const std::vector<int> items = LookRecorder::ItemsUsing(look.name, look.kind);
         LookRecorder::ShippedItems shippedItems;
         shippedItems.Open(items);
         for (const int item : items)
         {
-            for (const Situation& situation : LookRecorder::Situations())
+            for (const Situation& situation : LookRecorder::SituationsFor(look.name, look.kind))
             {
-                CAPTURE(name + " " + LookRecorder::DescribeItem(item) + " " + situation.Describe());
-                const Record code = LookRecorder::RecordItemWithCode(item, situation, name);
+                CAPTURE(look.Key() + " " + LookRecorder::DescribeItem(item) + " " + situation.Describe());
+                const Record code = LookRecorder::RecordItemWithCode(item, situation, look.name, look.kind);
                 const Record data = LookRecorder::RecordItem(item, situation);
                 CHECK(LookRecorder::FirstDifference(code, data) == "");
             }
@@ -427,12 +470,53 @@ TEST_CASE("Each render style in the data draws as its code while the code still 
     }
 }
 
-TEST_CASE("No render style is both in the data and in the code (design L14) [looks]")
+TEST_CASE("No render style or item effect is both in the data and in the code (design L14) [looks]")
 {
-    const RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
-    for (const LookDefinition& look : shipped.looks)
+    const RenderStylesLoadResult styles = LoadRenderStyleFile(DataDirectory / "Effects");
+    for (const LookDefinition& look : styles.looks)
     {
         CAPTURE(look.name);
         CHECK_FALSE(Render::Items::Styles::ExistsInCode(look.name));
     }
+    const RenderStylesLoadResult effects = LoadLookFile(DataDirectory / "Effects", LookKind::ItemEffect);
+    REQUIRE_FALSE(Data::Items::HasFatal(effects.issues));
+    for (const LookDefinition& look : effects.looks)
+    {
+        CAPTURE(look.name);
+        CHECK_FALSE(Render::Items::ItemEffects::ExistsInCode(look.name));
+    }
+}
+
+TEST_CASE("The Devil's Eye puts the pulse of its code on its object in the update, within float steps (design L45) "
+          "[looks][recorder]")
+{
+    const ShippedLooksScope looks;
+    REQUIRE(g_LookStore.FindItemEffect("devilsEye") != nullptr);
+    ItemModelDatabaseScope database;
+    Data::Items::ItemModelDefinition eye;
+    eye.group = ITEM_DEVILS_EYE / MAX_ITEM_INDEX;
+    eye.number = ITEM_DEVILS_EYE % MAX_ITEM_INDEX;
+    eye.file = "Data/Item/devil_eye.bmd";
+    eye.itemEffect = "devilsEye";
+    g_ItemModelDatabase.Build(std::span(&eye, 1), Data::Effects::GlowColorList{});
+    const int slot = Data::Items::ToModelSlot(ITEM_DEVILS_EYE);
+    REQUIRE(Render::Items::ItemEffects::Spawns(slot));
+
+    const double previousWorldTime = WorldTime;
+    for (const Situation& situation : LookRecorder::Situations())
+    {
+        WorldTime = situation.worldTime;
+        CAPTURE(WorldTime);
+        BMD model;
+        OBJECT object;
+        Render::Items::ItemEffects::Spawn(&model, &object, slot, nullptr);
+        // SpawnDevilsEye as the code wrote it; the data's wave rounds in another order, a few float steps away.
+        const float luminosity = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
+        const float floatStep = std::nextafter(5.f, 6.f) - 5.f;
+        for (int channel = 0; channel < 3; ++channel)
+        {
+            CHECK(std::fabs(object.Light[channel] - luminosity / 5.0f) <= 4.f * floatStep);
+        }
+    }
+    WorldTime = previousWorldTime;
 }

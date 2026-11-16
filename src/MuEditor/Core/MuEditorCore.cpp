@@ -39,10 +39,13 @@
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterAttacksUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterSetupUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterEquipmentUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterSoundsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
+#include "../MuEditor/UI/GraphicsLook/MuGraphicsLookUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "Network/Server/ServerListManager.h"
 #include "../UI/Common/MuEditorUI.h"
@@ -666,6 +669,14 @@ void CMuEditorCore::RenderMonsterTools()
     {
         g_MuMonsterAttacksUI.Render(&m_windows.monsterAttacks);
     }
+    if (m_windows.monsterSetup)
+    {
+        g_MuMonsterSetupUI.Render(&m_windows.monsterSetup);
+    }
+    if (m_windows.monsterEquipment)
+    {
+        g_MuMonsterEquipmentUI.Render(&m_windows.monsterEquipment);
+    }
     if (m_windows.monsterSounds)
     {
         g_MuMonsterSoundsUI.Render(&m_windows.monsterSounds);
@@ -949,6 +960,10 @@ void CMuEditorCore::Render()
         if (m_windows.serverList)
         {
             g_MuServerListUI.Render(&m_windows.serverList);
+        }
+        if (m_windows.graphicsLook)
+        {
+            g_MuGraphicsLookUI.Render(&m_windows.graphicsLook);
         }
         RenderItemTools();
         RenderMonsterTools();

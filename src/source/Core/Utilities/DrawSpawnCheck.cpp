@@ -20,7 +20,10 @@
 #else
 #include <cxxabi.h>
 #include <dlfcn.h>
+#if defined(__APPLE__) || defined(__GLIBC__)
 #include <execinfo.h>
+#define MU_HAS_BACKTRACE 1
+#endif
 #endif
 
 namespace Diagnostics::DrawSpawnCheck
@@ -104,7 +107,7 @@ void Note([[maybe_unused]] const char* kind)
     Callers callers{};
 #ifdef _WIN32
     CaptureStackBackTrace(2, CallerDepth, callers.data(), nullptr);
-#else
+#elif defined(MU_HAS_BACKTRACE)
     std::array<void*, CallerDepth + 2> frames{};
     const int count = backtrace(frames.data(), static_cast<int>(frames.size()));
     for (int i = 2; i < count; ++i)

@@ -158,6 +158,12 @@ std::optional<LookCommand> ParseLookCommand(std::wstring_view command)
         parsed.verb = LookVerb::Save;
         return parsed;
     }
+    if (verb == L"preview" && arguments == 1 && (words[2] == L"authoring" || words[2] == L"player"))
+    {
+        parsed.verb = LookVerb::Preview;
+        parsed.name = words[2] == L"authoring" ? "authoring" : "player";
+        return parsed;
+    }
     if (verb == L"show" || verb == L"reset" || verb == L"load")
     {
         parsed.verb = verb == L"show" ? LookVerb::Show : verb == L"reset" ? LookVerb::Reset : LookVerb::Load;

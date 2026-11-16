@@ -30,8 +30,35 @@ std::vector<MonsterGroup> MakeOneNumberGroups(std::span<const MonsterDefinition>
     return groups;
 }
 
+std::span<const MonsterValueField> GetMonsterValueFields()
+{
+    static const std::vector<MonsterValueField> fields = []
+    {
+        std::vector<MonsterValueField> all(MonsterValueFields.begin(), MonsterValueFields.end());
+        for (size_t index = 0; index < GetMonsterSetupFields().size(); ++index)
+            all.push_back(GetSetupValueField(index));
+        return all;
+    }();
+    return fields;
+}
+
+MonsterValueField GetSetupValueField(size_t index)
+{
+    return static_cast<MonsterValueField>(static_cast<int>(MonsterValueField::SetupFirst) + static_cast<int>(index));
+}
+
+std::optional<size_t> GetSetupFieldIndex(MonsterValueField field)
+{
+    const int index = static_cast<int>(field) - static_cast<int>(MonsterValueField::SetupFirst);
+    if (index < 0 || static_cast<size_t>(index) >= GetMonsterSetupFields().size())
+        return std::nullopt;
+    return static_cast<size_t>(index);
+}
+
 bool HasSameValue(const MonsterDefinition& left, const MonsterDefinition& right, MonsterValueField field)
 {
+    if (const std::optional<size_t> setup = GetSetupFieldIndex(field))
+        return GetMonsterSetupFields()[*setup].isSame(left.setup, right.setup);
     switch (field)
     {
     case MonsterValueField::Names:
@@ -48,12 +75,20 @@ bool HasSameValue(const MonsterDefinition& left, const MonsterDefinition& right,
         return left.mapVariants == right.mapVariants;
     case MonsterValueField::RandomVariants:
         return left.randomVariants == right.randomVariants;
+    case MonsterValueField::SetupFirst:
+        // A setup field, compared above.
+        break;
     }
     return true;
 }
 
 void CopyValue(MonsterDefinition& to, const MonsterDefinition& from, MonsterValueField field)
 {
+    if (const std::optional<size_t> setup = GetSetupFieldIndex(field))
+    {
+        GetMonsterSetupFields()[*setup].copy(to.setup, from.setup);
+        return;
+    }
     switch (field)
     {
     case MonsterValueField::Names:
@@ -76,6 +111,9 @@ void CopyValue(MonsterDefinition& to, const MonsterDefinition& from, MonsterValu
         break;
     case MonsterValueField::RandomVariants:
         to.randomVariants = from.randomVariants;
+        break;
+    case MonsterValueField::SetupFirst:
+        // A setup field, copied above.
         break;
     }
 }

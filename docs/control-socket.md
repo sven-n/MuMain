@@ -32,6 +32,12 @@ and removes the file when it exits normally.
 An option would not do: the client's command line is split on spaces, so a
 path containing one could not be passed.
 
+The same builds take `MU_CONFIG_PATH` too: the client then reads and writes
+that file instead of the `config.ini` in the user folder, so a scripted client can run
+with settings of its own and leave the player's alone. The in-game tests use
+it for scenarios that need fixed settings, such as `look-references`. Player
+builds ignore it.
+
 ## Talking to it
 
 Newline-delimited JSON, one request object per line, exactly one response per
@@ -68,6 +74,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `ping` | build identifier, the git `commit` the client was built from (`commit_changed` when tracked files differed from it), and the current scene |
 | `scene` | which screen the client is on: `login`, `character_list`, `world`, … |
 | `state` | the character and everything around it (see below) |
+| `frames` (`reset`) | frame times since the last reset: `frames` counted, `longest_ms`, and `slow` (over 50 ms); `{"reset":true}` answers and then starts counting again. A frame is the time between two of the socket's per-frame polls |
 | `nearby` | the objects the client can see, with their monster numbers |
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |

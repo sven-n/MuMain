@@ -26,6 +26,9 @@ void SetBuildIdentifier(std::string identifier);
 std::string Ping(const Request& request, std::unique_ptr<Act>& act);
 std::string Bench(const Request& request, std::unique_ptr<Act>& act);
 std::string Scene(const Request& request, std::unique_ptr<Act>& act);
+// The time since the last call, as one frame: ControlServer::Poll runs once per frame.
+void RecordFrame();
+std::string FrameTimes(const Request& request, std::unique_ptr<Act>& act);
 std::string Bones(const Request& request, std::unique_ptr<Act>& act);
 std::string DrawSpawns(const Request& request, std::unique_ptr<Act>& act);
 std::string DrawPurity(const Request& request, std::unique_ptr<Act>& act);

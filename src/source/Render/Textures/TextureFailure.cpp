@@ -1,7 +1,5 @@
 #include "TextureFailure.h"
 
-#include <cstdlib>
-
 namespace Render::Textures
 {
 namespace
@@ -28,18 +26,9 @@ void DispatchTextureError(const std::string& title, const std::string& message, 
                           const TextureErrorActions& actions)
 {
     const bool choseYes = actions.showDialog(title, message, forceDestroy);
-    if (ContinueAfterTextureError(forceDestroy, choseYes))
+    if (!ContinueAfterTextureError(forceDestroy, choseYes))
     {
-        return;
+        actions.requestQuit();
     }
-    actions.closeConnection();
-    actions.destroySound();
-    actions.destroyWindow();
-    ExitAfterTextureError();
-}
-
-[[noreturn]] void ExitAfterTextureError()
-{
-    std::exit(EXIT_FAILURE);
 }
 } // namespace Render::Textures

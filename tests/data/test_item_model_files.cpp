@@ -18,6 +18,7 @@
 #include "Data/GameData/ItemData/ItemModelGlowJson.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/PartModelSlots.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/LookData/LookStore.h"
@@ -68,19 +69,23 @@ const ItemModelDefinition* FindModel(const std::vector<ItemModelDefinition>& mod
     return found != models.end() ? &*found : nullptr;
 }
 
-// The render styles of Data/Effects/RenderStyles.json in g_LookStore while it lives, as the game loads them before
+// The render styles and item effects of Data/Effects in g_LookStore while it lives, as the game loads them before
 // the item models; the moved looks are no longer in code.
 struct ShippedRenderStylesScope
 {
     ShippedRenderStylesScope()
     {
-        Data::Looks::RenderStylesLoadResult result = Data::Looks::LoadRenderStyleFile(DataDirectory / "Effects");
-        REQUIRE_FALSE(HasFatal(result.issues));
-        Data::Looks::g_LookStore.SetRenderStyles(std::move(result.looks));
+        for (const Data::Looks::LookKind kind : {Data::Looks::LookKind::RenderStyle, Data::Looks::LookKind::ItemEffect})
+        {
+            Data::Looks::RenderStylesLoadResult result = Data::Looks::LoadLookFile(DataDirectory / "Effects", kind);
+            REQUIRE_FALSE(HasFatal(result.issues));
+            Data::Looks::g_LookStore.SetLooks(kind, std::move(result.looks));
+        }
     }
     ~ShippedRenderStylesScope()
     {
         Data::Looks::g_LookStore.SetRenderStyles({});
+        Data::Looks::g_LookStore.SetItemEffects({});
     }
     ShippedRenderStylesScope(const ShippedRenderStylesScope&) = delete;
     ShippedRenderStylesScope& operator=(const ShippedRenderStylesScope&) = delete;
@@ -900,6 +905,61 @@ TEST_CASE("Shipped item model files and texture folders exist [data][items]")
     }
 }
 
+TEST_CASE("The shipped part models name their slots, looks and files and need no checks' warnings [data][items]")
+{
+    const ShippedRenderStylesScope looks;
+    const std::vector<PartModel>& parts = ShippedModels().partModels;
+    std::vector<ItemDataIssue> issues;
+    ValidatePartModels(parts, Render::Items::Styles::Exists, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.field << ": " << issue.message);
+        CHECK(false);
+    }
+    for (const PartModel& part : parts)
+    {
+        INFO(part.model.name << " " << part.model.file);
+        CHECK(std::filesystem::is_regular_file(ClientDirectory / part.model.file));
+    }
+}
+
+TEST_CASE("Data Checks warns about a part model of no slot, a look that is not there, a slot without an entry and a "
+          "missing file [data][items]")
+{
+    std::vector<PartModel> parts = ShippedModels().partModels;
+    REQUIRE(parts.size() == std::size(PartModelSlots));
+    parts.erase(std::ranges::find(parts, "grade15Head", [](const PartModel& part) { return part.model.name; }));
+    PartModel typo;
+    typo.model.name = "grade15Hed";
+    typo.model.file = "Data/Item/NoSuchPartModel.bmd";
+    typo.renderStyle = "noSuchLook";
+    parts.push_back(typo);
+
+    std::vector<ItemDataIssue> issues;
+    ValidatePartModels(parts, [](std::string_view name) { return name != "noSuchLook"; }, issues);
+    ValidatePartModelFilesExist({&typo, 1}, issues);
+
+    std::set<std::string> fields;
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.field << ": " << issue.message);
+        CHECK(issue.severity == ItemDataIssueSeverity::Warning);
+        CHECK(issue.source == PartModelsFileName);
+        CHECK(issue.group == ItemDataIssue::NoItem);
+        fields.insert(issue.field);
+    }
+    CHECK(fields ==
+          std::set<std::string>{"grade15Hed.name", "grade15Hed.renderStyle", "grade15Head", "grade15Hed.file"});
+    CHECK(issues.size() == 4);
+}
+
+TEST_CASE("Without part models Data Checks names no slot [data][items]")
+{
+    std::vector<ItemDataIssue> issues;
+    ValidatePartModels({}, nullptr, issues);
+    CHECK(issues.empty());
+}
+
 // The game also uses a texture that another model loaded before, so a wrong
 // texture folder would only work as long as that other model loads first.
 TEST_CASE("Every texture of a shipped item model is in one of its texture folders [data][items]")
@@ -1494,6 +1554,23 @@ TEST_CASE("The render style and item effect lists name every look once, sorted [
     }
 }
 
+TEST_CASE("The shipped shine list is written as it is read, and the shipped models name its shines [data][items]")
+{
+    const std::filesystem::path file = DataDirectory / "Effects" / "Shines.json";
+    const ShinesLoadResult shines = LoadShinesFile(file);
+    CHECK(shines.issues.empty());
+    std::ifstream stream(file, std::ios::binary);
+    const std::string text((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+    CHECK(Data::Effects::WriteShinesJson(shines.shines) == text);
+    std::vector<ItemDataIssue> issues;
+    ValidateItemModelShines(ShippedModels().models, shines.shines, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+}
+
 TEST_CASE("Shipped item model glow colors are in the glow color list [data][items]")
 {
     CHECK(ShippedGlowColors().issues.empty());
@@ -1596,6 +1673,8 @@ TEST_CASE("Shipped item models keep the looks of the old drawing code [data][ite
 TEST_CASE("Render styles that are not for every drawing leave it to the drawing code [data][items]")
 {
     using namespace Render::Items;
+    // The Magic Gladiator sets' looks are data.
+    const ShippedRenderStylesScope looks;
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     // A model without meshes draws nothing, so the styles only decide here.
@@ -1651,6 +1730,8 @@ TEST_CASE("The second models of the Rage Fighter gloves are drawn like their glo
     CHECK(GetItemTypeOfModel(ToModelSlot(ITEM_KRIS)) == ITEM_KRIS);
     CHECK(GetItemTypeOfModel(MODEL_PLAYER) == -1);
 
+    // Their glove's look (the Phoenix Soul Star's) is data.
+    const ShippedRenderStylesScope looks;
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
     BMD model;
     OBJECT object;
@@ -1662,19 +1743,24 @@ TEST_CASE("The second models of the Rage Fighter gloves are drawn like their glo
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
-TEST_CASE("The glow pass of the Deadly Staff is the one of its render style [data][items]")
+TEST_CASE("The Deadly Staff glows again in white on its second mesh (design L30) [data][items]")
 {
     using namespace Render::Items;
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    const ItemModelDefinition* staff = g_ItemModelDatabase.Find(ITEM_DEADLY_STAFF);
+    REQUIRE(staff != nullptr);
+    CHECK(staff->glow.glowAgainInWhite == 1);
 
-    // The glow of its style keeps the object blending the second mesh; other
-    // items glow with their "glow" values.
+    // The glow keeps the object blending that mesh, in white; other items glow with their "glow" values.
     BMD model;
     OBJECT object;
     DrawLook look;
     look.blendMesh = -1;
     Glow::RenderGlow(&model, &object, look, ToModelSlot(ITEM_DEADLY_STAFF), 1.f, RENDER_TEXTURE, BITMAP_CHROME);
     CHECK(look.blendMesh == 1);
+    CHECK(model.BodyLight[0] == 1.f);
+    CHECK(model.BodyLight[1] == 1.f);
+    CHECK(model.BodyLight[2] == 1.f);
     look.blendMesh = -1;
     Glow::RenderGlow(&model, &object, look, ToModelSlot(ITEM_KRIS), 1.f, RENDER_TEXTURE, BITMAP_CHROME);
     CHECK(look.blendMesh == -1);
@@ -1682,64 +1768,29 @@ TEST_CASE("The glow pass of the Deadly Staff is the one of its render style [dat
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
-TEST_CASE("Styles that pick something per item draw other items plainly [data][items]")
+TEST_CASE("Render styles follow the item model database when it is built again [data][items]")
 {
     using namespace Render::Items;
-    struct Case
-    {
-        int group;
-        int number;
-        const char* renderStyle;
-        bool drawnWithStyle;
-    };
-    // Each of these styles has a mesh, texture or color for each of its items.
-    const Case cases[] = {
-        {7, 39, "violentWindToEternalWingHelm", true},
-        {7, 50, "violentWindToEternalWingHelm", false},
-        {8, 44, "violentWindToEternalWingArmor", true},
-        {8, 45, "violentWindToEternalWingArmor", false},
-        {9, 38, "violentWindToEternalWingPants", false},
-        {12, 65, "socketSeed", true},
-        {12, 66, "socketSeed", false},
-        {12, 129, "socketSeedSphere", true},
-        {12, 99, "socketSeedSphere", false},
-        {13, 97, "characterCard", true},
-        {13, 96, "characterCard", false},
-        {8, 53, "divineAndSuccubusSkin", true},
-        {8, 54, "divineAndSuccubusSkin", false},
-    };
-    std::vector<ItemModelDefinition> models;
-    for (const Case& item : cases)
-    {
-        ItemModelDefinition model;
-        model.group = item.group;
-        model.number = item.number;
-        model.file = "Data/Item/Test.bmd";
-        model.renderStyle = item.renderStyle;
-        models.push_back(model);
-    }
-    g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
+    const ShippedRenderStylesScope looks;
+    ItemModelDefinition seed;
+    seed.group = 12;
+    seed.number = 65;
+    seed.file = "Data/Item/Test.bmd";
+    seed.renderStyle = "socketSeed";
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{seed}, Data::Effects::GlowColorList{});
 
-    // Without the character skin (inventory, ground) the sets draw one mesh.
     BMD model;
-    model.HideSkin = true;
     OBJECT object;
     DrawLook look;
-    for (const Case& item : cases)
-    {
-        INFO("(" << item.group << "," << item.number << ") " << item.renderStyle);
-        object.Type = MODEL_ITEM + MakeItemType(item.group, item.number);
-        CHECK(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE) == item.drawnWithStyle);
-    }
-
-    // The styles follow the database when it is built again.
-    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
     object.Type = MODEL_ITEM + MakeItemType(12, 65);
+    CHECK(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE));
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
     CHECK_FALSE(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE));
 }
 
 TEST_CASE("The item effects of shipped item models exist [data][items]")
 {
+    const ShippedRenderStylesScope looks;
     for (const ItemModelDefinition& model : ShippedModels().models)
     {
         if (!model.itemEffect.empty())
@@ -1796,6 +1847,7 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
 {
     using namespace Render::Items;
     using ItemEffects::Result;
+    const ShippedRenderStylesScope looks;
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     // A model without meshes draws nothing, so only the values change here.
@@ -1823,9 +1875,10 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     level = 1;
     CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
     CHECK(look.hiddenMesh == 0);
-    // Some effects draw the model themselves.
+    // The effects that drew the model are render styles that draw alone (design L47).
     level = 2;
-    CHECK(apply(MakeItemType(14, 27), level) == Result::Drawn);
+    CHECK(apply(MakeItemType(14, 27), level) == Result::None);
+    CHECK(Styles::DrawsAlone(MODEL_ITEM + MakeItemType(14, 27)));
     // The Invisibility Cloak does not draw itself before the level glow; its
     // render style draws it, at its level.
     level = 5;
@@ -1841,60 +1894,74 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     CHECK(apply(MakeItemType(14, 0), level) == Result::None);
 }
 
-// The drawing below +3 of the old RenderPartObjectEffect: the light of the
-// item (scaled), the model, then two shine passes (RenderPartObjectBodyColor2).
-TEST_CASE("Some render styles shine below +3 like the old drawing code [data][items]")
+// The shines below +3 (design L30): the old drawing code's three named shines, in the shine list, named by the
+// glow of the 11 items that had them through their render style.
+TEST_CASE("The shipped items shine below +3 as the old drawing code did [data][items]")
 {
     using namespace Render::Items;
-    using Shine = Styles::ShineBelowPlus3;
+    using Data::Effects::Shine;
+    using Data::Effects::ShinePass;
+    const Data::Items::ShinesLoadResult shines = Data::Items::LoadShinesFile(DataDirectory / "Effects" / "Shines.json");
+    REQUIRE(shines.issues.empty());
+    g_Shines.Build(shines.shines);
     const std::vector<ItemModelDefinition>& models = ShippedModels().models;
     g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
 
-    const Shine::Pass chrome2{1.5f, RENDER_CHROME2 | RENDER_BRIGHT, 1.5f};
-    const Shine::Pass chrome4{1.f, RENDER_CHROME4 | RENDER_BRIGHT, 1.f};
     const auto shineOf = [](int group, int number)
-    { return Styles::FindShineBelowPlus3(MODEL_ITEM + MakeItemType(group, number)); };
-    const auto sameAs =
-        [](const Shine* shine, std::optional<float> light, const Shine::Pass& first, const Shine::Pass& second)
+    { return Glow::FindShineBelowPlus3(MODEL_ITEM + MakeItemType(group, number)); };
+    const auto sameAs = [](const Shine* shine, std::optional<double> light, int firstRenderType, float firstAmount,
+                           int secondRenderType)
     {
-        const auto samePass = [](const Shine::Pass& a, const Shine::Pass& b)
-        { return a.alpha == b.alpha && a.renderType == b.renderType && a.bright == b.bright; };
-        return shine != nullptr && shine->light == light && samePass(shine->passes[0], first) &&
-               samePass(shine->passes[1], second);
+        return shine != nullptr && shine->light == light && shine->passes.size() == 2 &&
+               Glow::RenderTypeOf(shine->passes[0]) == firstRenderType &&
+               static_cast<float>(shine->passes[0].opacity) == firstAmount &&
+               static_cast<float>(shine->passes[0].brightness) == firstAmount &&
+               Glow::RenderTypeOf(shine->passes[1]) == secondRenderType && shine->passes[1].opacity == 1.0 &&
+               shine->passes[1].brightness == 1.0;
     };
+    constexpr int Chrome2 = RENDER_CHROME2 | RENDER_BRIGHT;
+    constexpr int Chrome4 = RENDER_CHROME4 | RENDER_BRIGHT;
 
     // The seals: the light at 0.9.
     for (const auto& [group, number] : {std::pair{13, 43}, {13, 44}, {13, 45}, {13, 93}, {13, 94}, {13, 116}})
     {
         INFO("(" << group << "," << number << ")");
-        CHECK(sameAs(shineOf(group, number), 0.9f, chrome2, chrome4));
+        CHECK(sameAs(shineOf(group, number), 0.9, Chrome2, 1.5f, Chrome4));
     }
-    // The Illusion Sorcerer Covenant, the Jewel of Harmony and the Moonstone
-    // Pendant: the light as it is.
+    // The Illusion Sorcerer Covenant, the Jewel of Harmony and the Moonstone Pendant: the light as it is.
     for (const auto& [group, number] : {std::pair{13, 50}, {14, 42}, {13, 38}})
     {
         INFO("(" << group << "," << number << ")");
-        CHECK(sameAs(shineOf(group, number), 1.f, chrome2, chrome4));
+        CHECK(sameAs(shineOf(group, number), 1.0, Chrome2, 1.5f, Chrome4));
     }
     // The water of the Cursed Castle keeps the light the model has.
-    CHECK(sameAs(shineOf(14, 64), std::nullopt, Shine::Pass{0.5f, RENDER_TEXTURE | RENDER_BRIGHT, 0.5f}, chrome4));
+    CHECK(sameAs(shineOf(14, 64), std::nullopt, RENDER_TEXTURE | RENDER_BRIGHT, 0.5f, Chrome4));
 
-    // Other items are drawn plainly below +3; so are the Jewel of Harmony and
-    // the Moonstone Pendant above it (their style only shines).
+    // Other items are drawn plainly below +3, and the Jewel of Harmony and the Moonstone Pendant have no render
+    // style any more (harmonyShine only carried the shine).
     CHECK(shineOf(0, 0) == nullptr);
     CHECK(shineOf(12, 37) == nullptr);
-    BMD model;
-    OBJECT object;
-    DrawLook look;
-    object.Type = MODEL_ITEM + MakeItemType(14, 42);
-    CHECK_FALSE(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE));
+    for (const auto& [group, number] : {std::pair{14, 42}, {13, 38}})
+    {
+        const ItemModelDefinition* model = g_ItemModelDatabase.Find(MakeItemType(group, number));
+        REQUIRE(model != nullptr);
+        CHECK(model->renderStyle.empty());
+    }
+
+    // The shines follow the shine list when it is built again, also without a new build of the item models.
+    g_Shines.Build({});
+    CHECK(shineOf(13, 43) == nullptr);
+    g_Shines.Build(shines.shines);
+    CHECK(sameAs(shineOf(13, 43), 0.9, Chrome2, 1.5f, Chrome4));
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    g_Shines.Build({});
 }
 
 TEST_CASE("The item effect of a model is the one of its item, or of its event model [data][items]")
 {
     using Render::Items::ItemEffects::Result;
+    const ShippedRenderStylesScope looks;
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
 
     BMD model;
@@ -1998,4 +2065,82 @@ TEST_CASE("A version 14 model opens with every pair of ciphers [data][items][mod
             }
         }
     }
+}
+
+TEST_CASE("Part models are read and written like shared models, with a render style (design L28) [data][items]")
+{
+    const std::string text = R"({"formatVersion": 1, "partModels": [
+      {"name": "wing", "file": "Data/Item/sword36wing.bmd", "textureFolders": ["Item"], "renderStyle": "glowingWing"},
+      {"name": "plain", "file": "Data/Item/class15_head.bmd"}]})";
+    std::vector<PartModel> parts;
+    std::vector<ItemDataIssue> issues;
+    ReadPartModelsJson(text, PartModelsFileName, parts, issues);
+    CHECK(issues.empty());
+    REQUIRE(parts.size() == 2);
+    CHECK(parts[0].model.name == "wing");
+    CHECK(parts[0].model.file == "Data/Item/sword36wing.bmd");
+    CHECK(parts[0].model.textureFolders == std::vector<std::string>{"Item"});
+    CHECK(parts[0].renderStyle == "glowingWing");
+    CHECK(parts[1].renderStyle.empty());
+
+    // Written sorted by name, read back the same.
+    const std::string written = WritePartModelsJson(parts);
+    CHECK(written.find(R"("name": "plain")") < written.find(R"("name": "wing")"));
+    std::vector<PartModel> again;
+    ReadPartModelsJson(written, PartModelsFileName, again, issues);
+    CHECK(issues.empty());
+    CHECK(again == std::vector<PartModel>{parts[1], parts[0]});
+
+    const auto fatal = [](const std::string& list)
+    {
+        std::vector<PartModel> read;
+        std::vector<ItemDataIssue> found;
+        ReadPartModelsJson(R"({"formatVersion": 1, "partModels": [)" + list + "]}", PartModelsFileName, read, found);
+        return HasFatal(found);
+    };
+    CHECK(fatal(R"({"name": "a", "file": "Data/Item/a.bmd"}, {"name": "a", "file": "Data/Item/b.bmd"})"));
+    CHECK(fatal(R"({"name": "a", "file": "Data/Item/a.bmd", "renderStyle": "two words"})"));
+    CHECK(fatal(R"({"name": "a"})"));
+    CHECK_FALSE(fatal(R"({"name": "a", "file": "Data/Item/a.bmd", "glow": {}})"));
+}
+
+TEST_CASE("Every part model slot has its entry in the shipped PartModels.json, written as it is read [data][items]")
+{
+    const std::vector<PartModel>& parts = ShippedModels().partModels;
+    CHECK(parts.size() == std::size(PartModelSlots));
+    for (const PartModelSlot& slot : PartModelSlots)
+    {
+        INFO(slot.name);
+        const auto part =
+            std::ranges::find_if(parts, [&](const PartModel& entry) { return entry.model.name == slot.name; });
+        REQUIRE(part != parts.end());
+        CHECK(std::filesystem::exists(DataDirectory.parent_path() / part->model.file));
+        CHECK(PartModelNameOf(slot.modelType) == slot.name);
+    }
+    CHECK(WritePartModelsJson(parts) == TestFiles::ReadWholeFile(ModelDirectory / PartModelsFileName));
+    CHECK_FALSE(PartModelNameOf(MODEL_PLAYER).has_value());
+}
+
+TEST_CASE("A part model is drawn with the render style of its entry (design L28) [data][items]")
+{
+    using namespace Render::Items;
+    const ShippedRenderStylesScope looks;
+    PartModel wing;
+    wing.model.name = "phoenixSoulStarWing";
+    wing.model.file = "Data/Item/sword36wing.bmd";
+    BMD model;
+    OBJECT object;
+    DrawLook look;
+    object.Type = MODEL_SWORD_35_WING;
+
+    // Without a render style the drawing code draws it.
+    g_ItemModelDatabase.SetPartModels(std::vector{wing});
+    CHECK_FALSE(Styles::Render(&model, &object, look, MODEL_SWORD_35_WING, 1.f, RENDER_TEXTURE));
+    // With one, the style draws it.
+    wing.renderStyle = "chromeMesh0";
+    g_ItemModelDatabase.SetPartModels(std::vector{wing});
+    CHECK(Styles::Render(&model, &object, look, MODEL_SWORD_35_WING, 1.f, RENDER_TEXTURE));
+    // Other slots have no part model.
+    CHECK_FALSE(Styles::Render(&model, &object, look, MODEL_PLAYER, 1.f, RENDER_TEXTURE));
+    g_ItemModelDatabase.SetPartModels({});
 }

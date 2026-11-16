@@ -35,12 +35,10 @@ void AddMember(int memberIndex)
     g_pGuildInfoWindow->AddGuildMember(&GuildList[memberIndex]);
 }
 
-void ShowRelationshipRequest(std::uint32_t relationshipType, std::uint32_t requestType, std::uint8_t requesterKeyH,
-                             std::uint8_t requesterKeyL)
+void ShowRelationshipRequest(std::uint32_t relationshipType, std::uint32_t requestType, std::uint16_t requesterKey)
 {
     g_pGuildInfoWindow->ReceiveGuildRelationShip(static_cast<GuildRelationshipType>(relationshipType),
-                                                 static_cast<GuildRequestType>(requestType), requesterKeyH,
-                                                 requesterKeyL);
+                                                 static_cast<GuildRequestType>(requestType), requesterKey);
 }
 
 int AllianceGuildCount()

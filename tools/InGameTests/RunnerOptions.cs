@@ -7,6 +7,7 @@ internal sealed class RunnerOptions
         usage: InGameTests --client <path to Main> [--server <host:port>] [--fresh-server] [--scenario <name>]... [--out <folder>] [-t <ms>] [-q <1-100>]
                InGameTests --gui [--client <path to Main>] [--server <host:port>] [--fresh-server] [--out <folder>]
                InGameTests --list
+               InGameTests --compare <report before> <report after> [--out <folder>]
 
           --client        an editor build of Main (ENABLE_CONTROL_SOCKET=ON); default the Main next to the tester
           --server        the game server the clients log in to, default 127.0.0.1:56901, the test server
@@ -18,6 +19,7 @@ internal sealed class RunnerOptions
           -q              JPEG quality of the step screenshots, 1 to 100, default 70; lower makes the report smaller
           --gui           open the window to choose and run scenarios; also without any option
           --list          list the scenarios
+          --compare       compare the look-references pictures of two reports, scene by scene, into one HTML file
         """;
 
     private const string DefaultHost = "127.0.0.1";
@@ -40,6 +42,9 @@ internal sealed class RunnerOptions
     public string OutputFolder { get; private set; } = DefaultOutputFolder;
 
     public bool ListScenarios { get; private set; }
+
+    /// <summary>The two reports --compare compares, before and after; null without --compare.</summary>
+    public (string Before, string After)? Compare { get; private set; }
 
     public bool Gui { get; private set; }
 
@@ -69,6 +74,10 @@ internal sealed class RunnerOptions
                     continue;
                 case "--fresh-server":
                     options.FreshServer = true;
+                    continue;
+                case "--compare" when value is not null && i + 2 < args.Length:
+                    options.Compare = (value, args[i + 2]);
+                    i += 2;
                     continue;
                 case "--client" when value is not null:
                     options.ClientPath = value;
@@ -126,7 +135,13 @@ internal sealed class RunnerOptions
             }
         }
 
-        var needsClient = !options.ListScenarios && !options.Gui;
+        if (options.Compare is { } reports && !(File.Exists(reports.Before) && File.Exists(reports.After)))
+        {
+            error = $"--compare takes two existing reports, not '{reports.Before}' and '{reports.After}'";
+            return null;
+        }
+
+        var needsClient = !options.ListScenarios && !options.Gui && options.Compare is null;
         if (needsClient && (options.ClientPath is null || !File.Exists(options.ClientPath)))
         {
             error = $"--client has to name an existing Main, not '{options.ClientPath}'";

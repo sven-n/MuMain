@@ -96,11 +96,10 @@ void LoginSceneReconnect::OnConnectionLost()
 {
     switch (m_phase)
     {
-    case Phase::Probing:
     case Phase::Failed:
         return;
     case Phase::AwaitingGreeting:
-        Fail(); // the new connection closed before the server answered
+        Fail(); // the new connection closed before the server answered, or never opened
         return;
     case Phase::Idle:
         break;
@@ -168,9 +167,6 @@ void LoginSceneReconnect::Update()
         }
         RefreshServerList();
         return;
-    case Phase::Probing:
-        UpdateProbing();
-        return;
     case Phase::AwaitingGreeting:
         if (m_link.NowMs() - m_phaseStartMs > GreetingTimeoutMs)
         {
@@ -215,7 +211,6 @@ void LoginSceneReconnect::Reset()
         return;
     }
 
-    m_link.StopProbe();
     m_resume = nullptr;
     m_lossLogged = false;
     EnterPhase(Phase::Idle);
@@ -223,7 +218,7 @@ void LoginSceneReconnect::Reset()
 
 bool LoginSceneReconnect::IsReconnecting() const
 {
-    return m_phase == Phase::Probing || m_phase == Phase::AwaitingGreeting;
+    return m_phase == Phase::AwaitingGreeting;
 }
 
 void LoginSceneReconnect::Begin(LoginServer server, std::function<void()> resume, bool quiet)
@@ -237,13 +232,15 @@ void LoginSceneReconnect::Begin(LoginServer server, std::function<void()> resume
         m_link.ShowConnecting();
     }
 
-    if (!m_link.StartProbe(server))
+    // The connection itself is the check: it opens and the server greets the client, or
+    // it closes first (OnConnectionLost) or the greeting doesn't come in time.
+    if (!m_link.Connect(server))
     {
         Fail();
         return;
     }
 
-    EnterPhase(Phase::Probing);
+    EnterPhase(Phase::AwaitingGreeting);
 }
 
 void LoginSceneReconnect::PlayerWaits()
@@ -301,31 +298,8 @@ bool LoginSceneReconnect::TakeListRequest()
     return true;
 }
 
-void LoginSceneReconnect::UpdateProbing()
-{
-    switch (m_link.PollProbe())
-    {
-    case LoginSceneReconnectLink::ProbeResult::Pending:
-        return;
-    case LoginSceneReconnectLink::ProbeResult::Unreachable:
-        Fail();
-        return;
-    case LoginSceneReconnectLink::ProbeResult::Reachable:
-        break;
-    }
-
-    if (!m_link.Connect(m_server))
-    {
-        Fail();
-        return;
-    }
-
-    EnterPhase(Phase::AwaitingGreeting);
-}
-
 void LoginSceneReconnect::Fail()
 {
-    m_link.StopProbe();
     if (m_quiet)
     {
         // Nobody waited for it: as after any drop, the next step reconnects.

@@ -41,7 +41,8 @@ Błogosławieństwa" in the jewel bundle window; German mixes "Jewel of Soul" an
   the English text and expands it with English names. Before the item data is loaded a text shows `{item:...}`.
 - **Re-expansion.** On a language switch; after the item data is loaded; when Translate item names changes
   (`SetTranslateItemNames`); in the editor every frame the item database's name version changed
-  (`RefreshItemTextsIfNamesChanged`). A change runs the locale observers, as a language switch does.
+  (`RefreshItemTextsIfNamesChanged`). A change calls the texts-changed observers
+  (`ItemTexts::RegisterTextsChangedObserver`; CSQuest's dialog lines), not the locale observers: the language stayed.
 - **Item data texts.** A placeholder may be an item reference (`ReadPlaceholder`); a translation names the same
   items as English, its case may differ (`ToParityPlaceholders`). The tooltip compiles a text with its references
   replaced by names in the item name language, or in English for the English text of a line without a translation

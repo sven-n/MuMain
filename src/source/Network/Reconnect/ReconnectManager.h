@@ -1,9 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 #include "Core/Globals/_define.h"  // MAX_USERNAME_SIZE, MAX_PASSWORD_SIZE
-#include "Network/Reconnect/ReachabilityProbe.h"
+
+class Connection;
 
 // Drives automatic reconnection after an in-game disconnect (issue #338).
 //
@@ -11,7 +13,7 @@
 // the data needed to resume the session (game-server address, account
 // credentials, selected character) and replays the normal
 // connect -> login -> character-list -> select-character -> join sequence,
-// retrying the probe every few seconds until the server is back. Because the
+// trying to connect every few seconds until the server is back. Because the
 // server persists character state, re-entering the game restores the player
 // exactly where they left off.
 //
@@ -24,14 +26,14 @@ class ReconnectManager
 public:
     enum class Phase
     {
-        Idle,           // not reconnecting
-        Probing,        // in-game, world still rendered; probing the server for life
-        Connecting,     // socket opened, waiting for the server hello
-        LoggingIn,      // login sent, login/character scene loops are driving
-        SelectingChar,  // character list arrived, selecting the cached character
-        Joining,        // loading into the world
-        Retrying,       // post-teardown: re-connect + re-login attempt failed, retry
-        Done,           // back in game; dialog dismissed next frame
+        Idle,          // not reconnecting
+        Probing,       // in-game, world still rendered; connecting in the background until the server answers
+        Connecting,    // socket opened, waiting for the server hello
+        LoggingIn,     // login sent, login/character scene loops are driving
+        SelectingChar, // character list arrived, selecting the cached character
+        Joining,       // loading into the world
+        Retrying,      // post-teardown: re-connect + re-login attempt failed, retry
+        Done,          // back in game; dialog dismissed next frame
     };
 
     static ReconnectManager& Instance();
@@ -53,6 +55,11 @@ public:
         return m_serverPort;
     }
 
+    // The connection that found the server back, for the login scene to log in over
+    // (null when there is none): it opened before the teardown and has received nothing
+    // yet, so the server's greeting comes in the login scene.
+    std::unique_ptr<Connection> TakeStandby();
+
     // Lifecycle.
     void RequestBegin();  // detector asks to start reconnect (begins probing)
     void Begin();         // performs the teardown between frames; the main loop calls it once m_beginPending is set
@@ -64,10 +71,11 @@ public:
     Phase GetPhase() const { return m_phase; }
     int GetStepIndex() const;        // 1-based progress step for the bar
     static int GetStepCount();       // total steps the bar represents
-    int GetCountdownSeconds() const; // seconds until the next probe (Waiting only)
+    int GetCountdownSeconds() const; // seconds until the next attempt (Probing and Retrying)
 
 private:
-    ReconnectManager() = default;
+    ReconnectManager();
+    ~ReconnectManager();
 
     void EnterPhase(Phase phase);
     void Abort();                     // give up -> back to the login screen
@@ -82,9 +90,9 @@ private:
     void UpdateJoining();
     void UpdateRetrying();
 
-    // Background TCP reachability probe (keeps the game rendered while waiting).
-    void StartProbe();
-    void PollProbe();
+    // Background connection to the game server (keeps the game rendered while waiting).
+    void StartStandby();
+    void PollStandby();
 
     bool m_active = false;
     bool m_beginPending = false;       // RequestBegin posted, Begin not yet run
@@ -95,7 +103,7 @@ private:
     Phase m_phase = Phase::Idle;
     double m_phaseStartTime = 0.0;
 
-    ReachabilityProbe m_probe; // background check whether the server is back
+    std::unique_ptr<Connection> m_standby; // connecting while the world stays on screen
 
     wchar_t m_serverIp[256] = {};  // IPv4 literal or hostname
     unsigned short m_serverPort = 0;

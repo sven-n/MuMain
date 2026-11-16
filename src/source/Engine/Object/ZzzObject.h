@@ -6,6 +6,10 @@
 
 extern OBJECT_BLOCK ObjectBlock[256];
 extern OBJECT Mounts[];
+// How far each mount's head turns to a side now (following its rider's) and rolls (its idle shake), in degrees, by its
+// slot in Mounts (MoveMount).
+extern float MountHeadTurn[];
+extern float MountHeadRoll[];
 extern OBJECT Boids[];
 extern OBJECT Fishs[];
 
@@ -104,7 +108,6 @@ void DeleteObjectTile(int x, int y);
 void DeleteObject(OBJECT* o, OBJECT_BLOCK* ob);
 OBJECT* CreateObject(int Type, vec3_t Position, vec3_t Angle, float Scale = 1.f);
 bool SaveObjects(wchar_t* FileName, int iMapNumber);
-int OpenObjects(wchar_t* FileName);
 int OpenObjectsEnc(wchar_t* FileName);
 void SaveTrapObjects(wchar_t* FileName);
 

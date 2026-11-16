@@ -27,6 +27,7 @@
 #ifdef MU_TEST_COMBAT_AOT_TRANSPORT
 #include <winsock2.h>
 #include "Dotnet/Connection.h"
+#include "Dotnet/SymbolSources/ManagedLibrarySource.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Sprites/GpuUploadSkip.h"
 #include "Render/Textures/TextureFailure.h"
@@ -374,10 +375,11 @@ struct AcceptedCastFixture : SkillFixture
         characters[0].Dead = 1;
         characters[0].Object.Position[0] = hero.Object.Position[0];
         characters[0].Object.Position[1] = hero.Object.Position[1];
+        InitializeDotNetBridge(DotNetBridge::TargetManagedSymbolSource());
         REQUIRE(munique_client_library_handle != nullptr);
         connection = std::make_unique<Connection>(u"127.0.0.1", peer.port, false, nullptr);
         SocketClient = connection.get();
-        REQUIRE(connection->IsConnected());
+        REQUIRE(connection->State() != Network::ConnectionState::Closed);
         peer.Accept();
         restore.ownsHeadlessServices = true;
         Render::Sprites::SetGpuUploadsSkipped(true);

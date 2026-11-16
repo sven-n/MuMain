@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "GameLogic/Skills/SkillHotkeyConfiguration.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowObject.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -33,7 +34,7 @@ namespace mu::ui::window
     {
         enum
         {
-            SKILLHOTKEY_COUNT = 10
+            SKILLHOTKEY_COUNT = GameLogic::Skills::HotkeyConfiguration::HotkeyCount
         };
 
     public:
@@ -68,7 +69,8 @@ namespace mu::ui::window
 
         void Reset();
 
-        void SetHotKey(int iHotKey, int iSkillType);
+        // Whether the binding changed.
+        bool SetHotKey(int iHotKey, int iSkillType);
         int GetHotKey(int iHotKey);
         int GetSkillIndex(int iSkillType);
 

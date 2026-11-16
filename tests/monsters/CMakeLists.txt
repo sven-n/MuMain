@@ -6,6 +6,7 @@
 mu_add_test(
     NAME monster_model_recorder_tests
     SOURCES
+        MonsterCreationRecorder.cpp
         MonsterCreationScope.cpp
         MonsterModelRecorder.cpp
         test_monster_model_recorder.cpp
@@ -16,10 +17,30 @@ mu_add_test(
         test_monster_sound_events.cpp
         test_monster_sound_event_loads.cpp
         test_monster_creation_models.cpp
+        test_monster_creation_recorder.cpp
+        test_monster_setup.cpp
+        test_npc_talk.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
 )
 target_compile_definitions(monster_model_recorder_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The per-map file lists (Data/Maps/Files): the game's loads run on the client folder, recorded by what they read.
+mu_add_test(
+    NAME map_file_lists_tests
+    SOURCES
+        MonsterCreationRecorder.cpp
+        MonsterCreationScope.cpp
+        MonsterModelRecorder.cpp
+        test_map_file_lists.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(map_file_lists_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 )

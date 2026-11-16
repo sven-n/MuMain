@@ -7,12 +7,15 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdlib>
 
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
+#include "Core/Content/ContentStore.h"
+#include "Core/Platform/UserFolder.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/WinIni.h"  // private-profile (.ini) API
-#include "Core/Platform/Dpapi.h"   // Legacy credential format migration
 #include "Core/Platform/PlatformCrypto.h"
 
 GameConfig& GameConfig::GetInstance()
@@ -47,10 +50,43 @@ GameConfig::GameConfig()
         *(lastSlash + 1) = L'\0';  // Keep the trailing separator
     }
 
-    m_configPath = exePath;
-    m_configPath += L"config.ini";
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    const char* overridePath = std::getenv(CfgFiles::CfgEnvConfigPath);
+#else
+    const char* overridePath = nullptr;
+#endif
+    m_configPath = GameConfigValidation::ResolveConfigPath(Core::Platform::UserFolder(), overridePath);
+    if (overridePath == nullptr || overridePath[0] == '\0')
+    {
+        SeedFromExecutableFolder(std::filesystem::path(exePath) / CfgFiles::CfgFileName);
+    }
 
     Load();
+}
+
+void GameConfig::SeedFromExecutableFolder(const std::filesystem::path& legacyConfig) const
+{
+    using Core::Platform::Seeded;
+    const Seeded seeded = Core::Platform::SeedUserFile(m_configPath, legacyConfig,
+                                                       Content::ReadFile(Core::Platform::ShippedDefaultsFile));
+    const auto log = mu::log::Get("core");
+    switch (seeded)
+    {
+    case Seeded::FromLegacy:
+        log->info("config.ini: copied from the one next to the executable; that one is no longer read");
+        break;
+    case Seeded::FromDefaults:
+        log->info("config.ini: created from {}", Core::Platform::ShippedDefaultsFile);
+        break;
+    case Seeded::Nothing:
+        log->warn("config.ini: no {} to create it from; using built-in defaults", Core::Platform::ShippedDefaultsFile);
+        break;
+    case Seeded::Failed:
+        log->error("config.ini: could not be created in the user folder");
+        break;
+    case Seeded::Existing:
+        break;
+    }
 }
 
 void GameConfig::Load()
@@ -102,6 +138,7 @@ void GameConfig::Load()
     m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
     m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
     m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
+    m_enhancedMovement = ReadBool(CfgSectionRender, CfgKeyEnhancedMovement, CfgDefaultEnhancedMovement);
 
     m_renderBackend = GameConfigValidation::ValidateRenderBackend(
         ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
@@ -171,6 +208,7 @@ void GameConfig::Save()
     WriteBool(CfgSectionRender, CfgKeySunlight, m_sunlight);
     WriteBool(CfgSectionRender, CfgKeyLightMood, m_lightMood);
     WriteBool(CfgSectionRender, CfgKeyPostProcessing, m_postProcessing);
+    WriteBool(CfgSectionRender, CfgKeyEnhancedMovement, m_enhancedMovement);
     WriteBool(CfgSectionRender, CfgKeyDisableEffects, m_disableEffects);
     WriteBool(CfgSectionRender, CfgKeyDisableParticles, m_disableParticles);
     WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);
@@ -520,22 +558,13 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
     if (encryptedData.empty()) return L"";
 
     std::vector<std::uint8_t> decryptedData;
-    if (mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decryptedData))
+    if (mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decryptedData) ||
+        mu_decrypt_legacy_blob(encryptedData.data(), encryptedData.size(), decryptedData))
     {
         std::wstring result(reinterpret_cast<const wchar_t*>(decryptedData.data()), decryptedData.size() / sizeof(wchar_t));
         if (!result.empty() && result.back() == L'\0') {
             result.pop_back();
         }
-        return result;
-    }
-
-    DATA_BLOB dataIn = { static_cast<DWORD>(encryptedData.size()), encryptedData.data() };
-    DATA_BLOB dataOut = {};
-    if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
-    {
-        std::wstring result(reinterpret_cast<wchar_t*>(dataOut.pbData), dataOut.cbData / sizeof(wchar_t));
-        LocalFree(dataOut.pbData);
-        if (!result.empty() && result.back() == L'\0') result.pop_back();
         return result;
     }
 
@@ -557,6 +586,17 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
 
 void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* pass)
 {
+    if (!mu_credentials_available())
+    {
+        static bool reported = false;
+        if (!reported)
+        {
+            g_ErrorReport.Write(L"Saved logins are not available on this platform.\r\n");
+            reported = true;
+        }
+        return;
+    }
+
     std::wstring encUser = EncryptSetting(user);
     if (encUser.empty())
     {

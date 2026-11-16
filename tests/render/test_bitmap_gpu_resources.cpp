@@ -7,6 +7,7 @@
 #include <barrier>
 #include <cstdint>
 #include <cstring>
+#include <map>
 #include <string>
 #include <thread>
 #include <utility>
@@ -21,15 +22,19 @@ template <typename T> int Index(T* handle);
 struct Fake
 {
     static inline Fake* active = nullptr;
-    std::array<int, 128> tokens{};
-    int transfers = 0, samplers = 0, textures = 0, waits = 0, releases = 0, fences = 0, mipmaps = 0;
+    // Handles: transfer buffer n is token kTransferBase + n, its fence kFenceBase + n.
+    static constexpr int kTransferBase = 100, kFenceBase = 600;
+    std::array<int, 1100> tokens{};
+    int transfers = 0, samplers = 0, textures = 0, waits = 0, finishedWaits = 0, releases = 0, fences = 0, mipmaps = 0;
     int failureAt = -1, creates = 0;
     const char* failure = "original SDL error";
     bool failWait = false, failSubmit = false, failMap = false, failAcquire = false, failBegin = false;
-    bool failTexture = false;
+    bool failTexture = false, failGrow = false;
+    // Whether the GPU has finished a submission by the time its fence is queried.
+    bool gpuFinishes = true;
     bool mapped = false, cycled = false, overwrite = false, canceled = false;
-    std::array<std::vector<std::uint8_t>, Owner::kSlotCount> bytes;
-    std::array<bool, Owner::kSlotCount> busy{};
+    std::map<int, std::vector<std::uint8_t>> bytes;
+    std::map<int, bool> busy;
     std::vector<SDL_GPUSamplerCreateInfo> descriptors;
     SDL_GPUTextureTransferInfo source{};
     SDL_GPUTextureRegion destination{};
@@ -41,8 +46,6 @@ struct Fake
     Fake()
     {
         active = this;
-        for (auto& b : bytes)
-            b.resize(Owner::kSlotCapacity);
     }
     ~Fake()
     {
@@ -55,9 +58,12 @@ struct Fake
     static SDL_GPUTransferBuffer* CreateTransfer(SDL_GPUDevice*, const SDL_GPUTransferBufferCreateInfo* info)
     {
         CHECK(info->size == Owner::kSlotCapacity);
-        if (active->ShouldFail())
+        if (active->ShouldFail() ||
+            (active->failGrow && active->transfers >= static_cast<int>(Owner::kMinimumSlotCount)))
             return nullptr;
-        return Handle<SDL_GPUTransferBuffer>(++active->transfers);
+        ++active->transfers;
+        active->bytes[active->transfers].resize(Owner::kSlotCapacity);
+        return Handle<SDL_GPUTransferBuffer>(kTransferBase + active->transfers);
     }
     static void ReleaseTransfer(SDL_GPUDevice*, SDL_GPUTransferBuffer*)
     {
@@ -88,7 +94,7 @@ struct Fake
     }
     static void* Map(SDL_GPUDevice*, SDL_GPUTransferBuffer* buffer, bool cycle)
     {
-        auto index = (Index(buffer) - 1) % static_cast<int>(Owner::kSlotCount);
+        const int index = Index(buffer) - kTransferBase;
         active->cycled |= cycle;
         active->overwrite |= active->busy[index];
         active->mapped = true;
@@ -132,19 +138,32 @@ struct Fake
     {
         if (active->failSubmit)
             return nullptr;
-        const auto slot = (Index(active->source.transfer_buffer) - 1) % static_cast<int>(Owner::kSlotCount);
+        const int slot = Index(active->source.transfer_buffer) - kTransferBase;
         active->busy[slot] = true;
         ++active->fences;
-        return Handle<SDL_GPUFence>(static_cast<int>(slot) + 1);
+        return Handle<SDL_GPUFence>(kFenceBase + slot);
+    }
+    static bool Query(SDL_GPUDevice*, SDL_GPUFence* fence)
+    {
+        const int slot = Index(fence) - kFenceBase;
+        if (active->gpuFinishes)
+            active->busy[slot] = false;
+        return !active->busy[slot];
     }
     static bool Wait(SDL_GPUDevice*, bool all, SDL_GPUFence* const* fences, Uint32 count)
     {
         CHECK(all);
         CHECK(count == 1);
+        // Only a wait on a fence the GPU hasn't finished blocks; one on a finished fence returns at once.
+        if (!active->busy[Index(*fences) - kFenceBase])
+        {
+            ++active->finishedWaits;
+            return true;
+        }
         ++active->waits;
         if (active->failWait)
             return false;
-        active->busy[Index(*fences) - 1] = false;
+        active->busy[Index(*fences) - kFenceBase] = false;
         return true;
     }
     static void ReleaseFence(SDL_GPUDevice*, SDL_GPUFence*)
@@ -174,6 +193,7 @@ struct Fake
         c.generateMipmaps = GenerateMipmaps;
         c.cancel = Cancel;
         c.submit = Submit;
+        c.query = Query;
         c.wait = Wait;
         c.releaseFence = ReleaseFence;
         c.getError = Error;
@@ -187,6 +207,11 @@ template <typename T> T* Handle(int n)
 template <typename T> int Index(T* handle)
 {
     return static_cast<int>(reinterpret_cast<int*>(handle) - Fake::active->tokens.data());
+}
+// The staging bytes an upload's source points at.
+const std::uint8_t* Staged(const SDL_GPUTextureTransferInfo& source)
+{
+    return Fake::active->bytes[Index(source.transfer_buffer) - Fake::kTransferBase].data() + source.offset;
 }
 
 constexpr auto filter = SDL_GPU_FILTER_LINEAR;
@@ -231,7 +256,7 @@ TEST_CASE("bitmap owner fixed allocations and sampler descriptors")
     CHECK(fake.releases == 7);
 }
 
-TEST_CASE("bitmap owner uses only three uncycled slots for repeated uploads")
+TEST_CASE("repeated uploads share the open slot and never wait while the GPU keeps up")
 {
     Fake fake;
     Owner owner(fake.Calls());
@@ -246,8 +271,8 @@ TEST_CASE("bitmap owner uses only three uncycled slots for repeated uploads")
         if (!shared)
             shared = result.sampler;
         CHECK(result.sampler == shared);
-        CHECK(fake.source.offset == 0);
-        CHECK(fake.source.pixels_per_row == 128);
+        // 65 pixels take a 512-byte pitch: each upload's two rows are 1 KiB, 4096 to a slot.
+        CHECK(fake.source.offset == static_cast<Uint32>(i % 4096) * 1024u);
         CHECK(fake.source.rows_per_layer == 2);
         CHECK(fake.destination.w == 65);
         CHECK(fake.destination.h == 2);
@@ -255,12 +280,32 @@ TEST_CASE("bitmap owner uses only three uncycled slots for repeated uploads")
     }
     CHECK(fake.transfers == 3);
     CHECK(fake.samplers == 4);
-    CHECK(fake.waits == 10001 - 3);
-    CHECK(fake.fences == 3);
+    CHECK(fake.waits == 0);
+    CHECK(fake.fences == 2); // two full slots submitted; the third is still open
     CHECK_FALSE(fake.overwrite);
     CHECK_FALSE(fake.cycled);
     CHECK(owner.Shutdown());
     CHECK(fake.fences == 0);
+}
+
+TEST_CASE("bitmap owner stages rows at the platform's row pitch")
+{
+#if defined(__APPLE__)
+    static_assert(Owner::kRowAlignment == Owner::kBytesPerPixel);
+    constexpr Uint32 kExpectedPixelsPerRow = 65;
+#else
+    static_assert(Owner::kRowAlignment == 256u);
+    constexpr Uint32 kExpectedPixelsPerRow = 128;
+#endif
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> pixels(std::size_t{65} * 2u * 4u, 0x5a);
+    auto result = owner.Upload(pixels, 65, 2, filter, wrap);
+    REQUIRE(result);
+    CHECK(fake.source.pixels_per_row == kExpectedPixelsPerRow);
+    fake.Calls().releaseTexture(Device(), result.texture);
+    CHECK(owner.Shutdown());
 }
 
 TEST_CASE("bitmap owner checks dimensions and copies exact rows")
@@ -273,19 +318,15 @@ TEST_CASE("bitmap owner checks dimensions and copies exact rows")
         std::vector<std::uint8_t> pixels(static_cast<std::size_t>(width) * 8u + 1u, 0xa5);
         auto result = owner.Upload(std::span(pixels).first(pixels.size() - 1), width, 2, filter, wrap);
         REQUIRE(result);
-        const auto slot = (Index(fake.source.transfer_buffer) - 1) % static_cast<int>(Owner::kSlotCount);
+        const std::uint8_t* staged = Staged(fake.source);
         const auto pitch = fake.source.pixels_per_row * 4;
-        CHECK(std::memcmp(fake.bytes[slot].data(), pixels.data(), static_cast<std::size_t>(width) * 4u) == 0);
+        CHECK(std::memcmp(staged, pixels.data(), static_cast<std::size_t>(width) * 4u) == 0);
         const auto visibleRowBytes = static_cast<std::size_t>(width) * 4u;
-        CHECK(std::memcmp(fake.bytes[slot].data() + pitch, pixels.data() + visibleRowBytes, visibleRowBytes) == 0);
-        if (fake.waits == 0) // Fresh slots have zeroed poison space; reuse need not clear padding.
-        {
-            CHECK(std::all_of(fake.bytes[slot].begin() + visibleRowBytes, fake.bytes[slot].begin() + pitch,
-                              [](std::uint8_t byte) { return byte == 0; }));
-            CHECK(std::all_of(fake.bytes[slot].begin() + pitch + visibleRowBytes,
-                              fake.bytes[slot].begin() + std::size_t{2} * pitch,
-                              [](std::uint8_t byte) { return byte == 0; }));
-        }
+        CHECK(std::memcmp(staged + pitch, pixels.data() + visibleRowBytes, visibleRowBytes) == 0);
+        // The staged bytes are fresh here (the fake zeroes new slots): row padding is left alone.
+        CHECK(std::all_of(staged + visibleRowBytes, staged + pitch, [](std::uint8_t byte) { return byte == 0; }));
+        CHECK(std::all_of(staged + pitch + visibleRowBytes, staged + std::size_t{2} * pitch,
+                          [](std::uint8_t byte) { return byte == 0; }));
         fake.Calls().releaseTexture(Device(), result.texture);
     }
     std::vector<std::uint8_t> maximum(Owner::kSlotCapacity, 0x2a);
@@ -306,8 +347,7 @@ TEST_CASE("bitmap owner checks dimensions and copies exact rows")
 TEST_CASE("bitmap owner fails one upload on GPU errors and faults only without a usable slot")
 {
     // Texture, map, acquire and begin-copy fail before the slot is in use: only that upload fails.
-    // A failed submit takes its slot out of service, and the next upload uses another.
-    for (int stage = 0; stage < 5; ++stage)
+    for (int stage = 0; stage < 4; ++stage)
     {
         Fake fake;
         Owner owner(fake.Calls());
@@ -316,30 +356,34 @@ TEST_CASE("bitmap owner fails one upload on GPU errors and faults only without a
         fake.failMap = stage == 1;
         fake.failAcquire = stage == 2;
         fake.failBegin = stage == 3;
-        fake.failSubmit = stage == 4;
         std::array<std::uint8_t, 4> pixels{};
         CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
         CHECK_FALSE(owner.IsFaulted());
         CHECK(owner.LastError() == "original SDL error");
         CHECK(fake.canceled == (stage == 3));
-        fake.failTexture = fake.failMap = fake.failAcquire = fake.failBegin = fake.failSubmit = false;
+        fake.failTexture = fake.failMap = fake.failAcquire = fake.failBegin = false;
         auto next = owner.Upload(pixels, 1, 1, filter, wrap);
         REQUIRE(next);
         fake.Calls().releaseTexture(Device(), next.texture);
         owner.Shutdown();
     }
     {
+        // A failed submit (at the flush that sends the open slot) takes that slot out of service; the next upload
+        // uses another, and the uploader faults only once every slot is lost.
         Fake fake;
         Owner owner(fake.Calls());
         REQUIRE(owner.Initialize(Device()));
-        fake.failSubmit = true;
         std::array<std::uint8_t, 4> pixels{};
-        for (std::size_t lost = 1; lost <= Owner::kSlotCount; ++lost)
+        for (std::size_t lost = 1; lost <= Owner::kMinimumSlotCount; ++lost)
         {
-            CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
-            CHECK(owner.IsFaulted() == (lost == Owner::kSlotCount));
+            auto staged = owner.Upload(pixels, 1, 1, filter, wrap);
+            REQUIRE(staged);
+            fake.Calls().releaseTexture(Device(), staged.texture);
+            fake.failSubmit = true;
+            CHECK_FALSE(owner.Flush());
+            fake.failSubmit = false;
+            CHECK(owner.IsFaulted() == (lost == Owner::kMinimumSlotCount));
         }
-        fake.failSubmit = false;
         const auto texturesBefore = fake.textures;
         const auto rejected = owner.Upload(pixels, 1, 1, filter, wrap);
         CHECK_FALSE(rejected);
@@ -347,26 +391,6 @@ TEST_CASE("bitmap owner fails one upload on GPU errors and faults only without a
         CHECK(fake.textures == texturesBefore);
         owner.Shutdown();
     }
-    Fake fake;
-    Owner owner(fake.Calls());
-    REQUIRE(owner.Initialize(Device()));
-    std::array<std::uint8_t, 4> pixels{};
-    auto result = owner.Upload(pixels, 1, 1, filter, wrap);
-    REQUIRE(result);
-    fake.Calls().releaseTexture(Device(), result.texture);
-    for (int i = 0; i < 2; ++i)
-    {
-        result = owner.Upload(pixels, 1, 1, filter, wrap);
-        REQUIRE(result);
-        fake.Calls().releaseTexture(Device(), result.texture);
-    }
-    fake.failWait = true;
-    CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
-    CHECK_FALSE(owner.IsFaulted()); // that slot only
-    CHECK(fake.fences == 3);
-    CHECK(fake.textures == 3);
-    owner.Shutdown();
-    CHECK(fake.fences == 0);
 }
 
 TEST_CASE("bitmap owner rejects uploads from a different thread and can recreate after shutdown")
@@ -487,8 +511,7 @@ TEST_CASE("bitmap owner stages upscaled images in bands and builds their mips la
     CHECK(fake.destination.y == 1024);
     CHECK(fake.destination.h == 6);
     CHECK(fake.source.rows_per_layer == 6);
-    const auto slot = (Index(fake.source.transfer_buffer) - 1) % static_cast<int>(Owner::kSlotCount);
-    CHECK(fake.bytes[slot][0] == 1024 % 251);
+    CHECK(Staged(fake.source)[0] == 1024 % 251);
     CHECK(fake.textures == 1);
     CHECK(fake.texture.num_levels == 12);
     CHECK((fake.texture.usage & SDL_GPU_TEXTUREUSAGE_COLOR_TARGET) != 0);
@@ -531,8 +554,9 @@ TEST_CASE("a full 1024x1024 mip chain uploads through the fixed staging slots")
     REQUIRE(result);
     CHECK(fake.textures == 1);
     CHECK(fake.textureLevels == 11);
-    // Level 0 fills a slot by itself; the ten smaller levels share the next one.
-    CHECK(fake.fences == 2);
+    // Level 0 fills a slot by itself and goes when the next level doesn't fit; the ten smaller levels share the next
+    // slot, which stays open for later uploads until the flush.
+    CHECK(fake.fences == 1);
     REQUIRE(fake.uploads.size() == 11);
     for (std::size_t level = 0; level < fake.uploads.size(); ++level)
     {
@@ -544,9 +568,10 @@ TEST_CASE("a full 1024x1024 mip chain uploads through the fixed staging slots")
         CHECK(source.offset % Owner::kLevelAlignment == 0);
         CHECK(source.offset + static_cast<std::uint64_t>(source.pixels_per_row) * 4u * source.rows_per_layer <=
               Owner::kSlotCapacity);
-        const auto slot = (Index(source.transfer_buffer) - 1) % static_cast<int>(Owner::kSlotCount);
-        CHECK(fake.bytes[slot][source.offset] == level);
+        CHECK(Staged(source)[0] == level);
     }
+    CHECK(owner.Flush());
+    CHECK(fake.fences == 2);
 }
 
 TEST_CASE("a mip chain whose levels do not halve is refused before anything is created")
@@ -563,4 +588,267 @@ TEST_CASE("a mip chain whose levels do not halve is refused before anything is c
     CHECK(fake.textures == 0);
     CHECK(fake.uploads.empty());
     CHECK(owner.LastStage() == "upload: invalid mip chain");
+}
+
+TEST_CASE("bitmap uploads share a submission until the slot is full or the flush")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    // 65 pixels of 4 bytes take a 512-byte pitch; two rows are 1024 bytes, a multiple of the level alignment.
+    std::vector<std::uint8_t> small(std::size_t{65} * 2u * 4u, 0x5a);
+    for (int i = 0; i < 100; ++i)
+    {
+        auto result = owner.Upload(small, 65, 2, filter, wrap);
+        REQUIRE(result);
+        CHECK(fake.source.offset == static_cast<Uint32>(i) * 1024u);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(fake.fences == 0);
+    CHECK(fake.waits == 0);
+    CHECK(owner.Flush());
+    CHECK(fake.fences == 1);
+
+    // A full-size image fills a slot: each one submits the batch it started.
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    for (int i = 0; i < 5; ++i)
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        REQUIRE(result);
+        CHECK(fake.source.offset == 0);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(owner.Flush());
+    CHECK(owner.Flush());
+    CHECK(fake.waits == 0);
+    CHECK(fake.transfers == 3); // the GPU kept up: no slot was added
+    // A finished slot is still waited on, which returns at once: SDL's Vulkan backend cleans up there.
+    CHECK(fake.finishedWaits > 0);
+    CHECK_FALSE(fake.overwrite);
+    CHECK(owner.Shutdown());
+    CHECK(fake.fences == 0);
+}
+
+TEST_CASE("an open slot at shutdown is submitted and retired")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> small(std::size_t{65} * 2u * 4u, 0x5a);
+    auto result = owner.Upload(small, 65, 2, filter, wrap);
+    REQUIRE(result);
+    CHECK(fake.fences == 0);
+    CHECK(owner.Shutdown());
+    CHECK(fake.fences == 0);
+    CHECK(fake.waits == 1);
+}
+
+TEST_CASE("a busy ring grows instead of waiting, reports what is in flight, and trims back once idle")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    fake.gpuFinishes = false;
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    // Each full image fills a slot; the GPU finishes none of them.
+    for (int i = 0; i < 10; ++i)
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        REQUIRE(result);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(fake.waits == 0);
+    CHECK(fake.transfers == 10);
+    CHECK_FALSE(fake.overwrite);
+    CHECK(owner.BytesInFlight() == 10 * Owner::kSlotCapacity); // nine submitted, one open and full
+    CHECK(owner.OverStagingCap());
+
+    fake.gpuFinishes = true;
+    CHECK(owner.BytesInFlight() == Owner::kSlotCapacity); // only the open slot
+    CHECK_FALSE(owner.OverStagingCap());
+    const int releasesBefore = fake.releases;
+    for (int frame = 1; frame < Owner::kIdleFramesBeforeTrim; ++frame)
+        owner.TrimIdleSlots();
+    CHECK(fake.releases == releasesBefore);
+    owner.TrimIdleSlots();
+    // Down to the minimum; the open slot is kept.
+    CHECK(fake.releases - releasesBefore == 10 - static_cast<int>(Owner::kMinimumSlotCount));
+
+    // The trimmed ring still works.
+    auto after = owner.Upload(full, 1024, 1024, filter, wrap);
+    REQUIRE(after);
+    fake.Calls().releaseTexture(Device(), after.texture);
+    CHECK(owner.Shutdown());
+    CHECK(fake.fences == 0);
+}
+
+TEST_CASE("an upload outside any load reaches the GPU with the next flush, even frames later")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> small(std::size_t{65} * 2u * 4u, 0x5a);
+    auto first = owner.Upload(small, 65, 2, filter, wrap);
+    REQUIRE(first);
+    owner.TrimIdleSlots(); // a frame passes without a flush (no frame was drawn)
+    auto second = owner.Upload(small, 65, 2, filter, wrap);
+    REQUIRE(second);
+    CHECK(fake.fences == 0);
+    REQUIRE(fake.uploads.size() == 2);
+    CHECK(fake.uploads[0].first.transfer_buffer == fake.uploads[1].first.transfer_buffer);
+    CHECK(owner.Flush());
+    CHECK(fake.fences == 1);
+    CHECK(fake.waits == 0);
+    fake.Calls().releaseTexture(Device(), first.texture);
+    fake.Calls().releaseTexture(Device(), second.texture);
+    CHECK(owner.Shutdown());
+}
+
+TEST_CASE("runtime uploads carry a submission across frames and an upload larger than the open slot")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> small(std::size_t{65} * 2u * 4u, 0x5a);
+    for (int frame = 0; frame < 4; ++frame)
+    {
+        auto result = owner.Upload(small, 65, 2, filter, wrap);
+        REQUIRE(result);
+        CHECK(fake.source.offset == 0u); // each frame opens a fresh slot after its flush
+        fake.Calls().releaseTexture(Device(), result.texture);
+        CHECK(owner.Flush());
+    }
+    CHECK(fake.fences == 3);
+    CHECK_FALSE(owner.IsFaulted());
+    // A 1024x1024 RGBA image is exactly one slot: it fills the open slot by itself.
+    std::vector<std::uint8_t> large(Owner::kSlotCapacity, 0x3c);
+    auto big = owner.Upload(large, 1024, 1024, filter, wrap);
+    REQUIRE(big);
+    CHECK(fake.source.offset == 0u);
+    CHECK(fake.uploads.size() == 5u); // four small frames plus the large image
+    fake.Calls().releaseTexture(Device(), big.texture);
+    CHECK(owner.Flush());
+    CHECK_FALSE(owner.IsFaulted());
+    CHECK(owner.Shutdown());
+    CHECK(fake.fences == 0);
+}
+
+TEST_CASE("without memory for another slot a busy ring waits, and a failed wait loses only that slot")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    fake.gpuFinishes = false;
+    fake.failGrow = true;
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    for (int i = 0; i < 4; ++i)
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        REQUIRE(result);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(fake.transfers == 3);
+    CHECK(fake.waits == 1);
+    CHECK_FALSE(fake.overwrite);
+
+    fake.failWait = true;
+    CHECK_FALSE(owner.Upload(full, 1024, 1024, filter, wrap));
+    CHECK_FALSE(owner.IsFaulted()); // that slot only
+    owner.Shutdown();
+}
+
+TEST_CASE("a busy ring stops growing at its ceiling and waits there")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    fake.gpuFinishes = false;
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    for (std::size_t i = 0; i <= Owner::kMaximumSlotCount; ++i)
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        REQUIRE(result);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(fake.transfers == static_cast<int>(Owner::kMaximumSlotCount));
+    CHECK(fake.waits == 1);
+    CHECK_FALSE(fake.overwrite);
+    owner.Shutdown();
+}
+
+TEST_CASE("a trim that removes the next slot never leaves the ring on a lost one")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    const auto upload = [&]
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        if (result)
+            fake.Calls().releaseTexture(Device(), result.texture);
+        return static_cast<bool>(result);
+    };
+    // Four busy slots; the fourth fails to submit and is lost; a fifth is added.
+    fake.gpuFinishes = false;
+    for (int i = 0; i < 4; ++i)
+        REQUIRE(upload());
+    fake.failSubmit = true;
+    CHECK_FALSE(upload());
+    fake.failSubmit = false;
+    REQUIRE(upload());
+    auto* const lost = Handle<SDL_GPUTransferBuffer>(Fake::kTransferBase + 4);
+    // The GPU catches up; two uploads leave the next slot just before the lost one, with nothing open.
+    fake.gpuFinishes = true;
+    CHECK(owner.Flush());
+    REQUIRE(upload());
+    REQUIRE(upload());
+    CHECK(owner.Flush());
+    for (int frame = 0; frame < Owner::kIdleFramesBeforeTrim; ++frame)
+        owner.TrimIdleSlots();
+    // Every live slot busy and no memory for another: the upload waits on a live slot, not the lost one.
+    fake.gpuFinishes = false;
+    fake.failGrow = true;
+    REQUIRE(upload());
+    CHECK(fake.waits == 1);
+    CHECK(fake.uploads.back().first.transfer_buffer != lost);
+    owner.Shutdown();
+}
+
+TEST_CASE("trimming never removes the last usable slot when lost slots fill the minimum")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    const auto upload = [&]
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        if (result)
+            fake.Calls().releaseTexture(Device(), result.texture);
+        return static_cast<bool>(result);
+    };
+    // Four slots, the fourth open; it is lost to a failed submit.
+    fake.gpuFinishes = false;
+    for (int i = 0; i < 4; ++i)
+        REQUIRE(upload());
+    fake.failSubmit = true;
+    CHECK_FALSE(owner.Flush());
+    fake.failSubmit = false;
+    // The GPU catches up; slots 0 and 1 are lost the same way. Slot 2 is the only usable one left.
+    fake.gpuFinishes = true;
+    for (int i = 0; i < 2; ++i)
+    {
+        REQUIRE(upload());
+        fake.failSubmit = true;
+        CHECK_FALSE(owner.Flush());
+        fake.failSubmit = false;
+    }
+    CHECK_FALSE(owner.IsFaulted());
+    for (int frame = 0; frame < Owner::kIdleFramesBeforeTrim; ++frame)
+        owner.TrimIdleSlots();
+    // Slot 2 was kept, so the ring still uploads.
+    CHECK_FALSE(owner.IsFaulted());
+    CHECK(upload());
+    owner.Shutdown();
 }

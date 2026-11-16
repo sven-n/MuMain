@@ -43,8 +43,11 @@ internal sealed class GameClient : IAsyncDisposable
 
     public int ServerPort { get; }
 
-    /// <summary>Starts a client and waits until its control socket answers.</summary>
-    public static async Task<GameClient> StartAsync(ClientOptions options, string role, CancellationToken cancellationToken)
+    /// <summary>
+    /// Starts a client and waits until its control socket answers. With <paramref name="configPath"/>
+    /// the client reads and writes that config.ini instead of the one next to it.
+    /// </summary>
+    public static async Task<GameClient> StartAsync(ClientOptions options, string role, string? configPath, CancellationToken cancellationToken)
     {
         var socketPath = SocketPath(role);
         File.Delete(socketPath);
@@ -57,6 +60,10 @@ internal sealed class GameClient : IAsyncDisposable
             UseShellExecute = false,
         };
         startInfo.Environment["MU_CONTROL_SOCKET"] = socketPath;
+        if (configPath is not null)
+        {
+            startInfo.Environment["MU_CONFIG_PATH"] = configPath;
+        }
         var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"could not start {options.ExecutablePath}");
 
         ControlConnection? control = null;
@@ -103,9 +110,24 @@ internal sealed class GameClient : IAsyncDisposable
     /// <summary>Logs in and enters the world with <paramref name="character"/>.</summary>
     public async Task EnterWorldAsync(string account, string password, string character)
     {
-        await this.SendAsync("login", new { account, password }, WorldTimeout);
-        await this.SendAsync("select-char", new { name = character }, WorldTimeout);
+        await this.LogInAsync(account, password);
+        await this.SelectCharacterAsync(character);
     }
+
+    /// <summary>Logs in up to the character list.</summary>
+    public Task LogInAsync(string account, string password) => this.SendAsync("login", new { account, password }, WorldTimeout);
+
+    /// <summary>Enters the world from the character list with <paramref name="character"/>.</summary>
+    public Task SelectCharacterAsync(string character) => this.SendAsync("select-char", new { name = character }, WorldTimeout);
+
+    /// <summary>Leaves the world for the character list.</summary>
+    public Task LogOutAsync() => this.SendAsync("logout", timeout: WorldTimeout);
+
+    /// <summary>A game master's move to (<paramref name="x"/>, <paramref name="y"/>) on <paramref name="map"/>.</summary>
+    public Task TeleportAsync(int map, int x, int y) => this.SendAsync("teleport", new { map, x, y }, WorldTimeout);
+
+    /// <summary>Runs a <c>$</c> developer command, e.g. <c>$look classic</c>, as if typed into the chat box.</summary>
+    public Task DeveloperCommandAsync(string command) => this.SendAsync("console", new { text = command });
 
     /// <summary>
     /// Warps through the gate <paramref name="gate"/>, unless the character is on

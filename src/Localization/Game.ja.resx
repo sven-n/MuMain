@@ -7561,6 +7561,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%lsの%ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>不明なモンスター %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>私はバグです: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>%lsを取り消しますか？</value>
   </data>

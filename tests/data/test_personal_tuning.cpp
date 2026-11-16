@@ -137,6 +137,27 @@ TEST_CASE("only the changed tuning keys are written, and an emptied section goes
           "[Window]\r\nWidth=1\r\n[EnhancedTuning]\r\nbloom.strength=0.5\r\nmood.strengthPercent=40\r\n");
 }
 
+TEST_CASE("the light mood's values are never player values, read or written [data][config][tuning]")
+{
+    std::vector<std::string> issues;
+    const PersonalTuning tuning = Data::Config::ReadPersonalTuning(
+        "[EnhancedTuning]\nmood.base=0.5\nmood.sun=0.4\nmood.strengthPercent=50\nbloom.strength=0.5\n", issues);
+    CHECK_FALSE(tuning.look[LookValue::MoodBase].has_value());
+    CHECK_FALSE(tuning.look[LookValue::MoodSun].has_value());
+    CHECK(tuning.moodStrengthPercent == 50);
+    CHECK(tuning.look[LookValue::BloomStrength] == 0.5);
+    REQUIRE(issues.size() == 2);
+    CHECK_MESSAGE(issues[0].find("mood.base") != std::string::npos, Join(issues));
+    CHECK_MESSAGE(issues[0].find("is not a tuning value") != std::string::npos, Join(issues));
+
+    // A mood value set in code is not written either.
+    PersonalTuning set;
+    set.look[LookValue::MoodBase] = 0.5;
+    set.look[LookValue::BloomStrength] = 0.5;
+    const std::string written = Data::Config::UpdatePersonalTuningSection(ConfigWithoutTuning, {}, set);
+    CHECK(written == ConfigWithoutTuning + "[EnhancedTuning]\nbloom.strength=0.5\n");
+}
+
 TEST_CASE("two clients saving tuning keep each other's values [data][config][tuning]")
 {
     // Both started from a file without tuning; each saves only what it changed.

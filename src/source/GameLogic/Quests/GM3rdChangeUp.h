@@ -15,9 +15,6 @@ namespace SEASON3A
     class CGM3rdChangeUp
     {
     protected:
-        bool m_nDarkElfAppearance;
-
-    protected:
         CGM3rdChangeUp();
 
     public:
@@ -39,7 +36,6 @@ namespace SEASON3A
         void PlayEffectSound(OBJECT* o);
         void PlayBGM();
 
-        CHARACTER* CreateBalgasBarrackMonster(int iType, int PosX, int PosY, int Key);
         bool AttackEffectBalgasBarrackMonster(CHARACTER* c, OBJECT* o, BMD* b);
         bool MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
         void MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);

@@ -3,8 +3,10 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "UI/Windows/CreditWin.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Core/Input/Input.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -13,7 +15,6 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "App/Platform/Windows/Local.h"
-#include "Core/Platform/PathResolve.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -255,34 +256,27 @@ void CCreditWin::AnimationIllust(DurationMs deltaTime)
 
 void CCreditWin::LoadText()
 {
-#ifdef _WIN32
-    Core::Utilities::FileHandle file(std::fopen(kCreditDataPath.data(), "rb"));
-#else
-	// The path is Windows-spelled (backslashes, mixed case); resolve it against
-	// the case-sensitive filesystem.
-    Core::Utilities::FileHandle file(std::fopen(MuResolvePath(kCreditDataPath.data()).c_str(), "rb"));
-#endif
-	if (!file)
-	{
-		wchar_t szMessage[256];
-		std::swprintf(szMessage, std::size(szMessage), L"%hs file not found.\r\n", kCreditDataPath.data());
-		g_ErrorReport.Write(szMessage);
-		::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-		::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
-		return;
-	}
+    const Content::Stream file = Content::OpenIO(kCreditDataPath);
+    if (!file)
+    {
+        wchar_t szMessage[256];
+        std::swprintf(szMessage, std::size(szMessage), L"%hs file not found.\r\n", kCreditDataPath.data());
+        g_ErrorReport.Write(szMessage);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
+        return;
+    }
 
-	const std::size_t nSize = sizeof(SCreditItem) * CRW_ITEM_MAX;
-	if (std::fread(m_aCredit, nSize, 1, file.get()) != 1)
-	{
-		wchar_t szMessage[256];
-		std::swprintf(szMessage, std::size(szMessage), L"Failed to read %hs file or file is corrupt.\r\n", kCreditDataPath.data());
-		g_ErrorReport.Write(szMessage);
-		::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-		::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
-		return;
-	}
-	::BuxConvert(reinterpret_cast<BYTE*>(m_aCredit), static_cast<int>(nSize));
+    const std::size_t nSize = sizeof(SCreditItem) * CRW_ITEM_MAX;
+    if (!DataFileIO::ReadExact(file.get(), m_aCredit, nSize))
+    {
+        wchar_t szMessage[256];
+        std::swprintf(szMessage, std::size(szMessage), L"Failed to read %hs file or file is corrupt.\r\n",
+                      kCreditDataPath.data());
+        g_ErrorReport.Write(szMessage);
+        Core::Platform::ShowFatalError(L"Error", szMessage);
+        return;
+    }
+    ::BuxConvert(reinterpret_cast<BYTE*>(m_aCredit), static_cast<int>(nSize));
 }
 
 void CCreditWin::SetTextIndex()

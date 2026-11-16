@@ -25,20 +25,32 @@ void SortByName(std::vector<LookDefinition>& looks)
 {
     std::ranges::sort(looks, {}, &LookDefinition::name);
 }
+
+// The model entry's field that names a look of the kind.
+std::string& LookFieldOf(Data::Items::ItemModelDefinition& model, Data::Looks::LookKind kind)
+{
+    return kind == Data::Looks::LookKind::ItemEffect ? model.itemEffect : model.renderStyle;
+}
 } // namespace
 
 LookEdits& LookEdits::GetInstance()
 {
-    static LookEdits instance;
-    return instance;
+    return Of(Data::Looks::LookKind::RenderStyle);
+}
+
+LookEdits& LookEdits::Of(Data::Looks::LookKind kind)
+{
+    static LookEdits renderStyles(Data::Looks::LookKind::RenderStyle);
+    static LookEdits itemEffects(Data::Looks::LookKind::ItemEffect);
+    return kind == Data::Looks::LookKind::ItemEffect ? itemEffects : renderStyles;
 }
 
 const LookEdits::State& LookEdits::GetState() const
 {
-    const State& state = g_ItemDataHandler.GetRenderStyles();
-    if (m_texturesVersion != g_ItemDataHandler.GetRenderStylesVersion())
+    const State& state = g_ItemDataHandler.GetLookFile(m_kind);
+    if (m_texturesVersion != g_ItemDataHandler.GetLooksVersion(m_kind))
     {
-        m_texturesVersion = g_ItemDataHandler.GetRenderStylesVersion();
+        m_texturesVersion = g_ItemDataHandler.GetLooksVersion(m_kind);
         for (const LookDefinition& look : state.looks)
         {
             Render::Items::Looks::PrepareTextures(look);
@@ -58,17 +70,17 @@ int LookEdits::GetVersion() const
 {
     // The read counts too: the first one makes the state the file's.
     static_cast<void>(GetState());
-    return g_ItemDataHandler.GetRenderStylesVersion();
+    return g_ItemDataHandler.GetLooksVersion(m_kind);
 }
 
 const std::vector<Data::Items::ItemDataIssue>& LookEdits::GetIssues() const
 {
-    return g_ItemDataHandler.GetRenderStyleReadIssues();
+    return g_ItemDataHandler.GetLookReadIssues(m_kind);
 }
 
 bool LookEdits::IsComplete() const
 {
-    return g_ItemDataHandler.CanSaveRenderStyles();
+    return g_ItemDataHandler.CanSaveLooks(m_kind);
 }
 
 void LookEdits::SetLook(const char* step, const std::string& name, LookDefinition look)
@@ -131,7 +143,7 @@ void LookEdits::ApplyToItemOnly(const char* step, const std::string& original, L
         return;
     }
     Data::Items::ItemModelDefinition model = *entry;
-    model.renderStyle = copy.name;
+    LookFieldOf(model, m_kind) = copy.name;
     g_ItemEdits.BeginGroup(step);
     AddLook(step, std::move(copy), FolderOf(original));
     g_ItemEdits.SetItemModel(step, model);
@@ -150,7 +162,8 @@ void LookEdits::ApplyToNewItem(const char* step, const std::string& original, Lo
     g_ItemEdits.BeginGroup(step);
     AddLook(step, std::move(copy), FolderOf(original));
     Items::DuplicateItem(step, itemType, newItemType, itemName, true,
-                         [&name](Data::Items::ItemModelDefinition& model) { model.renderStyle = name; });
+                         [&name, kind = m_kind](Data::Items::ItemModelDefinition& model)
+                         { LookFieldOf(model, kind) = name; });
     g_ItemEdits.EndGroup();
 }
 
@@ -161,14 +174,14 @@ Data::Colors::ColorFolderPath LookEdits::FolderOf(const std::string& name) const
 
 void LookEdits::ResetForTest(State state)
 {
-    g_ItemDataHandler.ResetRenderStylesForTest(std::move(state));
+    g_ItemDataHandler.ResetLooksForTest(m_kind, std::move(state));
     // The textures its looks name.
     static_cast<void>(GetState());
 }
 
 void LookEdits::Change(const char* step, State next)
 {
-    g_ItemEdits.SetRenderStyles(step, std::move(next));
+    g_ItemEdits.SetLookFile(step, m_kind, std::move(next));
 }
 } // namespace MuEditor::Looks
 

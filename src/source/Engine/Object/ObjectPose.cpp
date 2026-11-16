@@ -2,7 +2,12 @@
 
 #include "Engine/Object/ObjectPose.h"
 
+#include "Engine/Object/Movement/MovementBones.h"
 #include "Render/Models/ZzzBMD.h"
+
+#include <algorithm>
+
+static_assert(sizeof(Engine::Object::PoseInputs::Movement) == sizeof(Engine::Characters::MovementPoseKey));
 
 namespace
 {
@@ -10,14 +15,20 @@ bool Equal(const vec3_t a, const vec3_t b)
 {
     return a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
 }
+
+// Whether what the movement features add to o's pose is still what the pose was built with.
+bool SameMovement(const Engine::Object::PoseInputs& pose, const OBJECT* o)
+{
+    const Engine::Characters::MovementPoseKey movement = Engine::Characters::CurrentMovementPoseKey(o);
+    return std::equal(movement.begin(), movement.end(), pose.Movement);
+}
 } // namespace
 
 namespace Engine::Object::Pose
 {
 void Build(OBJECT* o, BMD* model)
 {
-    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, false, nullptr, o->CurrentAction);
+    Engine::Characters::AnimateBones(o, *model, o->BoneTransform, o->AnimationFrame, false, o->CurrentAction);
     Record(o, model, false);
 }
 
@@ -35,6 +46,8 @@ void Record(OBJECT* o, const BMD* model, bool world)
     VectorCopy(model->BodyOrigin, pose.Origin);
     pose.Scale = model->BodyScale;
     pose.Height = model->BodyHeight;
+    const Engine::Characters::MovementPoseKey movement = Engine::Characters::CurrentMovementPoseKey(o);
+    std::copy(movement.begin(), movement.end(), pose.Movement);
 }
 
 bool IsCurrent(const OBJECT* o, const BMD* model, bool world)
@@ -46,7 +59,7 @@ bool IsCurrent(const OBJECT* o, const BMD* model, bool world)
         return false;
     return pose.CurrentAction == o->CurrentAction && pose.PriorAction == o->PriorAction &&
            pose.AnimationFrame == o->AnimationFrame && pose.PriorAnimationFrame == o->PriorAnimationFrame &&
-           Equal(pose.Angle, o->Angle) && Equal(pose.HeadAngle, o->HeadAngle);
+           Equal(pose.Angle, o->Angle) && Equal(pose.HeadAngle, o->HeadAngle) && SameMovement(pose, o);
 }
 
 void Invalidate(OBJECT* o)
@@ -67,8 +80,7 @@ float (*World(OBJECT* o, BMD* model))[3][4]
     o->EnableBoneMatrix = true;
     if (!IsCurrent(o, model, true))
     {
-        model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                         o->HeadAngle, false, true, nullptr, o->CurrentAction);
+        Engine::Characters::AnimateBones(o, *model, o->BoneTransform, o->AnimationFrame, true, o->CurrentAction);
         Record(o, model, true);
     }
     return o->BoneTransform;

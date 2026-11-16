@@ -2,6 +2,18 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <cstdint>
+#include <list>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace GameLogic::Warps
+{
+struct ServerWarp;
+}
+
 namespace SEASON3B
 {
     class CMoveCommandData
@@ -33,6 +45,15 @@ namespace SEASON3B
     private:
         std::list<MOVEINFODATA*>	m_listMoveInfoData;
 
+        // The warp list of the data files (movereq_<lang>.bmd), which is shown unless the server sends its own.
+        std::vector<MOVEREQINFO> m_dataFileWarps;
+
+        // One entry per warp index, kept until the end: copies of the list hold pointers to them, which have
+        // to stay valid when the list changes.
+        std::map<int, std::unique_ptr<MOVEINFODATA>> m_entries;
+
+        uint32_t m_listVersion = 0;
+
     protected:
         CMoveCommandData();
     public:
@@ -46,8 +67,20 @@ namespace SEASON3B
         const MOVEINFODATA* GetMoveCommandDataByIndex(int iIndex);
         const std::list<MOVEINFODATA*>& GetMoveCommandDatalist();
 
+        // Shows the warps of the server instead of the ones of the data files (see GameLogic/Warps/WarpListMerge.h).
+        void ApplyServerWarpList(const std::vector<GameLogic::Warps::ServerWarp>& serverWarps);
+
+        // Shows the warps of the data files again, e.g. before connecting to another server.
+        void RestoreDataFileWarpList();
+
+        // Changes whenever the list changes, so that holders of a copy of the list know when to refresh it.
+        uint32_t GetListVersion() const;
+
     protected:
         bool Create(const std::wstring& filename);
         void Release();
+
+    private:
+        void SetList(const std::vector<MOVEREQINFO>& warps);
     };
 }

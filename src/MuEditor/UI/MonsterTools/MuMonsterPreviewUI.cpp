@@ -4,6 +4,8 @@
 #ifdef _EDITOR
 
 #include "MuMonsterPreviewUI.h"
+
+#include "MonsterSetupLists.h"
 #include "GameLogic/Monsters/MonsterModelTimers.h"
 
 #include "MonsterAnimationFacts.h"
@@ -32,6 +34,8 @@
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "../MuEditor/UI/Common/MapPicker.h"
+#include "GameLogic/Monsters/MonsterSetupApply.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -108,8 +112,26 @@ std::optional<Data::Monsters::MonsterSoundMoment> MomentOf(int animation)
 
 // The values the preview plays: the Monster Model tool's, with an edit that
 // is not stored yet, else the model list's. The cues are GetCues'.
+// The player model has no entry in the model list: its own speeds.
+const MonsterModelDefinition& PlayerValues()
+{
+    static MonsterModelDefinition values;
+    if (values.load.speeds.empty() && Models != nullptr)
+    {
+        values.slot = "player";
+        const BMD& model = Models[MODEL_PLAYER];
+        for (int animation = 0; animation < model.NumActions; ++animation)
+            values.load.speeds.emplace_back(animation, model.Actions[animation].PlaySpeed);
+    }
+    return values;
+}
+
 const MonsterModelDefinition* ValuesOf(int slot)
 {
+    if (slot == MODEL_PLAYER)
+    {
+        return &PlayerValues();
+    }
     if (const MonsterModelDefinition* draft = g_MuMonsterModelUI.GetShownDraft(slot))
     {
         return draft;
@@ -172,7 +194,44 @@ void MuMonsterPreviewUI::Render(bool* open)
         {
             RenderVariants(*monster);
         }
-        const std::optional<int> slot = monster != nullptr ? ShownModel::FindShownSlot(*monster) : std::nullopt;
+        if (number != m_pickedNumber)
+        {
+            m_pickedNumber = number;
+            m_mapVariant = -1;
+            m_state.clear();
+        }
+        if (monster != nullptr)
+        {
+            RenderPickers(*monster);
+        }
+        m_monster = monster;
+        std::optional<int> slot = monster != nullptr ? ShownModel::FindShownSlot(*monster) : std::nullopt;
+        // A player-shaped monster: the player model, drawn as its character.
+        if (!slot && monster != nullptr && Data::Monsters::FindMonsterModelReference(monster->model) == MODEL_PLAYER &&
+            Models != nullptr && Models[MODEL_PLAYER].NumActions > 0)
+        {
+            slot = MODEL_PLAYER;
+        }
+        // A map variant's model on its maps.
+        if (monster != nullptr && m_mapVariant >= 0 && ShownModel::GetShownVariant(*monster) < 0)
+        {
+            const std::optional<std::string>& model = monster->mapVariants[static_cast<size_t>(m_mapVariant)].model;
+            const std::optional<int> variantSlot =
+                model ? Data::Monsters::FindMonsterModelReference(*model) : std::nullopt;
+            if (variantSlot && g_MonsterModelDatabase.Find(*variantSlot) != nullptr)
+                slot = variantSlot;
+        }
+        if (!slot)
+        {
+            // The game shows it with the unknown monsters' body (D64).
+            slot = ShownModel::FindUnknownLookSlot(number, monster);
+            if (slot)
+            {
+                ImGui::TextDisabled("%s", I18N::Editor::PreviewUnknownLookNote);
+                // The unknown look is a model only.
+                m_monster = nullptr;
+            }
+        }
         if (monster != nullptr && !slot)
         {
             ShownModel::RenderWhyNoModel(*monster);
@@ -185,6 +244,163 @@ void MuMonsterPreviewUI::Render(bool* open)
         }
     }
     ToolWindow::End();
+}
+
+void MuMonsterPreviewUI::RenderPickers(const MonsterDefinition& monster)
+{
+    if (m_mapVariant >= static_cast<int>(monster.mapVariants.size()))
+        m_mapVariant = -1;
+    // The state variants that apply on the picked map: the map variant's own,
+    // else the monster's.
+    const std::vector<Data::Monsters::MonsterStateVariant>& states =
+        SetupLists::StatesOnMap(monster, StatesMapVariant(monster));
+    m_state = SetupLists::PickedState(states, m_state);
+    ImGui::PushID("Pickers");
+    if (!monster.mapVariants.empty())
+    {
+        ImGui::TextUnformatted(I18N::Editor::Map);
+        ImGui::SameLine();
+        // Another map has other state variants: the state starts at Always.
+        if (ImGui::RadioButton(I18N::Editor::AllMaps, m_mapVariant < 0) && m_mapVariant >= 0)
+        {
+            m_mapVariant = -1;
+            m_state.clear();
+        }
+        for (size_t index = 0; index < monster.mapVariants.size(); ++index)
+        {
+            ImGui::SameLine();
+            const std::string name = MapPicker::Describe(monster.mapVariants[index].maps, I18N::Editor::NoMapYet) +
+                                     "##Map" + std::to_string(index);
+            if (ImGui::RadioButton(name.c_str(), m_mapVariant == static_cast<int>(index)) &&
+                m_mapVariant != static_cast<int>(index))
+            {
+                m_mapVariant = static_cast<int>(index);
+                m_state.clear();
+            }
+        }
+    }
+    const std::vector<Data::Monsters::MonsterStateVariant>& shown =
+        SetupLists::StatesOnMap(monster, StatesMapVariant(monster));
+    if (!shown.empty())
+    {
+        ImGui::TextUnformatted(I18N::Editor::State);
+        ImGui::SameLine();
+        if (ImGui::RadioButton(I18N::Editor::Always, m_state.empty()))
+            m_state.clear();
+        for (size_t index = 0; index < shown.size(); ++index)
+        {
+            ImGui::SameLine();
+            const std::string name = shown[index].state + "##State" + std::to_string(index);
+            if (ImGui::RadioButton(name.c_str(), shown[index].state == m_state))
+                m_state = shown[index].state;
+        }
+    }
+    ImGui::PopID();
+}
+
+MonsterPreviewLook MuMonsterPreviewUI::RenderLookControls(int slot)
+{
+    ImGui::PushID("Look");
+    ImGui::BeginDisabled(m_monster == nullptr);
+    ImGui::Checkbox(I18N::Editor::ShowEquipment, &m_showEquipment);
+    ImGui::SameLine();
+    ImGui::Checkbox(I18N::Editor::PointedAt, &m_pointedAt);
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(AnimationWidth * g_MuEditorCore.GetUIScale() * 0.6f);
+    ImGui::SliderFloat(I18N::Editor::Light, &m_light, 0.0f, 2.0f, "%.2f");
+    const MonsterPreviewLook look = BuildLook();
+    if (m_monster != nullptr)
+    {
+        // The game's ground shadow is left out of the preview (no map, no sun):
+        // said when the setup shown, or the monster's, sets a shadow field.
+        const Data::Monsters::MonsterSetup& setup = look.asCharacter ? look.setup : m_monster->setup;
+        if (setup.shadow || setup.hideShadow)
+        {
+            ImGui::PushTextWrapPos(0.0f);
+            ImGui::TextDisabled("%s", I18N::Editor::PreviewShadowNote);
+            ImGui::PopTextWrapPos();
+        }
+    }
+    if (m_monster != nullptr && m_showEquipment)
+    {
+        const std::optional<Data::Monsters::MonsterItem>& helper = look.setup.equipment.helper;
+        if (helper && Data::Monsters::IsDarkHorse(*helper))
+            ImGui::TextDisabled("%s", I18N::Editor::PreviewMountNote);
+    }
+    // The replays play on the character only.
+    ImGui::BeginDisabled(m_monster == nullptr || !look.asCharacter);
+    if (ImGui::Button(I18N::Editor::ReplaySpawn))
+        m_scene.ReplaySpawn();
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("%s", I18N::Editor::ReplaySpawnTip);
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::ReplayAppear))
+        PlayAppear(slot);
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        ImGui::SetTooltip("%s", I18N::Editor::ReplayAppearTip);
+    ImGui::EndDisabled();
+    ImGui::PopID();
+    return look;
+}
+
+// As a spawn fills an appear that names no animation: a player-shaped
+// monster comes up (PLAYER_COME_UP); a start frame without an animation is
+// on the animation shown.
+void MuMonsterPreviewUI::PlayAppear(int slot)
+{
+    const MonsterPreviewLook look = BuildLook();
+    const Data::Monsters::MonsterAppear appear = look.setup.appear.value_or(Data::Monsters::MonsterAppear{});
+    // The animation as the game's appear picks it.
+    const std::optional<int> action = GameLogic::Monsters::Setup::AppearAction(appear, slot, true);
+    m_playing = true;
+    if (action && *action >= 0 && *action < Models[slot].NumActions)
+    {
+        m_animation = *action;
+        m_once = true;
+        Restart(slot);
+    }
+    if (appear.startFrame)
+        m_frame = *appear.startFrame;
+    m_scene.ReplayAppear(m_sounds);
+}
+
+int MuMonsterPreviewUI::StatesMapVariant(const MonsterDefinition& monster) const
+{
+    // A map variant without maps yet is drawn with All maps' setup (SetupFor
+    // has no map for it), so its state is one of the monster's.
+    if (m_mapVariant < 0 || monster.mapVariants[static_cast<size_t>(m_mapVariant)].maps.empty())
+        return -1;
+    return m_mapVariant;
+}
+
+MonsterPreviewLook MuMonsterPreviewUI::BuildLook() const
+{
+    MonsterPreviewLook look;
+    look.light = m_light;
+    // The player model shows nothing without its character's parts.
+    const bool player =
+        m_monster != nullptr && Data::Monsters::FindMonsterModelReference(m_monster->model) == MODEL_PLAYER;
+    if (m_monster == nullptr || (!m_showEquipment && !m_pointedAt && !player))
+        return look;
+    look.asCharacter = true;
+    look.number = m_monster->number;
+    look.kind = Data::Monsters::GetMonsterObjectKind(m_monster->number);
+    std::optional<Data::Maps::MapRef> map;
+    if (m_mapVariant >= 0 && !m_monster->mapVariants[static_cast<size_t>(m_mapVariant)].maps.empty())
+        map = m_monster->mapVariants[static_cast<size_t>(m_mapVariant)].maps.front();
+    // The picked state of those that apply on the map.
+    const std::vector<Data::Monsters::MonsterStateVariant>& states =
+        SetupLists::StatesOnMap(*m_monster, StatesMapVariant(*m_monster));
+    const std::string state = SetupLists::PickedState(states, m_state);
+    look.setup = GameLogic::Monsters::Setup::SetupFor(*m_monster, map, state);
+    const int variant = ShownModel::GetShownVariant(*m_monster);
+    if (variant >= 0 && m_monster->randomVariants[static_cast<size_t>(variant)].equipment)
+        look.setup.equipment = *m_monster->randomVariants[static_cast<size_t>(variant)].equipment;
+    if (!m_showEquipment)
+        look.setup.equipment = {};
+    look.pointedAt = m_pointedAt;
+    return look;
 }
 
 // The looks of a monster with random variants (Q-MN83): the model shown and
@@ -273,9 +489,14 @@ void MuMonsterPreviewUI::PlayDrawnSounds(int slot)
 
 void MuMonsterPreviewUI::RenderPreview(int slot)
 {
-    ShownModel::OpenWhenShown(slot);
+    // The game opens the player model at its start.
+    const bool player = slot == MODEL_PLAYER;
+    if (!player)
+    {
+        ShownModel::OpenWhenShown(slot);
+    }
     const MonsterModelDefinition* values = ValuesOf(slot);
-    if (!ShownModel::IsOpen(slot) || values == nullptr || Models[slot].NumActions <= 0)
+    if ((!player && !ShownModel::IsOpen(slot)) || values == nullptr || Models[slot].NumActions <= 0)
     {
         ImGui::PushTextWrapPos(0.0f);
         ImGui::TextDisabled("%s", I18N::Editor::TheModelIsNotOpenItShowsWhenItIs);
@@ -299,11 +520,12 @@ void MuMonsterPreviewUI::RenderPreview(int slot)
     }
     ImGui::TextDisabled("%s", std::string(Data::Monsters::GetMonsterModelSymbol(slot)).c_str());
     RenderControls(slot, *values);
+    const MonsterPreviewLook look = RenderLookControls(slot);
     if (m_playing)
     {
         Advance(slot, *values);
     }
-    RenderView(slot, *values);
+    RenderView(slot, *values, look);
 }
 
 void MuMonsterPreviewUI::RenderControls(int slot, const MonsterModelDefinition& values)
@@ -656,7 +878,7 @@ void MuMonsterPreviewUI::Restart(int slot)
     PlaySounds(slot, m_animation != MONSTER01_WALK ? m_animation : -1, m_frame, MomentOf(m_animation));
 }
 
-void MuMonsterPreviewUI::RenderView(int slot, const MonsterModelDefinition& values)
+void MuMonsterPreviewUI::RenderView(int slot, const MonsterModelDefinition& values, const MonsterPreviewLook& look)
 {
     const float width = ImGui::GetContentRegionAvail().x;
     if (width < 1.0f)
@@ -672,10 +894,13 @@ void MuMonsterPreviewUI::RenderView(int slot, const MonsterModelDefinition& valu
     Effects::PreviewInput::RenderView("##MonsterView", width, height, m_camera);
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
-    if (m_framedSlot != slot)
+    // The character draws at its setup's size; the model alone at 1.
+    const float modelScale = look.asCharacter ? look.setup.scale.value_or(MonsterPreviewScene::CharacterScale) : 1.0f;
+    if (m_framedSlot != slot || m_framedScale != modelScale)
     {
         m_framedSlot = slot;
-        const Effects::PreviewFraming framing = m_scene.Frame(slot);
+        m_framedScale = modelScale;
+        const Effects::PreviewFraming framing = m_scene.Frame(slot, modelScale);
         m_camera.Frame(framing.center, framing.radius);
     }
     if (m_turn)
@@ -702,7 +927,7 @@ void MuMonsterPreviewUI::RenderView(int slot, const MonsterModelDefinition& valu
         const MuEditor::ScopedOffscreenCapture endCapture;
         const float priorFrame = AnimationFacts::GetPriorFrame(m_frame, PlayedFrames(Models[slot].Actions[m_animation]),
                                                                ModelValues::HoldsLastFrame(values, slot, m_animation));
-        m_scene.Draw(slot, m_animation, m_frame, priorFrame, m_turnDegrees, m_camera, width / height);
+        m_scene.Draw(slot, m_animation, m_frame, priorFrame, m_turnDegrees, m_camera, width / height, look);
     }
     else
     {

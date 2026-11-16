@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "Core/Utilities/Random.h"
 #include "Engine/AI/GOBoid.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -117,7 +118,8 @@ int LiveJoints()
 }
 
 // Each path must spawn with a real slot, never with either invalid slot. Repeat random-gated joints
-// from the same seed so a false random gate cannot make the missing-target check pass by accident.
+// from the same seeds so a false random gate cannot make the missing-target check pass by accident.
+// Both sequences are seeded: the legacy one (Rand) and the engine's, which rand_fps_check draws from.
 template <typename Spawn, typename Count> void CheckTargets(EffectScope& scope, Spawn spawn, Count count)
 {
     for (const short target :
@@ -129,6 +131,7 @@ template <typename Spawn, typename Count> void CheckTargets(EffectScope& scope, 
         scope.attacker.LastAttackEffectTime = -1;
         scope.attacker.AttackTime = 1.f;
         Random::SeedRand(977);
+        Random::Seed(977);
         for (int i = 0; i < 8; ++i)
             spawn();
         if (target == 2)

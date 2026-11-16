@@ -12,15 +12,23 @@
 #include <span>
 #include <string>
 #include <thread>
+#include <vector>
 
 namespace Render::Renderer
 {
 class BitmapGpuResources final
 {
 public:
-    static constexpr std::size_t kSlotCount = 3;
+    // The staging slots kept while nothing is loading; a busy ring grows past them instead of waiting.
+    static constexpr std::size_t kMinimumSlotCount = 3;
     static constexpr std::uint64_t kBytesPerPixel = 4;
+#if defined(__APPLE__)
+    // SDL's Metal backend (up to 3.4.20 at least) ignores pixels_per_row and reads tightly packed rows
+    // (libsdl-org/SDL#16474). Drop this once the SDL submodule includes libsdl-org/SDL#16610.
+    static constexpr std::uint64_t kRowAlignment = kBytesPerPixel;
+#else
     static constexpr std::uint64_t kRowAlignment = 256;
+#endif
     static_assert(Sprites::kBitmapMaximumWidth > 0 && Sprites::kBitmapMaximumHeight > 0);
     static_assert(static_cast<std::uint64_t>(Sprites::kBitmapMaximumWidth) <=
                   (std::numeric_limits<std::uint64_t>::max() - kRowAlignment + 1) / kBytesPerPixel);
@@ -37,6 +45,14 @@ public:
     static constexpr int kMaximumWidth = Sprites::kBitmapMaximumWidth * Sprites::kBitmapMaximumScale;
     static constexpr int kMaximumHeight = Sprites::kBitmapMaximumHeight * Sprites::kBitmapMaximumScale;
     static_assert(kMaximumPitch * Sprites::kBitmapMaximumScale <= kSlotCapacity);
+    // Bytes staged and not yet copied by the GPU above which a staged load leaves its next step to the next frame
+    // (OverStagingCap). Soft: one step may go past it.
+    static constexpr std::uint64_t kStagingSoftCap = 8 * kSlotCapacity;
+    // The most slots the ring grows to; past them an upload waits for the next slot after all. Only a load step that
+    // stages over 64 MiB ahead of the GPU gets here: such a step is too big for a target whose frame can't wait.
+    static constexpr std::size_t kMaximumSlotCount = 16;
+    // Frames without growth before slots past the minimum are released, so a load spread over frames keeps them.
+    static constexpr int kIdleFramesBeforeTrim = 60;
     // Where a mip level starts when it shares a slot with the level before it:
     // the D3D12 placement alignment, which keeps every backend on its direct
     // copy path.
@@ -59,6 +75,7 @@ public:
         decltype(&SDL_GenerateMipmapsForGPUTexture) generateMipmaps = &SDL_GenerateMipmapsForGPUTexture;
         decltype(&SDL_CancelGPUCommandBuffer) cancel = &SDL_CancelGPUCommandBuffer;
         decltype(&SDL_SubmitGPUCommandBufferAndAcquireFence) submit = &SDL_SubmitGPUCommandBufferAndAcquireFence;
+        decltype(&SDL_QueryGPUFence) query = &SDL_QueryGPUFence;
         decltype(&SDL_WaitForGPUFences) wait = &SDL_WaitForGPUFences;
         decltype(&SDL_ReleaseGPUFence) releaseFence = &SDL_ReleaseGPUFence;
         decltype(&SDL_GetError) getError = &SDL_GetError;
@@ -92,6 +109,15 @@ public:
     Result Upload(std::span<const std::uint8_t> pixels, int width, int height, SDL_GPUFilter filter,
                   SDL_GPUSamplerAddressMode wrap, std::span<const Textures::MipLevel> mips = {},
                   bool generateMips = false);
+    // Uploads share a submission until their slot is full, and the next slot is one the GPU is done with or a new
+    // one: an upload never waits for the GPU. A texture is ready on the GPU once its submission is in: Flush submits
+    // the open one, and the frame submit must come after it.
+    bool Flush();
+    // Bytes staged that the GPU has not finished copying, and whether they are over kStagingSoftCap.
+    std::uint64_t BytesInFlight();
+    bool OverStagingCap();
+    // Once per frame: after kIdleFramesBeforeTrim frames without growth, releases idle slots past the minimum.
+    void TrimIdleSlots();
     // Call before destroying the device, after clearing non-owning sampler registries.
     bool Shutdown();
     const std::string& LastError() const
@@ -107,6 +133,11 @@ public:
     {
         return m_faulted;
     }
+    // Time spent waiting for a slot's previous upload to finish: only when a new slot could not be created.
+    double FenceWaitSeconds() const
+    {
+        return m_fenceWaitSeconds;
+    }
 
 private:
     struct Slot
@@ -118,7 +149,10 @@ private:
     };
     bool OnOwnerThread() const;
     void Fail(const char* stage, bool gpuError);
-    bool Retire(Slot& slot);
+    bool TryRetire(Slot& slot);
+    bool WaitRetire(Slot& slot);
+    bool PickFreeSlot();
+    bool SubmitOpen();
     void LoseSlot(Slot& slot);
     void AdvanceSlot();
     void ReleaseHandles();
@@ -127,10 +161,15 @@ private:
     Calls m_calls;
     SDL_GPUDevice* m_device = nullptr;
     std::thread::id m_thread;
-    std::array<Slot, kSlotCount> m_slots{};
+    std::vector<Slot> m_slots;
     std::array<SDL_GPUSampler*, 4> m_samplers{};
     std::size_t m_next = 0;
+    // The command buffer staging into m_slots[m_next], and how much of that slot it used.
+    SDL_GPUCommandBuffer* m_open = nullptr;
+    std::uint64_t m_openUsed = 0;
+    int m_framesSinceGrowth = 0;
     bool m_faulted = false;
+    double m_fenceWaitSeconds = 0.0;
     std::string m_stage;
     std::string m_error;
 };

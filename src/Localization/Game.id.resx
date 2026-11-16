@@ -8935,6 +8935,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls Dari %ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Monster tak dikenal %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Saya adalah bug: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>%ls Apakah Anda ingin membatalkan?</value>
   </data>

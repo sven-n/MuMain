@@ -1,50 +1,45 @@
 #pragma once
 
-#define MAX_BUFF_NAME_LENGTH 50
+#include "Data/GameData/BuffData/BuffDefinition.h"
 
-#define MAX_DESCRIPT_LENGTH 100
+#define MAX_BUFF_NAME_LENGTH (Data::Buffs::MaxDisplayNameLength + 1)
 
-struct _BUFFINFO
-{
-    short s_BuffIndex;
-    BYTE s_BuffEffectType;
-    BYTE s_ItemType;
-    BYTE s_ItemIndex;
-    char s_BuffName[MAX_BUFF_NAME_LENGTH];
-    BYTE s_BuffClassType;
-    BYTE s_NoticeType;
-    BYTE s_ClearType;
-    char s_BuffDescript[MAX_DESCRIPT_LENGTH];
-};
-
+// One buff's names and links as the game code reads them, built from the buff table (Data/Buffs/Buffs.json,
+// g_BuffDatabase) in the display language.
 class BuffInfo
 {
 public:
+    // What s_ItemType and s_ItemIndex hold for a buff without an item, as the old BuffEffect files wrote it.
+    static constexpr short NoItem = 255;
+
     BuffInfo();
     virtual ~BuffInfo();
 
+    bool HasItem() const
+    {
+        return s_ItemType != NoItem;
+    }
+
 public:
     short s_BuffIndex;
+    // The buff's group: buffs of one group are the same kind of effect.
     BYTE s_BuffEffectType;
-    BYTE s_ItemType;
-    BYTE s_ItemIndex;
+    // The item that gives it, or NoItem and NoItem for none.
+    short s_ItemType;
+    short s_ItemIndex;
     wchar_t s_BuffName[MAX_BUFF_NAME_LENGTH];
+    // eBuffClass_Buff or eBuffClass_DeBuff.
     BYTE s_BuffClassType;
-    BYTE s_NoticeType;
-    BYTE s_ClearType;
-    wchar_t s_BuffDescript[MAX_DESCRIPT_LENGTH];
     std::list<std::wstring> s_BuffDescriptlist;
 };
 
 SmartPointer(BuffScriptLoader);
+// The game's buff info, read from the buff table (g_BuffDatabase) at each call, so it follows a new display language.
 class BuffScriptLoader
 {
 public:
     static BuffScriptLoaderPtr Make();
     virtual ~BuffScriptLoader();
-
-private:
-    bool Load(const std::wstring& pchFileName);
 
 public:
     const BuffInfo GetBuffinfo(eBuffState type) const;
@@ -57,10 +52,4 @@ public:
 
 private:
     BuffScriptLoader();
-
-private:
-    typedef std::map<eBuffState, BuffInfo> BuffInfoMap;
-
-private:
-    BuffInfoMap m_Info;
 };

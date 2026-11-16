@@ -3,6 +3,7 @@
 #include "ItemStats.h"
 
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "GameLogic/Items/ItemOptions.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -130,12 +131,13 @@ int ComputeStatRequirement(const RequirementFormula& formula, int base, int drop
     return LimitToItemValue(formula.add + weighted * formula.percent / 100);
 }
 
-void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& input, const ItemDefinition* definition,
-                         const RequirementTerms& terms, bool wing, const Data::Items::ItemStatProfiles& profiles,
-                         ItemStatValues& values)
+// `excellent`: the item has active excellent options. The drop level's excellent bonus reads the byte alone.
+void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& input, bool excellent,
+                         const ItemDefinition* definition, const RequirementTerms& terms,
+                         const Data::Items::ItemStatProfiles& profiles, ItemStatValues& values)
 {
     const size_t levelIndex = static_cast<size_t>(std::clamp(input.level, 0, Data::Items::ItemLevelCount - 1));
-    const bool excellentOptions = input.excellentFlags > 0;
+    const bool excellentByte = input.excellentFlags > 0;
 
     const RequirementByLevel* levelByLevel = FindRequirementByLevel(definition, ItemRequirement::Level);
     if (levelByLevel != nullptr)
@@ -148,7 +150,7 @@ void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& i
             LimitToItemValue(attribute.RequireLevel + WideValue{terms.levelPerItemLevel} * input.level);
     }
     const bool raisesLevel = definition == nullptr || definition->excellentRaisesLevel;
-    if (excellentOptions && values.requireLevel > 0 && !wing && raisesLevel)
+    if (excellent && values.requireLevel > 0 && raisesLevel)
     {
         values.requireLevel = LimitToItemValue(values.requireLevel + WideValue{terms.excellentLevelAdd});
     }
@@ -156,7 +158,7 @@ void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& i
     // The level requirement the "levelRequirement" basis takes: the one given by level, or the
     // base value, without the growth per item level and the excellent addition.
     const int levelRequirementBasis = levelByLevel != nullptr ? (*levelByLevel)[levelIndex] : attribute.RequireLevel;
-    const int dropLevel = attribute.Level + (excellentOptions                 ? profiles.GetExcellentDropLevelBonus()
+    const int dropLevel = attribute.Level + (excellentByte                    ? profiles.GetExcellentDropLevelBonus()
                                              : input.ancientDiscriminator > 0 ? profiles.GetAncientDropLevelBonus()
                                                                               : 0);
     int* const requirements[] = {&values.requireStrength, &values.requireDexterity, &values.requireEnergy,
@@ -183,8 +185,8 @@ ItemStatValues ComputeItemStats(const ITEM_ATTRIBUTE& attribute, const ItemStatI
 {
     const Data::Items::ItemStatProfile& profile = g_ItemDatabase.GetStatProfile(input.itemType);
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(input.itemType);
-    const bool wing = g_ItemDatabase.GetSlot(input.itemType) == ItemSlot::Wings;
-    return ComputeItemStats(ItemStatSources{attribute, definition, profile, wing}, input);
+    return ComputeItemStats(
+        ItemStatSources{attribute, definition, profile, g_ItemDatabase.GetOptionLinks(input.itemType)}, input);
 }
 
 ItemStatValues ComputeItemStats(const ItemStatSources& sources, const ItemStatInput& input)
@@ -192,11 +194,11 @@ ItemStatValues ComputeItemStats(const ItemStatSources& sources, const ItemStatIn
     const ITEM_ATTRIBUTE& attribute = sources.attribute;
     const Data::Items::ItemStatProfile& profile = sources.profile;
     const Data::Items::ItemDefinition* definition = sources.definition;
-    const bool wing = sources.wing;
+    const bool excellent = HasExcellentOptions(sources.optionLinks, input.excellentFlags);
     const StatContext context{g_ItemDatabase.GetStatProfiles(),
                               input.level,
                               attribute.Level,
-                              (input.excellentFlags > 0 && !wing) || input.ancientDiscriminator > 0,
+                              excellent || input.ancientDiscriminator > 0,
                               input.ancientDiscriminator > 0,
                               definition != nullptr ? definition->excellentBonus : 0};
 
@@ -217,7 +219,7 @@ ItemStatValues ComputeItemStats(const ItemStatSources& sources, const ItemStatIn
     values.defense = AddUpStat(profile.Get(ItemStat::Defense), attribute.Defense, attribute.Defense, false, context);
     values.magicDefense =
         AddUpStat(profile.Get(ItemStat::MagicDefense), attribute.MagicDefense, attribute.MagicDefense, false, context);
-    ComputeRequirements(attribute, input, definition, profile.requirements, wing, g_ItemDatabase.GetStatProfiles(),
+    ComputeRequirements(attribute, input, excellent, definition, profile.requirements, g_ItemDatabase.GetStatProfiles(),
                         values);
     return values;
 }

@@ -159,6 +159,11 @@ require_text(winmain_source
     "g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());"
     "Winmain.cpp must apply translated item names at startup")
 
+# Enhanced Movement changes how every character moves, so players switch it on: off without the key (the template
+# the client copies into a new player's folder is checked by ui_scaling_tests, since this check runs without src/bin).
+require_text(config_constants "CfgDefaultEnhancedMovement = false;"
+    "GameConfigConstants.h must turn Enhanced Movement off by default")
+
 # A missing or invalid Look counts as CfgDefaultLook, which is Classic: Enhanced is opt-in.
 require_text(config_constants "CfgDefaultLook[] = L\"Classic\""
     "GameConfigConstants.h must default the look preset to Classic")
@@ -236,13 +241,13 @@ foreach(required_text IN ITEMS
     require_text(console_source "${required_text}" "muConsoleDebug.cpp must persist deferred VSync requests")
 endforeach()
 
-string(FIND "${winmain_source}" "                ApplyPendingVSyncPreference();" apply_position)
-string(FIND "${winmain_source}" "                RenderProfiledFrame();" begin_position)
+string(FIND "${winmain_source}" "            ApplyPendingVSyncPreference();" apply_position)
+string(FIND "${winmain_source}" "            RenderProfiledFrame();" begin_position)
 if(apply_position EQUAL -1 OR begin_position EQUAL -1 OR NOT apply_position LESS begin_position)
     message(FATAL_ERROR "Pending VSync must be applied before BeginFrame")
 endif()
 
-string(FIND "${winmain_source}" "                Bitmaps.UpdateTextureFiltering();" filtering_position)
+string(FIND "${winmain_source}" "            Bitmaps.UpdateTextureFiltering();" filtering_position)
 if(filtering_position EQUAL -1 OR NOT filtering_position LESS begin_position)
     message(FATAL_ERROR "Texture filtering switches and mip chain builds must run before BeginFrame")
 endif()

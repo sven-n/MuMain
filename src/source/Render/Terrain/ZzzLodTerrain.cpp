@@ -3,17 +3,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Utilities/FileHandle.h"
 #include "Core/Utilities/Random.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
 #include <math.h>
 #include <iterator>
 #include <vector>
@@ -154,22 +149,20 @@ void InitTerrainMappingLayer()
 
 void ExitProgram()
 {
-    MessageBoxW(g_hWnd, I18N::Game::DataError, NULL, MB_OK);
-    PostQuitMessage(0);
+    Core::Platform::ShowFatalError(L"Error", I18N::Game::DataError);
 }
 
 
 int OpenTerrainAttribute(wchar_t* FileName)
 {
-    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    Content::Stream file = Content::OpenIO(FileName);
     if (!file)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return (-1);
     }
     // Read file data
@@ -269,14 +262,14 @@ int OpenTerrainAttribute(wchar_t* FileName)
 
 bool SaveTerrainAttribute(wchar_t* FileName, int iMap)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     FILE* fp = _wfopen(FileName, L"wb");
     if (fp == NULL) {
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return false;
     }
     const BYTE Version = 0;
@@ -358,7 +351,7 @@ void SetTerrainWaterState(std::list<int>& terrainIndex, int state)
 
 int OpenTerrainMapping(wchar_t* FileName) {
     InitTerrainMappingLayer();
-    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    Content::Stream file = Content::OpenIO(FileName);
     if (!file)
     {
         return -1;
@@ -406,6 +399,7 @@ int OpenTerrainMapping(wchar_t* FileName) {
 
 bool SaveTerrainMapping(wchar_t* FileName, int iMapNumber)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     FILE* fp = _wfopen(FileName, L"wb");
     BYTE Version = 0;
     fwrite(&Version, 1, 1, fp);
@@ -758,61 +752,53 @@ bool OpenTerrainHeight(wchar_t* filename)
     wcscat_s(FileName, NewFileName);
     wcscat_s(FileName, L"OZB");
 
-    FILE* fp;
-    errno_t err = _wfopen_s(&fp, FileName, L"rb");
-    if (err != 0 || fp == NULL)
+    Content::Stream fp = Content::OpenIO(FileName);
+    if (!fp)
     {
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return false;
     }
 
-    if (fseek(fp, 0, SEEK_END) != 0)
+    const Sint64 ioSize = SDL_GetIOSize(fp.get());
+    if (ioSize < 0)
     {
-        fclose(fp);
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"Failed to seek in %ls.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return false;
     }
 
-    long fileSize = ftell(fp);
+    long fileSize = static_cast<long>(ioSize);
     const long RequiredSize = Size + 4;
     if (fileSize < 0 || fileSize < RequiredSize)
     {
-        fclose(fp);
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"%ls is too small (%ld bytes, needs %ld).", FileName, fileSize, RequiredSize);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return false;
     }
 
-    if (fseek(fp, 0, SEEK_SET) != 0 || fread(OZBPrefix, 1, 4, fp) != 4)
+    if (SDL_SeekIO(fp.get(), 0, SDL_IO_SEEK_SET) != 0 || SDL_ReadIO(fp.get(), OZBPrefix, 4) != 4)
     {
-        fclose(fp);
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"Failed to rewind %ls.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return false;
     }
 
     auto* Buffer = new unsigned char[Size];
 
-    size_t readBytes = fread(Buffer, 1, Size, fp);
-    fclose(fp);
+    size_t readBytes = SDL_ReadIO(fp.get(), Buffer, Size);
     if (readBytes != Size)
     {
         delete[] Buffer;
@@ -820,8 +806,7 @@ bool OpenTerrainHeight(wchar_t* filename)
         mu_swprintf_s(Text, std::size(Text), L"Failed to read %ls (expected %d bytes, got %zu).", FileName, Size, readBytes);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return false;
     }
 
@@ -847,6 +832,7 @@ bool OpenTerrainHeight(wchar_t* filename)
 
 bool SaveTerrainHeight(wchar_t* name)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     auto* Buffer = new unsigned char[256 * 256];
     for (int i = 0; i < 256; i++)
     {
@@ -919,15 +905,14 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
     wcscat(FileName, NewFileName);
     wcscat(FileName, L"OZB");
 
-    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    Content::Stream file = Content::OpenIO(FileName);
     if (!file)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return false;
     }
 

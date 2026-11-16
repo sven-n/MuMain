@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/MapData/LookProfile.h"
 
 #include <array>
 #include <filesystem>
@@ -8,11 +9,15 @@
 #include <string_view>
 #include <vector>
 
-// The light mood of the world maps (Data/Maps/LightMood.json):
+// The light mood of the world maps: the "mood." values of the look profile
+// (LookProfile.h), resolved for one map (MoodOf). Before format 2 of
+// Data/Render/Look.json they had a file of their own, Data/Maps/LightMood.json:
 //
 //   { "formatVersion": 1,
 //     "default": { "base": 0.7, "figures": 0.7, "dynamicGain": 1, "background": 1, "sun": 0.6 },
 //     "maps": [ { "world": 10, "name": "Icarus", "background": 0.7 } ] }
+//
+// which is read only to upgrade a format 1 look profile (UpgradeLightMood).
 //
 // Each value scales the Classic light of a world map:
 //   base         the static (baked) light of the terrain and the map objects, 0.2 to 1;
@@ -31,9 +36,9 @@
 //   brightScale  optional, 0.3 to 1 (default, Classic): the scale places at the
 //                shadow keep get, never below base (figures: never below the
 //                figure scale); only with a shadow keep.
-// "default" has all five and applies to every map without an entry. A map
-// entry names its world number and overrides any of them; "name" is for the
-// reader only.
+// In the old file, "default" has the first five and applies to every map
+// without an entry; a map entry names its world number and overrides any of
+// them; "name" is for the reader only.
 namespace Data::Maps
 {
 struct LightMood
@@ -50,10 +55,17 @@ struct LightMood
     bool operator==(const LightMood&) const = default;
 };
 
+// The mood the look values give: their mood.* values.
+[[nodiscard]] LightMood MoodOf(const LookValues& values);
+
+constexpr std::size_t LightMoodValueCount = 8;
+
 struct MapLightMood
 {
     int world = 0;
     LightMood mood;
+    // Which values the entry names, by LightMoodValueInfos order: those it keeps when the default changes.
+    std::array<bool, LightMoodValueCount> named{};
 
     bool operator==(const MapLightMood&) const = default;
 };
@@ -65,6 +77,7 @@ struct LightMoodData
 
     // The world's own mood, or the default.
     const LightMood& ForWorld(int world) const;
+    bool operator==(const LightMoodData&) const = default;
 };
 
 constexpr int LightMoodFormatVersion = 1;
@@ -88,13 +101,24 @@ struct LightMoodValueInfo
     double max;
 };
 
-constexpr std::size_t LightMoodValueCount = 8;
 [[nodiscard]] const std::array<LightMoodValueInfo, LightMoodValueCount>& LightMoodValueInfos();
 // The value with that key in the file, if there is one.
 [[nodiscard]] const LightMoodValueInfo* FindLightMoodValue(std::string_view key);
+// The look value of the mood value at `index` of LightMoodValueInfos: "base" is mood.base.
+[[nodiscard]] LookValue MoodLookValue(std::size_t index);
 
-// The file, relative to the client folder.
+// The old file, relative to the client folder.
 constexpr const char* LightMoodFile = "Data/Maps/LightMood.json";
+
+// Gives a format 1 look profile the moods of the old file: the default's values
+// on the profile's default, and each map entry's named values on the entry of
+// its world (a new entry when the profile has none). A map keeps every value it
+// named, also one equal to the default.
+void UpgradeLightMood(LookProfileData& profile, const LightMoodData& moods);
+
+// The mood of every world 0 to 255 the profile gives: the default's, and an
+// entry for each world whose mood differs from it, naming the values that do.
+[[nodiscard]] LightMoodData MoodsOf(const LookProfileData& profile);
 
 // Reads the moods of the file into `data`. One invalid value makes the whole
 // file unusable: `data` is then left Classic (every value 1) and `issues`

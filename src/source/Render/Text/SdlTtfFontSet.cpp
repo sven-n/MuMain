@@ -1,13 +1,17 @@
 #include "SdlTtfFontSet.h"
 
+#include "Core/Content/ContentStore.h"
+#include "Core/Text/Utf8Path.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include <algorithm>
-#include <filesystem>
+#include <mutex>
+#include <optional>
 #include <string>
+#include <unordered_map>
 
 namespace Render::Text
 {
@@ -35,9 +39,37 @@ constexpr bool IsBoldRole(std::size_t role)
     return role == RoleIndex(SdlTtfFontRole::Bold) || role == RoleIndex(SdlTtfFontRole::Big);
 }
 
-[[nodiscard]] std::string BundledFontPath(const char* relativePath)
+// Every size and role of a face reads one copy of its file, which stays until exit: a font may be open until then.
+[[nodiscard]] TTF_Font* OpenFont(const std::string& path, float pointSize)
 {
-    return ResolveBundledFontPath(relativePath).string();
+    static std::mutex mutex;
+    static std::unordered_map<std::string, std::string> files;
+    const std::filesystem::path file = Core::Text::PathFromUtf8(path);
+    // A face whose file is gone no longer opens, as when each font read its own file.
+    if (Content::Probe(file) != Content::Found::File)
+    {
+        SDL_SetError("%s: not found", path.c_str());
+        return nullptr;
+    }
+    const std::string* bytes = nullptr;
+    {
+        std::lock_guard lock(mutex);
+        auto found = files.find(path);
+        if (found == files.end())
+        {
+            std::string error;
+            std::optional<std::string> read = Content::ReadFile(file, &error);
+            if (!read)
+            {
+                SDL_SetError("%s", error.c_str());
+                return nullptr;
+            }
+            found = files.emplace(path, std::move(*read)).first;
+        }
+        bytes = &found->second;
+    }
+    SDL_IOStream* const stream = SDL_IOFromConstMem(bytes->data(), bytes->size());
+    return stream != nullptr ? TTF_OpenFontIO(stream, true, pointSize) : nullptr;
 }
 
 [[nodiscard]] std::string FindDeveloperFontPath()
@@ -60,7 +92,7 @@ constexpr bool IsBoldRole(std::size_t role)
 
     for (const char* path : k_SystemFontPaths)
     {
-        if (std::filesystem::exists(path))
+        if (Content::Probe(path) == Content::Found::File)
         {
             return path;
         }
@@ -89,7 +121,7 @@ void CloseTtfFont(TTF_Font*& font)
 
     mu::log::Get("render")->warn("SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}'",
                                  family, role, fallbackPath);
-    TTF_Font* fallback = TTF_OpenFont(fallbackPath.c_str(), pointSize);
+    TTF_Font* fallback = OpenFont(fallbackPath, pointSize);
     if (!fallback)
     {
         mu::log::Get("render")->error(
@@ -102,8 +134,8 @@ void CloseTtfFont(TTF_Font*& font)
 [[nodiscard]] TTF_Font* OpenTtfFontRole(std::string_view family, std::string_view role, const char* relativePath,
                                         float pointSize)
 {
-    const std::string packagedPath = BundledFontPath(relativePath);
-    if (TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), pointSize))
+    const std::string packagedPath = relativePath;
+    if (TTF_Font* font = OpenFont(packagedPath, pointSize))
     {
         mu::log::Get("render")->info("SDL_ttf -- bundled family='{}' role='{}' path='{}'", family, role, packagedPath);
         return font;
@@ -121,8 +153,8 @@ void CloseTtfFont(TTF_Font*& font)
 
 [[nodiscard]] TTF_Font* OpenTtfFallbackRole(const BundledFont& fallbackFont, std::size_t role, TTF_Font* primary)
 {
-    const std::string packagedPath = BundledFontPath(FallbackPath(fallbackFont, role));
-    TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), TTF_GetFontSize(primary));
+    const std::string packagedPath = FallbackPath(fallbackFont, role);
+    TTF_Font* font = OpenFont(packagedPath, TTF_GetFontSize(primary));
     if (!font)
     {
         mu::log::Get("render")->error("SDL_ttf -- bundled fallback family='{}' role='{}' path='{}' failed: {}",
@@ -147,7 +179,7 @@ void CloseTtfFont(TTF_Font*& font)
     if (std::string_view(relativePath) == referencePath)
         return 0;
 
-    TTF_Font* reference = TTF_OpenFont(BundledFontPath(referencePath).c_str(), TTF_GetFontSize(font));
+    TTF_Font* reference = OpenFont(referencePath, TTF_GetFontSize(font));
     if (!reference)
     {
         mu::log::Get("render")->warn("SDL_ttf -- layout reference '{}' failed: {}", referencePath, SDL_GetError());

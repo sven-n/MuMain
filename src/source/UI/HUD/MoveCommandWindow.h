@@ -28,6 +28,8 @@ namespace mu::ui::window
         //$$AUTO_BUILD_LINE_ SHUFFLE_BEGIN
         CManager* m_pNewUIMng;
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*>	m_listMoveInfoData;
+        // The version of CMoveCommandData's list which m_listMoveInfoData is a copy of.
+        uint32_t m_listVersion = 0;
         DWORD						m_dwMoveCommandKey;
 
         void BindRmlModel(Rml::DataModelConstructor& c, MoveCommandRmlModel& model);
@@ -85,6 +87,8 @@ namespace mu::ui::window
         void SetStrifeMap();
         void SettingCanMoveMap();
         void RefreshData();
+        // Copies the list again when it changed since the last copy, e.g. because the server sent its warp list.
+        void RefreshDataIfChanged();
         // Gives #panel a fill slot's size.
         void ApplyFillSize();
 

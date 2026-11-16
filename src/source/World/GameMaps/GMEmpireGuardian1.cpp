@@ -66,149 +66,29 @@ bool GMEmpireGuardian1::CreateObject(OBJECT* o)
     return false;
 }
 
-CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int Key)
+bool GMEmpireGuardian1::ResetRage(std::string_view boss)
 {
-    CHARACTER* pCharacter = NULL;
-
-    switch (iType)
+    if (boss == "Raymond")
     {
-    case MONSTER_RAYMOND:
-    {
-        OpenMonsterModel(MONSTER_MODEL_RAYMOND);
-        pCharacter = CreateCharacter(Key, MODEL_RAYMOND, PosX, PosY);
-
-        pCharacter->Object.Scale = 1.45f;
-
         m_bCurrentIsRage_Raymond = false;
+        return true;
     }
-    break;
-    case MONSTER_LUCAS:
+    if (boss == "Ercanne")
     {
-        OpenMonsterModel(MONSTER_MODEL_LUCAS);
-        pCharacter = CreateCharacter(Key, MODEL_LUCAS, PosX, PosY);
-
-        pCharacter->Object.Scale = 1.25f;
-
         m_bCurrentIsRage_Ercanne = false;
+        return true;
     }
-    break;
-    case MONSTER_FRED:
+    if (boss == "Daesuler")
     {
-        OpenMonsterModel(MONSTER_MODEL_FRED);
-        pCharacter = CreateCharacter(Key, MODEL_FRED, PosX, PosY);
-        pCharacter->Object.Scale = 1.55f;
-
-        BoneManager::RegisterBone(pCharacter, L"node_eyes01", 14);
-        BoneManager::RegisterBone(pCharacter, L"node_eyes02", 15);
-        BoneManager::RegisterBone(pCharacter, L"node_blade01", 71);
-        BoneManager::RegisterBone(pCharacter, L"node_blade05", 72);
-        BoneManager::RegisterBone(pCharacter, L"node_blade04", 73);
-        BoneManager::RegisterBone(pCharacter, L"node_blade02", 74);
-        //			BoneManager::RegisterBone(pCharacter, L"node_blade03" ,75);
-
-        OBJECT* o = &pCharacter->Object;
-        BMD* b = &Models[o->Type];
-
-        MoveEye(o, b, 14, 15, 71, 72, 73, 74);
-        vec3_t vColor = {0.7f, 0.7f, 1.0f};
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 24, o, 10.f, -1, 0, 0, -1, vColor);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 25, o, 10.f, -1, 0, 0, -1, vColor);
-        Vector(0.7f, 0.7f, 1.0f, vColor);
-        float Sca = 100.f;
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 54, o, Sca, 0, 0, 0, -1, vColor);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 54, o, Sca, 1, 0, 0, -1, vColor);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 54, o, Sca, 2, 0, 0, -1, vColor);
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 54, o, Sca, 3, 0, 0, -1, vColor);
-
         m_bCurrentIsRage_Daesuler = false;
+        return true;
     }
-    break;
-    case MONSTER_DEVIL_LORD:
+    if (boss == "Gallia")
     {
-        OpenMonsterModel(MONSTER_MODEL_DEVIL_LORD);
-        pCharacter = CreateCharacter(Key, MODEL_DEVIL_LORD, PosX, PosY);
-        pCharacter->Object.Scale = 1.35f;
-
         m_bCurrentIsRage_Gallia = false;
+        return true;
     }
-    break;
-    case MONSTER_QUARTER_MASTER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_QUARTER_MASTER);
-        pCharacter = CreateCharacter(Key, MODEL_QUARTER_MASTER, PosX, PosY);
-        pCharacter->Object.Scale = 1.27f;
-    }
-    break;
-    case MONSTER_COMBAT_INSTRUCTOR:
-    {
-        OpenMonsterModel(MONSTER_MODEL_COMBAT_INSTRUCTOR);
-        pCharacter = CreateCharacter(Key, MODEL_COMBAT_INSTRUCTOR, PosX, PosY);
-        pCharacter->Object.Scale = 1.25f;
-    }
-    break;
-    case MONSTER_DEFENDER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DEFENDER);
-        pCharacter = CreateCharacter(Key, MODEL_DEFENDER, PosX, PosY);
-        pCharacter->Object.Scale = 1.2f;
-
-        Vector(0.0f, 0.0f, 0.0f, pCharacter->Object.EyeRight3);
-        Vector(0.0f, 0.0f, 0.0f, pCharacter->Object.EyeLeft3);
-    }
-    break;
-    case MONSTER_FORSAKER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_FORSAKER);
-        pCharacter = CreateCharacter(Key, MODEL_FORSAKER, PosX, PosY);
-        pCharacter->Object.Scale = 0.9f;
-    }
-    break;
-    case MONSTER_OCELOT_THE_LORD:
-    {
-        OpenMonsterModel(MONSTER_MODEL_OCELOT);
-        pCharacter = CreateCharacter(Key, MODEL_OCELOT, PosX, PosY);
-        pCharacter->Object.Scale = 1.1f;
-    }
-    break;
-    case MONSTER_ERIC_THE_GUARD:
-    {
-        OpenMonsterModel(MONSTER_MODEL_ERIC);
-        pCharacter = CreateCharacter(Key, MODEL_ERIC, PosX, PosY);
-        pCharacter->Object.Scale = 1.1f;
-    }
-    break;
-    case MONSTER_EVIL_GATE:
-    {
-        OpenMonsterModel(MONSTER_MODEL_EVIL_GATE);
-        pCharacter = CreateCharacter(Key, MODEL_EVIL_GATE, PosX, PosY);
-        pCharacter->Object.m_bRenderShadow = false;
-        pCharacter->Object.Scale = 1.25f;
-    }
-    break;
-    case MONSTER_LION_GATE:
-    {
-        OpenMonsterModel(MONSTER_MODEL_LION_GATE);
-        pCharacter = CreateCharacter(Key, MODEL_LION_GATE, PosX, PosY);
-        pCharacter->Object.m_bRenderShadow = false;
-        pCharacter->Object.LifeTime = 100;
-        pCharacter->Object.Scale = 1.25f;
-    }
-    break;
-    case MONSTER_STATUE:
-    {
-        OpenMonsterModel(MONSTER_MODEL_STATUE);
-        pCharacter = CreateCharacter(Key, MODEL_STATUE, PosX, PosY);
-        pCharacter->Object.m_bRenderShadow = false;
-        pCharacter->Object.Scale = 0.6f;
-        pCharacter->Object.LifeTime = 100;
-    }
-    break;
-
-    default:
-        return pCharacter;
-    }
-
-    return pCharacter;
+    return false;
 }
 
 bool GMEmpireGuardian1::MoveObject(OBJECT* o)

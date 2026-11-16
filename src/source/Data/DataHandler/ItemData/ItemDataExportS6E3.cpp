@@ -10,10 +10,12 @@
 #include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Data/Translation/MultiLanguage.h"
+#include "Core/Content/ContentStore.h"
 #include <memory>
 
 bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName, const ITEM_ATTRIBUTE* attributes, std::string* outProblems)
 {
+    const Content::RefreshAfterWrite refreshAfterWrite;
     const int Size = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
 
     if (const std::vector<ItemFileMisfit> misfits = FindItemFileMisfits(attributes, MAX_ITEM); !misfits.empty())

@@ -2,7 +2,8 @@
 
 #include "stdafx.h"
 #include "I18N/All.h"
-#include "Core/Platform/PathResolve.h"
+#include "Core/Content/ContentStore.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Data/Translation/ItemTextExpansion.h"
 
 #include <algorithm>
@@ -11,8 +12,6 @@
 #include <cstdint>
 #include <cwchar>
 #include <cstring>
-#include <filesystem>
-#include <fstream>
 #include <iterator>
 #include <vector>
 
@@ -35,7 +34,9 @@
 #include "UI/Core/WindowSystem.h"
 #include "Render/Text/CUIRenderText.h"
 
-bool bCheckNPC = false;
+// The classes whose quest window shows the talked NPC's own name and no quest
+// title (an NPC's questWindow talk step, Marlon's); empty for other NPCs.
+std::vector<int> g_noQuestTitleClasses;
 extern  int  g_iMessageTextStart;
 extern  char g_cMessageTextCurrNum;
 extern  char g_cMessageTextNum;
@@ -245,14 +246,7 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
         return false;
     }
 
-#ifdef _WIN32
-    const std::filesystem::path filePath(filename);
-#else
-    // The script path is Windows-spelled (backslashes, mixed case); resolve it
-    // against the case-sensitive filesystem.
-    const std::filesystem::path filePath(MuResolvePath(std::filesystem::path(filename).string().c_str()));
-#endif
-    std::ifstream file(filePath, std::ios::binary);
+    const Content::Stream file = Content::OpenIO(filename);
     if (!file)
     {
         wchar_t text[256];
@@ -267,7 +261,7 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
 
     for (auto& quest : m_Quest)
     {
-        if (!file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(recordSize)))
+        if (!DataFileIO::ReadExact(file.get(), buffer.data(), recordSize))
         {
             return false;
         }
@@ -290,7 +284,7 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
 void CSQuest::setQuestLists(const std::uint8_t* byList, int num, CLASS_TYPE Class)
 {
     m_bOnce = true;
-    bCheckNPC = false;
+    g_noQuestTitleClasses.clear();
     m_byClass = gCharacterManager.GetBaseClass(Class);
 
     m_byQuestList.fill(0);

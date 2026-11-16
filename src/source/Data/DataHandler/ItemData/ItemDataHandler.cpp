@@ -11,6 +11,8 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
+#include "Data/GameData/EffectData/Shines.h"
+#include "Data/GameData/ItemData/PartModelSlots.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemEnumNames.h"
@@ -324,11 +326,17 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     GlowColorsLoadResult colors = LoadGlowColorsFile(GetGlowColorsFile());
+    ShinesLoadResult shines = LoadShinesFile(GetShinesFile());
     ItemModelDataLoadResult result = LoadItemModelDataDirectory(GetItemModelDataDirectory());
+    result.issues.insert(result.issues.begin(), shines.issues.begin(), shines.issues.end());
     result.issues.insert(result.issues.begin(), colors.issues.begin(), colors.issues.end());
     if (!HasFatal(colors.issues))
     {
         ValidateItemModelGlowColors(result.models, colors.colors, result.issues);
+    }
+    if (!HasFatal(shines.issues))
+    {
+        ValidateItemModelShines(result.models, shines.shines, result.issues);
     }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasFatal(result.issues))
@@ -338,18 +346,22 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
     }
 
     g_GlowColors.Build(colors.colors);
+    g_Shines.Build(shines.shines);
 #ifdef _EDITOR
     g_GlowColors.SetFolders(std::move(colors.folders));
 #endif
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
     g_ItemModelDatabase.SetSharedModels(result.sharedModels);
+    g_ItemModelDatabase.SetPartModels(result.partModels);
 #ifdef _EDITOR
     // The models are where their files have them again.
     m_modelMoves.clear();
     m_changedModelGroups.reset();
     m_sharedModelsChanged = false;
+    m_partModelsChanged = false;
     m_glowColorsChanged = false;
     m_modelsToReopen.clear();
+    m_partModelsToReopen.clear();
 #endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
@@ -678,9 +690,9 @@ void CItemDataHandler::SetGlowColorFolders(std::vector<Data::Colors::ColorFolder
 
 namespace
 {
-std::filesystem::path RenderStylesFilePath()
+std::filesystem::path LookFilePath(Data::Looks::LookKind kind)
 {
-    return Data::Effects::GetEffectDataDirectory() / Data::Looks::GetRenderStylesFileName();
+    return Data::Effects::GetEffectDataDirectory() / Data::Looks::GetLookFileName(kind);
 }
 
 void SortLooks(std::vector<Data::Looks::LookDefinition>& looks)
@@ -689,97 +701,121 @@ void SortLooks(std::vector<Data::Looks::LookDefinition>& looks)
 }
 } // namespace
 
-void CItemDataHandler::ReadRenderStylesOnce()
+CItemDataHandler::LookFileState& CItemDataHandler::ReadLookFileOnce(Data::Looks::LookKind kind)
 {
-    if (m_renderStylesRead)
+    LookFileState& state = m_lookFiles[static_cast<std::size_t>(kind)];
+    if (state.read)
     {
-        return;
+        return state;
     }
-    m_renderStylesRead = true;
-    const std::filesystem::path file = RenderStylesFilePath();
+    state.read = true;
+    const std::filesystem::path file = LookFilePath(kind);
     const std::string source = file.generic_string();
-    Data::Looks::RenderStylesFile read;
+    Data::Looks::LookFile read;
     if (const std::optional<std::string> text = Data::ReadTextFile(file))
     {
-        Data::Looks::ReadRenderStylesFile(*text, source, read, m_renderStyleIssues);
+        Data::Looks::ReadLookFile(*text, source, kind, read, state.issues);
     }
     else
     {
-        m_renderStyleIssues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem,
-                                       ItemDataIssue::NoItem, "", "could not be read"});
+        state.issues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "",
+                                "could not be read"});
     }
-    m_renderStylesComplete = !HasFatal(m_renderStyleIssues);
-    if (m_renderStylesComplete)
+    state.complete = !HasFatal(state.issues);
+    if (state.complete)
     {
         SortLooks(read.looks);
-        m_renderStyles = std::move(read);
+        state.file = std::move(read);
         // The file may have changed since the game read it at start: the game draws what the editor shows.
-        if (!std::ranges::equal(m_renderStyles.looks, Data::Looks::g_LookStore.GetRenderStyles()))
+        if (!std::ranges::equal(state.file.looks, Data::Looks::g_LookStore.GetLooks(kind)))
         {
-            Data::Looks::g_LookStore.SetRenderStyles(m_renderStyles.looks);
+            Data::Looks::g_LookStore.SetLooks(kind, state.file.looks);
         }
     }
     else
     {
         // The game keeps the looks it read at start.
-        const auto looks = Data::Looks::g_LookStore.GetRenderStyles();
-        m_renderStyles = {{looks.begin(), looks.end()}, {}};
+        const auto looks = Data::Looks::g_LookStore.GetLooks(kind);
+        state.file = {{looks.begin(), looks.end()}, {}};
     }
-    ++m_renderStylesVersion;
+    ++state.version;
+    return state;
 }
 
-const Data::Looks::RenderStylesFile& CItemDataHandler::GetRenderStyles()
+const Data::Looks::LookFile& CItemDataHandler::GetLookFile(Data::Looks::LookKind kind)
 {
-    ReadRenderStylesOnce();
-    return m_renderStyles;
+    return ReadLookFileOnce(kind).file;
 }
 
-void CItemDataHandler::SetRenderStyles(Data::Looks::RenderStylesFile file)
+void CItemDataHandler::SetLookFile(Data::Looks::LookKind kind, Data::Looks::LookFile file)
 {
-    ReadRenderStylesOnce();
+    LookFileState& state = ReadLookFileOnce(kind);
     SortLooks(file.looks);
-    m_renderStyles = std::move(file);
-    Data::Looks::g_LookStore.SetRenderStyles(m_renderStyles.looks);
-    m_renderStylesChanged = true;
-    ++m_renderStylesVersion;
+    state.file = std::move(file);
+    Data::Looks::g_LookStore.SetLooks(kind, state.file.looks);
+    state.changed = true;
+    ++state.version;
 }
 
-const std::vector<ItemDataIssue>& CItemDataHandler::GetRenderStyleReadIssues()
+const std::vector<ItemDataIssue>& CItemDataHandler::GetLookReadIssues(Data::Looks::LookKind kind)
 {
-    ReadRenderStylesOnce();
-    return m_renderStyleIssues;
+    return ReadLookFileOnce(kind).issues;
 }
 
-bool CItemDataHandler::CanSaveRenderStyles()
+bool CItemDataHandler::CanSaveLooks(Data::Looks::LookKind kind)
 {
-    ReadRenderStylesOnce();
-    return m_renderStylesComplete;
+    return ReadLookFileOnce(kind).complete;
 }
 
-void CItemDataHandler::ResetRenderStylesForTest(Data::Looks::RenderStylesFile file)
+void CItemDataHandler::ResetLooksForTest(Data::Looks::LookKind kind, Data::Looks::LookFile file)
 {
+    LookFileState& state = m_lookFiles[static_cast<std::size_t>(kind)];
     SortLooks(file.looks);
-    m_renderStyles = std::move(file);
-    Data::Looks::g_LookStore.SetRenderStyles(m_renderStyles.looks);
-    m_renderStylesRead = true;
-    m_renderStylesComplete = true;
-    m_renderStyleIssues.clear();
-    m_renderStylesChanged = false;
-    ++m_renderStylesVersion;
+    state.file = std::move(file);
+    Data::Looks::g_LookStore.SetLooks(kind, state.file.looks);
+    state.read = true;
+    state.complete = true;
+    state.issues.clear();
+    state.changed = false;
+    ++state.version;
 }
 
-void CItemDataHandler::ForgetRenderStylesForTest()
+void CItemDataHandler::ForgetLooksForTest(Data::Looks::LookKind kind)
 {
-    m_renderStyles = {};
-    m_renderStylesRead = false;
-    m_renderStylesComplete = true;
-    m_renderStyleIssues.clear();
-    m_renderStylesChanged = false;
-    ++m_renderStylesVersion;
+    LookFileState& state = m_lookFiles[static_cast<std::size_t>(kind)];
+    const int version = state.version;
+    state = {};
+    state.version = version + 1;
+}
+
+void CItemDataHandler::SetPartModels(std::vector<Data::Items::PartModel> parts)
+{
+    for (const Data::Items::PartModel& part : parts)
+    {
+        const Data::Items::PartModel* before = g_ItemModelDatabase.FindPartModel(part.model.name);
+        const auto slot = std::ranges::find(Data::Items::PartModelSlots, std::string_view(part.model.name),
+                                            &Data::Items::PartModelSlot::name);
+        const bool opensDifferently = before == nullptr || before->model.file != part.model.file ||
+                                      before->model.textureFolders != part.model.textureFolders ||
+                                      before->model.noneBlendMeshes != part.model.noneBlendMeshes;
+        if (opensDifferently && slot != std::end(Data::Items::PartModelSlots) &&
+            std::ranges::find(m_partModelsToReopen, slot->modelType) == m_partModelsToReopen.end())
+        {
+            m_partModelsToReopen.push_back(slot->modelType);
+        }
+    }
+    g_ItemModelDatabase.SetPartModels(parts);
+    m_partModelsChanged = true;
 }
 
 std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
 {
+    std::vector<int> partSlots;
+    partSlots.swap(m_partModelsToReopen);
+    for (const int slot : partSlots)
+    {
+        ModelLoader::OpenPartModel(slot, lookNames);
+    }
     std::vector<int> itemTypes;
     itemTypes.swap(m_modelsToReopen);
     std::ranges::sort(itemTypes);
@@ -937,6 +973,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     {
         ValidateItemModelGlowColors(models, g_GlowColors.GetColors(), issues);
         ValidateGlowColorsAsWritten(g_GlowColors.GetColors(), issues);
+        ValidateItemModelShines(models, g_Shines.GetShines(), issues);
     }
     if (m_lookNames)
     {
@@ -946,9 +983,12 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     ValidateItemModelsAsWritten(g_ItemModelDatabase.GetAllSlots(), issues);
     ValidateSharedItemModelsAsWritten(g_ItemModelDatabase.GetSharedModels(), issues);
     ValidateItemModelFilesExist(models, issues);
+    ValidatePartModels(g_ItemModelDatabase.GetPartModels(), m_lookNames ? m_lookNames->renderStyle : nullptr, issues);
+    ValidatePartModelFilesExist(g_ItemModelDatabase.GetPartModels(), issues);
 }
 
-ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
+ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues,
+                                          std::span<const Data::TextFileToWrite> alsoWrite)
 {
     // Everything is checked before anything is written, so all problems are
     // reported at once.
@@ -966,6 +1006,8 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.groups = m_changedModelGroups;
     models.sharedModels = g_ItemModelDatabase.GetSharedModels();
     models.sharedModelsChanged = m_sharedModelsChanged;
+    models.partModels = g_ItemModelDatabase.GetPartModels();
+    models.partModelsChanged = m_partModelsChanged;
     models.glowColorsFile = GetGlowColorsFile();
     models.glowColors = g_GlowColors.GetColors();
     models.glowColorFolders = g_GlowColors.GetFolders();
@@ -976,24 +1018,29 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.groundLabelsFile = GetGroundLabelsFile();
     models.groundLabels = &g_ItemDatabase.GetGroundLabels();
     models.groundLabelsChanged = m_groundLabelsChanged;
-    // The render style file as the Style Editor changed it (design L39), when the read could use the whole file.
-    if (m_renderStylesChanged && m_renderStylesComplete)
+    // The look files as the Style Editor changed them (design L39), when the read could use the whole file.
+    for (const Data::Looks::LookKind kind : {Data::Looks::LookKind::RenderStyle, Data::Looks::LookKind::ItemEffect})
     {
-        models.renderStylesFile = RenderStylesFilePath();
-        models.renderStylesText = Data::Looks::WriteRenderStylesJson(m_renderStyles.looks, m_renderStyles.folders);
-        models.renderStylesChanged = true;
+        const LookFileState& state = m_lookFiles[static_cast<std::size_t>(kind)];
+        if (!state.changed || !state.complete)
+        {
+            continue;
+        }
+        LookFileToSave& save = models.lookFiles.emplace_back();
+        save.file = LookFilePath(kind);
+        save.text = Data::Looks::WriteLookFileJson(kind, state.file.looks, state.file.folders);
         // What the game would refuse is not written.
-        Data::Looks::RenderStylesFile readBack;
-        std::vector<ItemDataIssue> styleIssues;
-        Data::Looks::ReadRenderStylesFile(models.renderStylesText, models.renderStylesFile.generic_string(), readBack,
-                                          styleIssues);
-        const bool fatal = HasFatal(styleIssues);
-        issues.insert(issues.end(), styleIssues.begin(), styleIssues.end());
+        Data::Looks::LookFile readBack;
+        std::vector<ItemDataIssue> lookIssues;
+        Data::Looks::ReadLookFile(save.text, save.file.generic_string(), kind, readBack, lookIssues);
+        const bool fatal = HasFatal(lookIssues);
+        issues.insert(issues.end(), lookIssues.begin(), lookIssues.end());
         if (fatal)
         {
             return ItemDataSaveResult::InvalidData;
         }
     }
+    models.alsoWrite = alsoWrite;
     models.nameCasesFile = GetItemNameCasesFile();
     models.nameCases = &g_ItemDatabase.GetNameCases();
     models.nameCasesChanged = m_nameCasesChanged;

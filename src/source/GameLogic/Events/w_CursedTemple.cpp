@@ -134,125 +134,6 @@ bool CursedTemple::IsPartyMember(DWORD selectcharacterindex)
     return false;
 }
 
-CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey)
-{
-    CHARACTER* pCharacter = NULL;
-
-    switch (iType)
-    {
-    case MONSTER_STONE_STATUE:
-    {
-        OpenNpc(MODEL_CURSEDTEMPLE_STATUE);
-        pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_STATUE, iPosX, iPosY);
-        pCharacter->Object.EnableShadow = false;
-        pCharacter->Object.m_bRenderShadow = false;
-        pCharacter->Object.m_fEdgeScale = 1.03f;
-        pCharacter->Object.PKKey = 0;
-    }
-    break;
-    case MONSTER_MU_ALLIES_GENERAL:
-    {
-        OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_NPC);
-        pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_NPC, iPosX, iPosY);
-        pCharacter->Object.Scale = 1.2f;
-    }
-    break;
-    case MONSTER_ILLUSION_ELDER:
-    {
-        OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION_NPC);
-        pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION_NPC, iPosX, iPosY);
-        pCharacter->Object.Scale = 1.2f;
-    }
-    break;
-    case MONSTER_ALLIANCE_ITEM_STORAGE:
-    {
-        OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_BASKET);
-        pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_BASKET, iPosX, iPosY);
-        pCharacter->Object.Scale = 1.8f;
-        pCharacter->Object.m_fEdgeScale = 1.03f;
-        m_ShowAlliedPointEffect = false;
-    }
-    break;
-    case MONSTER_ILLUSION_ITEM_STORAGE:
-    {
-        OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION__BASKET);
-        pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION__BASKET, iPosX, iPosY);
-
-        pCharacter->Object.Scale = 1.5f;
-        pCharacter->Object.m_fEdgeScale = 1.03f;
-        m_ShowIllusionPointEffect = false;
-    }
-    break;
-    case MONSTER_MIRAGE:
-    {
-        OpenNpc(MODEL_CURSEDTEMPLE_ENTER_NPC);
-        pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ENTER_NPC, iPosX, iPosY);
-        pCharacter->Object.Scale = 0.95f;
-    }
-    break;
-    case MONSTER_ILLUSION_SORCERER_SPIRIT1_LIGHTNING:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT2_LIGHTNING:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT3_LIGHTNING:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT4_LIGHTNING:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT5_LIGHTNING:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT6_LIGHTNING:
-    {
-        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING);
-        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING, iPosX, iPosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_ILLUSION_SORCERER_SPIRIT1_ICE:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT2_ICE:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT3_ICE:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT4_ICE:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT5_ICE:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT6_ICE:
-    {
-        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE);
-        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_ICE, iPosX, iPosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
-    {
-        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON);
-        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_POISON, iPosX, iPosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_MU_ALLIES:
-    {
-        pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        pCharacter->Object.Scale = 1.f;
-        pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
-    }
-    break;
-    case MONSTER_ILLUSION_SORCERER:
-    {
-        pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        pCharacter->Object.Scale = 1.f;
-        pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
-    }
-    break;
-    default:
-        break;
-    }
-
-    return pCharacter;
-}
-
 bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsCursedTemple())
@@ -1186,6 +1067,16 @@ void CursedTemple::ReceiveCursedTempleState(const eCursedTempleState state)
         SetInterfaceState(false);
         mu::ui::window::CInventoryCtrl::BackupPickedItem();
     }
+}
+
+void CursedTemple::HideStoragePointEffect(bool allied)
+{
+    (allied ? m_ShowAlliedPointEffect : m_ShowIllusionPointEffect) = false;
+}
+
+bool CursedTemple::IsStoragePointEffectShown(bool allied) const
+{
+    return allied ? m_ShowAlliedPointEffect : m_ShowIllusionPointEffect;
 }
 
 void CursedTemple::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)

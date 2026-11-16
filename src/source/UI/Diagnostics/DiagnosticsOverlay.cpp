@@ -52,6 +52,7 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
     constructor.Bind("info", &model.info);
     constructor.Bind("frame_ms", &model.frameMs);
     constructor.Bind("cpu", &model.cpu);
+    constructor.Bind("cpu_available", &model.cpuAvailable);
     constructor.Bind("vsync", &model.vsync);
     constructor.Bind("driver", &model.driver);
     constructor.Bind("ui_update", &model.uiUpdate);
@@ -177,6 +178,7 @@ void UpdateSummary(DiagnosticsModel& model, const FrameSummary& summary)
     model.info.assign(summary.info.begin(), summary.info.end());
     model.frameMs = summary.frameMs;
     model.cpu = summary.cpu;
+    model.cpuAvailable = summary.cpu >= 0;
     model.vsync = summary.vsync;
     // Each bar is the slowest frame of its group, so a spike still shows with a fifth of the bars. The
     // bar count never changes: a shrinking array leaves RmlUi evaluating the bars it is about to remove.
@@ -225,6 +227,7 @@ void Update(const FrameSummary& summary)
             "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes_left", "passes_right", "history", "info"};
         for (const char* field : Fields)
             g_view->MarkDirty(field);
+        g_view->MarkDirty("cpu_available");
         g_nextRefresh = now + RefreshInterval;
     }
     if (changed)

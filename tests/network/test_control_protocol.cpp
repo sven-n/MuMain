@@ -6,11 +6,15 @@
 
 #include "doctest.h"
 
+#include "App/Control/ControlCommands.h"
 #include "App/Control/ControlProtocol.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Globals/_enum.h" // MESSAGE_SERVER_LOST_RECONNECT
 
 #include <cctype>
+#include <chrono>
+#include <memory>
+#include <thread>
 #include <string>
 #include <vector>
 
@@ -86,6 +90,7 @@ TEST_CASE("Control protocol serves the documented command vocabulary [network][c
     const std::vector<std::string> expected = {
         "ping",
         "scene",
+        "frames",
         "state",
         "nearby",
         "events",
@@ -248,4 +253,24 @@ TEST_CASE("Type request requires a strict optional boolean [network][control-pro
     request = Request::Parse(R"({"cmd":"type","text":"hello","enter":null})");
     CHECK(request.Contains("enter"));
     CHECK_FALSE(request.GetStrictBool("enter", enter));
+}
+
+TEST_CASE("Frames reports the longest frame and the slow ones, then resets [network][control-protocol]")
+{
+    using namespace App::Control;
+    std::unique_ptr<Act> act;
+    // Starts from a clean count whatever ran before.
+    (void)Commands::FrameTimes(Request::Parse(R"({"cmd":"frames","reset":true})"), act);
+    Commands::RecordFrame();
+    std::this_thread::sleep_for(std::chrono::milliseconds(60));
+    Commands::RecordFrame();
+
+    const std::string answer = Commands::FrameTimes(Request::Parse(R"({"cmd":"frames","reset":true})"), act);
+    CHECK(answer.find(R"("frames":1)") != std::string::npos);
+    CHECK(answer.find(R"("slow":1)") != std::string::npos);
+    const std::string afterReset = Commands::FrameTimes(Request::Parse(R"({"cmd":"frames"})"), act);
+    CHECK(afterReset.find(R"("frames":0)") != std::string::npos);
+    CHECK(afterReset.find(R"("longest_ms":0.0)") != std::string::npos);
+    CHECK(Commands::FrameTimes(Request::Parse(R"({"cmd":"frames","reset":1})"), act).find("bad_request") !=
+          std::string::npos);
 }
