@@ -4106,6 +4106,13 @@ public:
         return s_postProcessing.SetGradingTable(rgba);
     }
 
+    [[nodiscard]] bool CanTurnOffVSync() const override
+    {
+        return s_device && s_window &&
+               (SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_IMMEDIATE) ||
+                SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_MAILBOX));
+    }
+
     [[nodiscard]] bool SetVSyncEnabled(bool enabled) override
     {
         if (!s_device || !s_window)

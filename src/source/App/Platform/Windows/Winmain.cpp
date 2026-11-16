@@ -367,6 +367,17 @@ void ApplyVSyncPreferenceNow(bool enabled)
         return;
     }
 
+    if (!enabled && !CanDisableVSync())
+    {
+        static bool logged = false;
+        if (!logged)
+        {
+            mu::log::Get("render")->info("VSync stays on: this display has no present mode that isn't tied to it");
+            logged = true;
+        }
+        enabled = true;
+    }
+
     if (enabled)
     {
         EnableVSync();
