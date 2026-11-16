@@ -10,6 +10,8 @@
 #include "Network/IncomingPacketQueue.h"
 #include "Network/Server/CSMapServer.h"
 #include "UI/Combat/CastleSiegePhase.h"
+#include <cstddef>
+#include <cstdint>
 #include <span>
 #include <typeinfo>
 
@@ -3339,6 +3341,28 @@ typedef struct
     char chSendUserName[MAX_USERNAME_SIZE + 1];
     char chMessage[MAX_GIFT_MESSAGE_SIZE];
 } PMSG_CASHSHOP_GIFTSTORAGELIST, *LPPMSG_CASHSHOP_GIFTSTORAGELIST;
+
+// Keep the fields serialized by the original Cash Shop protocol at the same
+// byte offsets on LLP64 Windows and LP64 macOS/Linux builds.
+static_assert(sizeof(PBMSG_HEADER2) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lStorageIndex) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lItemSeq) == 8);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lStorageGroupCode) == 12);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lProductSeq) == 16);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lPriceSeq) == 20);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, dCashPoint) == 24);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, chItemType) == 32);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, lStorageIndex) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, lItemSeq) == 8);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, lStorageGroupCode) == 12);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, lProductSeq) == 16);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, lPriceSeq) == 20);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, dCashPoint) == 24);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chItemType) == 32);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chSendUserName) == 33);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chMessage) == 44);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, chItemType) + sizeof(char) == 33);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chMessage) + MAX_GIFT_MESSAGE_SIZE == 244);
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x07)
