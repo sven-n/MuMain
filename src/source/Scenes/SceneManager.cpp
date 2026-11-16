@@ -1196,6 +1196,7 @@ static void LogFrameTiming()
 {
     static bool enabled = std::getenv("MU_RENDER_TIMING") != nullptr;
     static unsigned frameCounter = 0;
+    FrameProfiler::g_TimingForLog = enabled;
     constexpr unsigned kLogInterval = 60;
     if (!enabled || ++frameCounter % kLogInterval != 0)
         return;

@@ -126,6 +126,15 @@ inline constexpr const char* kCounterNames[static_cast<int>(Counter::Count_)] = 
 static_assert(kCounterNames[static_cast<int>(Counter::Count_) - 1] != nullptr, "a counter without a name");
 
 inline bool g_CountersEnabled = false;
+// Pass timing reads the clock twice per scope, thousands of times a frame (a call into JavaScript in the browser),
+// so it runs only while the counters, the diagnostics overlay or the timing log want it.
+inline bool g_TimingForOverlay = false;
+inline bool g_TimingForLog = false;
+
+inline bool TimingEnabled()
+{
+    return g_CountersEnabled || g_TimingForOverlay || g_TimingForLog;
+}
 
 inline float& AccumulatorMs(Pass pass)
 {
@@ -283,16 +292,22 @@ inline void Count(Counter counter, std::uint32_t amount = 1)
 class Scope
 {
 public:
-    explicit Scope(Pass pass)
-        : m_pass(pass), m_startedAt(std::chrono::steady_clock::now())
+    explicit Scope(Pass pass) : m_pass(pass), m_timed(TimingEnabled())
     {
+        if (m_timed)
+        {
+            m_startedAt = std::chrono::steady_clock::now();
+        }
         PushPass(pass);
     }
 
     ~Scope()
     {
-        const auto elapsed = std::chrono::steady_clock::now() - m_startedAt;
-        AccumulatorMs(m_pass) += std::chrono::duration<float, std::milli>(elapsed).count();
+        if (m_timed)
+        {
+            const auto elapsed = std::chrono::steady_clock::now() - m_startedAt;
+            AccumulatorMs(m_pass) += std::chrono::duration<float, std::milli>(elapsed).count();
+        }
         PopPass();
     }
 
@@ -301,6 +316,7 @@ public:
 
 private:
     Pass m_pass;
+    bool m_timed;
     std::chrono::steady_clock::time_point m_startedAt;
 };
 }
