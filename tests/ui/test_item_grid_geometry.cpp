@@ -6,8 +6,9 @@
 
 using UI::Items::AnchoredTopLeft;
 using UI::Items::GridGeometry;
-using UI::Items::HeldItemCellOf;
+using UI::Items::HeldItemPlace;
 using UI::Items::PickupAnchor;
+using UI::Items::PlaceHeldItem;
 
 TEST_CASE("an item grid finds the cell under a point at the original pitch")
 {
@@ -160,7 +161,7 @@ TEST_CASE("a dropped item lands by each axis's own pitch in a grid of non-square
         }
     }
 
-    // 13 px down is under half a row (15) but over half a column (12): only the column moves on.
+    // 13 px right and down is under half a row (15) but over half a column (12): only the column moves on.
     REQUIRE(grid.ItemCellAt(48.f + 13.f, 30.f + 13.f, column, row));
     CHECK(column == 3);
     CHECK(row == 1);
@@ -175,20 +176,23 @@ TEST_CASE("an item picked up on a scaled grid and not moved lands back on its ow
     const auto cell = grid.CellsRect(itemColumn, itemRow, 1, 1);
     const int drawnLeft = static_cast<int>(std::lround(cell.x));
     const int drawnTop = static_cast<int>(std::lround(cell.y));
-    const int pitch = static_cast<int>(grid.PitchX());
+    // The item's drawn size: a hold is clamped inside it.
+    const int heldWidth = static_cast<int>(std::lround(grid.PitchX()));
+    const int heldHeight = static_cast<int>(std::lround(grid.PitchY()));
 
-    // Every whole-pixel hold in the item, kept as CPickedItem::Pick keeps it, with the pointer left where it was.
-    for (int dx = 0; dx < pitch; ++dx)
+    // Every whole-pixel hold in the item, stored in a PickupAnchor as the pickup stores it, with the pointer left
+    // where it was.
+    for (int dx = 0; dx < heldWidth; ++dx)
     {
-        for (int dy = 0; dy < pitch; ++dy)
+        for (int dy = 0; dy < heldHeight; ++dy)
         {
             const PickupAnchor hold{dx / grid.PitchX(), dy / grid.PitchY()};
-            int column = -1;
-            int row = -1;
-            HeldItemCellOf(grid, static_cast<float>(drawnLeft + dx), static_cast<float>(drawnTop + dy), hold, column,
-                           row);
-            CHECK(column == itemColumn);
-            CHECK(row == itemRow);
+            const HeldItemPlace place =
+                PlaceHeldItem(grid, static_cast<float>(drawnLeft + dx), static_cast<float>(drawnTop + dy), hold);
+            CHECK(place.left == drawnLeft);
+            CHECK(place.top == drawnTop);
+            CHECK(place.column == itemColumn);
+            CHECK(place.row == itemRow);
         }
     }
 }

@@ -1598,8 +1598,11 @@ bool CMyInventory::CheckTakeOff(int equipmentSlot) const
 bool CMyInventory::PickedItemLandsInGrid() const
 {
     CPickedItem* pickedItem = CInventoryCtrl::GetPickedItem();
-    return pickedItem != nullptr && m_pNewInventoryCtrl != nullptr &&
-           pickedItem->GetTargetLinealPos(m_pNewInventoryCtrl) >= 0;
+    if (pickedItem == nullptr || m_pNewInventoryCtrl == nullptr)
+        return false;
+
+    const int targetPos = pickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
+    return targetPos >= 0 && m_pNewInventoryCtrl->TakesDropAt(targetPos, pickedItem->GetItem());
 }
 
 bool CMyInventory::InventoryProcess() const

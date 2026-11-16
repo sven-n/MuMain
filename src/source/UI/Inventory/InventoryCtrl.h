@@ -99,11 +99,9 @@ namespace mu::ui::window
         void GetRect(RECT& rcBox);
         // The item's top-left in `grid`'s space, with the pointer at (pointerX, pointerY) there.
         POINT TopLeftIn(const CInventoryCtrl* grid, int pointerX, int pointerY) const;
-        // The item's top-left in `grid`'s space, at the pointer.
-        POINT TopLeftAtPointer(const CInventoryCtrl* grid) const;
-        // The cell the item lands on in `grid`, at the pointer: the one under its first cell's centre, also outside
-        // the grid (UI::Items::HeldItemCellOf). The drop and the drop preview both use it.
-        void TargetCellIn(const CInventoryCtrl* grid, int& column, int& row) const;
+        // The item's top-left in `grid`'s space at the pointer, and the cell it lands on there
+        // (UI::Items::PlaceHeldItem). The drop and the drop preview both use it.
+        UI::Items::HeldItemPlace PlaceIn(const CInventoryCtrl& grid) const;
         // The item's size in `grid`'s cells.
         SIZE SizeIn(const CInventoryCtrl* grid) const;
 
@@ -304,6 +302,9 @@ namespace mu::ui::window
         bool CanMove(int iLinealPos, ITEM* pItem);
         bool CanMove(int iColumnX, int iRowY, ITEM* pItem);
         bool CanMoveToPt(int x, int y, ITEM* pItem);
+        // Whether the grid takes `pItem` dropped with its first cell at iLinealPos: the cells are free, or the drop
+        // acts on the item there. The drop preview's green cells.
+        bool TakesDropAt(int iLinealPos, ITEM* pItem);
 
         void SetToolTipType(TOOLTIP_TYPE ToolTipType);
         void CreateItemToolTip(ITEM* pItem);

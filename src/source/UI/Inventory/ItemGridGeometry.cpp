@@ -61,12 +61,11 @@ void AnchoredTopLeft(float pointerX, float pointerY, const PickupAnchor& anchor,
     top = static_cast<int>(std::lround(pointerY - anchor.row * pitchY));
 }
 
-void HeldItemCellOf(const GridGeometry& grid, float pointerX, float pointerY, const PickupAnchor& anchor, int& column,
-                    int& row)
+HeldItemPlace PlaceHeldItem(const GridGeometry& grid, float pointerX, float pointerY, const PickupAnchor& anchor)
 {
-    int left = 0;
-    int top = 0;
-    AnchoredTopLeft(pointerX, pointerY, anchor, grid.PitchX(), grid.PitchY(), left, top);
-    grid.ItemCellOf(static_cast<float>(left), static_cast<float>(top), column, row);
+    HeldItemPlace place;
+    AnchoredTopLeft(pointerX, pointerY, anchor, grid.PitchX(), grid.PitchY(), place.left, place.top);
+    grid.ItemCellOf(static_cast<float>(place.left), static_cast<float>(place.top), place.column, place.row);
+    return place;
 }
 } // namespace UI::Items

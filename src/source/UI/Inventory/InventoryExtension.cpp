@@ -132,12 +132,14 @@ bool CInventoryExtension::UpdateMouseEvent()
             {
                 return false;
             }
-
-            if (InventoryProcess())
-            {
-                return false;
-            }
         }
+    }
+
+    // Once per release, after every page: the release goes to the page the held item lands in, and a page after it
+    // must not pick up the item under the pointer once a held item has been placed or put back.
+    if (InventoryProcess())
+    {
+        return false;
     }
 
     if (IsPointerOverPanel())

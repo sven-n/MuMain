@@ -209,17 +209,11 @@ int mu::ui::window::CPickedItem::GetSourceLinealPos()
     return -1;
 }
 
-POINT mu::ui::window::CPickedItem::TopLeftAtPointer(const CInventoryCtrl* grid) const
+UI::Items::HeldItemPlace mu::ui::window::CPickedItem::PlaceIn(const CInventoryCtrl& grid) const
 {
     const POINT pointer = CInventoryCtrl::PointerPos();
-    return TopLeftIn(grid, pointer.x, pointer.y);
-}
-
-void mu::ui::window::CPickedItem::TargetCellIn(const CInventoryCtrl* grid, int& column, int& row) const
-{
-    const POINT pointer = CInventoryCtrl::PointerPos();
-    UI::Items::HeldItemCellOf(grid->Geometry(), static_cast<float>(pointer.x), static_cast<float>(pointer.y), m_Anchor,
-                              column, row);
+    return UI::Items::PlaceHeldItem(grid.Geometry(), static_cast<float>(pointer.x), static_cast<float>(pointer.y),
+                                    m_Anchor);
 }
 
 bool mu::ui::window::CPickedItem::GetTargetPos(CInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY)
@@ -227,7 +221,9 @@ bool mu::ui::window::CPickedItem::GetTargetPos(CInventoryCtrl* pDest, int& iTarg
     if (pDest == nullptr)
         return false;
 
-    TargetCellIn(pDest, iTargetColumnX, iTargetRowY);
+    const UI::Items::HeldItemPlace place = PlaceIn(*pDest);
+    iTargetColumnX = place.column;
+    iTargetRowY = place.row;
     const UI::Items::GridGeometry& geometry = pDest->Geometry();
     return iTargetColumnX >= 0 && iTargetColumnX < geometry.Columns() && iTargetRowY >= 0 &&
            iTargetRowY < geometry.Rows();
@@ -1143,9 +1139,9 @@ void mu::ui::window::CInventoryCtrl::UpdateCells()
 
     // The picked item's own position is in its owner window's space; every placed window has its
     // own, so take the item's box from the pointer in this grid's space.
-    const POINT itemTopLeft = ms_pPickedItem->TopLeftAtPointer(this);
+    const UI::Items::HeldItemPlace place = ms_pPickedItem->PlaceIn(*this);
     const SIZE pickedSize = ms_pPickedItem->SizeIn(this);
-    RECT rcPickedItem{itemTopLeft.x, itemTopLeft.y, itemTopLeft.x + pickedSize.cx, itemTopLeft.y + pickedSize.cy};
+    RECT rcPickedItem{place.left, place.top, place.left + pickedSize.cx, place.top + pickedSize.cy};
     RECT rcInventory, rcIntersect;
     GetRect(rcInventory);
     if (!IntersectRect(&rcIntersect, &rcPickedItem, &rcInventory))
@@ -1153,9 +1149,8 @@ void mu::ui::window::CInventoryCtrl::UpdateCells()
 
     ITEM* pPickItem = ms_pPickedItem->GetItem();
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
-    int iColumnX = 0, iRowY = 0;
+    int iColumnX = place.column, iRowY = place.row;
     int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
-    ms_pPickedItem->TargetCellIn(this, iColumnX, iRowY);
 
     bool bWarning = false;
     if (iColumnX < 0 && iColumnX >= -nItemColumn)
@@ -1425,6 +1420,15 @@ bool mu::ui::window::CInventoryCtrl::CanMove(int iColumnX, int iRowY, ITEM* pIte
 {
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     return CheckSlot(iColumnX, iRowY, pItemAttr->Width, pItemAttr->Height);
+}
+
+bool mu::ui::window::CInventoryCtrl::TakesDropAt(int iLinealPos, ITEM* pItem)
+{
+    if (CanMove(iLinealPos, pItem))
+        return true;
+
+    ITEM* pTargetItem = FindItem(iLinealPos);
+    return pTargetItem != nullptr && DropActsOn(pItem, pTargetItem);
 }
 
 bool mu::ui::window::CInventoryCtrl::CanMoveToPt(int x, int y, ITEM* pItem)

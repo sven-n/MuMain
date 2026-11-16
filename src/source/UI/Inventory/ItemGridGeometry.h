@@ -67,9 +67,17 @@ struct PickupAnchor
 void AnchoredTopLeft(float pointerX, float pointerY, const PickupAnchor& anchor, float pitchX, float pitchY,
                      int& left, int& top);
 
-// The cell a held item lands on in `grid`, with the pointer at (pointerX, pointerY) there: its whole-pixel
-// top-left (AnchoredTopLeft), then the cell under its first cell's centre (GridGeometry::ItemCellOf). The drop and
-// the drop preview both use it.
-void HeldItemCellOf(const GridGeometry& grid, float pointerX, float pointerY, const PickupAnchor& anchor, int& column,
-                    int& row);
+// Where a held item is in a grid: its whole-pixel top-left (AnchoredTopLeft) and the cell it lands on, the one
+// under its first cell's centre (GridGeometry::ItemCellOf), also outside the grid.
+struct HeldItemPlace
+{
+    int left = 0;
+    int top = 0;
+    int column = 0;
+    int row = 0;
+};
+
+// The held item's place in `grid`, with the pointer at (pointerX, pointerY) there. The drop and the drop preview
+// both use it.
+HeldItemPlace PlaceHeldItem(const GridGeometry& grid, float pointerX, float pointerY, const PickupAnchor& anchor);
 } // namespace UI::Items
