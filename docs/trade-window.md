@@ -17,8 +17,9 @@ options.
 
 When an item of a kind that is already remembered comes in again, the better
 copy is kept. The memory lasts across trades with the same partner. It is
-cleared when a trade with another partner opens, or when a trade window that
-showed the warning closes.
+cleared when a trade with another partner opens, or when the trade window
+closes after you pressed the trade button, unless the trade was cancelled. A
+trade request from someone else that you decline leaves the memory alone.
 
 ## When an item is marked
 
@@ -34,4 +35,9 @@ worked out again each time the partner adds or takes out an item.
 
 While any offered item is marked, pressing the trade button first asks
 whether the items are really the ones you want to trade. The trade goes on
-only if you accept.
+only if you accept. With no item marked, the button never asks.
+
+The original client asked again after you had pressed the trade button once,
+even with nothing marked, because one flag stood both for the warning and for
+forgetting the remembered items when the window closes. These are two flags
+now.

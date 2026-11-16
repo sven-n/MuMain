@@ -107,6 +107,7 @@ bool CTrade::Create(CManager* pNewUIMng)
 
     ::memset(m_szYourID, 0, MAX_USERNAME_SIZE + 1);
     m_bTradeAlert = false;
+    m_bForgetBackUpOnClose = false;
 
     InitTradeInfo();
     InitYourInvenBackUp();
@@ -576,7 +577,7 @@ void CTrade::ProcessClosing()
     m_pYourInvenCtrl->RemoveAllItems();
     m_pMyInvenCtrl->RemoveAllItems();
 
-    if (m_bTradeAlert)
+    if (m_bForgetBackUpOnClose)
         InitYourInvenBackUp();
 }
 
@@ -676,7 +677,7 @@ void CTrade::ProcessCloseBtn()
 {
     if (CInventoryCtrl::GetPickedItem() == NULL)
     {
-        m_bTradeAlert = false;
+        m_bForgetBackUpOnClose = false;
         SocketClient->ToGameServer()->SendTradeCancel();
     }
 }
@@ -693,7 +694,7 @@ void CTrade::AlertTrade()
 {
     m_bMyConfirm = !m_bMyConfirm;
 
-    m_bTradeAlert = true;
+    m_bForgetBackUpOnClose = true;
     SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm ? TradeButtonState::Checked : TradeButtonState::Unchecked);
 }
 
@@ -710,14 +711,13 @@ bool CTrade::ProcessToReceiveTradeRequest(const wchar_t* pszYourID)
         return false;
     }
 
-    wcsncpy(m_szYourID, pszYourID, MAX_USERNAME_SIZE);
-    m_szYourID[MAX_USERNAME_SIZE] = L'\0';
-
+    // m_szYourID keeps the last partner until a trade opens: the remembered items belong to that partner, and this
+    // request may be declined.
     mu::ui::window::GenericDialogConfig cfg;
     cfg.showCancel = true;
     cfg.lines = {
-        { m_szYourID, false },
-        { I18N::Game::WouldLikeToTradeWithYou, false },
+        {pszYourID, false},
+        {I18N::Game::WouldLikeToTradeWithYou, false},
     };
     cfg.onPrimary = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(true); };
     cfg.onCancel = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(false); };
@@ -750,10 +750,11 @@ void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI
         wchar_t szTempID[MAX_USERNAME_SIZE + 1]{ };
         wcsncpy(szTempID, std::wstring(partner.name).c_str(), MAX_USERNAME_SIZE);
 
-        if (!m_bTradeAlert && ::wcscmp(m_szYourID, szTempID))
+        if (!m_bForgetBackUpOnClose && ::wcscmp(m_szYourID, szTempID))
             InitYourInvenBackUp();
 
         m_bTradeAlert = false;
+        m_bForgetBackUpOnClose = false;
         m_nYourGuildType = partner.guildKey;
         wcsncpy(m_szYourID, szTempID, MAX_USERNAME_SIZE);
         m_nYourLevel = partner.level;
@@ -763,17 +764,14 @@ void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI
 
 void CTrade::ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex)
 {
-    BackUpYourInven(int(byYourInvenIndex));
     ITEM* pYourItemObj = m_pYourInvenCtrl->FindItem(int(byYourInvenIndex));
+    if (pYourItemObj == nullptr)
+        return; // The server removed a slot this window shows empty.
+
+    BackUpYourInven(pYourItemObj);
     m_pYourInvenCtrl->RemoveItem(pYourItemObj);
     AlertYourTradeInven();
     ::PlayBuffer(SOUND_GET_ITEM01);
-}
-
-void CTrade::BackUpYourInven(int nYourInvenIndex)
-{
-    ITEM* pYourItemObj = m_pYourInvenCtrl->FindItem(nYourInvenIndex);
-    BackUpYourInven(pYourItemObj);
 }
 
 void CTrade::BackUpYourInven(ITEM* pYourItemObj)
@@ -888,7 +886,7 @@ void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
     {
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
 
-        m_bTradeAlert = false;
+        m_bForgetBackUpOnClose = false;
 
         int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
         for (int i = 0; i < nYourItems; ++i)

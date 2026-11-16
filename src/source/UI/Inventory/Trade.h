@@ -59,7 +59,8 @@ namespace mu::ui::window
         bool           m_bYourConfirm;         // Other player's confirmation status
         bool           m_bMyConfirm;           // My confirmation status
         int            m_nMyTradeWait;         // Delay to prevent spamming my confirm button
-        bool           m_bTradeAlert;          // Trade warning alert
+        bool m_bTradeAlert;                    // An offered item is marked: the confirm button asks first
+        bool m_bForgetBackUpOnClose;           // The trade button was pressed: closing forgets the remembered items
 
         // Window frame/title/both nickname displays/both gold strips/both confirm checkboxes/
         // divider/buttons are RmlUi. Both CInventoryCtrl grids stay native since their icons are
@@ -211,7 +212,6 @@ namespace mu::ui::window
 
         void InitTradeInfo();
         void InitYourInvenBackUp();
-        void BackUpYourInven(int nYourInvenIndex);
         void BackUpYourInven(ITEM* pYourItemObj);
         void AlertYourTradeInven();
 
