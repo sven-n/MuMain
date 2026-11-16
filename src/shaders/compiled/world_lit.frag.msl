@@ -236,7 +236,7 @@ float4 _main(thread const FSInput& _input, constant SceneLighting& _56, depth2d<
     if ((cloud < 1.0) && (_56.lightingParameters.y > 0.0))
     {
         float2 cellUv = ((_input.worldPosition.xy / float2(100.0)) + float2(0.5)) / float2(256.0);
-        float3 direct = terrainSunLight.sample(terrainSunSampler, cellUv).xyz;
+        float3 direct = terrainSunLight.sample(terrainSunSampler, cellUv, level(0.0)).xyz;
         ground = fast::max(ground - ((direct * sunVisible) * (1.0 - cloud)), float3(0.0));
     }
     float3 skyShade = mix(float3(1.0), _56.skyFill.xyz, float3(_56.skyFill.w * (1.0 - (sunVisible * cloud))));
