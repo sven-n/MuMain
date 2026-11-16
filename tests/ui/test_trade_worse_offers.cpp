@@ -1,8 +1,11 @@
 #include <doctest.h>
 #include "UI/Inventory/TradeWorseOffers.h"
+#include "Engine/Object/CompareItemResult.h"
 
 #include <array>
 
+namespace CompareResult = Engine::Items::CompareResult;
+using UI::Trade::CheckOffer;
 using UI::Trade::MarkWorseOffers;
 using UI::Trade::OfferedItemCheck;
 
@@ -75,4 +78,38 @@ TEST_CASE("a full trade window keeps the warning of the one worse item with no u
 TEST_CASE("no offered items raise no warning")
 {
     CHECK_FALSE(MarkWorseOffers({}, {}));
+}
+
+TEST_CASE("an offered item worse than the remembered copy counts as worse")
+{
+    const OfferedItemCheck check = CheckOffer(SwordType, CompareResult::FirstIsBetter);
+
+    CHECK(check.itemType == SwordType);
+    CHECK(check.worseThanRemembered);
+    CHECK_FALSE(check.sameAsRemembered);
+}
+
+TEST_CASE("an offered item the same as the remembered copy counts as unchanged")
+{
+    const OfferedItemCheck check = CheckOffer(SwordType, CompareResult::Same);
+
+    CHECK_FALSE(check.worseThanRemembered);
+    CHECK(check.sameAsRemembered);
+}
+
+TEST_CASE("an offered item better than the remembered copy is neither worse nor unchanged")
+{
+    const OfferedItemCheck check = CheckOffer(SwordType, CompareResult::SecondIsBetter);
+
+    CHECK_FALSE(check.worseThanRemembered);
+    CHECK_FALSE(check.sameAsRemembered);
+}
+
+TEST_CASE("an offered item with no remembered copy of its type is neither worse nor unchanged")
+{
+    const OfferedItemCheck check = CheckOffer(ShieldType, CompareResult::OtherType);
+
+    CHECK(check.itemType == ShieldType);
+    CHECK_FALSE(check.worseThanRemembered);
+    CHECK_FALSE(check.sameAsRemembered);
 }

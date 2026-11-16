@@ -1,34 +1,38 @@
 #include "UI/Inventory/TradeWorseOffers.h"
+#include "Engine/Object/CompareItemResult.h"
 
 #include <algorithm>
-#include <vector>
+#include <cassert>
 
 namespace UI::Trade
 {
 namespace
 {
-std::vector<int> TypesOfferedUnchanged(std::span<const OfferedItemCheck> offers)
+bool OffersUnchangedOfType(std::span<const OfferedItemCheck> offers, int itemType)
 {
-    std::vector<int> types;
-    for (const OfferedItemCheck& offer : offers)
-    {
-        if (offer.sameAsRemembered)
-            types.push_back(offer.itemType);
-    }
-
-    return types;
+    return std::ranges::any_of(offers, [itemType](const OfferedItemCheck& offer)
+                               { return offer.sameAsRemembered && offer.itemType == itemType; });
 }
 } // namespace
 
+OfferedItemCheck CheckOffer(int itemType, int compareWithRemembered)
+{
+    namespace CompareResult = Engine::Items::CompareResult;
+    return {
+        .itemType = itemType,
+        .worseThanRemembered = (compareWithRemembered == CompareResult::FirstIsBetter),
+        .sameAsRemembered = (compareWithRemembered == CompareResult::Same),
+    };
+}
+
 bool MarkWorseOffers(std::span<const OfferedItemCheck> offers, std::span<bool> marked)
 {
-    const std::vector<int> unchangedTypes = TypesOfferedUnchanged(offers);
+    assert(offers.size() == marked.size());
     bool anyMarked = false;
-    const size_t count = std::min(offers.size(), marked.size());
-    for (size_t i = 0; i < count; ++i)
+    for (size_t i = 0; i < offers.size(); ++i)
     {
-        marked[i] = offers[i].worseThanRemembered &&
-                    std::ranges::find(unchangedTypes, offers[i].itemType) == unchangedTypes.end();
+        // At most 32 offers, so scanning them again per item costs less than collecting the types first.
+        marked[i] = offers[i].worseThanRemembered && !OffersUnchangedOfType(offers, offers[i].itemType);
         anyMarked = anyMarked || marked[i];
     }
 

@@ -5,6 +5,7 @@
 #include "UI/Inventory/Trade.h"
 #include "UI/Inventory/HeldItemPlacement.h"
 #include "UI/Inventory/TradeWorseOffers.h"
+#include "Engine/Object/CompareItemResult.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -48,24 +49,16 @@ const wchar_t* const* const kTradeAlertLines[] = {
     &I18N::Game::TheSameItemThatYouWantToTrade,
 };
 
-// CompareItem's results for (remembered, offered) of one type.
-constexpr int RememberedIsBetter = 1;
-constexpr int RememberedIsSame = 0;
+namespace CompareResult = Engine::Items::CompareResult;
 
 // Holds an offered item against the copy of its type the trade window remembers. The window remembers at most one
 // copy per type (CTrade::BackUpYourInven).
 UI::Trade::OfferedItemCheck CheckAgainstRemembered(std::span<const ITEM> remembered, const ITEM& offered)
 {
-    UI::Trade::OfferedItemCheck check{.itemType = offered.Type};
     const auto copy =
         std::ranges::find_if(remembered, [&offered](const ITEM& item) { return item.Type == offered.Type; });
-    if (copy == remembered.end())
-        return check;
-
-    const int compareValue = ::CompareItem(*copy, offered);
-    check.worseThanRemembered = (compareValue == RememberedIsBetter);
-    check.sameAsRemembered = (compareValue == RememberedIsSame);
-    return check;
+    const int compareResult = (copy == remembered.end()) ? CompareResult::OtherType : ::CompareItem(*copy, offered);
+    return UI::Trade::CheckOffer(offered.Type, compareResult);
 }
 } // namespace
 
@@ -814,18 +807,18 @@ void CTrade::BackUpYourInven(ITEM* pYourItemObj)
                 continue;
 
             nCompareValue = ::CompareItem(m_aYourInvenBackUp[i], *pYourItemObj);
-            if (0 == nCompareValue)
+            if (nCompareValue == CompareResult::Same)
             {
                 bSameItem = true;
                 break;
             }
-            else if (-1 == nCompareValue)
+            else if (nCompareValue == CompareResult::SecondIsBetter)
             {
                 bSameItem = true;
                 m_aYourInvenBackUp[i] = *pYourItemObj;
                 break;
             }
-            else if (2 != nCompareValue)
+            else if (nCompareValue != CompareResult::OtherType)
             {
                 bSameItem = true;
             }
