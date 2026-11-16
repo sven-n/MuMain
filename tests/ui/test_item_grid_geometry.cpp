@@ -1,10 +1,12 @@
 #include "doctest.h"
 #include "UI/Inventory/ItemGridGeometry.h"
 
+#include <cmath>
 #include <initializer_list>
 
 using UI::Items::AnchoredTopLeft;
 using UI::Items::GridGeometry;
+using UI::Items::HeldItemCellOf;
 using UI::Items::PickupAnchor;
 
 TEST_CASE("an item grid finds the cell under a point at the original pitch")
@@ -162,4 +164,31 @@ TEST_CASE("a dropped item lands by each axis's own pitch in a grid of non-square
     REQUIRE(grid.ItemCellAt(48.f + 13.f, 30.f + 13.f, column, row));
     CHECK(column == 3);
     CHECK(row == 1);
+}
+
+TEST_CASE("an item picked up on a scaled grid and not moved lands back on its own cell")
+{
+    // #922: a fractional left edge and pitch, as at a scaled theme.
+    const GridGeometry grid{100.4f, 200.4f, 23.6f, 23.6f, 8, 4};
+    constexpr int itemColumn = 3;
+    constexpr int itemRow = 2;
+    const auto cell = grid.CellsRect(itemColumn, itemRow, 1, 1);
+    const int drawnLeft = static_cast<int>(std::lround(cell.x));
+    const int drawnTop = static_cast<int>(std::lround(cell.y));
+    const int pitch = static_cast<int>(grid.PitchX());
+
+    // Every whole-pixel hold in the item, kept as CPickedItem::Pick keeps it, with the pointer left where it was.
+    for (int dx = 0; dx < pitch; ++dx)
+    {
+        for (int dy = 0; dy < pitch; ++dy)
+        {
+            const PickupAnchor hold{dx / grid.PitchX(), dy / grid.PitchY()};
+            int column = -1;
+            int row = -1;
+            HeldItemCellOf(grid, static_cast<float>(drawnLeft + dx), static_cast<float>(drawnTop + dy), hold, column,
+                           row);
+            CHECK(column == itemColumn);
+            CHECK(row == itemRow);
+        }
+    }
 }

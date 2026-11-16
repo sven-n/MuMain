@@ -66,4 +66,10 @@ struct PickupAnchor
 // The item's top-left under the pointer, in a grid of the given pitch.
 void AnchoredTopLeft(float pointerX, float pointerY, const PickupAnchor& anchor, float pitchX, float pitchY,
                      int& left, int& top);
+
+// The cell a held item lands on in `grid`, with the pointer at (pointerX, pointerY) there: its whole-pixel
+// top-left (AnchoredTopLeft), then the cell under its first cell's centre (GridGeometry::ItemCellOf). The drop and
+// the drop preview both use it.
+void HeldItemCellOf(const GridGeometry& grid, float pointerX, float pointerY, const PickupAnchor& anchor, int& column,
+                    int& row);
 } // namespace UI::Items

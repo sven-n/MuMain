@@ -217,8 +217,9 @@ POINT mu::ui::window::CPickedItem::TopLeftAtPointer(const CInventoryCtrl* grid) 
 
 void mu::ui::window::CPickedItem::TargetCellIn(const CInventoryCtrl* grid, int& column, int& row) const
 {
-    const POINT itemTopLeft = TopLeftAtPointer(grid);
-    grid->Geometry().ItemCellOf(static_cast<float>(itemTopLeft.x), static_cast<float>(itemTopLeft.y), column, row);
+    const POINT pointer = CInventoryCtrl::PointerPos();
+    UI::Items::HeldItemCellOf(grid->Geometry(), static_cast<float>(pointer.x), static_cast<float>(pointer.y), m_Anchor,
+                              column, row);
 }
 
 bool mu::ui::window::CPickedItem::GetTargetPos(CInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY)
