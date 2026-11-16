@@ -195,6 +195,10 @@ static const int s_NumFpsCapValues = sizeof(s_FpsCapValues) / sizeof(s_FpsCapVal
 // ([Render] Antialiasing, Anisotropy); the first entry of each is "Off".
 static constexpr int s_AntialiasingValues[] = {0, 2, 4, 8};
 static constexpr int s_AnisotropyValues[] = {1, 2, 4, 8, 16};
+// The Render scale and Sharpness rows, in percent ([Render] RenderScale, Sharpness); a config value
+// between two shows the lower. The last render scale and the first sharpness change nothing.
+static constexpr int s_RenderScaleValues[] = {50, 59, 67, 77, 85, 100};
+static constexpr int s_SharpnessValues[] = {0, 25, 50, 75, 100};
 
 namespace
 {
@@ -208,6 +212,19 @@ template <std::size_t N> int FindValueIndex(const int (&values)[N], int value)
             index = i;
     }
     return index;
+}
+
+// "N%" for each value; the first is "Off" when `firstIsOff`.
+template <std::size_t N> std::vector<Rml::String> PercentLabels(const int (&values)[N], bool firstIsOff)
+{
+    std::vector<Rml::String> labels;
+    labels.reserve(N);
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        labels.push_back(i == 0 && firstIsOff ? StringUtils::WideToNarrow(I18N::Game::Off)
+                                              : std::to_string(values[i]) + "%");
+    }
+    return labels;
 }
 
 template <std::size_t N> std::vector<Rml::String> MultiplierLabels(const int (&values)[N])
@@ -499,6 +516,16 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("anisotropy_row_label", &model.anisotropyRowLabel);
     c.Bind("anisotropy_value_label", &model.anisotropyValueLabel);
     c.Bind("anisotropy_tooltip", &model.anisotropyTooltip);
+    c.Bind("render_scale_labels", &model.renderScaleLabels);
+    c.Bind("render_scale_index", &model.renderScaleIndex);
+    c.Bind("render_scale_row_label", &model.renderScaleRowLabel);
+    c.Bind("render_scale_value_label", &model.renderScaleValueLabel);
+    c.Bind("render_scale_tooltip", &model.renderScaleTooltip);
+    c.Bind("sharpness_labels", &model.sharpnessLabels);
+    c.Bind("sharpness_index", &model.sharpnessIndex);
+    c.Bind("sharpness_row_label", &model.sharpnessRowLabel);
+    c.Bind("sharpness_value_label", &model.sharpnessValueLabel);
+    c.Bind("sharpness_tooltip", &model.sharpnessTooltip);
 
     // Interface/UI tab.
     c.Bind("show_fps_counter", &model.showFpsCounter);
@@ -905,6 +932,12 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
         break;
     case DropdownTexturePack:
         RmlTexturePackChanged(optionIndex);
+        break;
+    case DropdownRenderScale:
+        RmlRenderScaleChanged(optionIndex);
+        break;
+    case DropdownSharpness:
+        RmlSharpnessChanged(optionIndex);
         break;
     default:
         break;
@@ -1349,6 +1382,28 @@ void mu::ui::window::COptionWindow::RmlAnisotropyChanged(int index)
     if (index < 0 || index >= static_cast<int>(std::size(s_AnisotropyValues)))
         return;
     MuSetAnisotropyPreference(s_AnisotropyValues[index]);
+}
+
+// MuSetRenderScalePreference and MuSetSharpnessPreference save the value and apply it while the
+// Enhanced look is active.
+void mu::ui::window::COptionWindow::RmlRenderScaleChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(std::size(s_RenderScaleValues)))
+        return;
+    MuSetRenderScalePreference(s_RenderScaleValues[index]);
+}
+
+void mu::ui::window::COptionWindow::RmlSharpnessChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(std::size(s_SharpnessValues)))
+        return;
+    MuSetSharpnessPreference(s_SharpnessValues[index]);
 }
 
 void mu::ui::window::COptionWindow::RmlToggleS6PlayerModels()
@@ -1807,6 +1862,10 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
     SyncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
     SyncLabel(model.anisotropyTooltip, "anisotropy_tooltip", I18N::Game::AnisotropicFilteringTooltip);
+    SyncLabel(model.renderScaleRowLabel, "render_scale_row_label", I18N::Game::RenderScale);
+    SyncLabel(model.renderScaleTooltip, "render_scale_tooltip", I18N::Game::RenderScaleTooltip);
+    SyncLabel(model.sharpnessRowLabel, "sharpness_row_label", I18N::Game::Sharpness);
+    SyncLabel(model.sharpnessTooltip, "sharpness_tooltip", I18N::Game::SharpnessTooltip);
     SyncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
     SyncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
     SyncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
@@ -1950,6 +2009,13 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncMultiplierRow(model.anisotropyLabels, "anisotropy_labels", model.anisotropyIndex, "anisotropy_index",
                       model.anisotropyValueLabel, "anisotropy_value_label", MultiplierLabels(s_AnisotropyValues),
                       FindValueIndex(s_AnisotropyValues, GameConfig::GetInstance().GetAnisotropy()));
+    syncMultiplierRow(model.renderScaleLabels, "render_scale_labels", model.renderScaleIndex, "render_scale_index",
+                      model.renderScaleValueLabel, "render_scale_value_label",
+                      PercentLabels(s_RenderScaleValues, false),
+                      FindValueIndex(s_RenderScaleValues, GameConfig::GetInstance().GetRenderScale()));
+    syncMultiplierRow(model.sharpnessLabels, "sharpness_labels", model.sharpnessIndex, "sharpness_index",
+                      model.sharpnessValueLabel, "sharpness_value_label", PercentLabels(s_SharpnessValues, true),
+                      FindValueIndex(s_SharpnessValues, GameConfig::GetInstance().GetSharpness()));
 
     const bool showFpsCounter = GetShowFpsCounter();
     const bool showDebugInfo = GetShowDebugInfo();

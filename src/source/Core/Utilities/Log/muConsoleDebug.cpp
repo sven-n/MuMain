@@ -21,6 +21,7 @@
 #include "Render/PostProcessing/PostProcessingSetting.h"
 #include "Render/Look/LookPresetSetting.h"
 #include "Render/PostProcessing/EdgeSmoothing.h"
+#include "Render/PostProcessing/RenderScale.h"
 #include "Render/Renderer/Antialiasing.h"
 #include "Render/Look/LookTuning.h"
 #include "Core/Text/Utf8.h"
@@ -537,6 +538,32 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         else
         {
             mu::log::Get("render")->warn("$fxaa expects on or off");
+        }
+        return Handled();
+    }
+    else if (strCommand.compare(0, 13, L"$renderscale ") == 0)
+    {
+        const auto percent = Render::PostProcessing::ParseRenderScaleCommand(std::wstring_view(strCommand).substr(13));
+        if (percent)
+        {
+            MuSetRenderScalePreference(*percent);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$renderscale expects a percentage from 50 to 100");
+        }
+        return Handled();
+    }
+    else if (strCommand.compare(0, 11, L"$sharpness ") == 0)
+    {
+        const auto percent = Render::PostProcessing::ParseSharpnessCommand(std::wstring_view(strCommand).substr(11));
+        if (percent)
+        {
+            MuSetSharpnessPreference(*percent);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$sharpness expects a value from 0 to 100");
         }
         return Handled();
     }

@@ -567,6 +567,18 @@ public:
     {
         return !enabled;
     }
+    // The 3D scene drawn at `percent` (50 to 100) of the window's size and upscaled to it before the
+    // UI (FSR 1). Returns false when a scale below 100 was requested but this backend cannot upscale.
+    [[nodiscard]] virtual bool SetRenderScale(int percent)
+    {
+        return percent >= 100;
+    }
+    // Sharpening of the 3D scene before the UI, 0 (none) to 100 (FSR 1's strongest). Returns false
+    // when sharpening was requested but this backend cannot sharpen.
+    [[nodiscard]] virtual bool SetSharpness(int percent)
+    {
+        return percent <= 0;
+    }
     // The look profile's bloom and grading values; a bloom strength of 0 is no bloom.
     virtual void SetPostProcessingLook(const PostProcessingLook& /*look*/) {}
     // Diagnosis only, not saved: what post-processed frames show (see PostProcessingView).

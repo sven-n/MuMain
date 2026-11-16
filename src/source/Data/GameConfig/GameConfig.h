@@ -145,6 +145,17 @@ public:
     {
         m_edgeSmoothing = enabled;
     }
+    // The render scale (50 to 100 percent) and sharpness (0 to 100) of the Enhanced look.
+    int GetRenderScale() const
+    {
+        return m_renderScale;
+    }
+    void SetRenderScale(int percent);
+    int GetSharpness() const
+    {
+        return m_sharpness;
+    }
+    void SetSharpness(int percent);
     bool GetEnhancedLighting() const { return m_enhancedLighting; }
     void SetEnhancedLighting(bool enabled) { m_enhancedLighting = enabled; }
     bool GetDynamicLights() const { return m_dynamicLights; }
@@ -265,6 +276,8 @@ private:
     int m_anisotropy;
     int m_antialiasing;
     bool m_edgeSmoothing;
+    int m_renderScale;
+    int m_sharpness;
     bool m_enhancedLighting;
     bool m_dynamicLights;
     bool m_sunlight;

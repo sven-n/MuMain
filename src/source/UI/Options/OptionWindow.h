@@ -90,6 +90,8 @@ namespace mu::ui::window
             DropdownAntialiasing = 6,
             DropdownAnisotropy = 7,
             DropdownTexturePack = 8,
+            DropdownRenderScale = 9,
+            DropdownSharpness = 10,
             DropdownCount
         };
 
@@ -207,6 +209,10 @@ namespace mu::ui::window
         // from GameConfig, since `$msaa` changes the first outside this window too.
         void RmlAntialiasingChanged(int index);
         void RmlAnisotropyChanged(int index);
+        // Render scale and Sharpness rows ([Render] RenderScale, Sharpness), read live from GameConfig
+        // as `$renderscale` and `$sharpness` change them too.
+        void RmlRenderScaleChanged(int index);
+        void RmlSharpnessChanged(int index);
         // Interface/UI tab -- Show FPS Counter/Show Debug Info stay ephemeral (SceneManager.h
         // globals, no GameConfig persistence), matching $fpscounter/$details today.
         void RmlToggleShowFpsCounter();
@@ -391,6 +397,17 @@ namespace mu::ui::window
             Rml::String anisotropyRowLabel;
             Rml::String anisotropyValueLabel;
             Rml::String anisotropyTooltip;
+            // [Render] RenderScale and Sharpness.
+            std::vector<Rml::String> renderScaleLabels;
+            int renderScaleIndex = 0;
+            Rml::String renderScaleRowLabel;
+            Rml::String renderScaleValueLabel;
+            Rml::String renderScaleTooltip;
+            std::vector<Rml::String> sharpnessLabels;
+            int sharpnessIndex = 0;
+            Rml::String sharpnessRowLabel;
+            Rml::String sharpnessValueLabel;
+            Rml::String sharpnessTooltip;
 
             // Interface/UI tab.
             bool showFpsCounter = false;

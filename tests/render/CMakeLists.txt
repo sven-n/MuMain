@@ -109,8 +109,10 @@ mu_add_test(
         test_post_processing.cpp
         test_color_grading_table.cpp
         test_edge_smoothing.cpp
+        test_render_scale.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/BloomSource.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/EdgeSmoothing.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/RenderScale.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/ColorGradingTable.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/SceneBoundary.cpp
