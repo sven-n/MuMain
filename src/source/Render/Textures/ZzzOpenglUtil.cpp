@@ -41,6 +41,7 @@ GLfloat FogColor[4] = { 30 / 256.f,20 / 256.f,10 / 256.f, };
 
 bool _isVSyncAvailable = false;
 bool _isVSyncEnabled = false;
+bool _canDisableVSync = true;
 
 unsigned int WindowWidth = 1024;
 unsigned int WindowHeight = 768;
@@ -656,6 +657,12 @@ void InitVSync()
 {
     // SDL GPU swapchains always support VSync. The renderer applies present-mode changes.
     _isVSyncAvailable = true;
+    _canDisableVSync = mu::GetRenderer().CanTurnOffVSync();
+}
+
+bool CanDisableVSync()
+{
+    return _canDisableVSync;
 }
 
 bool IsVSyncAvailable()

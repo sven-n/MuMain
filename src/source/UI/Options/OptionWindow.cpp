@@ -420,6 +420,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     // Video tab additions.
     c.Bind("vsync_enabled", &model.vsyncEnabled);
     c.Bind("vsync_label", &model.vsyncLabel);
+    c.Bind("vsync_locked", &model.vsyncLocked);
+    c.Bind("vsync_locked_reason", &model.vsyncLockedReason);
     c.Bind("fps_cap_labels", &model.fpsCapLabels);
     c.Bind("fps_cap_index", &model.fpsCapIndex);
     c.Bind("fps_cap_row_label", &model.fpsCapRowLabel);
@@ -1038,6 +1040,10 @@ void mu::ui::window::COptionWindow::ApplyPendingFont()
 
 void mu::ui::window::COptionWindow::RmlToggleVsync()
 {
+    if (!CanDisableVSync())
+    {
+        return;
+    }
     m_bVsyncEnabled = !m_bVsyncEnabled;
     // Persists + applies live next frame -- see this function's own doc comment (Winmain.cpp).
     // Calling GameConfig::SetVSyncEnabled() directly here would persist without applying.
@@ -1776,6 +1782,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.translateItemNamesLabel, "translate_item_names_label", I18N::Game::TranslateItemNames);
     SyncLabel(model.fontRowLabel, "font_row_label", I18N::Game::Font);
     SyncLabel(model.vsyncLabel, "vsync_label", I18N::Game::VSync);
+    SyncLabel(model.vsyncLockedReason, "vsync_locked_reason", I18N::Game::VSyncAlwaysOn);
     SyncLabel(model.fpsCapRowLabel, "fps_cap_row_label", I18N::Game::FPSLimit);
     SyncLabel(model.disableEffectsLabel, "disable_effects_label", I18N::Game::DisableEffects);
     SyncLabel(model.disableParticlesLabel, "disable_particles_label", I18N::Game::DisableParticles);
@@ -1856,7 +1863,18 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (model.fontIndex != m_iFontIndex) { model.fontIndex = m_iFontIndex; m_RmlView.MarkDirty("font_index"); }
     syncDropdownValue(model.fontValueLabel, "font_value_label", model.fontLabels, model.fontIndex);
 
-    if (model.vsyncEnabled != m_bVsyncEnabled) { model.vsyncEnabled = m_bVsyncEnabled; m_RmlView.MarkDirty("vsync_enabled"); }
+    const bool vsyncLocked = !CanDisableVSync();
+    if (model.vsyncLocked != vsyncLocked)
+    {
+        model.vsyncLocked = vsyncLocked;
+        m_RmlView.MarkDirty("vsync_locked");
+    }
+    const bool vsyncShown = m_bVsyncEnabled || vsyncLocked;
+    if (model.vsyncEnabled != vsyncShown)
+    {
+        model.vsyncEnabled = vsyncShown;
+        m_RmlView.MarkDirty("vsync_enabled");
+    }
 
     // Rebuilt every sync (not just once), same reasoning as font_labels' own "Default" entry --
     // the localized "Uncapped" entry needs to follow a live language switch.

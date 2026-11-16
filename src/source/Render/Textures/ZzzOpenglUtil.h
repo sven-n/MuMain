@@ -112,6 +112,8 @@ void RestoreCameraPerspective();
 
 void InitVSync();
 bool IsVSyncAvailable();
+// False where the display paces every frame itself (MuRenderer::CanTurnOffVSync): VSync stays on.
+bool CanDisableVSync();
 bool IsVSyncEnabled();
 bool EnableVSync();
 bool DisableVSync();

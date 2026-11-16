@@ -506,6 +506,10 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     }
     else if (strCommand.compare(L"$vsync off") == 0)
     {
+        if (!CanDisableVSync())
+        {
+            return BadArgument(L"VSync can't be turned off on this display: it paces every frame itself");
+        }
         MuSetVSyncPreference(false);
         return Handled();
     }
