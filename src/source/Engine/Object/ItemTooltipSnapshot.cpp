@@ -32,6 +32,13 @@ void ApplyOption(ItemCreationParams& params, BYTE level, BYTE type)
     params.OptionType = type;
 }
 
+void ApplyAncientBonus(ItemCreationParams& params, BYTE level)
+{
+    params.IsAncient = true;
+    params.AncientDiscriminator = 1;
+    params.AncientBonusOption = level;
+}
+
 constexpr TooltipVariant TooltipVariants[] = {
     {"plain", [](ItemCreationParams&) {}},
     {"full",
@@ -50,6 +57,11 @@ constexpr TooltipVariant TooltipVariants[] = {
          params.IsAncient = true;
          params.AncientDiscriminator = 1;
      }},
+    // The ancient bonus at the levels a server sends (1: +5, 2: +10 of the stat the item's bonus raises) and one above
+    // them, which the ancient byte can hold.
+    {"ancient bonus 1", [](ItemCreationParams& params) { ApplyAncientBonus(params, 1); }},
+    {"ancient bonus 2", [](ItemCreationParams& params) { ApplyAncientBonus(params, 2); }},
+    {"ancient bonus 3", [](ItemCreationParams& params) { ApplyAncientBonus(params, 3); }},
     {"harmony",
      [](ItemCreationParams& params)
      {

@@ -16,6 +16,25 @@ namespace
 {
 constexpr const char* OptionsField = "options";
 
+// The types the item sets give an item (phase 10), which no item links.
+bool IsAncientType(ItemOptionType type)
+{
+    return type == ItemOptionType::AncientOption || type == ItemOptionType::AncientBonus;
+}
+
+// Whether an item's attackType picks the definition at `index` (ItemOptionDatabase::FindAncientBonus).
+bool IsPickedByAttackType(const ItemOptionDatabase& options, size_t index)
+{
+    for (int attackType = 1; attackType <= static_cast<int>(AncientBonusNames.size()); ++attackType)
+    {
+        if (options.FindAncientBonus(attackType) == static_cast<int>(index))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 // A definition's problems name its file in Data/Items/Options and its place there.
 std::string DefinitionField(std::span<const ItemOptionDefinition> definitions, size_t index)
 {
@@ -186,6 +205,16 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                  "links excellent options, but its excellent byte holds its wing options or a horn's kind, "
                  "or nothing: no horn is excellent"});
         }
+        // Until the item sets link them (phase 10), the item's attackType picks its ancient bonus; its set options come
+        // from its set (the ancient byte's set number).
+        const bool linksAncient = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
+                                              { return IsAncientType(options.Get(link).type); });
+        if (linksAncient)
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", item.group, item.number, OptionsField,
+                              "links an ancient bonus or set options, which the item sets give: the link does "
+                              "nothing, the item's attackType picks its ancient bonus"});
+        }
     }
 }
 
@@ -207,12 +236,33 @@ void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const It
     const std::span<const ItemOptionDefinition> definitions = options.GetDefinitions();
     for (size_t index = 0; index < definitions.size(); ++index)
     {
-        if (!linked.contains(definitions[index].name))
+        // The item's attackType links the four ancient bonus definitions of AncientBonusNames.
+        if (!linked.contains(definitions[index].name) && !IsPickedByAttackType(options, index))
         {
             issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definitions[index]),
                               ItemDataIssue::NoItem, ItemDataIssue::NoItem,
                               DefinitionField(definitions, index) + ".name",
                               "no item and no option rule links \"" + definitions[index].name + "\""});
+        }
+    }
+}
+
+void ValidateAncientBonusNames(const ItemOptionDatabase& options, std::vector<ItemDataIssue>& issues)
+{
+    for (size_t attackType = 0; attackType < AncientBonusNames.size(); ++attackType)
+    {
+        if (options.FindAncientBonus(static_cast<int>(attackType) + 1) == ItemOptionDatabase::NoDefinition)
+        {
+            // The file of a definition of that name of another type, else the file the four belong in.
+            const int named = options.Find(AncientBonusNames[attackType]);
+            const std::string source = named != ItemOptionDatabase::NoDefinition
+                                           ? DefinitionSource(options.Get(static_cast<ItemOptionIndex>(named)))
+                                           : std::string("Options/Ancient.json");
+            issues.push_back(
+                {ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "definitions",
+                 "no definition of type ancientBonus is named \"" + std::string(AncientBonusNames[attackType]) +
+                     "\": the ancient items with attackType " + std::to_string(attackType + 1) +
+                     " show and add no ancient bonus"});
         }
     }
 }

@@ -819,6 +819,21 @@ TEST_CASE("Item validation checks the stat profiles against the stat file [data]
     CHECK(issues.size() == 2);
 }
 
+// attackType picks the ancient bonus (1 to 4) until the item sets link one: a value above 4 picks none.
+TEST_CASE("Item validation warns about an attackType that picks no ancient bonus [data][items]")
+{
+    ItemDefinition vitality = MakeKris();
+    vitality.attackType = 4;
+    ItemDefinition unknown = MakeKris();
+    unknown.attackType = 5;
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{vitality}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "attackType"));
+    ValidateItems(std::vector<ItemDefinition>{unknown}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "attackType"));
+    CHECK_FALSE(HasFatal(issues));
+}
+
 TEST_CASE("Item validation warns about an excellent bonus the stat profile has no term for [data][items]")
 {
     // Without an excellent damage term the Chaos Dragon Axe's fixed bonus would not count.
