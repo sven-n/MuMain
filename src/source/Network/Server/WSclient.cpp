@@ -6358,6 +6358,9 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     bool shouldResyncInventory = false;
     if (IsPlayerInventorySlot(itemindex))
         shouldResyncInventory = !UI::Inventory::InsertItem(itemindex, itemData);
+    else if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
+        // An equipped item changed, e.g. a rented one expired: it's equipped again, with the new data.
+        shouldResyncInventory = !UI::Inventory::InsertItem(itemindex, itemData);
 
     if (shouldResyncInventory)
     {

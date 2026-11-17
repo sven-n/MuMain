@@ -1221,7 +1221,9 @@ void CMyInventory::CreateEquippingEffect(ITEM* pItem)
 {
     SetCharacterClass(Hero);
     OBJECT* pHeroObject = &Hero->Object;
-    if (false == gMapManager.InChaosCastle())
+    // An expired rented pet or mount has no effect, so it doesn't accompany the hero (and doesn't collect zen).
+    const bool isExpired = pItem->bPeriodItem && pItem->bExpiredPeriod;
+    if (false == gMapManager.InChaosCastle() && !isExpired)
     {
         switch (pItem->Type)
         {
