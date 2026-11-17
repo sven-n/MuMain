@@ -51,6 +51,12 @@ const wchar_t* const* const kTradeAlertLines[] = {
 
 namespace CompareResult = Engine::Items::CompareResult;
 
+// The trade's dialogs close with the window: an OK after it would act on a trade that has ended.
+bool TradeWindowIsOpen()
+{
+    return g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE);
+}
+
 // Holds an offered item against the copy of its type the trade window remembers. The window remembers at most one
 // copy per type (CTrade::BackUpYourInven).
 UI::Trade::OfferedItemCheck CheckAgainstRemembered(std::span<const ITEM> remembered, const ITEM& offered)
@@ -176,6 +182,7 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
             cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
             cfg.input->maxLength = 8;
             cfg.input->numericOnly = true;
+            cfg.isValid = TradeWindowIsOpen;
             cfg.onPrimary = [this]
             {
                 const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
@@ -206,8 +213,9 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
                 cfg.showCancel = true;
                 for (const wchar_t* const* line : kTradeAlertLines)
                     cfg.lines.push_back({*line, true});
+                cfg.isValid = TradeWindowIsOpen;
                 cfg.onPrimary = [this] { AlertTrade(); };
-                m_TradeAlertDialogId = mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
             else
             {
@@ -569,10 +577,6 @@ void CTrade::ProcessClosing()
 {
     m_pYourInvenCtrl->RemoveAllItems();
     m_pMyInvenCtrl->RemoveAllItems();
-
-    // An OK on the warning after the window closed would press the trade button of no trade.
-    mu::ui::window::g_pGenericConfirmDialog->Cancel(m_TradeAlertDialogId);
-    m_TradeAlertDialogId = 0;
 
     if (m_bForgetBackUpOnClose)
         InitYourInvenBackUp();

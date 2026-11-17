@@ -60,9 +60,9 @@ worked out again each time the partner adds or takes out an item.
 
 While any offered item is marked, pressing the trade button first asks
 whether the items are really the ones you want to trade. The trade goes on
-only if you accept. With no item marked, the button never asks. The question
-closes with the trade window, so it cannot press the button of a trade that
-has already ended.
+only if you accept. With no item marked, the button never asks. The question,
+like the zen amount box, closes with the trade window, so it cannot act on a
+trade that has already ended.
 
 The original client asked again after you had pressed the trade button once,
 even with nothing marked, because one flag stood both for the warning and for
