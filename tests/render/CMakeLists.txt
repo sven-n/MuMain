@@ -145,6 +145,18 @@ mu_add_test(
         MuDep::Cryptopp
 )
 
+# The formats of a world's terrain files (Render/Terrain/TerrainFileFormat): the classic and the later seasons'
+# .map/.att cipher, object record sizes by version, 24-bit height maps by size, light bitmaps.
+mu_add_test(
+    NAME terrain_file_format_tests
+    SOURCES
+        test_terrain_file_format.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/TerrainFileFormat.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/BmdModulusCipher.cpp
+    LINK_LIBS
+        MuDep::Cryptopp
+)
+
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer, and the holes it finds in a texture's alpha.
 # It also reads the OZT files shipped in src/bin/Data.
 mu_add_test(
