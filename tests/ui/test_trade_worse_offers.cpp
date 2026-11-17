@@ -5,6 +5,7 @@
 #include <array>
 
 namespace CompareResult = Engine::Items::CompareResult;
+using UI::Trade::CheckAgainstRemembered;
 using UI::Trade::CheckOffer;
 using UI::Trade::MarkWorseOffers;
 using UI::Trade::OfferedItemCheck;
@@ -112,4 +113,63 @@ TEST_CASE("an offered item with no remembered copy of its type is neither worse 
     CHECK(check.itemType == ShieldType);
     CHECK_FALSE(check.worseThanRemembered);
     CHECK_FALSE(check.sameAsRemembered);
+}
+
+namespace
+{
+// Stands in for ITEM: CompareItem's level rule is enough to tell the argument order.
+struct LeveledItem
+{
+    int Type = 0;
+    int Level = 0;
+};
+
+int CompareByLevel(const LeveledItem& first, const LeveledItem& second)
+{
+    if (first.Level > second.Level)
+        return CompareResult::FirstIsBetter;
+    if (first.Level < second.Level)
+        return CompareResult::SecondIsBetter;
+    return CompareResult::Same;
+}
+
+constexpr int HighLevel = 9;
+constexpr int LowLevel = 7;
+} // namespace
+
+TEST_CASE("an offered copy below the remembered one is checked as worse, not better")
+{
+    const std::array remembered{LeveledItem{.Type = SwordType, .Level = HighLevel}};
+    const LeveledItem offered{.Type = SwordType, .Level = LowLevel};
+
+    const OfferedItemCheck check =
+        CheckAgainstRemembered(std::span<const LeveledItem>(remembered), offered, CompareByLevel);
+
+    CHECK(check.worseThanRemembered);
+    CHECK_FALSE(check.sameAsRemembered);
+}
+
+TEST_CASE("an offered copy above the remembered one is not checked as worse")
+{
+    const std::array remembered{LeveledItem{.Type = SwordType, .Level = LowLevel}};
+    const LeveledItem offered{.Type = SwordType, .Level = HighLevel};
+
+    const OfferedItemCheck check =
+        CheckAgainstRemembered(std::span<const LeveledItem>(remembered), offered, CompareByLevel);
+
+    CHECK_FALSE(check.worseThanRemembered);
+    CHECK_FALSE(check.sameAsRemembered);
+}
+
+TEST_CASE("an offered item is held only against the remembered copy of its own type")
+{
+    const std::array remembered{LeveledItem{.Type = ShieldType, .Level = HighLevel},
+                                LeveledItem{.Type = SwordType, .Level = LowLevel}};
+    const LeveledItem offered{.Type = SwordType, .Level = LowLevel};
+
+    const OfferedItemCheck check =
+        CheckAgainstRemembered(std::span<const LeveledItem>(remembered), offered, CompareByLevel);
+
+    CHECK_FALSE(check.worseThanRemembered);
+    CHECK(check.sameAsRemembered);
 }

@@ -56,16 +56,6 @@ bool TradeWindowIsOpen()
 {
     return g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE);
 }
-
-// Holds an offered item against the copy of its type the trade window remembers. The window remembers at most one
-// copy per type (CTrade::BackUpYourInven).
-UI::Trade::OfferedItemCheck CheckAgainstRemembered(std::span<const ITEM> remembered, const ITEM& offered)
-{
-    const auto copy =
-        std::ranges::find_if(remembered, [&offered](const ITEM& item) { return item.Type == offered.Type; });
-    const int compareResult = (copy == remembered.end()) ? CompareResult::OtherType : ::CompareItem(*copy, offered);
-    return UI::Trade::CheckOffer(offered.Type, compareResult);
-}
 } // namespace
 
 CTrade::CTrade()
@@ -860,7 +850,8 @@ void CTrade::AlertYourTradeInven()
 
     std::array<UI::Trade::OfferedItemCheck, MAX_TRADE_INVEN> offers{};
     for (size_t i = 0; i < nYourItems; ++i)
-        offers[i] = CheckAgainstRemembered(m_aYourInvenBackUp, *m_pYourInvenCtrl->GetItem(static_cast<int>(i)));
+        offers[i] = UI::Trade::CheckAgainstRemembered(std::span<const ITEM>(m_aYourInvenBackUp),
+                                                      *m_pYourInvenCtrl->GetItem(static_cast<int>(i)), ::CompareItem);
 
     std::array<bool, MAX_TRADE_INVEN> marked{};
     m_bTradeAlert =

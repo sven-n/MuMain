@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Engine/Object/CompareItemResult.h"
+
+#include <algorithm>
 #include <span>
 
 namespace UI::Trade
@@ -18,6 +21,19 @@ struct OfferedItemCheck
 // Reads CompareItem(remembered copy, offered item) for an offered item of `itemType`. Pass
 // Engine::Items::CompareResult::OtherType when no copy of its type is remembered.
 [[nodiscard]] OfferedItemCheck CheckOffer(int itemType, int compareWithRemembered);
+
+// Holds `offered` against the copy of its type in `remembered` (the window remembers at most one copy per type,
+// CTrade::BackUpYourInven). `compare` is CompareItem: it gets the remembered copy first and the offered item second.
+template <typename Item, typename Compare>
+[[nodiscard]] OfferedItemCheck CheckAgainstRemembered(std::span<const Item> remembered, const Item& offered,
+                                                      Compare compare)
+{
+    const auto copy =
+        std::ranges::find_if(remembered, [&offered](const Item& item) { return item.Type == offered.Type; });
+    const int compareResult =
+        (copy == remembered.end()) ? Engine::Items::CompareResult::OtherType : compare(*copy, offered);
+    return CheckOffer(offered.Type, compareResult);
+}
 
 // Marks the offered items the trade window warns about, in red, and returns whether any is marked, which makes the
 // confirm button ask first (CTrade::AlertYourTradeInven). An item is marked when it is worse than the remembered copy
