@@ -224,9 +224,7 @@ bool mu::ui::window::CPickedItem::GetTargetPos(CInventoryCtrl* pDest, int& iTarg
     const UI::Items::HeldItemPlace place = PlaceIn(*pDest);
     iTargetColumnX = place.column;
     iTargetRowY = place.row;
-    const UI::Items::GridGeometry& geometry = pDest->Geometry();
-    return iTargetColumnX >= 0 && iTargetColumnX < geometry.Columns() && iTargetRowY >= 0 &&
-           iTargetRowY < geometry.Rows();
+    return pDest->Geometry().HasCell(iTargetColumnX, iTargetRowY);
 }
 
 int mu::ui::window::CPickedItem::GetTargetLinealPos(CInventoryCtrl* pDest)
@@ -1420,15 +1418,6 @@ bool mu::ui::window::CInventoryCtrl::CanMove(int iColumnX, int iRowY, ITEM* pIte
 {
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     return CheckSlot(iColumnX, iRowY, pItemAttr->Width, pItemAttr->Height);
-}
-
-bool mu::ui::window::CInventoryCtrl::TakesDropAt(int iLinealPos, ITEM* pItem)
-{
-    if (CanMove(iLinealPos, pItem))
-        return true;
-
-    ITEM* pTargetItem = FindItem(iLinealPos);
-    return pTargetItem != nullptr && DropActsOn(pItem, pTargetItem);
 }
 
 bool mu::ui::window::CInventoryCtrl::CanMoveToPt(int x, int y, ITEM* pItem)

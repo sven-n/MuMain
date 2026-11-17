@@ -35,12 +35,15 @@ public:
     // The cell (x, y) falls in, also outside the grid, one further out on the negative side as
     // the original counted it: where an item hanging off the grid starts.
     void CellOf(float x, float y, int& column, int& row) const;
-    // The cell an item whose box starts at (left, top) lands on: the one holding the centre of its
-    // first cell, as the original counted it. A box a few pixels off a cell line, from rounding a
-    // fractional pitch or from the pointer's hold, still lands on the nearest cell.
-    bool ItemCellAt(float left, float top, int& column, int& row) const;
-    // As ItemCellAt, also outside the grid (see CellOf).
+    // Whether (column, row) is one of the grid's cells.
+    bool HasCell(int column, int row) const;
+    // The cell an item whose box starts at (left, top) lands on, also outside the grid (see CellOf):
+    // the one holding the centre of its first cell, as the original counted it. A box a few pixels
+    // off a cell line, from rounding a fractional pitch or from the pointer's hold, still lands on
+    // the nearest cell.
     void ItemCellOf(float left, float top, int& column, int& row) const;
+    // ItemCellOf, and whether that cell is in the grid.
+    bool ItemCellAt(float left, float top, int& column, int& row) const;
     // The box of `width` x `height` cells from (column, row).
     GridRect CellsRect(int column, int row, int width, int height) const;
 

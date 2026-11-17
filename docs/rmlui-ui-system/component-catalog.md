@@ -406,7 +406,9 @@ as in the original client, so a box a few pixels off a cell line still lands on 
 The drop preview and the drop share that lookup (`UI::Items::PlaceHeldItem`, through
 `CPickedItem::PlaceIn`). When that cell is in a grid, the grid takes the release, even with the
 pointer in the gap between extension grids. On an equipment slot just above the inventory, the
-grid takes it only where it accepts the item; otherwise the slot equips it.
+grid takes it only where the drop does something there (`CInventoryActionController::DropOutcomeOn`,
+the same rule the drop runs: apply a jewel, stack, move or put back); otherwise the slot takes
+the release.
 
 ## Native 3D viewer input
 

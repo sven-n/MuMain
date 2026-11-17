@@ -626,7 +626,7 @@ bool CMyInventory::UpdateMouseEvent()
     if (m_pNewInventoryCtrl && !m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
 
-    if (!PickedItemLandsInGrid() && EquipmentWindowProcess())
+    if (!ReleaseGoesToGrid() && EquipmentWindowProcess())
         return false;
     if (true == InventoryProcess())
         return false;
@@ -1595,14 +1595,12 @@ bool CMyInventory::CheckTakeOff(int equipmentSlot) const
     return false;
 }
 
-bool CMyInventory::PickedItemLandsInGrid() const
+bool CMyInventory::ReleaseGoesToGrid() const
 {
-    CPickedItem* pickedItem = CInventoryCtrl::GetPickedItem();
-    if (pickedItem == nullptr || m_pNewInventoryCtrl == nullptr)
+    if (!IsRelease(VK_LBUTTON) || m_pNewInventoryCtrl == nullptr)
         return false;
 
-    const int targetPos = pickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-    return targetPos >= 0 && m_pNewInventoryCtrl->TakesDropAt(targetPos, pickedItem->GetItem());
+    return m_ActionController.DropOutcomeOn(m_pNewInventoryCtrl) != DropOutcome::None;
 }
 
 bool CMyInventory::InventoryProcess() const

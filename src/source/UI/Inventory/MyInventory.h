@@ -236,10 +236,11 @@ namespace mu::ui::window
         int FindItemIndexWithTagInUseOrder(Data::Items::ItemTag tag) const;
 
         bool EquipmentWindowProcess();
-        // Whether the held item lands in the grid and the grid takes it: its first cell's centre can be in the grid
+        // Whether this frame's release of the held item goes to the grid: its first cell's centre can be in the grid
         // while the pointer is still on an equipment slot above it, and then the grid, which shows where it lands,
-        // takes the release. Where the grid refuses it, the slot still equips it.
-        bool PickedItemLandsInGrid() const;
+        // takes the release if its drop does anything (CInventoryActionController::DropOutcomeOn). Otherwise the
+        // slot takes the release.
+        bool ReleaseGoesToGrid() const;
         // The pointer over the drawn panel.
         bool IsPointerOverPanel() const;
         // Whether the item in equipmentSlot may be taken off here; tells the

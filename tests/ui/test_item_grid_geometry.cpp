@@ -196,3 +196,16 @@ TEST_CASE("an item picked up on a scaled grid and not moved lands back on its ow
         }
     }
 }
+
+TEST_CASE("a held item keeps each axis's own pitch in a grid of non-square cells")
+{
+    const GridGeometry grid{0.f, 0.f, 24.f, 30.f, 8, 4};
+    // Held 20 px right and 25 px down into the item at column 2, row 1 (48, 30).
+    const PickupAnchor hold{20.f / grid.PitchX(), 25.f / grid.PitchY()};
+
+    const HeldItemPlace place = PlaceHeldItem(grid, 48.f + 20.f, 30.f + 25.f, hold);
+    CHECK(place.left == 48);
+    CHECK(place.top == 30);
+    CHECK(place.column == 2);
+    CHECK(place.row == 1);
+}

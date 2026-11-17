@@ -302,9 +302,6 @@ namespace mu::ui::window
         bool CanMove(int iLinealPos, ITEM* pItem);
         bool CanMove(int iColumnX, int iRowY, ITEM* pItem);
         bool CanMoveToPt(int x, int y, ITEM* pItem);
-        // Whether the grid takes `pItem` dropped with its first cell at iLinealPos: the cells are free, or the drop
-        // acts on the item there. The drop preview's green cells.
-        bool TakesDropAt(int iLinealPos, ITEM* pItem);
 
         void SetToolTipType(TOOLTIP_TYPE ToolTipType);
         void CreateItemToolTip(ITEM* pItem);
