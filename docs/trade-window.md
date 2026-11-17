@@ -9,9 +9,11 @@ The window remembers items the partner offered, at most one copy of each item
 kind:
 
 - when the partner takes an item out of the trade window;
-- when the trade is cancelled, all items they offered. This holds for every
-  way of cancelling: the close button, Escape, walking away, or the partner
-  cancelling.
+- when the trade ends without items changing hands, all items they offered:
+  you press the close button or Escape, you walk away, the partner cancels,
+  or the server stops the trade because an inventory is full or an item is
+  reinforced. Closing all windows while you hold an item hides the trade
+  window without cancelling it, and remembers nothing.
 
 These items are remembered (`CTrade::BackUpYourInven`):
 
@@ -26,9 +28,10 @@ These items are remembered (`CTrade::BackUpYourInven`):
 
 When an item of a kind that is already remembered comes in again, the better
 copy is kept. The memory lasts across trades with the same partner. It is
-cleared when a trade with another partner opens, or when the trade window
-closes after you pressed the trade button, unless the trade was cancelled. A
-trade request from someone else that you decline leaves the memory alone.
+cleared when a trade with another partner opens, when a trade completes (even
+if you cancelled a moment too late), or when the trade window closes in any
+other way after you pressed the trade button. A trade request from someone
+else that you decline leaves the memory alone.
 
 ## When an item is marked
 

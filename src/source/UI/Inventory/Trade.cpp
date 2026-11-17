@@ -679,9 +679,14 @@ void CTrade::ProcessCloseBtn()
 void CTrade::CancelTrade()
 {
     // The window may hide right after this, before the server's answer: remember the offers now.
-    RememberYourOffers();
-    m_bForgetBackUpOnClose = false;
+    RememberOffersOfFailedTrade();
     SocketClient->ToGameServer()->SendTradeCancel();
+}
+
+void CTrade::RememberOffersOfFailedTrade()
+{
+    m_bForgetBackUpOnClose = false;
+    RememberYourOffers();
 }
 
 void CTrade::RememberYourOffers()
@@ -896,14 +901,13 @@ void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
     case UI::Trade::CloseReason::Cancelled:
     {
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
-
-        m_bForgetBackUpOnClose = false;
-        RememberYourOffers();
+        RememberOffersOfFailedTrade();
     }
     break;
 
     case UI::Trade::CloseReason::InventoryFull:
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceledBecauseYourInventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
+        RememberOffersOfFailedTrade();
         break;
 
     case UI::Trade::CloseReason::RequestCancelled:
@@ -912,6 +916,7 @@ void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
 
     case UI::Trade::CloseReason::ReinforcedItem:
         g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
+        RememberOffersOfFailedTrade();
         break;
 
     case UI::Trade::CloseReason::Completed:
