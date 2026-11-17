@@ -11,12 +11,15 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelGlowJson.h"
+#include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/PartModelSlots.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -137,15 +140,32 @@ void ApplyMaterial(int itemType, const ItemModelDefinition& model)
     Models[ToModelSlot(itemType)].SpecularStrength = static_cast<float>(model.material.specular);
 }
 
-// Whether the file was opened.
-bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
+// Opens the .bmd file into the slot; whether it was opened.
+bool AccessModelFile(int modelType, const std::string& file)
 {
-    const std::wstring path = ToLoaderPath(model.file);
+    const std::wstring path = ToLoaderPath(file);
     const size_t nameStart = path.find_last_of(LoaderSeparator) + 1; // 0 when there is no folder
     const std::wstring folder = path.substr(0, nameStart);
     const std::wstring name = path.substr(nameStart, path.size() - nameStart - ModelFileExtension.size());
+    return gLoadData.AccessModel(modelType, folder.c_str(), name.c_str());
+}
 
-    if (!gLoadData.AccessModel(ToModelSlot(itemType), folder.c_str(), name.c_str()))
+// The texture folders as the loader takes them.
+std::vector<std::wstring> LoaderFolders(const std::vector<std::string>& textureFolders)
+{
+    std::vector<std::wstring> folders;
+    folders.reserve(textureFolders.size());
+    for (const std::string& textureFolder : textureFolders)
+    {
+        folders.push_back(ToLoaderPath(textureFolder) + LoaderSeparator);
+    }
+    return folders;
+}
+
+// Whether the file was opened.
+bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
+{
+    if (!AccessModelFile(ToModelSlot(itemType), model.file))
     {
         AddProblem(MakeProblem(ItemModelProblemType::ModelFileMissing, model));
         return false;
@@ -205,15 +225,8 @@ void AddTextureProblem(const ItemModelDefinition& model, const TextureProblem& t
 
 void OpenModelTextures(int itemType, const ItemModelDefinition& model)
 {
-    std::vector<std::wstring> folders;
-    folders.reserve(model.textureFolders.size());
-    for (const std::string& textureFolder : model.textureFolders)
-    {
-        folders.push_back(ToLoaderPath(textureFolder) + LoaderSeparator);
-    }
-
     std::vector<TextureProblem> textureProblems;
-    gLoadData.OpenTexture(ToModelSlot(itemType), folders, textureProblems);
+    gLoadData.OpenTexture(ToModelSlot(itemType), LoaderFolders(model.textureFolders), textureProblems);
     for (const TextureProblem& textureProblem : textureProblems)
     {
         AddTextureProblem(model, textureProblem);
@@ -323,6 +336,54 @@ std::vector<ItemModelProblem> ReopenModels(std::span<const int> itemTypes, const
                                            std::make_move_iterator(g_problems.end()));
     g_problems.resize(problemsBefore);
     return problems;
+}
+
+void OpenPartModel(int modelType, const LookNames& lookNames)
+{
+    if (Models == nullptr)
+    {
+        return;
+    }
+    const auto logger = mu::log::Get(LoggerName);
+    const std::optional<std::string_view> name = PartModelNameOf(modelType);
+    const PartModel* part = name ? g_ItemModelDatabase.FindPartModel(*name) : nullptr;
+    if (part == nullptr)
+    {
+        MU_LOG_ERROR(logger, "Part model {}: no entry in {}", name ? std::string(*name) : std::to_string(modelType),
+                     PartModelsFileName);
+        return;
+    }
+    const SharedItemModel& model = part->model;
+    if (!AccessModelFile(modelType, model.file))
+    {
+        MU_LOG_ERROR(logger, "Part model {}: the model file {} is missing", model.name, model.file);
+        Models[modelType].Release();
+        return;
+    }
+    BMD& bmd = Models[modelType];
+    for (const int mesh : model.noneBlendMeshes)
+    {
+        if (mesh < bmd.NumMeshs)
+        {
+            bmd.Meshs[mesh].NoneBlendMesh = true;
+        }
+        else
+        {
+            MU_LOG_WARN(logger, "Part model {}: noneBlendMeshes names mesh {}, the model has {}", model.name, mesh,
+                        bmd.NumMeshs);
+        }
+    }
+    if (!part->renderStyle.empty() && !lookNames.renderStyle(part->renderStyle))
+    {
+        MU_LOG_WARN(logger, "Part model {}: the render style {} does not exist", model.name, part->renderStyle);
+    }
+    std::vector<TextureProblem> textureProblems;
+    gLoadData.OpenTexture(modelType, LoaderFolders(model.textureFolders), textureProblems);
+    for (const TextureProblem& problem : textureProblems)
+    {
+        MU_LOG_WARN(logger, "Part model {}: texture {} of mesh {} is missing in its texture folders", model.name,
+                    Core::Text::ToUtf8(problem.fileName.c_str()), problem.mesh);
+    }
 }
 
 std::string TakeProblemMessage()

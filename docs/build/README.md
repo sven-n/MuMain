@@ -172,6 +172,41 @@ cached dependencies, reconfigure the same build directory with
 disconnected mode requires its sources to already exist. Let configuration finish
 successfully before building or running the tests.
 
+### Targets
+
+Each target's build choices live in one file, `cmake/targets/<target>.cmake`.
+`src/CMakeLists.txt` picks it from `CMAKE_SYSTEM_NAME` (`windows`, `linux`,
+`macos`; `android`, `web` and `ios` have no file yet) and stops at configure
+time when it's missing. `MU_TARGET_FILE` points at another file instead.
+
+A target file sets:
+
+| Variable | Meaning |
+|----------|---------|
+| `MU_PLATFORM_SOURCES` | Which of `Core/Platform/win32` or `posix` the game library compiles. |
+| `MU_TARGET_ADAPTERS` | The platform service adapters, from the `Adapters/` folders under `src/source`: saved logins, shop downloads, CPU usage. Each service has an "unavailable" adapter for a target without it. Also the GPU device adapter, which adds the target's own device creation properties and says whether its frames may wait on the GPU (not where the host calls each frame, as a browser does): `GpuDevicePreferVulkan.cpp` (Windows) or `GpuDeviceSdlChoice.cpp` (none); the user folder adapter, `UserFolderSdl.cpp` (SDL's per-user folder); and the log sinks adapter, which adds where the target's log is read besides `MuError.log` (a browser's console, logcat): `LogSinksNone.cpp` (none). |
+| `MU_TARGET_DEPENDENCIES` | The libraries the target links, by provider name: `OpenSSL`, `CURL`, `Cryptopp`, `TurboJPEG`. |
+| `MU_TARGET_SYSTEM_LIBRARIES` | System libraries and frameworks. |
+| `MU_MANAGED_LIBRARY_FILE`, `MU_MANAGED_LIBRARY_BY_NAME`, `MU_DOTNET_RID`, `MU_DOTNET_PLATFORM`, `MU_DOTNET_EXTRA_ARGS` | The network library: its file name, how it's found, and how .NET builds it. Needed only while the exports come from the NativeAOT library. |
+| `MU_MANAGED_SYMBOL_SOURCE`, `MU_TARGET_SYMBOL_ADAPTER` | Optional: where the network library's exports come from. `library` (the default) is the NativeAOT library; any other name needs the target's own adapter source in `MU_TARGET_SYMBOL_ADAPTER`, and skips building the NativeAOT library. |
+| `MU_SDL_SHARED`, `MU_APP_LIBRARY`, `MU_APP_OUTPUT_NAME` | Optional, `OFF` by default: SDL as a shared library, and the game as a shared library with this name (Android's `SDLActivity` loads `libSDL3.so` and `libmain.so`). |
+
+Each dependency has a provider in `cmake/MuDependencies.cmake` that finds it
+and defines `MuDep::<Name>`. A missing one stops the configure, naming the
+package, the target and what needs it. A target that builds a dependency
+itself, such as a port that compiles Crypto++ from source, defines
+`MuDep::<Name>` in its target file (an `INTERFACE` or `GLOBAL` imported
+target), and the provider is skipped.
+
+With `MU_APP_LIBRARY`, every static library linked into the game is built
+position independent.
+
+A port adds its own target file and adapters, and changes no shared CMake.
+`tests/cmake/port-like-target.cmake` is shaped like one: it uses the
+unavailable adapters and a network adapter with no library, and builds SDL
+and the game as shared libraries. CI's Linux job configures and builds it
+without OpenSSL or libcurl.
+
 ### The network library
 
 The client talks to the server through OpenMU's `MUnique.Client.Library`, a C#
@@ -188,6 +223,28 @@ produce a Windows `.dll`, and vice versa. A MinGW-on-Linux build compiles and
 links the client but does **not** produce the `.dll`; build the
 Windows client on Windows to get a connectable one.
 
+At startup the client looks up every export it uses, once
+(`Dotnet/ManagedSymbols.h`):
+
+- the packet senders' exports are listed in the generated `PacketBindings_*.h`;
+  the connection's are listed in `ManagedSymbols.cpp`;
+- if a required export is missing, the log names each one, a dialog says the
+  library doesn't match this client, and the network stays off;
+- the `network_bridge_exports_listed_and_headers_platform_free` check fails if
+  a sender looks up an export that no list holds.
+
+The exports come from one adapter per target, in `Dotnet/SymbolSources/`.
+`src/CMakeLists.txt` compiles the adapter into `Main`, not into `MuClient`.
+
+- On desktop the adapter is `ManagedLibrarySource.cpp`, over the library.
+  The target file's `MU_MANAGED_LIBRARY_FILE` gives the library's file name,
+  and `MU_MANAGED_LIBRARY_BY_NAME` says whether the loader finds it by name
+  (Windows) or beside the executable (Linux, macOS); see [Targets](#targets).
+- A port that links the exports another way adds its own adapter, which
+  defines `DotNetBridge::TargetManagedSymbolSource()`, and names it in its
+  target file (`MU_MANAGED_SYMBOL_SOURCE`, `MU_TARGET_SYMBOL_ADAPTER`). Shared
+  code doesn't change.
+
 ### Output layout
 
 A post-build step copies the game assets (from `src/bin/`) and the network
@@ -198,10 +255,39 @@ library next to the executable, so the build output directory is runnable:
   Main (or Main.exe)
   MUnique.Client.Library.so (or .dll)
   Data/ ...                          <-- copied assets
-  config.ini                         <-- seeded from config.ini.template
+  config.ini.template                <-- the shipped defaults, read-only
 ```
 
 Run the client from that directory so it finds its assets and the library.
+
+### Where settings and logs live
+
+The client never writes next to the executable: that folder can be read-only (Program Files, a signed
+app bundle). `config.ini`, `MuError.log` (and its rotations), the chat macros (`Macro.txt`) and
+`Screenshots/` are in the player's user folder:
+
+| OS | Folder |
+|----|--------|
+| Windows | `%APPDATA%\MuMain\<name>\` |
+| Linux | `~/.local/share/MuMain/<name>/` (`$XDG_DATA_HOME` when set) |
+| macOS | `~/Library/Application Support/MuMain/<name>/` |
+
+- `<name>` is the install's own: its folder's name and a hash of its path, such as
+  `RelWithDebInfo-3f9a2c1b`. Every install, and so every server's client a player has, keeps its own
+  settings and remembered login, as when they were next to the executable. A distributor can set a
+  fixed `[Client] Name` in `config.ini.template` instead, so the settings stay when the client moves.
+- The first start creates `config.ini` there: a copy of the `config.ini` an older client kept next to
+  the executable, or else of `config.ini.template`. Later starts never overwrite it, and the old file
+  is no longer read. `Data/Macro.txt` moves the same way.
+- `MuError.log` names the folder in its first lines (the home folder shown as `~`).
+- `MU_USER_FOLDER` names another folder, for example to run two clients with separate settings. The
+  tests set it to a folder of each test binary's own beside it (`<binary>.user`), so binaries running side by
+  side never share a `config.ini`.
+- One profile serves every game account of the OS user: settings that belong to a character (skill
+  and potion hotkeys, auto-attack, the chat box, MuHelper) are kept by the server. The remembered
+  login is the last account that ticked "Remember me".
+- A target picks another folder through its adapter (`Core/Platform/UserFolder.h`, in
+  `MU_TARGET_ADAPTERS`).
 
 ## Hosted releases
 

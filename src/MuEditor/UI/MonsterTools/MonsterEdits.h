@@ -30,6 +30,13 @@ public:
     // change). False, with nothing changed, when it has none or a name has the
     // separator or a language code that is not one.
     bool SetMonster(std::string label, const Data::Monsters::MonsterDefinition& monster);
+    // The unknown monsters' look (D64), saved with the monster list; false
+    // when it is so already. Living monsters with the look show its glow,
+    // marks and message at once, its body at their next spawn.
+    bool SetUnknownLook(std::string label, const Data::Monsters::UnknownMonsterLook& look);
+    // The talk texts several NPCs share (the list's talkTexts), saved with
+    // the monster list; false when they are so already.
+    bool SetTalkTexts(std::string label, const Data::Monsters::MonsterTalkTexts& texts);
     // Sets the monster's name in `locale`; an empty text removes the
     // translation. False, with nothing changed, when the number has no entry,
     // the locale is not a language code, the text has the separator

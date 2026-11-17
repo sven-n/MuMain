@@ -379,6 +379,7 @@ constexpr SlotSymbol OtherAreaModels[] = {
 };
 
 constexpr std::string_view PlayerModel = "player";
+constexpr std::string_view NoModel = "none";
 
 constexpr SlotSymbol BitmapSlots[] = {
     {"BITMAP_MONSTER_SKIN", BITMAP_MONSTER_SKIN},
@@ -439,6 +440,8 @@ std::optional<int> FindMonsterModelReference(std::string_view model)
 {
     if (model == PlayerModel)
         return MODEL_PLAYER;
+    if (model == NoModel)
+        return NoModelSlot;
     for (const SlotSymbol& other : OtherAreaModels)
     {
         if (other.symbol == model)
@@ -461,6 +464,8 @@ std::string GetMonsterModelReference(int slot)
 {
     if (slot == MODEL_PLAYER)
         return std::string(PlayerModel);
+    if (slot == NoModelSlot)
+        return std::string(NoModel);
     for (const SlotSymbol& other : OtherAreaModels)
     {
         if (other.value == slot)

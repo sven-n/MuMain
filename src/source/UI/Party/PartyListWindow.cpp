@@ -7,6 +7,7 @@
 
 #include "Engine/Object/ZzzInventory.h"
 #include "Character/CharacterManager.h"
+#include "GameLogic/Party/PartyMemberSkill.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Camera/CameraProjection.h"
@@ -109,9 +110,17 @@ bool CPartyListWindow::BtnProcess()
         {
             m_iSelectedCharacter = i;
 
+            // -1 for a member out of sight, -3 for the hero's own card while the hero isn't found.
+            const int characterIndex = Party[i].index;
+            if (characterIndex < 0 || characterIndex >= MAX_CHARACTERS_CLIENT)
+            {
+                return false;
+            }
+
             if (SelectedCharacter == -1) {
-                CHARACTER* c = &CharactersClient[Party[i].index];
-                if (c && c != Hero) {
+                CHARACTER* c = &CharactersClient[characterIndex];
+                if (c != Hero)
+                {
                     UI::Chat::CreateChat(c->ID, L"", c);
                 }
             }
@@ -300,35 +309,29 @@ void CPartyListWindow::ClosingProcess()
 
 bool CPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
 {
-    auto HeroClass = gCharacterManager.GetBaseClass(Hero->Class);
-
-    if (HeroClass == CLASS_ELF
-        || HeroClass == CLASS_WIZARD
-        || HeroClass == CLASS_SUMMONER
-        )
+    if (IsMemberSkillSelected())
     {
-        auto Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
-
-        if (Skill == AT_SKILL_HEALING
-            || Skill == AT_SKILL_HEALING_STR
-            || Skill == AT_SKILL_DEFENSE
-            || Skill == AT_SKILL_DEFENSE_STR
-            || Skill == AT_SKILL_DEFENSE_MASTERY
-            || Skill == AT_SKILL_ATTACK
-            || Skill == AT_SKILL_ATTACK_STR
-            || Skill == AT_SKILL_ATTACK_MASTERY
-            || Skill == AT_SKILL_TELEPORT_ALLY
-            || Skill == AT_SKILL_SOUL_BARRIER
-            || Skill == AT_SKILL_SOUL_BARRIER_STR
-            || Skill == AT_SKILL_SOUL_BARRIER_PROFICIENCY
-            || Skill == AT_SKILL_ALICE_THORNS
-            || Skill == AT_SKILL_RECOVER
-            )
-        {
-            SelectedCharacter = pMember->index;
-            return true;
-        }
+        SelectedCharacter = pMember->index;
+        return true;
     }
 
     return false;
+}
+
+bool CPartyListWindow::IsCardHoveredForMemberSkill() const
+{
+    // Party[].index is reset after every frame, so the synced model is what still knows who is in sight.
+    const auto& cards = m_RmlView.GetModel().cards;
+    if (!m_bActive || m_HoveredCard < 0 || m_HoveredCard >= static_cast<int>(cards.size()))
+    {
+        return false;
+    }
+
+    return !cards[m_HoveredCard].absent && IsMemberSkillSelected();
+}
+
+bool CPartyListWindow::IsMemberSkillSelected()
+{
+    const CLASS_TYPE heroClass = gCharacterManager.GetBaseClass(Hero->Class);
+    return GameLogic::Party::IsPartyMemberSkill(heroClass, CharacterAttribute->Skill[Hero->CurrentSkill]);
 }

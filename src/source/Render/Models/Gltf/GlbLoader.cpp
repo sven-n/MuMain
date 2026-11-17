@@ -2,6 +2,7 @@
 
 #include "Render/Models/Gltf/GlbLoader.h"
 
+#include "Core/Content/ContentStore.h"
 #include "Core/Math/ZzzMathLib.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Models/Gltf/SkinnedModel.h"
@@ -364,6 +365,8 @@ private:
     BMD& model_;
     const std::filesystem::path& file_;
     const std::map<int, Data::Models::ActionClip>& actions_;
+    // The file's bytes; the parsed data points into them, so they outlive it.
+    std::string bytes_;
     std::unique_ptr<cgltf_data, CgltfDeleter> data_;
     const cgltf_skin* skin_ = nullptr;
     std::shared_ptr<SkinnedModel> skinned_ = std::make_shared<SkinnedModel>();
@@ -381,7 +384,9 @@ private:
         const std::string path = file_.string();
         cgltf_options options{};
         cgltf_data* data = nullptr;
-        if (cgltf_parse_file(&options, path.c_str(), &data) != cgltf_result_success)
+        // A file that can't be read parses as no bytes, and fails as one.
+        bytes_ = Content::ReadFile(file_).value_or(std::string());
+        if (cgltf_parse(&options, bytes_.data(), bytes_.size(), &data) != cgltf_result_success)
         {
             reason = "it is no glTF file that can be read";
             return false;
@@ -533,9 +538,16 @@ private:
                                             [&](size_t i)
                                             {
                                                 const cgltf_node* parent = skin_->joints[i]->parent;
-                                                const auto parentJoint =
-                                                    parent ? skinJoints.find(parent) : skinJoints.end();
-                                                return parentJoint == skinJoints.end() || placed[parentJoint->second];
+                                                if (!parent)
+                                                {
+                                                    return true;
+                                                }
+                                                const auto parentJoint = skinJoints.find(parent);
+                                                if (parentJoint == skinJoints.end())
+                                                {
+                                                    return true;
+                                                }
+                                                return static_cast<bool>(placed[parentJoint->second]);
                                             });
             if (ready == extras.end())
             {

@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MonsterOwnValues.h"
+#include "MonsterSetupFields.h"
 
 #include "MonsterEdits.h"
 #include "MonsterStepLabel.h"
@@ -203,6 +204,9 @@ void RenderMenuItems(int number, MonsterValueField field)
 
 const char* GetFieldName(MonsterValueField field)
 {
+    // A setup field by Monster Setup's name.
+    if (const std::optional<size_t> setup = Data::Monsters::GetSetupFieldIndex(field))
+        return SetupFields::GetLabel(Data::Monsters::GetMonsterSetupFields()[*setup].key);
     switch (field)
     {
     case MonsterValueField::Names:
@@ -219,6 +223,8 @@ const char* GetFieldName(MonsterValueField field)
         return I18N::Editor::MapVariants;
     case MonsterValueField::RandomVariants:
         return I18N::Editor::RandomVariants;
+    case MonsterValueField::SetupFirst:
+        break;
     }
     return "";
 }

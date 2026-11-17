@@ -106,6 +106,7 @@ void ClearTooltipRows();
 namespace Data::Items
 {
 struct ItemDefinition;
+struct ItemOption;
 }
 struct ItemTooltipValues;
 
@@ -242,11 +243,14 @@ template <size_t N> void GetItemName(int iType, int iLevel, wchar_t (&Text)[N])
 }
 std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana);
+void GetSpecialOptionText(wchar_t* Text, WORD Option, WORD Value, int iMana);
 // The tooltip lines of the item's option slot `slot` when its option comes from an option definition: its texts with
 // its value, blue and not bold, from row `textNum` on and before row `rowLimit`. The rows written (a text the option
 // texts lack has none), or nothing for a slot the code wrote, whose line the caller writes (GetSpecialOptionText).
 std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int textNum, int rowLimit);
+// The tooltip lines of `option` with `value`: its texts, blue and not bold, from row `textNum` on and before row
+// `rowLimit`; the rows written.
+int WriteOptionLines(const Data::Items::ItemOption& option, int value, int textNum, int rowLimit);
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
 void RenderItemInfoAtPx(float x, float y, const ITEM* ip, bool Sell, int Inventype = 0,

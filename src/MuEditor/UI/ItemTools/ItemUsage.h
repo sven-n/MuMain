@@ -5,6 +5,7 @@
 #include "ItemCodeReferences.h"
 
 #include "Data/GameData/ItemData/ItemTagSet.h"
+#include "Data/GameData/MonsterData/MonsterItemReferences.h"
 
 #include <span>
 #include <string>
@@ -32,6 +33,9 @@ struct ItemUsage
     bool hasAddOption = false;
     bool givesBuff = false;
     bool isPet = false;
+    // The monsters that wear it, by number and place (D60): they name it by
+    // its number.
+    std::vector<Data::Monsters::MonsterItemWearer> monsters;
     // The texts that name the item by its number ({item:14,13}), as Data::Translation::FindTextsNamingItem lists
     // them: they then name whatever takes the number.
     std::vector<std::string> texts;
@@ -48,7 +52,8 @@ struct ItemUsage
     // What reads the item by its number and stays there.
     bool IsUsedAtNumber() const
     {
-        return !code.empty() || inAncientSet || hasAddOption || givesBuff || isPet || !texts.empty();
+        return !code.empty() || inAncientSet || hasAddOption || givesBuff || isPet || !monsters.empty() ||
+               !texts.empty();
     }
 };
 

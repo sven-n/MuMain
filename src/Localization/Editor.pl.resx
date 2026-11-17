@@ -466,9 +466,6 @@
   <data name="Item data could not be written" xml:space="preserve">
     <value>Nie udało się zapisać plików danych przedmiotów. Zobacz konsolę.</value>
   </data>
-  <data name="Look Profile" xml:space="preserve">
-    <value>Profil wyglądu</value>
-  </data>
   <data name="Look Loaded From" xml:space="preserve">
     <value>Wczytano z</value>
   </data>
@@ -477,15 +474,6 @@
   </data>
   <data name="Look Scope Current Map" xml:space="preserve">
     <value>Bieżąca mapa</value>
-  </data>
-  <data name="Look Reset" xml:space="preserve">
-    <value>Resetuj</value>
-  </data>
-  <data name="Look Reset All" xml:space="preserve">
-    <value>Resetuj wszystko</value>
-  </data>
-  <data name="Look Save" xml:space="preserve">
-    <value>Zapisz</value>
   </data>
   <data name="Style and effect" xml:space="preserve">
     <value>Styl i efekt</value>
@@ -4173,5 +4161,8 @@
   </data>
   <data name="Sound kind everything else" xml:space="preserve">
     <value>Wszystko inne</value>
+  </data>
+  <data name="Buffs" xml:space="preserve">
+    <value>Buffy</value>
   </data>
 </root>

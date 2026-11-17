@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -23,8 +25,7 @@ JewelHarmonyInfo::JewelHarmonyInfo()
 
     mu::log::Get("ui")->error("{} {}", StringUtils::WideToNarrow(filename.c_str()), StringUtils::WideToNarrow(problem));
     const std::wstring message = filename + L" " + problem + L"\r\n";
-    ::MessageBox(g_hWnd, message.c_str(), NULL, MB_OK);
-    ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+    Core::Platform::ShowFatalError(L"Error", message.c_str());
 }
 
 JewelHarmonyInfo::~JewelHarmonyInfo() {}
@@ -39,16 +40,15 @@ const wchar_t* JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& fi
                                   LEVEL_COUNT * sizeof(int) + // HarmonyJewelLevel
                                   LEVEL_COUNT * sizeof(int);  // Zen
 
-    FILE* fp = ::_wfopen(filename.c_str(), L"rb");
-    if (fp != NULL)
+    const Content::Stream fp = Content::OpenIO(filename);
+    if (fp != nullptr)
     {
         int nEntries = MAXHARMONYJEWELOPTIONTYPE * MAXHARMONYJEWELOPTIONINDEX;
         size_t nSize = ENTRY_SIZE * nEntries;
 
         std::vector<BYTE> tempBuffer(nSize);
 
-        const bool complete = DataFileIO::ReadExact(fp, tempBuffer.data(), nSize);
-        ::fclose(fp);
+        const bool complete = DataFileIO::ReadExact(fp.get(), tempBuffer.data(), nSize);
         if (!complete)
         {
             return L"file corrupted.";

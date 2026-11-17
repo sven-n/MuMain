@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
@@ -357,7 +358,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.WriteCurrentTime();
 
         SaveOptions();
-        SaveMacro(L"Data\\Macro.txt");
+        SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {
@@ -368,7 +369,7 @@ void mu::ui::window::ShowSystemMenuDialog()
             MUHelper::g_MuHelper.TriggerStop();
             LogOut = true;
             SocketClient->ToGameServer()->SendLogOut(LogOutType::CloseGame);
-            PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+            Core::Platform::RequestQuit();
             g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 0");
         }
 
@@ -388,7 +389,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.WriteCurrentTime();
 
         SaveOptions();
-        SaveMacro(L"Data\\Macro.txt");
+        SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {
@@ -419,7 +420,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.WriteCurrentTime();
 
         SaveOptions();
-        SaveMacro(L"Data\\Macro.txt");
+        SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {

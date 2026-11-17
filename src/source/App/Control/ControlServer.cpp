@@ -83,6 +83,7 @@ void ControlServer::Poll()
         return;
     }
 
+    Commands::RecordFrame();
     RecordSceneTransition();
     AcceptNewConnections();
     ServeRequests();

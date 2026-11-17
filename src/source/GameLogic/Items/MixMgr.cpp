@@ -1,7 +1,8 @@
 ﻿#include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "MixMgr.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "I18N/All.h"
 #include "Core/Text/WideFormat.h"
 
@@ -1218,11 +1219,11 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
         m_MixRecipe[j].Reset();
     }
 
-    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    const Content::Stream fp = Content::OpenIO(szFileName);
     if (!fp)
     {
         DataFileIO::ReportUnusableFile(szFileName, L"File not exist.");
-        exit(0);
+        return;
     }
 
     int iNumMixRecipes[MAX_MIX_TYPES];
@@ -1230,21 +1231,20 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
     if (!DataFileIO::ReadExact(fp.get(), iNumMixRecipes, iSize))
     {
         DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
-        exit(0);
+        return;
     }
     BuxConvert(reinterpret_cast<BYTE*>(iNumMixRecipes), iSize);
 
     iSize = sizeof(MIX_RECIPE);
     for (j = 0; j < MAX_MIX_TYPES; ++j)
     {
-        if (feof(fp.get()) || iNumMixRecipes[j] > 1000)
+        if (SDL_GetIOStatus(fp.get()) == SDL_IO_STATUS_EOF || iNumMixRecipes[j] > 1000)
         {
             wchar_t Text[256];
             mu_swprintf(Text, L"%ls - Version not matched.", szFileName);
             g_ErrorReport.Write(Text);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
-            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-            exit(0);
+            Core::Platform::ShowFatalError(L"Error", Text);
+            return;
         }
         for (i = 0; i < iNumMixRecipes[j]; ++i)
         {
@@ -1252,7 +1252,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
             if (!DataFileIO::ReadExact(fp.get(), pMixRecipe.get(), iSize))
             {
                 DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
-                exit(0);
+                return;
             }
             BuxConvert(reinterpret_cast<BYTE*>(pMixRecipe.get()), iSize);
             m_MixRecipe[j].AddRecipe(pMixRecipe.release());

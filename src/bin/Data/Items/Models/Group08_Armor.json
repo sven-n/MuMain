@@ -759,7 +759,8 @@
         "color": "emerald",
         "shineColor": "orange"
       },
-      "renderStyle": "violentWindToEternalWingArmor"
+      "renderStyle": "violentWindToEternalWingArmor",
+      "renderStyleValues": {"inventoryTexture": "Player/InvenArmorMale40.tga"}
     },
     {
       "number": 40,
@@ -780,7 +781,8 @@
         "color": "rust",
         "shineColor": "orange"
       },
-      "renderStyle": "violentWindToEternalWingArmor"
+      "renderStyle": "violentWindToEternalWingArmor",
+      "renderStyleValues": {"inventoryTexture": "Player/InvenArmorMale41.tga"}
     },
     {
       "number": 41,
@@ -801,7 +803,8 @@
         "color": "amber",
         "shineColor": "orange"
       },
-      "renderStyle": "violentWindToEternalWingArmor"
+      "renderStyle": "violentWindToEternalWingArmor",
+      "renderStyleValues": {"inventoryTexture": "Player/InvenArmorMale42.tga"}
     },
     {
       "number": 42,
@@ -822,7 +825,8 @@
         "color": "purple",
         "shineColor": "orange"
       },
-      "renderStyle": "violentWindToEternalWingArmor"
+      "renderStyle": "violentWindToEternalWingArmor",
+      "renderStyleValues": {"inventoryTexture": "Player/InvenArmorMale43.tga"}
     },
     {
       "number": 43,
@@ -843,7 +847,8 @@
         "color": "pink",
         "shineColor": "blue"
       },
-      "renderStyle": "violentWindToEternalWingArmor"
+      "renderStyle": "violentWindToEternalWingArmor",
+      "renderStyleValues": {"inventoryTexture": "Player/InvenArmorMale44.tga"}
     },
     {
       "number": 44,
@@ -864,7 +869,8 @@
         "color": "lilac",
         "shineWhite": true
       },
-      "renderStyle": "violentWindToEternalWingArmor"
+      "renderStyle": "violentWindToEternalWingArmor",
+      "renderStyleValues": {"inventoryTexture": "Player/InvenArmorMale45.tga"}
     },
     {
       "number": 45,
@@ -974,7 +980,8 @@
       "glow": {
         "color": "moss"
       },
-      "renderStyle": "divineAndSuccubusSkin"
+      "renderStyle": "divineAndSuccubusSkin",
+      "renderStyleValues": {"inventoryTexture": "Player/Item312_Armoritem.tga"}
     },
     {
       "number": 51,
@@ -1029,7 +1036,8 @@
       "glow": {
         "color": "magenta"
       },
-      "renderStyle": "divineAndSuccubusSkin"
+      "renderStyle": "divineAndSuccubusSkin",
+      "renderStyleValues": {"inventoryTexture": "Player/SkinClass706_upperitem.tga"}
     },
     {
       "number": 59,
@@ -1155,7 +1163,8 @@
         "rotation": [270, 0, -45],
         "bodyHeight": -100
       },
-      "renderStyle": "luckyItem"
+      "renderStyle": "luckyItem",
+      "renderStyleValues": {"inventoryMeshes": [0], "inventoryOtherMeshes": {"allBut": [0]}, "inventoryTexture": "Player/LuckyItem/65/InvenArmorMale40_luck.tga"}
     },
     {
       "number": 66,
@@ -1230,7 +1239,8 @@
         "rotation": [270, 0, -45],
         "bodyHeight": -100
       },
-      "renderStyle": "luckyItem"
+      "renderStyle": "luckyItem",
+      "renderStyleValues": {"inventoryMeshes": [0], "inventoryOtherMeshes": {"allBut": [0]}, "inventoryTexture": "Player/LuckyItem/70/InvenArmorMale41_luck.tga"}
     },
     {
       "number": 71,

@@ -24,7 +24,7 @@ The MU Editor is a C++ ImGui-based in-game editor that provides real-time game e
 - **MuEditor.h/cpp** - Main editor class, initialization, lifecycle management
 - **MuEditorUI.h/cpp** - The editor window and its menu bar, or the Open Editor button while closed
 - **MuEditorLayout.h/cpp** - Where the editor window first opens, and the first layout of its tool windows
-- **UndoTarget.h/cpp** - The editor bar's Undo and Redo, for the tool worked in last (the item tools, the monster tools or the Server List window)
+- **UndoTarget.h/cpp** - The editor bar's Undo and Redo, for the tool worked in last (the item tools, the monster tools, the Server List or the Graphics Look window)
 - **ToolGroups.h/cpp** - The tool groups (the item tools, the monster tools): their browser and tools, which give each group its Windows sub-menu and dock it together
 - **ToolWindowFrame.h/cpp** - What every tool window of a group does when it begins: its docking, the editor's bar while it floats, the mouse over it, and its group's Ctrl+Z and Ctrl+Y
 - **MuEditorWindowIds.h** - The names the tool windows are docked by
@@ -105,6 +105,10 @@ Parts the item tools and the monster tools both use:
 - **ServerListEdits.h/cpp** - The groups being changed, what the file has, and their undo history (the editor bar's Undo and Redo while the window was used last)
 - **ServerListOfflinePreviewUI.h/cpp** - The preview of the servers the connect server didn't send: the toolbar's switch and Their load, and each offline channel's Show box and own load in the channel list
 - **ServerListStepLabel.h/cpp** - What each undo step did ("Remove Helheim", "Valhalla: channel 3"), for the tooltips of the editor bar's Undo and Redo
+
+### Graphics Look (UI/GraphicsLook)
+- **MuGraphicsLookUI.h/cpp** - The look profile (Data/Render/Look.json) on every scope: the default, its environments and its map entries; a map entry's environment; a warning before a change many maps share; sliders shown live while dragged; the Player or Authoring preview; Save and Revert (Windows > Graphics look)
+- **LookEditHistory.h/cpp** - Its undo history: the whole profile before and after each change (the editor bar's Undo and Redo while the window was used last)
 
 ### Input Management
 - **MuInputBlocker.h/cpp** - Blocks game input when hovering over ImGui UI

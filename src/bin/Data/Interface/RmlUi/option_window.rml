@@ -83,7 +83,7 @@
 				<div class="checkbox-tick"></div>
 			</div>
 		</div>
-		<div class="option-row option-checkbox-row" data-event-click="option_toggle_vsync">
+		<div class="option-row option-checkbox-row option-row-tipped" data-class-locked="vsync_locked" data-attr-data-hint="vsync_locked ? vsync_locked_reason : ''" data-event-click="option_toggle_vsync">
 			<span class="option-row-label">{{vsync_label}}</span>
 			<div class="checkbox-box" data-class-checked="vsync_enabled">
 				<div class="checkbox-tick"></div>
@@ -128,6 +128,7 @@
 		     checkbox switches the feature. Each group starts collapsed; specialist rows wait under its
 		     own "More settings". A slider previews while pressed, dragged or stepped by an arrow key
 		     and is saved on release, when it loses focus or when the window closes. -->
+		<div class="option-tuning-reason" data-class-hidden="tuning_preview_note == ''">{{tuning_preview_note}}</div>
 		<div class="option-row option-checkbox-row option-sub-row option-tuning-group-row" data-class-locked="look_features_locked">
 			<span class="option-row-label option-tuning-group-label" data-event-click="option_toggle_tuning_group(0)"><span class="option-tuning-chevron" data-class-expanded="tuning_expanded_0"></span>{{look_lighting_label}}</span>
 			<div class="checkbox-box" data-class-checked="look_lighting" data-event-click="option_toggle_enhanced_feature(0)">
@@ -367,6 +368,12 @@
 			<div class="option-tuning-reset" data-event-click="option_reset_all_tuning">{{tuning_reset_all_label}}</div>
 		</div>
 		<div class="option-tuning-error" data-class-hidden="tuning_save_message == ''">{{tuning_save_message}}</div>
+		<div class="option-row option-checkbox-row" data-event-click="option_toggle_enhanced_movement">
+			<span class="option-row-label">{{enhanced_movement_label}}</span>
+			<div class="checkbox-box" data-class-checked="enhanced_movement">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
 		<div class="option-row option-select-row option-row-tipped" data-attr-data-hint="antialiasing_tooltip">
 			<span class="option-row-label">{{antialiasing_row_label}}</span>
 			<div class="option-dropdown">

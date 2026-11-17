@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "Data/DataHandler/SkillData/SkillDataLoader.h"
+#include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Data/GameData/SkillData/SkillStructs.h"
 #include "Core/Globals/_struct.h"
@@ -20,7 +21,7 @@ extern HWND g_hWnd;
 
 bool SkillDataLoader::Load(wchar_t* fileName)
 {
-    FILE* fp = _wfopen(fileName, L"rb");
+    const Content::Stream fp = Content::OpenIO(fileName);
     if (fp == nullptr)
     {
         wchar_t errorMsg[256];
@@ -30,9 +31,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     }
 
     // Get file size to determine structure version
-    fseek(fp, 0, SEEK_END);
-    long fileSize = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    long fileSize = static_cast<long>(SDL_GetIOSize(fp.get()));
 
     const int LegacySize = sizeof(SKILL_ATTRIBUTE_FILE_LEGACY);
     const long expectedLegacySize = LegacySize * MAX_SKILLS + sizeof(DWORD);
@@ -49,14 +48,12 @@ bool SkillDataLoader::Load(wchar_t* fileName)
 
     if (isLegacyFormat)
     {
-        success = LoadLegacyFormat(fp, fileSize);
+        success = LoadLegacyFormat(fp.get(), fileSize);
     }
     else
     {
-        success = LoadNewFormat(fp, fileSize);
+        success = LoadNewFormat(fp.get(), fileSize);
     }
-
-    fclose(fp);
 
 #ifdef _EDITOR
     if (success)
@@ -80,8 +77,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     return success;
 }
 
-template<typename TFileFormat>
-bool SkillDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
+template <typename TFileFormat> bool SkillDataLoader::LoadFormat(SDL_IOStream* fp, const wchar_t* formatName)
 {
     const int Size = sizeof(TFileFormat);
 
@@ -130,12 +126,12 @@ bool SkillDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
     return true;
 }
 
-bool SkillDataLoader::LoadLegacyFormat(FILE* fp, long fileSize)
+bool SkillDataLoader::LoadLegacyFormat(SDL_IOStream* fp, long fileSize)
 {
     return LoadFormat<SKILL_ATTRIBUTE_FILE_LEGACY>(fp, L"legacy format");
 }
 
-bool SkillDataLoader::LoadNewFormat(FILE* fp, long fileSize)
+bool SkillDataLoader::LoadNewFormat(SDL_IOStream* fp, long fileSize)
 {
     return LoadFormat<SKILL_ATTRIBUTE_FILE>(fp, L"new format");
 }

@@ -18,8 +18,7 @@ void AddMember(int memberIndex);
 
 // Another guild master asks for an alliance or hostility; the values are the protocol's
 // GuildRelationshipType and GuildRequestType.
-void ShowRelationshipRequest(std::uint32_t relationshipType, std::uint32_t requestType, std::uint8_t requesterKeyH,
-                             std::uint8_t requesterKeyL);
+void ShowRelationshipRequest(std::uint32_t relationshipType, std::uint32_t requestType, std::uint16_t requesterKey);
 
 int AllianceGuildCount();
 void ClearAllianceGuilds();

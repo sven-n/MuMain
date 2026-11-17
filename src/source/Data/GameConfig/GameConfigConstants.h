@@ -71,6 +71,9 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeySunlight[] = L"Sunlight";
     inline constexpr wchar_t CfgKeyLightMood[] = L"LightMood";
     inline constexpr wchar_t CfgKeyPostProcessing[] = L"PostProcessing";
+    // The character realism features (smooth turning, look-at, flight feel, mount lean, foot
+    // placement and the like); off moves and draws characters as before them. Both looks.
+    inline constexpr wchar_t CfgKeyEnhancedMovement[] = L"EnhancedMovement";
 
     inline constexpr wchar_t CfgKeyRenderBackend[] = L"Backend";
     // DXP-23's per-system effect-cost toggles (MainScene.h's SetDisableEffects/SetDisableParticles/
@@ -155,6 +158,7 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultSunlight = true;
     inline constexpr bool CfgDefaultLightMood = true;
     inline constexpr bool CfgDefaultPostProcessing = true;
+    inline constexpr bool CfgDefaultEnhancedMovement = false;
 
     inline constexpr bool CfgDefaultDisableEffects = false;
     inline constexpr bool CfgDefaultDisableParticles = false;
@@ -166,7 +170,7 @@ namespace CfgDefaults
     inline constexpr wchar_t CfgDefaultTexturePack[] = L""; // The original textures
     inline constexpr bool CfgDefaultUseS6PlayerModels = true;
 
-    // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
+    // "default" = the target's pick (its GPU device adapter: Vulkan on Windows to avoid
     // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:
     // "vulkan", "direct3d12" (alias "d3d12"), "metal" -- forces that SDL_gpu driver on any
     // platform, falling back to auto-pick with a warning log if it's unavailable.

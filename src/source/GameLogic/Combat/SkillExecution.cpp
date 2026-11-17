@@ -141,7 +141,7 @@ bool CanExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
 
     if (Skill == AT_SKILL_SUMMON_EXPLOSION || Skill == AT_SKILL_SUMMON_REQUIEM || Skill == AT_SKILL_SUMMON_POLLUTION)
     {
-        CheckTarget(c);
+        CheckTarget(c, Skill, Distance);
         if (!CheckTile(c, o, Distance))
         {
             return false;
@@ -322,7 +322,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
 
     if (ClassIndex != CLASS_WIZARD)
     {
-        CheckTarget(c);
+        CheckTarget(c, Skill, Distance);
 
         if (CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY))
         {

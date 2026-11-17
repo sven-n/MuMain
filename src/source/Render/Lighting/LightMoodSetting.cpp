@@ -44,12 +44,18 @@ bool IsWorldMap(int world)
            world != WD_74NEW_CHARACTER_SCENE && world != WD_77NEW_LOGIN_SCENE && world != WD_78NEW_CHARACTER_SCENE;
 }
 
+// The player's strength; the full mood in the Graphics Look's Authoring preview, which shows the mood as authored.
+int EffectiveStrength()
+{
+    return Look::ActivePreview() == Look::LookPreview::Authoring ? MaxStrength : s_state.strength;
+}
+
 void LogScales(const char* event)
 {
     const Scales& scales = s_state.scales;
     mu::log::Get("render")->info("Light mood {} in world {} ({}, strength {}%): base {} figures {} dynamic gain {} "
                                  "background {} sun {} highlight knee {} shadow keep {} shade cool {} bright {}",
-                                 event, s_state.world, s_state.enabled ? "on" : "off", s_state.strength, scales.base,
+                                 event, s_state.world, s_state.enabled ? "on" : "off", EffectiveStrength(), scales.base,
                                  scales.figures, scales.dynamicGain, scales.background, scales.sun,
                                  scales.highlightKnee, scales.shadowKeep, scales.shadeCool, scales.brightScale);
 }
@@ -59,7 +65,7 @@ void Recompute(int world)
     const Scales previous = s_state.scales;
     s_state.world = world;
     s_state.lookRevision = Look::Revision();
-    s_state.scales = s_state.enabled && IsWorldMap(world) ? Blend(s_state.data.ForWorld(world), s_state.strength,
+    s_state.scales = s_state.enabled && IsWorldMap(world) ? Blend(s_state.data.ForWorld(world), EffectiveStrength(),
                                                                   Look::Value(Data::Maps::LookValue::HighlightKnee))
                                                           : Scales{};
     // Where the sky fill tints real shadows (under sun shadows the renderer can draw), painted shade keeps the

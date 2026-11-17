@@ -3,6 +3,7 @@
 #include <span>
 #include <string_view>
 
+#include "Data/GameData/LookData/LookDefinition.h"
 #include "Render/Models/DrawLook.h"
 
 class BMD;
@@ -10,14 +11,19 @@ class OBJECT;
 
 // What item models do before they are drawn: sprites, particles and
 // lightning on their bones, a pulsing glow mesh, a mesh hidden by level, the
-// level they glow like, or their own drawing instead of the usual one. Each
-// effect is code with a name; the model entry of an item names its effect
+// level they glow like (a model drawn alone has a render style that draws
+// alone, design L47; only the event models' effects still draw). An
+// effect is data (Data/Effects/ItemEffects.json, looked up first, design L14)
+// or code, with a name; the model entry of an item names its effect
 // (Data/Items/Models, "itemEffect"). Items with the same effect share it.
 namespace Render::Items::ItemEffects
 {
 // Whether there is an effect of this name. The model loader checks the names
 // of the model entries with it.
 bool Exists(std::string_view name);
+
+// Whether an item effect of this name is still code.
+bool ExistsInCode(std::string_view name);
 
 // The names of all item effects, sorted, for the item editor's lists.
 std::span<const std::string_view> GetNames();
@@ -42,4 +48,17 @@ bool Spawns(int modelType);
 
 // Spawns them from the model's pose, in the update; b is placed where the model is drawn.
 void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4]);
+
+#ifdef _EDITOR
+// While it lives, the model `modelType` runs `effect` instead of its own item effect: the Style Editor's preview of an
+// item effect before it is applied. The effect must outlive it; one at a time. Editor builds only.
+class PreviewEffect
+{
+public:
+    PreviewEffect(int modelType, const Data::Looks::LookDefinition& effect);
+    ~PreviewEffect();
+    PreviewEffect(const PreviewEffect&) = delete;
+    PreviewEffect& operator=(const PreviewEffect&) = delete;
+};
+#endif
 } // namespace Render::Items::ItemEffects

@@ -8,10 +8,12 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Commands/ChatCommandValueLookup.h"
 #include "Network/Server/WSclient.h"
+#include "Data/GameData/MapData/LightMood.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <array>
 #include <cstring>
+#include <filesystem>
 #include <span>
 #include <string>
 
@@ -86,6 +88,21 @@ TEST_CASE("Maps: the server's map number stays, Devil Square 5-7 loads as Devil 
     gMapManager.SetServerMap(32);
     gMapManager.WorldActive = WD_0LORENCIA;
     CHECK(gMapManager.GetServerMap() == WD_0LORENCIA);
+}
+
+TEST_CASE("Maps: the look and the light mood of Devil Square 5-7 are Devil Square's, the loaded world [maps][look]")
+{
+    // Lookup by the loaded world (gMapManager.WorldActive), not the server's map: map 32's entry is not read.
+    const HeroMapScope hero(WD_0LORENCIA);
+    const Data::Maps::LookProfileLoadResult shipped = Data::Maps::LoadLookProfileFile(
+        std::filesystem::path(MU_TEST_DATA_DIR).parent_path() / Data::Maps::LookProfileFile);
+    REQUIRE(shipped.issues.empty());
+    gMapManager.SetServerMap(32);
+    REQUIRE(gMapManager.WorldActive == WD_9DEVILSQUARE);
+    const Data::Maps::LookValues values = shipped.data.ForWorld(gMapManager.WorldActive);
+    // Map 32's own entry keeps the default's sun; world 9's environment lights models fully.
+    CHECK(Data::Maps::MoodOf(shipped.data.ForWorld(32)).sun < 1.0);
+    CHECK(Data::Maps::MoodOf(values).sun == 1.0);
 }
 
 TEST_CASE("Maps: a move loads the world only for another server map, also between Devil Square 1-4 and 5-7 (D67) "

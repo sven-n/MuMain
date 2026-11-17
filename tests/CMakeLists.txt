@@ -60,7 +60,7 @@ set(MU_CHECK_CTEST_ENTRIES "${CMAKE_CURRENT_LIST_DIR}/check_ctest_entries.cmake"
 # the binary pass only by failing; only the canaries below use it.
 set(MU_TEST_WINMAIN "${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp")
 # Most tests need the client globals of Winmain.cpp; compile it once for all of them, not per test.
-add_library(mu_test_winmain OBJECT "${MU_TEST_WINMAIN}")
+add_library(mu_test_winmain OBJECT "${MU_TEST_WINMAIN}" "${MU_MANAGED_SYMBOL_ADAPTER}")
 target_link_libraries(mu_test_winmain PUBLIC MuClient)
 target_include_directories(mu_test_winmain PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
 if(MSVC)
@@ -137,6 +137,11 @@ mu_add_test_objects(NAME mu_test_bench_stats SOURCES
     ${MU_GAME_SOURCE}/Core/Utilities/Benchmark/BenchTypes.cpp)
 mu_add_test_objects(NAME mu_test_asset_path SOURCES ${MU_GAME_SOURCE}/Render/Textures/AssetPath.cpp)
 mu_add_test_objects(NAME mu_test_path_resolve SOURCES ${MU_GAME_SOURCE}/Core/Platform/PathResolve.cpp)
+# With mu_test_path_resolve in the same LINK_LIBS: an object library's objects reach only its direct consumers.
+mu_add_test_objects(NAME mu_test_content SOURCES
+    ${MU_GAME_SOURCE}/Core/Content/ContentPath.cpp
+    ${MU_GAME_SOURCE}/Core/Content/ContentStore.cpp
+    LINK_LIBS SDL3::SDL3)
 mu_add_test_objects(NAME mu_test_master_skill_tree_layout SOURCES
     ${MU_GAME_SOURCE}/UI/HUD/Skills/MasterSkillTreeLayout.cpp)
 mu_add_test_objects(NAME mu_test_bitmap_gpu_resources SOURCES

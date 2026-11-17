@@ -47,7 +47,7 @@ The window has five tabs:
 | Tab | Settings |
 |---|---|
 | Display | Resolution, windowed mode, VSync, FPS limit, UI scale |
-| Graphics | Quality: Enhanced graphics, anti-aliasing, anisotropic filtering, render level. Effects: the effect toggles. Shadows: the shadow toggles |
+| Graphics | Quality: Enhanced graphics, Enhanced movement, anti-aliasing, anisotropic filtering, render level. Effects: the effect toggles. Shadows: the shadow toggles |
 | Audio | Sound and music volume, whisper sound |
 | Gameplay | Auto attack, slide help |
 | Interface | Language, translate item names, font, UI theme, S6 player models, FPS counter, debug info |
@@ -70,7 +70,8 @@ Enhanced tuning sliders) show it while the pointer is over the row.
 
 ## What it stores in `config.ini`
 
-Settings are written next to the executable as `config.ini`. The options
+Settings are written to `config.ini` in the player's user folder (see
+[where settings and logs live](build/README.md#where-settings-and-logs-live)). The options
 window writes to these sections:
 
 - `[Window]` - width, height, windowed flag.
@@ -89,6 +90,13 @@ window writes to these sections:
     (default `1`): the checkboxes of the rows under "Enhanced graphics", each a
     feature of the Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
     Clicking a row's name opens its tuning sliders instead.
+  - `EnhancedMovement` (default `0`): the "Enhanced movement" checkbox in the
+    Quality section, in both looks. Off, characters move and are drawn as
+    they were before the character realism features (facing snaps instead of
+    easing, the head turns alone, no look-at, nods, flight bank, wing lag,
+    mount lean, stride matching, slope lean, foot placement or pose fades);
+    see [`characters/animation-pipeline.md`](characters/animation-pipeline.md).
+    It takes effect on the next frame.
   - `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`,
     `DisableBoids`, `DisableBodyShadows`, `DisableWingShadow`: the Graphics
     tab's toggles. A toggle another one already covers shows ticked and

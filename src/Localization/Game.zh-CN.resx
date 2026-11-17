@@ -831,6 +831,366 @@
   <data name="Base Attributes" xml:space="preserve">
     <value>基础属性</value>
   </data>
+  <data name="Storage" xml:space="preserve">
+    <value>仓库</value>
+  </data>
+  <data name="Storage fee" xml:space="preserve">
+    <value>仓库使用费</value>
+  </data>
+  <data name="Deposit" xml:space="preserve">
+    <value>存入</value>
+  </data>
+  <data name="Withdraw" xml:space="preserve">
+    <value>取出</value>
+  </data>
+  <data name="open" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Expanded Vault" xml:space="preserve">
+    <value>扩展仓库</value>
+  </data>
+  <data name="Opening an Expanded Vault (H)" xml:space="preserve">
+    <value>打开扩展仓库（H）</value>
+  </data>
+  <data name="Enter the amount of Zen you would like to deposit." xml:space="preserve">
+    <value>请输入要存入的金币数量。</value>
+  </data>
+  <data name="Enter the amount of Zen you would like to withdraw." xml:space="preserve">
+    <value>请输入要取出的金币数量。</value>
+  </data>
+  <data name="You are short of Zen." xml:space="preserve">
+    <value>金币不足。</value>
+  </data>
+  <data name="Exceeded maximum amount of Zen you can possess." xml:space="preserve">
+    <value>已超过可持有的金币上限。</value>
+  </data>
+  <data name="Cannot store in vault." xml:space="preserve">
+    <value>无法存入仓库。</value>
+  </data>
+  <data name="These items cannot be stored in the inventory." xml:space="preserve">
+    <value>这些物品无法存入仓库。</value>
+  </data>
+  <data name="Warehouse Lock/Unlock" xml:space="preserve">
+    <value>仓库锁定/解锁</value>
+  </data>
+  <data name="Inventory is already locked" xml:space="preserve">
+    <value>仓库已锁定。</value>
+  </data>
+  <data name="Password Verification" xml:space="preserve">
+    <value>密码验证</value>
+  </data>
+  <data name="Choose 4 digits for password" xml:space="preserve">
+    <value>请设置 4 位数字密码。</value>
+  </data>
+  <data name="Choose new password" xml:space="preserve">
+    <value>请设置新密码。</value>
+  </data>
+  <data name="Verify new password" xml:space="preserve">
+    <value>请确认新密码。</value>
+  </data>
+  <data name="Enter password again" xml:space="preserve">
+    <value>请再次输入密码。</value>
+  </data>
+  <data name="it is not allowed to use same 4 numbers" xml:space="preserve">
+    <value>不能使用 4 个相同的数字作为密码。</value>
+  </data>
+  <data name="Enter your WEBZEN.COM password." xml:space="preserve">
+    <value>请输入你的 WEBZEN.COM 密码。</value>
+  </data>
+  <data name="EnterYourWEBZENCOMPassword697" xml:space="preserve">
+    <value>请输入你的 WEBZEN.COM 密码</value>
+  </data>
+  <data name="Incorrect password" xml:space="preserve">
+    <value>密码错误。</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Trade" xml:space="preserve">
+    <value>交易</value>
+  </data>
+  <data name="Zen Trade" xml:space="preserve">
+    <value>交易金币</value>
+  </data>
+  <data name="About %d" xml:space="preserve">
+    <value>约 %d</value>
+  </data>
+  <data name="Warning!" xml:space="preserve">
+    <value>警告！</value>
+  </data>
+  <data name="Notice! Please check out" xml:space="preserve">
+    <value>注意！请在交易前确认</value>
+  </data>
+  <data name="the level of the player" xml:space="preserve">
+    <value>对方的等级</value>
+  </data>
+  <data name="and the items before trading." xml:space="preserve">
+    <value>以及交易物品。</value>
+  </data>
+  <data name="The levels and options of some items" xml:space="preserve">
+    <value>部分物品的等级或属性</value>
+  </data>
+  <data name="have been changed in trade." xml:space="preserve">
+    <value>已在交易过程中发生变化。</value>
+  </data>
+  <data name="Please check whether the item is" xml:space="preserve">
+    <value>请确认该物品是否仍是</value>
+  </data>
+  <data name="the same item that you want to trade." xml:space="preserve">
+    <value>你想要交易的物品。</value>
+  </data>
+  <data name="would like to trade with you." xml:space="preserve">
+    <value>想与你交易。</value>
+  </data>
+  <data name="Enter the amount of Zen you would like to trade." xml:space="preserve">
+    <value>请输入要交易的金币数量。</value>
+  </data>
+  <data name="Your trade has been canceled." xml:space="preserve">
+    <value>交易已取消。</value>
+  </data>
+  <data name="You cannot trade right now." xml:space="preserve">
+    <value>当前无法交易。</value>
+  </data>
+  <data name="Your trade has been canceled because your inventory is full." xml:space="preserve">
+    <value>背包已满，交易已取消。</value>
+  </data>
+  <data name="Trade request is canceled" xml:space="preserve">
+    <value>交易请求已取消。</value>
+  </data>
+  <data name="Reinforced item can't be traded." xml:space="preserve">
+    <value>强化物品无法交易。</value>
+  </data>
+  <data name="Personal store" xml:space="preserve">
+    <value>个人商店</value>
+  </data>
+  <data name="[Store]" xml:space="preserve">
+    <value>[商店]</value>
+  </data>
+  <data name="Open1107" xml:space="preserve">
+    <value>开启</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>关店</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="Still opening" xml:space="preserve">
+    <value>营业中</value>
+  </data>
+  <data name="Zen" xml:space="preserve">
+    <value>金币</value>
+  </data>
+  <data name="W Coin(C)" xml:space="preserve">
+    <value>W币（C）</value>
+  </data>
+  <data name="W Coin(P)" xml:space="preserve">
+    <value>W币（P）</value>
+  </data>
+  <data name="Goblin Points" xml:space="preserve">
+    <value>哥布林点数</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>货币</value>
+  </data>
+  <data name="Currency: %ls" xml:space="preserve">
+    <value>货币：%ls</value>
+  </data>
+  <data name="Other items" xml:space="preserve">
+    <value>其他物品</value>
+  </data>
+  <data name="Enter selling price." xml:space="preserve">
+    <value>请输入售价。</value>
+  </data>
+  <data name="Selling price : %s zen" xml:space="preserve">
+    <value>售价：%s 金币</value>
+  </data>
+  <data name="Do you want to sell item at this price?" xml:space="preserve">
+    <value>确定以此价格出售该物品吗？</value>
+  </data>
+  <data name="Do you want to buy an item?" xml:space="preserve">
+    <value>确定要购买该物品吗？</value>
+  </data>
+  <data name="Do you want to open a store?" xml:space="preserve">
+    <value>确定要开设个人商店吗？</value>
+  </data>
+  <data name="There's no store name or item price." xml:space="preserve">
+    <value>未填写商店名称或物品价格。</value>
+  </data>
+  <data name="This item is not allowed to use the private store." xml:space="preserve">
+    <value>此物品无法在个人商店中出售。</value>
+  </data>
+  <data name="Selling price when opening the store" xml:space="preserve">
+    <value>开店时的物品售价</value>
+  </data>
+  <data name="Please verify." xml:space="preserve">
+    <value>请务必确认。</value>
+  </data>
+  <data name="Already in the personal store" xml:space="preserve">
+    <value>在个人商店中</value>
+  </data>
+  <data name="Cancel sold item" xml:space="preserve">
+    <value>已售出的物品</value>
+  </data>
+  <data name="Cancel purchased item" xml:space="preserve">
+    <value>已购买的物品</value>
+  </data>
+  <data name="Can't be returned." xml:space="preserve">
+    <value>无法取消或退回。</value>
+  </data>
+  <data name="All item trading" xml:space="preserve">
+    <value>所有物品交易</value>
+  </data>
+  <data name="can only be done using zen." xml:space="preserve">
+    <value>只能使用金币进行。</value>
+  </data>
+  <data name="Merchant" xml:space="preserve">
+    <value>商人</value>
+  </data>
+  <data name="Would you like to purchase?" xml:space="preserve">
+    <value>确定要购买吗？</value>
+  </data>
+  <data name="Tax rate: %d%% (changed in real-time)" xml:space="preserve">
+    <value>税率：%d%%（实时变动）</value>
+  </data>
+  <data name="Reinforced item can't be sold." xml:space="preserve">
+    <value>强化物品无法出售。</value>
+  </data>
+  <data name="Life: %d/%d" xml:space="preserve">
+    <value>生命值：%d/%d</value>
+  </data>
+  <data name="ManaDD359" xml:space="preserve">
+    <value>魔法值：%d/%d</value>
+  </data>
+  <data name="A G: %d / %d" xml:space="preserve">
+    <value>AG：%d / %d</value>
+  </data>
+  <data name=" S D : %d / %d" xml:space="preserve">
+    <value>SD：%d / %d</value>
+  </data>
+  <data name="EXP:%I64d / %I64d" xml:space="preserve">
+    <value>经验值：%llu / %llu</value>
+  </data>
+  <data name="Character (C)" xml:space="preserve">
+    <value>角色信息（C）</value>
+  </data>
+  <data name="Friend (F)" xml:space="preserve">
+    <value>好友（F）</value>
+  </data>
+  <data name="Menu (U)" xml:space="preserve">
+    <value>菜单（U）</value>
+  </data>
+  <data name="Party (P)" xml:space="preserve">
+    <value>组队（P）</value>
+  </data>
+  <data name="Guild (G)" xml:space="preserve">
+    <value>战盟（G）</value>
+  </data>
+  <data name="Command (D)" xml:space="preserve">
+    <value>互动菜单（D）</value>
+  </data>
+  <data name="MU Item Shop(X)" xml:space="preserve">
+    <value>商城（X）</value>
+  </data>
+  <data name="You must be at least level 6 to use the 'My Friend' function." xml:space="preserve">
+    <value>使用好友功能需要达到 6 级。</value>
+  </data>
+  <data name="Official MU Helper Setting" xml:space="preserve">
+    <value>设置奇迹助手</value>
+  </data>
+  <data name="Start Official MU Helper" xml:space="preserve">
+    <value>运行奇迹助手</value>
+  </data>
+  <data name="Stop Official MU Helper" xml:space="preserve">
+    <value>停止奇迹助手</value>
+  </data>
+  <data name="Duration period: %s" xml:space="preserve">
+    <value>持续时间：%s</value>
+  </data>
+  <data name="CancelSkillQuestion" xml:space="preserve">
+    <value>确定要取消 %ls 吗？</value>
+  </data>
+  <data name="Dmg(rate): %d~%d (%d)" xml:space="preserve">
+    <value>攻击力（成功率）：%d~%d（%d）</value>
+  </data>
+  <data name="Dmg: %d~%d" xml:space="preserve">
+    <value>攻击力：%d~%d</value>
+  </data>
+  <data name="Defense (rate):%d (%d +%d)" xml:space="preserve">
+    <value>防御率：%d（%d +%d）</value>
+  </data>
+  <data name="Defense: %d (+%d)" xml:space="preserve">
+    <value>防御力：%d（+%d）</value>
+  </data>
+  <data name="Defense (rate):%d (%d)" xml:space="preserve">
+    <value>防御率：%d（%d）</value>
+  </data>
+  <data name="HP: %d / %d" xml:space="preserve">
+    <value>生命值：%d / %d</value>
+  </data>
+  <data name="Mana: %d / %d" xml:space="preserve">
+    <value>魔法值：%d / %d</value>
+  </data>
+  <data name="Wizardry Dmg: %d~%d (+%d)" xml:space="preserve">
+    <value>魔力：%d~%d（+%d）</value>
+  </data>
+  <data name="WizardryDmgDD216" xml:space="preserve">
+    <value>魔力：%d~%d</value>
+  </data>
+  <data name="Point: %d" xml:space="preserve">
+    <value>点数：%d</value>
+  </data>
+  <data name="Close (%s)" xml:space="preserve">
+    <value>关闭（%s）</value>
+  </data>
+  <data name="Quest" xml:space="preserve">
+    <value>任务</value>
+  </data>
+  <data name="Pet" xml:space="preserve">
+    <value>宠物</value>
+  </data>
+  <data name="Skill Damage: %d%%" xml:space="preserve">
+    <value>技能伤害：%d%%</value>
+  </data>
+  <data name=" Curse Spell: %d ~ %d(+%d)" xml:space="preserve">
+    <value>诅咒力：%d ~ %d（+%d）</value>
+  </data>
+  <data name="CurseSpellDD1694" xml:space="preserve">
+    <value>诅咒力：%d ~ %d</value>
+  </data>
+  <data name="Master skill tree (A)" xml:space="preserve">
+    <value>大师技能树（A）</value>
+  </data>
+  <data name="DD1907" xml:space="preserve">
+    <value>[+]：%d%%|[-]：%d%%</value>
+  </data>
+  <data name="Attack rate: %d" xml:space="preserve">
+    <value>攻击成功率：%d</value>
+  </data>
+  <data name="Attack rate: %d (+%d)" xml:space="preserve">
+    <value>攻击成功率：%d（+%d）</value>
+  </data>
+  <data name="DefenseRateDD2110" xml:space="preserve">
+    <value>防御成功率：%d（+%d）</value>
+  </data>
+  <data name="Melee Damage: %d%%" xml:space="preserve">
+    <value>近战伤害：%d%%</value>
+  </data>
+  <data name="Divine Damage (Roar, Slasher): %d%%" xml:space="preserve">
+    <value>神圣伤害（咆哮、斩击）：%d%%</value>
+  </data>
+  <data name="AOE Damage (Dark Side): %d%%" xml:space="preserve">
+    <value>范围伤害（黑暗面）：%d%%</value>
+  </data>
+  <data name="Level: %u | Resets: %u" xml:space="preserve">
+    <value>等级：%u | 转生：%u</value>
+  </data>
+  <data name="StatPointsAdded" xml:space="preserve">
+    <value>增加</value>
+  </data>
+  <data name="StatPointsRemoved" xml:space="preserve">
+    <value>减少</value>
+  </data>
   <data name="Critical damage rate: %d%%" xml:space="preserve">
     <value>暴击伤害率：%d%%</value>
   </data>

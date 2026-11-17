@@ -248,6 +248,7 @@ TEST_CASE("sound effects resolve Windows-spelled asset paths [audio][paths]")
     engineConfig.noDevice = MA_TRUE;
     engineConfig.channels = 1;
     engineConfig.sampleRate = 48000;
+    engineConfig.pResourceManagerVFS = mu::ContentAudioFiles();
     REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
     backend->m_initialized = true;
 
@@ -283,6 +284,7 @@ void InitNoDeviceEngine(mu::MiniAudioBackend& backend)
     engineConfig.noDevice = MA_TRUE;
     engineConfig.channels = 1;
     engineConfig.sampleRate = 48000;
+    engineConfig.pResourceManagerVFS = mu::ContentAudioFiles();
     REQUIRE(ma_engine_init(&engineConfig, &backend.m_engine) == MA_SUCCESS);
     backend.m_initialized = true;
 }

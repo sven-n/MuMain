@@ -14,8 +14,8 @@ public:
     void Load();
     void Save();
 
-    // config.ini beside the executable. Its [EnhancedTuning] section is read and written on its own
-    // (Data/GameConfig/PersonalTuning.h); Save() leaves it as it is.
+    // config.ini in the user folder (Core/Platform/UserFolder.h). Its [EnhancedTuning] section is read
+    // and written on its own (Data/GameConfig/PersonalTuning.h); Save() leaves it as it is.
     const std::filesystem::path& GetConfigPath() const
     {
         return m_configPath;
@@ -152,6 +152,14 @@ public:
     void SetLightMood(bool enabled) { m_lightMood = enabled; }
     bool GetPostProcessing() const { return m_postProcessing; }
     void SetPostProcessing(bool enabled) { m_postProcessing = enabled; }
+    bool GetEnhancedMovement() const
+    {
+        return m_enhancedMovement;
+    }
+    void SetEnhancedMovement(bool enabled)
+    {
+        m_enhancedMovement = enabled;
+    }
 
     // DXP-23's per-system effect-cost toggles, promoted from console-only ($effects ...)
     // diagnostics to persisted, in-game-options-exposed settings -- see MainScene.h's
@@ -209,6 +217,10 @@ private:
     GameConfig(const GameConfig&) = delete;
     GameConfig& operator=(const GameConfig&) = delete;
 
+    // A missing config.ini: a copy of the one an older client kept next to the executable, else of the shipped
+    // defaults.
+    void SeedFromExecutableFolder(const std::filesystem::path& legacyConfig) const;
+
     std::filesystem::path m_configPath;
 
     int  m_windowWidth;
@@ -248,6 +260,7 @@ private:
     bool m_sunlight;
     bool m_lightMood;
     bool m_postProcessing;
+    bool m_enhancedMovement;
     std::wstring m_renderBackend;
     bool m_disableEffects;
     bool m_disableParticles;

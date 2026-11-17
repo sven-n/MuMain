@@ -21,6 +21,7 @@
 #include <cstring>
 #include <iterator>
 #include <optional>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -41,6 +42,9 @@ constexpr size_t TextureNameSize = sizeof(Texture_t::FileName);
 
 // "Data/Monster/Monster01.bmd" -> "Data\Monster\Monster01.bmd".
 using Data::Paths::ToLoaderPath;
+
+// The slots whose file was missing on this map (IsFileMissing).
+std::set<int> g_missingFiles;
 
 // AccessModel's folder ("Data\Monster\") and file name without ".bmd".
 bool OpenFile(int slot, const std::string& file)
@@ -205,6 +209,16 @@ void LoadBitmaps(const MonsterModelDefinition& model)
 
 } // namespace
 
+bool IsFileMissing(int slot)
+{
+    return g_missingFiles.contains(slot);
+}
+
+void ForgetMissingFiles()
+{
+    g_missingFiles.clear();
+}
+
 bool Open(int slot)
 {
     const MonsterModelDefinition* model = g_MonsterModelDatabase.Find(slot);
@@ -212,11 +226,19 @@ bool Open(int slot)
     {
         return false;
     }
+    // Tried on this map already.
+    if (g_missingFiles.contains(slot))
+    {
+        return true;
+    }
     const bool monsterRange = IsMonsterRangeSlot(slot);
     BMD& target = ::Models[slot];
     // A model whose file is missing has no body, and the game keeps running
     // (P1): AccessModel logs the file, and Data Checks lists it.
-    OpenFile(slot, model->load.file);
+    if (!OpenFile(slot, model->load.file))
+    {
+        g_missingFiles.insert(slot);
+    }
     // A monster model without meshes gets nothing more, its sounds are not
     // loaded; an NPC model still loads its sounds.
     if (monsterRange && target.NumMeshs == 0)
@@ -325,6 +347,8 @@ void LoadSoundsOfOpenModels()
 
 std::vector<int> Reopen(int slot)
 {
+    // The editor changed the entry: its file is tried again.
+    g_missingFiles.erase(slot);
     std::vector<int> reopened;
     if (!IsOpen(slot))
     {

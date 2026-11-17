@@ -73,7 +73,8 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
-      }
+      },
+      "itemEffect": "glowingMesh"
     },
     {
       "number": 6,
@@ -134,7 +135,8 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
-      }
+      },
+      "itemEffect": "pulsingGlow"
     },
     {
       "number": 11,
@@ -170,7 +172,8 @@
       },
       "ground": {
         "rotation": [60, 0, -45]
-      }
+      },
+      "itemEffect": "glowingMesh"
     },
     {
       "number": 14,
@@ -186,7 +189,8 @@
       "glow": {
         "color": "blue",
         "shineColor": "blue"
-      }
+      },
+      "itemEffect": "shimmeringPulse"
     },
     {
       "number": 15,
@@ -300,7 +304,8 @@
       "glow": {
         "color": "brown"
       },
-      "renderStyle": "sylphWindBow"
+      "renderStyle": "sylphWindBow",
+      "renderStyleValues": {"glowLight": [1, 0.7, 0.4], "glowTexture": "Effect/Chrome07.jpg", "lightAfter": [0.7, 0.7, 0.7], "scrollU": {"shape": "ramp", "from": -0.7, "to": 0.9, "seconds": 4}, "scrollV": null}
     },
     {
       "number": 23,
@@ -418,7 +423,8 @@
         "color": "sand",
         "hiddenMesh": 2
       },
-      "renderStyle": "runeBlade"
+      "renderStyle": "runeBlade",
+      "itemEffect": "hideMesh2"
     },
     {
       "number": 32,

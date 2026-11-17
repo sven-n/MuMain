@@ -8,6 +8,7 @@
 
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
@@ -109,7 +110,7 @@ TEST_CASE("Monster checks: a name opens Monster Translations, every other field 
     CHECK(GetToolForField("monster 2 kind") == MonsterTool::Browser);
     CHECK(GetToolForField("monster 2 number") == MonsterTool::Browser);
     // An unknown key, also one that only starts like the name's.
-    CHECK(GetToolForField("monster 2 scale") == MonsterTool::Browser);
+    CHECK(GetToolForField("monster 2 colour") == MonsterTool::Browser);
     CHECK(GetToolForField("monster 2 names") == MonsterTool::Browser);
     CHECK(GetToolForField("monsters[3].number") == MonsterTool::Browser);
     CHECK(GetToolForField("") == MonsterTool::Browser);
@@ -131,7 +132,7 @@ TEST_CASE("Monster checks: the problems of the monster list file name their mons
     const std::vector<ItemDataIssue> issues = ReadFileIssues(R"({ "formatVersion": 1, "monsters": [
         { "number": 5, "name": { "en": "Spider", "de": 3 }, "kind": "monster" },
         { "number": 6, "name": "Hound", "kind": "dragon" },
-        { "number": 7, "name": "Lich", "kind": "monster", "scale": 2 },
+        { "number": 7, "name": "Lich", "kind": "monster", "colour": 2 },
         { "number": 7, "name": "Lich", "kind": "monster" },
         { "name": "Nobody", "kind": "monster" } ] })");
 
@@ -145,7 +146,7 @@ TEST_CASE("Monster checks: the problems of the monster list file name their mons
     CHECK(kind->number == 6);
     CHECK(GetToolForField(kind->field) == MonsterTool::Browser);
 
-    const ItemDataIssue* unknown = FindField(issues, "monster 7 scale");
+    const ItemDataIssue* unknown = FindField(issues, "monster 7 colour");
     REQUIRE(unknown != nullptr);
     CHECK(unknown->number == 7);
     CHECK(GetToolForField(unknown->field) == MonsterTool::Browser);
@@ -255,6 +256,41 @@ TEST_CASE("Monster checks: RunModels lists a model whose file is not in the clie
     CHECK(issues[0].source == Data::Monsters::GetMonsterModelsFile().generic_string());
     CHECK(issues[0].field.find("MONSTER_MODEL_MOLT") != std::string::npos);
     CHECK(issues[0].message.find("Data/Monster/NoSuchMonster.bmd is not in the client folder") != std::string::npos);
+}
+
+// A monster naming an item the item list does not have is an error (D60); a
+// click opens the Monster Browser (Monster Equipment comes later).
+TEST_CASE("Monster checks: RunMonsters reports an item a monster names that the item list does not have "
+          "[editor][monsters]")
+{
+    std::vector<Data::Items::ItemDefinition> previousItems;
+    for (const Data::Items::ItemDefinition& slot : g_ItemDatabase.GetAllSlots())
+    {
+        if (slot.Exists())
+            previousItems.push_back(slot);
+    }
+    Data::Items::ItemDefinition crossbow;
+    crossbow.group = 4;
+    crossbow.number = 8;
+    crossbow.names.Set("en", "Crossbow");
+    g_ItemDatabase.Build(std::array{crossbow});
+
+    MonsterDefinition soldier = Monster(163, "Chaos Castle Elf");
+    soldier.setup.equipment.weapons[0] = Data::Monsters::MonsterItem{4, 8};
+    soldier.setup.equipment.helm = Data::Monsters::MonsterItem{7, 2};
+    g_MonsterDatabase.Build(std::array{soldier}, "en");
+    g_MonsterModelDatabase.Build({});
+    std::vector<ItemDataIssue> issues;
+
+    MuEditor::Monsters::MonsterChecks::RunMonsters(issues);
+    g_ItemDatabase.Build(previousItems);
+
+    const ItemDataIssue* missing = FindIssue(issues, 163, "item (7, 2)");
+    REQUIRE(missing != nullptr);
+    CHECK(missing->severity == ItemDataIssueSeverity::Error);
+    CHECK(missing->field == "monster 163 equipment.helm");
+    CHECK(GetToolForField(missing->field) == MonsterTool::Browser);
+    CHECK(FindIssue(issues, 163, "item (4, 8)") == nullptr);
 }
 
 #endif // _EDITOR

@@ -37,6 +37,10 @@ std::span<const std::string_view> GetNames();
 // the drawing code then draws the model itself.
 bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType);
 
+// Whether the model's render style draws alone (design L47): the drawing then draws it right after the item effect,
+// and nothing of its own after it.
+bool DrawsAlone(int modelType);
+
 #ifdef _EDITOR
 // While it lives, the model `modelType` is drawn with `look` instead of its own render style, without the glow pass or
 // the shine below +3 of a style in code: the Style Editor's preview of a look before it is applied. The look must
@@ -61,29 +65,4 @@ void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4]);
 
 // The lights and tint the helper NPCs' plate armor keeps on them, for the update to spawn while it is drawn.
 void SpawnHelperNpcPlateLights(OBJECT* o);
-
-// Draws the glow pass of items +7 and up for the few render styles that glow
-// differently from their "glow" values. False for the others.
-bool RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture);
-
-// How a few render styles shine below +3: the light of the item scaled, the
-// model drawn, then two shine passes (RenderPartObjectBodyColor2).
-struct ShineBelowPlus3
-{
-    struct Pass
-    {
-        float alpha;
-        int renderType;
-        float bright;
-    };
-
-    // Scales the light of the item before the model is drawn; none: the light
-    // stays as it is.
-    std::optional<float> light;
-    std::array<Pass, 2> passes;
-};
-
-// The shine below +3 of the render style of the item; nullptr for the others,
-// which are drawn plainly below +3.
-const ShineBelowPlus3* FindShineBelowPlus3(int modelType);
 } // namespace Render::Items::Styles

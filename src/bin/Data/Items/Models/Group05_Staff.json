@@ -13,7 +13,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 2}
     },
     {
       "number": 1,
@@ -84,7 +86,9 @@
         "hiddenMesh": 1,
         "shineColor": "blue",
         "shineHiddenMesh": 1
-      }
+      },
+      "itemEffect": "shimmeringGlow",
+      "itemEffectValues": {"glowMesh": 2}
     },
     {
       "number": 6,
@@ -98,7 +102,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "itemEffect": "pulsingGlow",
+      "itemEffectValues": {"glowMesh": "all"}
     },
     {
       "number": 7,
@@ -111,7 +117,8 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "itemEffect": "flickeringGlow"
     },
     {
       "number": 8,
@@ -124,7 +131,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "itemEffect": "pulsingGlow",
+      "itemEffectValues": {"glowMesh": "all", "glowStrength": {"shape": "wave", "from": 0.7, "to": 1.1, "seconds": 1.5707963}}
     },
     {
       "number": 9,
@@ -140,7 +149,8 @@
       },
       "glow": {
         "color": "white"
-      }
+      },
+      "itemEffect": "glowingMesh"
     },
     {
       "number": 10,
@@ -190,7 +200,8 @@
       "glow": {
         "color": "royalBlue"
       },
-      "renderStyle": "sylphWindBow"
+      "renderStyle": "sylphWindBow",
+      "renderStyleValues": {"glowTexture": "Effect/energy01.jpg", "scrollU": {"shape": "ramp", "from": -0.3, "to": 0.1, "seconds": 2}, "scrollV": {"shape": "ramp", "from": -0.3, "to": 0.1, "seconds": 2}}
     },
     {
       "number": 13,
@@ -384,7 +395,8 @@
         "rotation": [0, 270, -45]
       },
       "glow": {
-        "color": "red"
+        "color": "red",
+        "glowAgainInWhite": 1
       },
       "renderStyle": "deadlyStaff"
     },

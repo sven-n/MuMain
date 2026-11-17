@@ -1,7 +1,10 @@
 #include "stdafx.h"
 
 #include "ItemOptionValidation.h"
+#include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
+#include "ItemOptionEffects.h"
+#include "OptionTextsJson.h"
 
 #include <algorithm>
 #include <map>
@@ -12,6 +15,25 @@ namespace Data::Items
 namespace
 {
 constexpr const char* OptionsField = "options";
+
+// The types the item sets give an item (phase 10), which no item links.
+bool IsAncientType(ItemOptionType type)
+{
+    return type == ItemOptionType::AncientOption || type == ItemOptionType::AncientBonus;
+}
+
+// Whether an item's attackType picks the definition at `index` (ItemOptionDatabase::FindAncientBonus).
+bool IsPickedByAttackType(const ItemOptionDatabase& options, size_t index)
+{
+    for (int attackType = 1; attackType <= static_cast<int>(AncientBonusNames.size()); ++attackType)
+    {
+        if (options.FindAncientBonus(attackType) == static_cast<int>(index))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 // A definition's problems name its file in Data/Items/Options and its place there.
 std::string DefinitionField(std::span<const ItemOptionDefinition> definitions, size_t index)
@@ -62,18 +84,44 @@ void ValidateOptions(std::span<const ItemOptionDefinition> definitions, const It
             {
                 issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definition), ItemDataIssue::NoItem,
                                   ItemDataIssue::NoItem, field + ".attribute",
-                                  "the client computes no " + option.attribute + " of a " +
-                                      FindEnumName(definition.type) +
-                                      " option this way: its line is shown, it adds nothing"});
+                                  "the client computes no " + option.attribute + " for a definition of type " +
+                                      FindEnumName(definition.type) + " this way: its line is shown, it adds nothing"});
             }
+            for (size_t term = 0; term < option.value.per.size(); ++term)
+            {
+                const std::string& attribute = option.value.per[term].attribute;
+                if (FindItemOptionTermAttribute(attribute) == ItemOptionTermAttribute::Unread)
+                {
+                    issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definition),
+                                      ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                                      field + ".per[" + std::to_string(term) + "].attribute",
+                                      "the client reads no hero attribute " + attribute + ": the term adds nothing"});
+                }
+            }
+            const auto divisorTerms = std::count_if(option.value.per.begin(), option.value.per.end(),
+                                                    [](const ItemOptionTerm& term) { return term.divisor > 0; });
             for (const std::string& text : option.texts)
             {
                 namedTexts.insert(text);
-                if (texts.Find(text) == nullptr)
+                const LocalizedString* found = texts.Find(text);
+                if (found == nullptr)
                 {
                     issues.push_back({ItemDataIssueSeverity::Error, DefinitionSource(definition), ItemDataIssue::NoItem,
                                       ItemDataIssue::NoItem, field + ".text",
                                       "\"" + text + "\" is no text of OptionTexts.json: its line is left out"});
+                    continue;
+                }
+                const std::vector<std::string> names = ScanPlaceholders(found->GetNeutral()).names;
+                if (divisorTerms != 1 && std::find(names.begin(), names.end(), OptionDivisorPlaceholder) != names.end())
+                {
+                    const std::string problem =
+                        divisorTerms == 0 ? std::string("no term with a divisor: the line shows 0 there")
+                                          : std::to_string(divisorTerms) + " terms with a divisor: the line shows the "
+                                                                           "first one's";
+                    issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definition),
+                                      ItemDataIssue::NoItem, ItemDataIssue::NoItem, field + ".text",
+                                      "\"" + text + "\" shows {" + std::string(OptionDivisorPlaceholder) +
+                                          "}, but the option has " + problem});
                 }
             }
         }
@@ -139,11 +187,33 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
             }
             ++known;
         }
-        if (options.ResolveLinks(item.options).size() < known)
+        const std::vector<ItemOptionIndex> links = options.ResolveLinks(item.options);
+        if (links.size() < known)
         {
             issues.push_back({ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
                               "links two definitions whose options the same part of the server's item data turns on "
                               "(of one type): the later one is left out"});
+        }
+        // The excellent byte of wings holds their wing options, the Horn of Fenrir's its kind; no horn is excellent.
+        const bool byteMeansOther = item.slot == ItemSlot::Wings || item.tags.Has(ItemTag::HornMount);
+        const bool linksExcellent = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
+                                                { return options.Get(link).type == ItemOptionType::Excellent; });
+        if (byteMeansOther && linksExcellent)
+        {
+            issues.push_back(
+                {ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
+                 "links excellent options, but its excellent byte holds its wing options or a horn's kind, "
+                 "or nothing: no horn is excellent"});
+        }
+        // Until the item sets link them (phase 10), the item's attackType picks its ancient bonus; its set options come
+        // from its set (the ancient byte's set number).
+        const bool linksAncient = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
+                                              { return IsAncientType(options.Get(link).type); });
+        if (linksAncient)
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", item.group, item.number, OptionsField,
+                              "links an ancient bonus or set options, which the item sets give: the link does "
+                              "nothing, the item's attackType picks its ancient bonus"});
         }
     }
 }
@@ -166,12 +236,33 @@ void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const It
     const std::span<const ItemOptionDefinition> definitions = options.GetDefinitions();
     for (size_t index = 0; index < definitions.size(); ++index)
     {
-        if (!linked.contains(definitions[index].name))
+        // The item's attackType links the four ancient bonus definitions of AncientBonusNames.
+        if (!linked.contains(definitions[index].name) && !IsPickedByAttackType(options, index))
         {
             issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definitions[index]),
                               ItemDataIssue::NoItem, ItemDataIssue::NoItem,
                               DefinitionField(definitions, index) + ".name",
                               "no item and no option rule links \"" + definitions[index].name + "\""});
+        }
+    }
+}
+
+void ValidateAncientBonusNames(const ItemOptionDatabase& options, std::vector<ItemDataIssue>& issues)
+{
+    for (size_t attackType = 0; attackType < AncientBonusNames.size(); ++attackType)
+    {
+        if (options.FindAncientBonus(static_cast<int>(attackType) + 1) == ItemOptionDatabase::NoDefinition)
+        {
+            // The file of a definition of that name of another type, else the file the four belong in.
+            const int named = options.Find(AncientBonusNames[attackType]);
+            const std::string source = named != ItemOptionDatabase::NoDefinition
+                                           ? DefinitionSource(options.Get(static_cast<ItemOptionIndex>(named)))
+                                           : std::string("Options/Ancient.json");
+            issues.push_back(
+                {ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "definitions",
+                 "no definition of type ancientBonus is named \"" + std::string(AncientBonusNames[attackType]) +
+                     "\": the ancient items with attackType " + std::to_string(attackType + 1) +
+                     " show and add no ancient bonus"});
         }
     }
 }

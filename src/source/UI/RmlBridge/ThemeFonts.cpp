@@ -2,6 +2,7 @@
 #include "UI/RmlBridge/ThemeFonts.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Platform/BundledFonts.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Core/Text/Utf8Path.h"
@@ -88,7 +89,7 @@ bool FamilyAvailable(std::string family, Rml::Style::FontStyle style = Rml::Styl
     if (!fonts)
         return false;
     std::transform(family.begin(), family.end(), family.begin(),
-        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     constexpr int probeSize = 16;
     return fonts->GetFontFaceHandle(family, style, Rml::Style::FontWeight::Normal, probeSize) != 0;
 }
@@ -214,9 +215,10 @@ void LoadThemeFonts(const ThemeInheritance& theme)
         auto path = Core::Text::PathFromUtf8(*expanded);
         if (!path.is_absolute())
             path = setting.directory / path;
-        const std::string name = ThemePathUtf8(std::filesystem::absolute(path).lexically_normal());
-        std::error_code error;
-        if (LoadedFiles().contains(name) || !std::filesystem::is_regular_file(path, error))
+        // Relative stays relative, so RmlUi reads a theme's own font as content; "../" parts are resolved first.
+        path = path.lexically_normal();
+        const std::string name = ThemePathUtf8(path);
+        if (LoadedFiles().contains(name) || Content::Probe(path) != Content::Found::File)
             continue;
         LoadedFiles().insert(name);
         if (!Rml::LoadFontFace(name))

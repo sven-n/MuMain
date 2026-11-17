@@ -198,6 +198,7 @@ const std::vector<std::string>& CommandNames()
     static const std::vector<std::string> names = {
         "ping",
         "scene",
+        "frames",
         "state",
         "nearby",
         "events",

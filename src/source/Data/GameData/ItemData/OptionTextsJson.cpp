@@ -21,7 +21,7 @@ void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity
 }
 
 // The problems of a text, each a field and its message: no English, a language code that is none, a placeholder
-// problem, or a placeholder other than {value}.
+// problem, or a placeholder other than {value} and {divisor}.
 std::vector<std::pair<std::string, std::string>> CheckText(const LocalizedString& text, const std::string& field)
 {
     if (text.GetNeutral().empty())
@@ -41,10 +41,11 @@ std::vector<std::pair<std::string, std::string>> CheckText(const LocalizedString
     const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
     for (const std::string& name : english.names)
     {
-        if (name != OptionValuePlaceholder)
+        if (name != OptionValuePlaceholder && name != OptionDivisorPlaceholder)
         {
-            problems.emplace_back(field, "{" + name + "} is no placeholder of an option text; the one there is {" +
-                                             std::string(OptionValuePlaceholder) + "}, the option's value");
+            problems.emplace_back(field, "{" + name + "} is no placeholder of an option text; there are {" +
+                                             std::string(OptionValuePlaceholder) + "}, the option's value, and {" +
+                                             std::string(OptionDivisorPlaceholder) + "}, its term's divisor");
             break;
         }
     }

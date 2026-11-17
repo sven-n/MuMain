@@ -5,8 +5,8 @@
 #include <optional>
 #include <string_view>
 
-// The arithmetic of the light mood: how a map's mood (Data/Maps/LightMood.json)
-// scales the Classic light. The static (baked) light is darkened where it is
+// The arithmetic of the light mood: how a map's mood (the mood.* values of
+// Data/Render/Look.json) scales the Classic light. The static (baked) light is darkened where it is
 // built, so the dynamic lights added on top of it each frame keep their
 // strength and stand out.
 namespace Render::Lighting::LightMood

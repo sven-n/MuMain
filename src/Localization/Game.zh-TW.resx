@@ -8935,6 +8935,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls的%ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>未知怪物 %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>我是錯誤：%d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>%ls您想取消嗎？</value>
   </data>

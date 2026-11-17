@@ -14,6 +14,7 @@
 #include "Render/Look/TuningSetting.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/EnhancedLightingSetting.h"
+#include "Engine/Object/EnhancedMovement.h"
 #include "Render/Lighting/LightMoodScales.h"
 #include "Render/PostProcessing/PostProcessingSetting.h"
 #include "UI/Options/TuningRows.h"
@@ -419,6 +420,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     // Video tab additions.
     c.Bind("vsync_enabled", &model.vsyncEnabled);
     c.Bind("vsync_label", &model.vsyncLabel);
+    c.Bind("vsync_locked", &model.vsyncLocked);
+    c.Bind("vsync_locked_reason", &model.vsyncLockedReason);
     c.Bind("fps_cap_labels", &model.fpsCapLabels);
     c.Bind("fps_cap_index", &model.fpsCapIndex);
     c.Bind("fps_cap_row_label", &model.fpsCapRowLabel);
@@ -456,6 +459,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("look_light_mood_label", &model.lookLightMoodLabel);
     c.Bind("look_post_processing_label", &model.lookPostProcessingLabel);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
+    c.Bind("enhanced_movement", &model.enhancedMovement);
+    c.Bind("enhanced_movement_label", &model.enhancedMovementLabel);
     auto tuningRow = c.RegisterStruct<TuningRowModel>();
     tuningRow.RegisterMember("control", &TuningRowModel::control);
     tuningRow.RegisterMember("label", &TuningRowModel::label);
@@ -482,6 +487,7 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("tuning_reset_group_label", &model.tuningResetGroupLabel);
     c.Bind("tuning_reset_all_label", &model.tuningResetAllLabel);
     c.Bind("tuning_save_message", &model.tuningSaveMessage);
+    c.Bind("tuning_preview_note", &model.tuningPreviewNote);
     c.Bind("antialiasing_labels", &model.antialiasingLabels);
     c.Bind("antialiasing_index", &model.antialiasingIndex);
     c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
@@ -584,6 +590,9 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.BindEventCallback("option_toggle_enhanced_graphics",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleEnhancedGraphics(); });
+    c.BindEventCallback("option_toggle_enhanced_movement",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleEnhancedMovement(); });
     c.BindEventCallback("option_toggle_enhanced_feature",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
@@ -1031,6 +1040,10 @@ void mu::ui::window::COptionWindow::ApplyPendingFont()
 
 void mu::ui::window::COptionWindow::RmlToggleVsync()
 {
+    if (!CanDisableVSync())
+    {
+        return;
+    }
     m_bVsyncEnabled = !m_bVsyncEnabled;
     // Persists + applies live next frame -- see this function's own doc comment (Winmain.cpp).
     // Calling GameConfig::SetVSyncEnabled() directly here would persist without applying.
@@ -1135,6 +1148,14 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedFeature(int feature)
                                            !Render::Look::EnhancedFeatureChosen(EnhancedFeature::DynamicLights)))
         return; // the sun acts only with dynamic lights
     Render::Look::ChooseEnhancedFeature(chosen, !Render::Look::EnhancedFeatureChosen(chosen));
+}
+
+void mu::ui::window::COptionWindow::RmlToggleEnhancedMovement()
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetEnhancedMovement(!config.GetEnhancedMovement());
+    config.Save();
+    Engine::Characters::SetEnhancedMovementEnabled(config.GetEnhancedMovement());
 }
 
 void mu::ui::window::COptionWindow::RmlToggleTuningGroup(int group)
@@ -1264,6 +1285,8 @@ void mu::ui::window::COptionWindow::SyncTuningModel(OptionRmlModel& model)
 
     const Render::Look::TuningSession& session = Render::Look::PersonalTuningSession();
     syncText(model.tuningSaveMessage, "tuning_save_message", UI::Options::TuningSaveMessage(session));
+    syncText(model.tuningPreviewNote, "tuning_preview_note",
+             UI::Options::TuningPreviewNote(Render::Look::ActivePreview()));
 
     std::array<std::vector<TuningRowModel>, TuningGroupCount> rows;
     std::array<std::vector<TuningRowModel>, TuningGroupCount> moreRows;
@@ -1759,6 +1782,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.translateItemNamesLabel, "translate_item_names_label", I18N::Game::TranslateItemNames);
     SyncLabel(model.fontRowLabel, "font_row_label", I18N::Game::Font);
     SyncLabel(model.vsyncLabel, "vsync_label", I18N::Game::VSync);
+    SyncLabel(model.vsyncLockedReason, "vsync_locked_reason", I18N::Game::VSyncAlwaysOn);
     SyncLabel(model.fpsCapRowLabel, "fps_cap_row_label", I18N::Game::FPSLimit);
     SyncLabel(model.disableEffectsLabel, "disable_effects_label", I18N::Game::DisableEffects);
     SyncLabel(model.disableParticlesLabel, "disable_particles_label", I18N::Game::DisableParticles);
@@ -1773,6 +1797,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.lookSunlightLabel, "look_sunlight_label", I18N::Game::Sunlight);
     SyncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
     SyncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
+    SyncLabel(model.enhancedMovementLabel, "enhanced_movement_label", I18N::Game::EnhancedMovement);
     SyncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
     SyncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
     SyncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
@@ -1838,7 +1863,18 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (model.fontIndex != m_iFontIndex) { model.fontIndex = m_iFontIndex; m_RmlView.MarkDirty("font_index"); }
     syncDropdownValue(model.fontValueLabel, "font_value_label", model.fontLabels, model.fontIndex);
 
-    if (model.vsyncEnabled != m_bVsyncEnabled) { model.vsyncEnabled = m_bVsyncEnabled; m_RmlView.MarkDirty("vsync_enabled"); }
+    const bool vsyncLocked = !CanDisableVSync();
+    if (model.vsyncLocked != vsyncLocked)
+    {
+        model.vsyncLocked = vsyncLocked;
+        m_RmlView.MarkDirty("vsync_locked");
+    }
+    const bool vsyncShown = m_bVsyncEnabled || vsyncLocked;
+    if (model.vsyncEnabled != vsyncShown)
+    {
+        model.vsyncEnabled = vsyncShown;
+        m_RmlView.MarkDirty("vsync_enabled");
+    }
 
     // Rebuilt every sync (not just once), same reasoning as font_labels' own "Default" entry --
     // the localized "Uncapped" entry needs to follow a live language switch.
@@ -1891,6 +1927,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         syncFlag(model.lookPostProcessing, "look_post_processing", EnhancedFeatureChosen(EnhancedFeature::PostProcessing));
         syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
         syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
+        syncFlag(model.enhancedMovement, "enhanced_movement", Engine::Characters::EnhancedMovementEnabled());
         syncFlag(model.lookSunlightLocked, "look_sunlight_locked", !enhancedGraphics || !dynamicLights);
     }
     SyncTuningModel(model);

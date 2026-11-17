@@ -22,6 +22,8 @@ struct PoseInputs
     vec3_t Origin{};
     float Scale = 0.f;
     float Height = 0.f;
+    // What the movement features add to the pose (Engine::Characters::CurrentMovementPoseKey).
+    float Movement[9]{};
 };
 } // namespace Engine::Object
 

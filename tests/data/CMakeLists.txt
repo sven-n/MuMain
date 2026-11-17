@@ -28,7 +28,8 @@ mu_add_test(
         MuClient
 )
 
-# The light mood of the world maps (Data/Maps/LightMood.json).
+# The old light mood file of the world maps (Data/Maps/LightMood.json), read to upgrade a format 1
+# Look.json; look_v1 holds the last shipped pair.
 mu_add_test(
     NAME light_mood_data_tests
     SOURCES
@@ -37,6 +38,19 @@ mu_add_test(
         MuClient
 )
 target_compile_definitions(light_mood_data_tests PRIVATE
+    MU_TEST_LOOK_V1_DIR="${CMAKE_CURRENT_SOURCE_DIR}/look_v1"
+)
+
+# The buffs (Data/Buffs/Buffs.json, buffs design): reader, writer, checks, the
+# table and the game's buff info.
+mu_add_test(
+    NAME buff_data_tests
+    SOURCES
+        test_buffs.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(buff_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
@@ -140,11 +154,13 @@ mu_add_test(
         test_monster_edit_history.cpp
         test_monster_grouped_edits.cpp
         test_monster_grouped_tools.cpp
+        test_monster_item_references.cpp
         test_monster_json.cpp
         test_monster_list_model.cpp
         test_monster_model_files.cpp
         test_monster_model_values.cpp
         test_monster_models_json.cpp
+        test_monster_setup_json.cpp
         test_monster_sound_files.cpp
         test_monster_sounds_json.cpp
         test_monster_names.cpp
@@ -164,19 +180,36 @@ target_compile_definitions(monster_data_tests PRIVATE
 # GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
 mu_allow_gcc13_stringop_overflow(monster_data_tests test_monster_npc_name_files.cpp)
 
-# The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
-# tuning of it ([EnhancedTuning] of config.ini).
+# The look profile of the Enhanced rendering features (Data/Render/Look.json), its edit operations,
+# the player's own tuning of it ([EnhancedTuning] of config.ini) and the Graphics Look window's
+# undo history. look_v1 holds the last shipped pair of format 1 files, which the shipped file must
+# match on every map.
 mu_add_test(
     NAME look_profile_data_tests
     SOURCES
+        test_look_edit_history.cpp
         test_look_profile_json.cpp
+        test_look_profile_edits.cpp
         test_personal_tuning.cpp
     LINK_LIBS
         MuClient
 )
 target_compile_definitions(look_profile_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_LOOK_V1_DIR="${CMAKE_CURRENT_SOURCE_DIR}/look_v1"
 )
+
+# The editor's Graphics Look window, drawn and clicked; it needs the client globals of Winmain.cpp.
+if(ENABLE_EDITOR)
+    mu_add_test(
+        NAME graphics_look_window_tests
+        SOURCES
+            test_graphics_look_window.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+endif()
 
 # Reads the item and item model files shipped in src/bin/Data through the real
 # loader. The loader pulls in client globals defined in Winmain.cpp, so it is
@@ -213,7 +246,7 @@ mu_add_test(
         # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
         mu_test_rml_layout_fixture
         # The test's version 14 model is encrypted with Crypto++'s ciphers.
-        MuCryptopp
+        MuDep::Cryptopp
 )
 target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
@@ -228,6 +261,7 @@ mu_add_test(
     NAME test_character_bones
     SOURCES
         test_character_bones.cpp
+        test_character_realism_bones.cpp
         test_player_body_models.cpp
         ClientFolderScope.cpp
         PlayerTextureScope.cpp
@@ -310,7 +344,7 @@ mu_add_test(
     NAME player_model_selector_tests
     SOURCES test_player_model_selector.cpp
         ClientFolderScope.cpp
-        ExecutableConfigFile.cpp
+        UserConfigFile.cpp
         PlayerTextureScope.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
@@ -338,3 +372,23 @@ target_compile_definitions(render_style_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
 )
+
+# Each case of the data tests once more, with the shipped client data read from a storage of the test's own and the
+# working directory elsewhere (ClientDataScope), so a loader that goes around the content layer (Core/Content) fails
+# here. The extra argument keeps this discovery's files apart from the first one's.
+foreach(data_test IN ITEMS monster_data_tests test_item_database_files)
+    doctest_discover_tests(${data_test}
+        TEST_PREFIX "content storage: "
+        EXTRA_ARGS --no-version=true
+        PROPERTIES
+            ENVIRONMENT MU_TEST_CONTENT=storage
+            TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
+            RESOURCE_LOCK ${data_test}
+            FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}"
+            SKIP_REGULAR_EXPRESSION "${MU_TEST_SKIPPED}")
+endforeach()
+
+# Every model file of the shipped data is one the model loader can read: a header-only file loads as nothing and logs
+# an error on every load of its map.
+add_test(NAME model_files_are_readable
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/check_model_files.py" "${CMAKE_SOURCE_DIR}/src/bin/Data")

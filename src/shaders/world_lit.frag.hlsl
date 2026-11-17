@@ -68,7 +68,8 @@ float4 main(FSInput input) : SV_Target
     {
         // Cell centres: the terrain's 256 cells of 100 world units (TERRAIN_SIZE, TERRAIN_SCALE).
         const float2 cellUv = (input.worldPosition.xy / 100.0 + 0.5) / 256.0;
-        const float3 direct = terrainSunLight.Sample(terrainSunSampler, cellUv).rgb;
+        // A branch that isn't uniform: Sample's implicit derivatives are undefined here, and WGSL rejects them.
+        const float3 direct = terrainSunLight.SampleLevel(terrainSunSampler, cellUv, 0).rgb;
         ground = max(ground - direct * sunVisible * (1.0 - cloud), 0.0);
     }
     // Shade, from shadows and clouds, turns towards the sky's blue.

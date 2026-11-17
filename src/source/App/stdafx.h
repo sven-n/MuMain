@@ -185,9 +185,6 @@
 #endif
 #endif
 
-//opengl
-#include <gl/glew.h>
-#include <gl/GL.h>
 #include "Render/Renderer/GLCompatShim.h"
 
 //patch

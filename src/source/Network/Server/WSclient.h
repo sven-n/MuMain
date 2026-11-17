@@ -7,6 +7,7 @@
 #include "Dotnet/PacketFunctions_ChatServer.h"
 #include "Dotnet/PacketFunctions_ClientToServer.h"
 #include "Dotnet/PacketFunctions_ConnectServer.h"
+#include "Network/IncomingPacketQueue.h"
 #include "Network/Server/CSMapServer.h"
 #include "UI/Combat/CastleSiegePhase.h"
 #include <span>
@@ -1097,29 +1098,6 @@ typedef struct
     BYTE		Mark[32];
 } PPRECEIVE_GUILDINFO, * LPPPRECEIVE_GUILDINFO;
 
-enum GUILD_REQ_COMMON_RESULT
-{
-    GUILD_ANS_NOTEXIST_GUILD = 0x10,
-    GUILD_ANS_UNIONFAIL_BY_CASTLE = 0x10,
-    GUILD_ANS_NOTEXIST_PERMISSION = 0x11,
-    GUILD_ANS_NOTEXIST_EXTRA_STATUS = 0x12,
-    GUILD_ANS_NOTEXIST_EXTRA_TYPE = 0x13,
-    GUILD_ANS_EXIST_RELATIONSHIP_UNION = 0x15,
-    GUILD_ANS_EXIST_RELATIONSHIP_RIVAL = 0x16,
-    GUILD_ANS_EXIST_UNION = 0x17,
-    GUILD_ANS_EXIST_RIVAL = 0x18,
-    GUILD_ANS_NOTEXIST_UNION = 0x19,
-    GUILD_ANS_NOTEXIST_RIVAL = 0x1A,
-    GUILD_ANS_NOT_UNION_MASTER = 0x1B,
-    GUILD_ANS_NOT_GUILD_RIVAL = 0x1C,
-    GUILD_ANS_CANNOT_BE_UNION_MASTER_GUILD = 0x1D,
-    GUILD_ANS_EXCEED_MAX_UNION_MEMBER = 0x1E,
-    GUILD_ANS_CANCEL_REQUEST = 0x20,
-    GUILD_ANS_UNION_MASTER_NOT_GENS = 0xA1,
-    GUILD_ANS_GUILD_MASTER_NOT_GENS = 0xA2,
-    GUILD_ANS_UNION_MASTER_DISAGREE_GENS = 0xA3,
-};
-
 typedef struct
 {
     PBMSG_HEADER	Header;
@@ -1157,33 +1135,6 @@ typedef struct
     BYTE			GuildMark[32];
     char			szGuildName[MAX_GUILDNAME];
 } PMSG_UNIONLIST, * LPPMSG_UNIONLIST;
-
-typedef struct
-{
-    PBMSG_HEADER	Header;
-    GuildRelationshipType			byRelationShipType;
-    GuildRequestType			byRequestType;
-    BYTE			byTargetUserIndexH;
-    BYTE			byTargetUserIndexL;
-} PMSG_GUILD_RELATIONSHIP, * LPPMSG_GUILD_RELATIONSHIP;
-
-typedef struct
-{
-    PBMSG_HEADER	Header;
-    BYTE			byRelationShipType;
-    BYTE			byRequestType;
-    BYTE			byResult;
-    BYTE			byTargetUserIndexH;
-    BYTE			byTargetUserIndexL;
-} PMSG_GUILD_RELATIONSHIP_RESULT, * LPPMSG_GUILD_RELATIONSHIP_RESULT;
-
-typedef struct
-{
-    PREQUEST_DEFAULT_SUBCODE	Header;
-    BYTE			byResult;
-    BYTE			byRequestType;
-    BYTE			byRelationShipType;
-} PMSG_BAN_UNIONGUILD, * LPPMSG_BAN_UNIONGUILD;
 
 typedef struct
 {
@@ -3605,7 +3556,13 @@ extern int  SoccerTime;
 extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
+// Starts connecting SocketClient and returns at once; FALSE only when no connect could even start. A server that
+// can't be reached closes the connection later, and the frame that sees it calls FinishFailedConnect.
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
+// For a SocketClient that closed before it opened: says the server can't be reached, as CreateSocket did when it
+// waited for the answer, and deletes the connection. True when that was all to do (a server pick on the login
+// screen, which LoginSceneReconnect then reports); otherwise the loss is handled as a lost connection.
+bool FinishFailedConnect();
 // The connect server listens on 44288-44543 (0xAD00-0xADFF) and talks unencrypted; every other
 // port is a game server's, whose connection is encrypted. CreateSocket connects accordingly.
 bool IsGameServerPort(unsigned short Port);
@@ -3615,23 +3572,20 @@ void DeleteSocket();
 // server greets the new connection as a new client
 // (the connect server with its list, a game server with its join answer), not as a
 // map server change. Which of the two it is follows from the port (IsGameServerPort).
-BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port);
+// With `opened`, a connection to that address opened beforehand (OpenConnectionForLater),
+// the login goes over it instead of a new one.
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port, std::unique_ptr<Connection> opened = nullptr);
+// Connects in the background without receiving yet: what the server sends waits until
+// ConnectForLogin takes the connection over.
+std::unique_ptr<Connection> OpenConnectionForLater(const wchar_t* IpAddr, unsigned short Port);
 
 // Tears the live game session down to a clean login-scene state (matching the
 // in-game logout path). Used by the auto-reconnect flow before it replays login.
 void ResetClientToLoginScene();
 
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
+void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer);
 
-struct PacketInfo
-{
-    std::unique_ptr<BYTE[]> ReceiveBuffer;
-    int32_t ConnectionHandle = 0;
-    int32_t Size;
-    std::chrono::steady_clock::time_point EnqueuedAt;
-    bool Superseded = false;
-    bool SuppressOptionalPresentation = false;
-};
 void ProcessPacketCallback(const PacketInfo* Packet);
 
 void InitGame();

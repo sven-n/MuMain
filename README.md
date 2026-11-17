@@ -152,6 +152,8 @@ Typed into the chat input, in any build:
 - `$win <name> [full]` (`$win list` names them), `$preview <event>` (`$preview` lists them,
   `$preview off` ends one) and `$dialog`: open any window, event windows with sample data, and
   test dialogs, for UI work.
+- `$pause <seconds>`: freeze the client, network and timers included, as a mobile or browser
+  client is in the background; past the server's two-minute limit it reconnects on resume.
 
 ### Environment variables
 
