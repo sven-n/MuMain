@@ -1178,13 +1178,17 @@ client's rules, which its pet and guild windows show:
 | Attack rate (PvM) | 1 per 10 command | server |
 | Dark Raven damage | 1 per 8 command to the minimum, 1 per 4 to the maximum | server |
 | Dark Raven attack speed | 1 per 50 command | server |
-| Dark Horse damage | 1 per 10 command to the minimum, half again that to the maximum | client |
+| Dark Horse damage | 1 per 10 command to the minimum; the maximum is half again the whole minimum | client |
 | Dark Horse attack speed | 1 per 50 command | client |
 | Guild members as guild master | 1 per 10 command on top of 1 per 10 levels, at most 80 together | client |
 
 The command counts with what items and buffs add to it, as on the server. A
 part that adds nothing has no line, and without any part the row has no hint.
-The guild line shows only the members the command adds, so near the cap of 80
+The Dark Horse line shows what the command adds to the horse's minimum and
+maximum damage. Since the maximum halves the whole minimum (strength / 10,
+the command / 10 and 5 per horse level, rounded down), the command's part of
+the maximum counts the hero's strength and the horse's level too, as the pet
+window does. The guild line shows only the members the command adds, so near the cap of 80
 it adds less, and at the cap nothing. The guild window shows the whole limit:
 1 per 10 levels for every class, plus the command's part for a Dark Lord.
 

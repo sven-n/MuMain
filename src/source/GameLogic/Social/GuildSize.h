@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_enum.h"
 
 // How many members a guild master's guild can have: the original client's rule, which the guild window and the Dark

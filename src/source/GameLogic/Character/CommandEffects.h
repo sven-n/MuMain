@@ -13,10 +13,20 @@ inline constexpr int CommandPerAttackRate = 10;
 inline constexpr int CommandPerRavenMinimumDamage = 8;
 inline constexpr int CommandPerRavenMaximumDamage = 4;
 inline constexpr int CommandPerRavenAttackSpeed = 50;
-// The client's rule (CalcPetInfo): command per point of the Dark Horse's minimum damage, whose maximum is half again
-// its minimum, and per point of its attack speed.
+// The client's rule (CalcPetInfo): the Dark Horse's minimum damage is strength / 10 plus command / 10 plus 5 per horse
+// level, its maximum half again its minimum (rounded down), and its attack speed gets command / 50.
 inline constexpr int CommandPerHorseDamage = 10;
+inline constexpr int StrengthPerHorseDamage = 10;
+inline constexpr int HorseDamagePerLevel = 5;
 inline constexpr int CommandPerHorseAttackSpeed = 50;
+
+// What the Dark Horse's damage counts besides the command: the hero's strength (with what items and buffs add) and
+// the horse's level (0 without a horse).
+struct HorseDamageBase
+{
+    int strength = 0;
+    int horseLevel = 0;
+};
 
 struct CommandEffects
 {
@@ -37,12 +47,15 @@ int GetCommandAttackRate(int command);
 int GetCommandRavenMinimumDamage(int command);
 int GetCommandRavenMaximumDamage(int command);
 int GetCommandRavenAttackSpeed(int command);
+int GetHorseMinimumDamage(const HorseDamageBase& base, int command);
+int GetHorseMaximumDamage(int minimumDamage);
 int GetCommandHorseMinimumDamage(int command);
-// What the command adds to the maximum: half again its part of the minimum, as CalcPetInfo counts the maximum.
-int GetCommandHorseMaximumDamage(int command);
+// What the command adds to the maximum: the maximum with the command less the maximum without it, since the maximum
+// halves the whole minimum.
+int GetCommandHorseMaximumDamage(const HorseDamageBase& base, int command);
 int GetCommandHorseAttackSpeed(int command);
 // The guild members the command adds at this level: less near the cap of 80, none at it.
 int GetCommandGuildMembers(int level, int command);
 
-CommandEffects GetCommandEffects(int level, int command);
+CommandEffects GetCommandEffects(int level, int command, const HorseDamageBase& horse);
 } // namespace GameLogic::Character

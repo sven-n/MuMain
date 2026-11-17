@@ -7,6 +7,7 @@
 #include "UI/Character/CommandHintTexts.h"
 #include "UI/Character/CriticalHitTexts.h"
 #include "UI/Character/DamageHint.h"
+#include "UI/Character/TextsChangedWatch.h"
 #include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Dialogs/MessageBox.h"
@@ -129,7 +130,9 @@ namespace mu::ui::window
         // The critical damage rate's line under the strength's lines and the damage line's colour while the hero's
         // own Increase Critical Damage is on.
         void BuildCriticalHits();
-        // The hint of the command row, the Dark Lord's only, from the command the row shows.
+        // The command row, the Dark Lord's only: its value, where the value comes from, and its hint.
+        void BuildCommandRow();
+        // The command row's hint, from the command the row shows.
         void BuildCommandHint(int command);
         // Shows the hint of the line the pointer is over.
         void ShowLineHint();
@@ -180,10 +183,9 @@ namespace mu::ui::window
         void BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model);
         // The attribute labels and the buttons' tooltips, which change only with the language.
         void SetStaticTexts(CharacterInfoRmlModel& model);
-        // After a language switch or a refresh of the item texts (OnTextsChanged): sets the static texts again and
-        // has the command hint formatted again. The critical hit texts compare the language themselves.
+        // After a language switch or a refresh of the item texts: sets the static texts again and has the hints
+        // formatted again.
         void SyncChangedTexts();
-        static void OnTextsChanged(void* context) noexcept;
         UI::RmlBridge::ThemedView<CharacterInfoRmlModel> m_RmlView{"character_info",
             [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/character_info.rml"}}};
@@ -200,6 +202,6 @@ namespace mu::ui::window
         // What the Dark Lord's command adds, formatted again only when it changes.
         UI::Character::CommandHintTexts m_CommandHintTexts;
         // A language switch or a refresh of the item texts since the last sync.
-        bool m_TextsChanged = false;
+        UI::Character::TextsChangedWatch m_TextsChanged;
     };
 }

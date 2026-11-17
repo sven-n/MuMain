@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "GameLogic/Character/CommandEffects.h"
 
 #include "GameLogic/Social/GuildSize.h"
@@ -26,15 +24,26 @@ int GetCommandRavenAttackSpeed(int command)
     return command / CommandPerRavenAttackSpeed;
 }
 
+int GetHorseMinimumDamage(const HorseDamageBase& base, int command)
+{
+    return base.strength / StrengthPerHorseDamage + command / CommandPerHorseDamage +
+           base.horseLevel * HorseDamagePerLevel;
+}
+
+int GetHorseMaximumDamage(int minimumDamage)
+{
+    return minimumDamage + minimumDamage / 2;
+}
+
 int GetCommandHorseMinimumDamage(int command)
 {
     return command / CommandPerHorseDamage;
 }
 
-int GetCommandHorseMaximumDamage(int command)
+int GetCommandHorseMaximumDamage(const HorseDamageBase& base, int command)
 {
-    const int minimum = GetCommandHorseMinimumDamage(command);
-    return minimum + minimum / 2;
+    return GetHorseMaximumDamage(GetHorseMinimumDamage(base, command)) -
+           GetHorseMaximumDamage(GetHorseMinimumDamage(base, 0));
 }
 
 int GetCommandHorseAttackSpeed(int command)
@@ -48,7 +57,7 @@ int GetCommandGuildMembers(int level, int command)
            Social::GetMaxGuildMembers(CLASS_DARK_LORD, level, 0);
 }
 
-CommandEffects GetCommandEffects(int level, int command)
+CommandEffects GetCommandEffects(int level, int command, const HorseDamageBase& horse)
 {
     CommandEffects effects;
     effects.attackRate = GetCommandAttackRate(command);
@@ -56,7 +65,7 @@ CommandEffects GetCommandEffects(int level, int command)
     effects.ravenMaximumDamage = GetCommandRavenMaximumDamage(command);
     effects.ravenAttackSpeed = GetCommandRavenAttackSpeed(command);
     effects.horseMinimumDamage = GetCommandHorseMinimumDamage(command);
-    effects.horseMaximumDamage = GetCommandHorseMaximumDamage(command);
+    effects.horseMaximumDamage = GetCommandHorseMaximumDamage(horse, command);
     effects.horseAttackSpeed = GetCommandHorseAttackSpeed(command);
     effects.guildMembers = GetCommandGuildMembers(level, command);
     return effects;

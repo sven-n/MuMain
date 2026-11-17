@@ -16,7 +16,6 @@
 #include "UI/Core/UIManager.h"
 #include "Network/Server/ServerListManager.h"
 #include "I18N/All.h"
-#include "Data/Translation/ItemTextExpansion.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
@@ -94,20 +93,11 @@ namespace
 mu::ui::window::CCharacterInfoWindow::CCharacterInfoWindow()
 {
     m_pNewUIMng = NULL;
-    I18N::RegisterLocaleObserver(&CCharacterInfoWindow::OnTextsChanged, this);
-    Data::Translation::ItemTexts::RegisterTextsChangedObserver(&CCharacterInfoWindow::OnTextsChanged, this);
 }
 
 mu::ui::window::CCharacterInfoWindow::~CCharacterInfoWindow()
 {
-    I18N::UnregisterLocaleObserver(&CCharacterInfoWindow::OnTextsChanged, this);
-    Data::Translation::ItemTexts::UnregisterTextsChangedObserver(&CCharacterInfoWindow::OnTextsChanged, this);
     Release();
-}
-
-void mu::ui::window::CCharacterInfoWindow::OnTextsChanged(void* context) noexcept
-{
-    static_cast<CCharacterInfoWindow*>(context)->m_TextsChanged = true;
 }
 
 bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng)
@@ -230,11 +220,11 @@ void mu::ui::window::CCharacterInfoWindow::SetStaticTexts(CharacterInfoRmlModel&
 
 void mu::ui::window::CCharacterInfoWindow::SyncChangedTexts()
 {
-    if (!m_TextsChanged)
+    if (!m_TextsChanged.TakeChanged())
     {
         return;
     }
-    m_TextsChanged = false;
+    m_CriticalHitTexts.Invalidate();
     m_CommandHintTexts.Invalidate();
     SetStaticTexts(m_RmlView.GetModel());
     for (const char* field : {"str_label", "agi_label", "vit_label", "ene_label", "cmd_label", "exit_tooltip",
@@ -467,9 +457,9 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
 
 void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
 {
-    const UI::Character::CriticalHitTexts::Parts parts{
-        GameLogic::Combat::GetHeroCriticalDamageRate(), GameLogic::Combat::GetHeroCriticalDamageBonus(),
-        GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange, I18N::GetCurrentLocale()};
+    const UI::Character::CriticalHitTexts::Parts parts{GameLogic::Combat::GetHeroCriticalDamageRate(),
+                                                       GameLogic::Combat::GetHeroCriticalDamageBonus(),
+                                                       GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange};
     m_CriticalHitTexts.Update(parts);
     const UI::Character::CriticalDamageRateLine& line = m_CriticalHitTexts.RateLine();
 
@@ -487,9 +477,29 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
     }
 }
 
+void mu::ui::window::CCharacterInfoWindow::BuildCommandRow()
+{
+    const WORD wCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
+    const char* charismaSource =
+        AttributeSource(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5), CharacterAttribute->AddCharisma != 0);
+
+    wchar_t strCharisma[256];
+    mu_swprintf(strCharisma, L"%d", wCharisma);
+    SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueText, "cmd_value_text",
+              StringUtils::WideToNarrow(strCharisma));
+    SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueSource, "cmd_value_source",
+              Rml::String(charismaSource));
+    BuildCommandHint(wCharisma);
+}
+
 void mu::ui::window::CCharacterInfoWindow::BuildCommandHint(int command)
 {
-    m_CommandHintTexts.Update(GameLogic::Character::GetCommandEffects(CharacterAttribute->Level, command));
+    // The Dark Horse's maximum damage halves its whole minimum, so the command's part of it depends on the rest.
+    const PET_INFO* horse = Hero->GetEquipedPetInfo(PET_TYPE_DARK_HORSE);
+    GameLogic::Character::HorseDamageBase horseBase;
+    horseBase.strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
+    horseBase.horseLevel = horse->m_dwPetType != PET_TYPE_NONE ? horse->m_wLevel : 0;
+    m_CommandHintTexts.Update(GameLogic::Character::GetCommandEffects(CharacterAttribute->Level, command, horseBase));
 }
 
 void mu::ui::window::CCharacterInfoWindow::ShowLineHint()
@@ -1607,18 +1617,6 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     if (iBaseClass == CLASS_DARK_LORD)
     {
-        WORD wCharisma;
-
-        wCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-
-        const char* charismaSource = AttributeSource(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5),
-                                                     CharacterAttribute->AddCharisma != 0);
-
-        wchar_t strCharisma[256];
-        mu_swprintf(strCharisma, L"%d", wCharisma);
-        SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueText, "cmd_value_text",
-                  StringUtils::WideToNarrow(strCharisma));
-        SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueSource, "cmd_value_source", Rml::String(charismaSource));
-        BuildCommandHint(wCharisma);
+        BuildCommandRow();
     }
 }

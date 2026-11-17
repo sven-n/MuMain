@@ -206,6 +206,6 @@ mu_add_test(
     NAME test_command_effects
     SOURCES
         test_command_effects.cpp
-    LINK_LIBS
-        MuClient
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Character/CommandEffects.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Social/GuildSize.cpp
 )

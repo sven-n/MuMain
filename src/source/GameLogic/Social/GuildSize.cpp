@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "GameLogic/Social/GuildSize.h"
 
 #include <algorithm>
