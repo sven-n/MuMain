@@ -60,7 +60,9 @@ mu_add_test(
     NAME trade_worse_offers_tests
     SOURCES
         test_trade_worse_offers.cpp
+        test_additional_option_comparison.cpp
         ${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/TradeWorseOffers.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Engine/Object/AdditionalOptionComparison.cpp
 )
 
 mu_add_test(

@@ -14,6 +14,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/AdditionalOptionComparison.h"
 #include "Engine/Object/ItemOptionLines.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
@@ -3065,14 +3066,9 @@ int CompareItem(ITEM item1, ITEM item2)
                         }
                     }
 
-                    if (addOption1 < addOption2 || addOptionV1 < addOptionV2)
-                    {
-                        equal = -1;
-                    }
-                    else if (addOption1 != addOption2 && addOptionV1 != addOptionV2)
-                    {
-                        equal = 1;
-                    }
+                    // The original counted a lower value (+16 to +4) as the same copy.
+                    equal = Engine::Items::CompareAdditionalOption(addOption1 != 0, addOptionV1, addOption2 != 0,
+                                                                   addOptionV2);
                 }
             }
             if (equal == 0)

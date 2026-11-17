@@ -40,8 +40,14 @@ difference decides:
 2. whether the item has its skill;
 3. the excellent options, taken as one bit-flag number, not counted: a copy
    with one high-bit option beats a copy with two low-bit options;
-4. the number of other options, then the additional option and its value;
+4. the number of other options, then the additional option (the one a Jewel
+   of Life raises): a copy without it, or with a lower value, is worse, so a
+   +16 to +4 swap is marked;
 5. the durability, so a copy with less durability is also marked.
+
+The comparison never reads the Jewel of Harmony option, the 380 option, the
+sockets or the ancient set. Copies that differ only there count as the same:
+the worse one is not marked, and it clears the marks of its kind.
 
 The mark is cleared when the partner also offers an item of that kind that is
 the same as the remembered copy. Marks of other kinds stay. The marks are
