@@ -399,6 +399,13 @@ bool CInventoryActionController::IsSlotOccupied(int nSlot) const
 
 bool CInventoryActionController::TryEquipItem(CInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const
 {
+    // An expired rented item can't be worn, like when it's dragged onto its slot.
+    if (pItem->bPeriodItem && pItem->bExpiredPeriod)
+    {
+        g_pSystemLogBox->AddText(I18N::Game::CanTWearItem, TYPE_ERROR_MESSAGE);
+        return true;
+    }
+
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     int nDstIndex = pItemAttr->m_byItemSlot;
 
