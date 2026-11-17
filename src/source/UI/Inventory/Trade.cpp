@@ -915,6 +915,8 @@ void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
         break;
 
     case UI::Trade::CloseReason::Completed:
+        // Also when a cancel of ours lost the race against the completion: the items changed hands.
+        InitYourInvenBackUp();
         break;
     }
 
