@@ -30,16 +30,18 @@ the variants of one map, and a writer that writes unchanged data as it was.
   operations. Environments are added, renamed, and removed while no map uses
   them; which maps share an entry stays as the file has it until the maps
   area's map groups.
-- **GL2.1 (now):** after a design review of GL1 and GL2: the Player and
+- **GL2.1 (done, #1127):** after a design review of GL1 and GL2: the Player and
   Authoring previews instead of per-value developer marks (D-GL12), a
   slider's value shown live while it is dragged (D-GL13), and the decisions
   the review asked to record before zones and time of day (D-GL4, D-GL14,
   D-GL15).
 - **Later, with the stages of #990 that need them:** the time-of-day and zone
-  layers, named grading tables, effect lights on the effect types
+  layers, effect lights on the effect types
   (`dynamicLight`, area FX1), materials per mesh on model entries (items 13,
   MN), the light-map split results and verdict per map, a Lighting tab in
-  the Map Editor (after MP2+).
+  the Map Editor (after MP2+). Colour grading and materials are D1's
+  ([linear lighting design](2026-11-16-linear-lighting-design.md)): grading
+  values on the look layers, `roughness` and `metallic` on item models.
 
 ## Current state
 
@@ -93,7 +95,7 @@ the variants of one map, and a writer that writes unchanged data as it was.
 | GL2 | Graphics Look tool window | GL1 | The editor of the roadmap's shared editor parts: scopes default, environment and map; for an environment, the maps that use it and a warning before a change many maps share; choosing a map's environment; Undo/Redo; problems in Data Checks; changes only through the look's edit operations, which check every change (as `ItemEdits` for items). Replaces the Dev Editor's Look panel. GL1's new possibilities (mood values on environments, shared map entries) are editable only in a file until then; the area is not done before GL2. |
 | GL2.1 | Previews and live drag | GL2 | D-GL12 to D-GL15 after the design review: the Player and Authoring previews (`$look preview`, the window's Preview), the live drag, value headings grouped by prefix, and the docs. |
 | GL2.2 | Player controls by kind | GL2.1, #990 Stage 7's style choices | D-GL16, with the style choices: the Options window offers only Quality and Preference values; the art-direction sliders and their help go, their keys are ignored with a warning and dropped at the next save; the docs' table becomes the rule the control list is checked against. |
-| GL3+ | With #990 | GL1 | Not designed: time of day and zones as layers (zones after MP2+), named grading tables, the light-map split results, and the time-of-day scrubber in the tool window. |
+| GL3+ | With #990 | GL1 | Not designed: time of day and zones as layers (zones after MP2+), the light-map split results, and the time-of-day scrubber in the tool window. |
 
 ## Agreed questions
 
