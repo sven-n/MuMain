@@ -13,6 +13,8 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "Network/Server/WSclient.h"
+#include "Render/Effects/AuraJointLifecycle.h"
 #include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -1870,8 +1872,6 @@ TEST_CASE("Dark Side's fingerprint follows a dummy's step, not only how many dum
     CHECK(monk.DarksideStateHash() != before);
 }
 
-void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o); // defined in WSclient.cpp
-
 namespace
 {
 int LiveAuraJoints(const OBJECT* target)
@@ -1907,6 +1907,13 @@ void ClearJoints()
 {
     for (int i = 0; i < MAX_JOINTS; ++i)
         Joints[i].Live = false;
+}
+
+// What UnRegisterBuff does to the look when a buff ends.
+void EndBuff(OBJECT* o, eBuffState buff)
+{
+    ClearBuffPhysicalEffect(buff, o);
+    g_CharacterUnRegisterBuff(o, buff);
 }
 } // namespace
 
@@ -1949,8 +1956,37 @@ TEST_CASE("Greater Damage alone spawns no swirling aura, Greater Defense and the
         g_CharacterRegisterBuff(o, eBuff_HelpNpc);
         g_CharacterRegisterBuff(o, eBuff_Defense);
         UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
-        ClearBuffPhysicalEffect(eBuff_Defense, o);
+        EndBuff(o, eBuff_Defense);
+        MoveJoints();
         CHECK(LiveAuraJoints(o) == 5);
+    }
+
+    SUBCASE("Greater Defense ends alone")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        EndBuff(o, eBuff_Defense);
+        MoveJoints();
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    SUBCASE("An aura left on a Greater Damage player ends")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Attack);
+        Render::Effects::SpawnDefenseAura(o, 1);
+        REQUIRE(LiveAuraJoints(o) == 5);
+        MoveJoints();
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    SUBCASE("The aura ends when a Greater Defense player is cloaked")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        REQUIRE(LiveAuraJoints(o) == 5);
+        g_CharacterRegisterBuff(o, eBuff_Cloaking);
+        MoveJoints();
+        CHECK(LiveAuraJoints(o) == 0);
     }
 
     SUBCASE("Greater Defense on a cloaked player")
