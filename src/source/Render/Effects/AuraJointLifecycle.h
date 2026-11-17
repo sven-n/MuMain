@@ -11,7 +11,8 @@ inline constexpr float DefenseAuraScale = 20.0f;
 
 // Whether the object's buffs give it the defense aura: where the aura is created and where it is kept alive. The
 // swirling MODEL_SPEARSKILL aura (joint subtypes 4 and 9) belongs to Greater Defense and to the Elf Soldier buff;
-// Greater Damage shows only its red weapon sparkles. MoveJoint ends the aura the frame after the last of them leaves.
+// Greater Damage shows only its red weapon sparkles. A cloaked player shows none. MoveJoint ends the aura the frame
+// after the last of them leaves or the player is cloaked.
 [[nodiscard]] bool HasDefenseAura(const OBJECT* o);
 
 // Spawns the aura's joints on o unless it already has them. characterIndex is o's own CharactersClient index:

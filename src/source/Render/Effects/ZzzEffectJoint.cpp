@@ -2855,7 +2855,8 @@ void DeleteJoint(int Type, OBJECT* Target, int SubType)
 
 bool Render::Effects::HasDefenseAura(const OBJECT* o)
 {
-    return g_isCharacterBuff(o, eBuff_Defense) || g_isCharacterBuff(o, eBuff_HelpNpc);
+    return (g_isCharacterBuff(o, eBuff_Defense) || g_isCharacterBuff(o, eBuff_HelpNpc)) &&
+           !g_isCharacterBuff(o, eBuff_Cloaking);
 }
 
 void Render::Effects::SpawnDefenseAura(OBJECT* o, int characterIndex)
