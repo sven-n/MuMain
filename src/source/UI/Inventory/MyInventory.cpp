@@ -1291,7 +1291,7 @@ void CMyInventory::CreateEquippingEffect(ITEM* pItem)
     }
     if (Hero->EtcPart <= 0 || Hero->EtcPart > 3)
     {
-        if (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 3)
+        if (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 3 && !isExpired)
         {
             DeleteParts(Hero);
             Hero->EtcPart = PARTS_LION;

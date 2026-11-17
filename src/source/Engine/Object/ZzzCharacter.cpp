@@ -13028,6 +13028,16 @@ void SetCharacterScale(CHARACTER* c)
     }
 }
 
+namespace
+{
+// An equipment slot is drawn if it holds an item, unless it's an expired rented item: that one has no effect,
+// so the hero looks as if the slot was empty.
+bool IsShownEquipment(const ITEM& item)
+{
+    return item.Type != -1 && !(item.bPeriodItem && item.bExpiredPeriod);
+}
+} // namespace
+
 void SetCharacterClass(CHARACTER* c)
 {
     if (c->Object.Type != MODEL_PLAYER)
@@ -13037,7 +13047,7 @@ void SetCharacterClass(CHARACTER* c)
 
     ITEM* p = CharacterMachine->Equipment;
 
-    if (p[EQUIPMENT_WEAPON_RIGHT].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_WEAPON_RIGHT]))
     {
         c->Weapon[0].Type = -1;
     }
@@ -13046,7 +13056,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Weapon[0].Type = Data::Items::ToModelSlot(p[EQUIPMENT_WEAPON_RIGHT].Type);
     }
 
-    if (p[EQUIPMENT_WEAPON_LEFT].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_WEAPON_LEFT]))
     {
         c->Weapon[1].Type = -1;
     }
@@ -13055,7 +13065,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Weapon[1].Type = Data::Items::ToModelSlot(p[EQUIPMENT_WEAPON_LEFT].Type);
     }
 
-    if (p[EQUIPMENT_WING].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_WING]))
     {
         c->Wing.Type = -1;
     }
@@ -13064,7 +13074,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Wing.Type = Data::Items::ToModelSlot(p[EQUIPMENT_WING].Type);
     }
 
-    if (p[EQUIPMENT_HELPER].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_HELPER]))
     {
         c->Helper.Type = -1;
     }
@@ -13101,7 +13111,7 @@ void SetCharacterClass(CHARACTER* c)
         SetPlayerStop(c);
     }
 
-    if (p[EQUIPMENT_HELM].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_HELM]))
     {
         c->BodyPart[BODYPART_HELM].Type = static_cast<int>(MODEL_BODY_HELM) + c->SkinIndex;
         c->BodyPart[BODYPART_HELM].Level = 0;
@@ -13116,7 +13126,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_HELM].AncientDiscriminator = p[EQUIPMENT_HELM].AncientDiscriminator;
     }
 
-    if (p[EQUIPMENT_ARMOR].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_ARMOR]))
     {
         c->BodyPart[BODYPART_ARMOR].Type = static_cast<int>(MODEL_BODY_ARMOR) + c->SkinIndex;
         c->BodyPart[BODYPART_ARMOR].Level = 0;
@@ -13131,7 +13141,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = p[EQUIPMENT_ARMOR].AncientDiscriminator;
     }
 
-    if (p[EQUIPMENT_PANTS].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_PANTS]))
     {
         c->BodyPart[BODYPART_PANTS].Type = static_cast<int>(MODEL_BODY_PANTS) + c->SkinIndex;
         c->BodyPart[BODYPART_PANTS].Level = 0;
@@ -13146,7 +13156,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_PANTS].AncientDiscriminator = p[EQUIPMENT_PANTS].AncientDiscriminator;
     }
 
-    if (p[EQUIPMENT_GLOVES].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_GLOVES]))
     {
         c->BodyPart[BODYPART_GLOVES].Type = static_cast<int>(MODEL_BODY_GLOVES) + c->SkinIndex;
         c->BodyPart[BODYPART_GLOVES].Level = 0;
@@ -13161,7 +13171,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = p[EQUIPMENT_GLOVES].AncientDiscriminator;
     }
 
-    if (p[EQUIPMENT_BOOTS].Type == -1)
+    if (!IsShownEquipment(p[EQUIPMENT_BOOTS]))
     {
         c->BodyPart[BODYPART_BOOTS].Type = static_cast<int>(MODEL_BODY_BOOTS) + c->SkinIndex;
         c->BodyPart[BODYPART_BOOTS].Level = 0;
