@@ -4934,22 +4934,8 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                     if (!g_isCharacterBuff(to, eBuff_Defense))
                     {
                         g_CharacterRegisterBuff(to, eBuff_Defense);
-
-                        for (int j = 0; j < Render::Effects::DefenseAuraJointCount; ++j)
-                        {
-                            CreateJoint(MODEL_SPEARSKILL, to->Position, to->Position, to->Angle, 4, to,
-                                        Render::Effects::DefenseAuraScale, -1, 0, 0, c->TargetCharacter);
-                        }
                     }
-                    else if (!SearchJoint(MODEL_SPEARSKILL, to, 4)
-                        && !SearchJoint(MODEL_SPEARSKILL, to, 9))
-                    {
-                        for (int j = 0; j < Render::Effects::DefenseAuraJointCount; ++j)
-                        {
-                            CreateJoint(MODEL_SPEARSKILL, to->Position, to->Position, to->Angle, 4, to,
-                                        Render::Effects::DefenseAuraScale, -1, 0, 0, c->TargetCharacter);
-                        }
-                    }
+                    Render::Effects::SpawnDefenseAura(to, c->TargetCharacter);
                 }
                 break;
             case AT_SKILL_ATTACK:
@@ -10872,16 +10858,9 @@ void UpdateBuffAuraEffects(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
 
-    if (Render::Effects::HasDefenseAura(o) && !SearchJoint(MODEL_SPEARSKILL, o, 4) &&
-        !SearchJoint(MODEL_SPEARSKILL, o, 9))
+    if (Render::Effects::HasDefenseAura(o))
     {
-        // The aura's own character: MoveJoint reads its Helper and SafeZone to choose subtype 4 or 9.
-        const int self = static_cast<int>(c - CharactersClient);
-        for (int i = 0; i < Render::Effects::DefenseAuraJointCount; ++i)
-        {
-            CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, Render::Effects::DefenseAuraScale,
-                        -1, 0, 0, self);
-        }
+        Render::Effects::SpawnDefenseAura(o, static_cast<int>(c - CharactersClient));
     }
 }
 

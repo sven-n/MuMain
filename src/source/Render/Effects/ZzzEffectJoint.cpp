@@ -2853,9 +2853,23 @@ void DeleteJoint(int Type, OBJECT* Target, int SubType)
     }
 }
 
-bool Render::Effects::HasDefenseAura(OBJECT* o)
+bool Render::Effects::HasDefenseAura(const OBJECT* o)
 {
     return g_isCharacterBuff(o, eBuff_Defense) || g_isCharacterBuff(o, eBuff_HelpNpc);
+}
+
+void Render::Effects::SpawnDefenseAura(OBJECT* o, int characterIndex)
+{
+    if (SearchJoint(MODEL_SPEARSKILL, o, 4) || SearchJoint(MODEL_SPEARSKILL, o, 9))
+    {
+        return;
+    }
+
+    for (int i = 0; i < DefenseAuraJointCount; ++i)
+    {
+        CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, DefenseAuraScale, -1, 0, 0,
+                    characterIndex);
+    }
 }
 
 bool SearchJoint(int Type, OBJECT* Target, int SubType)
