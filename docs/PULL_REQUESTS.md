@@ -6,11 +6,12 @@ the PR has to show.
 
 ---
 
-## 1. Before and After Screenshots for Visible Changes
+## 1. Before and After Screenshots or Videos for Visible Changes
 
-A PR whose change can be seen in the game or in the editor has screenshots of
-the result before and after the change. Reviewers judge a visible change by
-looking at it, and most of them can't build and run every branch.
+A PR whose change can be seen in the game or in the editor has screenshots or
+videos of the result before and after the change. Reviewers judge a visible
+change by looking at it, and most of them can't build and run every branch.
+Wherever this rule says screenshots, a video (or GIF) works too.
 
 ### When they are required
 
@@ -47,14 +48,16 @@ unsure, add them.
 - A bug fix shows the bug in *before* and the fixed result in *after*.
 - Crop to the part that changed but keep enough around it to recognise the
   place. Mark small changes (an arrow or a box).
-- Things a still image can't show (an animation, timing, movement) get a short
-  video or GIF instead. A change that is only heard (sound, music) says in the
-  PR how it was checked.
-- Upload the images into the PR description on GitHub (drag and drop or
-  paste). Don't commit screenshots to the repository.
+- Videos are welcome for any change and are the better choice for things a
+  still image can't show well (an animation, timing, movement). Keep them
+  short. A change that is only heard (sound, music) can use a video with
+  sound, or says in the PR how it was checked.
+- Upload the images and videos into the PR description on GitHub (drag and
+  drop or paste). Don't commit them to the repository.
 
 ### PRs written by AI agents
 
-An agent that can't run the game and take screenshots says so in the PR
+An agent that can't run the game and take screenshots or videos says so in the PR
 description and leaves the *Before* / *After* section for the person who opens
-the PR. The PR is ready for review only once the screenshots are there.
+the PR. The PR is ready for review only once the screenshots or videos are
+there.

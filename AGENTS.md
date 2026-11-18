@@ -64,8 +64,8 @@ Quick references:
   static checks and formatting check as CI's Quality Gates.
 - Reference the related issue in the PR description when applicable.
 - Follow [`docs/PULL_REQUESTS.md`](docs/PULL_REQUESTS.md): a change that is
-  visible in the game or the editor needs before and after screenshots in the
-  PR description.
+  visible in the game or the editor needs before and after screenshots or
+  videos in the PR description.
 
 ## Out of scope for AI changes
 
