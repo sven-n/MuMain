@@ -64,8 +64,8 @@ public:
 
     // Builds each pass twice, for frames of `frameFormat`: into an image, and inside the UI pass
     // with `sampleCount` samples and a depth target. A pass whose pipelines fail is unavailable.
-    void CreatePipelines(SDL_GPUDevice* device, const SdlGpuFinalPassShaders& shaders,
-                         SDL_GPUTextureFormat frameFormat, SDL_GPUSampleCount sampleCount);
+    void CreatePipelines(SDL_GPUDevice* device, const SdlGpuFinalPassShaders& shaders, SDL_GPUTextureFormat frameFormat,
+                         SDL_GPUSampleCount sampleCount);
     void DestroyPipelines();
     [[nodiscard]] bool IsAvailable(Pass pass) const;
     // Every pass `plan` asks for is available.

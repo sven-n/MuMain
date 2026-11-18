@@ -2887,9 +2887,9 @@ public:
         }
         FRAME_PROFILE(SceneDepth);
         const bool scaled = SceneSize() != WindowSize();
-        SDL_GPUTexture* const depth = scaled ? EnsureDepthTexture(s_scaledSingleSampleDepth, SceneSize(),
-                                                                  SDL_GPU_SAMPLECOUNT_1)
-                                             : SingleSamplePassDepth();
+        SDL_GPUTexture* const depth =
+            scaled ? EnsureDepthTexture(s_scaledSingleSampleDepth, SceneSize(), SDL_GPU_SAMPLECOUNT_1)
+                   : SingleSamplePassDepth();
         if (!depth || !s_sceneDepthPipelines[0] || !s_sceneDepthPipelines[1] ||
             (s_renderPass = BeginDepthOnlyPass(depth)) == nullptr)
         {
@@ -3007,7 +3007,8 @@ public:
         const SDL_GPUColorTargetInfo colorTarget = CycledTarget(mu::GetSdlGpuFrameColorTarget(
             {s_postProcessing.GetBloomSourceTexture(), SceneMultisampleTexture()}, noLight));
         // The UI pass tests against the same depth, so it is kept.
-        if (!BeginReplayPass(colorTarget, MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE, ScenePassDepth())))
+        if (!BeginReplayPass(colorTarget,
+                             MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE, ScenePassDepth())))
         {
             return;
         }
@@ -3046,9 +3047,8 @@ public:
     }
 
     // `depth` at `size` with `sampleCount` samples, recreated when either changed. Null when it fails.
-    [[nodiscard]] static SDL_GPUTexture* EnsureDepthTexture(SizedDepthTexture& depth,
-                                                            Render::PostProcessing::FrameSize size,
-                                                            SDL_GPUSampleCount sampleCount)
+    [[nodiscard]] static SDL_GPUTexture*
+    EnsureDepthTexture(SizedDepthTexture& depth, Render::PostProcessing::FrameSize size, SDL_GPUSampleCount sampleCount)
     {
         if (depth.texture && depth.size == size && depth.sampleCount == sampleCount)
         {
@@ -3059,8 +3059,8 @@ public:
         depth.texture = info ? SDL_CreateGPUTexture(s_device, &*info) : nullptr;
         if (!depth.texture)
         {
-            mu::log::Get("render")->error("SDL_gpu -- scene depth creation failed ({}x{}): {}", size.width,
-                                          size.height, SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- scene depth creation failed ({}x{}): {}", size.width, size.height,
+                                          SDL_GetError());
             return nullptr;
         }
         depth.size = size;
@@ -3104,7 +3104,8 @@ public:
         // the UI did when it shared the scene's pass.
         const SDL_GPUColorTargetInfo sceneTarget = CycledTarget(mu::GetSdlGpuFrameColorTarget(
             {s_postProcessing.GetSceneTexture(), SceneMultisampleTexture()}, s_clearColor));
-        if (!BeginReplayPass(sceneTarget, MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE, ScenePassDepth())))
+        if (!BeginReplayPass(sceneTarget,
+                             MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE, ScenePassDepth())))
         {
             s_hdrScenePass = false;
             s_replayTargetSize = {};
@@ -3149,8 +3150,8 @@ public:
         }
         else
         {
-            s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, TargetSize(WindowSize()), look,
-                                           s_postProcessingView, ambientOcclusion);
+            s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, TargetSize(WindowSize()), look, s_postProcessingView,
+                                           ambientOcclusion);
         }
         ReplayCommands(sceneEnd, s_renderCmds.size(), boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
@@ -6513,7 +6514,8 @@ private:
         for (SDL_GPUShader** shader :
              {&s_vertShaderWorldLit, &s_fragShaderWorldLit, &s_fragShaderShadowMask, &s_vertShaderPostFullscreen,
               &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite, &s_fragShaderAmbientOcclusion,
-              &s_fragShaderAmbientOcclusionBlur, &s_fragShaderFxaa, &s_fragShaderFsrEasu, &s_fragShaderFsrRcas, &s_fragShaderSunDepth})
+              &s_fragShaderAmbientOcclusionBlur, &s_fragShaderFxaa, &s_fragShaderFsrEasu, &s_fragShaderFsrRcas,
+              &s_fragShaderSunDepth})
         {
             if (*shader)
             {

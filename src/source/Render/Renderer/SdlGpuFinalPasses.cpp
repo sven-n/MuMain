@@ -93,8 +93,8 @@ PassList PlannedPasses(const FinalPassPlan& plan)
 
 void SetViewport(SDL_GPURenderPass* pass, FrameSize size)
 {
-    const SDL_GPUViewport viewport{
-        0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height), 0.0f, 1.0f};
+    const SDL_GPUViewport viewport{0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height),
+                                   0.0f, 1.0f};
     const SDL_Rect scissor{0, 0, static_cast<int>(size.width), static_cast<int>(size.height)};
     SDL_SetGPUViewport(pass, &viewport);
     SDL_SetGPUScissor(pass, &scissor);
@@ -248,8 +248,8 @@ bool SdlGpuFinalPasses::RunAllButLast(SDL_GPUCommandBuffer* commandBuffer, const
     return false;
 }
 
-const SdlGpuFinalPasses::Image* SdlGpuFinalPasses::RunIntoImage(SDL_GPUCommandBuffer* commandBuffer,
-                                                                const Step& step, FrameSize sceneSize)
+const SdlGpuFinalPasses::Image* SdlGpuFinalPasses::RunIntoImage(SDL_GPUCommandBuffer* commandBuffer, const Step& step,
+                                                                FrameSize sceneSize)
 {
     // Never the image the pass reads: at the scene's size, the composite's is read first.
     const bool sceneSized = step.outputSize == sceneSize && step.source != &m_images[SceneImage];

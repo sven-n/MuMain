@@ -134,8 +134,8 @@ void GameConfig::Load()
     m_antialiasing = GameConfigValidation::ValidateAntialiasing(
         ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
     m_edgeSmoothing = ReadBool(CfgSectionRender, CfgKeyEdgeSmoothing, CfgDefaultEdgeSmoothing);
-    m_renderScale = GameConfigValidation::ValidateRenderScale(
-        ReadInt(CfgSectionRender, CfgKeyRenderScale, CfgDefaultRenderScale));
+    m_renderScale =
+        GameConfigValidation::ValidateRenderScale(ReadInt(CfgSectionRender, CfgKeyRenderScale, CfgDefaultRenderScale));
     m_sharpness =
         GameConfigValidation::ValidateSharpness(ReadInt(CfgSectionRender, CfgKeySharpness, CfgDefaultSharpness));
     m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
