@@ -41,6 +41,7 @@
 #include "RangeAllocator.h"
 #include "SdlGpuPixelFormat.h"
 #include "SdlGpuAmbientOcclusion.h"
+#include "SdlGpuDepthState.h"
 #include "ShadowPassSelection.h"
 #include "SdlGpuSunShadowMap.h"
 #include "SdlGpuPostProcessing.h"
@@ -6469,22 +6470,6 @@ private:
         std::string error;
     };
 
-    // Every variant compares depth with LESS_OR_EQUAL, as the classic MU OpenGL client set
-    // glDepthFunc(GL_LEQUAL) at the start of each 3D scene (SetDepthFunc, which this backend
-    // doesn't propagate). Depth-read-only and 2D pipelines always did. Depth-writing ones need it
-    // for models drawn in several depth-writing passes over the same mesh, like the Bill of
-    // Balrog's textured body over its chrome body: with LESS the later pass lost every
-    // equal-depth fragment, so only the first pass showed.
-    [[nodiscard]] static SDL_GPUDepthStencilState MakeDepthStencilState(const PipelineBuildDescription& description)
-    {
-        SDL_GPUDepthStencilState depthState{};
-        depthState.enable_depth_test = description.depthTestEnabled;
-        depthState.enable_depth_write = description.depthWriteEnabled;
-        depthState.enable_stencil_test = false;
-        depthState.compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
-        return depthState;
-    }
-
     [[nodiscard]] static PipelineBuildResult BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
                                                                 const PipelineBuildDescription& description)
     {
@@ -6685,7 +6670,8 @@ private:
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
         pipelineInfo.rasterizer_state = rasterState;
-        pipelineInfo.depth_stencil_state = MakeDepthStencilState(description);
+        pipelineInfo.depth_stencil_state =
+            Render::MakeDepthStencilState(description.depthTestEnabled, description.depthWriteEnabled);
         pipelineInfo.target_info = targetInfo;
         pipelineInfo.props = 0;
 

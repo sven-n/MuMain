@@ -65,6 +65,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME sdl_gpu_depth_state_tests
+    SOURCES
+        test_sdl_gpu_depth_state.cpp
+    LINK_LIBS
+        SDL3::SDL3
+)
+
+mu_add_test(
     NAME mip_chain_tests
     SOURCES
         test_mip_chain.cpp
