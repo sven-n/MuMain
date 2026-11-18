@@ -667,7 +667,8 @@ std::string NoSuchItem(const Request& request, int group, int number)
 }
 
 // Reads the item a request names into `params`: `group` and `number`, and the fields `level`, `durability`, `luck`,
-// `skill`, `option`, `excellent`, `ancient`, `harmony` and `harmony_level`, as the server would send them (left out:
+// `skill`, `option`, `option_type`, `excellent`, `ancient`, `ancient_bonus`, `harmony` and `harmony_level`, as the
+// server would send them (left out:
 // 0, and full durability for the item as made). Returns the `bad_request` to answer when a field is missing or can't
 // be held, or no item uses the number; empty when the item is read.
 std::string ReadItemParameters(const Request& request, const std::string& command, ItemCreationParams& params)
@@ -686,24 +687,37 @@ std::string ReadItemParameters(const Request& request, const std::string& comman
     int level = -1;
     int durability = -1;
     int option = 0;
+    int optionType = -1;
     int excellent = 0;
     int ancient = 0;
+    int ancientBonus = -1;
     int harmony = 0;
     int harmonyLevel = -1;
     if (!ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level) ||
         !ReadBounded(request, "durability", 255, durability) || !ReadBounded(request, "option", 15, option) ||
-        !ReadBounded(request, "excellent", 63, excellent) || !ReadBounded(request, "ancient", 255, ancient) ||
+        !ReadBounded(request, "option_type", 15, optionType) || !ReadBounded(request, "excellent", 63, excellent) ||
+        !ReadBounded(request, "ancient", 255, ancient) || !ReadBounded(request, "ancient_bonus", 15, ancientBonus) ||
         !ReadBounded(request, "harmony", 15, harmony) || !ReadBounded(request, "harmony_level", 15, harmonyLevel))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
-                           "`level`, `option`, `harmony` and `harmony_level` are 0 to 15, `excellent` the excellent "
-                           "options' bits 0 to 63, `durability` and `ancient` 0 to 255");
+                           "`level`, `option`, `option_type`, `ancient_bonus`, `harmony` and `harmony_level` are 0 to "
+                           "15, `excellent` the excellent options' bits 0 to 63, `durability` and `ancient` 0 to 255");
     }
-    // A harmony level counts only with a harmony option; alone it would be ignored.
+    // A harmony level counts only with a harmony option, an option type only with an option and a bonus level only
+    // with a set; alone each would be ignored.
     if (harmonyLevel >= 0 && harmony == 0)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`harmony_level` needs `harmony`, the Jewel of Harmony option");
+    }
+    if (optionType >= 0 && option == 0)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`option_type` needs `option`, the additional option's level");
+    }
+    if (ancientBonus >= 0 && ancient == 0)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`ancient_bonus` needs `ancient`, the set");
     }
     if (g_ItemDatabase.Find(group, number) == nullptr)
     {
@@ -722,6 +736,8 @@ std::string ReadItemParameters(const Request& request, const std::string& comman
     {
         params.WithOption = true;
         params.OptionLevel = static_cast<BYTE>(option);
+        if (optionType >= 0)
+            params.OptionType = static_cast<BYTE>(optionType);
     }
     if (excellent > 0)
     {
@@ -732,6 +748,8 @@ std::string ReadItemParameters(const Request& request, const std::string& comman
     {
         params.IsAncient = true;
         params.AncientDiscriminator = static_cast<BYTE>(ancient);
+        if (ancientBonus >= 0)
+            params.AncientBonusOption = static_cast<BYTE>(ancientBonus);
     }
     if (harmony > 0)
     {

@@ -148,7 +148,7 @@ std::unique_ptr<DataCheckArea> CreateItemOptionCheckArea()
             }
             return issues;
         },
-        nullptr, nullptr);
+        &ToolWindows::itemOptions, WindowIds::ItemOptions);
 }
 } // namespace MuEditor::DataChecks
 

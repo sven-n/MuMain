@@ -86,6 +86,11 @@ public:
     void SetStatFile(std::string label, const Data::Items::ItemStatFile& file,
                      std::span<const Data::Items::ItemDefinition> repointed = {});
 
+    // CItemDataHandler::SetOptions, with the items in `relinked` stored as they are (their links after a rename or a
+    // removal), as one step. `files` must be valid (ValidateItemOptionFilesAsWritten).
+    void SetOptions(std::string label, const Data::Items::ItemOptionFiles& files,
+                    std::span<const Data::Items::ItemDefinition> relinked = {});
+
     // The changes until EndGroup are one undo step under `label` (an item
     // duplicated with its model made shared). A group begun inside one is
     // part of it: its label is the outer one's.

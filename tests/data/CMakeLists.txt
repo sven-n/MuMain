@@ -9,6 +9,8 @@ mu_add_test(
         test_item_edit_history.cpp
         test_item_ground_labels.cpp
         test_item_json.cpp
+        test_item_option_file_change.cpp
+        test_item_preview_options.cpp
         test_item_references.cpp
         test_item_list_model.cpp
         test_item_model_json.cpp

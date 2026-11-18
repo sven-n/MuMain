@@ -226,6 +226,11 @@ public:
     // The cases each language declines item names in (also an undo); the texts that name items show the forms of
     // these. Save writes Data/Items/Tooltips/NameCases.json.
     void SetNameCases(const Data::Items::ItemNameCases& cases);
+    // Makes the option files these (also an undo): the item database takes the definitions, texts and rules, and each
+    // item's links resolve again. Save checks them as written (ValidateItemOptionFilesAsWritten) and writes
+    // Data/Items/Options/*.json, OptionRules.json and Data/Items/Tooltips/OptionTexts.json. The items' lists are the
+    // caller's.
+    void SetOptions(const Data::Items::ItemOptionFiles& files);
     // The folders MuEditor sorts the ground label styles in (D69); Save writes them with the styles.
     void SetGroundLabelFolders(std::vector<Data::Colors::ColorFolder> folders);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
@@ -372,6 +377,10 @@ private:
     std::array<LookFileState, 2> m_lookFiles;
     // Whether the editor changed the name cases since Load.
     bool m_nameCasesChanged = false;
+    // The definition files Data/Items/Options had at Load (written again, empty, when their last definition goes), and
+    // whether the editor changed the option files since.
+    std::vector<std::string> m_optionFiles;
+    bool m_optionsChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
     // The slots of the part models to open again.
