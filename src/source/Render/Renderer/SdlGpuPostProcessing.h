@@ -105,6 +105,10 @@ public:
     // Blurs the bloom source down and back up the chain, each level added to the
     // next larger one at `levelFalloff`; the composite of the same frame adds the result.
     void RenderBloom(SDL_GPUCommandBuffer* commandBuffer, float levelFalloff);
+    // Every composite adds the bloom RenderBloom made until this is called: call it before the
+    // frame's own bloom, so a frame without one never adds the last frame's. A composite that is
+    // drawn again in the same frame (a final pass that could not run) keeps the bloom.
+    void ForgetBloom();
 
     // Draws the processed scene over the whole target of `pass`: the scene,
     // plus this frame's bloom scaled by the look's bloom strength when

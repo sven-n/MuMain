@@ -370,6 +370,11 @@ void SdlGpuPostProcessing::RenderBloom(SDL_GPUCommandBuffer* commandBuffer, floa
     m_bloomRendered = true;
 }
 
+void SdlGpuPostProcessing::ForgetBloom()
+{
+    m_bloomRendered = false;
+}
+
 void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* pass,
                                          SdlGpuTargetSize size, const PostProcessingLook& look, PostProcessingView view,
                                          SDL_GPUTexture* ambientOcclusion, SdlGpuCompositeTarget target)
@@ -382,7 +387,6 @@ void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SD
     }
 
     const bool bloomRendered = m_bloomRendered && look.bloomStrength > 0.0f;
-    m_bloomRendered = false;
 
     // The image shown as the scene: the scene itself, or a diagnostic view in
     // its place (black when the bloom was not rendered this frame).

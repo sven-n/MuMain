@@ -29,6 +29,9 @@ struct FSInput
 
 // The strongest lobe that does not give unnatural results.
 static const float kLobeLimit = 0.25 - 1.0 / 16.0;
+// Keeps the limits' denominators away from 0 where every neighbour is black (max4 == 0) or white
+// (min4 == 1). 0/0 is NaN there, and SPIR-V's FMax need not drop a NaN the way D3D's max does.
+static const float kMinDenominator = 1.0 / 65536.0;
 
 float3 Load(int2 position)
 {
@@ -67,8 +70,8 @@ float4 main(FSInput input) : SV_Target
     const float3 min4 = min(Min3(b, d, f), h);
     const float3 max4 = max(Max3(b, d, f), h);
     // How far the lobe may go before the result would clip at 0 or at 1, per channel.
-    const float3 hitMin = min(min4, e) / (4.0 * max4);
-    const float3 hitMax = (1.0 - max(max4, e)) / (4.0 * min4 - 4.0);
+    const float3 hitMin = min(min4, e) / max(4.0 * max4, kMinDenominator);
+    const float3 hitMax = (1.0 - max(max4, e)) / min(4.0 * min4 - 4.0, -kMinDenominator);
     const float3 lobeRgb = max(-hitMin, hitMax);
     const float lobe = max(-kLobeLimit, min(Max3(lobeRgb.r, lobeRgb.g, lobeRgb.b), 0.0)) * sharpness;
 

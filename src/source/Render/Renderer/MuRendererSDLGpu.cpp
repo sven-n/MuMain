@@ -3113,6 +3113,7 @@ public:
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
 
+        s_postProcessing.ForgetBloom();
         if (look.bloomStrength > 0.0f && s_postProcessing.EnsureBloomTargets())
         {
             RenderBloomSources(sceneEnd, boneDataReady);
