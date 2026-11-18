@@ -69,13 +69,12 @@ not item models, and have the same names as the originals.
 
 ## Dragon armor pilot
 
-Dragon Helm and Dragon Armor have refined plate geometry that keeps the original MU silhouette.
-The helmet also uses a more detailed red-and-bronze texture. Other Dragon set pieces and other
-armor sets retain their existing art.
+The five Dragon set pieces have refined plate geometry that keeps the original MU silhouette.
+The helmet also uses a more detailed red-and-bronze texture. Other armor sets retain their existing art.
 
 These are equipped item assets, independent of **S6 player models** and of the selected graphics
-look. The existing Dragon Helm and Dragon Armor item entries use them automatically; no item
-IDs, stats or equip rules change. A complete incremental installation needs both updated BMD
+look. The existing Dragon set item entries use them automatically; no item
+IDs, stats or equip rules change. A complete incremental installation needs all five updated BMD
 files and `Data/Player/dragonHelmHD.OZJ`. The new helmet texture is included in the base data,
 so an external texture pack is not required. Restart after updating the assets.
 
