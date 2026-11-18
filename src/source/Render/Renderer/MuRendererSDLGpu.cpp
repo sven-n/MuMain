@@ -3094,11 +3094,30 @@ public:
         ReleaseDepthTexture(s_scaledSingleSampleDepth);
     }
 
+    // Validate both attachments before a scene pass can begin. A missing multisampled colour
+    // target must not silently pair a single-sample scene image with multisampled depth/pipelines.
+    [[nodiscard]] static bool PrepareSceneAttachments(SDL_GPUTexture*& color, SDL_GPUTexture*& depth)
+    {
+        s_hdrScenePass = s_postProcessing.IsHdrScene();
+        color = SceneMultisampleTexture();
+        depth = ScenePassDepth();
+        s_hdrScenePass = false;
+        return (!IsMultisampled() || color) && depth;
+    }
+
     // The scene into the scene texture, its bloom, then the processed scene and
     // the UI on top of it into `destination`.
     [[nodiscard]] static bool ReplayPostProcessedFrame(SDL_GPUTexture* destination, std::size_t sceneEnd,
                                                        bool boneDataReady)
     {
+        SDL_GPUTexture* sceneMultisampled = nullptr;
+        SDL_GPUTexture* sceneDepthTarget = nullptr;
+        if (!PrepareSceneAttachments(sceneMultisampled, sceneDepthTarget))
+        {
+            // BeginFrame already prepared the window-sized attachments and pipelines. Replay
+            // every command there, with the original viewport/scissor and no processed scene.
+            return ReplayFrame(destination, boneDataReady);
+        }
         SDL_GPUTexture* const multisampled = IsMultisampled() ? s_multisampleColorTexture : nullptr;
         ReplayView view = FullFrameView();
         const mu::PostProcessingLook look = CompositedLook();
@@ -3108,15 +3127,14 @@ public:
         s_replayTargetSize = scaled ? SceneSize() : Render::PostProcessing::FrameSize{};
         RenderGroundShadowMask(sceneEnd, boneDataReady, SceneSize());
         const bool sceneView = s_postProcessingView == mu::PostProcessingView::Scene;
-        // The scene texture's format says whether this frame's scene is HDR (EnsureTargets).
         s_hdrScenePass = s_postProcessing.IsHdrScene();
 
         // Its depth stays for the bloom and UI passes, which test against it as
         // the UI did when it shared the scene's pass.
-        const SDL_GPUColorTargetInfo sceneTarget = CycledTarget(mu::GetSdlGpuFrameColorTarget(
-            {s_postProcessing.GetSceneTexture(), SceneMultisampleTexture()}, s_clearColor));
+        const SDL_GPUColorTargetInfo sceneTarget = CycledTarget(
+            mu::GetSdlGpuFrameColorTarget({s_postProcessing.GetSceneTexture(), sceneMultisampled}, s_clearColor));
         if (!BeginReplayPass(sceneTarget,
-                             MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE, ScenePassDepth())))
+                             MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE, sceneDepthTarget)))
         {
             s_hdrScenePass = false;
             s_replayTargetSize = {};
