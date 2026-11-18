@@ -8,7 +8,8 @@ set(MU_TARGET_ADAPTERS
   "Core/Platform/Adapters/CredentialHostPosix.cpp"
   "GameShop/FileDownloader/Adapters/CurlShopDownload.cpp"
   "Core/Utilities/Adapters/CpuUsagePosix.cpp"
-  "Render/Renderer/Adapters/GpuDeviceSdlChoice.cpp")
+  "Render/Renderer/Adapters/GpuDeviceSdlChoice.cpp"
+  "Core/Utilities/Log/Adapters/LogSinksNone.cpp")
 set(MU_TARGET_DEPENDENCIES OpenSSL CURL Cryptopp TurboJPEG)
 set(MU_TARGET_SYSTEM_LIBRARIES pthread dl m)
 

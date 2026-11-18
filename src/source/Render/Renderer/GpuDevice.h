@@ -14,4 +14,9 @@ void FillGpuDeviceProperties(SDL_PropertiesID props, std::string_view configBack
 // The target's own device properties, from the adapter its CMake picks (MU_TARGET_ADAPTERS).
 void AddTargetGpuDeviceProperties(SDL_PropertiesID props);
 
+// Whether the target's frames may block on the GPU. False where the host calls each frame and a wait inside it
+// fails (a browser's requestAnimationFrame): the swapchain is acquired without waiting, the texture uploader grows
+// past its ceiling, and shutdown doesn't wait for the GPU to go idle.
+bool TargetFramesMayWait();
+
 } // namespace Render

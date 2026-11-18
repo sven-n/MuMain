@@ -523,6 +523,12 @@ public:
     {
         return false;
     }
+    // False where the window has no present mode that isn't tied to the display (a browser canvas, which the
+    // browser paces): there VSync can't be turned off.
+    [[nodiscard]] virtual bool CanTurnOffVSync() const
+    {
+        return true;
+    }
     // Multisample anti-aliasing: `samples` is the `[Render] Antialiasing`
     // value (0 or 1 off, 2, 4, 8), lowered to what the GPU supports. Before
     // initialisation it sets the count the renderer starts with; afterwards

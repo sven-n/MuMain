@@ -62,12 +62,19 @@ const KeySet TermKeys = {Keys::Attribute, Keys::Times, Keys::Divisor};
 // option only.
 bool HasNumbers(ItemOptionType type)
 {
-    return type != ItemOptionType::Luck;
+    return type != ItemOptionType::Luck && type != ItemOptionType::AncientBonus;
 }
 
 bool HasOneOption(ItemOptionType type)
 {
-    return type == ItemOptionType::Luck;
+    return type == ItemOptionType::Luck || type == ItemOptionType::AncientBonus;
+}
+
+// "a luck", "an ancientBonus": a type name with its article, for the messages.
+std::string WithArticle(std::string_view name)
+{
+    const bool vowel = !name.empty() && std::string_view("aeiou").find(name.front()) != std::string_view::npos;
+    return (vowel ? "an " : "a ") + std::string(name);
 }
 
 bool IsGuid(std::string_view text)
@@ -393,7 +400,7 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
         if (number != json.end())
         {
             AddFatal(field + "." + Keys::Number,
-                     std::string("a ") + FindEnumName(type) + " option has no number; leave it out");
+                     WithArticle(FindEnumName(type)) + " option has no number; leave it out");
         }
         return;
     }
@@ -402,7 +409,8 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
         AddFatal(field + "." + Keys::Number, "missing");
         return;
     }
-    const int minimum = type == ItemOptionType::Excellent ? 1 : 0;
+    // Excellent options count from 1 (bit number - 1), an ancient set's options in the order the set gives them.
+    const int minimum = type == ItemOptionType::Excellent || type == ItemOptionType::AncientOption ? 1 : 0;
     const int maximum = type == ItemOptionType::Option      ? MaxOptionTypeNumber
                         : type == ItemOptionType::Excellent ? MaxExcellentOptionNumber
                                                             : MaxNumber;
@@ -469,7 +477,7 @@ void ItemOptionsReader::ReadOptions(const OrderedJson& json, const std::string& 
     }
     if (HasOneOption(definition.type) && options->size() > 1)
     {
-        AddFatal(optionsField, std::string("a ") + FindEnumName(definition.type) + " definition has one option");
+        AddFatal(optionsField, WithArticle(FindEnumName(definition.type)) + " definition has one option");
     }
     std::set<int> numbers;
     for (size_t index = 0; index < options->size(); ++index)

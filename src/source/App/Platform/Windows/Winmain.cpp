@@ -101,6 +101,7 @@
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/Log/SdlLogBridge.h"
+#include "Core/Utilities/Log/TargetLogSinks.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "Character/CharMakeWin.h"
@@ -365,6 +366,17 @@ void ApplyVSyncPreferenceNow(bool enabled)
     {
         SetTargetFps(EffectiveOffVSyncTargetFps());
         return;
+    }
+
+    if (!enabled && !CanDisableVSync())
+    {
+        static bool logged = false;
+        if (!logged)
+        {
+            mu::log::Get("render")->info("VSync stays on: this display has no present mode that isn't tied to it");
+            logged = true;
+        }
+        enabled = true;
     }
 
     if (enabled)
@@ -2050,7 +2062,7 @@ static std::string InitializeWorkingDirectoryAndLog()
 {
     SetWorkingDirectoryToBasePath();
     std::string contentRoot = OpenContent();
-    mu::log::Init(Core::Platform::UserFolder());
+    mu::log::Init(Core::Platform::UserFolder(), mu::log::TargetLogSinks());
     return contentRoot;
 }
 

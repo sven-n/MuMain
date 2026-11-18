@@ -83,7 +83,7 @@
 				<div class="checkbox-tick"></div>
 			</div>
 		</div>
-		<div class="option-row option-checkbox-row" data-event-click="option_toggle_vsync">
+		<div class="option-row option-checkbox-row option-row-tipped" data-class-locked="vsync_locked" data-attr-data-hint="vsync_locked ? vsync_locked_reason : ''" data-event-click="option_toggle_vsync">
 			<span class="option-row-label">{{vsync_label}}</span>
 			<div class="checkbox-box" data-class-checked="vsync_enabled">
 				<div class="checkbox-tick"></div>

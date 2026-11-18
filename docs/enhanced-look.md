@@ -410,7 +410,8 @@ Shorter forms of `$look set`: `$lighting rim <v>`, `$lighting specular <v>`,
 
 The Options window's tuning sliders (`[EnhancedTuning]`) predate any rule on
 which values a player may set. They are sorted here by what they control, so
-that new values, such as D1's PBR values in #990, are not offered to players
+that new values, such as D1's PBR values in #990 (the [linear lighting
+design](superpowers/specs/2026-11-16-linear-lighting-design.md)), are not offered to players
 just because they are look values:
 
 | Kind | Values | What a player's value is for |

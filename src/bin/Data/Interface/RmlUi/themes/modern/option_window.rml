@@ -55,9 +55,10 @@
 						<span class="opt-label">{{windowed_mode_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="windowed_mode"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_vsync">
+					<div class="opt-row opt-toggle-row opt-row-tipped" data-class-locked="vsync_locked" data-event-click="option_toggle_vsync">
 						<span class="opt-label">{{vsync_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="vsync_enabled"><div class="opt-toggle-knob"></div></div></div>
+						<span class="opt-row-tip" data-if="vsync_locked">{{vsync_locked_reason}}</span>
 					</div>
 					<div class="opt-row">
 						<span class="opt-label">{{fps_cap_row_label}}</span>

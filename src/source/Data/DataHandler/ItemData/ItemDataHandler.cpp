@@ -79,6 +79,7 @@ ItemOptionDatabase LoadItemOptions(std::vector<ItemDefinition>& items, std::vect
     }
     ValidateItemOptionLinks(items, options, issues);
     ValidateOptionDefinitionUse(items, options, issues);
+    ValidateAncientBonusNames(options, issues);
     for (ItemDefinition& item : items)
     {
         options.OrderLinks(item.options);
