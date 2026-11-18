@@ -1046,7 +1046,7 @@ void CMapManager::LoadWorld(int Map)
     }
 
     mu_swprintf(FileName, L"%ls\\TerrainHeight.bmp", WorldName);
-    if (IsTerrainHeightExtMap(this->WorldActive) == true)
+    if (IsTerrainHeightExtFile(FileName))
     {
         CreateTerrain(FileName, true);
     }
