@@ -389,6 +389,8 @@ namespace mu::ui::window
             // Shown while the last save failed; empty otherwise.
             Rml::String tuningSaveMessage;
             Rml::String tuningPreviewNote;
+            // The localized text used by the cached render-option lists, not a bound field.
+            std::wstring renderOptionsOffText;
             // [Render] Antialiasing (the Enhanced look's samples) and Anisotropy.
             std::vector<Rml::String> antialiasingLabels;
             int antialiasingIndex = 0;
@@ -445,6 +447,8 @@ namespace mu::ui::window
         // The model's copy of a UI text, marked dirty when the text changed.
         void SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text);
         void SyncTuningModel(OptionRmlModel& model);
+        void SyncRenderOptionLabels(OptionRmlModel& model);
+        void SyncRenderOptionModel(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
             [this](Rml::DataModelConstructor& c, OptionRmlModel& model) { BindRmlModel(c, model); },

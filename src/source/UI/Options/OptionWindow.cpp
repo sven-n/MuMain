@@ -1791,6 +1791,60 @@ void mu::ui::window::COptionWindow::SyncLabel(Rml::String& field, const char* fi
     }
 }
 
+void mu::ui::window::COptionWindow::SyncRenderOptionLabels(OptionRmlModel& model)
+{
+    if (model.renderScaleLabels.empty())
+    {
+        model.renderScaleLabels = PercentLabels(s_RenderScaleValues, false);
+        m_RmlView.MarkDirty("render_scale_labels");
+    }
+    // Compare the wide text before converting or formatting any labels. Keep this cache in the
+    // model so rebuilding the view also initializes its arrays and dirty bindings.
+    const wchar_t* const off = I18N::Game::Off;
+    if (!model.sharpnessLabels.empty() && model.renderOptionsOffText == off)
+    {
+        return;
+    }
+    model.renderOptionsOffText = off;
+    model.antialiasingLabels = MultiplierLabels(s_AntialiasingValues);
+    model.anisotropyLabels = MultiplierLabels(s_AnisotropyValues);
+    model.sharpnessLabels = PercentLabels(s_SharpnessValues, true);
+    m_RmlView.MarkDirty("antialiasing_labels");
+    m_RmlView.MarkDirty("anisotropy_labels");
+    m_RmlView.MarkDirty("sharpness_labels");
+}
+
+void mu::ui::window::COptionWindow::SyncRenderOptionModel(OptionRmlModel& model)
+{
+    SyncRenderOptionLabels(model);
+    const auto syncMultiplierRow = [&](const std::vector<Rml::String>& labels, int& index, const char* indexName,
+                                       Rml::String& valueLabel, const char* valueName, int newIndex)
+    {
+        if (index != newIndex)
+        {
+            index = newIndex;
+            m_RmlView.MarkDirty(indexName);
+        }
+        if (valueLabel != labels[index])
+        {
+            valueLabel = labels[index];
+            m_RmlView.MarkDirty(valueName);
+        }
+    };
+    syncMultiplierRow(model.antialiasingLabels, model.antialiasingIndex, "antialiasing_index",
+                      model.antialiasingValueLabel, "antialiasing_value_label",
+                      FindValueIndex(s_AntialiasingValues, GameConfig::GetInstance().GetAntialiasing()));
+    syncMultiplierRow(model.anisotropyLabels, model.anisotropyIndex, "anisotropy_index", model.anisotropyValueLabel,
+                      "anisotropy_value_label",
+                      FindValueIndex(s_AnisotropyValues, GameConfig::GetInstance().GetAnisotropy()));
+    syncMultiplierRow(model.renderScaleLabels, model.renderScaleIndex, "render_scale_index",
+                      model.renderScaleValueLabel, "render_scale_value_label",
+                      FindValueIndex(s_RenderScaleValues, GameConfig::GetInstance().GetRenderScale()));
+    syncMultiplierRow(model.sharpnessLabels, model.sharpnessIndex, "sharpness_index", model.sharpnessValueLabel,
+                      "sharpness_value_label",
+                      FindValueIndex(s_SharpnessValues, GameConfig::GetInstance().GetSharpness()));
+}
+
 void mu::ui::window::COptionWindow::SyncRmlModel()
 {
     if (!m_RmlView.Document())
@@ -2004,36 +2058,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     SyncTuningModel(model);
 
-    // Rebuilt every sync for the localized "Off", as the FPS Limit row's "Uncapped".
-    const auto syncMultiplierRow = [&](std::vector<Rml::String>& labels, const char* labelsName, int& index,
-                                       const char* indexName, Rml::String& valueLabel, const char* valueName,
-                                       std::vector<Rml::String> newLabels, int newIndex)
-    {
-        if (labels != newLabels)
-        {
-            labels = std::move(newLabels);
-            m_RmlView.MarkDirty(labelsName);
-        }
-        if (index != newIndex)
-        {
-            index = newIndex;
-            m_RmlView.MarkDirty(indexName);
-        }
-        syncDropdownValue(valueLabel, valueName, labels, index);
-    };
-    syncMultiplierRow(model.antialiasingLabels, "antialiasing_labels", model.antialiasingIndex, "antialiasing_index",
-                      model.antialiasingValueLabel, "antialiasing_value_label", MultiplierLabels(s_AntialiasingValues),
-                      FindValueIndex(s_AntialiasingValues, GameConfig::GetInstance().GetAntialiasing()));
-    syncMultiplierRow(model.anisotropyLabels, "anisotropy_labels", model.anisotropyIndex, "anisotropy_index",
-                      model.anisotropyValueLabel, "anisotropy_value_label", MultiplierLabels(s_AnisotropyValues),
-                      FindValueIndex(s_AnisotropyValues, GameConfig::GetInstance().GetAnisotropy()));
-    syncMultiplierRow(model.renderScaleLabels, "render_scale_labels", model.renderScaleIndex, "render_scale_index",
-                      model.renderScaleValueLabel, "render_scale_value_label",
-                      PercentLabels(s_RenderScaleValues, false),
-                      FindValueIndex(s_RenderScaleValues, GameConfig::GetInstance().GetRenderScale()));
-    syncMultiplierRow(model.sharpnessLabels, "sharpness_labels", model.sharpnessIndex, "sharpness_index",
-                      model.sharpnessValueLabel, "sharpness_value_label", PercentLabels(s_SharpnessValues, true),
-                      FindValueIndex(s_SharpnessValues, GameConfig::GetInstance().GetSharpness()));
+    SyncRenderOptionModel(model);
 
     const bool showFpsCounter = GetShowFpsCounter();
     const bool showDebugInfo = GetShowDebugInfo();
