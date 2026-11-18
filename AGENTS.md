@@ -63,6 +63,9 @@ Quick references:
 - Run `scripts/install-hooks.sh` once per clone: the pre-push hook runs the same
   static checks and formatting check as CI's Quality Gates.
 - Reference the related issue in the PR description when applicable.
+- Follow [`docs/PULL_REQUESTS.md`](docs/PULL_REQUESTS.md): a change that is
+  visible in the game or the editor needs before and after screenshots in the
+  PR description.
 
 ## Out of scope for AI changes
 
