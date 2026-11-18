@@ -2,7 +2,8 @@
 
 These rules apply to every pull request, by humans and by AI agents alike. The
 code itself follows [`CODING_RULES.md`](CODING_RULES.md); this file covers what
-the PR has to show.
+the PR has to show: screenshots or videos of visible changes, what was tested,
+and that the coding rules were followed.
 
 ---
 
@@ -61,3 +62,43 @@ An agent that can't run the game and take screenshots or videos says so in the P
 description and leaves the *Before* / *After* section for the person who opens
 the PR. The PR is ready for review only once the screenshots or videos are
 there.
+
+## 2. Write Down What Was Tested
+
+The PR description lists what was done to check the change, so reviewers know
+what is covered and what still needs a look. "Tested" alone is not enough.
+
+- **Build:** which platform and configuration it was built on (for example
+  Windows x64 Release, Linux, macOS).
+- **Tested in game:** each case played through, with the steps, the server
+  (for example OpenMU and its version), the map, the character or class, and
+  the result. Bug fixes also say that the bug was reproduced on the base branch
+  first.
+- **In-game tests:** which scenarios of the [in-game tests](in-game-tests.md)
+  were run and their result; attach the report when it helps.
+- **Automated tests:** which tests were added or changed, and that the test
+  suite passes.
+- **Not tested:** what wasn't checked and why (a platform you don't have, a
+  case that needs two accounts, ...).
+
+A list of checkboxes works well:
+
+```markdown
+## Testing
+
+- [x] Built on Windows x64 Release
+- [x] In game (OpenMU): sold an item at the Lorencia shop, Zen updated, item gone
+- [x] Bug reproduced on main first: item stayed in the inventory
+- [x] In-game tests: `trade-item` passed (report attached)
+- [x] `ctest` passes, new test `ShopSellTests`
+- [ ] Not tested on Linux/macOS
+```
+
+Docs-only or CI-only PRs say so in one line.
+
+## 3. Confirm the Coding Rules
+
+The PR description confirms that [`CODING_RULES.md`](CODING_RULES.md) and this
+file were read and followed for the change. Where the change departs from a
+rule on purpose (for example to keep a diff small in old code), name the rule
+and say why, so the reviewer doesn't have to find it.
