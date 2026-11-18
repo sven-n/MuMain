@@ -147,6 +147,13 @@ void CheckChatText(wchar_t* Text)
         SetActionClass(c, o, PLAYER_HUSTLE, AT_HUSTLE);
         SendRequestAction(Hero->Object, AT_HUSTLE);
     }
+    else if (FindText(Text, L"/dance") || FindText(Text, L"/Dance"))
+    {
+        // PLAYER_POINT_DANCE is a real action in player.bmd (index 227). The animation
+        // request carries that index; the server relays it unchanged and ReceiveAction's
+        // default plays the number as the animation, so other clients dance too.
+        SetActionClass(c, o, PLAYER_POINT_DANCE, static_cast<BYTE>(PLAYER_POINT_DANCE));
+    }
     else if (FindText(Text, I18N::Game::ComeOn))
     {
         SetActionClass(c, o, PLAYER_PROVOCATION, AT_PROVOCATION);
