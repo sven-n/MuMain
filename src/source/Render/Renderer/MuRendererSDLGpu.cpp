@@ -7445,7 +7445,8 @@ private:
     // the HDR pipelines there; the frame's own (INVALID) when only edge smoothing takes the frame.
     [[nodiscard]] static SDL_GPUTextureFormat PostProcessedSceneFormat()
     {
-        return UsesHdrScene() && s_postProcessingEnabled ? kHdrSceneFormat : SDL_GPU_TEXTUREFORMAT_INVALID;
+        // The flag first: UsesHdrScene creates the HDR multisampled target, which only post-processing reads.
+        return s_postProcessingEnabled && UsesHdrScene() ? kHdrSceneFormat : SDL_GPU_TEXTUREFORMAT_INVALID;
     }
 
     [[nodiscard]] static bool UsesHdrScene()
