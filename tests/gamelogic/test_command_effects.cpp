@@ -2,38 +2,66 @@
 #include "GameLogic/Character/CommandEffects.h"
 #include "GameLogic/Social/GuildSize.h"
 
+using Data::Items::ItemPetStats;
+using Data::Items::PetStatValues;
 using GameLogic::Character::CommandEffects;
+using GameLogic::Character::DarkLordPet;
+using GameLogic::Character::DarkLordPets;
 using GameLogic::Character::GetCommandEffects;
 using GameLogic::Character::GetCommandGuildMembers;
-using GameLogic::Character::HorseDamageBase;
+using GameLogic::Character::GetCommandPetStats;
 using GameLogic::Social::GetMaxGuildMembers;
 
-TEST_CASE("the command adds what the Dark Lord's formulas add to the attack rate and the pets")
+namespace
 {
-    // OpenMU's ClassDarkLord: attack rate command / 10, raven damage command / 8 ~ command / 4, raven attack speed
-    // command / 50. The client's CalcPetInfo: horse damage command / 10, half again on the maximum, and attack speed
-    // command / 50.
-    const CommandEffects effects = GetCommandEffects(250, 1000, HorseDamageBase{});
+// The shipped Dark Raven's pet stats (Group13_Helper.json): OpenMU's ClassDarkLord.
+ItemPetStats RavenStats()
+{
+    ItemPetStats stats;
+    stats.minimumDamage = {180, 15, 1, 0, 8, 0};
+    stats.maximumDamage = {200, 15, 1, 0, 4, 0};
+    stats.attackSpeed = {20, 4, 5, 0, 50, 0};
+    return stats;
+}
+
+// The shipped Dark Horse's: the original client's CalcPetInfo.
+ItemPetStats HorseStats()
+{
+    ItemPetStats stats;
+    stats.minimumDamage = {0, 5, 1, 10, 10, 0};
+    stats.maximumDamage = {0, 0, 1, 0, 0, 150};
+    stats.attackSpeed = {20, 4, 5, 0, 50, 0};
+    return stats;
+}
+
+DarkLordPets Pets(int horseLevel = 0, int strength = 0)
+{
+    return {DarkLordPet{RavenStats(), 0, strength}, DarkLordPet{HorseStats(), horseLevel, strength}};
+}
+} // namespace
+
+TEST_CASE("the command adds to the attack rate and to what the pets' stats count of it")
+{
+    const CommandEffects effects = GetCommandEffects(250, 1000, Pets());
     CHECK(effects.attackRate == 100);
-    CHECK(effects.ravenMinimumDamage == 125);
-    CHECK(effects.ravenMaximumDamage == 250);
-    CHECK(effects.ravenAttackSpeed == 20);
-    CHECK(effects.horseMinimumDamage == 100);
-    CHECK(effects.horseMaximumDamage == 150);
-    CHECK(effects.horseAttackSpeed == 20);
+    CHECK(effects.raven == PetStatValues{125, 250, 20});
+    CHECK(effects.horse == PetStatValues{100, 150, 20});
 }
 
 TEST_CASE("each part of the command is rounded down")
 {
-    const CommandEffects effects = GetCommandEffects(19, 49, HorseDamageBase{});
+    const CommandEffects effects = GetCommandEffects(19, 49, Pets());
     CHECK(effects.attackRate == 4);
-    CHECK(effects.ravenMinimumDamage == 6);
-    CHECK(effects.ravenMaximumDamage == 12);
-    CHECK(effects.ravenAttackSpeed == 0);
-    CHECK(effects.horseMinimumDamage == 4);
-    CHECK(effects.horseMaximumDamage == 6);
-    CHECK(effects.horseAttackSpeed == 0);
+    CHECK(effects.raven == PetStatValues{6, 12, 0});
+    CHECK(effects.horse == PetStatValues{4, 6, 0});
     CHECK(effects.guildMembers == 4);
+}
+
+TEST_CASE("the command adds to the Dark Horse's maximum what the whole minimum's share gains")
+{
+    // The maximum is 150 % of the whole minimum: strength 100 and horse level 1 give 15 (maximum 22), 310 command makes
+    // it 46 (maximum 69), so the command adds 31 to the minimum and 47, not 46, to the maximum.
+    CHECK(GetCommandPetStats(DarkLordPet{HorseStats(), 1, 100}, 310) == PetStatValues{31, 47, 6});
 }
 
 TEST_CASE("by the client's rule, a guild master's guild takes level / 10 members, a Dark Lord's plus command / 10, "
@@ -58,15 +86,10 @@ TEST_CASE("the command adds the guild members above the level's, up to the cap")
 
 TEST_CASE("no command adds nothing")
 {
-    const CommandEffects effects = GetCommandEffects(0, 0, HorseDamageBase{});
-    CHECK(effects == CommandEffects{});
+    CHECK(GetCommandEffects(0, 0, Pets(5, 300)) == CommandEffects{});
 }
 
-TEST_CASE("the command adds to the Dark Horse's maximum what the whole minimum's half gains")
+TEST_CASE("a pet without pet stats gets nothing from the command")
 {
-    // CalcPetInfo halves the whole minimum: strength 100 and horse level 1 give 15 (maximum 22), 310 command makes it
-    // 46 (maximum 69), so the command adds 31 to the minimum and 47, not 46, to the maximum.
-    const CommandEffects effects = GetCommandEffects(400, 310, HorseDamageBase{100, 1});
-    CHECK(effects.horseMinimumDamage == 31);
-    CHECK(effects.horseMaximumDamage == 47);
+    CHECK(GetCommandPetStats(DarkLordPet{}, 1000) == PetStatValues{});
 }

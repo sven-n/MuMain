@@ -138,6 +138,7 @@ void CMuItemBasicsUI::Render(bool* open)
             RenderStatTable(*item);
             RenderPrices(*item);
             RenderResistances(*item);
+            RenderPetStats(*item);
             ImGui::PopID();
         }
         m_draft.End();
@@ -313,6 +314,41 @@ void CMuItemBasicsUI::RenderResistances(ItemDefinition& item)
             ImGui::SameLine();
         }
     }
+}
+
+void CMuItemBasicsUI::RenderPetStats(ItemDefinition& item)
+{
+    if (!item.tags.Has(Data::Items::ItemTag::DarkLordPet) && item.petStats.IsEmpty())
+    {
+        return;
+    }
+    if (!ImGui::CollapsingHeader(I18N::Editor::PetStats))
+    {
+        return;
+    }
+    ImGui::TextWrapped("%s", I18N::Editor::ThePetWindowAndTheCommandHintCountEachStatAs);
+    RenderPetStatFormula(I18N::Metadata::MinDamage, item.petStats.minimumDamage, false);
+    RenderPetStatFormula(I18N::Metadata::MaxDamage, item.petStats.maximumDamage, true);
+    RenderPetStatFormula(I18N::Metadata::AttackSpeed, item.petStats.attackSpeed, true);
+}
+
+void CMuItemBasicsUI::RenderPetStatFormula(const char* label, Data::Items::PetStatFormula& formula, bool shareOfMinimum)
+{
+    ImGui::PushID(label);
+    ImGui::SeparatorText(label);
+    Fields::Int(m_draft, I18N::Editor::BaseValue, formula.add);
+    Fields::Int(m_draft, I18N::Editor::PerPetLevel, formula.perPetLevel);
+    ImGui::SameLine();
+    Fields::Int(m_draft, I18N::Editor::PetLevelDivisor, formula.petLevelDivisor);
+    Fields::Int(m_draft, I18N::Editor::StrengthDivisor, formula.strengthDivisor);
+    ImGui::SameLine();
+    Fields::Int(m_draft, I18N::Editor::CommandDivisor, formula.commandDivisor);
+    // The minimum damage cannot take a share of itself (the item checks report it).
+    if (shareOfMinimum || formula.minimumPercent != 0)
+    {
+        Fields::Int(m_draft, I18N::Editor::ShareOfTheMinimumDamage, formula.minimumPercent);
+    }
+    ImGui::PopID();
 }
 
 #endif // _EDITOR

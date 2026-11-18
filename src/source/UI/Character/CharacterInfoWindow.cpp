@@ -26,6 +26,7 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Character/CriticalDamageRateLine.h"
+#include "GameLogic/Pets/PetStats.h"
 #include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
 
@@ -492,14 +493,26 @@ void mu::ui::window::CCharacterInfoWindow::BuildCommandRow()
     BuildCommandHint(wCharisma);
 }
 
+namespace
+{
+// A pet for the command hint: its item's pet stats, the equipped pet's level (0 without one) and the hero's strength.
+// A stat that takes a share of the whole minimum damage (the Dark Horse's maximum) counts them too.
+GameLogic::Character::DarkLordPet MakeHintPet(int itemType, int petType)
+{
+    GameLogic::Character::DarkLordPet pet;
+    pet.stats = GameLogic::Pets::GetItemPetStats(itemType);
+    const PET_INFO* equipped = Hero->GetEquipedPetInfo(petType);
+    pet.petLevel = equipped != nullptr && equipped->m_dwPetType != PET_TYPE_NONE ? equipped->m_wLevel : 0;
+    pet.strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
+    return pet;
+}
+} // namespace
+
 void mu::ui::window::CCharacterInfoWindow::BuildCommandHint(int command)
 {
-    // The Dark Horse's maximum damage halves its whole minimum, so the command's part of it depends on the rest.
-    const PET_INFO* horse = Hero->GetEquipedPetInfo(PET_TYPE_DARK_HORSE);
-    GameLogic::Character::HorseDamageBase horseBase;
-    horseBase.strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-    horseBase.horseLevel = horse->m_dwPetType != PET_TYPE_NONE ? horse->m_wLevel : 0;
-    m_CommandHintTexts.Update(GameLogic::Character::GetCommandEffects(CharacterAttribute->Level, command, horseBase));
+    const GameLogic::Character::DarkLordPets pets{MakeHintPet(ITEM_DARK_RAVEN_ITEM, PET_TYPE_DARK_SPIRIT),
+                                                  MakeHintPet(ITEM_DARK_HORSE_ITEM, PET_TYPE_DARK_HORSE)};
+    m_CommandHintTexts.Update(GameLogic::Character::GetCommandEffects(CharacterAttribute->Level, command, pets));
 }
 
 void mu::ui::window::CCharacterInfoWindow::ShowLineHint()

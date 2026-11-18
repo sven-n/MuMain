@@ -54,6 +54,7 @@ constexpr const char* Requirements = "requirements";
 constexpr const char* RequirementsByLevel = "requirementsByLevel";
 constexpr const char* ClassRequirements = "classRequirements";
 constexpr const char* Resistances = "resistances";
+constexpr const char* PetStats = "petStats";
 } // namespace Keys
 
 // Same order as ITEM_ATTRIBUTE::RequireClass.
@@ -121,7 +122,49 @@ void VisitRequirementFields(TRequirements& requirements, TVisitor&& visit)
     visit(key(ItemRequirement::Leadership), requirements.leadership, WORD{0});
 }
 
+// The pet stats' formulas, in the order they are written.
+template <typename TStats, typename TVisitor> void VisitPetStatFormulas(TStats& stats, TVisitor&& visit)
+{
+    visit("minimumDamage", stats.minimumDamage);
+    visit("maximumDamage", stats.maximumDamage);
+    visit("attackSpeed", stats.attackSpeed);
+}
+
+template <typename TFormula, typename TVisitor> void VisitPetStatFormulaFields(TFormula& formula, TVisitor&& visit)
+{
+    visit("add", formula.add, 0);
+    visit("perPetLevel", formula.perPetLevel, 0);
+    visit("petLevelDivisor", formula.petLevelDivisor, 1);
+    visit("strengthDivisor", formula.strengthDivisor, 0);
+    visit("commandDivisor", formula.commandDivisor, 0);
+    visit("minimumPercent", formula.minimumPercent, 0);
+}
+
 // ---------------------------------------------------------------- writing
+
+OrderedJson WritePetStats(const ItemPetStats& stats)
+{
+    OrderedJson json = OrderedJson::object();
+    VisitPetStatFormulas(stats,
+                         [&json](const char* name, const PetStatFormula& formula)
+                         {
+                             if (formula.IsEmpty())
+                             {
+                                 return;
+                             }
+                             OrderedJson fields = OrderedJson::object();
+                             VisitPetStatFormulaFields(formula,
+                                                       [&fields](const char* key, int value, int defaultValue)
+                                                       {
+                                                           if (value != defaultValue)
+                                                           {
+                                                               fields[key] = value;
+                                                           }
+                                                       });
+                             json[name] = std::move(fields);
+                         });
+    return json;
+}
 
 template <size_t Count>
 void WriteByteTable(OrderedJson& item, const char* key, const std::array<BYTE, Count>& values,
@@ -442,6 +485,10 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
 
     WriteByteTable(item, Keys::ClassRequirements, definition.classRequirements, ClassKeys);
     WriteByteTable(item, Keys::Resistances, definition.resistances, ResistanceKeys);
+    if (!definition.petStats.IsEmpty())
+    {
+        item[Keys::PetStats] = WritePetStats(definition.petStats);
+    }
     return item;
 }
 
@@ -485,6 +532,8 @@ private:
     void ReadStats(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition);
+    void ReadPetStats(const OrderedJson& json, ItemPetStats& stats);
+    void ReadPetStatFormula(const OrderedJson& json, const std::string& field, PetStatFormula& formula);
     template <size_t Count>
     void ReadByteTable(const OrderedJson& json, const char* key, std::array<BYTE, Count>& values,
                        const std::array<const char*, Count>& keys);
@@ -1345,13 +1394,69 @@ void ItemReader::ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition
     }
 }
 
+void ItemReader::ReadPetStats(const OrderedJson& json, ItemPetStats& stats)
+{
+    const auto found = json.find(Keys::PetStats);
+    if (found == json.end())
+    {
+        return;
+    }
+    if (!found->is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, Keys::PetStats, "must be an object");
+        return;
+    }
+    std::set<std::string, std::less<>> knownKeys;
+    VisitPetStatFormulas(stats,
+                         [&](const char* name, PetStatFormula& formula)
+                         {
+                             knownKeys.insert(name);
+                             if (const auto entry = found->find(name); entry != found->end())
+                             {
+                                 ReadPetStatFormula(*entry, std::string(Keys::PetStats) + "." + name, formula);
+                             }
+                         });
+    WarnAboutUnknownKeys(*found, knownKeys, std::string(Keys::PetStats) + ".");
+}
+
+void ItemReader::ReadPetStatFormula(const OrderedJson& json, const std::string& field, PetStatFormula& formula)
+{
+    if (!json.is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, field, "must be an object");
+        return;
+    }
+    std::set<std::string, std::less<>> knownKeys;
+    VisitPetStatFormulaFields(formula,
+                              [&](const char* key, int& value, int)
+                              {
+                                  knownKeys.insert(key);
+                                  if (const auto entry = json.find(key); entry != json.end())
+                                  {
+                                      ReadValue(*entry, field + "." + key, value);
+                                  }
+                              });
+    WarnAboutUnknownKeys(json, knownKeys, field + ".");
+}
+
 std::set<std::string, std::less<>> GetKnownItemKeys()
 {
-    std::set<std::string, std::less<>> keys{
-        Keys::Number,       Keys::Name,          Keys::NameForms,           Keys::Tags,
-        Keys::Options,      Keys::Description,   Keys::LevelValues,         Keys::NameLines,
-        Keys::GroundLabels, Keys::Requirements,  Keys::RequirementsByLevel, Keys::ClassRequirements,
-        Keys::Resistances,  Keys::TooltipLayout, Keys::TooltipLayoutChanges};
+    std::set<std::string, std::less<>> keys{Keys::Number,
+                                            Keys::Name,
+                                            Keys::NameForms,
+                                            Keys::Tags,
+                                            Keys::Options,
+                                            Keys::Description,
+                                            Keys::LevelValues,
+                                            Keys::NameLines,
+                                            Keys::GroundLabels,
+                                            Keys::Requirements,
+                                            Keys::RequirementsByLevel,
+                                            Keys::ClassRequirements,
+                                            Keys::Resistances,
+                                            Keys::TooltipLayout,
+                                            Keys::TooltipLayoutChanges,
+                                            Keys::PetStats};
     ItemDefinition unused;
     VisitStatFields(unused, [&](const char* key, auto&, const auto&) { keys.insert(key); });
     return keys;
@@ -1396,6 +1501,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     ReadRequirementsByLevel(json, definition);
     ReadByteTable(json, Keys::ClassRequirements, definition.classRequirements, ClassKeys);
     ReadByteTable(json, Keys::Resistances, definition.resistances, ResistanceKeys);
+    ReadPetStats(json, definition.petStats);
 
     static const std::set<std::string, std::less<>> KnownItemKeys = GetKnownItemKeys();
     WarnAboutUnknownKeys(json, KnownItemKeys, "");

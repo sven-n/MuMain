@@ -265,6 +265,22 @@
       },
       "classRequirements": {
         "darkLord": 1
+      },
+      "petStats": {
+        "minimumDamage": {
+          "perPetLevel": 5,
+          "strengthDivisor": 10,
+          "commandDivisor": 10
+        },
+        "maximumDamage": {
+          "minimumPercent": 150
+        },
+        "attackSpeed": {
+          "add": 20,
+          "perPetLevel": 4,
+          "petLevelDivisor": 5,
+          "commandDivisor": 50
+        }
       }
     },
     {
@@ -303,6 +319,24 @@
         "fairyElf": 1,
         "magicGladiator": 1,
         "darkLord": 1
+      },
+      "petStats": {
+        "minimumDamage": {
+          "add": 180,
+          "perPetLevel": 15,
+          "commandDivisor": 8
+        },
+        "maximumDamage": {
+          "add": 200,
+          "perPetLevel": 15,
+          "commandDivisor": 4
+        },
+        "attackSpeed": {
+          "add": 20,
+          "perPetLevel": 4,
+          "petLevelDivisor": 5,
+          "commandDivisor": 50
+        }
       }
     },
     {

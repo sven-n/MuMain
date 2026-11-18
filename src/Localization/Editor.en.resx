@@ -5665,4 +5665,25 @@
   <data name="A talk step names this set" xml:space="preserve">
     <value>A talk step names this set: it stays.</value>
   </data>
+  <data name="Pet stats" xml:space="preserve">
+    <value>Pet stats</value>
+  </data>
+  <data name="Per pet level" xml:space="preserve">
+    <value>Per pet level</value>
+  </data>
+  <data name="Pet level divisor" xml:space="preserve">
+    <value>Pet level divisor</value>
+  </data>
+  <data name="Strength divisor" xml:space="preserve">
+    <value>Strength divisor</value>
+  </data>
+  <data name="Command divisor" xml:space="preserve">
+    <value>Command divisor</value>
+  </data>
+  <data name="Share of the minimum damage (%)" xml:space="preserve">
+    <value>Share of the minimum damage (%)</value>
+  </data>
+  <data name="The pet window and the command hint count each stat as" xml:space="preserve">
+    <value>Each stat: base value + pet level × per pet level / its divisor + strength / its divisor + command / its divisor + minimum damage × share / 100. Each division is rounded down; a divisor of 0 leaves its term out.</value>
+  </data>
 </root>

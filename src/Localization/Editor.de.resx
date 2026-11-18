@@ -5383,4 +5383,25 @@
   <data name="A talk step names this set" xml:space="preserve">
     <value>Ein Gesprächsschritt nennt diesen Satz: er bleibt.</value>
   </data>
+  <data name="Pet stats" xml:space="preserve">
+    <value>Haustierwerte</value>
+  </data>
+  <data name="Per pet level" xml:space="preserve">
+    <value>Je Haustierstufe</value>
+  </data>
+  <data name="Pet level divisor" xml:space="preserve">
+    <value>Teiler der Haustierstufe</value>
+  </data>
+  <data name="Strength divisor" xml:space="preserve">
+    <value>Teiler der Stärke</value>
+  </data>
+  <data name="Command divisor" xml:space="preserve">
+    <value>Teiler der Führung</value>
+  </data>
+  <data name="Share of the minimum damage (%)" xml:space="preserve">
+    <value>Anteil am Mindestschaden (%)</value>
+  </data>
+  <data name="The pet window and the command hint count each stat as" xml:space="preserve">
+    <value>Jeder Wert: Grundwert + Haustierstufe × je Stufe / Teiler + Stärke / Teiler + Führung / Teiler + Mindestschaden × Anteil / 100. Jede Division wird abgerundet; ein Teiler von 0 lässt den Teil weg.</value>
+  </data>
 </root>

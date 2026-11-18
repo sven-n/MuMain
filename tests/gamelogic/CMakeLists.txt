@@ -208,4 +208,5 @@ mu_add_test(
         test_command_effects.cpp
         ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Character/CommandEffects.cpp
         ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Social/GuildSize.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Data/GameData/ItemData/ItemPetStats.cpp
 )

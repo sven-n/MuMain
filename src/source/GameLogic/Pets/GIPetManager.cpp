@@ -5,7 +5,7 @@
 #include "I18N/All.h"
 
 #include "GIPetManager.h"
-#include "GameLogic/Character/CommandEffects.h"
+#include "GameLogic/Pets/PetStats.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -552,6 +552,16 @@ static std::uint8_t g_tabBar = 0;
         return &gs_PetInfo;
     }
 
+    // Sets the pet's damage and attack speed from its item's pet stats (the item data's "petStats").
+    void ApplyPetStats(PET_INFO* pPetInfo, int itemType, int strength, int command)
+    {
+        const Data::Items::PetStatValues values = Data::Items::EvaluatePetStats(
+            GameLogic::Pets::GetItemPetStats(itemType), {pPetInfo->m_wLevel, strength, command});
+        pPetInfo->m_wDamageMin = static_cast<WORD>(values.minimumDamage);
+        pPetInfo->m_wDamageMax = static_cast<WORD>(values.maximumDamage);
+        pPetInfo->m_wAttackSpeed = static_cast<WORD>(values.attackSpeed);
+    }
+
     void CalcPetInfo(PET_INFO* pPetInfo)
     {
         int Charisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
@@ -563,22 +573,13 @@ static std::uint8_t g_tabBar = 0;
         {
         case PET_TYPE_DARK_SPIRIT:
             pPetInfo->m_dwExp2 = ((10 + Level) * Level * Level * Level * 100);
-            pPetInfo->m_wDamageMin =
-                (180 + (pPetInfo->m_wLevel * 15) + GameLogic::Character::GetCommandRavenMinimumDamage(Charisma));
-            pPetInfo->m_wDamageMax =
-                (200 + (pPetInfo->m_wLevel * 15) + GameLogic::Character::GetCommandRavenMaximumDamage(Charisma));
-            pPetInfo->m_wAttackSpeed =
-                (20 + (pPetInfo->m_wLevel * 4 / 5) + GameLogic::Character::GetCommandRavenAttackSpeed(Charisma));
+            ApplyPetStats(pPetInfo, ITEM_DARK_RAVEN_ITEM, Strength, Charisma);
             pPetInfo->m_wAttackSuccess = (1000 + pPetInfo->m_wLevel) + (pPetInfo->m_wLevel * 15);
             break;
 
         case PET_TYPE_DARK_HORSE:
             pPetInfo->m_dwExp2 = ((10 + Level) * Level * Level * Level * 100);
-            pPetInfo->m_wDamageMin = GameLogic::Character::GetHorseMinimumDamage(
-                GameLogic::Character::HorseDamageBase{Strength, pPetInfo->m_wLevel}, Charisma);
-            pPetInfo->m_wDamageMax = GameLogic::Character::GetHorseMaximumDamage(pPetInfo->m_wDamageMin);
-            pPetInfo->m_wAttackSpeed =
-                (20 + (pPetInfo->m_wLevel * 4 / 5) + GameLogic::Character::GetCommandHorseAttackSpeed(Charisma));
+            ApplyPetStats(pPetInfo, ITEM_DARK_HORSE_ITEM, Strength, Charisma);
             pPetInfo->m_wAttackSuccess = (1000 + pPetInfo->m_wLevel) + (pPetInfo->m_wLevel * 15);
             break;
         }

@@ -187,6 +187,7 @@ variants or option words. An online keyword need not select the same items offli
 | `requirementsByLevel` | A requirement for each item level 0 to 15 (one number for all of them, or 16), instead of the [item stat file's](#item-stats-by-level) formula; above +15 the +15 value counts. The Orb of Summoning has `{"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, ...]}` and the Transformation Ring `{"level": [20, 20, 20, 50, ...]}`. The base value of that requirement is not used. The bmd import keeps it |
 | `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed, 1 to 3 (first to third class; above 3 is a warning, as no character reaches it) |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
+| `petStats` | Only for the Dark Lord's pets (`darkLordPet` tag): the formulas of their damage and attack speed, which the pet window shows and the command row's hint counts; see [Pet stats](#pet-stats). A client-only field (OpenMU keeps the Dark Raven's in its `ClassDarkLord` attribute relationships and has no Dark Horse damage); the bmd import keeps it |
 | `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
 | `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | What changes for a rented item; see [Rules](#rules) |
 
@@ -1168,27 +1169,26 @@ way, since its value comes from that member's energy and command.
 ### Command
 
 A Dark Lord's command row in the character window has a hint too: with the
-pointer over the row, it lists what the command adds, each part rounded down.
-The attack rate and the Dark Raven follow the server's formulas (OpenMU's
-`ClassDarkLord`). The Dark Horse and the guild size follow the original
-client's rules, which its pet and guild windows show:
+pointer over the row, it lists what the command adds. The attack rate follows
+the server's formula (OpenMU's `ClassDarkLord`), the pets their
+[pet stats](#pet-stats), and the guild size the original client's rule, which
+its guild window shows. With the shipped data:
 
 | Part | Adds | Rule |
 |---|---|---|
 | Attack rate (PvM) | 1 per 10 command | server |
-| Dark Raven damage | 1 per 8 command to the minimum, 1 per 4 to the maximum | server |
-| Dark Raven attack speed | 1 per 50 command | server |
-| Dark Horse damage | 1 per 10 command to the minimum; the maximum is half again the whole minimum | client |
-| Dark Horse attack speed | 1 per 50 command | client |
+| Dark Raven damage | 1 per 8 command to the minimum, 1 per 4 to the maximum | pet stats (the server's) |
+| Dark Raven attack speed | 1 per 50 command | pet stats (the server's) |
+| Dark Horse damage | 1 per 10 command to the minimum; the maximum is 150 % of the whole minimum | pet stats (the client's) |
+| Dark Horse attack speed | 1 per 50 command | pet stats (the client's) |
 | Guild members as guild master | 1 per 10 command on top of 1 per 10 levels, at most 80 together | client |
 
 The command counts with what items and buffs add to it, as on the server. A
 part that adds nothing has no line, and without any part the row has no hint.
-The Dark Horse line shows what the command adds to the horse's minimum and
-maximum damage. Since the maximum halves the whole minimum (strength / 10,
-the command / 10 and 5 per horse level, rounded down), the command's part of
-the maximum counts the hero's strength and the horse's level too, as the pet
-window does. The guild line shows only the members the command adds, so near the cap of 80
+A pet's line shows each stat with the command less the stat without it, with
+the pet's level and the hero's strength, so a share of the whole minimum (the
+Dark Horse's maximum) comes out as the pet window shows it. The guild line
+shows only the members the command adds, so near the cap of 80
 it adds less, and at the cap nothing. The guild window shows the whole limit:
 1 per 10 levels for every class, plus the command's part for a Dark Lord.
 
@@ -1208,6 +1208,42 @@ are not counted by the client.
 
 The breakdown is a hint rather than lines under the command row, as the other
 attributes have: the row is the window's last, with no room under it.
+
+### Pet stats
+
+The Dark Raven's and the Dark Horse's damage and attack speed, which the pet
+window shows, are formulas in their items' `petStats`. The game reads the
+Dark Raven's (13,5) for the raven and the Dark Horse's (13,4) for the horse:
+
+```json
+"petStats": {
+  "minimumDamage": {"perPetLevel": 5, "strengthDivisor": 10, "commandDivisor": 10},
+  "maximumDamage": {"minimumPercent": 150},
+  "attackSpeed": {"add": 20, "perPetLevel": 4, "petLevelDivisor": 5, "commandDivisor": 50}
+}
+```
+
+Each of `minimumDamage`, `maximumDamage` and `attackSpeed` is
+
+`add` + pet level × `perPetLevel` / `petLevelDivisor` + strength /
+`strengthDivisor` + command / `commandDivisor` + minimum damage ×
+`minimumPercent` / 100,
+
+with each division rounded down. A divisor of 0 leaves its term out, and a
+left-out term is 0 (`petLevelDivisor`: 1). Strength and command count with
+what items and buffs add to them. The minimum damage comes first, so the other
+two can take a share of it; the minimum damage itself cannot. The shipped
+Dark Raven has OpenMU's `ClassDarkLord` formulas (180 + 15 per level +
+command / 8 to 200 + 15 per level + command / 4, attack speed 20 + level × 4
+/ 5 + command / 50); the shipped Dark Horse has the original client's (strength
+/ 10 + command / 10 + 5 per level, its maximum 150 % of that, and the raven's
+attack speed).
+
+Loading and the item checks report a value that is not a whole number, an
+unknown name, a negative divisor or share, a per level term with a level
+divisor of 0, a share of the minimum damage in the minimum damage, and pet
+stats on an item without the `darkLordPet` tag. The Item Basics window edits
+them under **Pet stats**, for items with that tag or with pet stats.
 
 ### Option rules
 
@@ -1940,7 +1976,8 @@ shows it in the others.
   the stat profile (*By the rules* takes what the
   [profile rules](#item-stats-by-level) give; beside the list, the rule that
   gives the item its profile, or that it is picked for the item; **Item
-  Formulas** opens the profile there) and the resistances. Below the stats, what the game
+  Formulas** opens the profile there), the resistances and, for the Dark Lord's
+  pets, their [pet stats](#pet-stats). Below the stats, what the game
   makes of them at each + level (damage, magic power, defense, magic
   defense, block rate), also as excellent or ancient, while a value is still
   being typed, and under that the formula of each with the item's numbers

@@ -296,6 +296,45 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
     }
 }
 
+// A pet stat formula's divisors and shares: a divisor below 0, a level term without a divisor and a negative share
+// give no meaningful value; the minimum damage cannot take a share of itself.
+void ValidatePetStatFormula(const ItemDefinition& definition, const PetStatFormula& formula, const char* field,
+                            bool isMinimumDamage, std::vector<ItemDataIssue>& issues)
+{
+    if (formula.strengthDivisor < 0 || formula.commandDivisor < 0 || formula.petLevelDivisor < 0 ||
+        formula.minimumPercent < 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, "has a negative divisor or percent", field);
+    }
+    if (formula.perPetLevel != 0 && formula.petLevelDivisor == 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, "has a per pet level term with a divisor of 0",
+                 field);
+    }
+    if (isMinimumDamage && formula.minimumPercent != 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
+                 "takes a share of the minimum damage in the minimum damage itself", field);
+    }
+}
+
+// Only the Dark Lord's pets have pet stats: the game reads them for the Dark Raven and the Dark Horse.
+void ValidatePetStats(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    if (definition.petStats.IsEmpty())
+    {
+        return;
+    }
+    if (!definition.tags.Has(ItemTag::DarkLordPet))
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has pet stats, but no darkLordPet tag",
+                 "petStats");
+    }
+    ValidatePetStatFormula(definition, definition.petStats.minimumDamage, "petStats.minimumDamage", true, issues);
+    ValidatePetStatFormula(definition, definition.petStats.maximumDamage, "petStats.maximumDamage", false, issues);
+    ValidatePetStatFormula(definition, definition.petStats.attackSpeed, "petStats.attackSpeed", false, issues);
+}
+
 // The highest level an item can need of a class: its third class.
 constexpr BYTE ThirdClassLevel = 3;
 
@@ -377,6 +416,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateDescription(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
+        ValidatePetStats(definition, issues);
         ValidateClassRequirements(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
