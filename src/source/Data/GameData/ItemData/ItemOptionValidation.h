@@ -34,6 +34,11 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
 void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const ItemOptionDatabase& options,
                                  std::vector<ItemDataIssue>& issues);
 
+// The option files as Save would write them (the editor's changes): each file is written and read back, so a problem
+// only the reader finds stops it too, and the checks above and ValidateAncientBonusNames run on what was read. The
+// problems name the files as "Options/<file>", "Options/OptionRules.json" and "Tooltips/OptionTexts.json".
+void ValidateItemOptionFilesAsWritten(const ItemOptionFiles& files, std::vector<ItemDataIssue>& issues);
+
 // An ancient bonus name of AncientBonusNames with no definition of type ancientBonus (a warning: the items with that
 // attackType show and add no bonus).
 void ValidateAncientBonusNames(const ItemOptionDatabase& options, std::vector<ItemDataIssue>& issues);

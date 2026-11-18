@@ -27,6 +27,7 @@
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemFormulasUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemOptionsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemSyncUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemTooltipUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
@@ -642,6 +643,10 @@ void CMuEditorCore::RenderItemTools()
     if (m_windows.itemFormulas)
     {
         g_MuItemFormulasUI.Render(&m_windows.itemFormulas);
+    }
+    if (m_windows.itemOptions)
+    {
+        g_MuItemOptionsUI.Render(&m_windows.itemOptions);
     }
     if (m_windows.itemSync)
     {

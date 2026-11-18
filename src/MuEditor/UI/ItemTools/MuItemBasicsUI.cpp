@@ -7,6 +7,7 @@
 #include "ItemEdits.h"
 #include "ItemFieldWidgets.h"
 #include "ItemHeldByCharacter.h"
+#include "ItemOptionLinksWidget.h"
 #include "ItemSelection.h"
 #include "ItemStatProfileWidgets.h"
 #include "ItemTextInput.h"
@@ -137,6 +138,7 @@ void CMuItemBasicsUI::Render(bool* open)
             RenderStats(*item);
             RenderStatTable(*item);
             RenderPrices(*item);
+            RenderOptions(*item);
             RenderResistances(*item);
             ImGui::PopID();
         }
@@ -296,6 +298,15 @@ void CMuItemBasicsUI::RenderPrices(ItemDefinition& item)
     ImGui::SameLine();
     Fields::Int(m_draft, I18N::Metadata::BuyPrice, item.buyPrice);
     MuEditor::Items::RenderStatProfileCombo(m_draft, item, m_profileCounts);
+}
+
+void CMuItemBasicsUI::RenderOptions(ItemDefinition& item)
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::Options, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        return;
+    }
+    MuEditor::Items::RenderOptionLinks(m_draft, item);
 }
 
 void CMuItemBasicsUI::RenderResistances(ItemDefinition& item)

@@ -35,7 +35,7 @@ bool IsGroundLabelStylesShown()
     return g_MuColorsUI.GetShownRoot() == Colors::ColorsRoot::GroundLabels;
 }
 
-const std::array<ToolWindowEntry, 11> ItemToolEntries = {{
+const std::array<ToolWindowEntry, 12> ItemToolEntries = {{
     {WindowIds::ItemBasics, &I18N::Editor::ItemBasics, &ToolWindows::itemBasics},
     {WindowIds::ItemRequirements, &I18N::Editor::ItemRequirements, &ToolWindows::itemRequirements},
     {WindowIds::ItemRules, &I18N::Editor::ItemRules, &ToolWindows::itemRules},
@@ -47,6 +47,7 @@ const std::array<ToolWindowEntry, 11> ItemToolEntries = {{
      &IsGroundLabelStylesShown},
     {WindowIds::ItemTooltip, &I18N::Editor::ItemTooltip, &ToolWindows::itemTooltip},
     {WindowIds::ItemFormulas, &I18N::Editor::ItemFormulas, &ToolWindows::itemFormulas},
+    {WindowIds::ItemOptions, &I18N::Editor::ItemOptions, &ToolWindows::itemOptions},
     {WindowIds::ItemSync, &I18N::Editor::ItemSync, &ToolWindows::itemSync},
     {WindowIds::ItemTranslations, &I18N::Editor::ItemTranslations, &ToolWindows::itemTranslations},
 }};
