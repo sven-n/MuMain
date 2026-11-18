@@ -57,7 +57,7 @@ specular lighting unlike skin-marked meshes.
 
 This is a body/face mesh and appearance improvement, not an armor-set upgrade. Equipped armor,
 masks, animations, class IDs and attachment rules are unchanged. The shipped Summoner/Rage Fighter
-bodies retain their original assets. Fully armored characters still use their existing armor art.
+bodies retain their original assets. Fully armored characters use their armor assets; the Dragon armor pilot below is separate from the body-model setting.
 The setting is independent of Classic/Enhanced graphics and texture packs.
 
 Player-shaped monsters and NPCs (guards, transformations, the Doppelganger) use the same body
@@ -67,8 +67,28 @@ monster setups before and after a change with the same setting on both runs.
 The editor's Item Model file picker does not list `Data/Player/Updated/`: those files are bodies,
 not item models, and have the same names as the originals.
 
+## Dragon armor pilot
+
+Dragon Helm and Dragon Armor have refined plate geometry that keeps the original MU silhouette.
+The helmet also uses a more detailed red-and-bronze texture. Other Dragon set pieces and other
+armor sets retain their existing art.
+
+These are equipped item assets, independent of **S6 player models** and of the selected graphics
+look. The existing Dragon Helm and Dragon Armor item entries use them automatically; no item
+IDs, stats or equip rules change. A complete incremental installation needs both updated BMD
+files and `Data/Player/dragonHelmHD.OZJ`. The new helmet texture is included in the base data,
+so an external texture pack is not required. Restart after updating the assets.
+
+This is an experimental art pilot. Equipped movement, joint seams, clipping against the body,
+item-level effects and performance in crowded scenes still need in-game validation before the
+pilot is ready for release. The original skeleton and animation data are retained.
+
 ## Attribution
 
 Original and improved models and textures belong to **Webzen**. Attribution does not transfer
 ownership or grant redistribution rights. Anyone distributing the packaged assets must have the
 necessary permission.
+
+The Dragon pilot derives from the existing Webzen armor assets. Its helmet texture was detailed
+with AI assistance; this does not change ownership of the underlying design or grant additional
+redistribution rights.
