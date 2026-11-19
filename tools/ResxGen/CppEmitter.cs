@@ -220,6 +220,21 @@ internal static class CppEmitter
             // is not currently registered.
             void UnregisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept;
 
+            """);
+        WriteMasterItemTextDeclarations(sb);
+        sb.Append($$"""
+
+            }  // namespace {{RootNamespace}}
+
+            """);
+
+        File.WriteAllText(Path.Combine(outputDir, $"{MasterFileName}.h"), sb.ToString());
+    }
+
+    private static void WriteMasterItemTextDeclarations(StringBuilder sb)
+    {
+        sb.Append("""
+
             // A text of an item text group (ResxGen --item-text-groups) that names
             // an item with {item:group,number} in at least one locale
             // (docs/translation-system.md, "Texts that name items").
@@ -254,11 +269,7 @@ internal static class CppEmitter
             // true when a text changed.
             bool ExpandItemTexts() noexcept;
 
-            }  // namespace {{RootNamespace}}
-
             """);
-
-        File.WriteAllText(Path.Combine(outputDir, $"{MasterFileName}.h"), sb.ToString());
     }
 
     public static void WriteMasterSource(string outputDir, IReadOnlyList<ResourceGroup> groups)
@@ -350,48 +361,9 @@ internal static class CppEmitter
                 }
             }
 
-            std::span<const ItemText> GetItemTexts() noexcept
-            {
-                static const std::vector<ItemText> texts = [] {
-                    std::vector<ItemText> all;
-
             """);
-
-        foreach (var g in groups.Where(g => g.NamesItems))
-        {
-            sb.AppendLine($"        const std::span<const ItemText> {CamelCase(g.Name)}Texts = {g.Name}::ItemTexts();");
-            sb.AppendLine($"        all.insert(all.end(), {CamelCase(g.Name)}Texts.begin(), {CamelCase(g.Name)}Texts.end());");
-        }
-
+        WriteMasterItemTextRuntime(sb, groups);
         sb.Append($$"""
-                    return all;
-                }();
-                return texts;
-            }
-
-            void SetItemTextExpander(ItemTextExpander expander) noexcept
-            {
-                g_itemTextExpander = expander;
-            }
-
-            bool ExpandItemTexts() noexcept
-            {
-                bool changed = false;
-                for (const ItemText& text : GetItemTexts())
-                {
-                    const wchar_t* written = text.values[g_currentLocaleIndex];
-                    const bool own = ((text.ownLocales >> g_currentLocaleIndex) & 1u) != 0;
-                    const int textLocale = own ? g_currentLocaleIndex : kDefaultLocaleIndex;
-                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale, text.isPrintfFormat) : written;
-                    if (shown == nullptr) shown = written;
-                    if (*text.slot != shown)
-                    {
-                        *text.slot = shown;
-                        changed = true;
-                    }
-                }
-                return changed;
-            }
 
             void RegisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept
             {
@@ -512,6 +484,56 @@ internal static class CppEmitter
             """);
 
         File.WriteAllText(Path.Combine(outputDir, $"{MasterFileName}.cpp"), sb.ToString());
+    }
+
+    private static void WriteMasterItemTextRuntime(StringBuilder sb, IReadOnlyList<ResourceGroup> groups)
+    {
+        sb.Append($$"""
+
+            std::span<const ItemText> GetItemTexts() noexcept
+            {
+                static const std::vector<ItemText> texts = [] {
+                    std::vector<ItemText> all;
+
+            """);
+
+        foreach (var g in groups.Where(g => g.NamesItems))
+        {
+            sb.AppendLine($"        const std::span<const ItemText> {CamelCase(g.Name)}Texts = {g.Name}::ItemTexts();");
+            sb.AppendLine($"        all.insert(all.end(), {CamelCase(g.Name)}Texts.begin(), {CamelCase(g.Name)}Texts.end());");
+        }
+
+        sb.Append($$"""
+                    return all;
+                }();
+                return texts;
+            }
+
+            void SetItemTextExpander(ItemTextExpander expander) noexcept
+            {
+                g_itemTextExpander = expander;
+            }
+
+            bool ExpandItemTexts() noexcept
+            {
+                bool changed = false;
+                for (const ItemText& text : GetItemTexts())
+                {
+                    const wchar_t* written = text.values[g_currentLocaleIndex];
+                    const bool own = ((text.ownLocales >> g_currentLocaleIndex) & 1u) != 0;
+                    const int textLocale = own ? g_currentLocaleIndex : kDefaultLocaleIndex;
+                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale, text.isPrintfFormat) : written;
+                    if (shown == nullptr) shown = written;
+                    if (*text.slot != shown)
+                    {
+                        *text.slot = shown;
+                        changed = true;
+                    }
+                }
+                return changed;
+            }
+
+            """);
     }
 
     private static void WriteLocaleRegistry(StringBuilder sb, IReadOnlyList<ResourceGroup> groups)
