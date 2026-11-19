@@ -1,12 +1,16 @@
 #include "Data/GameData/ItemData/ItemPetStats.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <limits>
+
 namespace Data::Items
 {
 namespace
 {
 constexpr int PercentBase = 100;
 
-int DivideOrNone(int value, int divisor)
+std::int64_t DivideOrNone(std::int64_t value, int divisor)
 {
     return divisor > 0 ? value / divisor : 0;
 }
@@ -14,9 +18,13 @@ int DivideOrNone(int value, int divisor)
 
 int EvaluatePetStat(const PetStatFormula& formula, const PetStatInputs& inputs, int minimumDamage)
 {
-    return formula.add + DivideOrNone(inputs.petLevel * formula.perPetLevel, formula.petLevelDivisor) +
-           DivideOrNone(inputs.strength, formula.strengthDivisor) +
-           DivideOrNone(inputs.command, formula.commandDivisor) + minimumDamage * formula.minimumPercent / PercentBase;
+    const auto levelTerm =
+        DivideOrNone(static_cast<std::int64_t>(inputs.petLevel) * formula.perPetLevel, formula.petLevelDivisor);
+    const auto minimumShare = static_cast<std::int64_t>(minimumDamage) * formula.minimumPercent / PercentBase;
+    const auto value = formula.add + levelTerm + DivideOrNone(inputs.strength, formula.strengthDivisor) +
+                       DivideOrNone(inputs.command, formula.commandDivisor) + minimumShare;
+    // The pet window stores each stat in an unsigned 16-bit field.
+    return static_cast<int>(std::clamp<std::int64_t>(value, 0, std::numeric_limits<std::uint16_t>::max()));
 }
 
 PetStatValues EvaluatePetStats(const ItemPetStats& stats, const PetStatInputs& inputs)

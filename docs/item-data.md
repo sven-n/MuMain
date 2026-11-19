@@ -1190,7 +1190,8 @@ the pet's level and the hero's strength, so a share of the whole minimum (the
 Dark Horse's maximum) comes out as the pet window shows it. The guild line
 shows only the members the command adds, so near the cap of 80
 it adds less, and at the cap nothing. The guild window shows the whole limit:
-1 per 10 levels for every class, plus the command's part for a Dark Lord.
+1 per 10 levels for every class, plus the Dark Lord's command, including
+bonuses from items and buffs, at 1 member per 10 command.
 
 The client's rules are not the server's. OpenMU does not check the guild size,
 so a server can allow more members. It has no Dark Horse damage or attack
@@ -1232,17 +1233,20 @@ Each of `minimumDamage`, `maximumDamage` and `attackSpeed` is
 with each division rounded down. A divisor of 0 leaves its term out, and a
 left-out term is 0 (`petLevelDivisor`: 1). Strength and command count with
 what items and buffs add to them. The minimum damage comes first, so the other
-two can take a share of it; the minimum damage itself cannot. The shipped
+two can take a share of it. Each stat is limited to 0–65,535, the range the
+pet window supports. The shipped
 Dark Raven has OpenMU's `ClassDarkLord` formulas (180 + 15 per level +
 command / 8 to 200 + 15 per level + command / 4, attack speed 20 + level × 4
 / 5 + command / 50); the shipped Dark Horse has the original client's (strength
 / 10 + command / 10 + 5 per level, its maximum 150 % of that, and the raven's
-attack speed).
+attack speed). OpenMU defines the raven formulas on the character class, so
+the item exchange omits `petStats`.
 
 Loading and the item checks report a value that is not a whole number, an
 unknown name, a negative divisor or share, a per level term with a level
 divisor of 0, a share of the minimum damage in the minimum damage, and pet
-stats on an item without the `darkLordPet` tag. The Item Basics window edits
+stats on an item without the `darkLordPet` tag. A tagged item with missing or
+empty pet stats also produces a warning. The Item Basics window edits
 them under **Pet stats**, for items with that tag or with pet stats.
 
 ### Option rules

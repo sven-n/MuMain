@@ -103,6 +103,12 @@ TEST_CASE("The command row's hint leaves out what the command does not add [data
                                    "Dark Horse damage: +4~6"});
     CHECK(UI::Character::BuildCommandHint(Effects(400, 0)).empty());
     CHECK(UI::Character::BuildCommandHint(Effects(400, 3)).empty());
+
+    GameLogic::Character::CommandEffects minimumOnly;
+    minimumOnly.raven.minimumDamage = 37;
+    minimumOnly.horse.minimumDamage = 30;
+    CHECK(Texts(UI::Character::BuildCommandHint(minimumOnly)) ==
+          std::vector<std::string>{"Command", "Dark Raven damage: +37~0", "Dark Horse damage: +30~0"});
 }
 
 // The hint is formatted again only when the command's effects change, or when the window invalidates it after its

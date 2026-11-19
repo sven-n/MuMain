@@ -96,23 +96,33 @@ TEST_CASE("Pet stats are checked: divisors, the minimum's share and the pet tag 
     ValidateItems(std::vector<ItemDefinition>{untagged}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "petStats"));
 
+    ItemDefinition missing = MakeHorse();
+    missing.petStats = {};
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{missing}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "petStats"));
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Fatal, "petStats"));
+
     ItemDefinition selfShare = MakeHorse();
     selfShare.petStats.minimumDamage.minimumPercent = 50;
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{selfShare}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "petStats.minimumDamage"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "petStats.minimumDamage"));
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Fatal, "petStats.minimumDamage"));
 
     ItemDefinition negative = MakeHorse();
     negative.petStats.attackSpeed.commandDivisor = -50;
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{negative}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "petStats.attackSpeed"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "petStats.attackSpeed"));
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Fatal, "petStats.attackSpeed"));
 
     ItemDefinition noLevelDivisor = MakeHorse();
     noLevelDivisor.petStats.attackSpeed.petLevelDivisor = 0;
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{noLevelDivisor}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "petStats.attackSpeed"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "petStats.attackSpeed"));
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Fatal, "petStats.attackSpeed"));
 }
 
 TEST_CASE("A pet stat adds its terms, each division rounded down, and a share of the minimum [data][items]")

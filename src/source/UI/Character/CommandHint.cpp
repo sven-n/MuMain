@@ -5,6 +5,8 @@
 #include "I18N/All.h"
 #include "UI/Character/HintLines.h"
 
+#include <algorithm>
+
 namespace UI::Character
 {
 using UI::RmlBridge::Tooltip::Line;
@@ -27,11 +29,11 @@ std::vector<Line> BuildCommandHint(const GameLogic::Character::CommandEffects& e
     std::vector<Line> lines;
     lines.push_back(MakeHintLine(StringUtils::WideToNarrow(I18N::Game::Command), LineColor::Yellow, true));
     AddPartLine(lines, effects.attackRate, I18N::Game::AttackRatePvMD, effects.attackRate);
-    AddPartLine(lines, effects.raven.maximumDamage, I18N::Game::DarkRavenDamageDD, effects.raven.minimumDamage,
-                effects.raven.maximumDamage);
+    AddPartLine(lines, std::max(effects.raven.minimumDamage, effects.raven.maximumDamage),
+                I18N::Game::DarkRavenDamageDD, effects.raven.minimumDamage, effects.raven.maximumDamage);
     AddPartLine(lines, effects.raven.attackSpeed, I18N::Game::DarkRavenAttackSpeedD, effects.raven.attackSpeed);
-    AddPartLine(lines, effects.horse.maximumDamage, I18N::Game::DarkHorseDamageDD, effects.horse.minimumDamage,
-                effects.horse.maximumDamage);
+    AddPartLine(lines, std::max(effects.horse.minimumDamage, effects.horse.maximumDamage),
+                I18N::Game::DarkHorseDamageDD, effects.horse.minimumDamage, effects.horse.maximumDamage);
     AddPartLine(lines, effects.horse.attackSpeed, I18N::Game::DarkHorseAttackSpeedD, effects.horse.attackSpeed);
     AddPartLine(lines, effects.guildMembers, I18N::Game::GuildMembersAsGuildMasterD, effects.guildMembers);
     // Only the title: the command adds nothing yet.

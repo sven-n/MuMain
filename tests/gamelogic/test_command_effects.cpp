@@ -2,6 +2,9 @@
 #include "GameLogic/Character/CommandEffects.h"
 #include "GameLogic/Social/GuildSize.h"
 
+#include <cstdint>
+#include <limits>
+
 using Data::Items::ItemPetStats;
 using Data::Items::PetStatValues;
 using GameLogic::Character::CommandEffects;
@@ -14,7 +17,7 @@ using GameLogic::Social::GetMaxGuildMembers;
 
 namespace
 {
-// The shipped Dark Raven's pet stats (Group13_Helper.json): OpenMU's ClassDarkLord.
+// Example Dark Raven stats using OpenMU's ClassDarkLord formulas.
 ItemPetStats RavenStats()
 {
     ItemPetStats stats;
@@ -24,7 +27,7 @@ ItemPetStats RavenStats()
     return stats;
 }
 
-// The shipped Dark Horse's: the original client's CalcPetInfo.
+// Example Dark Horse stats using the original client's formulas.
 ItemPetStats HorseStats()
 {
     ItemPetStats stats;
@@ -92,4 +95,17 @@ TEST_CASE("no command adds nothing")
 TEST_CASE("a pet without pet stats gets nothing from the command")
 {
     CHECK(GetCommandPetStats(DarkLordPet{}, 1000) == PetStatValues{});
+}
+
+TEST_CASE("Pet stats use wide arithmetic before limiting the result to the pet window's range")
+{
+    ItemPetStats stats;
+    constexpr int largeCoefficient = 100'000'000;
+    stats.minimumDamage.perPetLevel = largeCoefficient;
+    stats.minimumDamage.petLevelDivisor = largeCoefficient;
+    stats.maximumDamage.minimumPercent = largeCoefficient;
+    stats.attackSpeed.add = -1;
+
+    CHECK(Data::Items::EvaluatePetStats(stats, {50, 0, 0}) ==
+          PetStatValues{50, std::numeric_limits<std::uint16_t>::max(), 0});
 }

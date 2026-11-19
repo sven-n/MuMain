@@ -401,6 +401,24 @@ OrderedJson WriteTooltipLayoutChanges(const ItemTooltipLayoutChanges& changes)
     return json;
 }
 
+void WriteRequirementsByLevel(OrderedJson& item, const RequirementsByLevel& table)
+{
+    OrderedJson requirementsByLevel = OrderedJson::object();
+    for (size_t requirement = 0; requirement < ItemRequirementCount; ++requirement)
+    {
+        const RequirementByLevel* values = table.Find(static_cast<ItemRequirement>(requirement));
+        if (values == nullptr)
+        {
+            continue;
+        }
+        requirementsByLevel[RequirementKeys[requirement]] = Json::WritePerLevelValues(*values);
+    }
+    if (!requirementsByLevel.empty())
+    {
+        item[Keys::RequirementsByLevel] = std::move(requirementsByLevel);
+    }
+}
+
 OrderedJson WriteItemObject(const ItemDefinition& definition)
 {
     OrderedJson item;
@@ -467,21 +485,7 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
         item[Keys::Requirements] = std::move(requirements);
     }
 
-    OrderedJson requirementsByLevel = OrderedJson::object();
-    for (size_t requirement = 0; requirement < ItemRequirementCount; ++requirement)
-    {
-        const RequirementByLevel* values =
-            definition.requirementsByLevel.Find(static_cast<ItemRequirement>(requirement));
-        if (values == nullptr)
-        {
-            continue;
-        }
-        requirementsByLevel[RequirementKeys[requirement]] = Json::WritePerLevelValues(*values);
-    }
-    if (!requirementsByLevel.empty())
-    {
-        item[Keys::RequirementsByLevel] = std::move(requirementsByLevel);
-    }
+    WriteRequirementsByLevel(item, definition.requirementsByLevel);
 
     WriteByteTable(item, Keys::ClassRequirements, definition.classRequirements, ClassKeys);
     WriteByteTable(item, Keys::Resistances, definition.resistances, ResistanceKeys);

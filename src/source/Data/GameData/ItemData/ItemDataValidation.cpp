@@ -304,16 +304,16 @@ void ValidatePetStatFormula(const ItemDefinition& definition, const PetStatFormu
     if (formula.strengthDivisor < 0 || formula.commandDivisor < 0 || formula.petLevelDivisor < 0 ||
         formula.minimumPercent < 0)
     {
-        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, "has a negative divisor or percent", field);
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a negative divisor or percent", field);
     }
     if (formula.perPetLevel != 0 && formula.petLevelDivisor == 0)
     {
-        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, "has a per pet level term with a divisor of 0",
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a per pet level term with a divisor of 0",
                  field);
     }
     if (isMinimumDamage && formula.minimumPercent != 0)
     {
-        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                  "takes a share of the minimum damage in the minimum damage itself", field);
     }
 }
@@ -321,11 +321,17 @@ void ValidatePetStatFormula(const ItemDefinition& definition, const PetStatFormu
 // Only the Dark Lord's pets have pet stats: the game reads them for the Dark Raven and the Dark Horse.
 void ValidatePetStats(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
+    const bool isDarkLordPet = definition.tags.Has(ItemTag::DarkLordPet);
     if (definition.petStats.IsEmpty())
     {
+        if (isDarkLordPet)
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a darkLordPet tag but no pet stats",
+                     "petStats");
+        }
         return;
     }
-    if (!definition.tags.Has(ItemTag::DarkLordPet))
+    if (!isDarkLordPet)
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has pet stats, but no darkLordPet tag",
                  "petStats");
