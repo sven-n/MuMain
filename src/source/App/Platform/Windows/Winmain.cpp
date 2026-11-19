@@ -51,6 +51,7 @@
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "World/MapInfra/MapLoad.h"
+#include "Render/Renderer/BitmapUpload.h"
 #include "Network/EndpointForLog.h"
 #include "Dotnet/ManagedSymbols.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -1598,8 +1599,14 @@ bool IterateClient()
     // Process server packets handed over from the network thread. Replaces
     // the old WM_RECEIVE_BUFFER message round-trip; runs on the main thread.
     Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback, World::MapLoad::Active);
+    // The scene loop, which notices a lost connection, doesn't run while a map loads.
+    if (World::MapLoad::Active() &&
+        (SocketClient == nullptr || SocketClient->State() == Network::ConnectionState::Closed))
+    {
+        ReconnectManager::Instance().OnConnectionLostDuringMapLoad();
+    }
     // A map change a packet started: the next steps, between frames.
-    World::MapLoad::Pump();
+    World::MapLoad::Pump(mu::BitmapUploadsOverStagingCap);
 
     // Run a pending reconnect teardown between frames (self-guards on its
     // pending flag). Replaces the old WM_START_RECONNECT round-trip.
@@ -2526,6 +2533,8 @@ bool StartClient(char* szCmdLine)
     g_teardown.Push(
         []
         {
+            // A map load quit midway holds world state (a texture batch) that the teardown after this releases.
+            World::MapLoad::Cancel();
             if (SocketClient != nullptr)
             {
                 SocketClient->Close();

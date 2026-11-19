@@ -156,11 +156,25 @@ namespace Network
         {
             if (hold && hold())
             {
+                // Connection events don't wait: a close must reach the client while the packets are held.
+                std::deque<std::unique_ptr<PacketInfo>> held;
+                for (auto& entry : pending)
+                {
+                    if (entry->Event != ConnectionEvent::None)
+                    {
+                        process(entry.get());
+                        ++drainedCount;
+                    }
+                    else
+                    {
+                        held.push_back(std::move(entry));
+                    }
+                }
+                pending.clear();
                 // Back in front of what arrived meanwhile.
                 std::lock_guard<std::mutex> lock(m_mutex);
-                m_queue.insert(m_queue.begin(), std::make_move_iterator(pending.begin()),
-                               std::make_move_iterator(pending.end()));
-                pending.clear();
+                m_queue.insert(m_queue.begin(), std::make_move_iterator(held.begin()),
+                               std::make_move_iterator(held.end()));
                 break;
             }
             if (!pending.front()->Superseded)

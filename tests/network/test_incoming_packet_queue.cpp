@@ -73,7 +73,7 @@ bool s_loading = false;
 void RecordAndStartLoadAtTwo(const PacketInfo* entry)
 {
     Record(entry);
-    s_loading = s_loading || entry->ReceiveBuffer[0] == 2;
+    s_loading = s_loading || (entry->Event == ConnectionEvent::None && entry->ReceiveBuffer[0] == 2);
 }
 
 bool Loading()
@@ -105,4 +105,22 @@ TEST_CASE("Packets after the one that starts a map load wait for it, in order [n
 
     s_loading = false;
     CHECK(DrainHeld() == std::vector<int>{3, 4, 5});
+}
+
+TEST_CASE("A connection close reaches the client while a map load holds the packets [network]")
+{
+    Drain();
+    s_loading = false;
+    PushPacket(2);
+    PushPacket(3);
+    PushEvent(ConnectionEvent::Closed);
+    PushPacket(4);
+    CHECK(DrainHeld() == std::vector<int>{2, -2});
+    CHECK(IncomingPacketQueue::Instance().GetStats().depth == 2);
+
+    PushEvent(ConnectionEvent::Closed);
+    CHECK(DrainHeld() == std::vector<int>{-2});
+
+    s_loading = false;
+    CHECK(DrainHeld() == std::vector<int>{3, 4});
 }

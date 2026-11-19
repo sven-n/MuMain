@@ -4,12 +4,11 @@
 
 #include "Core/Utilities/StagedLoad.h"
 #include "Core/Utilities/Log/MuLogger.h"
-#include "Render/Renderer/BitmapUpload.h"
-#include "World/MapInfra/MapManager.h"
 
 #include <chrono>
 #include <optional>
 #include <utility>
+#include <vector>
 
 namespace World::MapLoad
 {
@@ -23,8 +22,8 @@ constexpr std::chrono::milliseconds LoadingScreenAfter{150};
 
 struct Load
 {
-    Load(int map, std::function<void()> afterLoad)
-        : steps(gMapManager.LoadWorldSteps(map)), afterLoad(std::move(afterLoad))
+    Load(std::vector<Core::StagedLoad::Step> steps, std::function<void()> afterLoad)
+        : steps(std::move(steps)), afterLoad(std::move(afterLoad))
     {
     }
 
@@ -51,7 +50,7 @@ void Finish()
 }
 } // namespace
 
-void Begin(int map, std::function<void()> afterLoad)
+void Begin(std::vector<Core::StagedLoad::Step> steps, std::function<void()> afterLoad)
 {
     if (s_load)
     {
@@ -60,7 +59,7 @@ void Begin(int map, std::function<void()> afterLoad)
         }
         Finish();
     }
-    s_load.emplace(map, std::move(afterLoad));
+    s_load.emplace(std::move(steps), std::move(afterLoad));
 }
 
 bool Active()
@@ -68,14 +67,14 @@ bool Active()
     return s_load.has_value();
 }
 
-void Pump()
+void Pump(const std::function<bool()>& holdBack)
 {
     if (!s_load)
     {
         return;
     }
     ++s_load->frames;
-    if (s_load->steps.Pump(StepBudget, mu::BitmapUploadsOverStagingCap))
+    if (s_load->steps.Pump(StepBudget, holdBack))
     {
         Finish();
     }

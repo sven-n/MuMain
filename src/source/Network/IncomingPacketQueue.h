@@ -55,7 +55,8 @@ namespace Network
         // thread once per frame. The queue is moved out under the lock and
         // drained after releasing it, so packet handling never blocks the
         // network thread.
-        // While `hold` says so (checked before each packet), the rest waits for a later drain, in order.
+        // While `hold` says so (checked before each packet), the rest of the packets wait for a later drain, in
+        // order; connection events among them are processed anyway.
         void DrainTo(Processor process, bool (*hold)() = nullptr);
 
         // Discard all queued packets. Called on session teardown (disconnect /

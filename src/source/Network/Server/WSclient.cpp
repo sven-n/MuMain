@@ -1145,6 +1145,8 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 void ResetClientToLoginScene()
 {
     App::Control::Events::RecordDisconnected("the game session was torn down");
+    // Before ReleaseMainData: a map load's steps hold world state that it releases.
+    World::MapLoad::Cancel();
 
     // Mirror of the in-game logout path (see ReceiveLogOut, case 2): release the
     // active game session and return to a clean login scene. The auto-reconnect
@@ -1174,7 +1176,6 @@ void ResetClientToLoginScene()
     // Drop packets received for the session we just tore down so they are not
     // processed against the freed world data on the next frame.
     Network::IncomingPacketQueue::Instance().Clear();
-    World::MapLoad::Cancel();
 
     ReleaseCharacterSceneData();
     SceneFlag = LOG_IN_SCENE;
@@ -1259,7 +1260,8 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     // Before LoadWorld, which loads the stage's map parts.
     gMapManager.SetServerStage(GetJoinMapServerStage(ReceiveBuffer));
     gMapManager.WorldActive = Data->Map;
-    World::MapLoad::Begin(gMapManager.WorldActive, [c, data = *Data] { FinishJoinMapServer(c, &data); });
+    World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+                          [c, data = *Data] { FinishJoinMapServer(c, &data); });
     return TRUE;
 }
 
@@ -1516,7 +1518,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
         const int OldWorld = gMapManager.WorldActive;
 
         gMapManager.WorldActive = Data->Map;
-        World::MapLoad::Begin(gMapManager.WorldActive,
+        World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
                               [c, OldWorld]
                               {
                                   RevivalAfterMapLoad(c, OldWorld);
@@ -2359,7 +2361,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             const BYTE flag = Data->Flag;
 
             gMapManager.WorldActive = Data->Map;
-            World::MapLoad::Begin(gMapManager.WorldActive,
+            World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
                                   [o, OldWorld, flag, iEtcPart]
                                   {
                                       TeleportAfterMapLoad(o, OldWorld);
