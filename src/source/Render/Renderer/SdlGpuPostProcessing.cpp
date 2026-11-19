@@ -138,6 +138,8 @@ bool SdlGpuPostProcessing::CreatePipelines(SDL_GPUDevice* device, const SdlGpuPo
     m_bloomUpPipeline = BuildPipeline(device, shaders.fullscreenVertex, {shaders.bloomUp, bloomFormat, {}, true});
     m_compositePipeline =
         BuildPipeline(device, shaders.fullscreenVertex, {shaders.composite, frameFormat, sampleCount, false, true});
+    // Optional: without it there is no edge smoothing, the rest of post-processing stays.
+    m_compositeImagePipeline = BuildPipeline(device, shaders.fullscreenVertex, {shaders.composite, frameFormat});
     if (!m_bloomDownPipeline || !m_bloomUpPipeline || !m_compositePipeline || !CreateSamplers() ||
         !CreateGradingTexture())
     {
@@ -153,12 +155,18 @@ void SdlGpuPostProcessing::DestroyPipelines()
     ReleasePipeline(m_device, m_bloomDownPipeline);
     ReleasePipeline(m_device, m_bloomUpPipeline);
     ReleasePipeline(m_device, m_compositePipeline);
+    ReleasePipeline(m_device, m_compositeImagePipeline);
 }
 
 bool SdlGpuPostProcessing::IsAvailable() const
 {
     return m_bloomDownPipeline && m_bloomUpPipeline && m_compositePipeline && m_pointSampler && m_linearSampler &&
            m_gradingTexture;
+}
+
+bool SdlGpuPostProcessing::CanCompositeToImage() const
+{
+    return IsAvailable() && m_compositeImagePipeline;
 }
 
 bool SdlGpuPostProcessing::CreateSamplers()
@@ -362,17 +370,23 @@ void SdlGpuPostProcessing::RenderBloom(SDL_GPUCommandBuffer* commandBuffer, floa
     m_bloomRendered = true;
 }
 
+void SdlGpuPostProcessing::ForgetBloom()
+{
+    m_bloomRendered = false;
+}
+
 void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* pass,
                                          SdlGpuTargetSize size, const PostProcessingLook& look, PostProcessingView view,
-                                         SDL_GPUTexture* ambientOcclusion)
+                                         SDL_GPUTexture* ambientOcclusion, SdlGpuCompositeTarget target)
 {
-    if (!IsAvailable() || !m_sceneTexture || size.width == 0u || size.height == 0u)
+    SDL_GPUGraphicsPipeline* const pipeline =
+        target == SdlGpuCompositeTarget::Image ? m_compositeImagePipeline : m_compositePipeline;
+    if (!IsAvailable() || !pipeline || !m_sceneTexture || size.width == 0u || size.height == 0u)
     {
         return;
     }
 
     const bool bloomRendered = m_bloomRendered && look.bloomStrength > 0.0f;
-    m_bloomRendered = false;
 
     // The image shown as the scene: the scene itself, or a diagnostic view in
     // its place (black when the bloom was not rendered this frame).
@@ -422,7 +436,7 @@ void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SD
     const SDL_Rect scissor{0, 0, static_cast<int>(size.width), static_cast<int>(size.height)};
     SDL_SetGPUViewport(pass, &viewport);
     SDL_SetGPUScissor(pass, &scissor);
-    SDL_BindGPUGraphicsPipeline(pass, m_compositePipeline);
+    SDL_BindGPUGraphicsPipeline(pass, pipeline);
     SDL_BindGPUFragmentSamplers(pass, 0, bindings, static_cast<Uint32>(std::size(bindings)));
     // One step of the 8-bit target: enough to break up banding in the smooth HDR gradients.
     constexpr float DitherAmount = 1.0f / 255.0f;

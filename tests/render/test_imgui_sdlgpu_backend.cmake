@@ -358,7 +358,7 @@ foreach(symbol IN ITEMS "{0.0f, 0.0f" "s_swapW" "s_swapH" "0.0f, 1.0f}")
     endif()
 endforeach()
 require_match(replay_commands
-    "Render::SdlGpuReplayState[ \t]+replayState[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.viewport[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.scissor[ \t]*\\)[ \t]*;"
+    "Render::SdlGpuReplayState[ \t]+replayState[ \t]*;[ \t\r\n]*SDL_Rect[ \t]+scissor[ \t]*=[ \t]*AppliedScissor[ \t]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*ApplyViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&scissor[ \t]*\\)[ \t]*;"
     "each replay pass owns a render-pass-local replay cache and starts from the carried viewport and scissor")
 string(REGEX MATCHALL "Render::SdlGpuReplayState[ \t]+replayState" replay_caches "${replay_commands}")
 list(LENGTH replay_caches replay_cache_count)
@@ -366,10 +366,10 @@ if(NOT replay_cache_count EQUAL 1)
     message(FATAL_ERROR "Invalid SDL_GPU editor contract: ReplayCommands must own exactly one replay cache")
 endif()
 require_match(replay_commands
-    "case[ \t]+RenderCmdType::SetViewport[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.viewport[ \t]*=[ \t]*cmd\.viewport[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.viewport[ \t]*\\)[ \t]*;"
+    "case[ \t]+RenderCmdType::SetViewport[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.viewport[ \t]*=[ \t]*cmd\.viewport[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*ApplyViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*;"
     "replay caches and applies the active viewport")
 require_match(replay_commands
-    "case[ \t]+RenderCmdType::SetScissor[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.scissor[ \t]*=[ \t]*cmd\.scissor[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.scissor[ \t]*\\)[ \t]*;"
+    "case[ \t]+RenderCmdType::SetScissor[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.scissor[ \t]*=[ \t]*cmd\.scissor[ \t]*;[ \t\r\n]*scissor[ \t]*=[ \t]*AppliedScissor[ \t]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&scissor[ \t]*\\)[ \t]*;"
     "replay caches and applies the active scissor")
 foreach(helper IN ITEMS
         "BindReplayPipeline"

@@ -298,6 +298,9 @@ set(shader_specs
     "post_composite.frag|frag||5|0|1"
     "post_ao.frag|frag||1|0|1"
     "post_ao_blur.frag|frag||2|0|1"
+    "post_fxaa.frag|frag||1|0|1"
+    "post_fsr_easu.frag|frag||1|0|1"
+    "post_fsr_rcas.frag|frag||1|0|1"
     "sun_depth.frag|frag||1|0|1"
 )
 

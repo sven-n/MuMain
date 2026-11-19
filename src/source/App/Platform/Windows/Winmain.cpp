@@ -38,6 +38,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/PostProcessing/RenderScale.h"
 #include "Render/Look/LookPresetSetting.h"
 #include "Render/Look/LookProfileSetting.h"
 #include "Render/Look/TuningSetting.h"
@@ -427,11 +428,92 @@ void MuSetAnisotropyPreference(int anisotropy)
 // Whether the active look renders with multisampling (Enhanced does, Classic does not).
 static bool g_antialiasingActive = false;
 
+// Edge smoothing follows the anti-aliasing of the look: on in Enhanced when the player chose it.
+static void ApplyEdgeSmoothing(bool enabled)
+{
+    if (!mu::GetRenderer().SetEdgeSmoothing(enabled))
+    {
+        mu::log::Get("render")->warn("Edge smoothing requested but unavailable; frames stay unsmoothed");
+        return;
+    }
+    mu::log::Get("render")->info("Edge smoothing {}", enabled ? "on" : "off");
+}
+
+// The render scale and sharpening follow the look the same way: the player's in Enhanced, none in
+// Classic.
+static void ApplyRenderScale(int percent)
+{
+    if (!mu::GetRenderer().SetRenderScale(percent))
+    {
+        mu::log::Get("render")->warn("Render scale {}% requested but upscaling is unavailable; the scene stays "
+                                     "at the window's size",
+                                     percent);
+        return;
+    }
+    mu::log::Get("render")->info("Render scale {}%", percent);
+}
+
+static void ApplySharpness(int percent)
+{
+    if (!mu::GetRenderer().SetSharpness(percent))
+    {
+        mu::log::Get("render")->warn("Sharpness {} requested but sharpening is unavailable", percent);
+        return;
+    }
+    mu::log::Get("render")->info("Sharpness {}", percent);
+}
+
 void MuSetAntialiasingActive(bool active)
 {
     g_antialiasingActive = active;
     // The renderer rebuilds its pipelines and targets at the next BeginFrame, if the count changed.
     mu::GetRenderer().SetAntialiasingSamples(active ? GameConfig::GetInstance().GetAntialiasing() : 0);
+    const GameConfig& config = GameConfig::GetInstance();
+    ApplyEdgeSmoothing(active && config.GetEdgeSmoothing());
+    ApplyRenderScale(active ? config.GetRenderScale() : Render::PostProcessing::MaxRenderScalePercent);
+    ApplySharpness(active ? config.GetSharpness() : Render::PostProcessing::MinSharpnessPercent);
+}
+
+void MuSetRenderScalePreference(int percent)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetRenderScale(percent);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Render scale: {}% saved for the Enhanced look; Classic renders without",
+                                     config.GetRenderScale());
+        return;
+    }
+    ApplyRenderScale(config.GetRenderScale());
+}
+
+void MuSetSharpnessPreference(int percent)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetSharpness(percent);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Sharpness: {} saved for the Enhanced look; Classic renders without",
+                                     config.GetSharpness());
+        return;
+    }
+    ApplySharpness(config.GetSharpness());
+}
+
+void MuSetEdgeSmoothingPreference(bool enabled)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetEdgeSmoothing(enabled);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Edge smoothing: {} saved for the Enhanced look; Classic renders without",
+                                     enabled ? "on" : "off");
+        return;
+    }
+    ApplyEdgeSmoothing(enabled);
 }
 
 void MuSetAntialiasingPreference(int samples)
