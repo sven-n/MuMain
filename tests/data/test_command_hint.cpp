@@ -5,6 +5,7 @@
 #include "ClientDataScope.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "GameLogic/Character/CommandEffects.h"
 #include "GameLogic/Pets/PetStats.h"
 #include "I18N/All.h"
@@ -88,6 +89,35 @@ TEST_CASE("The command row's hint lists what the Dark Lord's command adds [data]
     const std::vector<std::string> german = Texts(UI::Character::BuildCommandHint(Effects(250, 300)));
     CHECK(german[2] == "Schaden des Dunklen Raben: +37~75");
     CHECK(german[4] == "Schaden des Dunklen Pferdes: +30~45");
+}
+
+TEST_CASE("Pet names in Command hints follow item translations and preserve literal percent signs [data][items]")
+{
+    CommandHintScope scope;
+    REQUIRE(scope.Loaded());
+    const auto effects = Effects(250, 300);
+
+    I18N::SetLocale("ru");
+    auto lines = Texts(UI::Character::BuildCommandHint(effects));
+    REQUIRE(lines.size() == 7);
+    CHECK(lines[2] == "Урон Тёмного ворона: +37~75");
+    CHECK(lines[4] == "Урон Тёмного коня: +30~45");
+
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    lines = Texts(UI::Character::BuildCommandHint(effects));
+    CHECK(lines[2] == "Урон Dark Raven: +37~75");
+    CHECK(lines[4] == "Урон Dark Horse: +30~45");
+
+    I18N::SetLocale("en");
+    const auto* raven = g_ItemDatabase.Find(ITEM_DARK_RAVEN_ITEM);
+    REQUIRE(raven != nullptr);
+    auto renamedRaven = *raven;
+    renamedRaven.names.Set("en", "Raven 100% (%d)");
+    g_ItemDatabase.Set(renamedRaven);
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+    lines = Texts(UI::Character::BuildCommandHint(effects));
+    CHECK(lines[2] == "Raven 100% (%d) damage: +37~75");
+    CHECK(lines[3] == "Raven 100% (%d) attack speed: +6");
 }
 
 // A part that adds nothing has no line, like the damage and critical damage rate hints; without any part the row has

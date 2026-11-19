@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MuMain.Tools.ResxGen;
 
@@ -230,6 +231,7 @@ internal static class CppEmitter
                 const wchar_t* const* values;  // one per locale in GetAvailableLocales order; the
                                                // English text where a locale has none of its own
                 std::uint32_t ownLocales;      // bit i: locale i has a text of its own
+                bool isPrintfFormat;           // item names inserted here need escaped percent signs
             };
 
             // Every text that names an item, group by group in file order. The
@@ -241,7 +243,7 @@ internal static class CppEmitter
             // current one, or the default locale when the current locale has no
             // text of its own. The returned string must stay valid for the
             // program's lifetime: copies of the old pointer may still be read.
-            using ItemTextExpander = const wchar_t* (*)(const wchar_t* text, int textLocaleIndex) noexcept;
+            using ItemTextExpander = const wchar_t* (*)(const wchar_t* text, int textLocaleIndex, bool isPrintfFormat) noexcept;
 
             // Sets the expander that ExpandItemTexts uses; null shows the texts as
             // written. Set by the item data once its names are known.
@@ -380,7 +382,7 @@ internal static class CppEmitter
                     const wchar_t* written = text.values[g_currentLocaleIndex];
                     const bool own = ((text.ownLocales >> g_currentLocaleIndex) & 1u) != 0;
                     const int textLocale = own ? g_currentLocaleIndex : kDefaultLocaleIndex;
-                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale) : written;
+                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale, text.isPrintfFormat) : written;
                     if (shown == nullptr) shown = written;
                     if (*text.slot != shown)
                     {
@@ -621,8 +623,11 @@ internal static class CppEmitter
                 {
                     if (entry.Translations.ContainsKey(masterLocales[i])) own |= 1u << i;
                 }
+                // The English key declares the format contract shared by its translations.
+                var isPrintfFormat = Regex.IsMatch(entry.Key.Replace("%%", ""),
+                    @"%(?:[0-9]+\$)?[-+ #0']*(?:\d+|\*)?(?:\.(?:\d*|\*))?(?:hh|ll|I32|I64|[hlLjztI])?[cCdiouxXeEfgGaAnpsS]");
                 sb.AppendLine($"    {{ {Naming.EscapeCppString(group.Name)}, {Naming.EscapeCppString(entry.Key)}, &{entry.Identifier}, " +
-                              $"kSlots[{row}].values, 0x{own:X}u }},");
+                              $"kSlots[{row}].values, 0x{own:X}u, {(isPrintfFormat ? "true" : "false")} }},");
             }
             sb.AppendLine("};");
         }

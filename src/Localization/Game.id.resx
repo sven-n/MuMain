@@ -9107,16 +9107,16 @@
     <value>Tingkat serangan (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
-    <value>Kerusakan gagak gelap: +%d~%d</value>
+    <value>Kerusakan {item:13,5}: +%d~%d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
-    <value>Kecepatan serangan gagak gelap: +%d</value>
+    <value>Kecepatan serangan {item:13,5}: +%d</value>
   </data>
   <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
-    <value>Kerusakan kuda hitam: +%d~%d</value>
+    <value>Kerusakan {item:13,4}: +%d~%d</value>
   </data>
   <data name="Dark Horse attack speed: +%d" xml:space="preserve">
-    <value>Kecepatan serangan kuda hitam: +%d</value>
+    <value>Kecepatan serangan {item:13,4}: +%d</value>
   </data>
   <data name="Guild members as guild master: +%d" xml:space="preserve">
     <value>Anggota guild sebagai master guild: +%d</value>
