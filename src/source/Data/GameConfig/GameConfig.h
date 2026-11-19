@@ -241,6 +241,9 @@ private:
     // defaults.
     void SeedFromExecutableFolder(const std::filesystem::path& legacyConfig) const;
 
+    void LoadRenderSettings();
+    void SaveRenderSettings();
+
     std::filesystem::path m_configPath;
 
     int  m_windowWidth;

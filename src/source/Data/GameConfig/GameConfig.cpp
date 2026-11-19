@@ -126,37 +126,7 @@ void GameConfig::Load()
         ReadBool(CfgSectionUI, CfgKeyEnableAnimationTaskPool, CfgDefaultEnableAnimationTaskPool);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
-    m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
-    m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
-    m_look = ReadLookPreset(m_configPath);
-    m_anisotropy =
-        GameConfigValidation::ValidateAnisotropy(ReadInt(CfgSectionRender, CfgKeyAnisotropy, CfgDefaultAnisotropy));
-    m_antialiasing = GameConfigValidation::ValidateAntialiasing(
-        ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
-    m_edgeSmoothing = ReadBool(CfgSectionRender, CfgKeyEdgeSmoothing, CfgDefaultEdgeSmoothing);
-    m_renderScale =
-        GameConfigValidation::ValidateRenderScale(ReadInt(CfgSectionRender, CfgKeyRenderScale, CfgDefaultRenderScale));
-    m_sharpness =
-        GameConfigValidation::ValidateSharpness(ReadInt(CfgSectionRender, CfgKeySharpness, CfgDefaultSharpness));
-    m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
-    m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
-    m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
-    m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
-    m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
-    m_enhancedMovement = ReadBool(CfgSectionRender, CfgKeyEnhancedMovement, CfgDefaultEnhancedMovement);
-
-    m_renderBackend = GameConfigValidation::ValidateRenderBackend(
-        ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
-    m_disableEffects = ReadBool(CfgSectionRender, CfgKeyDisableEffects, CfgDefaultDisableEffects);
-    m_disableParticles = ReadBool(CfgSectionRender, CfgKeyDisableParticles, CfgDefaultDisableParticles);
-    m_disableSkillEffectModels =
-        ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
-    m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
-    m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
-    m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
-    m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
-    m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
-    m_useS6PlayerModels = ReadBool(CfgSectionRender, CfgKeyUseS6PlayerModels, CfgDefaultUseS6PlayerModels);
+    LoadRenderSettings();
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -204,6 +174,53 @@ void GameConfig::Save()
     WriteInt(CfgSectionUI, CfgKeyUIScalePercent, m_uiScalePercent);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
+    SaveRenderSettings();
+}
+
+void GameConfig::LoadRenderSettings()
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+    using namespace CfgDefaults;
+
+    m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
+    m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
+    m_look = ReadLookPreset(m_configPath);
+    m_anisotropy =
+        GameConfigValidation::ValidateAnisotropy(ReadInt(CfgSectionRender, CfgKeyAnisotropy, CfgDefaultAnisotropy));
+    m_antialiasing = GameConfigValidation::ValidateAntialiasing(
+        ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
+    m_edgeSmoothing = ReadBool(CfgSectionRender, CfgKeyEdgeSmoothing, CfgDefaultEdgeSmoothing);
+    m_renderScale =
+        GameConfigValidation::ValidateRenderScale(ReadInt(CfgSectionRender, CfgKeyRenderScale, CfgDefaultRenderScale));
+    m_sharpness =
+        GameConfigValidation::ValidateSharpness(ReadInt(CfgSectionRender, CfgKeySharpness, CfgDefaultSharpness));
+    m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
+    m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
+    m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
+    m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
+    m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
+    m_enhancedMovement = ReadBool(CfgSectionRender, CfgKeyEnhancedMovement, CfgDefaultEnhancedMovement);
+
+    m_renderBackend = GameConfigValidation::ValidateRenderBackend(
+        ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
+    m_disableEffects = ReadBool(CfgSectionRender, CfgKeyDisableEffects, CfgDefaultDisableEffects);
+    m_disableParticles = ReadBool(CfgSectionRender, CfgKeyDisableParticles, CfgDefaultDisableParticles);
+    m_disableSkillEffectModels =
+        ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
+    m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
+    m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
+    m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
+    m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
+    m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
+    m_useS6PlayerModels = ReadBool(CfgSectionRender, CfgKeyUseS6PlayerModels, CfgDefaultUseS6PlayerModels);
+}
+
+void GameConfig::SaveRenderSettings()
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
     WriteString(CfgSectionRender, CfgKeyLook, GameConfigValidation::FormatLook(m_look));
     WriteInt(CfgSectionRender, CfgKeyAnisotropy, m_anisotropy);
