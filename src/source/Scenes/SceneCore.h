@@ -26,6 +26,8 @@ extern void LoadingScene(HDC hDC);
 // once LoadingWorld actually drops below the "world ready" threshold. Safe to call any time,
 // including when there's nothing to close (no-op).
 extern void HideLoadingSceneOverlay();
+// Opens that wallpaper, if it isn't open: also for a map change that loads for a while.
+extern void ShowLoadingSceneOverlay();
 extern void RenderScene(HDC Hdc);
 extern bool CheckName();
 void    StartGame();

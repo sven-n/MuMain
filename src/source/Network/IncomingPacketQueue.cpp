@@ -117,7 +117,7 @@ namespace Network
         m_stats.highWaterMark = std::max(m_stats.highWaterMark, m_stats.depth);
     }
 
-    void IncomingPacketQueue::DrainTo(Processor process)
+    void IncomingPacketQueue::DrainTo(Processor process, bool (*hold)())
     {
         if (!process)
         {
@@ -154,6 +154,15 @@ namespace Network
         std::size_t drainedCount = 0;
         while (!pending.empty())
         {
+            if (hold && hold())
+            {
+                // Back in front of what arrived meanwhile.
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_queue.insert(m_queue.begin(), std::make_move_iterator(pending.begin()),
+                               std::make_move_iterator(pending.end()));
+                pending.clear();
+                break;
+            }
             if (!pending.front()->Superseded)
             {
                 process(pending.front().get());

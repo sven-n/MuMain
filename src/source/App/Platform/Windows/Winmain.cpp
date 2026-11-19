@@ -50,6 +50,7 @@
 #include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "World/MapInfra/MapLoad.h"
 #include "Network/EndpointForLog.h"
 #include "Dotnet/ManagedSymbols.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -933,6 +934,16 @@ static void RenderProfiledFrame()
     Core::Benchmark::Recorder::Instance().Tick();
 }
 
+static void RenderMapLoadingFrame()
+{
+    ShowLoadingSceneOverlay();
+    mu::GetRenderer().BeginFrame();
+    ::BeginOpengl();
+    mu::GetRenderer().ClearScreen();
+    ::EndOpengl();
+    mu::GetRenderer().EndFrame();
+}
+
 void RecordCpuUsage()
 {
     constexpr int max_recordings = 60;
@@ -1586,7 +1597,9 @@ bool IterateClient()
 
     // Process server packets handed over from the network thread. Replaces
     // the old WM_RECEIVE_BUFFER message round-trip; runs on the main thread.
-    Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback);
+    Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback, World::MapLoad::Active);
+    // A map change a packet started: the next steps, between frames.
+    World::MapLoad::Pump();
 
     // Run a pending reconnect teardown between frames (self-guards on its
     // pending flag). Replaces the old WM_START_RECONNECT round-trip.
@@ -1643,7 +1656,12 @@ bool IterateClient()
             // The first frame has something to draw now.
             if ((SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_HIDDEN) != 0)
                 SDL_ShowWindow(g_sdlWindow);
-            RenderProfiledFrame();
+            // While a map change loads, the game draws nothing: a short load holds the last frame, a long one
+            // shows the loading screen.
+            if (!World::MapLoad::Active())
+                RenderProfiledFrame();
+            else if (World::MapLoad::LoadingScreenDue())
+                RenderMapLoadingFrame();
 #ifdef _EDITOR
             // The editor's own windows, now that the game's frame went to the GPU.
             g_MuEditorCore.RenderPlatformWindows();
