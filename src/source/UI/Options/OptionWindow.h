@@ -442,6 +442,7 @@ namespace mu::ui::window
             Rml::String s6PlayerModelsLabel;
             Rml::String s6PlayerModelsTooltip;
         };
+        void BindRenderOptionModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);
         // The model's copy of a UI text, marked dirty when the text changed.

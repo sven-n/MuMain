@@ -6324,6 +6324,34 @@ private:
     // Returns false if the primary shader (basic_textured.vert) cannot be loaded
     // (fatal for 2D rendering). Other shaders log warnings but are non-fatal.
     // -----------------------------------------------------------------------
+    static void LoadPostProcessingShaders(const auto& createShader)
+    {
+        // Post-processing — non-fatal: without them post-processing is unavailable.
+        // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
+        // grading textures (t0-t2) and CompositeUniforms (b0).
+        s_vertShaderPostFullscreen =
+            createShader("post_fullscreen", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, /*fatal=*/false);
+        s_fragShaderBloomDown =
+            createShader("post_bloom_down", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderBloomUp =
+            createShader("post_bloom_up", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        // The composite also reads the ambient occlusion and the bloom source (t3, t4).
+        s_fragShaderComposite =
+            createShader("post_composite", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 5, 0, 1, /*fatal=*/false);
+        // Ambient occlusion: the depth (t0), and for the blur the occlusion (t1); AmbientOcclusion (b0).
+        s_fragShaderAmbientOcclusion =
+            createShader("post_ao", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderAmbientOcclusionBlur =
+            createShader("post_ao_blur", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 1, /*fatal=*/false);
+        // Edge smoothing: the processed image (t0) and FxaaUniforms (b0).
+        s_fragShaderFxaa = createShader("post_fxaa", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        // FSR 1 upscale and sharpening: the image (t0) and EasuUniforms or RcasUniforms (b0).
+        s_fragShaderFsrEasu =
+            createShader("post_fsr_easu", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderFsrRcas =
+            createShader("post_fsr_rcas", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+    }
+
     [[nodiscard]] static bool LoadShaders()
     {
         const Render::ShaderFormat& shaderFormat = *s_shaderFormat;
@@ -6458,30 +6486,7 @@ private:
         s_fragShaderSunDepth =
             createShader("sun_depth", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
 
-        // Post-processing — non-fatal: without them post-processing is unavailable.
-        // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
-        // grading textures (t0-t2) and CompositeUniforms (b0).
-        s_vertShaderPostFullscreen =
-            createShader("post_fullscreen", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, /*fatal=*/false);
-        s_fragShaderBloomDown =
-            createShader("post_bloom_down", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        s_fragShaderBloomUp =
-            createShader("post_bloom_up", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        // The composite also reads the ambient occlusion and the bloom source (t3, t4).
-        s_fragShaderComposite =
-            createShader("post_composite", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 5, 0, 1, /*fatal=*/false);
-        // Ambient occlusion: the depth (t0), and for the blur the occlusion (t1); AmbientOcclusion (b0).
-        s_fragShaderAmbientOcclusion =
-            createShader("post_ao", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        s_fragShaderAmbientOcclusionBlur =
-            createShader("post_ao_blur", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 1, /*fatal=*/false);
-        // Edge smoothing: the processed image (t0) and FxaaUniforms (b0).
-        s_fragShaderFxaa = createShader("post_fxaa", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        // FSR 1 upscale and sharpening: the image (t0) and EasuUniforms or RcasUniforms (b0).
-        s_fragShaderFsrEasu =
-            createShader("post_fsr_easu", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        s_fragShaderFsrRcas =
-            createShader("post_fsr_rcas", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        LoadPostProcessingShaders(createShader);
 
         mu::log::Get("render")->info("SDL_gpu -- shaders loaded, format: {}", shaderFormat.extension);
         return true;

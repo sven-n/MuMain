@@ -378,6 +378,32 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng)
     return true;
 }
 
+void mu::ui::window::COptionWindow::BindRenderOptionModel(Rml::DataModelConstructor& c, OptionRmlModel& model)
+{
+    c.Bind("antialiasing_labels", &model.antialiasingLabels);
+    c.Bind("antialiasing_index", &model.antialiasingIndex);
+    c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
+    c.Bind("antialiasing_value_label", &model.antialiasingValueLabel);
+    c.Bind("antialiasing_tooltip", &model.antialiasingTooltip);
+    c.Bind("anisotropy_labels", &model.anisotropyLabels);
+    c.Bind("anisotropy_index", &model.anisotropyIndex);
+    c.Bind("anisotropy_row_label", &model.anisotropyRowLabel);
+    c.Bind("anisotropy_value_label", &model.anisotropyValueLabel);
+    c.Bind("anisotropy_tooltip", &model.anisotropyTooltip);
+    c.Bind("render_scale_labels", &model.renderScaleLabels);
+    c.Bind("render_scale_index", &model.renderScaleIndex);
+    c.Bind("render_scale_row_label", &model.renderScaleRowLabel);
+    c.Bind("render_scale_value_label", &model.renderScaleValueLabel);
+    c.Bind("render_scale_tooltip", &model.renderScaleTooltip);
+    c.Bind("sharpness_labels", &model.sharpnessLabels);
+    c.Bind("sharpness_index", &model.sharpnessIndex);
+    c.Bind("sharpness_row_label", &model.sharpnessRowLabel);
+    c.Bind("sharpness_value_label", &model.sharpnessValueLabel);
+    c.Bind("sharpness_tooltip", &model.sharpnessTooltip);
+    c.BindEventCallback("option_toggle_edge_smoothing", [this](Rml::DataModelHandle, Rml::Event&,
+                                                               const Rml::VariantList&) { RmlToggleEdgeSmoothing(); });
+}
+
 void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model)
 {
     c.Bind("positioned", &model.positioned);
@@ -508,26 +534,7 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("tuning_reset_all_label", &model.tuningResetAllLabel);
     c.Bind("tuning_save_message", &model.tuningSaveMessage);
     c.Bind("tuning_preview_note", &model.tuningPreviewNote);
-    c.Bind("antialiasing_labels", &model.antialiasingLabels);
-    c.Bind("antialiasing_index", &model.antialiasingIndex);
-    c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
-    c.Bind("antialiasing_value_label", &model.antialiasingValueLabel);
-    c.Bind("antialiasing_tooltip", &model.antialiasingTooltip);
-    c.Bind("anisotropy_labels", &model.anisotropyLabels);
-    c.Bind("anisotropy_index", &model.anisotropyIndex);
-    c.Bind("anisotropy_row_label", &model.anisotropyRowLabel);
-    c.Bind("anisotropy_value_label", &model.anisotropyValueLabel);
-    c.Bind("anisotropy_tooltip", &model.anisotropyTooltip);
-    c.Bind("render_scale_labels", &model.renderScaleLabels);
-    c.Bind("render_scale_index", &model.renderScaleIndex);
-    c.Bind("render_scale_row_label", &model.renderScaleRowLabel);
-    c.Bind("render_scale_value_label", &model.renderScaleValueLabel);
-    c.Bind("render_scale_tooltip", &model.renderScaleTooltip);
-    c.Bind("sharpness_labels", &model.sharpnessLabels);
-    c.Bind("sharpness_index", &model.sharpnessIndex);
-    c.Bind("sharpness_row_label", &model.sharpnessRowLabel);
-    c.Bind("sharpness_value_label", &model.sharpnessValueLabel);
-    c.Bind("sharpness_tooltip", &model.sharpnessTooltip);
+    BindRenderOptionModel(c, model);
 
     // Interface/UI tab.
     c.Bind("show_fps_counter", &model.showFpsCounter);
@@ -623,8 +630,6 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.BindEventCallback("option_toggle_enhanced_movement",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleEnhancedMovement(); });
-    c.BindEventCallback("option_toggle_edge_smoothing", [this](Rml::DataModelHandle, Rml::Event&,
-                                                               const Rml::VariantList&) { RmlToggleEdgeSmoothing(); });
     c.BindEventCallback("option_toggle_enhanced_feature",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
                         {

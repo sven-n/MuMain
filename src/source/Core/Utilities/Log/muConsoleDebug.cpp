@@ -322,6 +322,49 @@ std::optional<double> ParseTargetFps(std::wstring_view argument)
 
     return fps;
 }
+bool HandleFinalPassCommand(std::wstring_view strCommand)
+{
+    if (strCommand.compare(0, 6, L"$fxaa ") == 0)
+    {
+        const auto enabled = Render::PostProcessing::ParseEdgeSmoothingCommand(std::wstring_view(strCommand).substr(6));
+        if (enabled)
+        {
+            MuSetEdgeSmoothingPreference(*enabled);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$fxaa expects on or off");
+        }
+        return true;
+    }
+    else if (strCommand.compare(0, 13, L"$renderscale ") == 0)
+    {
+        const auto percent = Render::PostProcessing::ParseRenderScaleCommand(std::wstring_view(strCommand).substr(13));
+        if (percent)
+        {
+            MuSetRenderScalePreference(*percent);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$renderscale expects a percentage from 50 to 100");
+        }
+        return true;
+    }
+    else if (strCommand.compare(0, 11, L"$sharpness ") == 0)
+    {
+        const auto percent = Render::PostProcessing::ParseSharpnessCommand(std::wstring_view(strCommand).substr(11));
+        if (percent)
+        {
+            MuSetSharpnessPreference(*percent);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$sharpness expects a value from 0 to 100");
+        }
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
@@ -532,43 +575,8 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         }
         return Handled();
     }
-    else if (strCommand.compare(0, 6, L"$fxaa ") == 0)
+    else if (HandleFinalPassCommand(strCommand))
     {
-        const auto enabled = Render::PostProcessing::ParseEdgeSmoothingCommand(std::wstring_view(strCommand).substr(6));
-        if (enabled)
-        {
-            MuSetEdgeSmoothingPreference(*enabled);
-        }
-        else
-        {
-            mu::log::Get("render")->warn("$fxaa expects on or off");
-        }
-        return Handled();
-    }
-    else if (strCommand.compare(0, 13, L"$renderscale ") == 0)
-    {
-        const auto percent = Render::PostProcessing::ParseRenderScaleCommand(std::wstring_view(strCommand).substr(13));
-        if (percent)
-        {
-            MuSetRenderScalePreference(*percent);
-        }
-        else
-        {
-            mu::log::Get("render")->warn("$renderscale expects a percentage from 50 to 100");
-        }
-        return Handled();
-    }
-    else if (strCommand.compare(0, 11, L"$sharpness ") == 0)
-    {
-        const auto percent = Render::PostProcessing::ParseSharpnessCommand(std::wstring_view(strCommand).substr(11));
-        if (percent)
-        {
-            MuSetSharpnessPreference(*percent);
-        }
-        else
-        {
-            mu::log::Get("render")->warn("$sharpness expects a value from 0 to 100");
-        }
         return Handled();
     }
     else if (strCommand.compare(L"$effects off") == 0)
