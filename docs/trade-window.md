@@ -12,8 +12,9 @@ kind:
 - when the trade ends without items changing hands, all items they offered:
   you press the close button or Escape, you walk away, the partner cancels,
   or the server stops the trade because an inventory is full or an item is
-  reinforced. Closing all windows while you hold an item hides the trade
-  window without cancelling it, and remembers nothing.
+  reinforced. Closing the inventory while you hold an item hides the trade
+  window and leaves the trade open. What gets remembered then depends on how
+  the trade ends.
 
 These items are remembered (`CTrade::BackUpYourInven`):
 
@@ -44,8 +45,10 @@ difference decides:
 3. the excellent options, taken as one bit-flag number, not counted: a copy
    with one high-bit option beats a copy with two low-bit options;
 4. the number of other options, then the additional option (the one a Jewel
-   of Life raises): a copy without it, or with a lower value, is worse, so a
-   +16 to +4 swap is marked;
+   of Life raises, including HP recovery, max mana and max AG). Having the
+   option is better than having none. Values are compared when both copies
+   have the same option kind, so a +16 to +4 damage swap or a +4% to +1% HP
+   recovery swap is marked. If the option kinds differ, durability decides;
 5. the durability, so a copy with less durability is also marked.
 
 The comparison never reads the Jewel of Harmony option, the 380 option, the

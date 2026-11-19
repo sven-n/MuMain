@@ -8,6 +8,7 @@
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Engine/Object/CompareItemResult.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemOptionSlots.h"
@@ -355,4 +356,49 @@ TEST_CASE("A slot of an option definition writes its texts into the tooltip's ro
     CHECK(TextBold[4] == 0);
     // Only the rows before the limit.
     CHECK(WriteDefinitionOptionLines(blade, 1, 3, 4) == 1);
+}
+
+TEST_CASE("Trade compares lower Jewel of Life values on actual items [items][trade]")
+{
+    using namespace Engine::Items::CompareResult;
+    const std::array options{
+        OptionSlot{AT_IMPROVE_DAMAGE, 16},
+        OptionSlot{AT_LIFE_REGENERATION, 4},
+        OptionSlot{AT_IMPROVE_MAX_MANA, 4},
+        OptionSlot{AT_IMPROVE_MAX_AG, 4},
+    };
+    for (const auto& [kind, highValue] : options)
+    {
+        CAPTURE(kind);
+        ITEM remembered{};
+        remembered.Type = ITEM_BLADE;
+        remembered.SpecialNum = 1;
+        remembered.Special[0] = kind;
+        remembered.SpecialValue[0] = highValue;
+
+        ITEM offered = remembered;
+        offered.SpecialValue[0] = highValue / 4;
+        CHECK(CompareItem(remembered, offered) == FirstIsBetter);
+        CHECK(CompareItem(offered, remembered) == SecondIsBetter);
+        CHECK(CompareItem(remembered, remembered) == Same);
+    }
+}
+
+TEST_CASE("Trade compares durability when Jewel of Life option kinds differ [items][trade]")
+{
+    using namespace Engine::Items::CompareResult;
+    ITEM remembered{};
+    remembered.Type = ITEM_WING;
+    remembered.SpecialNum = 1;
+    remembered.Special[0] = AT_LIFE_REGENERATION;
+    remembered.SpecialValue[0] = 4;
+    remembered.Durability = 10;
+
+    ITEM offered = remembered;
+    offered.Special[0] = AT_IMPROVE_DAMAGE;
+    offered.SpecialValue[0] = 16;
+    CHECK(CompareItem(remembered, offered) == Same);
+
+    offered.Durability = 9;
+    CHECK(CompareItem(remembered, offered) == FirstIsBetter);
 }
