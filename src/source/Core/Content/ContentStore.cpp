@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iterator>
 #include <mutex>
+#include <set>
 #include <shared_mutex>
 #include <unordered_map>
 #include <utility>
@@ -376,6 +377,44 @@ std::vector<Entry> ListFolder(const std::filesystem::path& requested)
     }
     std::sort(entries.begin(), entries.end(), [](const Entry& a, const Entry& b) { return a.name < b.name; });
     return entries;
+}
+
+namespace
+{
+PackSource& Packs()
+{
+    static PackSource source;
+    return source;
+}
+} // namespace
+
+void SetPackSource(PackSource source)
+{
+    Packs() = std::move(source);
+}
+
+PackStatus RequestPack(std::string_view pack)
+{
+    if (!Packs())
+    {
+        return {};
+    }
+    PackStatus status = Packs()(pack);
+    // A pack that arrives brings files the folder listings don't hold yet.
+    static std::set<std::string, std::less<>> pending;
+    if (status.state == PackStatus::State::Pending)
+    {
+        pending.emplace(pack);
+    }
+    else if (const auto it = pending.find(pack); it != pending.end())
+    {
+        pending.erase(it);
+        if (status.state == PackStatus::State::Ready)
+        {
+            Refresh();
+        }
+    }
+    return status;
 }
 
 void Refresh()
