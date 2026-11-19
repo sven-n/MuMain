@@ -152,6 +152,27 @@ void ReconnectManager::Begin()
     EnterPhase(Phase::Connecting);
 }
 
+void ReconnectManager::OnConnectionLostDuringMapLoad()
+{
+    // Unlike a loss in a loaded world, nothing can stay on screen while probing: the world is half built.
+    const bool restore = !m_active && m_hasSession;
+    if (restore)
+    {
+        m_muHelperWasActive = MUHelper::g_MuHelper.IsActive();
+    }
+    g_ErrorReport.Write(L"> Connection lost while loading a map - back to the login scene. ");
+    g_ErrorReport.WriteCurrentTime();
+    m_beginPending = false;
+    ResetClientToLoginScene();
+    if (restore || m_active)
+    {
+        // Retrying is the phase after a teardown; the first attempt goes now.
+        m_active = true;
+        EnterPhase(Phase::Retrying);
+        m_phaseStartTime = WorldTime - RETRY_INTERVAL_MS;
+    }
+}
+
 void ReconnectManager::RequestCancel()
 {
     if (!m_active)
