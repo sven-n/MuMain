@@ -102,4 +102,9 @@ void ItemOptionDatabase::OrderLinks(std::vector<std::string>& names) const
     std::stable_sort(names.begin(), names.end(),
                      [&](const std::string& left, const std::string& right) { return key(left) < key(right); });
 }
+
+bool ExcellentByteMeansOther(const ItemDefinition& item)
+{
+    return item.slot == ItemSlot::Wings || item.tags.Has(ItemTag::HornMount);
+}
 } // namespace Data::Items

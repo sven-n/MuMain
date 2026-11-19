@@ -19,6 +19,7 @@ struct ToolWindows
     bool styleEditor = false;
     bool itemTooltip = false;
     bool itemFormulas = false;
+    bool itemOptions = false;
     bool itemSync = false;
     bool itemTranslations = false;
     bool monsterBrowser = false;

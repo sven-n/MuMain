@@ -94,7 +94,12 @@ public:
                 {},
                 {},
                 [this] { return m_nameCases; },
-                [this](const Data::Items::ItemNameCases& cases) { m_nameCases = cases; }};
+                [this](const Data::Items::ItemNameCases& cases) { m_nameCases = cases; },
+                // No part models.
+                {},
+                {},
+                [this] { return m_options; },
+                [this](const Data::Items::ItemOptionFiles& files) { m_options = files; }};
     }
 
     std::map<std::string, Data::Items::SharedItemModel> m_shared;
@@ -104,6 +109,7 @@ public:
     std::vector<Data::Items::GroundLabelStyle> m_styles;
     std::map<std::string, std::vector<Data::Colors::ColorFolder>> m_folders;
     Data::Items::ItemNameCases m_nameCases;
+    Data::Items::ItemOptionFiles m_options;
     // The move changes the weapon kind, as a move to another group may.
     static inline bool MoveDerives = false;
 
@@ -311,6 +317,28 @@ TEST_CASE("The item edit history undoes moves and shared model changes [editor][
 
         // Cases changed past the history are not overwritten.
         items.m_nameCases.SetCases("de", {});
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
+    }
+
+    SUBCASE("the option files")
+    {
+        Data::Items::ItemOptionFiles before;
+        before.definitions.push_back({.name = "luck", .file = "Luck.json"});
+        Data::Items::ItemOptionFiles after = before;
+        after.definitions.front().name = "fortune";
+        items.m_options = after;
+        ItemEditStep step{ItemEditStep::Kind::Options};
+        step.optionsBefore = std::make_shared<const Data::Items::ItemOptionFiles>(before);
+        step.optionsAfter = std::make_shared<const Data::Items::ItemOptionFiles>(after);
+        history.Record({"Option files", {step}});
+        REQUIRE(history.Undo());
+        CHECK(items.m_options == before);
+        REQUIRE(history.Redo());
+        CHECK(items.m_options == after);
+
+        // Files changed past the history are not overwritten.
+        items.m_options.definitions.clear();
         CHECK_FALSE(history.Undo());
         CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
     }

@@ -4804,7 +4804,7 @@
   <data name="Monster log name {0} {1}" xml:space="preserve">
     <value>{0} ({1} Nummern)</value>
   </data>
-  <data name="Item options" xml:space="preserve">
+  <data name="Item Options" xml:space="preserve">
     <value>Item-Optionen</value>
   </data>
   <data name="Outline" xml:space="preserve">
@@ -5403,5 +5403,212 @@
   </data>
   <data name="The pet window and the command hint count each stat as" xml:space="preserve">
     <value>Jeder Wert: Grundwert + Haustierstufe × je Stufe / Teiler + Stärke / Teiler + Führung / Teiler + Mindestschaden × Anteil / 100. Jede Division wird abgerundet; ein Teiler von 0 lässt den Teil weg.</value>
+  </data>
+  <data name="Add a term" xml:space="preserve">
+    <value>Term hinzufügen</value>
+  </data>
+  <data name="Add an option" xml:space="preserve">
+    <value>Option hinzufügen</value>
+  </data>
+  <data name="Add chance" xml:space="preserve">
+    <value>Chance</value>
+  </data>
+  <data name="Adds" xml:space="preserve">
+    <value>Addiert</value>
+  </data>
+  <data name="Adds randomly" xml:space="preserve">
+    <value>Zufällig vergeben</value>
+  </data>
+  <data name="All types" xml:space="preserve">
+    <value>Alle Typen</value>
+  </data>
+  <data name="Another attribute" xml:space="preserve">
+    <value>Anderes Attribut</value>
+  </data>
+  <data name="Apply to the options" xml:space="preserve">
+    <value>Auf die Optionen anwenden</value>
+  </data>
+  <data name="Attribute" xml:space="preserve">
+    <value>Attribut</value>
+  </data>
+  <data name="Change the item options" xml:space="preserve">
+    <value>Gegenstandsoptionen ändern</value>
+  </data>
+  <data name="Copy an option definition" xml:space="preserve">
+    <value>Optionsdefinition kopieren</value>
+  </data>
+  <data name="Display name: {0}" xml:space="preserve">
+    <value>Anzeigename: {0}</value>
+  </data>
+  <data name="Divided by" xml:space="preserve">
+    <value>geteilt durch</value>
+  </data>
+  <data name="Each list goes on by its own step" xml:space="preserve">
+    <value>Jede markierte Liste wird um ihren eigenen Schritt (den Unterschied ihrer letzten zwei Werte) verlängert oder bei der Stufe gekürzt.</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Fill" xml:space="preserve">
+    <value>Füllen</value>
+  </data>
+  <data name="Fill levels" xml:space="preserve">
+    <value>Stufen füllen</value>
+  </data>
+  <data name="Fill levels of {0} marked" xml:space="preserve">
+    <value>Stufen der {0} markierten füllen</value>
+  </data>
+  <data name="Fill the levels of option lists" xml:space="preserve">
+    <value>Stufen von Optionslisten füllen</value>
+  </data>
+  <data name="From level" xml:space="preserve">
+    <value>Ab Stufe</value>
+  </data>
+  <data name="Highest level" xml:space="preserve">
+    <value>Höchste Stufe</value>
+  </data>
+  <data name="Highest level {0}" xml:space="preserve">
+    <value>Höchste Stufe {0}</value>
+  </data>
+  <data name="Its values are constants" xml:space="preserve">
+    <value>Seine Werte sind Konstanten: es hat keine Stufen zum Füllen.</value>
+  </data>
+  <data name="Level {0}" xml:space="preserve">
+    <value>Stufe {0}</value>
+  </data>
+  <data name="Mark for Fill levels" xml:space="preserve">
+    <value>Für Stufen füllen markieren</value>
+  </data>
+  <data name="Maximum per item" xml:space="preserve">
+    <value>Höchstens pro Gegenstand</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+  <data name="New option definition" xml:space="preserve">
+    <value>Neue Optionsdefinition</value>
+  </data>
+  <data name="No text {0}" xml:space="preserve">
+    <value>Kein Text "{0}": die Zeile fehlt</value>
+  </data>
+  <data name="One value per level" xml:space="preserve">
+    <value>Ein Wert pro Stufe</value>
+  </data>
+  <data name="Only the server reads them" xml:space="preserve">
+    <value>Nur der Server liest sie: ob und wie oft er die Optionen einem gefallenen Gegenstand gibt.</value>
+  </data>
+  <data name="OpenMU finds the definition by its labels" xml:space="preserve">
+    <value>OpenMU findet die Definition über ihre Kennungen (Id und englischer Name oben), nicht über diesen Namen.</value>
+  </data>
+  <data name="Option type" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>Optionen</value>
+  </data>
+  <data name="Remove an option definition" xml:space="preserve">
+    <value>Optionsdefinition entfernen</value>
+  </data>
+  <data name="Remove the option" xml:space="preserve">
+    <value>Option entfernen</value>
+  </data>
+  <data name="Rename an option definition" xml:space="preserve">
+    <value>Optionsdefinition umbenennen</value>
+  </data>
+  <data name="Server values" xml:space="preserve">
+    <value>Serverwerte</value>
+  </data>
+  <data name="The client computes nothing for this attribute" xml:space="preserve">
+    <value>Der Client berechnet für dieses Attribut dieses Typs nichts: die Zeile wird gezeigt, sie addiert nichts.</value>
+  </data>
+  <data name="The items and rules that link it are renamed too" xml:space="preserve">
+    <value>Die Gegenstände und Regeln, die sie verknüpfen, werden mit umbenannt.</value>
+  </data>
+  <data name="The server keeps its own option definitions" xml:space="preserve">
+    <value>Der Server hat eigene Optionsdefinitionen: diese geben die Zeilen und Werte, die der Client zeigt.</value>
+  </data>
+  <data name="To level" xml:space="preserve">
+    <value>Bis Stufe</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Wert</value>
+  </data>
+  <data name="Value there" xml:space="preserve">
+    <value>Wert dort</value>
+  </data>
+  <data name="A list that differs from the rules stays until changed" xml:space="preserve">
+    <value>Eine Liste, die von den Regeln abweicht, bleibt so, bis sie geändert wird; Regeln verwenden lässt sie ihnen wieder folgen.</value>
+  </data>
+  <data name="Link an option definition" xml:space="preserve">
+    <value>Optionsdefinition verknüpfen</value>
+  </data>
+  <data name="No definition {0}" xml:space="preserve">
+    <value>Keine Definition "{0}": die Verknüpfung fehlt</value>
+  </data>
+  <data name="Open in Item Options" xml:space="preserve">
+    <value>In Item-Optionen öffnen</value>
+  </data>
+  <data name="Option links" xml:space="preserve">
+    <value>Optionsverknüpfungen</value>
+  </data>
+  <data name="Remove the link" xml:space="preserve">
+    <value>Verknüpfung entfernen</value>
+  </data>
+  <data name="The option rules give {0}" xml:space="preserve">
+    <value>Die Optionsregeln geben: {0}</value>
+  </data>
+  <data name="The option rules give this list" xml:space="preserve">
+    <value>Die Optionsregeln geben diese Liste.</value>
+  </data>
+  <data name="Use the rules" xml:space="preserve">
+    <value>Regeln verwenden</value>
+  </data>
+  <data name="Additional option type" xml:space="preserve">
+    <value>Optionstyp</value>
+  </data>
+  <data name="Ancient bonus level" xml:space="preserve">
+    <value>Antike Bonusstufe</value>
+  </data>
+  <data name="Excellent option {0}" xml:space="preserve">
+    <value>Exzellent {0}</value>
+  </data>
+  <data name="Item numbers" xml:space="preserve">
+    <value>Gegenstandsnummern</value>
+  </data>
+  <data name="Without tags" xml:space="preserve">
+    <value>Ohne Tags</value>
+  </data>
+  <data name="All texts" xml:space="preserve">
+    <value>Alle Texte</value>
+  </data>
+  <data name="Definitions" xml:space="preserve">
+    <value>Definitionen</value>
+  </data>
+  <data name="How the option rules work" xml:space="preserve">
+    <value>Die erste Regel, auf die ein Gegenstand passt, gibt seine Liste von Definitionen; ein Gegenstand, auf den keine passt, hat keine. Ein Gegenstand, dessen Liste die der Regeln ist, folgt einer Änderung; eine in Gegenstandsgrundlagen gewählte Liste bleibt.</value>
+  </data>
+  <data name="New text" xml:space="preserve">
+    <value>Neuer Text</value>
+  </data>
+  <data name="Rules" xml:space="preserve">
+    <value>Regeln</value>
+  </data>
+  <data name="The name options name the text by" xml:space="preserve">
+    <value>Der Name, unter dem Optionen den Text nennen</value>
+  </data>
+  <data name="The texts of the options lines" xml:space="preserve">
+    <value>Die Texte der Tooltipzeilen der Optionen: {value} ist der Wert der Option.</value>
+  </data>
+  <data name="The items pick it by this name" xml:space="preserve">
+    <value>Die Gegenstände wählen sie über ihren attackType nach diesem Namen: eine Umbenennung würde sie verlieren.</value>
+  </data>
+  <data name="Links that would do nothing are left out" xml:space="preserve">
+    <value>Nicht angeboten: eine zweite Definition eines Typs, den der Gegenstand schon verknüpft (die erste zählt), die Ancient-Typen (die Sets geben sie) und Excellent-Optionen auf Flügeln und Hörnern.</value>
+  </data>
+  <data name="The option files changed under the changes" xml:space="preserve">
+    <value>Die Optionsdateien haben sich seit Beginn dieser Änderungen geändert (Rückgängig oder Wiederholen): Anwenden würde das zurückschreiben. Verwerfen und dann neu ändern.</value>
+  </data>
+  <data name="Wing option bit {0}" xml:space="preserve">
+    <value>Flügeloptions-Bit {0}</value>
   </data>
 </root>

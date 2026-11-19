@@ -218,6 +218,12 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
                 return false;
             }
             break;
+        case ItemEditStep::Kind::Options:
+            if (m_hooks.readOptions && m_hooks.readOptions() != *(undoing ? step.optionsAfter : step.optionsBefore))
+            {
+                return false;
+            }
+            break;
         case ItemEditStep::Kind::MonsterItems:
             if (!AreMonstersAsLeft(step, undoing))
             {
@@ -289,6 +295,7 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
         case ItemEditStep::Kind::MonsterItems:
         case ItemEditStep::Kind::NameCases:
         case ItemEditStep::Kind::PartModels:
+        case ItemEditStep::Kind::Options:
             break;
         }
     }
@@ -380,6 +387,12 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
         if (m_hooks.restorePartModels)
         {
             m_hooks.restorePartModels(undoing ? step.partModelsBefore : step.partModelsAfter);
+        }
+        break;
+    case ItemEditStep::Kind::Options:
+        if (m_hooks.restoreOptions)
+        {
+            m_hooks.restoreOptions(*(undoing ? step.optionsBefore : step.optionsAfter));
         }
         break;
     case ItemEditStep::Kind::MonsterItems:

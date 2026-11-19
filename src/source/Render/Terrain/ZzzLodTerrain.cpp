@@ -24,6 +24,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
+#include "Render/Terrain/TerrainFileFormat.h"
 #include "Render/Terrain/TerrainHeightGrid.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Render/Lighting/DynamicLightHistory.h"
@@ -173,13 +174,10 @@ int OpenTerrainAttribute(wchar_t* FileName)
         DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
         return (-1);
     }
-    const int file_size = static_cast<int>(file_data->size());
 
-    // Decrypt file data
-    int iSize = MapFileDecrypt(NULL, file_data->data(), file_size);
-    std::vector<unsigned char> decrypted(static_cast<std::size_t>(iSize));
+    std::vector<unsigned char> decrypted = Render::Terrain::FileFormat::DecryptTerrainFile(*file_data);
+    const int iSize = static_cast<int>(decrypted.size());
     unsigned char* decrypted_data = decrypted.data();
-    MapFileDecrypt(decrypted_data, file_data->data(), file_size);
 
     // Check file size
     bool extAtt = false;
@@ -349,6 +347,9 @@ void SetTerrainWaterState(std::list<int>& terrainIndex, int state)
     }
 }
 
+// A .map file: version and map number bytes, two tile layers and an alpha layer of one byte a tile each.
+constexpr std::size_t MappingFileSize = 2 + 3 * TERRAIN_SIZE * TERRAIN_SIZE;
+
 int OpenTerrainMapping(wchar_t* FileName) {
     InitTerrainMappingLayer();
     Content::Stream file = Content::OpenIO(FileName);
@@ -363,12 +364,14 @@ int OpenTerrainMapping(wchar_t* FileName) {
     {
         return -1;
     }
-    const int EncBytes = static_cast<int>(EncData->size());
 
-    int DataBytes = MapFileDecrypt(NULL, EncData->data(), EncBytes);
-    std::vector<unsigned char> Decrypted(static_cast<std::size_t>(DataBytes));
+    std::vector<unsigned char> Decrypted = Render::Terrain::FileFormat::DecryptTerrainFile(*EncData);
+    if (Decrypted.size() < MappingFileSize)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return -1;
+    }
     unsigned char* Data = Decrypted.data();
-    MapFileDecrypt(Data, EncData->data(), EncBytes);
 
     int DataPtr = 0;
     DataPtr += 1;
@@ -655,9 +658,47 @@ void CreateTerrainLight_Part(int xi, int yi)
     }
 }
 
+namespace
+{
+// "Data\<name without its extension>.<extension>", where the terrain loaders look for a world's files.
+std::wstring DataFileWithExtension(const wchar_t* name, const wchar_t* extension)
+{
+    std::wstring path = name;
+    const auto dot = path.find_last_of(L'.');
+    if (dot != std::wstring::npos)
+        path.resize(dot);
+    return L"Data\\" + path + L"." + extension;
+}
+
+// Later seasons' maps ship their light map as a bitmap .OZB and no .OZJ. False when the world has an .OZJ or no
+// readable .OZB, so the JPEG is read as before.
+bool OpenTerrainLightBitmap(const wchar_t* FileName)
+{
+    if (Content::OpenIO(DataFileWithExtension(FileName, L"OZJ")))
+        return false;
+    Content::Stream file = Content::OpenIO(DataFileWithExtension(FileName, L"OZB"));
+    if (!file)
+        return false;
+    const std::optional<std::vector<BYTE>> content = DataFileIO::ReadAll(file.get());
+    if (!content)
+        return false;
+    const std::vector<std::array<float, 3>> light = Render::Terrain::FileFormat::ReadLightBitmap(*content);
+    if (light.empty())
+        return false;
+    for (std::size_t i = 0; i < light.size(); ++i)
+    {
+        TerrainLight[i][0] = light[i][0];
+        TerrainLight[i][1] = light[i][1];
+        TerrainLight[i][2] = light[i][2];
+    }
+    return true;
+}
+} // namespace
+
 void OpenTerrainLight(wchar_t* FileName)
 {
-    OpenJpegBuffer(FileName, &TerrainLight[0][0]);
+    if (!OpenTerrainLightBitmap(FileName))
+        OpenJpegBuffer(FileName, &TerrainLight[0][0]);
     // Apply corrections to the loaded terrain light
     for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; i++)
     {
@@ -727,9 +768,10 @@ unsigned char BMPHeader[1080];
 // one (the OpenTerrainHeightNew path).
 unsigned char OZBPrefix[4] = { 0x42, 0x4D, 0x38, 0x04 };
 
-bool IsTerrainHeightExtMap(int iWorld)
+bool IsTerrainHeightExtFile(const wchar_t* FileName)
 {
-    return (iWorld == WD_42CHANGEUP3RD_2ND || gMapManager.IsPKField() || iWorld == WD_66DOPPLEGANGER2);
+    Content::Stream file = Content::OpenIO(DataFileWithExtension(FileName, L"OZB"));
+    return file && Render::Terrain::FileFormat::IsHeightMap24Bit(static_cast<std::size_t>(SDL_GetIOSize(file.get())));
 }
 
 bool OpenTerrainHeight(wchar_t* filename)

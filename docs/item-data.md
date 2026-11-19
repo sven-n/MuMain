@@ -1252,7 +1252,8 @@ them under **Pet stats**, for items with that tag or with pet stats.
 ### Option rules
 
 `Options/OptionRules.json` says which definitions an item's data gives it.
-The game does not read it: the editor writes the items' lists from it.
+The game does not read it: the editor writes the items' lists from it (Item
+Options' **Rules** tab edits it).
 
 ```json
 {
@@ -1980,8 +1981,15 @@ shows it in the others.
   the stat profile (*By the rules* takes what the
   [profile rules](#item-stats-by-level) give; beside the list, the rule that
   gives the item its profile, or that it is picked for the item; **Item
-  Formulas** opens the profile there), the resistances and, for the Dark Lord's
-  pets, their [pet stats](#pet-stats). Below the stats, what the game
+  Formulas** opens the profile there), the resistances, the Dark Lord pets'
+  [pet stats](#pet-stats) and the item's [option links](#item-options): each
+  definition it links with its type and
+  English name (a click opens it in Item Options, **x** takes the link out),
+  a list to link another (without the links that would do nothing: a
+  second definition of a type it links, the ancient types, excellent
+  options on wings and horns), and, when the list is not the one the
+  [option rules](#option-rules) give, what they give and **Use the rules**.
+  A list that differs from the rules stays so until it is changed. Below the stats, what the game
   makes of them at each + level (damage, magic power, defense, magic
   defense, block rate), also as excellent or ancient, while a value is still
   being typed, and under that the formula of each with the item's numbers
@@ -2329,8 +2337,16 @@ problem is never written; the editor then shows the looks the game has.
 
 How the selected item is shown, for now its name in the tooltip and on the
 ground, and its [tooltip layout](#presets). The preview takes a level, skill,
-luck, an option, the excellent options and a set (one of the item's sets),
-and shows such an item's name in two rows:
+luck, the additional option's level (0 to 15, the option byte's four bits;
+off while the item links no `option` definition) and, for a definition whose
+options are numbered by it (wings), its type (0 to the highest number of
+its options), one checkbox per excellent option of the item's excellent
+definition (without one: the bits the item's name lines name as the whole
+byte, as the Horn of Fenrir's `excellentFlags=1`, `=2` and `=4` kinds, each
+named by its line; else all six bits on wings, whose own code reads the byte),
+and a set (one of the
+item's sets) with its ancient bonus level (0 to 2), and shows such an item's
+name in two rows:
 
 - **In the tooltip**: the name row its tooltip writes, bold, in the colors the
   game's tooltip has in the active UI theme (its line's color and highlight
@@ -2411,6 +2427,63 @@ The server keeps its own formulas until they are synced (see
 [Item Sync](#item-sync)), so what it checks and computes can differ from
 what changed formulas give. Items your character already has keep their
 values until they are made again.
+
+### Item Options
+
+The [option definitions](#item-options) of `Options/*.json` with their
+options, the [option rules](#option-rules) and the option texts, in three
+tabs. The files are changed on a copy (a definition, rule or text with
+changes not applied is marked with `*`) and **Apply to the options** takes
+all of it: the files are checked first (each written and read back, as Save
+Items does; a fatal problem refuses the change, the others are listed under
+the buttons), and when the change reaches items they are listed before it is
+applied: the items that link a definition whose options or texts changed,
+and the items that follow the rules and take another list with the change.
+Every change is one step of the undo history, and Save Items writes the
+definition files, `Options/OptionRules.json` and `Tooltips/OptionTexts.json`.
+While the copy has changes that are not applied, **New**, **Copy**,
+**Rename**, **Remove** and **Fill levels of … marked** wait until they are
+applied or reverted. An undo or redo of the option files while the copy has
+such changes stops **Apply to the options** (it would write the undone change
+back) until **Revert**.
+
+- **Definitions**: the definitions with a search, a type filter, how many
+  items link each (unused ones are grey) and the highest level its value
+  lists give a value of their own (`-` for constants). The picked definition
+  shows its type, file, OpenMU's labels (read-only), its display name in
+  every language, its server values (only the server reads them), and its
+  options: number (not for `luck` and `ancientBonus`), attribute (the ones
+  the client computes for the type, or another, which is warned about), how
+  it adds its value, the value (a constant, or one value per level with
+  **+**, **-** and **Fill levels** from a start level, a value there and a
+  step to a last level), its terms (`level` / 20 and the like) and the names
+  of its texts with their English text. **New** adds a definition of a type
+  with one option to fill in, **Copy** a copy without OpenMU's labels; both
+  are applied with the other changes. **Rename** renames the definition in
+  the rules and every item that links it; the four ancient bonus definitions
+  keep their names, since the items' `attackType` picks them by name (and
+  counts as a use). **Remove** works while no item and no rule uses it.
+- **Highest level per list**: the checkbox before a definition marks it, and
+  **Fill levels of … marked** makes each of their value lists end at one
+  level: a shorter list goes on by its own step (the difference of its last
+  two values), a longer one is cut. So all damage and defense lists go from
+  +16 to +28 at once (`[4, 8, 12, 16]` to `[4, … 28]`), while the jewelry
+  lists (`[1, 2, 3]`) are marked or not on their own. A level above a list's
+  end shows its last value in the game, so the levels a server sends decide
+  nothing else.
+- **Rules**: the rules in order, each with its definitions, its conditions
+  and how many items take their list from it (the selected item's rule is
+  marked). **New rule**, **Move up**, **Move down** and **Remove the rule**
+  as in Item Formulas; the picked rule's definitions (**x** takes one out,
+  the list adds one) and its conditions, with the item numbers (`0, 1,
+  41-49`) and the tags an item must not have, which only the option rules
+  have.
+- **Texts**: the texts in the names grid (names by language, missing
+  translations counted); **New text** adds one, its English text `{value}`
+  until it is written.
+
+The server keeps its own option definitions until they are synced, so what
+it adds to an item can differ from what changed definitions show.
 
 ### Item Sync
 

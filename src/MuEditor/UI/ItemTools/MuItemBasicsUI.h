@@ -27,6 +27,8 @@ private:
     // excellent or ancient, while a value is still being typed.
     void RenderStatTable(const Data::Items::ItemDefinition& item);
     void RenderPrices(Data::Items::ItemDefinition& item);
+    // The item's option links (RenderOptionLinks).
+    void RenderOptions(Data::Items::ItemDefinition& item);
     void RenderResistances(Data::Items::ItemDefinition& item);
     // The Dark Lord's pets' stat formulas ("petStats"): for items with the darkLordPet tag or with pet stats.
     void RenderPetStats(Data::Items::ItemDefinition& item);

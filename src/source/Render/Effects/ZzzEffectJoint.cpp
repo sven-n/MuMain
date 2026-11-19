@@ -2853,6 +2853,26 @@ void DeleteJoint(int Type, OBJECT* Target, int SubType)
     }
 }
 
+bool Render::Effects::HasDefenseAura(const OBJECT* o)
+{
+    return (g_isCharacterBuff(o, eBuff_Defense) || g_isCharacterBuff(o, eBuff_HelpNpc)) &&
+           !g_isCharacterBuff(o, eBuff_Cloaking);
+}
+
+void Render::Effects::SpawnDefenseAura(OBJECT* o, int characterIndex)
+{
+    if (SearchJoint(MODEL_SPEARSKILL, o, 4) || SearchJoint(MODEL_SPEARSKILL, o, 9))
+    {
+        return;
+    }
+
+    for (int i = 0; i < DefenseAuraJointCount; ++i)
+    {
+        CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, DefenseAuraScale, -1, 0, 0,
+                    characterIndex);
+    }
+}
+
 bool SearchJoint(int Type, OBJECT* Target, int SubType)
 {
     for (int i = 0; i < MAX_JOINTS; i++)
@@ -4475,10 +4495,7 @@ static void MoveJoint(JOINT* o, int iIndex)
 
             if (o->SubType == 4 || o->SubType == 9)
             {
-                const bool hasAttack = g_isCharacterBuff(o->Target, eBuff_Attack);
-                const bool hasDefense = g_isCharacterBuff(o->Target, eBuff_Defense);
-                const bool hasHelpNpc = g_isCharacterBuff(o->Target, eBuff_HelpNpc);
-                if (Render::Effects::ShouldKeepAuraJointAlive(hasAttack, hasDefense, hasHelpNpc))
+                if (Render::Effects::HasDefenseAura(o->Target))
                 {
                     o->LifeTime = 100;
                 }
