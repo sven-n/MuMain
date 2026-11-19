@@ -215,7 +215,6 @@ namespace mu::ui::window
         void InitTradeInfo();
         void InitYourInvenBackUp();
         void BackUpYourInven(ITEM* pYourItemObj);
-        void RememberYourOffers();
         // No items changed hands: keep the partner's offers in memory past the close.
         void RememberOffersOfFailedTrade();
         void AlertYourTradeInven();

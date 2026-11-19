@@ -680,11 +680,6 @@ void CTrade::CancelTrade()
 void CTrade::RememberOffersOfFailedTrade()
 {
     m_bForgetBackUpOnClose = false;
-    RememberYourOffers();
-}
-
-void CTrade::RememberYourOffers()
-{
     const int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
     for (int i = 0; i < nYourItems; ++i)
         BackUpYourInven(m_pYourInvenCtrl->GetItem(i));
