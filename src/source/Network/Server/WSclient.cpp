@@ -80,6 +80,7 @@
 #include "GameLogic/Events/Event.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "World/MapInfra/MapManager.h"
+#include "World/MapInfra/MapLoad.h"
 #include "GameLogic/Events/SenatusInfo.h"
 #include "GameLogic/Events/SiegeRegistration.h"
 #include "UI/Dialogs/ConfirmRequest.h"
@@ -1144,6 +1145,8 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 void ResetClientToLoginScene()
 {
     App::Control::Events::RecordDisconnected("the game session was torn down");
+    // Before ReleaseMainData: a map load's steps hold world state that it releases.
+    World::MapLoad::Cancel();
 
     // Mirror of the in-game logout path (see ReceiveLogOut, case 2): release the
     // active game session and return to a clean login scene. The auto-reconnect
@@ -1207,6 +1210,8 @@ int GetJoinMapServerStage(std::span<const BYTE> packet)
     return packet.size() > StageIndex ? packet[StageIndex] : 0;
 }
 
+static void FinishJoinMapServer(CHARACTER* c, const PRECEIVE_JOIN_MAP_SERVER_EXTENDED* Data);
+
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
     MouseLButton = false;
@@ -1255,8 +1260,14 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     // Before LoadWorld, which loads the stage's map parts.
     gMapManager.SetServerStage(GetJoinMapServerStage(ReceiveBuffer));
     gMapManager.WorldActive = Data->Map;
-    gMapManager.LoadWorld(gMapManager.WorldActive);
+    World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+                          [c, data = *Data] { FinishJoinMapServer(c, &data); });
+    return TRUE;
+}
 
+// ReceiveJoinMapServer once the map is ready.
+static void FinishJoinMapServer(CHARACTER* c, const PRECEIVE_JOIN_MAP_SERVER_EXTENDED* Data)
+{
     if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
     {
         SocketClient->ToGameServer()->SendCrywolfInfoRequest();
@@ -1381,9 +1392,10 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     GameLogic::Commands::Catalog().RequestOnce();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
-
-    return (TRUE);
 }
+
+static void RevivalAfterMapLoad(CHARACTER* c, int OldWorld);
+static void FinishRevival(CHARACTER* c);
 
 void ReceiveRevival(const BYTE* ReceiveBuffer)
 {
@@ -1503,45 +1515,61 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     gMapManager.SetServerStage(0);
     if (!gMapManager.IsServerMapLoaded(Data->Map))
     {
-        int OldWorld = gMapManager.WorldActive;
+        const int OldWorld = gMapManager.WorldActive;
 
         gMapManager.WorldActive = Data->Map;
-        gMapManager.LoadWorld(gMapManager.WorldActive);
+        World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+                              [c, OldWorld]
+                              {
+                                  RevivalAfterMapLoad(c, OldWorld);
+                                  FinishRevival(c);
+                              });
+        return;
+    }
+    FinishRevival(c);
+}
 
-        if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) ||
-            gMapManager.InChaosCastle() == true)
-        {
-            SetCharacterClass(Hero);
-        }
-
-        if (gMapManager.InChaosCastle() == false)
-        {
-            StopBuffer(SOUND_CHAOSCASTLE, true);
-            StopBuffer(SOUND_CHAOS_ENVIR, true);
-        }
-
-        if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
-            gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
-        {
-            StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
-            StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
-            StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
-            StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
-        }
-
-        if (gMapManager.WorldActive == -1 || c->Helper.Type != MODEL_HORN_OF_DINORANT || c->SafeZone)
-        {
-            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        }
-        else
-        {
-            if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
-                o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 90.f;
-            else
-                o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-        }
+// ReceiveRevival on another map, once that map is ready.
+static void RevivalAfterMapLoad(CHARACTER* c, int OldWorld)
+{
+    OBJECT* o = &c->Object;
+    if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) ||
+        gMapManager.InChaosCastle() == true)
+    {
+        SetCharacterClass(Hero);
     }
 
+    if (gMapManager.InChaosCastle() == false)
+    {
+        StopBuffer(SOUND_CHAOSCASTLE, true);
+        StopBuffer(SOUND_CHAOS_ENVIR, true);
+    }
+
+    if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
+        gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
+    {
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
+    }
+
+    if (gMapManager.WorldActive == -1 || c->Helper.Type != MODEL_HORN_OF_DINORANT || c->SafeZone)
+    {
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+    }
+    else
+    {
+        if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 90.f;
+        else
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+    }
+}
+
+// The end of ReceiveRevival, on its map.
+static void FinishRevival(CHARACTER* c)
+{
     CreatePetDarkSpirit_Now(c);
     SummonLife = 0;
     GuildTeam(c);
@@ -2268,6 +2296,10 @@ int GetTeleportStage(const PRECEIVE_TELEPORT_POSITION& packet)
     return packet.Header.Size > offsetof(PRECEIVE_TELEPORT_POSITION, MapDiscriminator) ? packet.MapDiscriminator : 0;
 }
 
+static void TeleportAfterMapLoad(OBJECT* o, int OldWorld);
+static void TeleportIntoView(OBJECT* o);
+static void FinishTeleport(BYTE flag, int iEtcPart);
+
 BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     UI::Inventory::RestorePickedItem();
@@ -2325,107 +2357,131 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         RemoveAllShopTitleExceptHero();
         if (!gMapManager.IsServerMapLoaded(Data->Map))
         {
-            int OldWorld = gMapManager.WorldActive;
+            const int OldWorld = gMapManager.WorldActive;
+            const BYTE flag = Data->Flag;
 
             gMapManager.WorldActive = Data->Map;
-            gMapManager.LoadWorld(gMapManager.WorldActive);
-
-            if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
-            {
-                SocketClient->ToGameServer()->SendCrywolfInfoRequest();
-            }
-
-            if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) ||
-                gMapManager.InChaosCastle() == true)
-            {
-                PlayBuffer(SOUND_CHAOS_ENVIR, nullptr, true);
-
-                UI::Windows::Hide(mu::ui::window::INTERFACE_FRIEND);
-
-                SetCharacterClass(Hero);
-                DeleteMount(&Hero->Object);
-            }
-            if (gMapManager.InChaosCastle() == false)
-            {
-                StopBuffer(SOUND_CHAOSCASTLE, true);
-                StopBuffer(SOUND_CHAOS_ENVIR, true);
-            }
-
-            if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
-                gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
-            {
-                StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
-                StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
-                StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
-                StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
-            }
-
-            matchEvent::CreateEventMatch(gMapManager.WorldActive);
-
-            if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
-            {
-                o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-            }
-            else
-            {
-                if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
-                    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 90.f;
-                else
-                    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-            }
-
-            if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
-                ;
-            else
-            {
-                wchar_t Text[256];
-                mu_swprintf(Text, I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
-
-                UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            }
+            World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+                                  [o, OldWorld, flag, iEtcPart]
+                                  {
+                                      TeleportAfterMapLoad(o, OldWorld);
+                                      TeleportIntoView(o);
+                                      FinishTeleport(flag, iEtcPart);
+                                  });
+            return TRUE;
         }
-
-        SocketClient->ToGameServer()->SendClientReadyAfterMapChange();
-
-        g_dwLatestZoneMoving = GetTickCount();
-        g_bWhileMovingZone = FALSE;
-
-        LoadingWorld = 30;
-
-        MouseUpdateTime = 0;
-        MouseUpdateTimeMax = 6;
-
-        if (gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4)
-        {
-            UI::Windows::Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
-        }
-        if (gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
-        {
-            UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
-        }
-
-        UI::Windows::HideAll();
-
-        CreatePetDarkSpirit_Now(Hero);
-        CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
-
-        o->Alpha = 0.f;
-        EnableEvent = 0; // USE_EVENT_ELDORADO
-
-        SelectedItem = -1;
-        SelectedNpc = -1;
-        SelectedCharacter = -1;
-        SelectedOperate = -1;
-        Attacking = -1;
-        RepairEnable = 0;
+        TeleportIntoView(o);
     }
 
+    FinishTeleport(Data->Flag, iEtcPart);
+    return TRUE;
+}
+
+// ReceiveTeleport to another map, once that map is ready.
+static void TeleportAfterMapLoad(OBJECT* o, int OldWorld)
+{
+    if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
+    {
+        SocketClient->ToGameServer()->SendCrywolfInfoRequest();
+    }
+
+    if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) ||
+        gMapManager.InChaosCastle() == true)
+    {
+        PlayBuffer(SOUND_CHAOS_ENVIR, nullptr, true);
+
+        UI::Windows::Hide(mu::ui::window::INTERFACE_FRIEND);
+
+        SetCharacterClass(Hero);
+        DeleteMount(&Hero->Object);
+    }
+    if (gMapManager.InChaosCastle() == false)
+    {
+        StopBuffer(SOUND_CHAOSCASTLE, true);
+        StopBuffer(SOUND_CHAOS_ENVIR, true);
+    }
+
+    if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
+        gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
+    {
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
+    }
+
+    matchEvent::CreateEventMatch(gMapManager.WorldActive);
+
+    if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
+    {
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+    }
+    else
+    {
+        if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 90.f;
+        else
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+    }
+
+    if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
+        ;
+    else
+    {
+        wchar_t Text[256];
+        mu_swprintf(Text, I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
+
+        UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    }
+}
+
+// A teleport that empties the view: the server sends the new one once the client is ready.
+static void TeleportIntoView(OBJECT* o)
+{
+    SocketClient->ToGameServer()->SendClientReadyAfterMapChange();
+
+    g_dwLatestZoneMoving = GetTickCount();
+    g_bWhileMovingZone = FALSE;
+
+    LoadingWorld = 30;
+
+    MouseUpdateTime = 0;
+    MouseUpdateTimeMax = 6;
+
+    if (gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4)
+    {
+        UI::Windows::Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
+    }
+    if (gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
+    {
+        UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
+    }
+
+    UI::Windows::HideAll();
+
+    CreatePetDarkSpirit_Now(Hero);
+    CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
+
+    o->Alpha = 0.f;
+    EnableEvent = 0; // USE_EVENT_ELDORADO
+
+    SelectedItem = -1;
+    SelectedNpc = -1;
+    SelectedCharacter = -1;
+    SelectedOperate = -1;
+    Attacking = -1;
+    RepairEnable = 0;
+}
+
+// The end of ReceiveTeleport, on its map.
+static void FinishTeleport(BYTE flag, int iEtcPart)
+{
     MUHelper::g_MuHelper.TriggerStop();
 
     Hero->Movement = false;
     SetPlayerStop(Hero);
 
-    if (Data->Flag)
+    if (flag)
         UI::Hud::ShowMapName();
 
     CreateMyGensInfluenceGroundEffect();
@@ -2435,11 +2491,9 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         Hero->EtcPart = iEtcPart;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1C [ReceiveTeleport(%d)]", Data->Flag);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1C [ReceiveTeleport(%d)]", flag);
 
     App::Control::Events::RecordTeleportPacket();
-
-    return (TRUE);
 }
 
 void ReceiveEquipment(std::span<const BYTE> ReceiveBuffer)
