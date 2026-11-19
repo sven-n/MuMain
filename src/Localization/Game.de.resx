@@ -4846,10 +4846,10 @@
     <value>und drücken Sie die Schaltfläche für die Anzahl der Juwelen</value>
   </data>
   <data name="Jewel of Bless" xml:space="preserve">
-    <value>Juwel des Segens</value>
+    <value>{item:14,13}</value>
   </data>
   <data name="Jewel of Soul" xml:space="preserve">
-    <value>Juwel der Seele</value>
+    <value>{item:14,14}</value>
   </data>
   <data name="Combine %d (%d zen is required)" xml:space="preserve">
     <value>%d kombinieren (%d Zen erforderlich)</value>
@@ -5440,7 +5440,7 @@
     <value>%s Erfolg %s : %d%%</value>
   </data>
   <data name="Jewel stone" xml:space="preserve">
-    <value>Juwelenstein</value>
+    <value>{item:14,41}</value>
   </data>
   <data name="Weapons or shields" xml:space="preserve">
     <value>Waffen oder Schilde</value>
@@ -5695,7 +5695,7 @@
     <value>Über die Verfeinerung</value>
   </data>
   <data name="Jewel of Harmony" xml:space="preserve">
-    <value>Juwel der Harmonie</value>
+    <value>{item:14,42}</value>
   </data>
   <data name="Refine Gemstone" xml:space="preserve">
     <value>Edelstein verfeinern</value>
@@ -7801,22 +7801,22 @@
     <value>Wählen Sie ein Juwel zum Zerlegen aus.</value>
   </data>
   <data name="Jewel of Life" xml:space="preserve">
-    <value>Juwel des Lebens</value>
+    <value>{item:14,16}</value>
   </data>
   <data name="Jewel of Creation" xml:space="preserve">
-    <value>Juwel der Schöpfung</value>
+    <value>{item:14,22}</value>
   </data>
   <data name="Jewel of Guardian" xml:space="preserve">
-    <value>Juwel des Wächters</value>
+    <value>{item:14,31}</value>
   </data>
   <data name="Jewel of Chaos" xml:space="preserve">
-    <value>Juwel des Chaos</value>
+    <value>{item:12,15}</value>
   </data>
   <data name="Lower Refining Stone" xml:space="preserve">
-    <value>Niederer Verfeinerungsstein</value>
+    <value>{item:14,43}</value>
   </data>
   <data name="Higher Refining Stone" xml:space="preserve">
-    <value>Höherer Verfeinerungsstein</value>
+    <value>{item:14,44}</value>
   </data>
   <data name="Are you sure you want to dissolve" xml:space="preserve">
     <value>Möchten Sie wirklich zerlegen:</value>
@@ -8937,6 +8937,9 @@
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Neuer Versuch in %d Sekunden...</value>
   </data>
+  <data name="Reconnected after connection lost" xml:space="preserve">
+    <value>Wieder verbunden: Die Verbindung zum Server war unterbrochen.</value>
+  </data>
   <data name="Reconnect" xml:space="preserve">
     <value>Erneut verbinden</value>
   </data>
@@ -9026,6 +9029,12 @@
   </data>
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls von %ls</value>
+  </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Unbekanntes Monster %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Ich bin ein Fehler: %d</value>
   </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>Möchten Sie %ls abbrechen?</value>
@@ -9155,5 +9164,56 @@
   </data>
   <data name="MagicStoneOfOwner" xml:space="preserve">
     <value>Zauberstein von %ls</value>
+  </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Kritische Schadensrate: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Kritische Schadensrate: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Kritische Schadensrate</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Glück (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Set-Optionen: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Sockeloptionen: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Gesamt: %d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Schaden</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>Normaler Treffer: %d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>Kritischer Treffer: %d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>Exzellenter Treffer: %d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>vor der Verteidigung des Ziels</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>Kritischer Schaden</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>Set-Optionen: +%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>Harmonie-Optionen: +%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>Sockeloptionen: +%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>Gesamt: +%d</value>
   </data>
 </root>

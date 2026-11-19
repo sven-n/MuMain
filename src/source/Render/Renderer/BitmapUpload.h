@@ -13,4 +13,9 @@ Render::Renderer::BitmapGpuResources::Result UploadBitmapPixels(std::span<const 
                                                                 bool generateMips = false);
 void ReleaseBitmapTexture(SDL_GPUDevice* device, SDL_GPUTexture* texture);
 const char* BitmapUploadDriverName();
+double BitmapUploadFenceWaitSeconds();
+// Whether a staged load should leave its next step to the next frame (BitmapGpuResources::OverStagingCap).
+bool BitmapUploadsOverStagingCap();
+// Submits the staged uploads now: the end of a load, so its textures are on the GPU without waiting for a frame.
+void FlushBitmapUploads();
 } // namespace mu

@@ -19,6 +19,7 @@ struct ToolWindows
     bool styleEditor = false;
     bool itemTooltip = false;
     bool itemFormulas = false;
+    bool itemOptions = false;
     bool itemSync = false;
     bool itemTranslations = false;
     bool monsterBrowser = false;
@@ -26,11 +27,14 @@ struct ToolWindows
     bool monsterModel = false;
     bool monsterPreview = false;
     bool monsterAttacks = false;
+    bool monsterSetup = false;
+    bool monsterEquipment = false;
     bool monsterSounds = false;
     bool dataChecks = false;
     bool soundMixer = false;
     bool soundEditor = false;
     bool serverList = false;
+    bool graphicsLook = false;
     bool skillEditor = false;
     bool devEditor = false;
     bool mapEditor = false;

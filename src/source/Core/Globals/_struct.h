@@ -379,7 +379,6 @@ typedef struct
     WORD MagicDamageMax;
     WORD CurseDamageMin;
     WORD CurseDamageMax;
-    WORD CriticalDamage;
     WORD SuccessfulBlocking;
     WORD Defense;
     WORD MagicDefense;

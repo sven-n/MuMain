@@ -9,9 +9,13 @@ namespace Data::Items
 {
 namespace
 {
-// The order the game takes an item's definitions in, by type (the tooltip shows their lines in it): wing options,
-// the skill (no definition), luck, the additional option, the Dark Horse, excellent options, fixed options.
-constexpr std::array<ItemOptionType, 1> TakeOrder = {ItemOptionType::Luck};
+// The order the game takes an item's definitions in, by type (the tooltip shows the option slots' lines in it): wing
+// options, the skill (no definition), luck, the additional option, the Dark Horse, excellent options, fixed options.
+// The ancient types follow them only for the order of a saved list (names of no definition last): they take no slot,
+// and the tooltip shows the ancient bonus above the slots' lines.
+constexpr std::array<ItemOptionType, 5> TakeOrder = {ItemOptionType::Luck, ItemOptionType::Option,
+                                                     ItemOptionType::Excellent, ItemOptionType::AncientOption,
+                                                     ItemOptionType::AncientBonus};
 
 size_t GetTakeOrder(ItemOptionType type)
 {
@@ -24,13 +28,33 @@ ItemOptionDatabase::ItemOptionDatabase(std::vector<ItemOptionDefinition> definit
     : m_definitions(std::move(definitions)), m_texts(std::move(texts)), m_rules(std::move(rules))
 {
     m_effects.reserve(m_definitions.size());
-    for (const ItemOptionDefinition& definition : m_definitions)
+    m_optionOrders.reserve(m_definitions.size());
+    for (ItemOptionDefinition& definition : m_definitions)
     {
         std::vector<ItemOptionEffect>& effects = m_effects.emplace_back();
-        for (const ItemOption& option : definition.options)
+        for (ItemOption& option : definition.options)
         {
+            ResolveTermAttributes(option.value);
             effects.push_back(FindItemOptionEffect(definition.type, option.attribute, option.add)
                                   .value_or(ItemOptionEffect{NoItemOptionEffect, false}));
+        }
+        std::vector<size_t>& order = m_optionOrders.emplace_back(definition.options.size());
+        for (size_t index = 0; index < order.size(); ++index)
+        {
+            order[index] = index;
+        }
+        if (definition.type == ItemOptionType::Excellent)
+        {
+            std::stable_sort(order.begin(), order.end(), [&definition](size_t left, size_t right)
+                             { return definition.options[left].number > definition.options[right].number; });
+        }
+    }
+    for (size_t attackType = 0; attackType < AncientBonusNames.size(); ++attackType)
+    {
+        const int index = Find(AncientBonusNames[attackType]);
+        if (index != NoDefinition && m_definitions[static_cast<size_t>(index)].type == ItemOptionType::AncientBonus)
+        {
+            m_ancientBonuses[attackType] = index;
         }
     }
 }
@@ -77,5 +101,10 @@ void ItemOptionDatabase::OrderLinks(std::vector<std::string>& names) const
     };
     std::stable_sort(names.begin(), names.end(),
                      [&](const std::string& left, const std::string& right) { return key(left) < key(right); });
+}
+
+bool ExcellentByteMeansOther(const ItemDefinition& item)
+{
+    return item.slot == ItemSlot::Wings || item.tags.Has(ItemTag::HornMount);
 }
 } // namespace Data::Items

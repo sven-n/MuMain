@@ -2,11 +2,12 @@
 
 #include "SoundFolderStorage.h"
 
+#include "Core/Content/ContentStore.h"
+
 #include "Data/DataHandler/TextFile.h"
 
 #include <optional>
 #include <string>
-#include <system_error>
 
 namespace Data::Sounds
 {
@@ -18,8 +19,8 @@ std::filesystem::path GetSoundFoldersFile()
 SoundFoldersLoadResult LoadSoundFoldersFile(const std::filesystem::path& file)
 {
     SoundFoldersLoadResult result;
-    std::error_code error;
-    if (!std::filesystem::exists(file, error))
+    if (const Content::Found found = Content::Probe(file);
+        found == Content::Found::Nothing || found == Content::Found::Unknown)
     {
         return result;
     }

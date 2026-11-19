@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Core/Utilities/Random.h"
 
 #ifdef ASG_ADD_MAP_KARUTAN
@@ -354,63 +355,6 @@ void CGMKarutan1::PlayObjectSound(OBJECT* o)
 }
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-CHARACTER* CGMKarutan1::CreateMonster(int iType, int PosX, int PosY, int Key)
-{
-    CHARACTER* pCharacter = NULL;
-
-    switch (iType)
-    {
-    case MONSTER_VENOMOUS_CHAIN_SCORPION:
-        OpenMonsterModel(MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION);
-        pCharacter = CreateCharacter(Key, MODEL_VENOMOUS_CHAIN_SCORPION, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        break;
-    case MONSTER_BONE_SCORPION:
-        OpenMonsterModel(MONSTER_MODEL_BONE_SCORPION);
-        pCharacter = CreateCharacter(Key, MODEL_BONE_SCORPION, PosX, PosY);
-        pCharacter->Object.Scale = 0.58f;
-        break;
-    case MONSTER_ORCUS:
-        OpenMonsterModel(MONSTER_MODEL_ORCUS);
-        pCharacter = CreateCharacter(Key, MODEL_ORCUS, PosX, PosY);
-        pCharacter->Object.Scale = 0.64f;
-        break;
-    case MONSTER_GOLLOCK:
-        OpenMonsterModel(MONSTER_MODEL_GOLLOCK);
-        pCharacter = CreateCharacter(Key, MODEL_GOLLOCK, PosX, PosY);
-        pCharacter->Object.Scale = 1.5f;
-        break;
-    case MONSTER_CRYPTA:
-        OpenMonsterModel(MONSTER_MODEL_CRYPTA);
-        pCharacter = CreateCharacter(Key, MODEL_CRYPTA, PosX, PosY);
-        pCharacter->Object.Scale = 1.5f;
-        break;
-    case MONSTER_CRYPOS:
-        OpenMonsterModel(MONSTER_MODEL_CRYPOS);
-        pCharacter = CreateCharacter(Key, MODEL_CRYPOS, PosX, PosY);
-        pCharacter->Object.Scale = 1.25f;
-        break;
-    case MONSTER_CONDRA:
-        OpenMonsterModel(MONSTER_MODEL_CONDRA);
-        pCharacter = CreateCharacter(Key, MODEL_CONDRA, PosX, PosY);
-        pCharacter->Object.Scale = 1.45f;
-        pCharacter->Object.LifeTime = 100;
-        break;
-    case MONSTER_NARCONDRA:
-        OpenMonsterModel(MONSTER_MODEL_NACONDRA);
-        pCharacter = CreateCharacter(Key, MODEL_NACONDRA, PosX, PosY);
-        pCharacter->Object.Scale = 1.55f;
-        pCharacter->Object.LifeTime = 100;
-
-        OBJECT* o = &pCharacter->Object;
-
-        vec3_t vColor = {1.5f, 0.1f, 0.5f};
-        CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 24, o, 10.f, -1, 0, 0, -1, vColor);
-        break;
-    }
-
-    return pCharacter;
-}
 
 bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
@@ -717,18 +661,19 @@ bool CGMKarutan1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
         if (o->CurrentAction == MONSTER01_ATTACK2 && (o->AnimationFrame >= 3.5f && o->AnimationFrame <= 4.5f) &&
             rand_fps_check(1))
         {
-            CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-            OBJECT* to = &tc->Object;
-            vec3_t vLight;
-            int i;
+            if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+            {
+                vec3_t vLight;
+                int i;
 
-            Vector(0.4f, 0.9f, 0.6f, vLight);
-            for (i = 0; i < 5; ++i)
-                CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
+                Vector(0.4f, 0.9f, 0.6f, vLight);
+                for (i = 0; i < 5; ++i)
+                    CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
 
-            Vector(0.4f, 1.0f, 0.6f, vLight);
-            for (i = 0; i < 2; ++i)
-                CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
+                Vector(0.4f, 1.0f, 0.6f, vLight);
+                for (i = 0; i < 2; ++i)
+                    CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
+            }
         }
         return true;
     }

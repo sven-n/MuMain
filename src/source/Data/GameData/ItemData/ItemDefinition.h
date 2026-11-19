@@ -3,6 +3,7 @@
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_define.h"
 #include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/ItemData/ItemNameForms.h"
 #include "Data/GameData/ItemData/ItemTagSet.h"
 #include "Data/GameData/ItemData/ItemTooltipConditions.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -142,6 +143,9 @@ struct ItemNameLine : ItemDescriptionLine
 {
     bool hasText = false;
     bool hasColor = false;
+    // The forms of the line's text in the languages that decline names, for texts that name the item at a level of
+    // this line with a case ({item:13,20+3:gen}). A line written as "{name}" uses the item's forms.
+    ItemNameForms nameForms;
 
     bool operator==(const ItemNameLine& other) const = default;
 };
@@ -314,6 +318,9 @@ struct ItemDefinition
     // All names of the item, English first. Logs always use the English
     // name (names.GetNeutral()), never a translation.
     LocalizedString names;
+    // The forms of the names in the languages that decline names, for texts that name the item with a case
+    // ({item:14,25:acc}; docs/translation-system.md, "Texts that name items").
+    ItemNameForms nameForms;
     // The name in the item name language (the UI language, or English while
     // translated item names are off), shown to the player. Filled by
     // ItemDatabase from names.

@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iomanip>
 #include <locale>
+#include <optional>
 #include <sstream>
 
 namespace Render::Look
@@ -58,6 +59,10 @@ constexpr std::array<ControlSpec, TuningControlCount> Specs = {{
      TuningUnit::Seconds, 1.0, TuningZero::Immediate},
     {TuningControlId::EffectCap, TuningGroup::DynamicLights, false, LookValue::DynamicEffectCap, 0.1, TuningUnit::None,
      1.0, TuningZero::NoCap},
+    {TuningControlId::ShadowOpacity, TuningGroup::DynamicLights, false, LookValue::GroundShadowOpacity, 0.05,
+     TuningUnit::Percent, 100.0, TuningZero::Plain},
+    {TuningControlId::ShadowLights, TuningGroup::DynamicLights, false, LookValue::GroundShadowLights, 1.0,
+     TuningUnit::None, 1.0, TuningZero::Plain},
     {TuningControlId::Wrap, TuningGroup::DynamicLights, true, LookValue::DynamicWrap, 0.05, TuningUnit::None, 1.0,
      TuningZero::Plain},
     {TuningControlId::MapSmoothing, TuningGroup::DynamicLights, true, LookValue::DynamicMapSmoothing, 0.05,
@@ -72,6 +77,30 @@ constexpr std::array<ControlSpec, TuningControlCount> Specs = {{
      TuningUnit::None, 1.0, TuningZero::Plain},
     {TuningControlId::GradingStrength, TuningGroup::PostProcessing, false, LookValue::GradingStrength, 0.01,
      TuningUnit::Percent, 100.0, TuningZero::Plain},
+    {TuningControlId::AmbientOcclusionStrength, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionStrength,
+     0.05, TuningUnit::None, 1.0, TuningZero::Plain},
+    {TuningControlId::AmbientOcclusionRadius, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionRadius,
+     5.0, TuningUnit::None, 1.0, TuningZero::Plain},
+    {TuningControlId::SunShadowStrength, TuningGroup::Sunlight, false, LookValue::SunShadowStrength, 0.05,
+     TuningUnit::Percent, 100.0, TuningZero::Plain},
+    {TuningControlId::SunShadowSoftness, TuningGroup::Sunlight, true, LookValue::SunShadowSoftness, 0.1,
+     TuningUnit::None, 1.0, TuningZero::Plain},
+    {TuningControlId::SunShadowResolution, TuningGroup::Sunlight, true, LookValue::SunShadowResolution, 1024.0,
+     TuningUnit::None, 1.0, TuningZero::Plain},
+    {TuningControlId::FlatSunShadow, TuningGroup::Sunlight, true, LookValue::FlatSunShadow, 0.05, TuningUnit::Percent,
+     100.0, TuningZero::Plain},
+    {TuningControlId::CloudStrength, TuningGroup::Sunlight, false, LookValue::CloudStrength, 0.05, TuningUnit::Percent,
+     100.0, TuningZero::Plain},
+    {TuningControlId::CloudScale, TuningGroup::Sunlight, true, LookValue::CloudScale, 250.0, TuningUnit::None, 1.0,
+     TuningZero::Plain},
+    {TuningControlId::CloudSpeed, TuningGroup::Sunlight, true, LookValue::CloudSpeed, 5.0, TuningUnit::None, 1.0,
+     TuningZero::Plain},
+    {TuningControlId::CloudCover, TuningGroup::Sunlight, true, LookValue::CloudCover, 0.05, TuningUnit::Percent, 100.0,
+     TuningZero::Plain},
+    {TuningControlId::SkyFill, TuningGroup::Sunlight, false, LookValue::SkyFill, 0.05, TuningUnit::Percent, 100.0,
+     TuningZero::Plain},
+    {TuningControlId::RimSunFollow, TuningGroup::Sunlight, true, LookValue::RimSunFollow, 0.05, TuningUnit::Percent,
+     100.0, TuningZero::Plain},
 }};
 
 constexpr bool SpecsFollowIdOrder()
@@ -266,47 +295,14 @@ std::optional<double> TuningPointerValue(const TuningControl& control, double cu
     return value;
 }
 
-void DeveloperLookEdits::Mark(LookValue value, std::optional<int> world)
-{
-    Flags& flags = world ? worlds[*world] : defaults;
-    flags[static_cast<std::size_t>(value)] = true;
-}
-
-void DeveloperLookEdits::Clear(LookValue value, int world)
-{
-    const auto index = static_cast<std::size_t>(value);
-    defaults[index] = false;
-    const auto entry = worlds.find(world);
-    if (entry != worlds.end())
-    {
-        entry->second[index] = false;
-    }
-}
-
-bool DeveloperLookEdits::Covers(const Data::Maps::LookProfileData& profile, int world, LookValue value) const
-{
-    const auto index = static_cast<std::size_t>(value);
-    const auto entry = worlds.find(world);
-    if (entry != worlds.end() && entry->second[index])
-    {
-        return true;
-    }
-    if (!defaults[index])
-    {
-        return false;
-    }
-    // An edited default shows only where no map entry overrides it.
-    return std::none_of(profile.maps.begin(), profile.maps.end(),
-                        [world, value](const Data::Maps::MapLookOverrides& map)
-                        { return map.world == world && map.overrides[value].has_value(); });
-}
-
 TuningGroupSet TuningGroupsApplying(const LookFeatures& features)
 {
     TuningGroupSet applying{};
     applying[static_cast<std::size_t>(TuningGroup::Lighting)] = features.enhancedLighting;
     applying[static_cast<std::size_t>(TuningGroup::DynamicLights)] =
         features.enhancedLighting && features.dynamicLights;
+    applying[static_cast<std::size_t>(TuningGroup::Sunlight)] =
+        features.enhancedLighting && features.dynamicLights && features.sunlight;
     applying[static_cast<std::size_t>(TuningGroup::LightMood)] = features.lightMood;
     applying[static_cast<std::size_t>(TuningGroup::PostProcessing)] = features.postProcessing;
     return applying;
@@ -332,6 +328,10 @@ void ApplyLookFeatures(const LookFeatures& requested, const LookFeatureAppliers&
     {
         appliers.dynamicLights(requested.dynamicLights);
     }
+    if (appliers.sunlight)
+    {
+        appliers.sunlight(requested.sunlight);
+    }
     const bool postProcessing = appliers.postProcessing && appliers.postProcessing(requested.postProcessing);
     if (appliers.tuningGroups)
     {
@@ -347,30 +347,23 @@ void ApplyLookFeatures(const LookFeatures& requested, const LookFeatureAppliers&
     }
 }
 
-bool PersonalValueApplies(const Data::Maps::LookProfileData& profile, int world,
-                          const Data::Maps::LookOverrides& personal, const DeveloperLookEdits& developerEdits,
-                          const TuningGroupSet& applying, LookValue value)
+bool PersonalValueApplies(const Data::Maps::LookOverrides& personal, const TuningGroupSet& applying, LookValue value)
 {
     if (!personal[value])
     {
         return false;
     }
     const std::optional<TuningControlId> control = FindTuningControl(value);
-    if (!control || !applying[static_cast<std::size_t>(Control(*control).group)])
-    {
-        return false;
-    }
-    return !developerEdits.Covers(profile, world, value);
+    return control && applying[static_cast<std::size_t>(Control(*control).group)];
 }
 
 Data::Maps::LookValues ResolveLookValues(const Data::Maps::LookProfileData& profile, int world,
-                                         const Data::Maps::LookOverrides& personal,
-                                         const DeveloperLookEdits& developerEdits, const TuningGroupSet& applying)
+                                         const Data::Maps::LookOverrides& personal, const TuningGroupSet& applying)
 {
     Data::Maps::LookValues values = profile.ForWorld(world);
     for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
     {
-        if (PersonalValueApplies(profile, world, personal, developerEdits, applying, info.value))
+        if (PersonalValueApplies(personal, applying, info.value))
         {
             values[info.value] = *personal[info.value];
         }

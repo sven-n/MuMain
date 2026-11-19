@@ -18,6 +18,11 @@ struct ShadowDraw;
 struct ClothShadow;
 } // namespace Render::ModelDrawing
 
+namespace mu
+{
+struct ShadowProjection;
+}
+
 struct BITMAP_t;
 
 extern const float (*g_pActiveBoneTransform)[3][4];
@@ -73,6 +78,15 @@ typedef struct
     vec3_t* Rotation;
     vec4_t* Quaternion;
 } BoneMatrix_t;
+
+// A second pose BMD::Animation blends into the one it builds: `Action` at `Frame` (fraction between keys), by
+// `Weight` (0: none of it, 1: all of it). A character fading from one way of moving into the next.
+struct PoseBlend
+{
+    unsigned short Action = 0;
+    float Frame = 0.f;
+    float Weight = 0.f;
+};
 
 typedef struct
 {
@@ -211,6 +225,12 @@ public:
     bool          ContrastEnable;
     vec3_t        BodyLight;
     int           BoneHead;
+    // A Biped's head and the neck and spine bones below it (Bip01 Head, Neck, Spine1, Spine; -1 where the chain
+    // stops), found when the model loads: the head's turn spreads into them (HeadTurn.h) while BoneHead is that head.
+    short HeadTurnBones[4] = {-1, -1, -1, -1};
+    // The Biped's ponytail root (Bip01 Ponytail1, -1: none), found when the model loads: Animation's PonytailLag
+    // swings it about the head's upright, so the hair trails behind a turn.
+    short PonytailBone = -1;
 
     int           BoneFoot[4];
     float         BodyScale;
@@ -218,7 +238,6 @@ public:
     vec3_t        BodyAngle;
     float         BodyHeight;
     char          StreamMesh;
-    vec3_t        ShadowAngle;
     char          Skin;
     bool          HideSkin;
     float         Velocity;
@@ -340,7 +359,8 @@ public:
     void Animation(float (*BoneTransform)[3][4], float AnimationFrame, float PriorAnimationFrame,
                    unsigned short PriorAction, const vec3_t Angle, const vec3_t HeadAngle, bool Parent = false,
                    bool Translate = true, const float (*ExtParentMatrix)[4] = nullptr, short CurrentAction = -1,
-                   int BoneMatrixCapacity = MAX_BONES);
+                   int BoneMatrixCapacity = MAX_BONES, float PonytailLag = 0.f, float HeadTurnUp = 0.f,
+                   float HeadRoll = 0.f, const PoseBlend* Blend = nullptr);
     void InterpolationTrans(float(*Mat1)[4], float(*TransMat2)[4], float _Scale);
     void Transform(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax, OBB_t* OBB,
                    bool Translate = false, float _Scale = 0.0f);
@@ -495,8 +515,8 @@ private:
     // The shadow streams the renderer keeps for the meshes of this slot.
     void ReleaseShadowStreams();
 
-    void AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes, const float* origin,
-                                   float sx, float sy, std::uint32_t color) const;
+    void AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes,
+                                   const mu::ShadowProjection& projection, std::uint32_t color) const;
     // Whether VertexTransform[mesh] holds this model's vertices now: skinned on the CPU, or written by the cloth.
     [[nodiscard]] bool OwnsCpuVertices(int mesh) const;
     // Whether a shadow casts a mesh's own CPU vertices instead of skinning it on the GPU.
@@ -505,19 +525,19 @@ private:
     // mesh skinned from the draw's skin without writing the scratch (valid until the next call).
     [[nodiscard]] const vec3_t* ShadowVertices(const Render::ModelDrawing::ShadowDraw& draw, int mesh) const;
     void AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, int blendMesh, int hiddenMesh,
-                                int startMesh, int endMesh, const float* origin, float sx, float sy,
+                                int startMesh, int endMesh, const mu::ShadowProjection& projection,
                                 std::uint32_t color) const;
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
     [[nodiscard]] bool RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
-                                           float sx, float sy, std::uint32_t color) const;
+                                           const mu::ShadowProjection& projection, std::uint32_t color) const;
     // AddMeshShadowTriangles of a model file: the meshes' shadows
     // (ProjectWeightedShadowMesh) drawn indexed, in mesh and triangle order.
     void AddWeightedMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
-                                        float sx, float sy, std::uint32_t color) const;
+                                        const mu::ShadowProjection& projection, std::uint32_t color) const;
     // A model file's shadow, each mesh from the mesh its body draw caches on the GPU; a mesh the GPU cannot
     // draw gets its CPU shadow (AddWeightedMeshShadowTriangles).
-    void RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh, float sx,
-                                  float sy, std::uint32_t color) const;
+    void RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
+                                  const mu::ShadowProjection& projection, std::uint32_t color) const;
 };
 
 extern BMD* Models;

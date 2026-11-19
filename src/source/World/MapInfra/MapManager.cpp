@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/MapObjectSounds.h"
 #include "Audio/SoundLoads.h"
@@ -21,9 +22,16 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/WSclient.h"
 #include "I18N/All.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #ifdef _EDITOR
 #include "Core/Utilities/WorldClearing.h"
 #endif
+
+#include <SDL3/SDL_timer.h>
+#include <algorithm>
+#include <chrono>
+#include <memory>
+#include <optional>
 
 CMapManager gMapManager;
 
@@ -36,7 +44,8 @@ CMapManager::~CMapManager() // OK
 {
 }
 
-void CMapManager::Load() // OK
+// The map's own models and textures, before its numbered objects.
+void CMapManager::LoadMapModels()
 {
     // The Sound Editor shows which map loaded a sound.
     const Audio::SoundLoads::ScopedLoadWhere loadsFor(gMapManager.WorldActive);
@@ -726,8 +735,21 @@ void CMapManager::Load() // OK
     }
 
     LoadBitmap(L"Object8\\light01.jpg", BITMAP_SHINES, GL_LINEAR, GL_REPEAT);
+}
 
-    if (this->WorldActive == 0)
+void CMapManager::Load()
+{
+    LoadMapModels();
+    LoadWorldObjects(MODEL_WORLD_OBJECT, MAX_WORLD_OBJECTS);
+}
+
+// The map's objects from `first` to before `last`: a map load reads them a chunk per step.
+void CMapManager::LoadWorldObjects(int first, int last)
+{
+    const Audio::SoundLoads::ScopedLoadWhere loadsFor(gMapManager.WorldActive);
+    int i;
+
+    if (this->WorldActive == 0 && first == MODEL_WORLD_OBJECT)
     {
         for (i = 0; i < 13; i++)
             gLoadData.AccessModel(MODEL_TREE01 + i, L"Data\\Object1\\", L"Tree", i + 1);
@@ -796,8 +818,10 @@ void CMapManager::Load() // OK
         gLoadData.AccessModel(MODEL_CANDLE, L"Data\\Object1\\", L"Candle", 1);
         for (i = 0; i < 3; i++)
             gLoadData.AccessModel(MODEL_BEER01 + i, L"Data\\Object1\\", L"Beer", i + 1);
-
-        for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+    }
+    if (this->WorldActive == 0)
+    {
+        for (i = first; i < last; i++)
             gLoadData.OpenTexture(i, L"Object1\\");
     }
     else
@@ -806,13 +830,19 @@ void CMapManager::Load() // OK
         const int iMapWorld = GetFilesFolder(this->WorldActive);
 
         mu_swprintf(DirName, L"Data\\Object%d\\", iMapWorld);
-        for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+        for (i = first; i < last; i++)
             gLoadData.AccessModel(i, DirName, L"Object", i + 1, true);
 
         mu_swprintf(DirName, L"Object%d\\", iMapWorld);
-        for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+        for (i = first; i < last; i++)
         {
             gLoadData.OpenTexture(i, DirName);
+        }
+
+        // The tweaks below need every object loaded.
+        if (last != MAX_WORLD_OBJECTS)
+        {
+            return;
         }
 
         if (this->WorldActive == WD_1DUNGEON)
@@ -914,10 +944,56 @@ int CMapManager::GetFilesFolder(int serverMap)
     return world + 1;
 }
 
+// What a map load's steps share.
+struct CMapManager::WorldLoad
+{
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+    std::optional<TextureLoadBatch> textureBatch;
+    int map = 0;
+    int iMapWorld = 0;
+    wchar_t WorldName[32] = {};
+    int CryWolfState = 0;
+    bool failed = false;
+};
+
+std::vector<Core::StagedLoad::Step> CMapManager::LoadWorldSteps(int Map)
+{
+    auto load = std::make_shared<WorldLoad>();
+    std::vector<Core::StagedLoad::Step> steps = {
+        [this, load, Map] { LoadWorldClear(*load, Map); },
+        [this] { LoadMapModels(); },
+    };
+    // Most of a map's load is its numbered objects, so they load a chunk per step.
+    static constexpr int ObjectsPerStep = 16;
+    for (int first = MODEL_WORLD_OBJECT; first < MAX_WORLD_OBJECTS; first += ObjectsPerStep)
+    {
+        steps.emplace_back([this, first]
+                           { LoadWorldObjects(first, std::min<int>(first + ObjectsPerStep, MAX_WORLD_OBJECTS)); });
+    }
+    steps.insert(steps.end(),
+                 {
+                     [this] { World::MapObjectSounds::LoadForMap(GetServerMap(), GetServerStage()); },
+                     [this, load] { LoadWorldTerrainFiles(*load); },
+                     [this, load] { LoadWorldTerrain(*load); },
+                     [this, load] { LoadWorldTextures(*load); },
+                     [this, load] { LoadWorldFinish(*load); },
+                 });
+    return steps;
+}
+
 void CMapManager::LoadWorld(int Map)
 {
+    for (const Core::StagedLoad::Step& step : LoadWorldSteps(Map))
+    {
+        step();
+    }
+}
+
+void CMapManager::LoadWorldClear(WorldLoad& load, int Map)
+{
+    load.textureBatch.emplace();
     SetServerMap(Map);
-    Map = this->WorldActive;
+    load.map = this->WorldActive;
 
     this->DeleteObjects();
     DeleteNpcs();
@@ -936,14 +1012,14 @@ void CMapManager::LoadWorld(int Map)
     g_Direction.m_CKanturu.m_iKanturuState = 0;
     g_Direction.m_CKanturu.m_iMayaState = 0;
     g_Direction.m_CKanturu.m_iNightmareState = 0;
+}
 
-    this->Load();
-    // The sounds of its objects (Data/Maps/ObjectSounds.json, maps design MP1).
-    World::MapObjectSounds::LoadForMap(GetServerMap(), GetServerStage());
-
+// The map's terrain, attribute and object files; a corrupt one fails the load.
+void CMapManager::LoadWorldTerrainFiles(WorldLoad& load)
+{
     wchar_t FileName[64];
-    wchar_t WorldName[32];
-    int iMapWorld = GetFilesFolder(Map);
+    auto& WorldName = load.WorldName;
+    const int iMapWorld = load.iMapWorld = GetFilesFolder(load.map);
 
     battleCastle::Init();
 
@@ -958,8 +1034,8 @@ void CMapManager::LoadWorld(int Map)
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
+        load.failed = true;
         return;
     }
 
@@ -969,7 +1045,7 @@ void CMapManager::LoadWorld(int Map)
         CCameraMove::GetInstancePtr()->LoadCameraWalkScript(FileName);
     }
 
-    int CryWolfState = M34CryWolf1st::IsCryWolf1stMVPStart();
+    const int CryWolfState = load.CryWolfState = M34CryWolf1st::IsCryWolf1stMVPStart();
 
     if (gMapManager.InBattleCastle())
     {
@@ -1021,8 +1097,8 @@ void CMapManager::LoadWorld(int Map)
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
+        load.failed = true;
         return;
     }
 
@@ -1035,13 +1111,24 @@ void CMapManager::LoadWorld(int Map)
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
+        load.failed = true;
         return;
     }
+}
+
+void CMapManager::LoadWorldTerrain(WorldLoad& load)
+{
+    if (load.failed)
+    {
+        return;
+    }
+    wchar_t FileName[64];
+    const auto& WorldName = load.WorldName;
+    const int CryWolfState = load.CryWolfState;
 
     mu_swprintf(FileName, L"%ls\\TerrainHeight.bmp", WorldName);
-    if (IsTerrainHeightExtMap(this->WorldActive) == true)
+    if (IsTerrainHeightExtFile(FileName))
     {
         CreateTerrain(FileName, true);
     }
@@ -1083,6 +1170,17 @@ void CMapManager::LoadWorld(int Map)
         }
 
     OpenTerrainLight(FileName);
+}
+
+void CMapManager::LoadWorldTextures(WorldLoad& load)
+{
+    if (load.failed)
+    {
+        return;
+    }
+    wchar_t FileName[64];
+    const auto& WorldName = load.WorldName;
+    const int Map = load.map;
 
     if (CreateWaterTerrain(this->WorldActive) == false)
     {
@@ -1224,14 +1322,27 @@ void CMapManager::LoadWorld(int Map)
             LoadBitmap(FileName, BITMAP_MAPTILE + 10, GL_NEAREST, GL_REPEAT, false);
         }
     }
+}
 
-    if (iMapWorld != 74 && iMapWorld != 75)
+void CMapManager::LoadWorldFinish(WorldLoad& load)
+{
+    // A map also loads without the interface (tools and tests).
+    if (!load.failed && load.iMapWorld != 74 && load.iMapWorld != 75 && g_pNewUIMiniMap != nullptr)
     {
         g_pNewUIMiniMap->UnloadImages();
-        g_pNewUIMiniMap->LoadImages(WorldName);
+        g_pNewUIMiniMap->LoadImages(load.WorldName);
     }
 
+    load.textureBatch.reset();
+    if (load.failed)
+    {
+        return;
+    }
     Bitmaps.LogTextureFilteringSummary("world loaded");
+    mu::log::Get("render")->info(
+        "World {} loaded in {:.0f} ms, {} ms after start", load.iMapWorld,
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - load.start).count(),
+        SDL_GetTicks());
 }
 
 void CMapManager::DeleteObjects()

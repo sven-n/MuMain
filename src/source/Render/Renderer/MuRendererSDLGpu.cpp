@@ -1,7 +1,7 @@
 // MuRendererSDLGpu.cpp: SDL_gpu backend implementation of IMuRenderer.
 //
 // MuRendererSDLGpu replaces the OpenGL immediate-mode backend (MuRendererGL)
-// with SDL_gpu — selecting Metal on macOS, Vulkan on Linux, D3D12 on Windows.
+// with SDL_gpu — the driver comes from config.ini, the target's adapter (GpuDevice.h) or SDL's own pick.
 //
 // DESIGN NOTES (4.3.2 updates):
 //   - No #ifdef _WIN32 in this file — SDL_gpu handles platform selection internally.
@@ -34,19 +34,30 @@
 #include "BitmapUpload.h"
 #include "D3D12Diagnostics.h"
 #include "DrawCommandHistory.h"
+#include "GpuDevice.h"
+#include "GpuShaderFormats.h"
 #include "MuRenderer.h"
 #include "QuadTopology.h"
 #include "RangeAllocator.h"
 #include "SdlGpuPixelFormat.h"
+#include "SdlGpuAmbientOcclusion.h"
+#include "SdlGpuFinalPasses.h"
+#include "SdlGpuDepthState.h"
+#include "ShadowPassSelection.h"
+#include "SdlGpuSunShadowMap.h"
 #include "SdlGpuPostProcessing.h"
 #include "SdlGpuReplayState.h"
 #include "SdlGpuValidation.h"
 #include "SingleSampleTwins.h"
 #include "WorldPipelineSet.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/PostProcessing/BloomSource.h"
+#include "Render/PostProcessing/EdgeSmoothing.h"
+#include "Render/PostProcessing/RenderScale.h"
 #include "Render/PostProcessing/SceneBoundary.h"
+#include "Render/Lighting/SunShadow.h"
 #include "Render/Terrain/TerrainHeightGrid.h"
 #include "Render/Text/SdlTtfFontSet.h"
 #ifdef _EDITOR
@@ -60,10 +71,10 @@
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
-#include <fstream>
 #include <limits>
 #include <span>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -91,6 +102,8 @@ constexpr int k_MaxQuads = 4096;
 // Initial vertex capacity. CPU staging grows so stress frames keep late UI draws.
 constexpr Uint32 k_InitialVertexBufferSize = 64u * 1024u * 1024u;
 constexpr Uint32 k_InitialBoneBufferSize = 64u * 1024u;
+// Never read by a shader; only its handle matters (see CreateStorageRebindDummyBuffer).
+constexpr Uint32 k_StorageRebindDummyBufferSize = 16u;
 // Number of blend pipelines: 8 blend modes + 1 disabled.
 constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
@@ -128,8 +141,11 @@ static_assert(offsetof(SkinningVertexUniforms, eyePositionAndSpecular) == 192,
 static_assert(offsetof(SkinningVertexUniforms, vertexToWorldRows) == 208,
               "vertexToWorldRows must follow eyePositionAndSpecular (HLSL cbuffer Skinning)");
 
-// skinned_lit.frag's normal map (t1, s1 in space2): bound for every draw with that shader.
+// Slot 1 (t1, s1 in space2): skinned_lit.frag's normal map, bound for every draw with that shader, or
+// world_lit.frag's ground shadow mask.
 constexpr Uint32 k_FragmentSamplerSlotNormalMap = 1u;
+// Slot 2 (t2, s2 in space2): the sun shadow map of both lit shaders, bound once per pass (BindLitSamplers).
+constexpr Uint32 k_FragmentSamplerSlotSunShadow = 2u;
 // The flat tangent-space normal (0, 0, 1) as RGBA8: the normal map of draws without one.
 constexpr Uint32 k_FlatNormalPixel = 0xFFFF8080u; // R = G = 128, B = A = 255 (little-endian RGBA)
 
@@ -150,7 +166,7 @@ using WorldPipelines = Render::WorldPipelineSet<SDL_GPUGraphicsPipeline, k_Pipel
 struct ShadowVertexUniforms
 {
     float origin[4]{};     // xyz: BodyOrigin, w: height of TW_HEIGHT cells
-    float projection[4]{}; // x, y: sx, sy; z: 1 when the scene has terrain
+    float projection[4]{}; // x, y: sx, sy; z: 1 when the scene has terrain; w: the shear's axis angle
 };
 static_assert(sizeof(ShadowVertexUniforms) == 32, "ShadowVertexUniforms must be 32 bytes");
 
@@ -188,89 +204,54 @@ static_assert(offsetof(FogUniform, fogPadding) == 24, "FogUniform HLSL cbuffer l
 static_assert(offsetof(FogUniform, fogColor) == 32, "FogUniform HLSL float4 register alignment");
 static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuffer)");
 
+// Whether SDL picked its Metal backend; `driver` is SDL_GetGPUDeviceDriver's name.
+[[nodiscard]] static bool IsMetalDriver(const char* driver)
+{
+    return driver && std::string_view(driver) == "metal";
+}
+
 // ---------------------------------------------------------------------------
-// Returns the absolute path to a compiled shader blob given GPU driver name,
-// shader stage, and shader base name. Uses MU_SHADER_DIR (CMake compile def).
-// driver: "vulkan" | "direct3d12" | "metal"
+// Returns the path to a compiled shader blob given its file extension (the
+// device's Render::ShaderFormat), shader stage, and shader base name. Uses
+// MU_SHADER_DIR (CMake compile def).
 // stage:  "vert" | "frag"
 // name:   e.g., "basic_textured", "basic_colored", "shadow_volume"
 // ---------------------------------------------------------------------------
-[[nodiscard]] std::string GetShaderBlobPath(const char* driver, const char* stage, const char* name)
+[[nodiscard]] std::string GetShaderBlobPath(const char* ext, const char* stage, const char* name)
 {
-    const char* ext = "spv";
-    if (driver && std::string(driver) == "direct3d12")
-    {
-        ext = "dxil";
-    }
-    else if (driver && std::string(driver) == "metal")
-    {
-        ext = "msl";
-    }
-
 #ifndef MU_SHADER_DIR
 #define MU_SHADER_DIR ""
 #endif
     // Primary: cmake build-output path (works for local dev builds).
-    // Fallback: shaders/ next to the executable (works for CI artifacts and installs).
+    // Fallback: shaders/ in the game's content (works for CI artifacts and installs).
     std::string filename = std::string(name) + "." + stage + "." + ext;
     std::filesystem::path cmakePath = std::filesystem::path(MU_SHADER_DIR) / filename;
-    if (!cmakePath.empty() && std::filesystem::exists(cmakePath))
+    if (!cmakePath.empty() && Content::Probe(cmakePath) == Content::Found::File)
     {
         return cmakePath.string();
     }
-    const char* basePath = SDL_GetBasePath();
-    if (basePath != nullptr)
-    {
-        return (std::filesystem::path(basePath) / "shaders" / filename).string();
-    }
     return (std::filesystem::path("shaders") / filename).string();
-}
-
-// ---------------------------------------------------------------------------
-// Returns the SDL_GPUShaderFormat constant name for the given driver.
-// Only used internally — returns the correct enum value for SDL_CreateGPUShader.
-// ---------------------------------------------------------------------------
-[[nodiscard]] static SDL_GPUShaderFormat GetShaderFormat(const char* driver)
-{
-    if (driver && std::string(driver) == "direct3d12")
-    {
-        return SDL_GPU_SHADERFORMAT_DXIL;
-    }
-    if (driver && std::string(driver) == "metal")
-    {
-        return SDL_GPU_SHADERFORMAT_MSL;
-    }
-    return SDL_GPU_SHADERFORMAT_SPIRV;
 }
 
 // ---------------------------------------------------------------------------
 // Loads a compiled shader blob from disk into a byte vector.
 // Returns empty vector on failure (caller logs via mu::log).
 // ---------------------------------------------------------------------------
-[[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* driver)
+[[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* ext)
 {
-    const std::string path = GetShaderBlobPath(driver, stage, name);
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file.is_open())
+    const std::string path = GetShaderBlobPath(ext, stage, name);
+    const std::optional<std::string> file = Content::ReadFile(path);
+    if (!file)
     {
         mu::log::Get("render")->error("SDL_gpu -- shader blob not found: {}", path);
         return {};
     }
-    const auto fileSize = static_cast<std::streamsize>(file.tellg());
-    if (fileSize <= 0)
+    if (file->empty())
     {
         mu::log::Get("render")->error("SDL_gpu -- shader blob empty: {}", path);
         return {};
     }
-    file.seekg(0, std::ios::beg);
-    std::vector<Uint8> blob(static_cast<size_t>(fileSize));
-    file.read(reinterpret_cast<char*>(blob.data()), fileSize);
-    if (!file)
-    {
-        mu::log::Get("render")->error("SDL_gpu -- shader blob read error: {}", path);
-        return {};
-    }
-    return blob;
+    return std::vector<Uint8>(file->begin(), file->end());
 }
 
 // ---------------------------------------------------------------------------
@@ -278,7 +259,15 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 // ---------------------------------------------------------------------------
 
 static SDL_GPUDevice* s_device = nullptr;
-static Render::Renderer::BitmapGpuResources s_bitmapGpuResources;
+// The device's shader format, picked once at Init.
+static const Render::ShaderFormat* s_shaderFormat = nullptr;
+static Render::Renderer::BitmapGpuResources::Calls BitmapCallsForTarget()
+{
+    Render::Renderer::BitmapGpuResources::Calls calls;
+    calls.waitAtCeiling = Render::TargetFramesMayWait();
+    return calls;
+}
+static Render::Renderer::BitmapGpuResources s_bitmapGpuResources{BitmapCallsForTarget()};
 static SDL_Window* s_window = nullptr;
 
 // Uncapped present mode for VSync off: IMMEDIATE when the window supports it, otherwise
@@ -604,6 +593,8 @@ static WorldPipelines s_pipelinesSkinnedLit;
 static WorldPipelines s_pipelinesSkinnedWeighted;
 static WorldPipelines s_pipelinesSkinnedWeightedEnhancedFog;
 static WorldPipelines s_pipelinesSkinnedWeightedLit;
+// The ground lit per pixel by the frame's first point lights (BeginWorldLitGeometry).
+static WorldPipelines s_pipelinesWorldLit;
 static bool s_enhancedLightingAvailable = false;
 static bool s_enhancedLightingEnabled = false;
 // The frame's scene lighting, pushed once per render pass to fragment uniform slot 1.
@@ -617,8 +608,39 @@ static mu::SdlGpuPostProcessing s_postProcessing;
 static bool s_postProcessingEnabled = false;
 static mu::PostProcessingLook s_postProcessingLook{};
 static mu::PostProcessingView s_postProcessingView = mu::PostProcessingView::Scene;
+// The passes between the composite and the UI: edge smoothing (FXAA), and FSR 1's upscale from the
+// render scale and sharpening. They take the post-processed path too, with a composite that changes
+// nothing when post-processing itself is off.
+static mu::SdlGpuFinalPasses s_finalPasses;
+static bool s_edgeSmoothingEnabled = false;
+static int s_renderScalePercent = Render::PostProcessing::MaxRenderScalePercent;
+static int s_sharpnessPercent = Render::PostProcessing::MinSharpnessPercent;
+// The size of the target the scene passes replay into, while it differs from the window's: the views
+// recorded for the window are scaled to it. Empty otherwise.
+static Render::PostProcessing::FrameSize s_replayTargetSize{};
 static Render::PostProcessing::SceneBoundary s_sceneBoundary;
 static int s_bloomExclusionDepth = 0;
+static int s_worldLitGeometryDepth = 0;
+static int s_groundShadowDepth = 0;
+// Draws recorded inside a ScopedCharacterDraws: the characters, apart from the world's objects.
+static int s_characterDrawDepth = 0;
+// Draws recorded inside a ScopedNoSunCasters cast no sun shadow.
+static int s_noSunCasterDepth = 0;
+static int s_lightShadowDepth = 0;
+// Ground shadows (BeginGroundShadow) are drawn into a coverage mask the world-lit ground samples, in
+// a frame that recorded world-lit draws; until the mask holds the frame's shadows they draw as before.
+static bool s_frameHasWorldLit = false;
+static bool s_groundShadowMaskReady = false;
+// Per pixel, 1 minus the darkest shadow alpha drawn there; single-sample, at the frame's size.
+static SDL_GPUTexture* s_groundShadowMask = nullptr;
+// The terrain's direct sunlight per cell (SetTerrainSunLight), which clouds dim; null until the first one.
+static SDL_GPUTexture* s_terrainSunLight = nullptr;
+static constexpr Uint32 kTerrainSunLightSize = 256;
+static Uint32 s_groundShadowMaskW = 0;
+static Uint32 s_groundShadowMaskH = 0;
+// The mask's pipelines, [point light][skinned]: GPU-skinned shadows, and the CPU and cloth shadows
+// in the 3D layout. Sun shadows write the red channel, point-light shadows the green one.
+static SDL_GPUGraphicsPipeline* s_groundShadowMaskPipelines[2][3]{};
 
 // Alpha-to-coverage variants of the depth-writing world pipelines (each world set's culled and
 // no-cull states), used while anti-aliasing is on by alpha-tested cutout draws (foliage, hair,
@@ -736,6 +758,8 @@ static std::uint64_t s_submittedFrames = 0u;
 // Per-frame packed float4 bone rows. Three rows represent one affine 3x4 bone transform.
 static SDL_GPUTransferBuffer* s_boneTransferBuf = nullptr;
 static SDL_GPUBuffer* s_boneGpuBuf = nullptr;
+// Metal only: bound before the real storage buffers so SDL sees a changed handle.
+static SDL_GPUBuffer* s_storageRebindDummyBuf = nullptr;
 static Uint32 s_boneCapacity = 0u;
 static std::vector<float> s_boneRowScratch;
 static const float* s_lastBonePalette = nullptr;
@@ -811,6 +835,12 @@ struct RenderCmd
     bool depthMaskEnabled{};
     bool cullFaceEnabled{};
     bool bloomExcluded{}; // recorded inside a ScopedBloomExclusion: never a bloom source
+    bool groundShadow{};  // recorded inside a ScopedGroundShadow
+    bool worldLit{};      // recorded inside BeginWorldLitGeometry: slot 1 is the ground shadow mask
+    bool lightShadow{};   // a point light's (GroundShadowSource::PointLight)
+    bool characterDraw{}; // recorded inside a ScopedCharacterDraws
+    bool noSunCaster{};   // recorded inside a ScopedNoSunCasters
+    bool translucentVertices{}; // below full alpha before the texture
     // Set once this command has been replayed into an offscreen capture (see
     // BeginOffscreenCapture/EndOffscreenCapture); the main frame's replay pass then
     // skips it instead of drawing it a second time into the frame.
@@ -845,7 +875,9 @@ static Render::DrawCommandHistory s_previousDrawCommands;
         return Counter::BatchBreakTexture;
     }
     if (previous.blendEnabled != command.blendEnabled || previous.blendMode != command.blendMode ||
-        previous.bloomExcluded != command.bloomExcluded)
+        previous.bloomExcluded != command.bloomExcluded || previous.groundShadow != command.groundShadow ||
+        previous.lightShadow != command.lightShadow || previous.characterDraw != command.characterDraw ||
+        previous.noSunCaster != command.noSunCaster || previous.translucentVertices != command.translucentVertices)
     {
         return Counter::BatchBreakBlend;
     }
@@ -1022,8 +1054,8 @@ static void PushReplayFragmentUniforms(const FogUniform& uniforms, Render::SdlGp
     ++s_dbgFragmentUniformPushesThisFrame;
 }
 
-// Classic fragment shaders declare one uniform buffer and never read slots 1 and 2; only
-// skinned_lit.frag reads slot 2.
+// Classic fragment shaders declare one uniform buffer and never read slots 1 and 2; only the
+// skinned_lit and world_lit fragment shaders read slot 2.
 static void PushSceneLightingUniforms()
 {
     SDL_PushGPUFragmentUniformData(s_cmdBuf, k_FragmentUniformSlotSceneLighting, &s_sceneLightingUniform,
@@ -1033,8 +1065,22 @@ static void PushSceneLightingUniforms()
     s_dbgFragmentUniformPushesThisFrame += 2;
 }
 
+// The world-lit ground's slot 1: this frame's shadow mask once it holds its shadows, otherwise white,
+// which leaves the ground unshadowed.
+static SDL_GPUTextureSamplerBinding GroundShadowMaskBinding();
+
 static void BindReplayFragmentSampler(const RenderCmd& command, Render::SdlGpuReplayState& state)
 {
+    // Slot 1 changes meaning with the shader (normal map or shadow mask), so it is bound per draw.
+    if (!command.normalTexture && command.worldLit)
+    {
+        const SDL_GPUTextureSamplerBinding maskBinding = GroundShadowMaskBinding();
+        if (state.SelectNormalMapSampler(maskBinding.texture, maskBinding.sampler))
+        {
+            SDL_BindGPUFragmentSamplers(s_renderPass, k_FragmentSamplerSlotNormalMap, &maskBinding, 1);
+            ++s_dbgSamplerBindsThisFrame;
+        }
+    }
     if (command.normalTexture && state.SelectNormalMapSampler(command.normalTexture, command.normalSampler))
     {
         const SDL_GPUTextureSamplerBinding normalBinding{command.normalTexture, command.normalSampler};
@@ -1060,6 +1106,24 @@ static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUI
     SDL_BindGPUIndexBuffer(s_renderPass, &indexBinding, elementSize);
 }
 
+// A skinned draw's bones, plus the terrain heights for its ground shadow.
+// SDL 3.4.8's Metal backend binds vertex storage buffers at draw time only while needVertexStorageBufferBind is
+// set, and a draw whose pipeline has no storage buffers clears that flag without binding anything. A skinned draw
+// after such a plain draw keeps the same bone buffer handle, so SDL never sets the flag again and Metal reads the
+// bones from whatever sits in that slot, stretching monsters across the void. Binding a different buffer first
+// marks the slot as changed.
+static void BindReplayVertexStorageBuffers(bool shadow, Render::SdlGpuReplayState& state)
+{
+    SDL_GPUBuffer* const storageBuffers[] = {s_boneGpuBuf, s_terrainHeightGpuBuf};
+    const std::span<SDL_GPUBuffer* const> bound{storageBuffers, shadow ? 2u : 1u};
+    if (!state.SelectVertexStorageBuffers(bound))
+        return;
+
+    if (s_storageRebindDummyBuf)
+        SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &s_storageRebindDummyBuf, 1);
+    SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, bound.data(), static_cast<Uint32>(bound.size()));
+}
+
 // Passes outside the frame's main pass draw with one sample even while anti-aliasing is on: the
 // offscreen captures and render targets, the post-RmlUi pass and FlushRenderCommands render into
 // single-sample textures. Each multisampled pipeline maps to its single-sample twin, built with
@@ -1067,8 +1131,61 @@ static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUI
 // sample. s_singleSamplePass makes ReplayDrawCommand use the twins.
 static std::unordered_map<SDL_GPUGraphicsPipeline*, SDL_GPUGraphicsPipeline*> s_singleSamplePipelines;
 static bool s_singleSamplePass = false;
+// The HDR scene: with post-processing, the scene and bloom-source passes draw into float textures
+// (kHdrSceneFormat), so additive light stacks above 1 and the composite rolls it off. Each pipeline
+// those passes use maps to its twin built for that format; s_hdrScenePass makes ReplayDrawCommand
+// use them. Empty when the device cannot render the format at the frame's sample count.
+static constexpr SDL_GPUTextureFormat kHdrSceneFormat = SDL_GPU_TEXTUREFORMAT_R16G16B16A16_FLOAT;
+static std::unordered_map<SDL_GPUGraphicsPipeline*, SDL_GPUGraphicsPipeline*> s_hdrScenePipelines;
+static bool s_hdrScenePass = false;
+// The colour format CreatePipelines builds for instead of the swapchain's (INVALID: the swapchain's).
+static SDL_GPUTextureFormat s_pipelineFormatOverride = SDL_GPU_TEXTUREFORMAT_INVALID;
 // Whether the built pipelines are multisampled; set by CreatePipelinesForSampleCount.
 static bool s_pipelinesMultisampled = false;
+
+// Enhanced sun shadows: while s_sunShadowPass replays the scene into the shadow map, each draw's recorded
+// scene matrix is turned into the sun's by s_sunFromScene.
+static bool s_sunShadowPass = false;
+// While the scene's solid draws are replayed depth-only into a single-sample depth (RenderSceneDepth).
+static bool s_sceneDepthPass = false;
+static glm::mat4 s_sunFromScene{1.0f};
+
+// What the sun shadow and scene depth passes read of a recorded draw.
+[[nodiscard]] static Render::ShadowPass::DrawTraits ShadowPassTraits(const RenderCmd& command)
+{
+    const bool skinned = command.type == RenderCmdType::DrawSkinnedTriangles;
+    Render::ShadowPass::DrawTraits traits;
+    // Models drawn for the UI (their own view, Enhanced without the point lights) are left out.
+    traits.worldGeometry =
+        skinned ? s_skinningUniforms[command.skinningIndex].palette[3] != k_SkinningLightingEnhanced
+                : command.type != RenderCmdType::DrawTriangles2D && command.vtxStride == sizeof(Vertex3D);
+    traits.groundShadow = command.groundShadow;
+    traits.depthTest = command.depthTestEnabled;
+    traits.depthWrite = command.depthMaskEnabled;
+    traits.blended = command.blendEnabled;
+    traits.blendMode = command.blendMode;
+    traits.alphaTest = command.fogUniform.alphaDiscardEnabled != 0u;
+    traits.alphaToCoverage = command.fogUniform.alphaToCoverage != 0u;
+    traits.translucentVertices = command.translucentVertices;
+    traits.characterPart = command.characterDraw && skinned;
+    traits.noSunCaster = command.noSunCaster;
+    return traits;
+}
+
+// A draw's vertex uniforms in the sun shadow pass: its own, with the sun's matrix.
+static void PushSunShadowVertexUniforms(const RenderCmd& command, bool skinned, Render::SdlGpuReplayState& state)
+{
+    if (skinned)
+    {
+        SkinningVertexUniforms uniforms = s_skinningUniforms[command.skinningIndex];
+        uniforms.mvp = s_sunFromScene * uniforms.mvp;
+        PushReplayVertexUniforms(0, &uniforms, sizeof(uniforms), state);
+        return;
+    }
+    VertexUniforms uniforms = command.vu;
+    uniforms.mvp = s_sunFromScene * uniforms.mvp;
+    PushReplayVertexUniforms(0, &uniforms, sizeof(uniforms), state);
+}
 
 // Replays a recorded draw with `pipeline`: its own, or a variant of it for another pass.
 static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline* pipeline, bool boneDataReady,
@@ -1082,6 +1199,11 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
         const auto twin = s_singleSamplePipelines.find(pipeline);
         pipeline = twin != s_singleSamplePipelines.end() ? twin->second : nullptr;
     }
+    else if (s_hdrScenePass)
+    {
+        const auto twin = s_hdrScenePipelines.find(pipeline);
+        pipeline = twin != s_hdrScenePipelines.end() ? twin->second : nullptr;
+    }
     const bool skinned = command.type == RenderCmdType::DrawSkinnedTriangles;
     const bool shadow = skinned && command.shadowIndex != ~0u;
     if (!command.texture || !command.sampler || (skinned && (!boneDataReady || !s_boneGpuBuf)) ||
@@ -1090,7 +1212,9 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
         return;
     }
 
-    if (skinned)
+    if (s_sunShadowPass)
+        PushSunShadowVertexUniforms(command, skinned, state);
+    else if (skinned)
         PushReplayVertexUniforms(0, &s_skinningUniforms[command.skinningIndex], sizeof(SkinningVertexUniforms), state);
     else
         PushReplayVertexUniforms(0, &command.vu, sizeof(command.vu), state);
@@ -1118,12 +1242,7 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     }
 
     if (skinned)
-    {
-        SDL_GPUBuffer* const storageBuffers[] = {s_boneGpuBuf, s_terrainHeightGpuBuf};
-        const std::span<SDL_GPUBuffer* const> bound{storageBuffers, shadow ? 2u : 1u};
-        if (state.SelectVertexStorageBuffers(bound))
-            SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, bound.data(), static_cast<Uint32>(bound.size()));
-    }
+        BindReplayVertexStorageBuffers(shadow, state);
 
     Uint32 firstIndex = 0u;
     if (command.type == RenderCmdType::DrawIndexedQuads)
@@ -1135,7 +1254,16 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     }
 
     BindReplayFragmentSampler(command, state);
-    PushReplayFragmentUniforms(command.fogUniform, state);
+    if (s_sunShadowPass || s_sceneDepthPass)
+    {
+        // sun_depth.frag reads fogEnabled's slot as its coverage mode.
+        FogUniform coverage = command.fogUniform;
+        coverage.fogEnabled =
+            static_cast<std::uint32_t>(Render::ShadowPass::CoverageOf(ShadowPassTraits(command))) - 1u;
+        PushReplayFragmentUniforms(coverage, state);
+    }
+    else
+        PushReplayFragmentUniforms(command.fogUniform, state);
 
     if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip ||
         command.trianglesIndexed)
@@ -1168,6 +1296,11 @@ static std::vector<TextureUpdateCmd> s_textureUpdates;
 
 // Default white 1×1 texture used for textureId==0 and unknown IDs.
 static SDL_GPUTexture* s_whiteTexture = nullptr;
+
+static SDL_GPUTextureSamplerBinding GroundShadowMaskBinding()
+{
+    return {s_groundShadowMaskReady ? s_groundShadowMask : s_whiteTexture, s_defaultSampler};
+}
 // 1×1 flat normal map (k_FlatNormalPixel) bound to skinned_lit.frag for draws without a map.
 static SDL_GPUTexture* s_flatNormalTexture = nullptr;
 
@@ -1183,11 +1316,29 @@ static SDL_GPUShader* s_vertShaderSkinnedShadow = nullptr; // skinned_shadow.ver
 static SDL_GPUShader* s_vertShaderSkinnedWeightedShadow = nullptr; // skinned_weighted_shadow.vert
 static SDL_GPUShader* s_fragShaderTexFog = nullptr;  // basic_textured_fog.frag (Enhanced, optional)
 static SDL_GPUShader* s_fragShaderLit = nullptr;     // skinned_lit.frag (Enhanced, optional)
+static SDL_GPUShader* s_vertShaderWorldLit = nullptr;   // world_lit.vert (Enhanced, optional)
+static SDL_GPUShader* s_fragShaderWorldLit = nullptr;   // world_lit.frag (Enhanced, optional)
+static SDL_GPUShader* s_fragShaderShadowMask = nullptr; // shadow_mask.frag (optional)
 // Post-processing (optional): without them post-processing is unavailable.
 static SDL_GPUShader* s_vertShaderPostFullscreen = nullptr; // post_fullscreen.vert
 static SDL_GPUShader* s_fragShaderBloomDown = nullptr;      // post_bloom_down.frag
 static SDL_GPUShader* s_fragShaderBloomUp = nullptr;        // post_bloom_up.frag
 static SDL_GPUShader* s_fragShaderComposite = nullptr;      // post_composite.frag
+static SDL_GPUShader* s_fragShaderAmbientOcclusion = nullptr;     // post_ao.frag
+static SDL_GPUShader* s_fragShaderAmbientOcclusionBlur = nullptr; // post_ao_blur.frag
+static SDL_GPUShader* s_fragShaderFxaa = nullptr;                 // post_fxaa.frag
+static SDL_GPUShader* s_fragShaderFsrEasu = nullptr;              // post_fsr_easu.frag
+static SDL_GPUShader* s_fragShaderFsrRcas = nullptr;              // post_fsr_rcas.frag
+// The scene's ambient occlusion (one sample only), and the scene's projection it reconstructs from.
+static mu::SdlGpuAmbientOcclusion s_ambientOcclusion;
+static float s_sceneProjection[16]{};
+// Enhanced sun shadows (one sample): the shadow map's pipelines for 3D, skinned and glTF draws, and its
+// textures.
+static SDL_GPUGraphicsPipeline* s_sunShadowPipelines[3]{}; // [ShadowPassLayout]
+// The same draws, unbiased, into the scene's single-sample depth (RenderSceneDepth).
+static SDL_GPUGraphicsPipeline* s_sceneDepthPipelines[3]{}; // [ShadowPassLayout]
+static SDL_GPUShader* s_fragShaderSunDepth = nullptr;       // sun_depth.frag
+static mu::SdlGpuSunShadowMap s_sunShadowMap;
 
 // Depth buffer texture for correct 3D depth testing.
 // Created in Init() at swapchain dimensions, recreated on window resize.
@@ -1217,6 +1368,21 @@ static bool s_alphaCoverageDrawLogged = false;
 static Render::Antialiasing::SupportedSampleCounts s_supportedSampleCounts{};
 static SDL_GPUTexture* s_multisampleColorTexture = nullptr;
 static SDL_GPUTextureCreateInfo s_multisampleColorInfo{};
+// The scene's own multisampled colour target while anti-aliasing is on and the scene is not drawn
+// like the frame: HDR (kHdrSceneFormat), or at the render size.
+static SDL_GPUTexture* s_sceneMultisampleColorTexture = nullptr;
+static SDL_GPUTextureCreateInfo s_sceneMultisampleColorInfo{};
+// A depth target of its own size and sample count, created when either changes.
+struct SizedDepthTexture
+{
+    SDL_GPUTexture* texture = nullptr;
+    Render::PostProcessing::FrameSize size{};
+    SDL_GPUSampleCount sampleCount = SDL_GPU_SAMPLECOUNT_1;
+};
+// The scene's depth while it is drawn at the render size: with the frame's samples, and with one for
+// the ambient occlusion of a multisampled frame.
+static SizedDepthTexture s_scaledSceneDepth;
+static SizedDepthTexture s_scaledSingleSampleDepth;
 // The depth of a single-sample pass at the frame's size while the frame's own depth is multisampled.
 static SDL_GPUTexture* s_singleSampleDepthTexture = nullptr;
 static Uint32 s_singleSampleDepthW = 0u;
@@ -1783,43 +1949,26 @@ public:
             return false;
         }
 
-        // "default" (or empty) means this app's own platform-aware pick; Windows prefers Vulkan
-        // (SDL's own default D3D12 pick doesn't vsync-cap FPS correctly -- see the
-        // FPS_ANIMATION_FACTOR/CCreditWin fix commits), other platforms pass straight through to
-        // SDL's own auto-pick. Any other value forces that specific SDL_gpu driver name
-        // ("vulkan"/"direct3d12"/"metal") on any platform. config.ini's [Render] Backend key
-        // (GameConfig::GetRenderBackend()) is the source of this value; GameConfigValidation
-        // already normalized case/whitespace/the "d3d12" alias.
-        std::string requestedBackend(renderBackend);
-        if (requestedBackend.empty() || requestedBackend == "default")
-        {
-#ifdef _WIN32
-            requestedBackend = "vulkan";
-#else
-            requestedBackend.clear();
-#endif
-        }
-        const char* requestedDriverName = requestedBackend.empty() ? nullptr : requestedBackend.c_str();
-
-        // SDL_CreateGPUDevice() with a specific driver name has no built-in fallback (fails
-        // outright if that driver isn't available), so retry with nullptr (SDL's own auto-pick)
-        // if the requested one fails -- still works on a machine without it, just loses whatever
-        // benefit the requested backend had until that's addressed directly.
+        // config.ini's [Render] Backend (already normalized by GameConfigValidation) names a driver, or
+        // "default" leaves the choice to the target's adapter and then to SDL.
+        const SDL_PropertiesID deviceProps = SDL_CreateProperties();
+        Render::FillGpuDeviceProperties(deviceProps, renderBackend, Render::kGpuValidationEnabled);
+        const std::string requestedDriverName =
+            SDL_GetStringProperty(deviceProps, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, "");
         mu::log::Get("render")->info("SDL_gpu -- validation: {}, requested backend: {}",
                                      Render::kGpuValidationEnabled ? "enabled" : "disabled",
-                                     requestedDriverName ? requestedDriverName : "(SDL auto-pick)");
-        s_device =
-            SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-                                Render::kGpuValidationEnabled, requestedDriverName);
+                                     requestedDriverName.empty() ? "(SDL auto-pick)" : requestedDriverName);
+        s_device = SDL_CreateGPUDeviceWithProperties(deviceProps);
 
-        if (!s_device && requestedDriverName != nullptr)
+        // A named driver has no fallback in SDL, so a machine without it retries with SDL's own pick.
+        if (!s_device && !requestedDriverName.empty())
         {
             mu::log::Get("render")->warn("SDL_gpu -- '{}' device creation failed ({}), falling back to "
                                          "SDL's own auto-picked driver", requestedDriverName, SDL_GetError());
-            s_device = SDL_CreateGPUDevice(
-                SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-                Render::kGpuValidationEnabled, nullptr);
+            SDL_ClearProperty(deviceProps, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING);
+            s_device = SDL_CreateGPUDeviceWithProperties(deviceProps);
         }
+        SDL_DestroyProperties(deviceProps);
 
         if (!s_device)
         {
@@ -1827,9 +1976,19 @@ public:
             return false;
         }
 
-        mu::log::Get("render")->info("SDL_gpu -- device driver: {}", SDL_GetGPUDeviceDriver(s_device));
-
         const char* driverName = SDL_GetGPUDeviceDriver(s_device);
+        s_shaderFormat = Render::PickShaderFormat(SDL_GetGPUShaderFormats(s_device));
+        if (!s_shaderFormat)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- the '{}' driver accepts none of the shader formats this build "
+                                          "ships ({})",
+                                          driverName, Render::ShaderFormatNames());
+            SDL_DestroyGPUDevice(s_device);
+            s_device = nullptr;
+            return false;
+        }
+        mu::log::Get("render")->info("SDL_gpu -- device driver: {}, shader format: {}", driverName,
+                                     s_shaderFormat->extension);
         ConfigureD3D12Diagnostics(driverName);
 
         // Claim the window for the GPU device.
@@ -1841,9 +2000,8 @@ public:
             return false;
         }
 
-        // Load real HLSL shader blobs from MU_SHADER_DIR.
-        // Driver name used to select the correct blob format (SPIR-V/DXIL/MSL).
-        if (!LoadShaders(driverName))
+        // Load real HLSL shader blobs from MU_SHADER_DIR, in the device's shader format.
+        if (!LoadShaders())
         {
             mu::log::Get("render")->error("SDL_gpu -- shader loading failed; cannot build pipelines");
             SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
@@ -1960,6 +2118,8 @@ public:
             return false;
         }
 
+        CreateStorageRebindDummyBuffer(driverName);
+
         // Create initial depth texture at window size.
         // BeginFrame() will recreate it if the swapchain dimensions differ.
         {
@@ -2044,6 +2204,13 @@ public:
                                           s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
         }
 
+        ReleaseSunShadowResources();
+        if (s_terrainSunLight)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_terrainSunLight);
+            s_terrainSunLight = nullptr;
+        }
+
         // Release the independently owned white fallback texture.
         if (s_whiteTexture)
         {
@@ -2101,12 +2268,17 @@ public:
         }
 
         DestroyQuadIndexBuffer();
+        DestroyStorageRebindDummyBuffer();
         DestroyVertexBuffers();
         DestroyBoneBuffers();
         DestroyTerrainHeightBuffers();
         DestroySkinnedMeshCache();
         DestroyPipelines();
         ReleaseShaders();
+        ReleaseGroundShadowMask();
+        s_ambientOcclusion.Release();
+        s_finalPasses.Release();
+        ReleaseScaledSceneDepths();
         s_postProcessing.Release();
 
         SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
@@ -2122,7 +2294,7 @@ public:
     // Waits on the same frame-in-flight fence as BeginFrame's acquire, so the acquire after it returns at once.
     void WaitForSwapchain() override
     {
-        if (!s_device || !s_window)
+        if (!s_device || !s_window || !Render::TargetFramesMayWait())
         {
             return;
         }
@@ -2183,6 +2355,13 @@ public:
                                          s_bloomExclusionDepth);
             s_bloomExclusionDepth = 0;
         }
+        s_worldLitGeometryDepth = 0;
+        s_groundShadowDepth = 0;
+        s_characterDrawDepth = 0;
+        s_noSunCasterDepth = 0;
+        s_lightShadowDepth = 0;
+        s_frameHasWorldLit = false;
+        s_groundShadowMaskReady = false;
 
         s_replayedCmdCount = 0u;
         s_mainColorPassOpenedThisFrame = false;
@@ -2238,10 +2417,14 @@ public:
         // the frames in flight are full, and the loop ran on without drawing, several times per displayed frame on
         // Vulkan and Direct3D 12 alike. The game loop already waited in WaitForSwapchain, before reading input, so
         // this returns at once there; it still paces the frames drawn outside it (the title and loading screens).
-        if (!SDL_WaitAndAcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
+        // Where the host paces the frames instead, a frame without a free texture is skipped.
+        const bool mayWait = Render::TargetFramesMayWait();
+        const auto acquire = mayWait ? &SDL_WaitAndAcquireGPUSwapchainTexture : &SDL_AcquireGPUSwapchainTexture;
+        if (!acquire(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
         {
-            mu::log::Get("render")->error("SDL_gpu -- SDL_WaitAndAcquireGPUSwapchainTexture failed: {}",
-                                          SDL_GetError());
+            mu::log::Get("render")->error(
+                "SDL_gpu -- {} failed: {}",
+                mayWait ? "SDL_WaitAndAcquireGPUSwapchainTexture" : "SDL_AcquireGPUSwapchainTexture", SDL_GetError());
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             FailPendingFrameReadback();
@@ -2249,7 +2432,8 @@ public:
         }
 
         // If swapchain texture is null, skip the frame: a hidden window, or on Vulkan a minimized one whose
-        // surface the driver reports as 0x0 (Direct3D 12 keeps rendering a minimized window).
+        // surface the driver reports as 0x0 (Direct3D 12 keeps rendering a minimized window), or no texture free yet
+        // where frames may not wait.
         if (!s_swapchainTexture)
         {
             // A requested readback stays pending for the next frame that renders;
@@ -2296,6 +2480,9 @@ public:
     {
         AllCommands,
         BloomSources,
+        GroundShadows,    // the ground shadows, into the ground shadow mask
+        SunShadowCasters, // solid world draws, into the sun shadow map
+        SceneDepth,       // the scene's solid draws, into a single-sample depth
     };
 
     [[nodiscard]] static ReplayView FullFrameView()
@@ -2311,7 +2498,72 @@ public:
 
     [[nodiscard]] static bool IsPostProcessingActive()
     {
-        return s_postProcessingEnabled && s_postProcessing.IsAvailable();
+        return Render::PostProcessing::UsesPostProcessedFrame(s_postProcessingEnabled, FinalPasses().Any()) &&
+               s_postProcessing.IsAvailable();
+    }
+
+    [[nodiscard]] static Render::PostProcessing::FrameSize WindowSize()
+    {
+        return {s_swapW, s_swapH};
+    }
+
+    // The passes this frame takes between the composite and the UI: the chosen ones that are available.
+    [[nodiscard]] static Render::PostProcessing::FinalPassPlan FinalPasses()
+    {
+        using Pass = mu::SdlGpuFinalPasses::Pass;
+        if (!s_postProcessing.CanCompositeToImage())
+        {
+            return {};
+        }
+        const Render::PostProcessing::FrameSize window = WindowSize();
+        Render::PostProcessing::FinalPassPlan plan = Render::PostProcessing::PlanFinalPasses(
+            s_edgeSmoothingEnabled, Render::PostProcessing::ScaledSize(window, s_renderScalePercent), window,
+            s_sharpnessPercent);
+        plan.edgeSmoothing = plan.edgeSmoothing && s_finalPasses.IsAvailable(Pass::EdgeSmoothing);
+        plan.upscale = plan.upscale && s_finalPasses.IsAvailable(Pass::Upscale);
+        plan.sharpen = plan.sharpen && s_finalPasses.IsAvailable(Pass::Sharpen);
+        return plan;
+    }
+
+    // The size a post-processed frame's scene is drawn at: the render size while it is upscaled.
+    [[nodiscard]] static Render::PostProcessing::FrameSize SceneSize()
+    {
+        return FinalPasses().upscale ? Render::PostProcessing::ScaledSize(WindowSize(), s_renderScalePercent)
+                                     : WindowSize();
+    }
+
+    [[nodiscard]] static mu::SdlGpuTargetSize TargetSize(Render::PostProcessing::FrameSize size)
+    {
+        return {size.width, size.height};
+    }
+
+    // The viewport and scissor the replay applies: as recorded, or scaled to a scene at the render size.
+    [[nodiscard]] static SDL_GPUViewport AppliedViewport(const SDL_GPUViewport& viewport)
+    {
+        if (s_replayTargetSize == Render::PostProcessing::FrameSize{})
+        {
+            return viewport;
+        }
+        const Render::PostProcessing::ViewRect scaled = Render::PostProcessing::ScaleViewRect(
+            {viewport.x, viewport.y, viewport.w, viewport.h}, WindowSize(), s_replayTargetSize);
+        return {scaled.x, scaled.y, scaled.width, scaled.height, viewport.min_depth, viewport.max_depth};
+    }
+
+    [[nodiscard]] static SDL_Rect AppliedScissor(const SDL_Rect& scissor)
+    {
+        if (s_replayTargetSize == Render::PostProcessing::FrameSize{})
+        {
+            return scissor;
+        }
+        const Render::PostProcessing::PixelRect scaled = Render::PostProcessing::ScalePixelRect(
+            {scissor.x, scissor.y, scissor.w, scissor.h}, WindowSize(), s_replayTargetSize);
+        return {scaled.x, scaled.y, scaled.width, scaled.height};
+    }
+
+    // The look this frame's composite applies: none of it while only edge smoothing is on.
+    [[nodiscard]] static mu::PostProcessingLook CompositedLook()
+    {
+        return Render::PostProcessing::CompositedLook(s_postProcessingEnabled, s_postProcessingLook);
     }
 
     // The pipeline a bloom source replays with into the bloom pass, or null for
@@ -2340,6 +2592,46 @@ public:
         return nullptr;
     }
 
+    // The vertex layout a shadow pass replays `command` with: 0 3D, 1 skinned, 2 weighted skinned (glTF).
+    [[nodiscard]] static int ShadowPassLayout(const RenderCmd& command)
+    {
+        return command.type != RenderCmdType::DrawSkinnedTriangles        ? 0
+               : command.vtxStride == sizeof(mu::SkinnedWeightedVertex3D) ? 2
+                                                                          : 1;
+    }
+
+    [[nodiscard]] static SDL_GPUGraphicsPipeline* GetGroundShadowMaskPipeline(const RenderCmd& command)
+    {
+        return s_groundShadowMaskPipelines[command.lightShadow ? 1 : 0][ShadowPassLayout(command)];
+    }
+
+    // The pipeline `command` replays with in a pass of `selection`, or null when it is not drawn there.
+    // Once the mask holds the ground shadows, the other passes leave them out.
+    [[nodiscard]] static SDL_GPUGraphicsPipeline* GetReplayPipeline(const RenderCmd& command, ReplaySelection selection)
+    {
+        if (selection == ReplaySelection::GroundShadows)
+        {
+            return command.groundShadow ? GetGroundShadowMaskPipeline(command) : nullptr;
+        }
+        if (selection == ReplaySelection::SceneDepth)
+        {
+            return Render::ShadowPass::WritesSceneDepth(ShadowPassTraits(command))
+                       ? s_sceneDepthPipelines[ShadowPassLayout(command)]
+                       : nullptr;
+        }
+        if (selection == ReplaySelection::SunShadowCasters)
+        {
+            return Render::ShadowPass::CastsSunShadow(ShadowPassTraits(command))
+                       ? s_sunShadowPipelines[ShadowPassLayout(command)]
+                       : nullptr;
+        }
+        if (command.lightShadow || (command.groundShadow && s_groundShadowMaskReady))
+        {
+            return nullptr;
+        }
+        return selection == ReplaySelection::BloomSources ? GetBloomSourcePipeline(command) : command.pipeline;
+    }
+
     // Replays commands [begin, end) into s_renderPass, starting from `view`;
     // `view` ends as the last replayed command left it.
     static void ReplayCommands(std::size_t begin, std::size_t end, bool boneDataReady, ReplaySelection selection,
@@ -2348,12 +2640,15 @@ public:
         // Track explicit state. Pipeline changes re-apply the active scissor because
         // SDL GPU backends may discard it while binding a new pipeline.
         Render::SdlGpuReplayState replayState;
+        SDL_Rect scissor = AppliedScissor(view.scissor);
         if (replayState.SelectViewport(view.viewport))
-            SDL_SetGPUViewport(s_renderPass, &view.viewport);
+            ApplyViewport(view.viewport);
         if (replayState.SelectScissor(view.scissor))
-            SDL_SetGPUScissor(s_renderPass, &view.scissor);
+            SDL_SetGPUScissor(s_renderPass, &scissor);
 
-        const bool bloomSourcesOnly = selection == ReplaySelection::BloomSources;
+        const bool allCommands = selection == ReplaySelection::AllCommands;
+        // The shadow map keeps its own viewport and scissor.
+        const bool ownView = selection == ReplaySelection::SunShadowCasters;
         for (std::size_t index = begin; index < end; ++index)
         {
             const RenderCmd& cmd = s_renderCmds[index];
@@ -2367,9 +2662,13 @@ public:
             {
                 continue; // already drawn into its own offscreen texture above
             }
-            if (!bloomSourcesOnly)
+            if (allCommands)
             {
                 ++s_dbgRenderCmdsReplayedThisFrame;
+            }
+            if (ownView && !IsDrawCommand(cmd.type))
+            {
+                continue;
             }
 
             switch (cmd.type)
@@ -2378,15 +2677,16 @@ public:
             {
                 view.viewport = cmd.viewport;
                 if (replayState.SelectViewport(view.viewport))
-                    SDL_SetGPUViewport(s_renderPass, &view.viewport);
+                    ApplyViewport(view.viewport);
                 break;
             }
 
             case RenderCmdType::SetScissor:
             {
                 view.scissor = cmd.scissor;
+                scissor = AppliedScissor(view.scissor);
                 if (replayState.SelectScissor(view.scissor))
-                    SDL_SetGPUScissor(s_renderPass, &view.scissor);
+                    SDL_SetGPUScissor(s_renderPass, &scissor);
                 break;
             }
 
@@ -2397,10 +2697,10 @@ public:
             case RenderCmdType::DrawIndexedStrip:
             case RenderCmdType::DrawTriangles2D:
             {
-                SDL_GPUGraphicsPipeline* pipeline = bloomSourcesOnly ? GetBloomSourcePipeline(cmd) : cmd.pipeline;
+                SDL_GPUGraphicsPipeline* pipeline = GetReplayPipeline(cmd, selection);
                 if (pipeline)
                 {
-                    ReplayDrawCommand(cmd, pipeline, boneDataReady, view.scissor, replayState);
+                    ReplayDrawCommand(cmd, pipeline, boneDataReady, scissor, replayState);
                 }
                 break;
             }
@@ -2408,10 +2708,18 @@ public:
         }
     }
 
-    [[nodiscard]] static SDL_GPUDepthStencilTargetInfo MakeDepthTarget(SDL_GPULoadOp loadOp, SDL_GPUStoreOp storeOp)
+    static void ApplyViewport(const SDL_GPUViewport& viewport)
+    {
+        const SDL_GPUViewport applied = AppliedViewport(viewport);
+        SDL_SetGPUViewport(s_renderPass, &applied);
+    }
+
+    // A pass's depth target: the frame's own depth unless `texture` names another.
+    [[nodiscard]] static SDL_GPUDepthStencilTargetInfo MakeDepthTarget(SDL_GPULoadOp loadOp, SDL_GPUStoreOp storeOp,
+                                                                       SDL_GPUTexture* texture = s_depthTexture)
     {
         SDL_GPUDepthStencilTargetInfo depthTarget{};
-        depthTarget.texture = s_depthTexture;
+        depthTarget.texture = texture;
         depthTarget.clear_depth = 1.0f;
         depthTarget.load_op = loadOp;
         depthTarget.store_op = storeOp;
@@ -2442,13 +2750,169 @@ public:
     [[nodiscard]] static bool BeginReplayPass(const SDL_GPUColorTargetInfo& colorTarget,
                                               const SDL_GPUDepthStencilTargetInfo& depthTarget)
     {
-        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
+        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, depthTarget.texture ? &depthTarget : nullptr);
         if (!s_renderPass)
         {
             return false;
         }
         PushSceneLightingUniforms();
+        BindLitSamplers();
         return true;
+    }
+
+    // The Enhanced-lit shaders' slot 2, the sun shadow map: this frame's once drawn, otherwise the far
+    // 1x1 map. Slot 1 is bound per draw (BindReplayFragmentSampler).
+    static void BindLitSamplers()
+    {
+        SDL_GPUTexture* const sunShadow = s_sunShadowMap.Bound();
+        SDL_GPUSampler* const sunShadowSampler = s_sunShadowMap.Sampler();
+        // Slot 3, the terrain's direct sunlight (world_lit reads it only while lightingParameters.y is 1).
+        SDL_GPUTexture* const terrainSun = s_terrainSunLight ? s_terrainSunLight : s_whiteTexture;
+        const SDL_GPUTextureSamplerBinding terrainSunBinding{terrainSun, s_defaultSampler};
+        if (sunShadow && sunShadowSampler)
+        {
+            const SDL_GPUTextureSamplerBinding bindings[] = {{sunShadow, sunShadowSampler}, terrainSunBinding};
+            SDL_BindGPUFragmentSamplers(s_renderPass, k_FragmentSamplerSlotSunShadow, bindings, 2);
+        }
+        else
+        {
+            SDL_BindGPUFragmentSamplers(s_renderPass, k_FragmentSamplerSlotSunShadow + 1, &terrainSunBinding, 1);
+        }
+    }
+
+    // The ground shadow mask at the scene's size, recreated when that changed. Null when it fails.
+    [[nodiscard]] static SDL_GPUTexture* EnsureGroundShadowMask(Render::PostProcessing::FrameSize size)
+    {
+        if (s_groundShadowMask && s_groundShadowMaskW == size.width && s_groundShadowMaskH == size.height)
+        {
+            return s_groundShadowMask;
+        }
+        ReleaseGroundShadowMask();
+        SDL_GPUTextureCreateInfo maskInfo{};
+        maskInfo.type = SDL_GPU_TEXTURETYPE_2D;
+        maskInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8_UNORM;
+        maskInfo.width = size.width;
+        maskInfo.height = size.height;
+        maskInfo.layer_count_or_depth = 1;
+        maskInfo.num_levels = 1;
+        maskInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
+        maskInfo.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        s_groundShadowMask = SDL_CreateGPUTexture(s_device, &maskInfo);
+        if (!s_groundShadowMask)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- ground shadow mask creation failed ({}x{}): {}", size.width,
+                                          size.height, SDL_GetError());
+            return nullptr;
+        }
+        s_groundShadowMaskW = size.width;
+        s_groundShadowMaskH = size.height;
+        return s_groundShadowMask;
+    }
+
+    static void ReleaseGroundShadowMask()
+    {
+        if (s_groundShadowMask)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_groundShadowMask);
+            s_groundShadowMask = nullptr;
+        }
+        s_groundShadowMaskW = 0u;
+        s_groundShadowMaskH = 0u;
+    }
+
+    // In a frame with world-lit ground, its shadows [0, end) into the ground shadow mask of the scene's
+    // `size`, after which the other passes leave them out.
+    static void RenderGroundShadowMask(std::size_t end, bool boneDataReady, Render::PostProcessing::FrameSize size)
+    {
+        if (!s_frameHasWorldLit || !s_groundShadowMaskPipelines[0][0] || !EnsureGroundShadowMask(size))
+        {
+            return;
+        }
+        SDL_GPUColorTargetInfo maskTarget{};
+        maskTarget.texture = s_groundShadowMask;
+        maskTarget.clear_color = {1.0f, 1.0f, 1.0f, 1.0f};
+        maskTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+        maskTarget.store_op = SDL_GPU_STOREOP_STORE;
+        maskTarget.cycle = true;
+        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &maskTarget, 1, nullptr);
+        if (!s_renderPass)
+        {
+            return;
+        }
+        ReplayView view = FullFrameView();
+        ReplayCommands(0u, end, boneDataReady, ReplaySelection::GroundShadows, view);
+        EndReplayPass();
+        s_groundShadowMaskReady = true;
+    }
+
+    // A depth-only pass into `depth`, cleared to the far plane. Null when it cannot begin.
+    [[nodiscard]] static SDL_GPURenderPass* BeginDepthOnlyPass(SDL_GPUTexture* depth)
+    {
+        SDL_GPUDepthStencilTargetInfo target{};
+        target.texture = depth;
+        target.clear_depth = 1.0f;
+        target.load_op = SDL_GPU_LOADOP_CLEAR;
+        target.store_op = SDL_GPU_STOREOP_STORE;
+        target.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+        target.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+        target.cycle = true;
+        return SDL_BeginGPURenderPass(s_cmdBuf, nullptr, 0, &target);
+    }
+
+    // The frame's sun shadow map: the scene's solid draws [0, end) seen from the sun. Without a request
+    // (SetSceneLighting) the map is released and the lit shaders read the far 1x1 one.
+    // shortcut: every solid draw is drawn again each frame, the map's still parts too; cache them
+    // apart from the characters if the pass shows up in the profile.
+    static void RenderSunShadowMap(std::size_t end, bool boneDataReady)
+    {
+        FRAME_PROFILE(SunShadow);
+        if (SDL_GPUTexture* const fallback = s_sunShadowMap.FallbackToClear())
+        {
+            if ((s_renderPass = BeginDepthOnlyPass(fallback)) != nullptr)
+            {
+                EndReplayPass();
+                s_sunShadowMap.MarkFallbackCleared();
+            }
+        }
+        SDL_GPUTexture* const map = s_sunShadowMap.PrepareMap();
+        if (!map || (s_renderPass = BeginDepthOnlyPass(map)) == nullptr)
+        {
+            return;
+        }
+        const int texels = static_cast<int>(s_sunShadowMap.Resolution());
+        const float size = static_cast<float>(texels);
+        ReplayView view{{0.0f, 0.0f, size, size, 0.0f, 1.0f}, {0, 0, texels, texels}};
+        s_sunShadowPass = true;
+        ReplayCommands(0u, end, boneDataReady, ReplaySelection::SunShadowCasters, view);
+        s_sunShadowPass = false;
+        EndReplayPass();
+        s_sunShadowMap.MarkReady();
+    }
+
+    // The scene's depth for ambient occlusion: the frame's own with one sample; multisampled, which
+    // cannot be read, its solid draws [0, end) again into the single-sample pass depth. Null without.
+    [[nodiscard]] static SDL_GPUTexture* RenderSceneDepth(std::size_t end, bool boneDataReady)
+    {
+        if (!IsMultisampled())
+        {
+            return ScenePassDepth();
+        }
+        FRAME_PROFILE(SceneDepth);
+        const bool scaled = SceneSize() != WindowSize();
+        SDL_GPUTexture* const depth =
+            scaled ? EnsureDepthTexture(s_scaledSingleSampleDepth, SceneSize(), SDL_GPU_SAMPLECOUNT_1)
+                   : SingleSamplePassDepth();
+        if (!depth || !s_sceneDepthPipelines[0] || !s_sceneDepthPipelines[1] ||
+            (s_renderPass = BeginDepthOnlyPass(depth)) == nullptr)
+        {
+            return nullptr;
+        }
+        ReplayView view = FullFrameView();
+        s_sceneDepthPass = true;
+        ReplayCommands(0u, end, boneDataReady, ReplaySelection::SceneDepth, view);
+        s_sceneDepthPass = false;
+        EndReplayPass();
+        return depth;
     }
 
     static void EndReplayPass()
@@ -2466,6 +2930,8 @@ public:
         // Nothing reads depth after the pass; skip storing every sample of it.
         const SDL_GPUDepthStencilTargetInfo depthTarget =
             MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, IsMultisampled() ? SDL_GPU_STOREOP_DONT_CARE : SDL_GPU_STOREOP_STORE);
+        RenderSunShadowMap(s_renderCmds.size(), boneDataReady);
+        RenderGroundShadowMask(s_renderCmds.size(), boneDataReady, WindowSize());
         if (!BeginReplayPass(colorTarget, depthTarget))
         {
             return false;
@@ -2521,7 +2987,7 @@ public:
         depthInfo.layer_count_or_depth = 1;
         depthInfo.num_levels = 1;
         depthInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
-        depthInfo.usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
+        depthInfo.usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
         s_singleSampleDepthTexture = SDL_CreateGPUTexture(s_device, &depthInfo);
         if (!s_singleSampleDepthTexture)
         {
@@ -2551,17 +3017,93 @@ public:
     {
         constexpr SDL_FColor noLight{0.0f, 0.0f, 0.0f, 0.0f};
         const SDL_GPUColorTargetInfo colorTarget = CycledTarget(mu::GetSdlGpuFrameColorTarget(
-            {s_postProcessing.GetBloomSourceTexture(), IsMultisampled() ? s_multisampleColorTexture : nullptr},
-            noLight));
+            {s_postProcessing.GetBloomSourceTexture(), SceneMultisampleTexture()}, noLight));
         // The UI pass tests against the same depth, so it is kept.
-        if (!BeginReplayPass(colorTarget, MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE)))
+        if (!BeginReplayPass(colorTarget,
+                             MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE, ScenePassDepth())))
         {
             return;
         }
         ReplayView view = FullFrameView();
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::BloomSources, view);
         EndReplayPass();
-        s_postProcessing.RenderBloom(s_cmdBuf, s_postProcessingLook.bloomLevelFalloff);
+        s_postProcessing.RenderBloom(s_cmdBuf, CompositedLook().bloomLevelFalloff);
+    }
+
+    // The multisampled colour target of the scene and bloom-source passes: the HDR one with the HDR
+    // scene; null with one sample.
+    [[nodiscard]] static SDL_GPUTexture* SceneMultisampleTexture()
+    {
+        if (!IsMultisampled())
+        {
+            return nullptr;
+        }
+        if (!s_hdrScenePass && SceneSize() == WindowSize())
+        {
+            return s_multisampleColorTexture;
+        }
+        const SDL_GPUTextureFormat format =
+            s_hdrScenePass ? kHdrSceneFormat : SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
+        return EnsureSceneMultisampleColorTexture(format, SceneSize()) ? s_sceneMultisampleColorTexture : nullptr;
+    }
+
+    // The depth of the scene's passes: the frame's own, or its own at the render size.
+    [[nodiscard]] static SDL_GPUTexture* ScenePassDepth()
+    {
+        if (SceneSize() == WindowSize())
+        {
+            return s_depthTexture;
+        }
+        return EnsureDepthTexture(s_scaledSceneDepth, SceneSize(),
+                                  mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1));
+    }
+
+    // `depth` at `size` with `sampleCount` samples, recreated when either changed. Null when it fails.
+    [[nodiscard]] static SDL_GPUTexture*
+    EnsureDepthTexture(SizedDepthTexture& depth, Render::PostProcessing::FrameSize size, SDL_GPUSampleCount sampleCount)
+    {
+        if (depth.texture && depth.size == size && depth.sampleCount == sampleCount)
+        {
+            return depth.texture;
+        }
+        ReleaseDepthTexture(depth);
+        const auto info = mu::GetSdlGpuDepthTextureInfo(TargetSize(size), sampleCount);
+        depth.texture = info ? SDL_CreateGPUTexture(s_device, &*info) : nullptr;
+        if (!depth.texture)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- scene depth creation failed ({}x{}): {}", size.width, size.height,
+                                          SDL_GetError());
+            return nullptr;
+        }
+        depth.size = size;
+        depth.sampleCount = sampleCount;
+        return depth.texture;
+    }
+
+    static void ReleaseDepthTexture(SizedDepthTexture& depth)
+    {
+        if (depth.texture)
+        {
+            SDL_ReleaseGPUTexture(s_device, depth.texture);
+        }
+        depth = {};
+    }
+
+    static void ReleaseScaledSceneDepths()
+    {
+        ReleaseDepthTexture(s_scaledSceneDepth);
+        ReleaseDepthTexture(s_scaledSingleSampleDepth);
+    }
+
+    // Validate both attachments before a scene pass can begin. A missing multisampled colour
+    // target must not silently pair a single-sample scene image with multisampled depth/pipelines.
+    [[nodiscard]] static bool PrepareSceneAttachments(SDL_GPUTexture*& color, SDL_GPUTexture*& depth)
+    {
+        s_hdrScenePass = s_postProcessing.IsHdrScene();
+        color = SceneMultisampleTexture();
+        depth = ScenePassDepth();
+        s_hdrScenePass = false;
+        return (!IsMultisampled() || color) && depth;
     }
 
     // The scene into the scene texture, its bloom, then the processed scene and
@@ -2569,41 +3111,114 @@ public:
     [[nodiscard]] static bool ReplayPostProcessedFrame(SDL_GPUTexture* destination, std::size_t sceneEnd,
                                                        bool boneDataReady)
     {
+        SDL_GPUTexture* sceneMultisampled = nullptr;
+        SDL_GPUTexture* sceneDepthTarget = nullptr;
+        if (!PrepareSceneAttachments(sceneMultisampled, sceneDepthTarget))
+        {
+            // BeginFrame already prepared the window-sized attachments and pipelines. Replay
+            // every command there, with the original viewport/scissor and no processed scene.
+            return ReplayFrame(destination, boneDataReady);
+        }
         SDL_GPUTexture* const multisampled = IsMultisampled() ? s_multisampleColorTexture : nullptr;
         ReplayView view = FullFrameView();
+        const mu::PostProcessingLook look = CompositedLook();
+        RenderSunShadowMap(sceneEnd, boneDataReady);
+        // The scene's passes draw at the render size, into targets of that size.
+        const bool scaled = SceneSize() != WindowSize();
+        s_replayTargetSize = scaled ? SceneSize() : Render::PostProcessing::FrameSize{};
+        RenderGroundShadowMask(sceneEnd, boneDataReady, SceneSize());
+        const bool sceneView = s_postProcessingView == mu::PostProcessingView::Scene;
+        s_hdrScenePass = s_postProcessing.IsHdrScene();
 
         // Its depth stays for the bloom and UI passes, which test against it as
         // the UI did when it shared the scene's pass.
         const SDL_GPUColorTargetInfo sceneTarget = CycledTarget(
-            mu::GetSdlGpuFrameColorTarget({s_postProcessing.GetSceneTexture(), multisampled}, s_clearColor));
-        if (!BeginReplayPass(sceneTarget, MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE)))
+            mu::GetSdlGpuFrameColorTarget({s_postProcessing.GetSceneTexture(), sceneMultisampled}, s_clearColor));
+        if (!BeginReplayPass(sceneTarget,
+                             MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE, sceneDepthTarget)))
         {
+            s_hdrScenePass = false;
+            s_replayTargetSize = {};
             return false;
         }
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
 
-        if (s_postProcessingLook.bloomStrength > 0.0f)
+        s_postProcessing.ForgetBloom();
+        if (look.bloomStrength > 0.0f && s_postProcessing.EnsureBloomTargets())
         {
             RenderBloomSources(sceneEnd, boneDataReady);
         }
+        s_hdrScenePass = false;
+
+        SDL_GPUTexture* const sceneDepth =
+            look.ambientOcclusionStrength > 0.0f && sceneView ? RenderSceneDepth(sceneEnd, boneDataReady) : nullptr;
+        SDL_GPUTexture* const ambientOcclusion =
+            sceneDepth ? s_ambientOcclusion.Render(s_cmdBuf, sceneDepth, TargetSize(SceneSize()), s_sceneProjection,
+                                                   look.ambientOcclusionRadius)
+                       : nullptr;
+        s_replayTargetSize = {};
+        const bool finalPasses = sceneView && RunFinalPasses(look, ambientOcclusion);
 
         // The composite covers every pixel: the target's old content is not loaded.
         // A diagnostic view without its image this frame leaves black instead.
         constexpr SDL_FColor black{0.0f, 0.0f, 0.0f, 1.0f};
         SDL_GPUColorTargetInfo uiTarget = mu::GetSdlGpuFrameColorTarget({destination, multisampled}, black);
-        if (s_postProcessingView == mu::PostProcessingView::Scene)
+        if (sceneView)
         {
             uiTarget.load_op = SDL_GPU_LOADOP_DONT_CARE;
         }
-        if (!BeginReplayPass(uiTarget, MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_DONT_CARE)))
+        // A scene drawn at the render size has its own depth: the UI then starts from a cleared one.
+        const SDL_GPULoadOp uiDepthLoad = scaled ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
+        if (!BeginReplayPass(uiTarget, MakeDepthTarget(uiDepthLoad, SDL_GPU_STOREOP_DONT_CARE)))
         {
             return false;
         }
-        s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, {s_swapW, s_swapH}, s_postProcessingLook,
-                                       s_postProcessingView);
+        if (finalPasses)
+        {
+            s_finalPasses.DrawLast(s_cmdBuf, s_renderPass);
+        }
+        else
+        {
+            s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, TargetSize(WindowSize()), look, s_postProcessingView,
+                                           ambientOcclusion);
+        }
         ReplayCommands(sceneEnd, s_renderCmds.size(), boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
+        return true;
+    }
+
+    // With a final pass planned, the composite into the image the first one reads, then all of them but
+    // the last, which draws in the UI pass. False when none is planned or one could not run: the UI
+    // pass then composites itself.
+    [[nodiscard]] static bool RunFinalPasses(const mu::PostProcessingLook& look, SDL_GPUTexture* ambientOcclusion)
+    {
+        const Render::PostProcessing::FinalPassPlan plan = FinalPasses();
+        return plan.Any() && CompositeToImage(look, ambientOcclusion) &&
+               s_finalPasses.RunAllButLast(s_cmdBuf, plan, SceneSize(), WindowSize(), s_sharpnessPercent);
+    }
+
+    [[nodiscard]] static bool CompositeToImage(const mu::PostProcessingLook& look, SDL_GPUTexture* ambientOcclusion)
+    {
+        SDL_GPUTexture* const image = s_finalPasses.EnsureCompositeImage(SceneSize());
+        if (!image)
+        {
+            return false;
+        }
+        SDL_GPUColorTargetInfo target{};
+        target.texture = image;
+        target.load_op = SDL_GPU_LOADOP_DONT_CARE;
+        target.store_op = SDL_GPU_STOREOP_STORE;
+        // Not loaded: a fresh texture instead of waiting for the frame still reading it.
+        target.cycle = true;
+        SDL_GPURenderPass* const pass = SDL_BeginGPURenderPass(s_cmdBuf, &target, 1, nullptr);
+        if (!pass)
+        {
+            return false;
+        }
+        s_postProcessing.DrawComposite(s_cmdBuf, pass, TargetSize(SceneSize()), look, s_postProcessingView,
+                                       ambientOcclusion, mu::SdlGpuCompositeTarget::Image);
+        SDL_EndGPURenderPass(pass);
         return true;
     }
 
@@ -2823,6 +3438,7 @@ public:
     {
         // These passes render into single-sample textures (see s_singleSamplePipelines).
         PushSceneLightingUniforms();
+        BindLitSamplers();
         s_singleSamplePass = true;
         ReplayView view = FullFrameView();
         ReplayCommands(startIdx, endIdx, boneDataReady, ReplaySelection::AllCommands, view);
@@ -2981,13 +3597,27 @@ public:
         std::optional<FrameProfiler::Scope> replayScope(std::in_place, FrameProfiler::Pass::RendererReplay);
         const Render::PostProcessing::FrameSplit split =
             s_sceneBoundary.Split(s_renderCmds.size(), IsPostProcessingActive());
+        // Passes that will not run this frame free their targets, whichever way the frame is drawn.
+        {
+            const bool scene = split.postProcessed && s_postProcessingView == mu::PostProcessingView::Scene;
+            if (!scene || CompositedLook().ambientOcclusionStrength <= 0.0f)
+                s_ambientOcclusion.ReleaseTargets();
+            // The bloom views show the bloom too.
+            if (!split.postProcessed || CompositedLook().bloomStrength <= 0.0f)
+                s_postProcessing.ReleaseBloomTargets();
+            if (!scene || !FinalPasses().Any())
+                s_finalPasses.ReleaseImages();
+            if (!split.postProcessed || SceneSize() == WindowSize())
+                ReleaseScaledSceneDepths();
+        }
         if (s_mainColorPassOpenedThisFrame && frameColorTexture == FrameColorTexture())
         {
             // FlushRenderCommands already drew part of this frame into its target with one
             // sample: the rest follows the same way, without multisampling or post-processing.
             renderPassCompleted = ContinueFlushedFrame(frameColorTexture, boneDataReady);
         }
-        else if (split.postProcessed && s_postProcessing.EnsureTargets({s_swapW, s_swapH}))
+        else if (split.postProcessed &&
+                 s_postProcessing.EnsureTargets(TargetSize(SceneSize()), PostProcessedSceneFormat()))
         {
             renderPassCompleted = ReplayPostProcessedFrame(frameColorTexture, split.sceneEnd, boneDataReady);
         }
@@ -3151,6 +3781,14 @@ public:
         }
 
         s_submitTime = std::chrono::steady_clock::now();
+        // The frame may draw bitmaps whose uploads are still in the open upload slot.
+        if (!s_bitmapGpuResources.Flush())
+        {
+            mu::log::Get("render")->error("SDL_gpu -- bitmap upload batch failed at {}: {}",
+                                          s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
+        }
+        s_bitmapGpuResources.TrimIdleSlots();
+
         if (s_frameReadbackTexture)
         {
             if (!renderPassCompleted)
@@ -3617,6 +4255,26 @@ public:
         return !enabled || s_postProcessing.IsAvailable();
     }
 
+    [[nodiscard]] bool SetEdgeSmoothing(bool enabled) override
+    {
+        s_edgeSmoothingEnabled = enabled;
+        return !enabled || !s_device || s_finalPasses.IsAvailable(mu::SdlGpuFinalPasses::Pass::EdgeSmoothing);
+    }
+
+    [[nodiscard]] bool SetRenderScale(int percent) override
+    {
+        s_renderScalePercent = Render::PostProcessing::ClampRenderScale(percent);
+        return s_renderScalePercent == Render::PostProcessing::MaxRenderScalePercent || !s_device ||
+               s_finalPasses.IsAvailable(mu::SdlGpuFinalPasses::Pass::Upscale);
+    }
+
+    [[nodiscard]] bool SetSharpness(int percent) override
+    {
+        s_sharpnessPercent = Render::PostProcessing::ClampSharpness(percent);
+        return s_sharpnessPercent == Render::PostProcessing::MinSharpnessPercent || !s_device ||
+               s_finalPasses.IsAvailable(mu::SdlGpuFinalPasses::Pass::Sharpen);
+    }
+
     void SetPostProcessingLook(const mu::PostProcessingLook& look) override
     {
         s_postProcessingLook = look;
@@ -3641,6 +4299,59 @@ public:
         }
     }
 
+    void BeginWorldLitGeometry() override
+    {
+        ++s_worldLitGeometryDepth;
+    }
+
+    void EndWorldLitGeometry() override
+    {
+        if (s_worldLitGeometryDepth > 0)
+        {
+            --s_worldLitGeometryDepth;
+        }
+    }
+
+    void BeginNoSunCasters() override
+    {
+        ++s_noSunCasterDepth;
+    }
+
+    void EndNoSunCasters() override
+    {
+        if (s_noSunCasterDepth > 0)
+        {
+            --s_noSunCasterDepth;
+        }
+    }
+
+    void BeginCharacterDraws() override
+    {
+        ++s_characterDrawDepth;
+    }
+
+    void EndCharacterDraws() override
+    {
+        if (s_characterDrawDepth > 0)
+        {
+            --s_characterDrawDepth;
+        }
+    }
+
+    void BeginGroundShadow(GroundShadowSource source) override
+    {
+        ++(source == GroundShadowSource::PointLight ? s_lightShadowDepth : s_groundShadowDepth);
+    }
+
+    void EndGroundShadow(GroundShadowSource source) override
+    {
+        int& depth = source == GroundShadowSource::PointLight ? s_lightShadowDepth : s_groundShadowDepth;
+        if (depth > 0)
+        {
+            --depth;
+        }
+    }
+
     [[nodiscard]] bool IsBloomExcluded() const override
     {
         return s_bloomExclusionDepth > 0;
@@ -3649,6 +4360,13 @@ public:
     [[nodiscard]] bool SetColorGradingTable(std::span<const std::uint8_t> rgba) override
     {
         return s_postProcessing.SetGradingTable(rgba);
+    }
+
+    [[nodiscard]] bool CanTurnOffVSync() const override
+    {
+        return s_device && s_window &&
+               (SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_IMMEDIATE) ||
+                SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_MAILBOX));
     }
 
     [[nodiscard]] bool SetVSyncEnabled(bool enabled) override
@@ -4413,7 +5131,8 @@ public:
             }
             return;
         }
-        const AlphaCoverageChoice coverage = ChooseAlphaCoverage(pipeline, resolvedTexId, GetVertexAlpha(vertices));
+        const VertexAlpha vertexAlpha = GetVertexAlpha(vertices);
+        const AlphaCoverageChoice coverage = ChooseAlphaCoverage(pipeline, resolvedTexId, vertexAlpha);
         pipeline = coverage.pipeline;
 
         void* pSampler = LookupWorldSampler(resolvedTexId);
@@ -4432,6 +5151,7 @@ public:
         cmd.vu.fogEnd = m_fogUniform.fogEnd;
         cmd.fogUniform = m_fogUniform;
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;
+        cmd.translucentVertices = vertexAlpha == VertexAlpha::Translucent;
         RecordDrawState(cmd);
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
         std::size_t& previousCommand =
@@ -4534,6 +5254,7 @@ public:
         cmd.vu.fogStart = m_fogUniform.fogStart;
         cmd.vu.fogEnd = m_fogUniform.fogEnd;
         cmd.fogUniform = m_fogUniform;
+        cmd.translucentVertices = GetVertexAlpha(vertices) == VertexAlpha::Translucent;
         RecordDrawState(cmd);
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
         std::size_t& previousCommand =
@@ -4810,8 +5531,8 @@ public:
         const Uint32 numIndices = numQuads * 6;
 
         // RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
-        const AlphaCoverageChoice coverage =
-            ChooseAlphaCoverage(GetActive3DPipeline(), resolvedTexId, GetVertexAlpha(vertices));
+        const VertexAlpha vertexAlpha = GetVertexAlpha(vertices);
+        const AlphaCoverageChoice coverage = ChooseAlphaCoverage(GetActive3DPipeline(), resolvedTexId, vertexAlpha);
         SDL_GPUGraphicsPipeline* pipeline = coverage.pipeline;
         if (!pipeline)
         {
@@ -4856,6 +5577,7 @@ public:
         cmd.vu.fogEnd = m_fogUniform.fogEnd;
         cmd.fogUniform = m_fogUniform;
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;
+        cmd.translucentVertices = vertexAlpha == VertexAlpha::Translucent;
         RecordDrawState(cmd);
         s_renderCmds.push_back(cmd);
 
@@ -4988,8 +5710,78 @@ public:
         fog.color[1] = m_fogUniform.fogColor[1];
         fog.color[2] = m_fogUniform.fogColor[2];
         s_sceneLightingUniform = PackSceneLightingUniform(lighting, fog);
-        // The scene sets its lighting right after its camera, so the model-view is the view.
+        s_sceneLightingUniform.lightingParameters[1] = s_terrainSunLight ? 1.0f : 0.0f;
+        // The scene sets its lighting right after its camera, so the model-view is the view and the
+        // projection the scene's.
         m_worldFromViewMatrix = glm::inverse(m_modelViewMatrix);
+        std::memcpy(s_sceneProjection, glm::value_ptr(m_projMatrix), sizeof(s_sceneProjection));
+        const glm::mat4 viewProjection = m_projMatrix * m_modelViewMatrix;
+
+        s_sunShadowMap.Cancel();
+        if (lighting.sunShadowResolution > 0u)
+        {
+            s_sunShadowMap.Want(lighting.sunShadowResolution);
+        }
+        if (lighting.sunShadowDarkness > 0.0f && SunShadowsAvailable())
+        {
+            s_sunShadowMap.Request(lighting.sunShadowResolution);
+            const Uint32 resolution = s_sunShadowMap.Resolution();
+            const glm::vec3 toSun(lighting.sunDirection[0], lighting.sunDirection[1], lighting.sunDirection[2]);
+            const Render::Lighting::SunShadowView sun = Render::Lighting::BuildSunShadowView(
+                toSun, viewProjection, lighting.groundLow, lighting.groundHigh, resolution);
+            s_sunFromScene = sun.sunFromScene;
+            std::memcpy(s_sceneLightingUniform.sunViewProjection, glm::value_ptr(sun.viewProjection),
+                        sizeof(s_sceneLightingUniform.sunViewProjection));
+            const float texel = 1.0f / static_cast<float>(resolution);
+            s_sceneLightingUniform.sunShadowParameters[0] = lighting.sunShadowDarkness;
+            s_sceneLightingUniform.sunShadowParameters[1] = lighting.sunShadowSoftness;
+            s_sceneLightingUniform.sunShadowParameters[2] = texel;
+            s_sceneLightingUniform.sunShadowParameters[3] = sun.box.size * texel;
+        }
+    }
+
+    [[nodiscard]] bool SunShadowsAvailable() const override
+    {
+        return s_enhancedLightingAvailable && s_sunShadowPipelines[0] && s_sunShadowPipelines[1] &&
+               s_sunShadowMap.IsAvailable();
+    }
+
+    void SetTerrainSunLight(std::span<const std::uint8_t> rgba) override
+    {
+        if (rgba.size() != kTerrainSunLightSize * kTerrainSunLightSize * 4u || !s_device)
+        {
+            return;
+        }
+        if (!s_terrainSunLight)
+        {
+            SDL_GPUTextureCreateInfo info{};
+            info.type = SDL_GPU_TEXTURETYPE_2D;
+            info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+            info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+            info.width = kTerrainSunLightSize;
+            info.height = kTerrainSunLightSize;
+            info.layer_count_or_depth = 1;
+            info.num_levels = 1;
+            info.sample_count = SDL_GPU_SAMPLECOUNT_1;
+            s_terrainSunLight = SDL_CreateGPUTexture(s_device, &info);
+            if (!s_terrainSunLight)
+            {
+                return;
+            }
+        }
+        DiscardQueuedTextureUpdates(s_terrainSunLight);
+        TextureUpdateCmd cmd{};
+        cmd.gpuTexture = s_terrainSunLight;
+        cmd.pixelsCopy.assign(rgba.begin(), rgba.end());
+        cmd.width = kTerrainSunLightSize;
+        cmd.height = kTerrainSunLightSize;
+        cmd.bytesPerRow = kTerrainSunLightSize * 4u;
+        s_textureUpdates.push_back(std::move(cmd));
+    }
+
+    [[nodiscard]] bool InScreenSpaceSampling() const override
+    {
+        return s_screenSpaceSamplingDepth > 0;
     }
 
     void SetDynamicLights(const DynamicLightsUniform& lights) override
@@ -5137,10 +5929,9 @@ private:
         SDL_GPUGraphicsPipeline* pipeline =
             set.Select(static_cast<std::size_t>(pipelineIdx), m_depthTestEnabled, m_depthMaskEnabled, cullFaceEnabled);
         // One colour for the whole draw: its alpha is the vertices' alpha.
+        const VertexAlpha vertexAlpha = (color >> 24u) == 0xFFu ? VertexAlpha::Opaque : VertexAlpha::Translucent;
         const AlphaCoverageChoice coverage =
-            shadow ? AlphaCoverageChoice{pipeline, false}
-                   : ChooseAlphaCoverage(pipeline, resolvedTexId,
-                                         (color >> 24u) == 0xFFu ? VertexAlpha::Opaque : VertexAlpha::Translucent);
+            shadow ? AlphaCoverageChoice{pipeline, false} : ChooseAlphaCoverage(pipeline, resolvedTexId, vertexAlpha);
         pipeline = coverage.pipeline;
         if (shadow)
         {
@@ -5245,9 +6036,11 @@ private:
             shadowVu.projection[0] = shadow->shearX;
             shadowVu.projection[1] = shadow->shearHeight;
             shadowVu.projection[2] = shadow->terrain ? 1.0f : 0.0f;
+            shadowVu.projection[3] = shadow->axisAngle;
         }
         cmd.fogUniform = m_fogUniform;
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;
+        cmd.translucentVertices = vertexAlpha == VertexAlpha::Translucent;
         RecordDrawState(cmd);
         s_renderCmds.push_back(cmd);
 
@@ -5334,6 +6127,15 @@ private:
         command.depthMaskEnabled = m_depthMaskEnabled;
         command.cullFaceEnabled = m_cullFaceEnabled;
         command.bloomExcluded = s_bloomExclusionDepth > 0;
+        command.lightShadow = s_lightShadowDepth > 0;
+        command.groundShadow = s_groundShadowDepth > 0 || command.lightShadow;
+        command.worldLit = s_worldLitGeometryDepth > 0;
+        command.characterDraw = s_characterDrawDepth > 0;
+        command.noSunCaster = s_noSunCasterDepth > 0;
+        if (command.worldLit)
+        {
+            s_frameHasWorldLit = true;
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -5355,7 +6157,9 @@ private:
 
     [[nodiscard]] SDL_GPUGraphicsPipeline* GetActive3DPipeline() const
     {
-        const WorldPipelines& set = UsesEnhancedLighting() ? s_pipelines3DEnhancedFog : s_pipelines3D;
+        const WorldPipelines& set = !UsesEnhancedLighting()       ? s_pipelines3D
+                                    : s_worldLitGeometryDepth > 0 ? s_pipelinesWorldLit
+                                                                  : s_pipelines3DEnhancedFog;
         return set.Select(static_cast<std::size_t>(GetActivePipelineIndex()), m_depthTestEnabled, m_depthMaskEnabled,
                           m_cullFaceEnabled && !s_disableD3D12Culling);
     }
@@ -5516,20 +6320,48 @@ private:
     // -----------------------------------------------------------------------
     // Loads all 6 HLSL shader blobs from MU_SHADER_DIR and creates
     // SDL_GPUShader handles for pipeline creation.
-    // driverName: SDL_GetGPUDeviceDriver(s_device) result.
+    // Blobs are in the device's shader format (s_shaderFormat, picked at Init).
     // Returns false if the primary shader (basic_textured.vert) cannot be loaded
     // (fatal for 2D rendering). Other shaders log warnings but are non-fatal.
     // -----------------------------------------------------------------------
-    [[nodiscard]] static bool LoadShaders(const char* driverName)
+    static void LoadPostProcessingShaders(const auto& createShader)
     {
-        const SDL_GPUShaderFormat fmt = GetShaderFormat(driverName);
+        // Post-processing — non-fatal: without them post-processing is unavailable.
+        // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
+        // grading textures (t0-t2) and CompositeUniforms (b0).
+        s_vertShaderPostFullscreen =
+            createShader("post_fullscreen", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, /*fatal=*/false);
+        s_fragShaderBloomDown =
+            createShader("post_bloom_down", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderBloomUp =
+            createShader("post_bloom_up", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        // The composite also reads the ambient occlusion and the bloom source (t3, t4).
+        s_fragShaderComposite =
+            createShader("post_composite", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 5, 0, 1, /*fatal=*/false);
+        // Ambient occlusion: the depth (t0), and for the blur the occlusion (t1); AmbientOcclusion (b0).
+        s_fragShaderAmbientOcclusion =
+            createShader("post_ao", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderAmbientOcclusionBlur =
+            createShader("post_ao_blur", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 1, /*fatal=*/false);
+        // Edge smoothing: the processed image (t0) and FxaaUniforms (b0).
+        s_fragShaderFxaa = createShader("post_fxaa", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        // FSR 1 upscale and sharpening: the image (t0) and EasuUniforms or RcasUniforms (b0).
+        s_fragShaderFsrEasu =
+            createShader("post_fsr_easu", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderFsrRcas =
+            createShader("post_fsr_rcas", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+    }
+
+    [[nodiscard]] static bool LoadShaders()
+    {
+        const Render::ShaderFormat& shaderFormat = *s_shaderFormat;
 
         // Helper lambda: load blob + create shader.
         // Returns nullptr on failure (fatal=true logs error and propagates).
         auto createShader = [&](const char* name, const char* stage, SDL_GPUShaderStage shaderStage, Uint32 numSamplers,
                                 Uint32 numStorageBuffers, Uint32 numUniformBuffers, bool fatal) -> SDL_GPUShader*
         {
-            const std::vector<Uint8> blob = LoadShaderBlob(name, stage, driverName);
+            const std::vector<Uint8> blob = LoadShaderBlob(name, stage, shaderFormat.extension);
             if (blob.empty())
             {
                 if (fatal)
@@ -5547,9 +6379,8 @@ private:
             SDL_GPUShaderCreateInfo info{};
             info.code = blob.data();
             info.code_size = blob.size();
-            // spirv-cross renames "main" to "main0" in MSL because Metal reserves "main".
-            info.entrypoint = (fmt == SDL_GPU_SHADERFORMAT_MSL) ? "main0" : "main";
-            info.format = fmt;
+            info.entrypoint = shaderFormat.entrypoint;
+            info.format = shaderFormat.format;
             info.stage = shaderStage;
             info.num_samplers = numSamplers;
             info.num_storage_textures = 0;
@@ -5641,22 +6472,23 @@ private:
         s_fragShaderTexFog =
             createShader("basic_textured_fog", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 2, /*fatal=*/false);
         // skinned_lit.frag also reads the frame's point lights, DynamicLights (b2).
-        // skinned_lit.frag samples the texture and the normal map (k_FragmentSamplerSlotNormalMap).
-        s_fragShaderLit = createShader("skinned_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 3, /*fatal=*/false);
+        // skinned_lit.frag samples the texture, the normal map (k_FragmentSamplerSlotNormalMap) and the sun
+        // shadow map (k_FragmentSamplerSlotSunShadow).
+        s_fragShaderLit = createShader("skinned_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 3, 0, 3, /*fatal=*/false);
+        // The ground lit per pixel: the Transform (b0) of basic_textured.vert, and the uniforms of skinned_lit.frag.
+        s_vertShaderWorldLit = createShader("world_lit", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/false);
+        // world_lit.frag also samples the sun shadow map (s1) and the ground shadow mask (s2).
+        s_fragShaderWorldLit =
+            createShader("world_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 4, 0, 3, /*fatal=*/false);
+        s_fragShaderShadowMask =
+            createShader("shadow_mask", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, /*fatal=*/false);
+        // Sun shadows: the draw's texture (t0) for its alpha test, FogUniforms (b0).
+        s_fragShaderSunDepth =
+            createShader("sun_depth", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
 
-        // Post-processing — non-fatal: without them post-processing is unavailable.
-        // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
-        // grading textures (t0-t2) and CompositeUniforms (b0).
-        s_vertShaderPostFullscreen =
-            createShader("post_fullscreen", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, /*fatal=*/false);
-        s_fragShaderBloomDown =
-            createShader("post_bloom_down", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        s_fragShaderBloomUp =
-            createShader("post_bloom_up", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        s_fragShaderComposite =
-            createShader("post_composite", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 3, 0, 1, /*fatal=*/false);
+        LoadPostProcessingShaders(createShader);
 
-        mu::log::Get("render")->info("SDL_gpu -- shaders loaded for driver: {}", driverName ? driverName : "unknown");
+        mu::log::Get("render")->info("SDL_gpu -- shaders loaded, format: {}", shaderFormat.extension);
         return true;
     }
 
@@ -5722,7 +6554,10 @@ private:
             s_fragShaderLit = nullptr;
         }
         for (SDL_GPUShader** shader :
-             {&s_vertShaderPostFullscreen, &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite})
+             {&s_vertShaderWorldLit, &s_fragShaderWorldLit, &s_fragShaderShadowMask, &s_vertShaderPostFullscreen,
+              &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite, &s_fragShaderAmbientOcclusion,
+              &s_fragShaderAmbientOcclusionBlur, &s_fragShaderFxaa, &s_fragShaderFsrEasu, &s_fragShaderFsrRcas,
+              &s_fragShaderSunDepth})
         {
             if (*shader)
             {
@@ -5740,6 +6575,7 @@ private:
     {
         TwoDimensional,
         ThreeDimensional,
+        ThreeDimensionalWorldLit, // the 3D layout, with world_lit.vert
         Skinned,
         SkinnedWeighted,       // SkinnedWeightedVertex3D, with skinned_weighted.vert
         SkinnedShadow,         // the skinned layout, with skinned_shadow.vert
@@ -5751,6 +6587,9 @@ private:
         Textured,
         TexturedEnhancedFog,
         SkinnedLit,
+        WorldLit,
+        ShadowMask,
+        SunDepth,
     };
 
     struct PipelineBuildDescription
@@ -5764,6 +6603,12 @@ private:
         bool cullFaceEnabled;
         FragmentShader fragmentShader = FragmentShader::Textured;
         bool alphaToCoverage = false;
+        // Into the ground shadow mask: one sample, no depth, instead of the frame's targets.
+        bool groundShadowMaskTarget = false;
+        // Into the sun shadow map: depth only, one sample, biased against self-shadowing.
+        bool sunShadowTarget = false;
+        // Into the scene's single-sample depth: depth only, one sample, unbiased.
+        bool sceneDepthTarget = false;
     };
 
     // The world sets built together, and what a failed pipeline means for them.
@@ -5805,6 +6650,8 @@ private:
              FragmentShader::TexturedEnhancedFog, WorldSetFamily::EnhancedLighting},
             {&s_pipelinesSkinnedWeightedLit, "skinned-weighted-lit", VertexLayout::SkinnedWeighted,
              FragmentShader::SkinnedLit, WorldSetFamily::EnhancedLighting},
+            {&s_pipelinesWorldLit, "world-lit", VertexLayout::ThreeDimensionalWorldLit, FragmentShader::WorldLit,
+             WorldSetFamily::EnhancedLighting},
         };
         return sets;
     }
@@ -5852,6 +6699,12 @@ private:
             return s_fragShaderTexFog;
         case FragmentShader::SkinnedLit:
             return s_fragShaderLit;
+        case FragmentShader::WorldLit:
+            return s_fragShaderWorldLit;
+        case FragmentShader::ShadowMask:
+            return s_fragShaderShadowMask;
+        case FragmentShader::SunDepth:
+            return s_fragShaderSunDepth;
         case FragmentShader::Textured:
             break;
         }
@@ -5866,6 +6719,12 @@ private:
             return "basic_textured_fog.frag";
         case FragmentShader::SkinnedLit:
             return "skinned_lit.frag";
+        case FragmentShader::WorldLit:
+            return "world_lit.frag";
+        case FragmentShader::ShadowMask:
+            return "shadow_mask.frag";
+        case FragmentShader::SunDepth:
+            return "sun_depth.frag";
         case FragmentShader::Textured:
             break;
         }
@@ -5879,22 +6738,6 @@ private:
         std::string error;
     };
 
-    // Every variant compares depth with LESS_OR_EQUAL, as the classic MU OpenGL client set
-    // glDepthFunc(GL_LEQUAL) at the start of each 3D scene (SetDepthFunc, which this backend
-    // doesn't propagate). Depth-read-only and 2D pipelines always did. Depth-writing ones need it
-    // for models drawn in several depth-writing passes over the same mesh, like the Bill of
-    // Balrog's textured body over its chrome body: with LESS the later pass lost every
-    // equal-depth fragment, so only the first pass showed.
-    [[nodiscard]] static SDL_GPUDepthStencilState MakeDepthStencilState(const PipelineBuildDescription& description)
-    {
-        SDL_GPUDepthStencilState depthState{};
-        depthState.enable_depth_test = description.depthTestEnabled;
-        depthState.enable_depth_write = description.depthWriteEnabled;
-        depthState.enable_stencil_test = false;
-        depthState.compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
-        return depthState;
-    }
-
     [[nodiscard]] static PipelineBuildResult BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
                                                                 const PipelineBuildDescription& description)
     {
@@ -5904,7 +6747,9 @@ private:
         const SDL_GPUTextureFormat swapchainFmt = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
 
         SDL_GPUColorTargetDescription colorTargetDesc{};
-        colorTargetDesc.format = swapchainFmt;
+        colorTargetDesc.format = description.groundShadowMaskTarget ? SDL_GPU_TEXTUREFORMAT_R8G8_UNORM
+                                 : s_pipelineFormatOverride != SDL_GPU_TEXTUREFORMAT_INVALID ? s_pipelineFormatOverride
+                                                                                             : swapchainFmt;
         colorTargetDesc.blend_state = blendState;
 
         SDL_GPUVertexAttribute vertexAttribs[9];
@@ -5940,7 +6785,8 @@ private:
             vtxBufDesc.pitch = sizeof(Vertex2D);
             numAttribs = 3;
         }
-        else if (description.vertexLayout == VertexLayout::ThreeDimensional)
+        else if (description.vertexLayout == VertexLayout::ThreeDimensional ||
+                 description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit)
         {
             // Vertex3D mapped to the 2D shader's input locations:
             //   location 0 (TEXCOORD0 → pos):   float3 pos  — shader reads float2 (x,y), z dropped
@@ -5967,6 +6813,16 @@ private:
 
             vtxBufDesc.pitch = sizeof(Vertex3D);
             numAttribs = 3;
+            if (description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit)
+            {
+                // The lit ground's normal carries the darkening its vertex colour cannot (world_lit.vert).
+                vertexAttribs[3] = {};
+                vertexAttribs[3].location = 3;
+                vertexAttribs[3].buffer_slot = 0;
+                vertexAttribs[3].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3;
+                vertexAttribs[3].offset = static_cast<Uint32>(offsetof(Vertex3D, nx));
+                numAttribs = 4;
+            }
         }
         else
         {
@@ -6049,11 +6905,12 @@ private:
         vtxInputState.num_vertex_attributes = numAttribs;
 
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
-        targetInfo.color_target_descriptions = &colorTargetDesc;
-        targetInfo.num_color_targets = 1;
+        const bool depthOnly = description.sunShadowTarget || description.sceneDepthTarget;
+        targetInfo.color_target_descriptions = depthOnly ? nullptr : &colorTargetDesc;
+        targetInfo.num_color_targets = depthOnly ? 0u : 1u;
         // Enable depth-stencil target so pipelines match
         // the render pass that now includes a depth buffer.
-        targetInfo.has_depth_stencil_target = true;
+        targetInfo.has_depth_stencil_target = !description.groundShadowMaskTarget;
         targetInfo.depth_stencil_format = mu::SdlGpuDepthFormat;
 
         // Back-face culling as the descriptor asks: on for opaque 3D geometry (depth write ON),
@@ -6062,24 +6919,34 @@ private:
         rasterState.fill_mode = SDL_GPU_FILLMODE_FILL;
         rasterState.cull_mode = description.cullFaceEnabled ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
+        if (description.sunShadowTarget)
+        {
+            rasterState.enable_depth_bias = true;
+            rasterState.depth_bias_constant_factor = 2.0f;
+            rasterState.depth_bias_slope_factor = 2.0f;
+        }
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.vertex_shader =
-            description.vertexLayout == VertexLayout::Skinned                 ? s_vertShaderSkinned
-            : description.vertexLayout == VertexLayout::SkinnedWeighted       ? s_vertShaderSkinnedWeighted
-            : description.vertexLayout == VertexLayout::SkinnedShadow         ? s_vertShaderSkinnedShadow
-            : description.vertexLayout == VertexLayout::SkinnedWeightedShadow ? s_vertShaderSkinnedWeightedShadow
-                                                                              : s_vertShader2D;
+            description.vertexLayout == VertexLayout::Skinned                    ? s_vertShaderSkinned
+            : description.vertexLayout == VertexLayout::SkinnedWeighted          ? s_vertShaderSkinnedWeighted
+            : description.vertexLayout == VertexLayout::SkinnedShadow            ? s_vertShaderSkinnedShadow
+            : description.vertexLayout == VertexLayout::SkinnedWeightedShadow    ? s_vertShaderSkinnedWeightedShadow
+            : description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit ? s_vertShaderWorldLit
+                                                                                 : s_vertShader2D;
         pipelineInfo.fragment_shader = GetFragmentShader(description.fragmentShader);
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
         pipelineInfo.rasterizer_state = rasterState;
-        pipelineInfo.depth_stencil_state = MakeDepthStencilState(description);
+        pipelineInfo.depth_stencil_state =
+            Render::MakeDepthStencilState(description.depthTestEnabled, description.depthWriteEnabled);
         pipelineInfo.target_info = targetInfo;
         pipelineInfo.props = 0;
 
         pipelineInfo.multisample_state.sample_count =
-            mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1);
+            description.groundShadowMaskTarget || depthOnly
+                ? SDL_GPU_SAMPLECOUNT_1
+                : mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1);
         pipelineInfo.multisample_state.enable_alpha_to_coverage = description.alphaToCoverage;
 
         result.pipeline = SDL_CreateGPUGraphicsPipeline(s_device, &pipelineInfo);
@@ -6097,15 +6964,18 @@ private:
     static void LogPipelineFailure(const char* driverName, const PipelineBuildResult& result, bool required)
     {
         const PipelineBuildDescription& description = result.description;
-        const char* layoutName = description.vertexLayout == VertexLayout::TwoDimensional     ? "2D"
-                                 : description.vertexLayout == VertexLayout::ThreeDimensional ? "3D"
-                                                                                              : "skinned";
+        const char* layoutName = description.vertexLayout == VertexLayout::TwoDimensional ? "2D"
+                                 : description.vertexLayout == VertexLayout::ThreeDimensional ||
+                                         description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit
+                                     ? "3D"
+                                     : "skinned";
         const char* vertexShaderName =
-            description.vertexLayout == VertexLayout::Skinned                 ? "skinned_textured.vert"
-            : description.vertexLayout == VertexLayout::SkinnedWeighted       ? "skinned_weighted.vert"
-            : description.vertexLayout == VertexLayout::SkinnedShadow         ? "skinned_shadow.vert"
-            : description.vertexLayout == VertexLayout::SkinnedWeightedShadow ? "skinned_weighted_shadow.vert"
-                                                                              : "basic_textured.vert";
+            description.vertexLayout == VertexLayout::Skinned                    ? "skinned_textured.vert"
+            : description.vertexLayout == VertexLayout::SkinnedWeighted          ? "skinned_weighted.vert"
+            : description.vertexLayout == VertexLayout::SkinnedShadow            ? "skinned_shadow.vert"
+            : description.vertexLayout == VertexLayout::SkinnedWeightedShadow    ? "skinned_weighted_shadow.vert"
+            : description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit ? "world_lit.vert"
+                                                                                 : "basic_textured.vert";
         const char* fragmentShaderName = GetFragmentShaderName(description.fragmentShader);
         const char* cullMode = description.cullFaceEnabled ? "back" : "none";
         if (required)
@@ -6321,6 +7191,7 @@ private:
 
     static void DestroyPipelines()
     {
+        DestroyHdrScenePipelines();
         DestroySingleSamplePipelines();
         s_pipelinesMultisampled = false;
         DestroyEnhancedPipelines();
@@ -6336,6 +7207,33 @@ private:
                     SDL_ReleaseGPUGraphicsPipeline(s_device, set[i]);
                     set[i] = nullptr;
                 }
+            }
+        }
+        for (auto& layouts : s_groundShadowMaskPipelines)
+        {
+            for (SDL_GPUGraphicsPipeline*& pipeline : layouts)
+            {
+                if (pipeline)
+                {
+                    SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline);
+                    pipeline = nullptr;
+                }
+            }
+        }
+        for (SDL_GPUGraphicsPipeline*& pipeline : s_sceneDepthPipelines)
+        {
+            if (pipeline)
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline);
+                pipeline = nullptr;
+            }
+        }
+        for (SDL_GPUGraphicsPipeline*& pipeline : s_sunShadowPipelines)
+        {
+            if (pipeline)
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline);
+                pipeline = nullptr;
             }
         }
         DestroyAlphaCoveragePipelines();
@@ -6459,6 +7357,8 @@ private:
             }
         }
         CreateAlphaCoveragePipelines();
+        CreateGroundShadowMaskPipelines();
+        CreateSunShadowPipelines();
         CreatePostProcessingPipelines();
         if (!CreateSingleSamplePipelines())
         {
@@ -6473,10 +7373,159 @@ private:
             {
                 return false;
             }
+            CreateGroundShadowMaskPipelines();
+            CreateSunShadowPipelines();
             CreatePostProcessingPipelines();
         }
         s_pipelinesMultisampled = s_sampleCount != Render::Antialiasing::OffSampleCount;
+        CreateHdrScenePipelines();
         return true;
+    }
+
+    // The HDR scene's twins of every pipeline the scene and bloom-source passes replay, built for
+    // kHdrSceneFormat at s_sampleCount (an alpha-to-coverage variant maps to the variant built for its
+    // twin). Optional: without a complete set the scene stays in the swapchain's format.
+    static void CreateHdrScenePipelines()
+    {
+        DestroyHdrScenePipelines();
+        const SDL_GPUTextureUsageFlags usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        const SDL_GPUSampleCount sampleCount = mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1);
+        if (!SDL_GPUTextureSupportsFormat(s_device, kHdrSceneFormat, SDL_GPU_TEXTURETYPE_2D, usage) ||
+            !SDL_GPUTextureSupportsSampleCount(s_device, kHdrSceneFormat, sampleCount))
+        {
+            mu::log::Get("render")->info("SDL_gpu -- HDR scene unavailable at {}x: format unsupported", s_sampleCount);
+            return;
+        }
+
+        const std::vector<SDL_GPUGraphicsPipeline**> slots = ReplayPipelineSlots();
+        std::vector<SDL_GPUGraphicsPipeline*> frameFormat;
+        frameFormat.reserve(slots.size());
+        for (SDL_GPUGraphicsPipeline** slot : slots)
+        {
+            frameFormat.push_back(*slot);
+            *slot = nullptr;
+        }
+        const bool enhancedLightingAvailable = s_enhancedLightingAvailable;
+        std::vector<AlphaCoveragePipeline> frameFormatCoverage;
+        frameFormatCoverage.swap(s_alphaCoveragePipelines);
+
+        s_pipelineFormatOverride = kHdrSceneFormat;
+        const bool created = CreatePipelines();
+        CreateAlphaCoveragePipelines();
+        s_pipelineFormatOverride = SDL_GPU_TEXTUREFORMAT_INVALID;
+
+        for (std::size_t i = 0; i < slots.size(); ++i)
+        {
+            if (frameFormat[i] && *slots[i])
+            {
+                s_hdrScenePipelines[frameFormat[i]] = *slots[i];
+            }
+            else if (*slots[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, *slots[i]);
+            }
+            *slots[i] = frameFormat[i];
+        }
+        s_enhancedLightingAvailable = enhancedLightingAvailable;
+        // Both coverage lists were built for the same slots in the same order: pair them by slot.
+        for (const AlphaCoveragePipeline& hdr : s_alphaCoveragePipelines)
+        {
+            const auto original = std::ranges::find(frameFormatCoverage, hdr.opaque, &AlphaCoveragePipeline::opaque);
+            if (original != frameFormatCoverage.end())
+            {
+                s_hdrScenePipelines[original->variant] = hdr.variant;
+            }
+            else
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, hdr.variant);
+            }
+        }
+        s_alphaCoveragePipelines.swap(frameFormatCoverage);
+        for (const AlphaCoveragePipeline& entry : s_alphaCoveragePipelines)
+        {
+            frameFormat.push_back(entry.variant);
+        }
+
+        if (!created || !Render::SingleSampleTwinsComplete<SDL_GPUGraphicsPipeline>(frameFormat, s_hdrScenePipelines))
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- HDR scene pipelines incomplete at {}x; HDR scene off",
+                                         s_sampleCount);
+            DestroyHdrScenePipelines();
+            return;
+        }
+        mu::log::Get("render")->info("SDL_gpu -- {} HDR scene pipelines at {}x", s_hdrScenePipelines.size(),
+                                     s_sampleCount);
+    }
+
+    static void DestroyHdrScenePipelines()
+    {
+        std::unordered_set<SDL_GPUGraphicsPipeline*> released;
+        for (const auto& [frameFormat, twin] : s_hdrScenePipelines)
+        {
+            if (twin && released.insert(twin).second)
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, twin);
+            }
+        }
+        s_hdrScenePipelines.clear();
+    }
+
+    // The HDR scene this frame: its pipelines, and with anti-aliasing its multisampled target.
+    // The scene texture's format for a post-processed frame: HDR with post-processing itself on and
+    // the HDR pipelines there; the frame's own (INVALID) when only edge smoothing takes the frame.
+    [[nodiscard]] static SDL_GPUTextureFormat PostProcessedSceneFormat()
+    {
+        // The flag first: UsesHdrScene creates the HDR multisampled target, which only post-processing reads.
+        return s_postProcessingEnabled && UsesHdrScene() ? kHdrSceneFormat : SDL_GPU_TEXTUREFORMAT_INVALID;
+    }
+
+    [[nodiscard]] static bool UsesHdrScene()
+    {
+        return !s_hdrScenePipelines.empty() &&
+               (!IsMultisampled() || EnsureSceneMultisampleColorTexture(kHdrSceneFormat, SceneSize()));
+    }
+
+    // The scene's own multisampled colour target in `format` at `size`, recreated when any of them or
+    // the sample count changed.
+    [[nodiscard]] static bool EnsureSceneMultisampleColorTexture(SDL_GPUTextureFormat format,
+                                                                 Render::PostProcessing::FrameSize size)
+    {
+        const SDL_GPUSampleCount sampleCount = mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1);
+        if (s_sceneMultisampleColorTexture && s_sceneMultisampleColorInfo.format == format &&
+            s_sceneMultisampleColorInfo.width == size.width && s_sceneMultisampleColorInfo.height == size.height &&
+            s_sceneMultisampleColorInfo.sample_count == sampleCount)
+        {
+            return true;
+        }
+        ReleaseSceneMultisampleColorTexture();
+        SDL_GPUTextureCreateInfo info{};
+        info.type = SDL_GPU_TEXTURETYPE_2D;
+        info.format = format;
+        info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+        info.width = size.width;
+        info.height = size.height;
+        info.layer_count_or_depth = 1;
+        info.num_levels = 1;
+        info.sample_count = sampleCount;
+        s_sceneMultisampleColorTexture = SDL_CreateGPUTexture(s_device, &info);
+        if (!s_sceneMultisampleColorTexture)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- scene multisampled colour target creation failed ({}x{}): {}",
+                                          size.width, size.height, SDL_GetError());
+            return false;
+        }
+        s_sceneMultisampleColorInfo = info;
+        return true;
+    }
+
+    static void ReleaseSceneMultisampleColorTexture()
+    {
+        if (s_sceneMultisampleColorTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_sceneMultisampleColorTexture);
+            s_sceneMultisampleColorTexture = nullptr;
+        }
+        s_sceneMultisampleColorInfo = {};
     }
 
     // Every pipeline slot CreatePipelines() fills, in one fixed order.
@@ -6579,6 +7628,11 @@ private:
         s_singleSamplePipelines.clear();
     }
 
+    [[nodiscard]] static const char* AvailableText(bool available)
+    {
+        return available ? "available" : "unavailable";
+    }
+
     // Optional: without them every frame stays unprocessed.
     static void CreatePostProcessingPipelines()
     {
@@ -6589,6 +7643,138 @@ private:
                                              mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1));
         mu::log::Get("render")->info("SDL_gpu -- post-processing {} at {}x", created ? "available" : "unavailable",
                                      s_sampleCount);
+        (void)s_ambientOcclusion.CreatePipelines(
+            s_device, {s_vertShaderPostFullscreen, s_fragShaderAmbientOcclusion, s_fragShaderAmbientOcclusionBlur});
+        s_finalPasses.CreatePipelines(
+            s_device, {s_vertShaderPostFullscreen, s_fragShaderFxaa, s_fragShaderFsrEasu, s_fragShaderFsrRcas},
+            SDL_GetGPUSwapchainTextureFormat(s_device, s_window),
+            mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1));
+        using Pass = mu::SdlGpuFinalPasses::Pass;
+        mu::log::Get("render")->info("SDL_gpu -- edge smoothing {}, upscale {}, sharpening {}",
+                                     AvailableText(s_finalPasses.IsAvailable(Pass::EdgeSmoothing)),
+                                     AvailableText(s_finalPasses.IsAvailable(Pass::Upscale)),
+                                     AvailableText(s_finalPasses.IsAvailable(Pass::Sharpen)));
+    }
+
+    // The pipelines replaying solid draws into the sun shadow map, with its comparison sampler and far
+    // 1x1 map. Optional: without them there are no sun shadows.
+    static void CreateSunShadowPipelines()
+    {
+        if (!s_fragShaderSunDepth)
+        {
+            return;
+        }
+        // Indexed by ShadowPassLayout.
+        const VertexLayout layouts[] = {VertexLayout::ThreeDimensional, VertexLayout::Skinned,
+                                        VertexLayout::SkinnedWeighted};
+        for (std::size_t layout = 0; layout < 3; ++layout)
+        {
+            if (layout == 2 && !s_vertShaderSkinnedWeighted)
+            {
+                continue;
+            }
+            PipelineBuildDescription description{"sun-shadow",    "opaque", k_PipelineDisabled,      true, true,
+                                                 layouts[layout], false,    FragmentShader::SunDepth};
+            description.sunShadowTarget = true;
+            PipelineBuildResult result = BuildBlendPipeline(SDL_GPUColorTargetBlendState{}, description);
+            s_sunShadowPipelines[layout] = result.pipeline;
+            if (result.pipeline)
+            {
+                description.setName = "scene-depth";
+                description.sunShadowTarget = false;
+                description.sceneDepthTarget = true;
+                result = BuildBlendPipeline(SDL_GPUColorTargetBlendState{}, description);
+                s_sceneDepthPipelines[layout] = result.pipeline;
+            }
+            if (!result.pipeline)
+            {
+                const char* driver = SDL_GetGPUDeviceDriver(s_device);
+                LogPipelineFailure(driver ? driver : "unknown", result, false);
+            }
+        }
+        (void)s_sunShadowMap.CreateResources(s_device);
+    }
+
+    static void ReleaseSunShadowResources()
+    {
+        s_sunShadowMap.Release();
+    }
+
+    // The ground shadow mask's pipelines (one sample, whatever s_sampleCount is). Optional: without them
+    // ground shadows draw as recorded.
+    static void CreateGroundShadowMaskPipelines()
+    {
+        const SDL_GPUTextureUsageFlags maskUsage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        if (!s_fragShaderShadowMask || !SDL_GPUTextureSupportsFormat(s_device, SDL_GPU_TEXTUREFORMAT_R8G8_UNORM,
+                                                                     SDL_GPU_TEXTURETYPE_2D, maskUsage))
+        {
+            return;
+        }
+        // The darkest shadow wins: overlapping shadows darken a pixel once.
+        SDL_GPUColorTargetBlendState darkest{};
+        darkest.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+        darkest.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+        darkest.color_blend_op = SDL_GPU_BLENDOP_MIN;
+        darkest.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+        darkest.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+        darkest.alpha_blend_op = SDL_GPU_BLENDOP_MIN;
+        darkest.enable_blend = true;
+        darkest.enable_color_write_mask = true;
+        const char* deviceDriver = SDL_GetGPUDeviceDriver(s_device);
+        const auto build = [&](int lightShadow, int layout, const char* name)
+        {
+            PipelineBuildDescription description{name,
+                                                 "darkest",
+                                                 k_PipelineDisabled,
+                                                 false,
+                                                 false,
+                                                 layout == 2   ? VertexLayout::SkinnedWeightedShadow
+                                                 : layout == 1 ? VertexLayout::SkinnedShadow
+                                                               : VertexLayout::ThreeDimensional,
+                                                 false,
+                                                 FragmentShader::ShadowMask};
+            description.groundShadowMaskTarget = true;
+            darkest.color_write_mask = lightShadow ? SDL_GPU_COLORCOMPONENT_G : SDL_GPU_COLORCOMPONENT_R;
+            const PipelineBuildResult result = BuildBlendPipeline(darkest, description);
+            s_groundShadowMaskPipelines[lightShadow][layout] = result.pipeline;
+            if (!result.pipeline)
+            {
+                LogPipelineFailure(deviceDriver ? deviceDriver : "unknown", result, false);
+            }
+        };
+        build(0, 0, "ground-shadow-mask-3d");
+        build(1, 0, "ground-light-shadow-mask-3d");
+        if (s_vertShaderSkinnedShadow)
+        {
+            build(0, 1, "ground-shadow-mask-skinned");
+            build(1, 1, "ground-light-shadow-mask-skinned");
+        }
+        if (s_vertShaderSkinnedWeightedShadow)
+        {
+            build(0, 2, "ground-shadow-mask-weighted");
+            build(1, 2, "ground-light-shadow-mask-weighted");
+        }
+        // All or none: once the mask is ready the scene leaves every ground shadow to it, so a shadow
+        // the mask cannot draw would vanish. Without them, ground shadows draw as recorded.
+        const bool skinnedComplete =
+            !s_vertShaderSkinnedShadow || (s_groundShadowMaskPipelines[0][1] && s_groundShadowMaskPipelines[1][1]);
+        const bool weightedComplete = !s_vertShaderSkinnedWeightedShadow ||
+                                      (s_groundShadowMaskPipelines[0][2] && s_groundShadowMaskPipelines[1][2]);
+        if (!s_groundShadowMaskPipelines[0][0] || !s_groundShadowMaskPipelines[1][0] || !skinnedComplete ||
+            !weightedComplete)
+        {
+            for (auto& layouts : s_groundShadowMaskPipelines)
+            {
+                for (SDL_GPUGraphicsPipeline*& pipeline : layouts)
+                {
+                    if (pipeline)
+                    {
+                        SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline);
+                        pipeline = nullptr;
+                    }
+                }
+            }
+        }
     }
 
     // Alpha-to-coverage variants for s_sampleCount; none with one sample.
@@ -6662,6 +7848,7 @@ private:
         }
         s_multisampleColorInfo = {};
         ReleaseSingleSampleDepthTexture();
+        ReleaseSceneMultisampleColorTexture();
     }
 
     // The multisampled colour target for this frame's swapchain format, size
@@ -6701,8 +7888,7 @@ private:
     // their destruction until that frame has finished.
     static void RebuildForSampleCount(int sampleCount)
     {
-        const char* driverName = SDL_GetGPUDeviceDriver(s_device);
-        if (!LoadShaders(driverName))
+        if (!LoadShaders())
         {
             mu::log::Get("render")->error("SDL_gpu -- shader loading failed; anti-aliasing stays at {}x",
                                           s_sampleCount);
@@ -6892,6 +8078,7 @@ private:
             const SDL_Rect scissor{0, 0, static_cast<int>(capture.width), static_cast<int>(capture.height)};
             SDL_SetGPUScissor(s_renderPass, &scissor);
             PushSceneLightingUniforms();
+            BindLitSamplers();
 
             s_singleSamplePass = true;
             Render::SdlGpuReplayState replayState;
@@ -7218,6 +8405,32 @@ private:
         return true;
     }
 
+    // Only the Metal backend needs the storage-buffer rebind (see BindReplayVertexStorageBuffers). Without the buffer,
+    // skinned draws still work everywhere else; on Metal they may read stale bones after a plain draw.
+    static void CreateStorageRebindDummyBuffer(const char* driverName)
+    {
+        if (!IsMetalDriver(driverName))
+            return;
+
+        SDL_GPUBufferCreateInfo info{};
+        info.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+        info.size = k_StorageRebindDummyBufferSize;
+        s_storageRebindDummyBuf = SDL_CreateGPUBuffer(s_device, &info);
+        if (!s_storageRebindDummyBuf)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- storage rebind buffer creation failed: {}", SDL_GetError());
+        }
+    }
+
+    static void DestroyStorageRebindDummyBuffer()
+    {
+        if (s_storageRebindDummyBuf)
+        {
+            SDL_ReleaseGPUBuffer(s_device, s_storageRebindDummyBuf);
+            s_storageRebindDummyBuf = nullptr;
+        }
+    }
+
     static void DestroyQuadIndexBuffer()
     {
         if (s_quadIdxBuf)
@@ -7426,6 +8639,25 @@ const char* BitmapUploadDriverName()
     return s_device ? SDL_GetGPUDeviceDriver(s_device) : "no device";
 }
 
+double BitmapUploadFenceWaitSeconds()
+{
+    return s_bitmapGpuResources.FenceWaitSeconds();
+}
+
+bool BitmapUploadsOverStagingCap()
+{
+    return s_bitmapGpuResources.OverStagingCap();
+}
+
+void FlushBitmapUploads()
+{
+    if (!s_bitmapGpuResources.Flush())
+    {
+        mu::log::Get("render")->error("SDL_gpu -- bitmap upload batch failed at {}: {}",
+                                      s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
+    }
+}
+
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).
 [[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily,
                                       std::string_view renderBackend, float normalPointSize,
@@ -7437,7 +8669,8 @@ const char* BitmapUploadDriverName()
 
 void WaitForSDLGpuIdle()
 {
-    if (s_device && !SDL_WaitForGPUIdle(s_device))
+    // Where frames may not wait, neither may teardown: the host keeps the device until the page goes away.
+    if (s_device && Render::TargetFramesMayWait() && !SDL_WaitForGPUIdle(s_device))
     {
         mu::log::Get("render")->error("SDL_gpu -- failed to wait for idle before resource teardown: {}",
                                       SDL_GetError());

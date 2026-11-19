@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "EffectRecorder.h"
+#include "RecorderFields.h"
 
 #include "Core/Platform/IPlatformAudio.h"
 #include "Core/Utilities/Random.h"
@@ -50,74 +51,8 @@ constexpr std::array<float, 3> SecondPosition{12345.5f, 13579.25f, 260.5f};
 constexpr std::array<float, 3> SecondAngle{-17.f, 101.f, 271.f};
 constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
 
-// ---------------------------------------------------------------------------
-// The named fields of the pool elements. Keep in step with OBJECT
-// (w_ObjectInfo.h), PARTICLE and JOINT (_struct.h).
-// ---------------------------------------------------------------------------
-// clang-format off
-#define RECORDER_OBJECT_FIELDS(F)                                                                                    \
-    F(Live) F(bBillBoard) F(m_bCollisionCheck) F(m_bRenderShadow) F(EnableShadow) F(LightEnable) F(m_bActionStart)   \
-    F(m_bRenderAfterCharacter) F(Visible) F(AlphaEnable) F(EnableBoneMatrix) F(ContrastEnable) F(ChromeEnable)       \
-    F(OwnsBoneTransform)                                                                                             \
-    F(AI) F(CurrentAction) F(PriorAction) F(ExtState) F(Teleport) F(Kind) F(Skill) F(m_byNumCloth)                   \
-    F(m_byHurtByDeathstab) F(WeaponLevel) F(DamageTime) F(m_byBuildTime) F(m_bySkillCount) F(m_bySkillSerialNum)     \
-    F(Block) F(m_pCloth) F(ScreenX) F(ScreenY) F(Weapon) F(Type) F(SubType) F(m_iAnimation) F(HiddenMesh)            \
-    F(LifeTime) F(BlendMesh) F(AttackPoint) F(RenderType) F(InitialSceneTime) F(LinkBone) F(m_dwTime) F(Scale)       \
-    F(BlendMeshLight) F(BlendMeshTexCoordU) F(BlendMeshTexCoordV) F(Timer) F(m_fEdgeScale) F(Velocity)               \
-    F(CollisionRange) F(ShadowScale) F(Gravity) F(Distance) F(AnimationFrame) F(PriorAnimationFrame)                 \
-    F(AlphaTarget) F(Alpha) F(LastHorseWaveEffect) F(PKKey) F(Light) F(Direction) F(m_vPosSword) F(StartPosition)    \
-    F(BoundingBoxMin) F(BoundingBoxMax) F(m_vDownAngle) F(m_vDeadPosition) F(Position) F(Angle) F(HeadAngle)         \
-    F(HeadTargetAngle) F(EyeLeft) F(EyeRight) F(EyeLeft2) F(EyeRight2) F(EyeLeft3) F(EyeRight3) F(SetTrailLeft) F(SetTrailRight) F(Matrix)            \
-    F(BoneTransform) F(Pose.Type) F(Pose.CurrentAction) F(Pose.PriorAction) F(Pose.AnimationFrame)                   \
-    F(Pose.PriorAnimationFrame) F(Pose.Angle) F(Pose.HeadAngle) F(Pose.World) F(Pose.Origin) F(Pose.Scale)           \
-    F(Pose.Height) F(DrawnFrame) F(OBB.StartPos) F(OBB.XAxis) F(OBB.YAxis) F(OBB.ZAxis) F(Owner) F(Prior)            \
-    F(Next) F(m_BuffMap)                                                                                             \
-    F(m_sTargetIndex) F(m_bpcroom) F(m_v3PrePos1) F(m_v3PrePos2) F(m_Interpolates)
-
-#define RECORDER_PARTICLE_FIELDS(F)                                                                                  \
-    F(Live) F(Type) F(TexType) F(SubType) F(Scale) F(Position) F(Angle) F(Light) F(Alpha) F(LifeTime) F(Target)      \
-    F(Rotation) F(Frame) F(bEnableMove) F(Gravity) F(Velocity) F(TurningForce) F(StartPosition) F(iNumBone)          \
-    F(bRepeatedly) F(fRepeatedlyHeight)
-
-#define RECORDER_JOINT_FIELDS(F)                                                                                     \
-    F(Live) F(Type) F(TexType) F(SubType) F(RenderType) F(RenderFace) F(Scale) F(Position) F(StartPosition)          \
-    F(Angle) F(HeadAngle) F(Light) F(Target) F(TargetPosition) F(byOnlyOneRender) F(LifeTime) F(Collision)           \
-    F(Velocity) F(Direction) F(PKKey) F(Skill) F(Weapon) F(MultiUse) F(bTileMapping) F(m_byReverseUV)                \
-    F(TargetIndex) F(m_bySkillSerialNum) F(m_iChaIndex) F(m_sTargetIndex) F(m_bCreateTails) F(NumTails)              \
-    F(MaxTails) F(Tails) F(TailFrames)
-// clang-format on
-
-// A field added to one of the structs changes its size, so the build stops
-// until the field lists above have it too. The sizes are those of the 64-bit
-// Windows build without iterator debugging (OBJECT holds a std::map and
-// std::vectors, whose size depends on it).
-#if defined(_MSC_VER) && defined(_WIN64) && defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL == 0
-static_assert(sizeof(OBJECT) == 776, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
-static_assert(sizeof(PARTICLE) == 136, "PARTICLE changed: update RECORDER_PARTICLE_FIELDS");
-static_assert(sizeof(JOINT) == 9800, "JOINT changed: update RECORDER_JOINT_FIELDS");
-#endif
-
-// Calls visitor(name, field of `target`, same field of `reference`) for every field.
-template <typename Visitor> void VisitFields(OBJECT& target, const OBJECT& reference, Visitor&& visitor)
-{
-#define RECORDER_VISIT(name) visitor(#name, target.name, reference.name);
-    RECORDER_OBJECT_FIELDS(RECORDER_VISIT)
-#undef RECORDER_VISIT
-}
-
-template <typename Visitor> void VisitFields(PARTICLE& target, const PARTICLE& reference, Visitor&& visitor)
-{
-#define RECORDER_VISIT(name) visitor(#name, target.name, reference.name);
-    RECORDER_PARTICLE_FIELDS(RECORDER_VISIT)
-#undef RECORDER_VISIT
-}
-
-template <typename Visitor> void VisitFields(JOINT& target, const JOINT& reference, Visitor&& visitor)
-{
-#define RECORDER_VISIT(name) visitor(#name, target.name, reference.name);
-    RECORDER_JOINT_FIELDS(RECORDER_VISIT)
-#undef RECORDER_VISIT
-}
+// The named fields of the pool elements (RecorderFields.h).
+using RecorderFields::VisitFields;
 
 // ---------------------------------------------------------------------------
 // The world the recorder pins: owners, pattern targets, names of pointers.

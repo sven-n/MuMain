@@ -13,6 +13,7 @@
 #include <SDL3/SDL_video.h>
 #include "MuInputBlockerCore.h"
 #include "MuEditorCursor.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "MuEditorPlatformWindows.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
@@ -26,6 +27,7 @@
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemFormulasUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemOptionsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemSyncUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemTooltipUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
@@ -38,10 +40,13 @@
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterAttacksUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterSetupUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterEquipmentUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterSoundsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
+#include "../MuEditor/UI/GraphicsLook/MuGraphicsLookUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "Network/Server/ServerListManager.h"
 #include "../UI/Common/MuEditorUI.h"
@@ -537,6 +542,9 @@ void CMuEditorCore::Update()
     // Once per frame: the game's mouse-button reads ask it many times.
     m_bMouseInEditorWindow = FindMouseInEditorWindow();
 
+    // The texts that name items follow the editor's name edits, undo and revert.
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+
     // Apply a pending UI scale change between frames (never mid-frame).
     if (m_bScaleDirty)
     {
@@ -636,6 +644,10 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemFormulasUI.Render(&m_windows.itemFormulas);
     }
+    if (m_windows.itemOptions)
+    {
+        g_MuItemOptionsUI.Render(&m_windows.itemOptions);
+    }
     if (m_windows.itemSync)
     {
         g_MuItemSyncUI.Render(&m_windows.itemSync);
@@ -661,6 +673,14 @@ void CMuEditorCore::RenderMonsterTools()
     if (m_windows.monsterAttacks)
     {
         g_MuMonsterAttacksUI.Render(&m_windows.monsterAttacks);
+    }
+    if (m_windows.monsterSetup)
+    {
+        g_MuMonsterSetupUI.Render(&m_windows.monsterSetup);
+    }
+    if (m_windows.monsterEquipment)
+    {
+        g_MuMonsterEquipmentUI.Render(&m_windows.monsterEquipment);
     }
     if (m_windows.monsterSounds)
     {
@@ -945,6 +965,10 @@ void CMuEditorCore::Render()
         if (m_windows.serverList)
         {
             g_MuServerListUI.Render(&m_windows.serverList);
+        }
+        if (m_windows.graphicsLook)
+        {
+            g_MuGraphicsLookUI.Render(&m_windows.graphicsLook);
         }
         RenderItemTools();
         RenderMonsterTools();

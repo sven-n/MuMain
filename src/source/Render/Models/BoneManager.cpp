@@ -21,6 +21,11 @@ void BoneManager::UnregisterAll()
     CBoneManager::GetInstance()->UnregisterAll();
 }
 
+std::vector<std::pair<std::wstring, int>> BoneManager::ListBones(const CHARACTER* pCharacter)
+{
+    return CBoneManager::GetInstance()->ListBones(pCharacter);
+}
+
 CHARACTER* BoneManager::GetOwnCharacter(OBJECT* pObject, const std::wstring& name)
 {
     return CBoneManager::GetInstance()->GetOwnCharacter(pObject, name);
@@ -80,6 +85,19 @@ void CBoneManager::UnregisterBone(CHARACTER* pCharacter)
     m_listBone.remove_if([pCharacter](const std::unique_ptr<BONEINFO>& boneInfo)
                          { return boneInfo && boneInfo->pCharacter == pCharacter; });
 }
+std::vector<std::pair<std::wstring, int>> CBoneManager::ListBones(const CHARACTER* pCharacter) const
+{
+    std::vector<std::pair<std::wstring, int>> bones;
+    for (const std::unique_ptr<BONEINFO>& bone : m_listBone)
+    {
+        if (bone->pCharacter == pCharacter)
+        {
+            bones.emplace_back(bone->name, bone->nBone);
+        }
+    }
+    return bones;
+}
+
 void CBoneManager::UnregisterAll()
 {
     m_listBone.clear();

@@ -125,6 +125,11 @@ namespace SEASON4A
         int m_iDexterityBonus;
         int m_iVitalityBonus;
         int m_iEnergyBonus;
+        // The seed spheres' "Critical damage rate", in percent (the character window's critical damage rate).
+        int m_iCriticalDamageRateBonus;
+        // What the seed spheres add to a critical hit and to an excellent hit (the character window's damage hint).
+        int m_iCriticalDamageBonus;
+        int m_iExcellentDamageBonus;
     } SOCKET_OPTION_STATUS_BONUS;
 
     class CSocketItemMgr
@@ -163,6 +168,9 @@ namespace SEASON4A
 
     protected:
         BOOL IsSocketItem(int iItemType);
+        // Whether the worn item's seed spheres count: it is a socket item and not broken, as on the server (OpenMU's
+        // ItemPowerUpFactory) and for the item's other options.
+        bool AreSocketOptionsActive(const ITEM* pItem);
 
         void CalcSocketOptionValueText(wchar_t* pszOptionValueText, int iOptionType, float fOptionValue);
         int CalcSocketOptionValue(int iOptionType, float fOptionValue);

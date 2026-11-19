@@ -4826,10 +4826,10 @@
     <value>e pressione o botão para não. de jóias</value>
   </data>
   <data name="Jewel of Bless" xml:space="preserve">
-    <value>Jóia da Abençoação</value>
+    <value>{item:14,13}</value>
   </data>
   <data name="Jewel of Soul" xml:space="preserve">
-    <value>Jóia da Alma</value>
+    <value>{item:14,14}</value>
   </data>
   <data name="Combine %d (%d zen is required)" xml:space="preserve">
     <value>Combine %d (%d zen é necessário)</value>
@@ -5420,7 +5420,7 @@
     <value>%s sucesso %s: %d%%</value>
   </data>
   <data name="Jewel stone" xml:space="preserve">
-    <value>Pedra joia</value>
+    <value>{item:14,41}</value>
   </data>
   <data name="Weapons or shields" xml:space="preserve">
     <value>Armas ou escudos</value>
@@ -5675,7 +5675,7 @@
     <value>Sobre refinaria</value>
   </data>
   <data name="Jewel of Harmony" xml:space="preserve">
-    <value>Jóia da Harmonia</value>
+    <value>{item:14,42}</value>
   </data>
   <data name="Refine Gemstone" xml:space="preserve">
     <value>Refinar Pedra Preciosa</value>
@@ -7781,22 +7781,22 @@
     <value>Selecione uma joia para dissolver.</value>
   </data>
   <data name="Jewel of Life" xml:space="preserve">
-    <value>Jóia da Vida</value>
+    <value>{item:14,16}</value>
   </data>
   <data name="Jewel of Creation" xml:space="preserve">
-    <value>Jóia da Criação</value>
+    <value>{item:14,22}</value>
   </data>
   <data name="Jewel of Guardian" xml:space="preserve">
-    <value>Jóia do Guardião</value>
+    <value>{item:14,31}</value>
   </data>
   <data name="Jewel of Chaos" xml:space="preserve">
-    <value>Jóia do Caos</value>
+    <value>{item:12,15}</value>
   </data>
   <data name="Lower Refining Stone" xml:space="preserve">
-    <value>Pedra de Refino Inferior</value>
+    <value>{item:14,43}</value>
   </data>
   <data name="Higher Refining Stone" xml:space="preserve">
-    <value>Pedra de alto refino</value>
+    <value>{item:14,44}</value>
   </data>
   <data name="Are you sure you want to dissolve" xml:space="preserve">
     <value>Tem certeza que deseja dissolver</value>
@@ -8935,6 +8935,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls De %ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Monstro desconhecido %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Sou um erro: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>%ls Você gostaria de cancelar?</value>
   </data>
@@ -9048,5 +9054,56 @@
   </data>
   <data name="MagicStoneOfOwner" xml:space="preserve">
     <value>Pedra mágica de %ls</value>
+  </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Taxa de dano crítico: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Taxa de dano crítico: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Taxa de dano crítico</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Sorte (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Opções de conjunto: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Opções de soquete: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Total: %d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Dano</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>Golpe normal: %d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>Golpe crítico: %d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>Golpe excelente: %d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>antes da defesa do alvo</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>Dano crítico</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>Opções de conjunto: +%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>Opções de harmonia: +%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>Opções de soquete: +%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>Total: +%d</value>
   </data>
 </root>

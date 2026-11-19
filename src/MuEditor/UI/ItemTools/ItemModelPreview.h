@@ -27,6 +27,8 @@ class CItemModelPreview
 {
 public:
     void Render(int itemType);
+    // The model of a slot that is no item's, a part model (design L50), with the same controls.
+    void RenderModelSlot(int modelSlot);
     // The most views RenderSideBySide draws.
     static constexpr int MaxViews = 3;
     // Draws what stands above view `view` (0 is the left one), its name or a control, in the view's width; one line.

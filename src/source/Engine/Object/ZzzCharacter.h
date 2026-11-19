@@ -47,6 +47,9 @@ bool IsCharacterDrawn(CHARACTER* c);
 // The effects, sounds and state changes of the characters drawn this frame, after every Move* of the frame: their
 // bones are final, and what they spawn is drawn this frame.
 void UpdateCharacterEffects();
+// The Greater Damage weapon sparkles and the defense aura of a buffed player, spawned by its effects update. Only for
+// CharactersClient entries: the aura's joints carry the character's index in that array.
+void UpdateBuffAuraEffects(CHARACTER* c, OBJECT* o, BMD* b);
 // A preview's update (a character outside CharactersClient, tracked by Engine::Object::Attachments::Track): its parts,
 // cloth and transformation, which its draw only draws. Its owner calls it in its update, before drawing it.
 void UpdatePreviewCharacter(CHARACTER* c);
@@ -110,6 +113,11 @@ bool CheckFullSet(CHARACTER* c);
 [[nodiscard]] bool IsFullSet(const CHARACTER* c);
 
 void MoveCharacterPosition(CHARACTER* c);
+// Moves the character one frame along `heading` (a walking character's MoveHeading) instead of its facing, at `pace`
+// of its speed (StepMomentum's).
+void MoveCharacterPosition(CHARACTER* c, float heading, float pace = 1.f);
+// The client character whose object `o` is, or nullptr (a mount, an item, a map object).
+CHARACTER* CharacterOfObject(const OBJECT* o);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr,
                            OBJECT* pHelper = nullptr);
@@ -135,8 +143,10 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
 
 void SetAttackSpeed();
 void SetPlayerShock(CHARACTER* c, int Hit);
-void SetPlayerStop(CHARACTER* c);
-void SetPlayerWalk(CHARACTER* c);
+// The standing and the walking action for the character's class, mount and weapons. Without `playSounds`, silently:
+// a standing turn's steps (FinishPendingTurn) aren't a walk of their own, so they play no walk or stand sounds.
+void SetPlayerStop(CHARACTER* c, bool playSounds = true);
+void SetPlayerWalk(CHARACTER* c, bool playSounds = true);
 
 void SetPlayerAttack(CHARACTER* c);
 void SetPlayerDie(CHARACTER* c);
@@ -148,6 +158,11 @@ void SetCharacterScale(CHARACTER* c);
 void SetChangeClass(CHARACTER* c);
 int LevelConvert(BYTE Level);
 float CharacterMoveSpeed(CHARACTER* c);
+// Paths another player or a monster from its tile to c->TargetX/TargetY and starts the walk, cancelling any running
+// glide. Returns false, and changes nothing, when there is no path yet.
+bool StartObservedWalk(CHARACTER* c);
+void MoveMonsterClient(CHARACTER* c, OBJECT* o);
+void PushingCharacter(CHARACTER* c, OBJECT* o);
 
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);

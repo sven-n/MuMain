@@ -60,7 +60,6 @@ public:
     void LoadModel();
     void LoadSound();
 
-    CHARACTER* CreateMonster(int iType, int iPosX, int iPosY, int iKey);
     bool MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
 };
 
@@ -81,7 +80,6 @@ public:
     void LoadModel();
     void LoadSound();
 
-    CHARACTER* CreateMonster(int iType, int iPosX, int iPosY, int iKey);
     bool MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
 };
 

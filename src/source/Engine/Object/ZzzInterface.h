@@ -66,7 +66,6 @@ void ClearInput(BOOL bClearWhisperTarget = TRUE);
 // area forgets them.
 void CollectCrownSwitchLines(std::wstring (&lines)[2]);
 
-
 //  HotKey
 int  FindHotKey(int Skill);
 

@@ -30,6 +30,20 @@ several near-identical-name classes across different eras that look interchangea
 these docs exist specifically so new code doesn't reach for a closed or transitional one by
 accident.
 
+## Data-driven features — read this too
+
+New features are data-driven by design: data files and a MuEditor tool (the
+design principle at the top of [`docs/CODING_RULES.md`](docs/CODING_RULES.md)).
+In areas that are already data-driven (items, monsters, effects, ...), new or
+changed behaviour is a data field that every entry of that kind can use, never
+a special case in code.
+
+## Reading game content
+
+Code reads shipped content (`Data/`, fonts, shaders) through `Core/Content`, never with
+`fopen`, streams or `std::filesystem` directly, so ports can serve it from anywhere. See
+[`docs/content-access.md`](docs/content-access.md); a test fails on new direct file calls.
+
 ## Build setup
 
 The project uses CMake. Supported build environments and setup steps are
@@ -49,6 +63,11 @@ Quick references:
 - Run `scripts/install-hooks.sh` once per clone: the pre-push hook runs the same
   static checks and formatting check as CI's Quality Gates.
 - Reference the related issue in the PR description when applicable.
+- Follow [`docs/PULL_REQUESTS.md`](docs/PULL_REQUESTS.md): a change that is
+  visible in the game or the editor needs before and after screenshots or
+  videos in the PR description, the description lists what was tested (build,
+  in game, in-game tests, automated tests, not tested), and it confirms the
+  coding rules were followed.
 
 ## Out of scope for AI changes
 

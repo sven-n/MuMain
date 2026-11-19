@@ -1,0 +1,161 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+#pragma clang diagnostic ignored "-Wmissing-braces"
+
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+template<typename T, size_t Num>
+struct spvUnsafeArray
+{
+    T elements[Num ? Num : 1];
+    
+    thread T& operator [] (size_t pos) thread
+    {
+        return elements[pos];
+    }
+    constexpr const thread T& operator [] (size_t pos) const thread
+    {
+        return elements[pos];
+    }
+    
+    device T& operator [] (size_t pos) device
+    {
+        return elements[pos];
+    }
+    constexpr const device T& operator [] (size_t pos) const device
+    {
+        return elements[pos];
+    }
+    
+    constexpr const constant T& operator [] (size_t pos) const constant
+    {
+        return elements[pos];
+    }
+    
+    threadgroup T& operator [] (size_t pos) threadgroup
+    {
+        return elements[pos];
+    }
+    constexpr const threadgroup T& operator [] (size_t pos) const threadgroup
+    {
+        return elements[pos];
+    }
+};
+
+struct FSInput
+{
+    float4 pos;
+    float2 uv;
+};
+
+struct AmbientOcclusion
+{
+    float4x4 projection;
+    float4x4 inverseProjection;
+    float2 depthTexelSize;
+    float radius;
+    float padding;
+};
+
+constant spvUnsafeArray<float, 16> _247 = spvUnsafeArray<float, 16>({ 0.0, 0.5, 0.125, 0.625, 0.75, 0.25, 0.875, 0.375, 0.1875, 0.6875, 0.0625, 0.5625, 0.9375, 0.4375, 0.8125, 0.3125 });
+constant spvUnsafeArray<float3, 12> _337 = spvUnsafeArray<float3, 12>({ float3(0.20999999344348907470703125, 0.0500000007450580596923828125, 0.100000001490116119384765625), float3(-0.100000001490116119384765625, 0.25, 0.1500000059604644775390625), float3(-0.2800000011920928955078125, -0.119999997317790985107421875, 0.07999999821186065673828125), float3(0.14000000059604644775390625, -0.300000011920928955078125, 0.20000000298023223876953125), float3(0.4199999868869781494140625, 0.2199999988079071044921875, 0.25), float3(-0.3499999940395355224609375, 0.4000000059604644775390625, 0.119999997317790985107421875), float3(-0.300000011920928955078125, -0.449999988079071044921875, 0.3499999940395355224609375), float3(0.37999999523162841796875, -0.36000001430511474609375, 0.4199999868869781494140625), float3(0.699999988079071044921875, 0.100000001490116119384765625, 0.300000011920928955078125), float3(-0.1500000059604644775390625, 0.7200000286102294921875, 0.449999988079071044921875), float3(-0.660000026226043701171875, -0.20000000298023223876953125, 0.550000011920928955078125), float3(0.20000000298023223876953125, -0.62000000476837158203125, 0.699999988079071044921875) });
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+};
+
+static inline __attribute__((always_inline))
+float SceneDepth(thread const float2& uv, texture2d<float> depthTexture, sampler depthSampler)
+{
+    return depthTexture.sample(depthSampler, uv, level(0.0)).x;
+}
+
+static inline __attribute__((always_inline))
+float3 ViewPosition(thread const float2& uv, thread const float& depth, constant AmbientOcclusion& _73)
+{
+    float4 view = _73.inverseProjection * float4((uv.x * 2.0) - 1.0, 1.0 - (uv.y * 2.0), depth, 1.0);
+    return view.xyz / float3(view.w);
+}
+
+static inline __attribute__((always_inline))
+float3 ViewPositionAt(thread const float2& uv, texture2d<float> depthTexture, sampler depthSampler, constant AmbientOcclusion& _73)
+{
+    float2 centre = (floor((uv / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+    float2 param = centre;
+    float2 param_1 = centre;
+    float param_2 = SceneDepth(param, depthTexture, depthSampler);
+    return ViewPosition(param_1, param_2, _73);
+}
+
+static inline __attribute__((always_inline))
+float3 SurfaceNormal(thread const float2& uv, thread const float3& position, texture2d<float> depthTexture, sampler depthSampler, constant AmbientOcclusion& _73)
+{
+    float2 param = uv + float2(_73.depthTexelSize.x, 0.0);
+    float3 right = ViewPositionAt(param, depthTexture, depthSampler, _73) - position;
+    float2 param_1 = uv - float2(_73.depthTexelSize.x, 0.0);
+    float3 left = position - ViewPositionAt(param_1, depthTexture, depthSampler, _73);
+    float2 param_2 = uv + float2(0.0, _73.depthTexelSize.y);
+    float3 down = ViewPositionAt(param_2, depthTexture, depthSampler, _73) - position;
+    float2 param_3 = uv - float2(0.0, _73.depthTexelSize.y);
+    float3 up = position - ViewPositionAt(param_3, depthTexture, depthSampler, _73);
+    float3 alongX = select(left, right, bool3(abs(right.z) < abs(left.z)));
+    float3 alongY = select(up, down, bool3(abs(down.z) < abs(up.z)));
+    float3 normal = fast::normalize(cross(alongX, alongY));
+    return select(normal, -normal, bool3(dot(normal, position) > 0.0));
+}
+
+static inline __attribute__((always_inline))
+float4 _main(thread const FSInput& _input, texture2d<float> depthTexture, sampler depthSampler, constant AmbientOcclusion& _73)
+{
+    float2 param = _input.uv;
+    if (SceneDepth(param, depthTexture, depthSampler) >= 1.0)
+    {
+        return float4(1.0);
+    }
+    float2 param_1 = _input.uv;
+    float3 position = ViewPositionAt(param_1, depthTexture, depthSampler, _73);
+    float2 param_2 = _input.uv;
+    float3 param_3 = position;
+    float3 normal = SurfaceNormal(param_2, param_3, depthTexture, depthSampler, _73);
+    uint2 cell = uint2(_input.pos.xy) & uint2(3u);
+    float angle = 6.283185482025146484375 * _247[(cell.y * 4u) + cell.x];
+    float3 turn = float3(cos(angle), sin(angle), 0.0);
+    float3 tangent = fast::normalize((turn - (normal * dot(turn, normal))) + float3(9.9999997473787516355514526367188e-05, 0.0, 0.0));
+    float3 bitangent = cross(normal, tangent);
+    float occlusion = 0.0;
+    for (uint i = 0u; i < 12u; i++)
+    {
+        float3 offset = ((tangent * _337[i].x) + (bitangent * _337[i].y)) + (normal * _337[i].z);
+        float3 samplePosition = position + (offset * _73.radius);
+        float4 clip = _73.projection * float4(samplePosition, 1.0);
+        float2 sampleUv = float2(((clip.x / clip.w) * 0.5) + 0.5, 0.5 - ((clip.y / clip.w) * 0.5));
+        float2 param_4 = sampleUv;
+        float3 toOccluder = ViewPositionAt(param_4, depthTexture, depthSampler, _73) - position;
+        float distanceSquared = dot(toOccluder, toOccluder);
+        float rise = dot(toOccluder, normal) * rsqrt(fast::max(distanceSquared, 9.9999999747524270787835121154785e-07));
+        float inRange = fast::clamp(1.0 - (distanceSquared / (_73.radius * _73.radius)), 0.0, 1.0);
+        occlusion += (fast::clamp(rise - 0.1500000059604644775390625, 0.0, 1.0) * inRange);
+    }
+    float visibility = 1.0 - (occlusion / 12.0);
+    return float4(visibility);
+}
+
+fragment main0_out main0(main0_in in [[stage_in]], constant AmbientOcclusion& _73 [[buffer(0)]], texture2d<float> depthTexture [[texture(0)]], sampler depthSampler [[sampler(0)]], float4 gl_FragCoord [[position]])
+{
+    main0_out out = {};
+    FSInput _input;
+    _input.pos = gl_FragCoord;
+    _input.uv = in.input_uv;
+    FSInput param = _input;
+    out._entryPointOutput = _main(param, depthTexture, depthSampler, _73);
+    return out;
+}
+

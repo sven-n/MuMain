@@ -20,6 +20,8 @@
 #include "Render/Lighting/DynamicLightHistory.h"
 #include "Render/PostProcessing/PostProcessingSetting.h"
 #include "Render/Look/LookPresetSetting.h"
+#include "Render/PostProcessing/EdgeSmoothing.h"
+#include "Render/PostProcessing/RenderScale.h"
 #include "Render/Renderer/Antialiasing.h"
 #include "Render/Look/LookTuning.h"
 #include "Core/Text/Utf8.h"
@@ -129,7 +131,8 @@ bool CheckDeveloperLookCommand(const std::wstring& command)
         return true;
     }
     if (command.starts_with(L"$lightmood ") || command.starts_with(L"$texfilter ") ||
-        command.starts_with(L"$lighting ") || command.starts_with(L"$dynlights ") || command.starts_with(L"$post "))
+        command.starts_with(L"$lighting ") || command.starts_with(L"$dynlights ") || command.starts_with(L"$post ") ||
+        command.starts_with(L"$ao ") || command.starts_with(L"$sun "))
     {
         mu::log::Get("render")->warn("{}: not understood (on or off; $lightmood also takes 0 to 100)",
                                      Core::Text::ToUtf8(command.c_str()));
@@ -243,7 +246,9 @@ ConsoleCommandResult BadArgument(std::wstring message)
 // The names of the commands handled below. The argument offset comes from the literal, so a
 // renamed command cannot leave a stale length behind.
 constexpr std::wstring_view FpsCommand = L"$fps";
-constexpr std::wstring_view WinMsgCommand = L"$winmsg";
+constexpr std::wstring_view PauseCommand = L"$pause";
+// Long enough to outlast the server's two-minute idle limit; the client is frozen meanwhile.
+constexpr int MaxPauseSeconds = 600;
 
 // How a command text relates to one command name.
 enum class CommandForm
@@ -252,7 +257,7 @@ enum class CommandForm
     WithoutArgument,
     WithArgument,
     // Starts with the name, but the next character is neither the end nor a space: "$fps30",
-    // "$fpscounter", "$winmsgx". A typo of the command, not a chat line; the caller shows the
+    // "$fpscounter". A typo of the command, not a chat line; the caller shows the
     // usage hint.
     MalformedArgument,
 };
@@ -317,6 +322,49 @@ std::optional<double> ParseTargetFps(std::wstring_view argument)
 
     return fps;
 }
+bool HandleFinalPassCommand(std::wstring_view strCommand)
+{
+    if (strCommand.compare(0, 6, L"$fxaa ") == 0)
+    {
+        const auto enabled = Render::PostProcessing::ParseEdgeSmoothingCommand(std::wstring_view(strCommand).substr(6));
+        if (enabled)
+        {
+            MuSetEdgeSmoothingPreference(*enabled);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$fxaa expects on or off");
+        }
+        return true;
+    }
+    else if (strCommand.compare(0, 13, L"$renderscale ") == 0)
+    {
+        const auto percent = Render::PostProcessing::ParseRenderScaleCommand(std::wstring_view(strCommand).substr(13));
+        if (percent)
+        {
+            MuSetRenderScalePreference(*percent);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$renderscale expects a percentage from 50 to 100");
+        }
+        return true;
+    }
+    else if (strCommand.compare(0, 11, L"$sharpness ") == 0)
+    {
+        const auto percent = Render::PostProcessing::ParseSharpnessCommand(std::wstring_view(strCommand).substr(11));
+        if (percent)
+        {
+            MuSetSharpnessPreference(*percent);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$sharpness expects a value from 0 to 100");
+        }
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
@@ -327,7 +375,7 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     }
 
     // "$win <name>" toggles a window, "$win list" names them. Temporary; see kDebugWindows above.
-    if (strCommand.compare(0, 4, L"$win") == 0 && strCommand.compare(0, 7, L"$winmsg") != 0)
+    if (strCommand.compare(0, 4, L"$win") == 0)
     {
         std::wstring argument = strCommand.size() > 5 ? strCommand.substr(5) : std::wstring();
         if (argument.empty() || argument == L"list")
@@ -484,6 +532,18 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         SetTargetFps(*targetFps);
         return Handled();
     }
+    else if (const CommandForm form = FormOfCommand(strCommand, PauseCommand); form != CommandForm::NotThisCommand)
+    {
+        const std::optional<std::wstring_view> argument = CommandArgument(form, strCommand, PauseCommand);
+        const std::optional<double> seconds = argument ? Core::Text::TryParseDouble(*argument) : std::nullopt;
+        if (!seconds || !(*seconds >= 1.0 && *seconds <= MaxPauseSeconds))
+        {
+            return BadArgument(L"usage: $pause <seconds>, 1 to " + std::to_wstring(MaxPauseSeconds));
+        }
+
+        PauseFrames(static_cast<unsigned int>(*seconds));
+        return Handled();
+    }
     else if (strCommand.compare(L"$vsync on") == 0)
     {
         MuSetVSyncPreference(true);
@@ -491,6 +551,10 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     }
     else if (strCommand.compare(L"$vsync off") == 0)
     {
+        if (!CanDisableVSync())
+        {
+            return BadArgument(L"VSync can't be turned off on this display: it paces every frame itself");
+        }
         MuSetVSyncPreference(false);
         return Handled();
     }
@@ -509,6 +573,10 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         {
             mu::log::Get("render")->warn("$msaa expects off, 2, 4 or 8");
         }
+        return Handled();
+    }
+    else if (HandleFinalPassCommand(strCommand))
+    {
         return Handled();
     }
     else if (strCommand.compare(L"$effects off") == 0)
@@ -635,18 +703,6 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     else if (strCommand.compare(L"$effects wingextralayers on") == 0)
     {
         SetDisableWingExtraLayers(false);
-        return Handled();
-    }
-    else if (const CommandForm form = FormOfCommand(strCommand, WinMsgCommand); form != CommandForm::NotThisCommand)
-    {
-        const std::optional<std::wstring_view> argument = CommandArgument(form, strCommand, WinMsgCommand);
-        const std::optional<int> messageLimit = argument ? Core::Text::TryParseInt(*argument) : std::nullopt;
-        if (!messageLimit || *messageLimit == 0)
-        {
-            return BadArgument(L"usage: $winmsg <count>, 1 or more, or -1 for unlimited");
-        }
-
-        SetMaxMessagePerCycle(*messageLimit);
         return Handled();
     }
     // Runtime theme selection is session-only; the Options window persists its choice.

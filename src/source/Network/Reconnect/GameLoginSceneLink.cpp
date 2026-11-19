@@ -12,12 +12,6 @@
 extern double WorldTime;
 extern BOOL g_bGameServerConnected;
 
-namespace
-{
-// How long the background check waits for a server to accept the connection.
-constexpr double ProbeTimeoutMs = 5000.0;
-} // namespace
-
 // Defined here, with the game's link, so the state machine links without the game (tests).
 LoginSceneReconnect& LoginSceneReconnect::Instance()
 {
@@ -28,7 +22,8 @@ LoginSceneReconnect& LoginSceneReconnect::Instance()
 
 bool GameLoginSceneLink::IsConnected() const
 {
-    return SocketClient != nullptr && SocketClient->IsConnected();
+    // Connecting counts: the connection to that server is on its way.
+    return SocketClient != nullptr && SocketClient->State() != Network::ConnectionState::Closed;
 }
 
 LoginServer GameLoginSceneLink::ConnectedServer() const
@@ -59,7 +54,7 @@ bool GameLoginSceneLink::IsServerListShown() const
     return UI::LoginScene::IsServerListShown() && !g_bGameServerConnected;
 }
 
-bool GameLoginSceneLink::StartProbe(LoginServer server)
+bool GameLoginSceneLink::Connect(LoginServer server)
 {
     const Address address = AddressOf(server);
     if (address.host == nullptr || address.host[0] == L'\0' || address.port == 0)
@@ -67,22 +62,6 @@ bool GameLoginSceneLink::StartProbe(LoginServer server)
         return false;
     }
 
-    return m_probe.Start(address.host, address.port, WorldTime, ProbeTimeoutMs);
-}
-
-LoginSceneReconnectLink::ProbeResult GameLoginSceneLink::PollProbe()
-{
-    return m_probe.Poll(WorldTime);
-}
-
-void GameLoginSceneLink::StopProbe()
-{
-    m_probe.Stop();
-}
-
-bool GameLoginSceneLink::Connect(LoginServer server)
-{
-    const Address address = AddressOf(server);
     return ConnectForLogin(address.host, address.port) != FALSE;
 }
 

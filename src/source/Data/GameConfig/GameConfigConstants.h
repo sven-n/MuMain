@@ -65,11 +65,22 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyAnisotropy[] = L"Anisotropy";
     // Multisample anti-aliasing of the Enhanced look: 0 (off), 2, 4 or 8 samples per pixel.
     inline constexpr wchar_t CfgKeyAntialiasing[] = L"Antialiasing";
+    // Edge smoothing (FXAA) of the Enhanced look, beside the multisampling: 1 on, 0 off.
+    inline constexpr wchar_t CfgKeyEdgeSmoothing[] = L"EdgeSmoothing";
+    // The Enhanced look's 3D scene drawn at this share of the window's size, 50 to 100 (percent), and
+    // upscaled to it (FSR 1); 100 draws at the window's size.
+    inline constexpr wchar_t CfgKeyRenderScale[] = L"RenderScale";
+    // Sharpening of the Enhanced look's 3D scene (FSR 1), 0 (none) to 100.
+    inline constexpr wchar_t CfgKeySharpness[] = L"Sharpness";
     // The Enhanced look's features the player keeps on; Classic ignores them.
     inline constexpr wchar_t CfgKeyEnhancedLighting[] = L"EnhancedLighting";
     inline constexpr wchar_t CfgKeyDynamicLights[] = L"DynamicLights";
+    inline constexpr wchar_t CfgKeySunlight[] = L"Sunlight";
     inline constexpr wchar_t CfgKeyLightMood[] = L"LightMood";
     inline constexpr wchar_t CfgKeyPostProcessing[] = L"PostProcessing";
+    // The character realism features (smooth turning, look-at, flight feel, mount lean, foot
+    // placement and the like); off moves and draws characters as before them. Both looks.
+    inline constexpr wchar_t CfgKeyEnhancedMovement[] = L"EnhancedMovement";
 
     inline constexpr wchar_t CfgKeyRenderBackend[] = L"Backend";
     // DXP-23's per-system effect-cost toggles (MainScene.h's SetDisableEffects/SetDisableParticles/
@@ -149,10 +160,17 @@ namespace CfgDefaults
     // The samples the Enhanced look renders with (Classic renders without); a
     // requested count is lowered to what the GPU supports.
     inline constexpr int CfgDefaultAntialiasing = 4;
+    // Off: the Enhanced look stays as it was until a player switches it on.
+    inline constexpr bool CfgDefaultEdgeSmoothing = false;
+    // The window's size and no sharpening: the Enhanced look as it was.
+    inline constexpr int CfgDefaultRenderScale = 100;
+    inline constexpr int CfgDefaultSharpness = 0;
     inline constexpr bool CfgDefaultEnhancedLighting = true;
     inline constexpr bool CfgDefaultDynamicLights = true;
+    inline constexpr bool CfgDefaultSunlight = true;
     inline constexpr bool CfgDefaultLightMood = true;
     inline constexpr bool CfgDefaultPostProcessing = true;
+    inline constexpr bool CfgDefaultEnhancedMovement = false;
 
     inline constexpr bool CfgDefaultDisableEffects = false;
     inline constexpr bool CfgDefaultDisableParticles = false;
@@ -164,9 +182,17 @@ namespace CfgDefaults
     inline constexpr wchar_t CfgDefaultTexturePack[] = L""; // The original textures
     inline constexpr bool CfgDefaultUseS6PlayerModels = true;
 
-    // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
+    // "default" = the target's pick (its GPU device adapter: Vulkan on Windows to avoid
     // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:
     // "vulkan", "direct3d12" (alias "d3d12"), "metal" -- forces that SDL_gpu driver on any
     // platform, falling back to auto-pick with a warning log if it's unavailable.
     inline constexpr wchar_t CfgDefaultRenderBackend[] = L"default";
 }
+
+namespace CfgFiles
+{
+inline constexpr wchar_t CfgFileName[] = L"config.ini";
+// Developer builds (the control socket): the config file to use instead of the one beside the
+// executable, so a scripted client runs with settings of its own and leaves the player's alone.
+inline constexpr char CfgEnvConfigPath[] = "MU_CONFIG_PATH";
+} // namespace CfgFiles

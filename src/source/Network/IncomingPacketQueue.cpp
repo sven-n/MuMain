@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Network/IncomingPacketQueue.h"
-#include "Network/Server/WSclient.h" // PacketInfo (complete type for the queued unique_ptr)
+#include "Network/Server/WSclient.h" // PRECEIVE_ACTION
 
 #include <array>
 #include <cstring>
@@ -117,7 +117,7 @@ namespace Network
         m_stats.highWaterMark = std::max(m_stats.highWaterMark, m_stats.depth);
     }
 
-    void IncomingPacketQueue::DrainTo(Processor process)
+    void IncomingPacketQueue::DrainTo(Processor process, bool (*hold)())
     {
         if (!process)
         {
@@ -154,6 +154,29 @@ namespace Network
         std::size_t drainedCount = 0;
         while (!pending.empty())
         {
+            if (hold && hold())
+            {
+                // Connection events don't wait: a close must reach the client while the packets are held.
+                std::deque<std::unique_ptr<PacketInfo>> held;
+                for (auto& entry : pending)
+                {
+                    if (entry->Event != ConnectionEvent::None)
+                    {
+                        process(entry.get());
+                        ++drainedCount;
+                    }
+                    else
+                    {
+                        held.push_back(std::move(entry));
+                    }
+                }
+                pending.clear();
+                // Back in front of what arrived meanwhile.
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_queue.insert(m_queue.begin(), std::make_move_iterator(held.begin()),
+                               std::make_move_iterator(held.end()));
+                break;
+            }
             if (!pending.front()->Superseded)
             {
                 process(pending.front().get());
@@ -186,7 +209,14 @@ namespace Network
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             std::swap(discarded, m_queue);
-            m_stats.depth = 0;
+            for (auto& entry : discarded)
+            {
+                if (entry->Event != ConnectionEvent::None)
+                {
+                    m_queue.push_back(std::move(entry));
+                }
+            }
+            m_stats.depth = m_queue.size();
         }
     }
 

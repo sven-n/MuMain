@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "I18N/All.h"
 #include "Render/Look/TuningControls.h"
 #include "Render/Look/TuningSession.h"
 #include "UI/Options/TuningRows.h"
@@ -138,24 +139,28 @@ TEST_CASE("a tuning group is locked with its reason and dynamic lights need Enha
 {
     using UI::Options::TuningGroupLock;
     const UI::Options::TuningFeatureState on;
-    CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, on) == TuningLock::None);
-    CHECK(TuningGroupLock(TuningGroup::Lighting, false, true, on) == TuningLock::ClassicLook);
-    CHECK(TuningGroupLock(TuningGroup::DynamicLights, true, false, on) == TuningLock::NeedsLighting);
-    CHECK(TuningGroupLock(TuningGroup::LightMood, true, false, on) == TuningLock::None);
+    CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, true, on) == TuningLock::None);
+    CHECK(TuningGroupLock(TuningGroup::Lighting, false, true, true, on) == TuningLock::ClassicLook);
+    CHECK(TuningGroupLock(TuningGroup::DynamicLights, true, false, true, on) == TuningLock::NeedsLighting);
+    CHECK(TuningGroupLock(TuningGroup::Sunlight, true, false, true, on) == TuningLock::NeedsLighting);
+    CHECK(TuningGroupLock(TuningGroup::Sunlight, true, true, false, on) == TuningLock::NeedsDynamicLights);
+    CHECK(TuningGroupLock(TuningGroup::DynamicLights, true, true, false, on) == TuningLock::None);
+    CHECK(TuningGroupLock(TuningGroup::LightMood, true, false, true, on) == TuningLock::None);
     UI::Options::TuningFeatureState off;
     off.chosen = false;
-    CHECK(TuningGroupLock(TuningGroup::PostProcessing, true, true, off) == TuningLock::FeatureOff);
+    CHECK(TuningGroupLock(TuningGroup::PostProcessing, true, true, true, off) == TuningLock::FeatureOff);
     UI::Options::TuningFeatureState unavailable;
     unavailable.active = false;
-    CHECK(TuningGroupLock(TuningGroup::PostProcessing, true, true, unavailable) == TuningLock::Unavailable);
+    CHECK(TuningGroupLock(TuningGroup::PostProcessing, true, true, true, unavailable) == TuningLock::Unavailable);
     UI::Options::TuningFeatureState session;
     session.sessionOff = true;
-    CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, session) == TuningLock::SessionOff);
+    CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, true, session) == TuningLock::SessionOff);
     UI::Options::TuningFeatureState sessionValue;
     sessionValue.sessionSet = true;
-    CHECK(TuningGroupLock(TuningGroup::LightMood, true, true, sessionValue) == TuningLock::SessionSet);
-    for (const TuningLock lock : {TuningLock::ClassicLook, TuningLock::FeatureOff, TuningLock::NeedsLighting,
-                                  TuningLock::Unavailable, TuningLock::SessionOff, TuningLock::SessionSet})
+    CHECK(TuningGroupLock(TuningGroup::LightMood, true, true, true, sessionValue) == TuningLock::SessionSet);
+    for (const TuningLock lock :
+         {TuningLock::ClassicLook, TuningLock::FeatureOff, TuningLock::NeedsLighting, TuningLock::NeedsDynamicLights,
+          TuningLock::Unavailable, TuningLock::SessionOff, TuningLock::SessionSet})
     {
         CHECK_FALSE(UI::Options::TuningLockReason(lock).empty());
     }
@@ -199,7 +204,9 @@ TEST_CASE("both option themes bind the same tuning groups, rows, sliders and res
         }
         // One slider template per row list: pointer, drag, keys and every way an interaction ends.
         const std::size_t lists = Count(markup, "data-for=\"row : tuning_");
-        CHECK(lists == 6);
+        CHECK(lists == 8);
+        // The note that the look shows as authored, without the player's values.
+        CHECK(Count(markup, "data-class-hidden=\"tuning_preview_note == ''\">{{tuning_preview_note}}") == 1);
         for (const char* binding :
              {"data-event-mousedown=\"option_tuning_pointer(row.control)\"",
               "data-event-drag=\"option_tuning_pointer(row.control)\"",
@@ -214,4 +221,12 @@ TEST_CASE("both option themes bind the same tuning groups, rows, sliders and res
         CHECK(Count(markup, "option_reset_all_tuning") == 1);
         CHECK(Count(markup, "{{tuning_save_message}}") == 1);
     }
+}
+
+TEST_CASE("the tuning says while the look shows as authored that its values are left out [ui][options][tuning]")
+{
+    I18N::SetLocale("en");
+    CHECK(UI::Options::TuningPreviewNote(Render::Look::LookPreview::Player).empty());
+    CHECK(UI::Options::TuningPreviewNote(Render::Look::LookPreview::Authoring).find("$look preview player") !=
+          std::string::npos);
 }

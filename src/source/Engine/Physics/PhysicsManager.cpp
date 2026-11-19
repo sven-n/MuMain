@@ -976,7 +976,7 @@ void CPhysicsCloth::RenderCollisions(void)
         {
             CPhysicsColSphere* pColSph = (CPhysicsColSphere*)pCol;
 
-            static GLUquadricObj* pQuad = NULL;
+            static void* pQuad = NULL;
             if (NULL == pQuad)
             {
                 pQuad = gluNewQuadric();

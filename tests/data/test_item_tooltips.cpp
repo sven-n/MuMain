@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "HeroScope.h"
+#include "TooltipDataScope.h"
 
 #include "Core/Platform/ProcessLocale.h"
 #include "Core/Text/Utf8.h"
@@ -55,71 +56,6 @@
 namespace
 {
 const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
-
-// The game data a tooltip reads besides the items, loaded as the game loads it (ZzzOpenData.cpp, CUIManager): the
-// skills (the orbs' and scrolls' names and damage), the socket items, the item sets, the monster list (the
-// transformation rings), the Jewel of Harmony and item add
-// option tables, and the buff system's time texts. Run in a ClientDataScope, which makes the paths relative to the
-// client. It puts back what it replaces (the language, the two tables, the buff system and the skill table it made),
-// but the item sets, the socket items and the monster list stay loaded for the tests after it: the game has no
-// way to unload them, and every one of these loads replaces what was there.
-class TooltipDataScope
-{
-public:
-    TooltipDataScope() : m_previousLanguage(g_strSelectedML)
-    {
-        g_strSelectedML = L"Eng";
-        if (SkillAttribute == nullptr)
-        {
-            m_skills = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
-            SkillAttribute = m_skills;
-        }
-        wchar_t path[MAX_PATH];
-        mu_swprintf(path, L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-        g_SkillDataHandler.Load(path);
-        mu_swprintf(path, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-        g_SocketItemMgr.OpenSocketItemScript(path);
-        g_csItemOption.OpenItemSetScript();
-        // The transformation rings' names are monster names (Data/Monsters/Monsters.json).
-        std::string monsterError;
-        g_MonsterDataHandler.Load(monsterError);
-        m_previousHarmony = g_pUIJewelHarmonyinfo;
-        m_previousAddOptions = g_pItemAddOptioninfo;
-        g_pUIJewelHarmonyinfo = JewelHarmonyInfo::MakeInfo();
-        g_pItemAddOptioninfo = ItemAddOptioninfo::MakeInfo();
-        // The time texts of the elixirs and seals (g_StringTime).
-        if (!g_BuffSystem)
-        {
-            g_BuffSystem = BuffStateSystem::Make();
-            m_madeBuffSystem = true;
-        }
-    }
-
-    ~TooltipDataScope()
-    {
-        if (m_madeBuffSystem)
-        {
-            g_BuffSystem.reset();
-        }
-        delete g_pUIJewelHarmonyinfo;
-        delete g_pItemAddOptioninfo;
-        g_pUIJewelHarmonyinfo = m_previousHarmony;
-        g_pItemAddOptioninfo = m_previousAddOptions;
-        if (m_skills != nullptr)
-        {
-            SkillAttribute = nullptr;
-            delete[] m_skills;
-        }
-        g_strSelectedML = m_previousLanguage;
-    }
-
-private:
-    std::wstring m_previousLanguage;
-    SKILL_ATTRIBUTE* m_skills = nullptr;
-    JewelHarmonyInfo* m_previousHarmony = nullptr;
-    ItemAddOptioninfo* m_previousAddOptions = nullptr;
-    bool m_madeBuffSystem = false;
-};
 } // namespace
 
 namespace
@@ -233,8 +169,9 @@ public:
 };
 } // namespace
 
-// Every item's tooltip at every level 0 to 15, in the eleven variants of WriteItemTooltipSnapshot (plain, full, ancient,
-// harmony, each option alone, worn, broken and expired),
+// Every item's tooltip at every level 0 to 15, in the 28 variants of WriteItemTooltipSnapshot (plain, full, ancient,
+// the ancient bonus at levels 1 to 3, harmony, each option alone, the additional option at levels 2 to 7 and option
+// types 1 to 3, each excellent option alone, worn, broken and expired),
 // for the two heroes, against the hashes recorded in item_tooltip_snapshot.txt: a tooltip that changes shows here.
 // After a change that is meant, run the test with MU_TOOLTIP_SNAPSHOT_UPDATE=1 to record the new hashes; the control
 // socket's `tooltip-snapshot` writes the full lines in the game to compare with.
@@ -288,7 +225,7 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
                     changedTooltips.emplace_back(key, text);
                 }
             });
-        CHECK(tooltips == 911 * 11 * 16);
+        CHECK(tooltips == 911 * 28 * 16);
     }
     SetItemTooltipTextMeasure(nullptr);
 
@@ -1016,7 +953,7 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
     CHECK(lucky.textColor == rgb(0x66, 0xb2, 0xff));
     CHECK(lucky.text == std::wstring(L"Kris +3") + I18N::Game::Luck);
     CHECK(lucky.style == "withOptions");
-    // ... green when excellent, also first-tier wings, but not the second-tier wings, ...
+    // ... green when excellent (active excellent options), not wings with the excellent byte, ...
     const auto excellent = [&](int group, int number)
     {
         ItemCreationParams params = at(group, number, 0);
@@ -1025,8 +962,10 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
         return label(params).textColor;
     };
     CHECK(excellent(0, 0) == rgb(0x19, 0xff, 0x7f));
-    CHECK(excellent(12, 0) == rgb(0x19, 0xff, 0x7f));
+    CHECK(excellent(12, 0) == rgb(0xb2, 0xb2, 0xb2));
     CHECK(excellent(12, 3) == rgb(0xb2, 0xb2, 0xb2));
+    // ... and the Horn of Fenrir with a colour, until its options move into data, ...
+    CHECK(excellent(13, 37) == rgb(0x19, 0xff, 0x7f));
     // ... a set item green on blue and bold after its set's name, but not an item whose discriminator names no set.
     ItemCreationParams rapier = at(0, 2, 0);
     rapier.IsAncient = true;
@@ -1094,6 +1033,12 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
     for (const int number : {10, 39, 41, 68, 76, 122})
     {
         INFO("13/" << number);
+        // A transformation ring links no options: one linked for the test gives it option lines to come after.
+        const int type = Data::Items::MakeItemType(13, number);
+        const Data::Items::ItemDefinition shipped = *g_ItemDatabase.Find(type);
+        Data::Items::ItemDefinition linked = shipped;
+        linked.options.push_back("excellentDefense");
+        g_ItemDatabase.Set(linked);
         const std::vector<ItemTooltipLine> plain = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, number));
         ItemCreationParams full = Engine::Items::TooltipSnapshot::FullItemParameters(13, number);
         full.WithLuck = true;
@@ -1112,6 +1057,7 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
             shown += Core::Text::ToUtf8(line.text.c_str()) + " | ";
         }
         INFO(shown);
+        g_ItemDatabase.Set(shipped);
         if (at == lines.end())
         {
             CHECK(at != lines.end());

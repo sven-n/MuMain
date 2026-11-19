@@ -20,7 +20,7 @@
 namespace Render::Look
 {
 
-// The state of the five features the preset switches.
+// The state of the features the preset switches.
 struct LookFeatures
 {
     bool textureFiltering = false;
@@ -32,6 +32,7 @@ struct LookFeatures
     int lightMoodStrength = 100;
     // Multisampling at the [Render] Antialiasing sample count; off renders one sample per pixel.
     bool antialiasing = false;
+    bool sunlight = false;
 
     bool operator==(const LookFeatures&) const = default;
 };
@@ -44,6 +45,7 @@ struct FeatureOverrides
     std::optional<bool> textureFiltering;
     std::optional<bool> enhancedLighting;
     std::optional<bool> dynamicLights;
+    std::optional<bool> sunlight;
     std::optional<bool> lightMood;
     std::optional<bool> postProcessing;
     std::optional<int> lightMoodStrength;

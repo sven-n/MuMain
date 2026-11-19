@@ -35,6 +35,10 @@ enum class LegacyCall : std::uint8_t
     EndSprite,
     BeginReorderableDraws,
     EndReorderableDraws,
+    BeginCharacterDraws,
+    EndCharacterDraws,
+    BeginNoSunCasters,
+    EndNoSunCasters,
     // Argument: the edit flag.
     RenderTerrain,
     RenderWaterTerrain,
@@ -69,5 +73,38 @@ public:
     }
     ScopedReorderableDraws(const ScopedReorderableDraws&) = delete;
     ScopedReorderableDraws& operator=(const ScopedReorderableDraws&) = delete;
+};
+
+// The draws in its lifetime are the characters (mu::IMuRenderer::BeginCharacterDraws), recorded with them when drawn
+// later.
+class ScopedCharacterDraws
+{
+public:
+    ScopedCharacterDraws()
+    {
+        MakeLegacyCall(LegacyCall::BeginCharacterDraws, 0);
+    }
+    ~ScopedCharacterDraws()
+    {
+        MakeLegacyCall(LegacyCall::EndCharacterDraws, 0);
+    }
+    ScopedCharacterDraws(const ScopedCharacterDraws&) = delete;
+    ScopedCharacterDraws& operator=(const ScopedCharacterDraws&) = delete;
+};
+
+// The draws in its lifetime cast no sun shadow, recorded with them when drawn later.
+class ScopedNoSunCasters
+{
+public:
+    ScopedNoSunCasters()
+    {
+        MakeLegacyCall(LegacyCall::BeginNoSunCasters, 0);
+    }
+    ~ScopedNoSunCasters()
+    {
+        MakeLegacyCall(LegacyCall::EndNoSunCasters, 0);
+    }
+    ScopedNoSunCasters(const ScopedNoSunCasters&) = delete;
+    ScopedNoSunCasters& operator=(const ScopedNoSunCasters&) = delete;
 };
 } // namespace Render::Drawing

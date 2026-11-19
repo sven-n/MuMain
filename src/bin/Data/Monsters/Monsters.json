@@ -1,11 +1,111 @@
 {
   "formatVersion": 2,
+  "unknownMonsters": {
+    "model": "MONSTER_MODEL_GHOST",
+    "scale": 1,
+    "glow": [1, 0.15, 0.1],
+    "marks": true,
+    "messageSeconds": 10,
+    "for": ["noEntry", "noModel", "missingFile"]
+  },
+  "talkTexts": {
+    "crywolfAltar": {
+      "canContract": {
+        "en": "Contract can be made for %d times.",
+        "de": "Der Vertrag kann %d-mal geschlossen werden.",
+        "es": "El contrato se puede realizar por tiempos %d.",
+        "id": "Kontrak dapat dibuat untuk waktu %d.",
+        "ja": "契約可能な回数は%d回です。",
+        "pl": "Kontrakt można zawrzeć %d razy.",
+        "pt": "O contrato pode ser feito para horários %d.",
+        "ru": "Контракт может быть заключен на %d раз.",
+        "tl": "Maaaring gawin ang kontrata para sa %d beses.",
+        "uk": "Контракт можна укласти на %d разів.",
+        "zh-TW": "可以簽訂%d次的合約。"
+      },
+      "proceed": {
+        "en": "Would you like to proceed with the contract?",
+        "de": "Möchten Sie den Vertrag schließen?",
+        "es": "¿Le gustaría continuar con el contrato?",
+        "id": "Apakah Anda ingin melanjutkan kontrak?",
+        "ja": "契約しますか?",
+        "pl": "Czy chcesz kontynuować realizację umowy?",
+        "pt": "Gostaria de prosseguir com o contrato?",
+        "ru": "Хотите продолжить контракт?",
+        "tl": "Gusto mo bang magpatuloy sa kontrata?",
+        "uk": "Бажаєте продовжити контракт?",
+        "zh-TW": "您想繼續履行合約嗎？"
+      },
+      "onMount": {
+        "en": "Contract can't be made when you are on a mount.",
+        "de": "Auf einem Reittier kann kein Vertrag geschlossen werden.",
+        "es": "No se puede hacer contrato cuando estás en una montura.",
+        "id": "Kontrak tidak dapat dibuat saat Anda berada di atas tunggangan.",
+        "ja": "乗物に乗った状態では契約できません。",
+        "pl": "Kontraktu nie można zawrzeć będąc na wierzchowcu.",
+        "pt": "O contrato não pode ser feito quando você está montado.",
+        "ru": "Контракт не может быть заключен, когда вы находитесь на скакуне.",
+        "tl": "Ang kontrata ay hindi maaaring gawin kapag ikaw ay nasa bundok.",
+        "uk": "Контракт не можна укласти, коли ви перебуваєте на верховій їзді.",
+        "zh-TW": "坐騎時無法簽訂契約。"
+      },
+      "needGuardian": {
+        "en": "We need a guardian to protect the wolf.",
+        "de": "Wir brauchen einen Wächter, der den Wolf beschützt.",
+        "es": "Necesitamos un guardián para proteger al lobo.",
+        "id": "Kita membutuhkan wali untuk melindungi serigala.",
+        "ja": "狼の神像を守る契約者が必要です。",
+        "pl": "Potrzebujemy strażnika, który będzie chronił wilka.",
+        "pt": "Precisamos de um guardião para proteger o lobo.",
+        "ru": "Нам нужен страж, который защитит волка.",
+        "tl": "Kailangan natin ng tagapag-alaga para protektahan ang lobo.",
+        "uk": "Нам потрібен охоронець, щоб захистити вовка.",
+        "zh-TW": "我們需要一個守護者來保護狼。"
+      },
+      "destroyed": {
+        "en": "Further contract can't be done since the altar has been destroyed.",
+        "de": "Ein weiterer Vertrag kann nicht abgeschlossen werden, da der Altar zerstört wurde.",
+        "es": "No se pueden realizar más contratos ya que el altar ha sido destruido.",
+        "id": "Kontrak lebih lanjut tidak dapat dilakukan karena altar telah dihancurkan.",
+        "ja": "祭壇が破壊され、これ以上の契約ができません。",
+        "pl": "Dalszego kontraktu nie można wykonać, gdyż ołtarz został zniszczony.",
+        "pt": "Novos contratos não podem ser feitos porque o altar foi destruído.",
+        "ru": "Дальнейший контракт невозможно заключить, так как алтарь разрушен.",
+        "tl": "Ang karagdagang kontrata ay hindi maaaring gawin dahil ang altar ay nawasak.",
+        "uk": "Подальший контракт неможливий, оскільки вівтар було зруйновано.",
+        "zh-TW": "由於祭壇已被毀壞，進一步的契約無法進行。"
+      },
+      "ongoing": {
+        "en": "Contract is ongoing therefore dual compact is not possible.",
+        "de": "Es läuft bereits ein Vertrag, daher ist ein zweiter Vertrag nicht möglich.",
+        "es": "El contrato está en curso, por lo que no es posible un pacto dual.",
+        "id": "Kontrak sedang berlangsung sehingga dual compact tidak dimungkinkan.",
+        "ja": "契約中であるため、重複契約はできません。",
+        "pl": "Kontrakt jest w toku, nie można zawrzeć drugiego.",
+        "pt": "O contrato está em andamento, portanto o pacto duplo não é possível.",
+        "ru": "Контракт действует, поэтому двойной договор невозможен.",
+        "tl": "Patuloy ang kontrata kaya hindi posible ang dual compact.",
+        "uk": "Контракт діє, тому подвійний компакт неможливий.",
+        "zh-TW": "合約正在進行中，因此雙重緊湊是不可能的。"
+      }
+    }
+  },
   "monsters": [
     {
       "name": {"en": "Bull Fighter", "es": "Toro Luchador", "pt": "Toureiro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
+      "scale": 0.8,
+      "hiddenMesh": 0,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 6
+          }
+        ]
+      },
       "numbers": [
         {"number": 0, "maps": [0]}
       ]
@@ -15,6 +115,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_HOUND",
       "soundSet": "Hound",
+      "scale": 0.85,
+      "hiddenMesh": 0,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 4
+          }
+        ]
+      },
       "numbers": [
         {"number": 1, "maps": [0]}
       ]
@@ -24,6 +134,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BUDGE_DRAGON",
       "soundSet": "Budge Dragon",
+      "scale": 0.5,
       "numbers": [
         {"number": 2, "maps": [0]}
       ]
@@ -33,6 +144,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SPIDER",
       "soundSet": "Spider",
+      "scale": 0.4,
       "numbers": [
         {"number": 3, "maps": [0]}
       ]
@@ -42,6 +154,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
+      "scale": 1.15,
+      "lookLevel": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 7
+          }
+        ]
+      },
       "numbers": [
         {"number": 4, "maps": [0]}
       ]
@@ -51,6 +173,21 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_HOUND",
       "soundSet": "Hound",
+      "scale": 1.1,
+      "lookLevel": 1,
+      "hiddenMesh": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 7
+          },
+          {
+            "group": 6,
+            "number": 9
+          }
+        ]
+      },
       "numbers": [
         {"number": 5, "maps": [1, 9]}
       ]
@@ -60,6 +197,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_LICH",
       "soundSet": "LIch",
+      "scale": 0.85,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 2
+          }
+        ]
+      },
       "numbers": [
         {"number": 6, "maps": [0]}
       ]
@@ -69,6 +215,25 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GIANT",
       "soundSet": "Giant",
+      "scale": 1.6,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 2
+          },
+          {
+            "group": 1,
+            "number": 2
+          }
+        ]
+      },
+      "stateVariants": [
+        {
+          "state": "playerTransformed",
+          "scale": 0.8
+        }
+      ],
       "numbers": [
         {"number": 7, "maps": [0]}
       ]
@@ -78,6 +243,19 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
+      "scale": 1,
+      "lookLevel": 2,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 8
+          }
+        ]
+      },
+      "spawnBuffs": [
+        "poison"
+      ],
       "numbers": [
         {"number": 8, "maps": [1, 9]}
       ]
@@ -87,6 +265,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_LICH",
       "soundSet": "LIch",
+      "scale": 1.1,
+      "lookLevel": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 3
+          }
+        ]
+      },
       "numbers": [
         {"number": 9, "maps": [1]}
       ]
@@ -96,6 +284,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_KNIGHT",
       "soundSet": "Dark Knight",
+      "scale": 0.8,
+      "lookLevel": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 13
+          }
+        ]
+      },
       "numbers": [
         {"number": 10, "maps": [1, 9]}
       ]
@@ -105,6 +303,9 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GHOST",
       "soundSet": "Ghost",
+      "alphaTarget": 0.4,
+      "moveSpeed": 15,
+      "noBloodPool": true,
       "numbers": [
         {"number": 11, "maps": [1]}
       ]
@@ -114,6 +315,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_LARVA",
       "soundSet": "Larva",
+      "scale": 0.6,
       "numbers": [
         {"number": 12, "maps": [1]},
         {"number": 532}
@@ -124,6 +326,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_HELL_SPIDER",
       "soundSet": "Hell Spider",
+      "scale": 1.1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 2
+          }
+        ]
+      },
       "numbers": [
         {"number": 13, "maps": [1, 9]}
       ]
@@ -132,6 +343,21 @@
       "name": {"en": "Skeleton", "es": "Esqueleto", "pt": "Esqueleto"},
       "kind": "monster",
       "model": "player",
+      "scale": 0.95,
+      "subType": 244,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 6
+          },
+          {
+            "group": 6,
+            "number": 4
+          }
+        ]
+      },
+      "noBloodPool": true,
       "numbers": [
         {"number": 14, "maps": [0, 1]}
       ]
@@ -140,6 +366,19 @@
       "name": {"en": "Skeleton Archer", "es": "Arquero Esqueleto", "pt": "Arqueiro esqueleto"},
       "kind": "monster",
       "model": "player",
+      "scale": 1.1,
+      "subType": 245,
+      "lookLevel": 1,
+      "equipment": {
+        "weapons": [
+          null,
+          {
+            "group": 4,
+            "number": 2
+          }
+        ]
+      },
+      "noBloodPool": true,
       "numbers": [
         {"number": 15, "maps": [1, 9]}
       ]
@@ -148,6 +387,22 @@
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
       "model": "player",
+      "scale": 1.2,
+      "subType": 246,
+      "lookLevel": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 3
+          },
+          {
+            "group": 6,
+            "number": 6
+          }
+        ]
+      },
+      "noBloodPool": true,
       "numbers": [
         {"number": 16, "maps": [1]}
       ]
@@ -157,6 +412,14 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CYCLOPS",
       "soundSet": "Cyclops",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 8
+          }
+        ]
+      },
       "numbers": [
         {"number": 17, "maps": [1, 9]}
       ]
@@ -166,6 +429,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GORGON",
       "soundSet": "Gorgon",
+      "scale": 1.5,
+      "glowMesh": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 4
+          }
+        ]
+      },
       "numbers": [
         {"number": 18, "maps": [1, 9]}
       ]
@@ -175,6 +448,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_YETI",
       "soundSet": "Yeti",
+      "scale": 1.1,
       "numbers": [
         {"number": 19}
       ]
@@ -184,6 +458,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ELITE_YETI",
       "soundSet": "Elite Yeti",
+      "scale": 1.4,
       "numbers": [
         {"number": 20, "maps": [2]}
       ]
@@ -193,6 +468,12 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ASSASSIN",
       "soundSet": "Assassin",
+      "scale": 0.95,
+      "appear": {
+        "action": "stop2",
+        "fadeIn": false,
+        "sound": "SOUND_ASSASSIN"
+      },
       "numbers": [
         {"number": 21, "maps": [2]}
       ]
@@ -202,6 +483,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ICE_MONSTER",
       "soundSet": "Ice Monster",
+      "glowMesh": 0,
       "numbers": [
         {"number": 22, "maps": [2]}
       ]
@@ -211,6 +493,19 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_HOMMERD",
       "soundSet": "Hommerd",
+      "scale": 1.15,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 7
+          },
+          {
+            "group": 6,
+            "number": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 23, "maps": [2]}
       ]
@@ -229,6 +524,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ICE_QUEEN",
       "soundSet": "Ice Queen",
+      "scale": 1.1,
+      "lookLevel": 3,
+      "glowMesh": 2,
+      "light": false,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 1
+          }
+        ]
+      },
       "numbers": [
         {"number": 25, "maps": [2]}
       ]
@@ -238,6 +545,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GOBLIN",
       "soundSet": "Goblin",
+      "scale": 0.8,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 0
+          }
+        ]
+      },
       "numbers": [
         {"number": 26, "maps": [3]}
       ]
@@ -247,6 +563,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CHAIN_SCORPION",
       "soundSet": "Chain Scorpion",
+      "scale": 1.1,
       "numbers": [
         {"number": 27, "maps": [3]}
       ]
@@ -256,6 +573,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BEETLE_MONSTER",
       "soundSet": "Beetle Monster",
+      "scale": 0.8,
+      "glowMesh": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 1
+          }
+        ]
+      },
       "numbers": [
         {"number": 28, "maps": [3]}
       ]
@@ -265,6 +592,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_HUNTER",
       "soundSet": "Hunter",
+      "scale": 0.95,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 29, "maps": [3]}
       ]
@@ -274,6 +610,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_FOREST_MONSTER",
       "soundSet": "Forest Monster",
+      "scale": 0.75,
       "numbers": [
         {"number": 30, "maps": [3]}
       ]
@@ -283,6 +620,19 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_AGON",
       "soundSet": "Agon",
+      "scale": 1.3,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 8
+          },
+          {
+            "group": 0,
+            "number": 8
+          }
+        ]
+      },
       "numbers": [
         {"number": 31, "maps": [3]}
       ]
@@ -301,6 +651,20 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GOBLIN",
       "soundSet": "Goblin",
+      "scale": 1.2,
+      "lookLevel": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 2,
+            "number": 1
+          },
+          {
+            "group": 6,
+            "number": 1
+          }
+        ]
+      },
       "numbers": [
         {"number": 33, "maps": [3]}
       ]
@@ -309,6 +673,51 @@
       "name": {"en": "Cursed Wizard", "es": "Mago Maldito", "pt": "Mago amaldiçoado"},
       "kind": "monster",
       "model": "player",
+      "mapVariants": [
+        {
+          "maps": [9],
+          "scale": 1
+        }
+      ],
+      "scale": "character",
+      "pkColor": "murderer2",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 5
+          },
+          {
+            "group": 6,
+            "number": 14
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 3,
+          "level": 9
+        },
+        "armor": {
+          "group": 8,
+          "number": 3,
+          "level": 9
+        },
+        "pants": {
+          "group": 9,
+          "number": 3,
+          "level": 9
+        },
+        "gloves": {
+          "group": 10,
+          "number": 3,
+          "level": 9
+        },
+        "boots": {
+          "group": 11,
+          "number": 3,
+          "level": 9
+        }
+      },
       "numbers": [
         {"number": 34, "maps": [4, 9]}
       ]
@@ -318,6 +727,21 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GORGON",
       "soundSet": "Gorgon",
+      "scale": 1.3,
+      "lookLevel": 2,
+      "glowMesh": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 8
+          },
+          {
+            "group": 1,
+            "number": 8
+          }
+        ]
+      },
       "numbers": [
         {"number": 35, "maps": [4, 9]}
       ]
@@ -327,6 +751,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SHADOW",
       "soundSet": "Shadow",
+      "scale": 1.2,
       "numbers": [
         {"number": 36, "maps": [4, 9]}
       ]
@@ -336,6 +761,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DEVIL",
       "soundSet": "Devil",
+      "scale": 1.1,
       "numbers": [
         {"number": 37, "maps": [4, 9]}
       ]
@@ -345,6 +771,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BALROG",
       "soundSet": "Balrog",
+      "scale": 1.6,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 9,
+            "level": 9
+          }
+        ]
+      },
       "numbers": [
         {"number": 38, "maps": [4]}
       ]
@@ -354,6 +790,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SHADOW",
       "soundSet": "Shadow",
+      "scale": 1.2,
+      "lookLevel": 1,
       "numbers": [
         {"number": 39, "maps": [4, 9]}
       ]
@@ -363,6 +801,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_KNIGHT",
       "soundSet": "Dark Knight",
+      "scale": 1.3,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 14
+          }
+        ]
+      },
       "numbers": [
         {"number": 40, "maps": [4, 9]}
       ]
@@ -372,6 +819,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_COW",
       "soundSet": "Bull Fighter",
+      "scale": 1.1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 2,
+            "number": 3
+          }
+        ]
+      },
       "numbers": [
         {"number": 41, "maps": [4, 9]}
       ]
@@ -381,6 +837,14 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DRAGON",
       "soundSet": "Red Dragon",
+      "scale": 1.3,
+      "boundingBox": {
+        "max": [
+          200,
+          150,
+          280
+        ]
+      },
       "numbers": [
         {"number": 42}
       ]
@@ -390,6 +854,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BUDGE_DRAGON",
       "soundSet": "Budge Dragon",
+      "scale": 0.7,
       "numbers": [
         {"number": 43}
       ]
@@ -399,6 +864,11 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DRAGON",
       "soundSet": "Red Dragon",
+      "appear": {
+        "action": "stop2",
+        "fadeIn": false,
+        "sound": "SOUND_MONSTER_BULLATTACK1"
+      },
       "numbers": [
         {"number": 44}
       ]
@@ -408,6 +878,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BAHAMUT",
       "soundSet": "Bahamut",
+      "scale": 0.6,
       "numbers": [
         {"number": 45, "maps": [7]}
       ]
@@ -417,6 +888,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_VEPAR",
       "soundSet": "Vepar",
+      "scale": 1,
       "numbers": [
         {"number": 46, "maps": [7]}
       ]
@@ -426,6 +898,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_VALKYRIE",
       "soundSet": "Valkyrie",
+      "scale": 1.1,
+      "glowMesh": 0,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 13
+          }
+        ]
+      },
       "numbers": [
         {"number": 47, "maps": [7]}
       ]
@@ -435,6 +917,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_LIZARD",
       "soundSet": "Lizard King",
+      "scale": 1.4,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 6
+          }
+        ]
+      },
       "numbers": [
         {"number": 48, "maps": [7]}
       ]
@@ -444,6 +935,9 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_HYDRA",
       "soundSet": "Hydra",
+      "scale": 1,
+      "glowMesh": 5,
+      "glowLight": 0,
       "numbers": [
         {"number": 49, "maps": [7, 9]}
       ]
@@ -452,6 +946,7 @@
       "name": {"en": "Sea Worm", "es": "Gusano Marítimo", "pt": "Verme marinho"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SEA_WORM",
+      "scale": 1.8,
       "numbers": [
         {"number": 50}
       ]
@@ -461,6 +956,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BAHAMUT",
       "soundSet": "Bahamut",
+      "scale": 1,
+      "lookLevel": 1,
       "numbers": [
         {"number": 51, "maps": [7]}
       ]
@@ -470,6 +967,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_VALKYRIE",
       "soundSet": "Valkyrie",
+      "scale": 1.4,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 13
+          }
+        ]
+      },
       "numbers": [
         {"number": 52, "maps": [7]}
       ]
@@ -479,6 +985,25 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_TITAN",
       "soundSet": "Dark Knight",
+      "scale": 1.8,
+      "glowMesh": 2,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
+      "appear": {
+        "action": "stop2",
+        "fadeIn": false,
+        "appearTime": 60
+      },
       "numbers": [
         {"number": 53}
       ]
@@ -488,6 +1013,21 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SOLDIER",
       "soundSet": "Lizard King",
+      "scale": 1.1,
+      "equipment": {
+        "weapons": [
+          null,
+          {
+            "group": 4,
+            "number": 14
+          }
+        ]
+      },
+      "appear": {
+        "action": "stop2",
+        "fadeIn": false,
+        "appearTime": 60
+      },
       "numbers": [
         {"number": 54}
       ]
@@ -496,6 +1036,18 @@
       "name": {"en": "Death King", "es": "Rey de la Muerte", "pt": "Rei da Morte"},
       "kind": "monster",
       "model": "player",
+      "scale": 1.4,
+      "subType": 244,
+      "lookLevel": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 9
+          }
+        ]
+      },
+      "noBloodPool": true,
       "numbers": [
         {"number": 55}
       ]
@@ -504,6 +1056,17 @@
       "name": {"en": "Death Bone", "es": "Hueso de la Muerte", "pt": "Osso da Morte"},
       "kind": "monster",
       "model": "player",
+      "scale": 0.8,
+      "subType": 244,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 8
+          }
+        ]
+      },
+      "noBloodPool": true,
       "numbers": [
         {"number": 56}
       ]
@@ -513,6 +1076,27 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GOLDEN_WHEEL",
       "soundSet": "Iron Wheel",
+      "scale": 1.4,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 14
+          }
+        ]
+      },
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 57, "maps": [8, 9, 32]}
       ]
@@ -522,6 +1106,28 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_TANTALLOS",
       "soundSet": "Tantalos",
+      "scale": 1.8,
+      "glowMesh": 2,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          }
+        ]
+      },
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 58, "maps": [8]}
       ]
@@ -531,6 +1137,29 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_TANTALLOS",
       "soundSet": "Tantalos",
+      "scale": 2.1,
+      "subType": 1,
+      "glowMesh": 2,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 8
+          }
+        ]
+      },
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 59, "maps": [8]}
       ]
@@ -540,6 +1169,19 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BLOODY_WOLF",
       "soundSet": "Bloody wolf",
+      "scale": 2.2,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 60, "maps": [8, 9, 32]}
       ]
@@ -549,6 +1191,19 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BEAM_KNIGHT",
       "soundSet": "Beam Knight",
+      "scale": 1.5,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 61, "maps": [8, 32]}
       ]
@@ -558,6 +1213,19 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_MUTANT",
       "soundSet": "Mutant",
+      "scale": 1.5,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 62, "maps": [8]}
       ]
@@ -567,6 +1235,20 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BEAM_KNIGHT",
       "soundSet": "Beam Knight",
+      "scale": 1.9,
+      "glowMesh": -2,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 63, "maps": [8]}
       ]
@@ -576,6 +1258,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ORC_ARCHER",
       "soundSet": "Ogre archer",
+      "scale": 1.2,
+      "hiddenMesh": 1,
+      "equipment": {
+        "weapons": [
+          null,
+          {
+            "group": 4,
+            "number": 3,
+            "level": 3
+          }
+        ]
+      },
       "numbers": [
         {"number": 64, "maps": [9]}
       ]
@@ -585,6 +1279,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ORC",
       "soundSet": "Elite Ogre",
+      "scale": 1.3,
+      "hiddenMesh": 2,
       "numbers": [
         {"number": 65, "maps": [9]}
       ]
@@ -594,6 +1290,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CURSED_KING",
       "soundSet": "Cursed king",
+      "scale": 1.7,
       "numbers": [
         {"number": 66, "maps": [9]}
       ]
@@ -603,6 +1300,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BALROG",
       "soundSet": "Balrog",
+      "scale": 1.6,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 9,
+            "level": 9
+          }
+        ]
+      },
       "numbers": [
         {"number": 67, "maps": [9]}
       ]
@@ -612,6 +1319,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_MOLT",
       "soundSet": "Molt",
+      "scale": 1.4,
       "numbers": [
         {"number": 68}
       ]
@@ -621,6 +1329,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ALQUAMOS",
       "soundSet": "Alquamos",
+      "scale": 1,
+      "glowMesh": 0,
       "numbers": [
         {"number": 69, "maps": [9, 10]}
       ]
@@ -630,6 +1340,9 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_QUEEN_RAINER",
       "soundSet": "Queen Rainier",
+      "scale": 1.3,
+      "glowMesh": -2,
+      "shadow": false,
       "numbers": [
         {"number": 70, "maps": [9, 10, 32]}
       ]
@@ -639,6 +1352,21 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CRUST",
       "soundSet": "Mega Crust",
+      "scale": 1.1,
+      "glowMesh": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 18,
+            "level": 5
+          },
+          {
+            "group": 6,
+            "number": 14
+          }
+        ]
+      },
       "numbers": [
         {"number": 71, "maps": [10, 32]}
       ]
@@ -648,6 +1376,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_PHANTOM_KNIGHT",
       "soundSet": "Phantom Knight",
+      "scale": 1.45,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 17,
+            "level": 5
+          }
+        ]
+      },
       "numbers": [
         {"number": 72, "maps": [10]}
       ]
@@ -657,6 +1395,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DRAKAN",
       "soundSet": "Drakan",
+      "scale": 0.8,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 73, "maps": [10, 32]}
       ]
@@ -666,6 +1406,22 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CRUST",
       "soundSet": "Mega Crust",
+      "scale": 1.3,
+      "glowMesh": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 18,
+            "level": 9
+          },
+          {
+            "group": 6,
+            "number": 14,
+            "level": 9
+          }
+        ]
+      },
       "numbers": [
         {"number": 74, "maps": [10, 32]}
       ]
@@ -675,6 +1431,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DRAKAN",
       "soundSet": "Drakan",
+      "scale": 1,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 75, "maps": [10]}
       ]
@@ -682,8 +1440,6 @@
     {
       "name": {"en": "Phoenix Darkness shield", "es": "Escudo de Fénix de Oscuridad", "pt": "Escudo da Fênix da escuridão"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
       "numbers": [
         {"number": 76}
       ]
@@ -693,6 +1449,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_PHOENIX_SHIELD",
       "soundSet": "Phoenix of Darkness",
+      "scale": 1,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 77, "maps": [10]}
       ]
@@ -702,6 +1460,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GOBLIN",
       "soundSet": "Goblin",
+      "scale": 0.8,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 0,
+            "level": 9
+          }
+        ]
+      },
       "numbers": [
         {"number": 78}
       ]
@@ -720,6 +1488,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_LIZARD",
       "soundSet": "Lizard King",
+      "scale": 1.4,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 7,
+            "excellent": 63
+          }
+        ]
+      },
       "numbers": [
         {"number": 80}
       ]
@@ -729,6 +1507,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_VEPAR",
       "soundSet": "Vepar",
+      "scale": 1,
       "numbers": [
         {"number": 81}
       ]
@@ -738,6 +1517,29 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_TANTALLOS",
       "soundSet": "Tantalos",
+      "scale": 1.8,
+      "glowMesh": 2,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16,
+            "excellent": 63
+          }
+        ]
+      },
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 82}
       ]
@@ -747,6 +1549,28 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GOLDEN_WHEEL",
       "soundSet": "Iron Wheel",
+      "scale": 1.4,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 14,
+            "excellent": 63
+          }
+        ]
+      },
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 83}
       ]
@@ -756,15 +1580,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ORC",
       "soundSet": "Elite Ogre",
+      "scale": 1.1,
       "numbers": [
         {"number": 84, "maps": [11]},
-        {"number": 90, "maps": [12]},
-        {"number": 96, "maps": [13]},
-        {"number": 113, "maps": [14]},
-        {"number": 119, "maps": [15]},
-        {"number": 125, "maps": [16]},
-        {"number": 138, "maps": [17]},
-        {"number": 428, "maps": [52]}
+        {"number": 90, "maps": [12], "scale": 1.15},
+        {"number": 96, "maps": [13], "scale": 1.15},
+        {"number": 113, "maps": [14], "scale": 1.15},
+        {"number": 119, "maps": [15], "scale": 1.15},
+        {"number": 125, "maps": [16], "scale": 1.2},
+        {"number": 138, "maps": [17], "scale": 1.2},
+        {"number": 428, "maps": [52], "scale": 1.2}
       ]
     },
     {
@@ -772,15 +1597,30 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ORC_ARCHER",
       "soundSet": "Ogre archer",
+      "scale": 1.1,
+      "equipment": {
+        "weapons": [
+          null,
+          {
+            "group": 4,
+            "number": 3,
+            "level": 1
+          }
+        ]
+      },
+      "appear": {
+        "fadeIn": false,
+        "sound": "SOUND_MONSTER_ORCCAPATTACK1"
+      },
       "numbers": [
         {"number": 85, "maps": [11]},
-        {"number": 91, "maps": [12]},
-        {"number": 97, "maps": [13]},
-        {"number": 114, "maps": [14]},
-        {"number": 120, "maps": [15]},
-        {"number": 126, "maps": [16]},
-        {"number": 139, "maps": [17]},
-        {"number": 429, "maps": [52]}
+        {"number": 91, "maps": [12], "scale": 1.15},
+        {"number": 97, "maps": [13], "scale": 1.15},
+        {"number": 114, "maps": [14], "scale": 1.15},
+        {"number": 120, "maps": [15], "scale": 1.15},
+        {"number": 126, "maps": [16], "scale": 1.2},
+        {"number": 139, "maps": [17], "scale": 1.2, "appear": null},
+        {"number": 429, "maps": [52], "scale": 1.2, "appear": null}
       ]
     },
     {
@@ -788,15 +1628,28 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
       "soundSet": "Dark Skull Soldier",
+      "scale": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 1,
+            "number": 8
+          },
+          {
+            "group": 1,
+            "number": 8
+          }
+        ]
+      },
       "numbers": [
         {"number": 86, "maps": [11]},
-        {"number": 92, "maps": [12]},
-        {"number": 98, "maps": [13]},
-        {"number": 115, "maps": [14]},
-        {"number": 121, "maps": [15]},
-        {"number": 127, "maps": [16]},
-        {"number": 140, "maps": [17]},
-        {"number": 430, "maps": [52]}
+        {"number": 92, "maps": [12], "scale": 1.05},
+        {"number": 98, "maps": [13], "scale": 1.05},
+        {"number": 115, "maps": [14], "scale": 1.05},
+        {"number": 121, "maps": [15], "scale": 1.05},
+        {"number": 127, "maps": [16], "scale": 1.1},
+        {"number": 140, "maps": [17], "scale": 1.1},
+        {"number": 430, "maps": [52], "scale": 1.1}
       ]
     },
     {
@@ -804,15 +1657,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GIANT_OGRE",
       "soundSet": "Giant Ogre",
+      "scale": 0.8,
       "numbers": [
         {"number": 87, "maps": [11]},
-        {"number": 93, "maps": [12]},
-        {"number": 99, "maps": [13]},
-        {"number": 116, "maps": [14]},
-        {"number": 122, "maps": [15]},
-        {"number": 128, "maps": [16]},
-        {"number": 141, "maps": [17]},
-        {"number": 431, "maps": [52]}
+        {"number": 93, "maps": [12], "scale": 0.85},
+        {"number": 99, "maps": [13], "scale": 0.85},
+        {"number": 116, "maps": [14], "scale": 0.85},
+        {"number": 122, "maps": [15], "scale": 0.85},
+        {"number": 128, "maps": [16], "scale": 0.9},
+        {"number": 141, "maps": [17], "scale": 0.9},
+        {"number": 431, "maps": [52], "scale": 0.9}
       ]
     },
     {
@@ -820,15 +1674,24 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
       "soundSet": "Red Skeleton Knight",
+      "scale": 1.19,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 2,
+            "number": 6
+          }
+        ]
+      },
       "numbers": [
-        {"number": 88, "maps": [11]},
-        {"number": 94, "maps": [12]},
-        {"number": 111, "maps": [13]},
-        {"number": 117, "maps": [14]},
-        {"number": 123, "maps": [15]},
-        {"number": 129, "maps": [16]},
-        {"number": 142, "maps": [17]},
-        {"number": 432, "maps": [52]}
+        {"number": 88, "maps": [11], "equipment": {"weapons": [{"group": 2, "number": 6, "level": 8}]}},
+        {"number": 94, "maps": [12], "scale": 1.24, "equipment": {"weapons": [{"group": 2, "number": 6, "level": 8}]}},
+        {"number": 111, "maps": [13], "scale": 1.24},
+        {"number": 117, "maps": [14], "scale": 1.24},
+        {"number": 123, "maps": [15], "scale": 1.24},
+        {"number": 129, "maps": [16], "scale": 1.29},
+        {"number": 142, "maps": [17], "scale": 1.29},
+        {"number": 432, "maps": [52], "scale": 1.29}
       ]
     },
     {
@@ -836,15 +1699,25 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_MAGIC_SKELETON",
       "soundSet": "Magic Skeleton",
+      "scale": 1.2,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 0,
+            "level": 11
+          }
+        ]
+      },
       "numbers": [
         {"number": 89, "maps": [11]},
-        {"number": 95, "maps": [12]},
-        {"number": 112, "maps": [13]},
-        {"number": 118, "maps": [14]},
-        {"number": 124, "maps": [15]},
-        {"number": 130, "maps": [16]},
-        {"number": 143, "maps": [17]},
-        {"number": 433, "maps": [52]}
+        {"number": 95, "maps": [12], "scale": 1.25},
+        {"number": 112, "maps": [13], "scale": 1.25},
+        {"number": 118, "maps": [14], "scale": 1.25},
+        {"number": 124, "maps": [15], "scale": 1.25},
+        {"number": 130, "maps": [16], "scale": 1.3},
+        {"number": 143, "maps": [17], "scale": 1.3},
+        {"number": 433, "maps": [52], "scale": 1.3}
       ]
     },
     {
@@ -900,6 +1773,8 @@
       "name": {"en": "Trap", "es": "Trampa", "pt": "Armadilha"},
       "kind": "trap",
       "model": "mapObject 11",
+      "shadow": false,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 104}
       ]
@@ -908,6 +1783,7 @@
       "name": {"en": "Canon Trap", "es": "Trampa Cañón", "pt": "Armadilha de canhão"},
       "kind": "trap",
       "model": "MODEL_TRAP_CANON",
+      "scale": 1,
       "numbers": [
         {"number": 105, "maps": [38]}
       ]
@@ -929,6 +1805,18 @@
       "name": {"en": "Castle Gate", "es": "Puerta del Castillo", "pt": "Portão do castelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_CASTLE_GATE",
+      "mapVariants": [
+        {
+          "maps": [12, 13, 14, 15],
+          "scale": 0.85
+        },
+        {
+          "maps": [16, 17, 52],
+          "scale": 0.9
+        }
+      ],
+      "scale": 0.8,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 131, "maps": [11, 12, 13, 14, 15, 16, 17, 52]}
       ]
@@ -937,6 +1825,18 @@
       "name": {"en": "Statue of Saint", "es": "Estatua de Santo", "pt": "Estátua do Santo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_STATUE_OF_SAINT",
+      "mapVariants": [
+        {
+          "maps": [12, 13, 14, 15],
+          "scale": 0.85
+        },
+        {
+          "maps": [16, 17, 52],
+          "scale": 0.9
+        }
+      ],
+      "scale": 0.8,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 132},
         {"number": 133},
@@ -948,6 +1848,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CURSED_KING",
       "soundSet": "Cursed king",
+      "scale": 1.7,
       "numbers": [
         {"number": 135}
       ]
@@ -957,6 +1858,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ORC",
       "soundSet": "Elite Ogre",
+      "scale": 1.3,
+      "hiddenMesh": 2,
       "numbers": [
         {"number": 136}
       ]
@@ -966,6 +1869,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ORC_ARCHER",
       "soundSet": "Ogre archer",
+      "scale": 1.2,
+      "hiddenMesh": 1,
+      "equipment": {
+        "weapons": [
+          null,
+          {
+            "group": 4,
+            "number": 3,
+            "level": 5
+          }
+        ]
+      },
       "numbers": [
         {"number": 137}
       ]
@@ -975,6 +1890,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_ANGEL",
       "soundSet": "Death Angel",
+      "scale": 1.2,
+      "glowMesh": 1,
       "numbers": [
         {"number": 144, "maps": [24]},
         {"number": 174, "maps": [25]},
@@ -995,6 +1912,18 @@
         "otherwise": "attack1",
         "clearSkill": "never"
       },
+      "scale": 1.5,
+      "subType": 9,
+      "glowMesh": 0,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 10,
+            "level": 7
+          }
+        ]
+      },
       "numbers": [
         {"number": 145, "maps": [24]},
         {"number": 175, "maps": [25]},
@@ -1010,6 +1939,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BLOOD_SOLDIER",
       "soundSet": "Blood Soldier",
+      "scale": 0.8,
       "numbers": [
         {"number": 146, "maps": [24]},
         {"number": 176, "maps": [25]},
@@ -1030,6 +1960,8 @@
         "otherwise": "attack1",
         "clearSkill": "never"
       },
+      "scale": 1.4,
+      "glowMesh": 1,
       "numbers": [
         {"number": 147, "maps": [24]},
         {"number": 177, "maps": [25]},
@@ -1049,6 +1981,17 @@
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
         "clearSkill": "never"
+      },
+      "scale": 1,
+      "glowMesh": 0,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 10,
+            "level": 7
+          }
+        ]
       },
       "numbers": [
         {"number": 148, "maps": [24]},
@@ -1070,6 +2013,8 @@
         "otherwise": "none",
         "clearSkill": "never"
       },
+      "scale": 1.2,
+      "glowMesh": 3,
       "numbers": [
         {"number": 149, "maps": [24]},
         {"number": 179, "maps": [25]},
@@ -1089,6 +2034,7 @@
         "otherwiseRandom": "bali",
         "clearSkill": "never"
       },
+      "scale": 0.12,
       "numbers": [
         {"number": 150}
       ]
@@ -1098,6 +2044,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SOLDIER",
       "soundSet": "Lizard King",
+      "scale": 1.3,
+      "equipment": {
+        "weapons": [
+          null,
+          {
+            "group": 4,
+            "number": 14
+          }
+        ]
+      },
       "numbers": [
         {"number": 151}
       ]
@@ -1106,6 +2062,34 @@
       "name": {"en": "Gate to Kalima 1"},
       "kind": "monster",
       "model": "MODEL_WARCRAFT",
+      "scale": 1,
+      "startFrame": 10,
+      "noTurnOnHit": true,
+      "appear": {
+        "startFrame": 0,
+        "sound": "SOUND_CHAOS_FALLING_STONE",
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 50,
+            "count": 2,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 152}
       ]
@@ -1114,6 +2098,34 @@
       "name": {"en": "Gate to Kalima 2"},
       "kind": "monster",
       "model": "MODEL_WARCRAFT",
+      "scale": 1,
+      "startFrame": 10,
+      "noTurnOnHit": true,
+      "appear": {
+        "startFrame": 0,
+        "sound": "SOUND_CHAOS_FALLING_STONE",
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 50,
+            "count": 2,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 153}
       ]
@@ -1122,6 +2134,34 @@
       "name": {"en": "Gate to Kalima 3"},
       "kind": "monster",
       "model": "MODEL_WARCRAFT",
+      "scale": 1,
+      "startFrame": 10,
+      "noTurnOnHit": true,
+      "appear": {
+        "startFrame": 0,
+        "sound": "SOUND_CHAOS_FALLING_STONE",
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 50,
+            "count": 2,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 154}
       ]
@@ -1130,6 +2170,34 @@
       "name": {"en": "Gate to Kalima 4"},
       "kind": "monster",
       "model": "MODEL_WARCRAFT",
+      "scale": 1,
+      "startFrame": 10,
+      "noTurnOnHit": true,
+      "appear": {
+        "startFrame": 0,
+        "sound": "SOUND_CHAOS_FALLING_STONE",
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 50,
+            "count": 2,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 155}
       ]
@@ -1138,6 +2206,34 @@
       "name": {"en": "Gate to Kalima 5"},
       "kind": "monster",
       "model": "MODEL_WARCRAFT",
+      "scale": 1,
+      "startFrame": 10,
+      "noTurnOnHit": true,
+      "appear": {
+        "startFrame": 0,
+        "sound": "SOUND_CHAOS_FALLING_STONE",
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 50,
+            "count": 2,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 156}
       ]
@@ -1146,6 +2242,34 @@
       "name": {"en": "Gate to Kalima 6"},
       "kind": "monster",
       "model": "MODEL_WARCRAFT",
+      "scale": 1,
+      "startFrame": 10,
+      "noTurnOnHit": true,
+      "appear": {
+        "startFrame": 0,
+        "sound": "SOUND_CHAOS_FALLING_STONE",
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 50,
+            "count": 2,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 157}
       ]
@@ -1154,6 +2278,34 @@
       "name": {"en": "Gate to Kalima 7"},
       "kind": "monster",
       "model": "MODEL_WARCRAFT",
+      "scale": 1,
+      "startFrame": 10,
+      "noTurnOnHit": true,
+      "appear": {
+        "startFrame": 0,
+        "sound": "SOUND_CHAOS_FALLING_STONE",
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 50,
+            "count": 2,
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 1,
+            "scale": 60,
+            "scaleRandom": 10
+          }
+        ]
+      },
       "numbers": [
         {"number": 158}
       ]
@@ -1166,6 +2318,19 @@
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
+      },
+      "scale": 1.2,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 13
+          },
+          {
+            "group": 0,
+            "number": 13
+          }
+        ]
       },
       "numbers": [
         {"number": 160, "maps": [24]},
@@ -1186,6 +2351,20 @@
         "otherwiseRandom": "rand",
         "clearSkill": "never"
       },
+      "scale": 1.5,
+      "subType": 9,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 13
+          },
+          {
+            "group": 0,
+            "number": 13
+          }
+        ]
+      },
       "numbers": [
         {"number": 161, "maps": [24]},
         {"number": 181, "maps": [25]},
@@ -1200,6 +2379,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          },
+          {
+            "group": 0,
+            "number": 16
+          }
+        ]
+      },
       "numbers": [
         {"number": 162, "maps": [18]}
       ]
@@ -1210,8 +2401,16 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
       "soundSet": "Chaos Castle",
       "randomVariants": [
-        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard", "equipment": {"weapons": [{"group": 5, "number": 5}]}}
       ],
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 19
+          }
+        ]
+      },
       "numbers": [
         {"number": 163, "maps": [18]}
       ]
@@ -1221,6 +2420,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          },
+          {
+            "group": 0,
+            "number": 16
+          }
+        ]
+      },
       "numbers": [
         {"number": 164, "maps": [19]}
       ]
@@ -1231,8 +2442,16 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
       "soundSet": "Chaos Castle",
       "randomVariants": [
-        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard", "equipment": {"weapons": [{"group": 5, "number": 5}]}}
       ],
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 19
+          }
+        ]
+      },
       "numbers": [
         {"number": 165, "maps": [19]}
       ]
@@ -1242,6 +2461,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          },
+          {
+            "group": 0,
+            "number": 16
+          }
+        ]
+      },
       "numbers": [
         {"number": 166, "maps": [20]}
       ]
@@ -1252,8 +2483,16 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
       "soundSet": "Chaos Castle",
       "randomVariants": [
-        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard", "equipment": {"weapons": [{"group": 5, "number": 5}]}}
       ],
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 19
+          }
+        ]
+      },
       "numbers": [
         {"number": 167, "maps": [20]}
       ]
@@ -1263,6 +2502,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          },
+          {
+            "group": 0,
+            "number": 16
+          }
+        ]
+      },
       "numbers": [
         {"number": 168, "maps": [21]}
       ]
@@ -1273,8 +2524,16 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
       "soundSet": "Chaos Castle",
       "randomVariants": [
-        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard", "equipment": {"weapons": [{"group": 5, "number": 5}]}}
       ],
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 19
+          }
+        ]
+      },
       "numbers": [
         {"number": 169, "maps": [21]}
       ]
@@ -1284,6 +2543,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          },
+          {
+            "group": 0,
+            "number": 16
+          }
+        ]
+      },
       "numbers": [
         {"number": 170, "maps": [22]}
       ]
@@ -1294,8 +2565,16 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
       "soundSet": "Chaos Castle",
       "randomVariants": [
-        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard", "equipment": {"weapons": [{"group": 5, "number": 5}]}}
       ],
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 19
+          }
+        ]
+      },
       "numbers": [
         {"number": 171, "maps": [22]}
       ]
@@ -1305,6 +2584,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          },
+          {
+            "group": 0,
+            "number": 16
+          }
+        ]
+      },
       "numbers": [
         {"number": 172, "maps": [23]}
       ]
@@ -1315,8 +2606,16 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
       "soundSet": "Chaos Castle",
       "randomVariants": [
-        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard", "equipment": {"weapons": [{"group": 5, "number": 5}]}}
       ],
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 19
+          }
+        ]
+      },
       "numbers": [
         {"number": 173, "maps": [23]}
       ]
@@ -1325,6 +2624,9 @@
       "name": {"en": "Soccer Ball", "es": "Bola de Fútbol", "pt": "Bola de futebol"},
       "kind": "monster",
       "model": "MODEL_BALL",
+      "scale": 1.8,
+      "lookLevel": 1,
+      "glowMesh": 2,
       "numbers": [
         {"number": 200, "maps": [6]}
       ]
@@ -1333,6 +2635,8 @@
       "name": {"en": "Wolf Status", "es": "Estatus de Lobo", "pt": "Status de lobo"},
       "kind": "npc",
       "model": "MODEL_CRYWOLF_STATUE",
+      "live": false,
+      "talks": false,
       "numbers": [
         {"number": 204, "maps": [34]}
       ]
@@ -1341,6 +2645,14 @@
       "name": {"en": "Wolf Altar1", "es": "Altar de Lobo1", "pt": "Altar do lobo1"},
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR1",
+      "hiddenMesh": -2,
+      "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 205, "maps": [34]}
       ]
@@ -1349,6 +2661,14 @@
       "name": {"en": "Wolf Altar2", "es": "Altar de Lobo2", "pt": "Altar do lobo2"},
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR2",
+      "hiddenMesh": -2,
+      "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 206, "maps": [34]}
       ]
@@ -1357,6 +2677,14 @@
       "name": {"en": "Wolf Altar3", "es": "Altar de Lobo3", "pt": "Altar do lobo3"},
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR3",
+      "hiddenMesh": -2,
+      "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 207, "maps": [34]}
       ]
@@ -1365,6 +2693,14 @@
       "name": {"en": "Wolf Altar4", "es": "Altar de Lobo4", "pt": "Altar do lobo4"},
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR4",
+      "hiddenMesh": -2,
+      "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 208, "maps": [34]}
       ]
@@ -1373,6 +2709,14 @@
       "name": {"en": "Wolf Altar5", "es": "Altar de Lobo5", "pt": "Altar do lobo5"},
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR5",
+      "hiddenMesh": -2,
+      "heightOffset": -10,
+      "onTalk": [
+        {
+          "crywolfAltarContract": "crywolfAltar"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 209, "maps": [34]}
       ]
@@ -1381,6 +2725,10 @@
       "name": {"en": "Shield", "es": "Escudo", "pt": "Escudo"},
       "kind": "npc",
       "model": "MODEL_NPC_BARRIER",
+      "scale": 1.52,
+      "shadow": false,
+      "selectable": false,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 215}
       ]
@@ -1389,6 +2737,8 @@
       "name": {"en": "Crown", "es": "Corona", "pt": "Coroa"},
       "kind": "npc",
       "model": "MODEL_NPC_CROWN",
+      "shadow": false,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 216, "maps": [30]}
       ]
@@ -1397,6 +2747,14 @@
       "name": {"en": "Crown Switch2", "es": "Corona Conmutador2", "pt": "Troca de coroa2"},
       "kind": "npc",
       "model": "MODEL_NPC_CHECK_FLOOR",
+      "keepGroundHeight": true,
+      "noTurnOnHit": true,
+      "stateVariants": [
+        {
+          "state": "castleSiegeNotRunning",
+          "heightOffset": -100
+        }
+      ],
       "numbers": [
         {"number": 217, "maps": [30]}
       ]
@@ -1405,6 +2763,14 @@
       "name": {"en": "Crown Switch1", "es": "Corona Conmutador1", "pt": "Troca de coroa1"},
       "kind": "npc",
       "model": "MODEL_NPC_CHECK_FLOOR",
+      "keepGroundHeight": true,
+      "noTurnOnHit": true,
+      "stateVariants": [
+        {
+          "state": "castleSiegeNotRunning",
+          "heightOffset": -100
+        }
+      ],
       "numbers": [
         {"number": 218, "maps": [30]}
       ]
@@ -1413,6 +2779,8 @@
       "name": {"en": "Castle Gate Switch", "es": "Interruptor Puerta de Castillo", "pt": "Inter. do Portão do Castelo"},
       "kind": "npc",
       "model": "MODEL_NPC_GATE_SWITCH",
+      "scale": 1.1,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 219, "maps": [30]}
       ]
@@ -1426,6 +2794,8 @@
         "otherwise": "shock",
         "clearSkill": "never"
       },
+      "scale": 1.1,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 220, "maps": [30]}
       ]
@@ -1434,6 +2804,10 @@
       "name": {"en": "Slingshot attack", "es": "Ataque con honda", "pt": "Ataque de estilingue"},
       "kind": "npc",
       "model": "MODEL_NPC_CAPATULT_ATT",
+      "scale": 0.8,
+      "outline": 1.03,
+      "shadow": false,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 221, "maps": [30]}
       ]
@@ -1442,6 +2816,10 @@
       "name": {"en": "Slingshot defense", "es": "Defensa con honda", "pt": "Defesa de estilingue"},
       "kind": "npc",
       "model": "MODEL_NPC_CAPATULT_DEF",
+      "scale": 0.8,
+      "outline": 1.03,
+      "shadow": false,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 222, "maps": [30]}
       ]
@@ -1450,6 +2828,8 @@
       "name": {"en": "Senior", "es": "Superior", "pt": "Sênior"},
       "kind": "npc",
       "model": "MODEL_NPC_SENATUS",
+      "scale": 1.1,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 223, "maps": [30]}
       ]
@@ -1458,6 +2838,12 @@
       "name": {"en": "Guardsman", "es": "Guardia", "pt": "Guarda"},
       "kind": "npc",
       "model": "MODEL_NPC_CLERK",
+      "scale": 1,
+      "randomLook": [
+        10,
+        11
+      ],
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 224, "maps": [30, 34]}
       ]
@@ -1466,6 +2852,15 @@
       "name": {"en": "Trainer", "es": "Adiestrador", "pt": "Treinador"},
       "kind": "npc",
       "model": "MODEL_NPC_BREEDER",
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "send": "petInfo"
+        }
+      ],
+      "crywolfContract": true,
       "numbers": [
         {"number": 226, "maps": [0, 34]}
       ]
@@ -1474,6 +2869,55 @@
       "name": {"en": "Marlon", "es": "Marlon", "pt": "Marlon"},
       "kind": "npc",
       "model": "player",
+      "scale": "character",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 3,
+            "number": 7,
+            "level": 8
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 9,
+          "level": 7
+        },
+        "armor": {
+          "group": 8,
+          "number": 9,
+          "level": 7
+        },
+        "pants": {
+          "group": 9,
+          "number": 9,
+          "level": 7
+        },
+        "gloves": {
+          "group": 10,
+          "number": 9,
+          "level": 7
+        },
+        "boots": {
+          "group": 11,
+          "number": 9,
+          "level": 7
+        }
+      },
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "questWindow": {
+            "noQuestTitleFor": [
+              "darkLord",
+              "magicGladiator",
+              "rageFighter"
+            ]
+          }
+        }
+      ],
       "numbers": [
         {"number": 229, "maps": [0, 2, 3, 7]}
       ]
@@ -1482,6 +2926,21 @@
       "name": {"en": "Wandering Merchant Alex", "es": "Mercader Errante Alex", "pt": "Alex, o Mercador itinerante"},
       "kind": "npc",
       "model": "MODEL_MERCHANT_MAN",
+      "equipment": {
+        "helm": {
+          "part": "MODEL_MERCHANT_MAN_HEAD"
+        },
+        "armor": {
+          "part": "MODEL_MERCHANT_MAN_UPPER+1"
+        },
+        "gloves": {
+          "part": "MODEL_MERCHANT_MAN_GLOVES+1"
+        },
+        "boots": {
+          "part": "MODEL_MERCHANT_MAN_BOOTS"
+        }
+      },
+      "crywolfContract": true,
       "numbers": [
         {"number": 230, "maps": [0]}
       ]
@@ -1498,6 +2957,7 @@
       "name": {"en": "Archangel", "es": "Arcángel", "pt": "Arcanjo"},
       "kind": "npc",
       "model": "MODEL_NPC_ARCHANGEL",
+      "scale": 1,
       "numbers": [
         {"number": 232, "maps": [11, 12, 13, 14, 15, 16, 17, 52]}
       ]
@@ -1506,6 +2966,7 @@
       "name": {"en": "Messenger of Archangel", "es": "Mensajero de Arcángel", "pt": "Mensageiro do Arcanjo"},
       "kind": "npc",
       "model": "MODEL_NPC_ARCHANGEL_MESSENGER",
+      "scale": 1,
       "numbers": [
         {"number": 233, "maps": [2]}
       ]
@@ -1515,6 +2976,16 @@
       "kind": "npc",
       "model": "MONSTER_MODEL_GOBLIN",
       "soundSet": "Goblin",
+      "scale": 1.5,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 0,
+            "level": 4
+          }
+        ]
+      },
       "numbers": [
         {"number": 234}
       ]
@@ -1523,6 +2994,7 @@
       "name": {"en": "Sebina the Priest", "es": "Sebina la Sacerdotisa", "pt": "Sebina, a Madre"},
       "kind": "npc",
       "model": "MODEL_NPC_SEVINA",
+      "scale": 1,
       "numbers": [
         {"number": 235, "maps": [2]}
       ]
@@ -1531,6 +3003,9 @@
       "name": {"en": "Golden Archer", "es": "Arquero Dorado", "pt": "Arqueiro dourado"},
       "kind": "npc",
       "model": "player",
+      "scale": 1,
+      "subType": 245,
+      "lookLevel": 8,
       "numbers": [
         {"number": 236, "maps": [0]}
       ]
@@ -1548,6 +3023,23 @@
       "kind": "npc",
       "model": "MODEL_MIX_NPC",
       "soundSet": "Chaos Goblin",
+      "glowMesh": 1,
+      "talkLevel": {
+        "level": 10,
+        "message": {
+          "en": "Only level above %d can do the Chaos Combination.",
+          "de": "Nur Charaktere über Level %d können die Chaos-Kombination durchführen.",
+          "es": "Sólo el nivel superior a %d puede realizar la Combinación del Caos.",
+          "id": "Hanya level di atas %d yang dapat melakukan Kombinasi Chaos.",
+          "ja": "レベル %d以上からカオス合成が可能です。",
+          "pl": "Kombinację Chaos mogą wykonać tylko postacie powyżej poziomu %d.",
+          "pt": "Somente níveis acima de %d podem fazer a Combinação do Caos.",
+          "ru": "Только уровень выше %d может выполнить Комбинацию Хаоса.",
+          "tl": "Ang antas lamang sa itaas ng %d ang makakagawa ng Chaos Combination.",
+          "uk": "Тільки рівень вище %d може виконувати комбінацію хаосу.",
+          "zh-TW": "只有%d以上的等級才能進行混沌組合。"
+        }
+      },
       "numbers": [
         {"number": 238, "maps": [3]}
       ]
@@ -1564,6 +3056,7 @@
       "name": {"en": "Safety Guardian", "es": "Guardián de Seguridad", "pt": "Guardião de segurança"},
       "kind": "npc",
       "model": "MODEL_STORAGE",
+      "crywolfContract": true,
       "numbers": [
         {"number": 240, "maps": [0, 2, 3, 4, 6, 7, 34, 51, 80]}
       ]
@@ -1581,6 +3074,8 @@
       "kind": "npc",
       "model": "MODEL_ELF_WIZARD",
       "soundSet": "Elf Lala",
+      "glowMesh": 1,
+      "heightOffset": 140,
       "numbers": [
         {"number": 242, "maps": [3]}
       ]
@@ -1589,6 +3084,7 @@
       "name": {"en": "Eo the Craftsman", "es": "Eo el Artesano", "pt": "Eo, o artesão"},
       "kind": "npc",
       "model": "MODEL_ELF_MERCHANT",
+      "repairShop": true,
       "numbers": [
         {"number": 243, "maps": [3]}
       ]
@@ -1613,6 +3109,7 @@
       "name": {"en": "Weapons Merchant Zienna", "es": "Mercader de Armas Zienna", "pt": "Zienna, a Mercadora de armas"},
       "kind": "npc",
       "model": "MODEL_SNOW_SMITH",
+      "repairShop": true,
       "numbers": [
         {"number": 246, "maps": [2]}
       ]
@@ -1621,15 +3118,63 @@
       "name": {"en": "Guard", "es": "Guardia", "pt": "Guarda"},
       "kind": "npc",
       "model": "player",
+      "scale": "character",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 11
+          },
+          {
+            "group": 4,
+            "number": 7
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 9
+        },
+        "armor": {
+          "group": 8,
+          "number": 9
+        },
+        "pants": {
+          "group": 9,
+          "number": 9
+        },
+        "gloves": {
+          "group": 10,
+          "number": 9
+        },
+        "boots": {
+          "group": 11,
+          "number": 9
+        }
+      },
       "numbers": [
         {"number": 247, "maps": [0, 2]},
-        {"number": 249, "maps": [0]}
+        {"number": 249, "maps": [0], "equipment": {"weapons": [{"group": 3, "number": 7}], "helm": {"group": 7, "number": 9}, "armor": {"group": 8, "number": 9}, "pants": {"group": 9, "number": 9}, "gloves": {"group": 10, "number": 9}, "boots": {"group": 11, "number": 9}}}
       ]
     },
     {
       "name": {"en": "Wandering Merchant Martin", "es": "Mercader Errante Martin", "pt": "Martin, o Mercador itinerante"},
       "kind": "npc",
       "model": "MODEL_MERCHANT_MAN",
+      "equipment": {
+        "helm": {
+          "part": "MODEL_MERCHANT_MAN_HEAD+1"
+        },
+        "armor": {
+          "part": "MODEL_MERCHANT_MAN_UPPER+1"
+        },
+        "gloves": {
+          "part": "MODEL_MERCHANT_MAN_GLOVES+1"
+        },
+        "boots": {
+          "part": "MODEL_MERCHANT_MAN_BOOTS+1"
+        }
+      },
+      "crywolfContract": true,
       "numbers": [
         {"number": 248, "maps": [0, 34]}
       ]
@@ -1638,6 +3183,21 @@
       "name": {"en": "Wandering Merchant", "es": "Mercader Errante", "pt": "Mercador itinerante"},
       "kind": "npc",
       "model": "MODEL_MERCHANT_MAN",
+      "equipment": {
+        "helm": {
+          "part": "MODEL_MERCHANT_MAN_HEAD"
+        },
+        "armor": {
+          "part": "MODEL_MERCHANT_MAN_UPPER"
+        },
+        "gloves": {
+          "part": "MODEL_MERCHANT_MAN_GLOVES"
+        },
+        "boots": {
+          "part": "MODEL_MERCHANT_MAN_BOOTS"
+        }
+      },
+      "crywolfContract": true,
       "numbers": [
         {"number": 250, "maps": [0]}
       ]
@@ -1647,6 +3207,9 @@
       "kind": "npc",
       "model": "MODEL_SMITH",
       "soundSet": "Hanzo the Blacksmith",
+      "scale": 0.95,
+      "repairShop": true,
+      "crywolfContract": true,
       "numbers": [
         {"number": 251, "maps": [0, 34]}
       ]
@@ -1654,8 +3217,6 @@
     {
       "name": {"en": ""},
       "kind": "npc",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
       "numbers": [
         {"number": 252}
       ]
@@ -1664,6 +3225,17 @@
       "name": {"en": "Potion Girl Amy", "es": "Amy la Chica de las Pócimas", "pt": "Amy, a Garota das poções"},
       "kind": "npc",
       "model": "MODEL_MERCHANT_GIRL",
+      "equipment": {
+        "helm": {
+          "part": "MODEL_MERCHANT_GIRL_HEAD"
+        },
+        "armor": {
+          "part": "MODEL_MERCHANT_GIRL_UPPER"
+        },
+        "pants": {
+          "part": "MODEL_MERCHANT_GIRL_LOWER"
+        }
+      },
       "numbers": [
         {"number": 253, "maps": [0, 3, 4]}
       ]
@@ -1680,6 +3252,20 @@
       "name": {"en": "Lumen the Barmaid", "es": "Lumen la Mesera", "pt": "Lumen, a garçonete"},
       "kind": "npc",
       "model": "MODEL_MERCHANT_FEMALE",
+      "equipment": {
+        "helm": {
+          "part": "MODEL_MERCHANT_FEMALE_HEAD+1"
+        },
+        "armor": {
+          "part": "MODEL_MERCHANT_FEMALE_UPPER+1"
+        },
+        "pants": {
+          "part": "MODEL_MERCHANT_FEMALE_LOWER+1"
+        },
+        "boots": {
+          "part": "MODEL_MERCHANT_FEMALE_BOOTS+1"
+        }
+      },
       "numbers": [
         {"number": 255, "maps": [0]}
       ]
@@ -1688,6 +3274,7 @@
       "name": {"en": "Lahap", "es": "Lahap", "pt": "Lahap"},
       "kind": "npc",
       "model": "MODEL_NPC_SERBIS",
+      "crywolfContract": true,
       "numbers": [
         {"number": 256, "maps": [2, 34, 51]}
       ]
@@ -1696,6 +3283,53 @@
       "name": {"en": "Shadow Phantom Soldier", "es": "Soldado Fantasma de la Sombra", "pt": "Soldado Fantasma das sombras"},
       "kind": "npc",
       "model": "player",
+      "scale": 1,
+      "equipment": {
+        "helm": {
+          "group": 7,
+          "number": 24,
+          "level": 13
+        },
+        "armor": {
+          "group": 8,
+          "number": 24,
+          "level": 13
+        },
+        "pants": {
+          "group": 9,
+          "number": 24,
+          "level": 13
+        },
+        "gloves": {
+          "group": 10,
+          "number": 24,
+          "level": 13
+        },
+        "boots": {
+          "group": 11,
+          "number": 24,
+          "level": 13
+        },
+        "wings": {
+          "group": 12,
+          "number": 3
+        }
+      },
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_FLARE",
+          "subType": 42,
+          "scale": 15
+        }
+      ],
+      "boundingBox": {
+        "max": [
+          40,
+          40,
+          190
+        ]
+      },
+      "startAction": 11,
       "numbers": [
         {"number": 257, "maps": [0, 2, 3, 51]}
       ]
@@ -1704,6 +3338,30 @@
       "name": {"en": "Luke the Helper", "es": "Luke el Ayudante", "pt": "Luke, o ajudante"},
       "kind": "npc",
       "model": "player",
+      "scale": "character",
+      "helperPlate": true,
+      "equipment": {
+        "helm": {
+          "group": 7,
+          "number": 9
+        },
+        "armor": {
+          "group": 8,
+          "number": 9
+        },
+        "pants": {
+          "group": 9,
+          "number": 9
+        },
+        "gloves": {
+          "group": 10,
+          "number": 9
+        },
+        "boots": {
+          "group": 11,
+          "number": 9
+        }
+      },
       "numbers": [
         {"number": 258}
       ]
@@ -1712,6 +3370,7 @@
       "name": {"en": "Oracle Layla", "es": "Oráculo Layla", "pt": "Oráculo Layla"},
       "kind": "npc",
       "model": "MODEL_KALIMA_SHOP",
+      "heightOffset": 140,
       "numbers": [
         {"number": 259, "maps": [24, 25, 26, 27, 28, 29, 36]}
       ]
@@ -1725,6 +3384,17 @@
         "otherwiseRandom": "rand",
         "clearSkill": "never"
       },
+      "scale": 2,
+      "equipment": {
+        "weapons": [
+          null,
+          {
+            "group": 5,
+            "number": 11
+          }
+        ]
+      },
+      "deathEffect": 100,
       "numbers": [
         {"number": 275, "maps": [36]}
       ]
@@ -1734,6 +3404,15 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CASTLE_GATE1",
       "soundSet": "Castle Gate",
+      "scale": 1,
+      "shadow": false,
+      "noTurnOnHit": true,
+      "gate": {
+        "closed": "stop1",
+        "opening": "stop2",
+        "open": "walk",
+        "arrival": "opening"
+      },
       "numbers": [
         {"number": 277, "maps": [30]}
       ]
@@ -1742,6 +3421,16 @@
       "name": {"en": "Life Stone", "es": "Piedra de la Vida", "pt": "Pedra da Vida"},
       "kind": "monster",
       "model": "MONSTER_MODEL_LIFE_STONE",
+      "scale": 1,
+      "glowMesh": 3,
+      "shadow": false,
+      "spawnEffects": [
+        {
+          "effect": "MODEL_AURORA",
+          "key": 120
+        }
+      ],
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 278}
       ]
@@ -1750,6 +3439,22 @@
       "name": {"en": "Guardian Statue", "es": "Estatua Guardián", "pt": "Estátua do guardião"},
       "kind": "monster",
       "model": "MONSTER_MODEL_GUARDIAN_STATUE",
+      "scale": 1,
+      "outline": 1.03,
+      "shadow": false,
+      "spawnEffects": [
+        {
+          "effect": "MODEL_AURORA",
+          "key": 120
+        }
+      ],
+      "noTurnOnHit": true,
+      "stateVariants": [
+        {
+          "state": "castleSiegeNotRunning",
+          "hiddenMesh": -2
+        }
+      ],
       "numbers": [
         {"number": 283, "maps": [30]}
       ]
@@ -1758,6 +3463,9 @@
       "name": {"en": "Guardian", "es": "Guardián", "pt": "Guardião"},
       "kind": "monster",
       "model": "MONSTER_MODEL_GUARDIAN_STATUE",
+      "scale": 1,
+      "shadow": false,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 285}
       ]
@@ -1771,6 +3479,8 @@
         "otherwise": "shock",
         "clearSkill": "never"
       },
+      "scale": 1,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 286}
       ]
@@ -1784,6 +3494,9 @@
         "otherwise": "shock",
         "clearSkill": "never"
       },
+      "scale": 1,
+      "subType": 30,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 287}
       ]
@@ -1792,6 +3505,10 @@
       "name": {"en": "Canon Tower", "es": "Torre Cañón", "pt": "Torre de canhão"},
       "kind": "monster",
       "model": "MONSTER_MODEL_CANON_TOWER",
+      "scale": 1,
+      "outline": 1.04,
+      "shadow": false,
+      "noTurnOnHit": true,
       "numbers": [
         {"number": 288}
       ]
@@ -1800,6 +3517,7 @@
       "name": {"en": "Lizard Warrior", "es": "Guerrero Lagartija", "pt": "Guerreiro lagarto"},
       "kind": "monster",
       "model": "MONSTER_MODEL_LIZARD_WARRIOR",
+      "scale": 1.2,
       "numbers": [
         {"number": 290, "maps": [31, 32]}
       ]
@@ -1822,6 +3540,7 @@
           }
         }
       ],
+      "scale": 1.8,
       "numbers": [
         {"number": 291, "maps": [31, 32]}
       ]
@@ -1830,6 +3549,7 @@
       "name": {"en": "Queen Bee", "es": "Reina Abeja", "pt": "Abelha Rainha"},
       "kind": "monster",
       "model": "MONSTER_MODEL_QUEEN_BEE",
+      "scale": 1.4,
       "numbers": [
         {"number": 292, "maps": [31, 32]}
       ]
@@ -1838,6 +3558,7 @@
       "name": {"en": "Poison Golem", "es": "Gólem Venenoso", "pt": "Golem venenoso"},
       "kind": "monster",
       "model": "MONSTER_MODEL_POISON_GOLEM",
+      "scale": 1.4,
       "numbers": [
         {"number": 293, "maps": [31, 32]}
       ]
@@ -1846,6 +3567,7 @@
       "name": {"en": "Ax Warrior", "es": "Guerrero Hachero", "pt": "Guerreiro do machado"},
       "kind": "monster",
       "model": "MONSTER_MODEL_AXE_HERO",
+      "scale": 0.7,
       "numbers": [
         {"number": 294, "maps": [9, 31, 32]}
       ]
@@ -1854,6 +3576,8 @@
       "name": {"en": "Erohim", "es": "Erohim", "pt": "Erohim"},
       "kind": "monster",
       "model": "MONSTER_MODEL_EROHIM",
+      "scale": 2,
+      "spawnSound": "SOUND_BC_EROHIM_ENTER",
       "numbers": [
         {"number": 295, "maps": [31]}
       ]
@@ -1861,8 +3585,6 @@
     {
       "name": {"en": "Monster7", "es": "Monstruo7", "pt": "Monstro7"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
       "numbers": [
         {"number": 296}
       ]
@@ -1871,6 +3593,46 @@
       "name": {"en": "PK Dark Knight", "es": "Caballero Oscuro PK", "pt": "Cavaleiro Negro PK"},
       "kind": "monster",
       "model": "player",
+      "scale": 0.93,
+      "pkColor": "murderer2",
+      "classStep": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          },
+          {
+            "group": 6,
+            "number": 13
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 1,
+          "level": 9
+        },
+        "armor": {
+          "group": 8,
+          "number": 1,
+          "level": 9
+        },
+        "pants": {
+          "group": 9,
+          "number": 1,
+          "level": 9
+        },
+        "gloves": {
+          "group": 10,
+          "number": 1,
+          "level": 9
+        },
+        "boots": {
+          "group": 11,
+          "number": 1,
+          "level": 9
+        }
+      },
       "numbers": [
         {"number": 297}
       ]
@@ -1880,6 +3642,19 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_MUTANT",
       "soundSet": "Mutant",
+      "scale": 1.5,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 300}
       ]
@@ -1889,6 +3664,22 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CRUST",
       "soundSet": "Mega Crust",
+      "scale": 1.3,
+      "glowMesh": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 18,
+            "level": 9
+          },
+          {
+            "group": 6,
+            "number": 14,
+            "level": 9
+          }
+        ]
+      },
       "numbers": [
         {"number": 301}
       ]
@@ -1897,6 +3688,7 @@
       "name": {"en": "Axl Hero", "es": "Héroe Axl", "pt": "Herói Axl"},
       "kind": "monster",
       "model": "MONSTER_MODEL_AXE_HERO",
+      "scale": 0.7,
       "numbers": [
         {"number": 302}
       ]
@@ -1905,6 +3697,7 @@
       "name": {"en": "Gigas Golem", "es": "Gólem Gigas", "pt": "Golem Gigas"},
       "kind": "monster",
       "model": "MONSTER_MODEL_POISON_GOLEM",
+      "scale": 1.4,
       "numbers": [
         {"number": 303}
       ]
@@ -1918,6 +3711,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.4,
       "numbers": [
         {"number": 304, "maps": [33]}
       ]
@@ -1931,6 +3725,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.35,
       "numbers": [
         {"number": 305, "maps": [33]}
       ]
@@ -1940,6 +3735,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_RIDER",
       "soundSet": "Death Rider",
+      "scale": 1.1,
       "numbers": [
         {"number": 306, "maps": [33]}
       ]
@@ -1949,6 +3745,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_FOREST_ORC",
       "soundSet": "Forest Orc",
+      "scale": 1.15,
       "numbers": [
         {"number": 307, "maps": [33]}
       ]
@@ -1958,6 +3755,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_TREE",
       "soundSet": "Death Tree",
+      "scale": 1.2,
       "numbers": [
         {"number": 308, "maps": [33]}
       ]
@@ -1972,6 +3770,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.8,
       "numbers": [
         {"number": 309, "maps": [33]}
       ]
@@ -1980,6 +3779,14 @@
       "name": {"en": "Hammer Scout", "es": "Explorador con Martillo", "pt": "Batedor de martelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SCOUT",
+      "mapVariants": [
+        {
+          "maps": [35],
+          "model": "MONSTER_MODEL_BALRAM",
+          "scale": 1.25
+        }
+      ],
+      "scale": 1.2,
       "numbers": [
         {"number": 310, "maps": [34]}
       ]
@@ -1988,6 +3795,7 @@
       "name": {"en": "Lance Scout", "es": "Explorador con Lanza", "pt": "Batedor de lança"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SOLAM",
+      "scale": 1.2,
       "numbers": [
         {"number": 311, "maps": [34]}
       ]
@@ -1996,6 +3804,7 @@
       "name": {"en": "Bow Scout", "es": "Explorador con Arco", "pt": "Batedor de arco"},
       "kind": "monster",
       "model": "MONSTER_MODEL_VALAM",
+      "scale": 1.2,
       "numbers": [
         {"number": 312, "maps": [34]}
       ]
@@ -2004,6 +3813,7 @@
       "name": {"en": "Werewolf", "es": "Hombre Lobo", "pt": "Lobisomem"},
       "kind": "monster",
       "model": "MONSTER_MODEL_WEREWOLF_HERO",
+      "scale": 1.25,
       "numbers": [
         {"number": 313, "maps": [34]}
       ]
@@ -2012,6 +3822,7 @@
       "name": {"en": "Scout(Hero)", "es": "Explorador (Héroe)", "pt": "Batedor (Herói)"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SCOUT",
+      "scale": 1.6,
       "numbers": [
         {"number": 314, "maps": [34]}
       ]
@@ -2020,6 +3831,15 @@
       "name": {"en": "Werewolf(Hero)", "es": "Hombre Lobo (Héroe)", "pt": "Lobisomem(Herói)"},
       "kind": "monster",
       "model": "MONSTER_MODEL_WEREWOLF_HERO",
+      "mapVariants": [
+        {
+          "maps": [35],
+          "scale": 1.25,
+          "subType": 0
+        }
+      ],
+      "scale": 1.65,
+      "subType": 1,
       "numbers": [
         {"number": 315, "maps": [34]}
       ]
@@ -2028,24 +3848,27 @@
       "name": {"en": "Balram", "es": "Balram", "pt": "Balram"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BALRAM",
+      "scale": 1.25,
       "numbers": [
-        {"number": 316, "maps": [34]},
-        {"number": 344, "maps": [34], "attacks": {"monsterSkills": {"9": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
+        {"number": 316, "maps": [34], "mapVariants": [{"maps": [35], "model": "MONSTER_MODEL_VALAM", "scale": 1.2}]},
+        {"number": 344, "maps": [34], "attacks": {"monsterSkills": {"9": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}, "appear": {"effects": [{"joint": "BITMAP_JOINT_THUNDER+1", "subType": 7, "scale": 60, "offset": [20, 20, 0], "scaleRandom": 10}, {"joint": "BITMAP_JOINT_THUNDER+1", "subType": 7, "scale": 50, "count": 2, "offset": [20, 20, 0], "scaleRandom": 10}, {"joint": "BITMAP_JOINT_THUNDER+1", "subType": 7, "scale": 60, "offset": [20, 20, 0], "scaleRandom": 10}, {"particle": "BITMAP_SMOKE+4", "subType": 1, "scale": 5, "count": 3}, {"joint": "BITMAP_JOINT_THUNDER", "subType": 17, "scale": 10, "count": 4, "targetOffset": [0, 0, 120]}]}, "stateVariants": [{"state": "crywolfReady", "appear": {"fadeIn": false}}]}
       ]
     },
     {
       "name": {"en": "Soram", "es": "Soram", "pt": "Soram"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SORAM",
+      "scale": 1.3,
       "numbers": [
-        {"number": 317, "maps": [34]},
-        {"number": 341, "maps": [34], "attacks": {"monsterSkills": {"11": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
+        {"number": 317, "maps": [34], "mapVariants": [{"maps": [35], "model": "MONSTER_MODEL_SOLAM", "scale": 1.2}]},
+        {"number": 341, "maps": [34], "attacks": {"monsterSkills": {"11": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}, "appear": {"effects": [{"joint": "BITMAP_JOINT_THUNDER+1", "subType": 7, "scale": 60, "offset": [20, 20, 0], "scaleRandom": 10}, {"joint": "BITMAP_JOINT_THUNDER+1", "subType": 7, "scale": 50, "count": 2, "offset": [20, 20, 0], "scaleRandom": 10}, {"joint": "BITMAP_JOINT_THUNDER+1", "subType": 7, "scale": 60, "offset": [20, 20, 0], "scaleRandom": 10}, {"particle": "BITMAP_SMOKE+4", "subType": 1, "scale": 5, "count": 3}, {"joint": "BITMAP_JOINT_THUNDER", "subType": 17, "scale": 10, "count": 4, "targetOffset": [0, 0, 120]}]}, "stateVariants": [{"state": "crywolfReady", "appear": {"fadeIn": false}}]}
       ]
     },
     {
       "name": {"en": "Scout", "es": "Explorador", "pt": "Batedor"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SCOUT",
+      "scale": 1.2,
       "numbers": [
         {"number": 318}
       ]
@@ -2059,6 +3882,70 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.5,
+      "appear": {
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 7,
+            "scale": 60,
+            "offset": [
+              20,
+              20,
+              0
+            ],
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 7,
+            "scale": 50,
+            "count": 2,
+            "offset": [
+              20,
+              20,
+              0
+            ],
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 7,
+            "scale": 60,
+            "offset": [
+              20,
+              20,
+              0
+            ],
+            "scaleRandom": 10
+          },
+          {
+            "particle": "BITMAP_SMOKE+4",
+            "subType": 1,
+            "scale": 5,
+            "count": 3
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER",
+            "subType": 17,
+            "scale": 10,
+            "count": 4,
+            "targetOffset": [
+              0,
+              0,
+              120
+            ]
+          }
+        ]
+      },
+      "stateVariants": [
+        {
+          "state": "crywolfReady",
+          "appear": {
+            "fadeIn": false
+          }
+        }
+      ],
       "numbers": [
         {"number": 340, "maps": [34]},
         {"number": 440, "maps": [32], "attacks": {"monsterSkills": {"8": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
@@ -2073,6 +3960,70 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.25,
+      "appear": {
+        "effects": [
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 7,
+            "scale": 60,
+            "offset": [
+              20,
+              20,
+              0
+            ],
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 7,
+            "scale": 50,
+            "count": 2,
+            "offset": [
+              20,
+              20,
+              0
+            ],
+            "scaleRandom": 10
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER+1",
+            "subType": 7,
+            "scale": 60,
+            "offset": [
+              20,
+              20,
+              0
+            ],
+            "scaleRandom": 10
+          },
+          {
+            "particle": "BITMAP_SMOKE+4",
+            "subType": 1,
+            "scale": 5,
+            "count": 3
+          },
+          {
+            "joint": "BITMAP_JOINT_THUNDER",
+            "subType": 17,
+            "scale": 10,
+            "count": 4,
+            "targetOffset": [
+              0,
+              0,
+              120
+            ]
+          }
+        ]
+      },
+      "stateVariants": [
+        {
+          "state": "crywolfReady",
+          "appear": {
+            "fadeIn": false
+          }
+        }
+      ],
       "numbers": [
         {"number": 345, "maps": [34]}
       ]
@@ -2081,6 +4032,21 @@
       "name": {"en": "Tanker", "es": "Tanker", "pt": "Tanker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BALLISTA",
+      "scale": 1,
+      "facingByTile": [
+        {
+          "tileY": 90,
+          "facingStep": 0
+        },
+        {
+          "tileX": 62,
+          "facingStep": -135
+        },
+        {
+          "tileX": 183,
+          "facingStep": 90
+        }
+      ],
       "numbers": [
         {"number": 348, "maps": [34]}
       ]
@@ -2094,6 +4060,19 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 2,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 2,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 3,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 349, "maps": [34]}
       ]
@@ -2107,6 +4086,7 @@
         "otherwiseRandom": "rand",
         "clearSkill": "never"
       },
+      "scale": 0.95,
       "numbers": [
         {"number": 350, "maps": [37]},
         {"number": 435, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
@@ -2121,6 +4101,35 @@
         "otherwiseRandom": "rand",
         "clearSkill": "never"
       },
+      "scale": 0.8,
+      "spawnEffects": [
+        {
+          "eyes": [
+            16,
+            17
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 24,
+          "scale": 10,
+          "color": [
+            1.5,
+            0.01,
+            0
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 25,
+          "scale": 10,
+          "color": [
+            1.5,
+            0.01,
+            0
+          ]
+        }
+      ],
       "numbers": [
         {"number": 351, "maps": [37]}
       ]
@@ -2134,6 +4143,7 @@
         "otherwiseRandom": "rand",
         "clearSkill": "never"
       },
+      "scale": 1.3,
       "numbers": [
         {"number": 352, "maps": [37]}
       ]
@@ -2143,6 +4153,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SATYROS",
       "soundSet": "Satyros",
+      "scale": 1.3,
       "numbers": [
         {"number": 353, "maps": [37]}
       ]
@@ -2152,6 +4163,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BLADE_HUNTER",
       "soundSet": "Blade Hunter",
+      "scale": 1.3,
+      "randomStart": true,
       "numbers": [
         {"number": 354, "maps": [37, 39]}
       ]
@@ -2166,6 +4179,7 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1.1,
       "numbers": [
         {"number": 355, "maps": [37]}
       ]
@@ -2179,6 +4193,7 @@
         "otherwiseRandom": "rand",
         "clearSkill": "never"
       },
+      "scale": 1.2,
       "numbers": [
         {"number": 356, "maps": [37]},
         {"number": 434, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
@@ -2193,6 +4208,7 @@
         "otherwiseRandom": "rand",
         "clearSkill": "never"
       },
+      "scale": 1.2,
       "numbers": [
         {"number": 357, "maps": [37, 39]}
       ]
@@ -2207,6 +4223,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1,
       "numbers": [
         {"number": 358, "maps": [38, 39]},
         {"number": 438, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
@@ -2222,6 +4239,8 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.3,
+      "randomStart": true,
       "numbers": [
         {"number": 359, "maps": [38, 39]}
       ]
@@ -2236,6 +4255,8 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.3,
+      "randomStart": true,
       "numbers": [
         {"number": 360, "maps": [38, 39]},
         {"number": 439, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
@@ -2250,6 +4271,43 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.6,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 20,
+          "scale": 10
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 21,
+          "scale": 10
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 18,
+          "scale": 10
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 19,
+          "scale": 10
+        }
+      ],
+      "teleport": {
+        "sound": "SOUND_KANTURU_3RD_NIGHTMARE_TELE",
+        "effects": [
+          {
+            "effect": "BITMAP_SPARK+1",
+            "color": [
+              1,
+              1,
+              1
+            ],
+            "count": 2
+          }
+        ]
+      },
       "numbers": [
         {"number": 361, "maps": [39]}
       ]
@@ -2262,6 +4320,38 @@
         "monsterSkills": {"23": "attack1", "24": "attack2"},
         "otherwise": "attack1",
         "clearSkill": "always"
+      },
+      "scale": 2.28,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 18,
+          "scale": 15
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 19,
+          "scale": 15
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 20,
+          "scale": 15
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 21,
+          "scale": 15
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 27,
+          "scale": 15
+        }
+      ],
+      "appear": {
+        "action": "appear",
+        "blend": true
       },
       "numbers": [
         {"number": 362, "maps": [39]}
@@ -2276,6 +4366,38 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 2.28,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 28,
+          "scale": 15
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 29,
+          "scale": 15
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 30,
+          "scale": 15
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 31,
+          "scale": 15
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 33,
+          "scale": 15
+        }
+      ],
+      "appear": {
+        "action": "appear",
+        "blend": true
+      },
       "numbers": [
         {"number": 363, "maps": [39]}
       ]
@@ -2288,6 +4410,8 @@
         "otherwise": "none",
         "clearSkill": "never"
       },
+      "scale": 0.2,
+      "hiddenMesh": -2,
       "numbers": [
         {"number": 364, "maps": [39]}
       ]
@@ -2296,6 +4420,7 @@
       "name": {"en": "Pouch of Blessing", "es": "Saco de Bendiciones", "pt": "Bolsa da bênção"},
       "kind": "monster",
       "model": "MONSTER_MODEL_POUCH_OF_BLESSING",
+      "scale": 1.5,
       "numbers": [
         {"number": 365}
       ]
@@ -2305,6 +4430,19 @@
       "kind": "npc",
       "model": "MODEL_KANTURU2ND_ENTER_NPC",
       "soundSet": "Gateway Machine",
+      "scale": 4.76,
+      "outline": 1,
+      "shadow": false,
+      "positionOffset": [
+        -20,
+        -200
+      ],
+      "facingStep": 90,
+      "hooks": [
+        {
+          "hook": "Kanturu2ndEntrance"
+        }
+      ],
       "numbers": [
         {"number": 367, "maps": [38]}
       ]
@@ -2313,6 +4451,12 @@
       "name": {"en": "Elpis", "es": "Elpis", "pt": "Elpis"},
       "kind": "npc",
       "model": "MODEL_SMELTING_NPC",
+      "scale": 2.5,
+      "shadow": false,
+      "tileOffset": [
+        1,
+        -1
+      ],
       "numbers": [
         {"number": 368, "maps": [39]}
       ]
@@ -2337,6 +4481,30 @@
       "name": {"en": "Leo the Helper", "es": "Leo el Ayudante", "pt": "Leo, o ajudante"},
       "kind": "npc",
       "model": "player",
+      "scale": "character",
+      "helperPlate": true,
+      "equipment": {
+        "helm": {
+          "group": 7,
+          "number": 9
+        },
+        "armor": {
+          "group": 8,
+          "number": 9
+        },
+        "pants": {
+          "group": 9,
+          "number": 9
+        },
+        "gloves": {
+          "group": 10,
+          "number": 9
+        },
+        "boots": {
+          "group": 11,
+          "number": 9
+        }
+      },
       "numbers": [
         {"number": 371, "maps": [0]}
       ]
@@ -2345,6 +4513,8 @@
       "name": {"en": "Elite Skull Soldier", "es": "Soldado Calavera de Élite", "pt": "Soldado elite da caveira"},
       "kind": "monster",
       "model": "player",
+      "scale": 0.95,
+      "subType": 247,
       "numbers": [
         {"number": 372}
       ]
@@ -2353,6 +4523,8 @@
       "name": {"en": "Jack Olantern", "es": "Jack Olantern", "pt": "Jack Olantern"},
       "kind": "monster",
       "model": "player",
+      "scale": 0.95,
+      "subType": 248,
       "numbers": [
         {"number": 373}
       ]
@@ -2361,6 +4533,8 @@
       "name": {"en": "Santa", "es": "Santa", "pt": "Papai Noel"},
       "kind": "monster",
       "model": "player",
+      "scale": 0.85,
+      "subType": 198,
       "numbers": [
         {"number": 374}
       ]
@@ -2369,6 +4543,39 @@
       "name": {"en": "Chaos Card Master", "es": "Amo de Tarjetas de Caos", "pt": "Mestre das cartas do caos"},
       "kind": "npc",
       "model": "player",
+      "scale": "character",
+      "subType": 375,
+      "equipment": {
+        "helm": {
+          "group": 7,
+          "number": 30,
+          "level": 9
+        },
+        "armor": {
+          "group": 8,
+          "number": 30,
+          "level": 9
+        },
+        "pants": {
+          "group": 9,
+          "number": 30,
+          "level": 9
+        },
+        "gloves": {
+          "group": 10,
+          "number": 30,
+          "level": 9
+        },
+        "boots": {
+          "group": 11,
+          "number": 30,
+          "level": 9
+        },
+        "wings": {
+          "group": 12,
+          "number": 1
+        }
+      },
       "numbers": [
         {"number": 375, "maps": [0]}
       ]
@@ -2377,6 +4584,12 @@
       "name": {"en": "Pamela the Supplier", "es": "Pamela la Proveedora", "pt": "Pamela, a fornecedora"},
       "kind": "npc",
       "model": "MODEL_BC_NPC1",
+      "scale": 1,
+      "spawnEffects": [
+        {
+          "object": "MODEL_BC_BOX"
+        }
+      ],
       "numbers": [
         {"number": 376, "maps": [30]}
       ]
@@ -2385,6 +4598,13 @@
       "name": {"en": "Angela the Supplier", "es": "Angela la Proveedora", "pt": "Angela, a fornecedora"},
       "kind": "npc",
       "model": "MODEL_BC_NPC2",
+      "scale": 1,
+      "spawnEffects": [
+        {
+          "object": "MODEL_BC_BOX",
+          "angle": 90
+        }
+      ],
       "numbers": [
         {"number": 377, "maps": [30]}
       ]
@@ -2393,6 +4613,8 @@
       "name": {"en": "GameMaster", "es": "Amo del Juego", "pt": "Mestre do jogo"},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "subType": 194,
       "numbers": [
         {"number": 378}
       ]
@@ -2401,6 +4623,8 @@
       "name": {"en": "Natasha the Firecracker Merchant", "es": "Natasha, Mercader de Petardos", "pt": "Natasha, Merc. Fog. Artifício"},
       "kind": "npc",
       "model": "MODEL_WEDDING_NPC",
+      "scale": 1.1,
+      "shadow": false,
       "numbers": [
         {"number": 379, "maps": [2]}
       ]
@@ -2409,6 +4633,8 @@
       "name": {"en": "Stone Statue", "es": "Estatua de Piedra", "pt": "Estátua de pedra"},
       "kind": "npc",
       "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 380}
       ]
@@ -2417,6 +4643,7 @@
       "name": {"en": "MU Allies General", "es": "General de Aliados de MU", "pt": "General dos Aliados do MU"},
       "kind": "npc",
       "model": "MODEL_CURSEDTEMPLE_ALLIED_NPC",
+      "scale": 1.2,
       "numbers": [
         {"number": 381}
       ]
@@ -2425,6 +4652,7 @@
       "name": {"en": "Illusion Sorcerer Elder", "es": "Anciano Hechicero de Ilusiones", "pt": "Ancião feiticeiro da ilusão"},
       "kind": "npc",
       "model": "MODEL_CURSEDTEMPLE_ILLUSION_NPC",
+      "scale": 1.2,
       "numbers": [
         {"number": 382}
       ]
@@ -2433,6 +4661,14 @@
       "name": {"en": "Alliance Sacred Item Storage", "es": "Almacén Alianza Ítems Sagrados", "pt": "Armaz. Item Sagr. da Aliança"},
       "kind": "npc",
       "model": "MODEL_CURSEDTEMPLE_ALLIED_BASKET",
+      "scale": 1.8,
+      "outline": 1.03,
+      "hooks": [
+        {
+          "hook": "IllusionTempleStorageReset",
+          "storage": "allied"
+        }
+      ],
       "numbers": [
         {"number": 383}
       ]
@@ -2441,6 +4677,14 @@
       "name": {"en": "Illusion Castle Sacred Item Storage", "es": "Alm. Ít. Sagrado Cast. Ilusión", "pt": "Armaz. It. Sagr. Cast. Ilusão"},
       "kind": "npc",
       "model": "MODEL_CURSEDTEMPLE_ILLUSION__BASKET",
+      "scale": 1.5,
+      "outline": 1.03,
+      "hooks": [
+        {
+          "hook": "IllusionTempleStorageReset",
+          "storage": "illusion"
+        }
+      ],
       "numbers": [
         {"number": 384}
       ]
@@ -2449,6 +4693,7 @@
       "name": {"en": "Mirage", "es": "Espejismo", "pt": "Miragem"},
       "kind": "npc",
       "model": "MODEL_CURSEDTEMPLE_ENTER_NPC",
+      "scale": 0.95,
       "numbers": [
         {"number": 385, "maps": [2, 51]}
       ]
@@ -2457,6 +4702,7 @@
       "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
       "kind": "monster",
       "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING",
+      "scale": 1,
       "numbers": [
         {"number": 386},
         {"number": 389},
@@ -2470,6 +4716,7 @@
       "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
       "kind": "monster",
       "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE",
+      "scale": 1,
       "numbers": [
         {"number": 387},
         {"number": 390},
@@ -2488,6 +4735,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1,
       "numbers": [
         {"number": 388},
         {"number": 391},
@@ -2501,6 +4749,8 @@
       "name": {"en": "MU Allies", "es": "Aliados de MU", "pt": "Aliados do MU"},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "subType": 256,
       "numbers": [
         {"number": 404}
       ]
@@ -2509,6 +4759,8 @@
       "name": {"en": "Illusion Sorcerer", "es": "Hechicero de Ilusiones", "pt": "Feiticeiro da ilusão"},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "subType": 257,
       "numbers": [
         {"number": 405}
       ]
@@ -2525,6 +4777,117 @@
       "name": {"en": "Werewolf Quarel", "es": "Hombre Lobo Quarel", "pt": "Lobisomem Quarel"},
       "kind": "npc",
       "model": "MODEL_NPC_QUARREL",
+      "scale": 1.9,
+      "stateVariants": [
+        {
+          "state": "crywolfElfTime",
+          "onTalk": [
+            {
+              "send": "talk"
+            }
+          ]
+        }
+      ],
+      "onTalk": [
+        {
+          "dialog": {
+            "title": {
+              "en": "Werewolf Guardsman",
+              "de": "Werwolf-Wächter",
+              "es": "Guardia hombre lobo",
+              "id": "Penjaga Manusia Serigala",
+              "ja": "ウェアウルフコーラル",
+              "pl": "Werewolf Guardsman",
+              "pt": "Guarda Lobisomem",
+              "ru": "Оборотень-гвардеец",
+              "tl": "Werewolf Guardsman",
+              "uk": "Гвардійський перевертень",
+              "zh-TW": "狼人守衛"
+            },
+            "lines": [
+              {
+                "en": "'Do you even know about me? I've been both blessed and cursed from Lugard. You may be helped if you are appropriately qualified.'",
+                "de": "„Wissen Sie überhaupt etwas über mich? Ich wurde von Lugard sowohl gesegnet als auch verflucht. Wenn Sie entsprechend qualifiziert sind, kann Ihnen geholfen werden.“",
+                "es": "'¿Sabes siquiera acerca de mí? He sido bendecido y maldecido por parte de Lugard. Es posible que le ayuden si está debidamente cualificado.",
+                "id": "'Apakah kamu tahu tentang aku? Saya telah diberkati sekaligus dikutuk dari Lugard. Anda mungkin terbantu jika Anda memiliki kualifikasi yang sesuai.'",
+                "ja": "「私を知っているのか?私はルガド様の祝福と呪いを同時に受けた者だ。君が資格を持っていれば者であれば助けを与えよう。」",
+                "pl": "Czy ty w ogóle o mnie wiesz? Zostałem pobłogosławiony i przeklęty przez Lugarda. Jeśli masz odpowiednie kwalifikacje, możesz uzyskać pomoc.",
+                "pt": "'Você ao menos sabe sobre mim? Fui abençoado e amaldiçoado por Lugard. Você pode ser ajudado se estiver devidamente qualificado.",
+                "ru": "— Ты вообще знаешь обо мне? Лугард одновременно благословил и проклял меня. Вам могут помочь, если вы обладаете соответствующей квалификацией».",
+                "tl": "'May alam ka pa ba tungkol sa akin? Pareho akong pinagpala at isinumpa mula kay Lugard. Maaari kang matulungan kung ikaw ay angkop na kuwalipikado.'",
+                "uk": "«Ти взагалі про мене знаєш? Мене одночасно благословив і прокляв Лугард. Вам можуть допомогти, якщо ви маєте належну кваліфікацію».",
+                "zh-TW": "'你還了解我嗎？我既受到盧加德的祝福，也受到盧加德的詛咒。如果您有適當的資格，您可能會得到幫助。"
+              },
+              {
+                "en": "If you have passed through the Apostle Devin's test, Werewolf Guardsman will send you and your party members Balgass' Barrack.",
+                "de": "Wenn Sie die Prüfung des Apostels Devin bestanden haben, schickt der Werwolf-Wächter Sie und Ihre Partymitglieder in die Balgass-Kaserne.",
+                "es": "Si has pasado la prueba del Apóstol Devin, Werewolf Guardsman te enviará a ti y a los miembros de tu grupo el Cuartel de Balgass.",
+                "id": "Jika Anda telah lulus ujian Rasul Devin, Penjaga Manusia Serigala akan mengirim Anda dan anggota partai Anda Balgass' Barrack.",
+                "ja": "君が「司祭デヴィン」の試練を通過した者なら君と仲間たちを「バルガスの兵営」へ送ろう。",
+                "pl": "Jeśli przeszedłeś próbę Apostoła Devina, Werewolf Guardsman wyśle ciebie i członków twojej grupy do Balgass' Barrack.",
+                "pt": "Se você passou no teste do Apóstolo Devin, o Guarda Lobisomem enviará você e os membros do seu grupo Balgass' Barrack.",
+                "ru": "Если вы прошли испытание апостола Девина, гвардеец-оборотень отправит вас и членов вашей группы в казарму Балгасса.",
+                "tl": "Kung nakapasa ka sa pagsubok ni Apostol Devin, ipapadala ka ng Werewolf Guardsman at ng iyong mga miyembro ng partido na Balgass' Barrack.",
+                "uk": "Якщо ви пройшли випробування Апостола Девіна, Werewolf Guardsman надішле вам і членам вашої групи казарму Балгаса.",
+                "zh-TW": "如果你通過了使徒德文的考驗，狼人守衛將把你和你的小隊成員送到巴爾加斯的兵營。"
+              },
+              {
+                "en": "You must be located closely together in order to enter Balgass' Barrack at once.",
+                "de": "Um gemeinsam die Balgass-Kaserne zu betreten, müssen Sie dicht beieinander stehen.",
+                "es": "Deben estar ubicados muy juntos para poder ingresar al Cuartel de Balgass de inmediato.",
+                "id": "Anda harus berada berdekatan agar dapat memasuki Barak Balgass sekaligus.",
+                "ja": "あなたのパーティーメンバーたちが「バルガスの兵営」に一緒に入場するためにはあなたの近くにいなければなりません。",
+                "pl": "Aby od razu wejść do Balgass' Barrack, musicie znajdować się blisko siebie.",
+                "pt": "Vocês devem estar próximos um do outro para entrar no Quartel de Balgass imediatamente.",
+                "ru": "Вы должны находиться близко друг к другу, чтобы сразу войти в казарму Балгасса.",
+                "tl": "Dapat kang matatagpuan malapit nang magkasama upang makapasok nang sabay-sabay sa Balgass' Barrack.",
+                "uk": "Ви повинні розташуватися близько один до одного, щоб відразу потрапити в казарму Балгаса.",
+                "zh-TW": "你們必須靠得很近才能立即進入巴爾加斯的軍營。"
+              },
+              {
+                "en": "In order to receive help from Werewolf Guardsman; you must pay him 3,000,000 Zen.",
+                "de": "Um Hilfe vom Werwolf-Wächter zu erhalten, müssen Sie ihm 3.000.000 Zen zahlen.",
+                "es": "Para recibir ayuda de Werewolf Guardsman; debes pagarle 3.000.000 Zen.",
+                "id": "Untuk menerima bantuan dari Werewolf Guardsman; Anda harus membayarnya 3.000.000 Zen.",
+                "ja": "「ウェアウルフコーラル」に手伝ってもらうためには彼に300万ゼンを払わなければならない。",
+                "pl": "Aby otrzymać pomoc od Werewolf Guardsman, musisz mu zapłacić 3 000 000 Zen.",
+                "pt": "Para receber ajuda do Guarda Lobisomem; você deve pagar a ele 3.000.000 Zen.",
+                "ru": "Чтобы получить помощь от гвардейца-оборотня; вы должны заплатить ему 3 000 000 дзэн.",
+                "tl": "Upang makatanggap ng tulong mula sa Werewolf Guardsman; kailangan mong bayaran siya ng 3,000,000 Zen.",
+                "uk": "Щоб отримати допомогу від Werewolf Guardsman; ви повинні заплатити йому 3 000 000 дзен.",
+                "zh-TW": "為了得到狼人守衛的幫助；你必須付給他 3,000,000 Zen。"
+              }
+            ],
+            "ok": {
+              "request": "enterRefuge",
+              "if": {
+                "quest": "thirdChangeUp2",
+                "is": [
+                  "ongoing",
+                  "done"
+                ]
+              },
+              "zen": 3000000,
+              "failure": {
+                "en": "You are short of Zen.",
+                "de": "Ihnen fehlt Zen.",
+                "es": "Te falta Zen.",
+                "id": "Anda kekurangan Zen.",
+                "ja": "ゼンが不足しています。",
+                "pl": "Brakuje ci Zen.",
+                "pt": "Você está com falta de Zen.",
+                "ru": "Вам не хватает дзэн.",
+                "tl": "Kulang ka kay Zen.",
+                "uk": "Вам не вистачає Дзен.",
+                "zh-TW": "你缺乏禪宗。"
+              }
+            }
+          }
+        },
+        {
+          "send": "talk"
+        }
+      ],
       "numbers": [
         {"number": 407, "maps": [34]}
       ]
@@ -2533,6 +4896,82 @@
       "name": {"en": "Gatekeeper", "es": "Guardián de Entrada", "pt": "Porteiro"},
       "kind": "npc",
       "model": "MODEL_NPC_CASTEL_GATE",
+      "scale": 1.2,
+      "outline": 1.1,
+      "shadow": false,
+      "heightOffset": 240,
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "dialog": {
+            "title": {
+              "en": "Gatekeeper",
+              "de": "Torwächter",
+              "es": "Portero",
+              "id": "Penjaga gerbang",
+              "ja": "門番",
+              "pl": "Odźwierny",
+              "pt": "Porteiro",
+              "ru": "привратник",
+              "tl": "Gatekeeper",
+              "uk": "Воротар",
+              "zh-TW": "看門人"
+            },
+            "lines": [
+              {
+                "en": "'Hmm, who are you? I'm confused. Are you even approved of Balgass?",
+                "de": "„Hmm, wer sind Sie? Ich bin verwirrt. Hat Balgass Sie überhaupt zugelassen?“",
+                "es": "'Mmm, ¿quién eres? Estoy confundido. ¿Apruebas siquiera a Balgass?",
+                "id": "'Hmm, siapa kamu? saya bingung. Apakah Anda menyetujui Balgass?",
+                "ja": "「誰だ？?怪しい奴だな。お前はバルガス様の許可をもらった者なのか?」",
+                "pl": "'Hm, kim jesteś? Nic nie rozumiem. Czy Balgass w ogóle cię przyjął?",
+                "pt": "'Hum, quem é você? Estou confuso. Você ao menos aprovou Balgass?",
+                "ru": "'Хм, а ты кто? Я в замешательстве. Вы вообще одобряете Балгасса?",
+                "tl": "'Hmm, sino ka? naguguluhan ako. Approved ka na ba kay Balgass?",
+                "uk": "«Хм, хто ти? я збентежений Ви взагалі схвалюєте Балгасса?",
+                "zh-TW": "’嗯，你是誰？我很困惑。您是否認可巴爾加斯？"
+              },
+              {
+                "en": "Lugadr's 12 apostles are helping by blinding the gatekeeper by the road to Balgass' Resting Place.",
+                "de": "Die 12 Apostel von Lugard helfen, indem sie den Torwächter am Weg zu Balgass’ Ruhestätte blenden.",
+                "es": "Los 12 apóstoles de Lugadr están ayudando cegando al portero en el camino hacia el lugar de descanso de Balgass.",
+                "id": "Ke-12 rasul Lugadr membantu dengan membutakan penjaga gerbang di jalan menuju Tempat Peristirahatan Balgass.",
+                "ja": "クエスト遂行中はルガドの12司祭の力で「安息所」の門番の目を欺くことが可能です。",
+                "pl": "Pomaga mu 12 apostołów Lugadra, oślepiając odźwiernego przy drodze do miejsca spoczynku Balgassa.",
+                "pt": "Os 12 apóstolos de Lugadr estão ajudando cegando o porteiro na estrada para o local de descanso de Balgass.",
+                "ru": "12 апостолов Лугадра помогают ослепить привратника на дороге к месту упокоения Балгасса.",
+                "tl": "Ang 12 apostol ni Lugadr ay tumutulong sa pamamagitan ng pagbulag sa bantay-pinto sa daan patungo sa Balgass' Resting Place.",
+                "uk": "12 апостолів Лугадра допомагають, засліплюючи воротаря біля дороги до місця спочинку Балгаса.",
+                "zh-TW": "盧加德爾的 12 名使徒正在幫忙，他們蒙蔽了通往巴爾加斯安息之地的道路旁的守門人。"
+              },
+              {
+                "en": "Apostle Devin's third mission request enables entrance into the resting place.",
+                "de": "Die dritte Mission des Apostels Devin ermöglicht den Zutritt zur Ruhestätte.",
+                "es": "La tercera petición de misión del apóstol Devin permite la entrada al lugar de descanso.",
+                "id": "Permintaan misi ketiga Rasul Devin memungkinkan masuk ke tempat peristirahatan.",
+                "ja": "司祭デヴィンの三番目の要請を遂行する間、安息所への入場が可能になります。",
+                "pl": "Trzecia misja apostoła Devina umożliwia wejście do miejsca spoczynku.",
+                "pt": "O terceiro pedido missionário do apóstolo Devin permite a entrada no local de descanso.",
+                "ru": "Третья миссия апостола Девина позволяет войти в место упокоения.",
+                "tl": "Ang ikatlong kahilingan sa misyon ni Apostol Devin ay nagbibigay-daan sa pagpasok sa pahingahang lugar.",
+                "uk": "Третє прохання апостола Девіна про місію дозволяє ввійти до місця спочинку.",
+                "zh-TW": "使徒德文的第三個任務請求允許進入安息之地。"
+              }
+            ],
+            "ok": {
+              "request": "enterBarracks",
+              "if": {
+                "quest": "thirdChangeUp3",
+                "is": [
+                  "ongoing"
+                ]
+              }
+            }
+          }
+        }
+      ],
       "numbers": [
         {"number": 408, "maps": [41]}
       ]
@@ -2545,6 +4984,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.25,
       "numbers": [
         {"number": 409, "maps": [41]},
         {"number": 436, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
@@ -2558,6 +4998,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.25,
       "numbers": [
         {"number": 410, "maps": [41, 42]}
       ]
@@ -2570,6 +5011,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.3,
       "numbers": [
         {"number": 411, "maps": [41, 42]},
         {"number": 437, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
@@ -2584,6 +5026,36 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.7,
+      "spawnEffects": [
+        {
+          "effect": "BITMAP_CRATER",
+          "subType": 2,
+          "bone": 27
+        },
+        {
+          "particle": "BITMAP_BLUE_BLUR",
+          "subType": 1,
+          "color": [
+            1,
+            0.2,
+            0.2
+          ],
+          "bone": 27,
+          "count": 2
+        },
+        {
+          "effect": "BITMAP_SHOCK_WAVE",
+          "subType": 8,
+          "color": [
+            1,
+            0.2,
+            0.2
+          ],
+          "bone": 27,
+          "count": 5
+        }
+      ],
       "numbers": [
         {"number": 412, "maps": [42]}
       ]
@@ -2592,6 +5064,12 @@
       "name": {"en": "Lunar Rabbit", "es": "Conejo Lunar", "pt": "Coelho lunar"},
       "kind": "monster",
       "model": "MONSTER_MODEL_LUNAR_RABBIT",
+      "scale": 0.8,
+      "randomLook": [
+        0,
+        1,
+        2
+      ],
       "numbers": [
         {"number": 413}
       ]
@@ -2600,6 +5078,30 @@
       "name": {"en": "Helper Ellen", "es": "Ayudante Ellen", "pt": "Ajudante Ellen"},
       "kind": "npc",
       "model": "player",
+      "scale": "character",
+      "helperPlate": true,
+      "equipment": {
+        "helm": {
+          "group": 7,
+          "number": 9
+        },
+        "armor": {
+          "group": 8,
+          "number": 9
+        },
+        "pants": {
+          "group": 9,
+          "number": 9
+        },
+        "gloves": {
+          "group": 10,
+          "number": 9
+        },
+        "boots": {
+          "group": 11,
+          "number": 9
+        }
+      },
       "numbers": [
         {"number": 414}
       ]
@@ -2608,6 +5110,7 @@
       "name": {"en": "Silvia", "es": "Silvia", "pt": "Silvia"},
       "kind": "npc",
       "model": "MODEL_ELBELAND_SILVIA",
+      "scale": 1,
       "numbers": [
         {"number": 415, "maps": [51]}
       ]
@@ -2616,6 +5119,9 @@
       "name": {"en": "Rhea", "es": "Rhea", "pt": "Rhea"},
       "kind": "npc",
       "model": "MODEL_ELBELAND_RHEA",
+      "scale": 1,
+      "outline": 1.1,
+      "repairShop": true,
       "numbers": [
         {"number": 416, "maps": [51]}
       ]
@@ -2624,6 +5130,7 @@
       "name": {"en": "Marce", "es": "Marce", "pt": "Marce"},
       "kind": "npc",
       "model": "MODEL_ELBELAND_MARCE",
+      "scale": 1.05,
       "numbers": [
         {"number": 417, "maps": [51]}
       ]
@@ -2633,6 +5140,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_RABBIT",
       "soundSet": "Strange Rabbit",
+      "scale": 0.95,
       "numbers": [
         {"number": 418, "maps": [51]}
       ]
@@ -2642,6 +5150,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BUTTERFLY",
       "soundSet": "Hideous Rabbit",
+      "scale": 0.76,
       "numbers": [
         {"number": 419, "maps": [51]}
       ]
@@ -2651,6 +5160,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_HIDEOUS_RABBIT",
       "soundSet": "Werewolf",
+      "scale": 0.95,
       "numbers": [
         {"number": 420, "maps": [51]}
       ]
@@ -2660,6 +5170,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_WEREWOLF2",
       "soundSet": "Polluted Butterfly",
+      "scale": 0.88000005,
       "numbers": [
         {"number": 421, "maps": [51]}
       ]
@@ -2669,6 +5180,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CURSED_LICH",
       "soundSet": "Cursed Lich",
+      "scale": 0.95,
       "numbers": [
         {"number": 422, "maps": [51]}
       ]
@@ -2678,6 +5190,9 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_TOTEM_GOLEM",
       "soundSet": "Totem Golem",
+      "scale": 0.1615,
+      "outline": 1.05,
+      "deathEffect": 100,
       "numbers": [
         {"number": 423, "maps": [51]}
       ]
@@ -2687,6 +5202,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GRIZZLY",
       "soundSet": "Grizzly",
+      "scale": 1.14,
       "numbers": [
         {"number": 424, "maps": [51]}
       ]
@@ -2696,6 +5212,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CAPTAIN_GRIZZLY",
       "soundSet": "Captain Grizzly",
+      "scale": 1.2349999,
       "numbers": [
         {"number": 425, "maps": [51]}
       ]
@@ -2705,6 +5222,18 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 16
+          },
+          {
+            "group": 0,
+            "number": 16
+          }
+        ]
+      },
       "numbers": [
         {"number": 426, "maps": [53]}
       ]
@@ -2715,8 +5244,16 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
       "soundSet": "Chaos Castle",
       "randomVariants": [
-        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard", "equipment": {"weapons": [{"group": 5, "number": 5}]}}
       ],
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 19
+          }
+        ]
+      },
       "numbers": [
         {"number": 427, "maps": [53]}
       ]
@@ -2726,6 +5263,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SAPIUNUS",
       "soundSet": "Sapi-Unus",
+      "scale": 1,
       "numbers": [
         {"number": 441, "maps": [56]}
       ]
@@ -2735,6 +5273,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SAPIDUO",
       "soundSet": "Sapi-Unus",
+      "scale": 1,
       "numbers": [
         {"number": 442, "maps": [56]}
       ]
@@ -2744,6 +5283,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SAPITRES",
       "soundSet": "Sapi-Tres",
+      "scale": 1,
       "numbers": [
         {"number": 443, "maps": [56]}
       ]
@@ -2753,6 +5293,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SHADOW_PAWN",
       "soundSet": "Shadow Pawn",
+      "scale": 1.1,
+      "deathEffect": 100,
       "numbers": [
         {"number": 444, "maps": [56]}
       ]
@@ -2762,6 +5304,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SHADOW_KNIGHT",
       "soundSet": "Shadow Knight",
+      "scale": 1.1,
+      "deathEffect": 100,
       "numbers": [
         {"number": 445, "maps": [56]}
       ]
@@ -2771,6 +5315,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SHADOW_LOOK",
       "soundSet": "Shadow Look",
+      "scale": 1.3,
+      "deathEffect": 100,
       "numbers": [
         {"number": 446, "maps": [56]}
       ]
@@ -2780,6 +5326,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_NAPIN",
       "soundSet": "Thunder Napin",
+      "scale": 0.95,
       "numbers": [
         {"number": 447, "maps": [56]}
       ]
@@ -2789,6 +5336,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GHOST_NAPIN",
       "soundSet": "Ghost Napin",
+      "scale": 0.95,
       "numbers": [
         {"number": 448, "maps": [56]}
       ]
@@ -2798,6 +5346,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BLAZE_NAPIN",
       "soundSet": "Blaze Napin",
+      "scale": 0.95,
       "numbers": [
         {"number": 449, "maps": [56]}
       ]
@@ -2806,6 +5355,9 @@
       "name": {"en": "Cherry Blossom Spirit", "es": "Espíritu Flor de Cerezo", "pt": "Espírito da flor de cereja"},
       "kind": "npc",
       "model": "MODEL_NPC_CHERRYBLOSSOM",
+      "scale": 0.65,
+      "outline": 1.08,
+      "heightOffset": 170,
       "numbers": [
         {"number": 450, "maps": [3]}
       ]
@@ -2814,6 +5366,9 @@
       "name": {"en": "Cherry Blossom Tree", "es": "Árbol Flor de Cerezo", "pt": "Cerejeira"},
       "kind": "other",
       "model": "MODEL_NPC_CHERRYBLOSSOMTREE",
+      "scale": 1,
+      "outline": 0,
+      "shadow": false,
       "numbers": [
         {"number": 451, "maps": [3]}
       ]
@@ -2822,6 +5377,7 @@
       "name": {"en": "Seed Master", "es": "Amo de Simientes", "pt": "Mestre das sementes"},
       "kind": "npc",
       "model": "MODEL_SEED_MASTER",
+      "scale": 1.1,
       "numbers": [
         {"number": 452, "maps": [51]}
       ]
@@ -2830,6 +5386,7 @@
       "name": {"en": "Seed Researcher", "es": "Investigador de Simientes", "pt": "Pesquisador de sementes"},
       "kind": "npc",
       "model": "MODEL_SEED_INVESTIGATOR",
+      "outline": 1.15,
       "numbers": [
         {"number": 453, "maps": [51]}
       ]
@@ -2844,6 +5401,7 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1.2,
       "numbers": [
         {"number": 454, "maps": [57]},
         {"number": 531, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
@@ -2859,6 +5417,7 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1.7,
       "numbers": [
         {"number": 455, "maps": [57]}
       ]
@@ -2873,6 +5432,8 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1,
+      "deathEffect": 100,
       "numbers": [
         {"number": 456, "maps": [57]}
       ]
@@ -2887,6 +5448,7 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1,
       "numbers": [
         {"number": 457, "maps": [57, 58]}
       ]
@@ -2901,6 +5463,7 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1.5,
       "numbers": [
         {"number": 458, "maps": [57]}
       ]
@@ -2915,6 +5478,18 @@
         "otherwise": "attack4",
         "clearSkill": "afterAttack"
       },
+      "scale": 2,
+      "stateVariants": [
+        {
+          "state": "raklionBossWaiting",
+          "height": 1000
+        }
+      ],
+      "hooks": [
+        {
+          "hook": "RaklionBossDrop"
+        }
+      ],
       "numbers": [
         {"number": 459, "maps": [58]}
       ]
@@ -2923,6 +5498,8 @@
       "name": {"en": "Spider Eggs", "es": "Huevos de Araña", "pt": "Ovos de aranha"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SPIDER_EGGS_1",
+      "scale": 0.3,
+      "shadow": false,
       "numbers": [
         {"number": 460, "maps": [58]}
       ]
@@ -2931,6 +5508,8 @@
       "name": {"en": "Spider Eggs", "es": "Huevos de Araña", "pt": "Ovos de aranha"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SPIDER_EGGS_2",
+      "scale": 0.3,
+      "shadow": false,
       "numbers": [
         {"number": 461, "maps": [58]}
       ]
@@ -2939,6 +5518,8 @@
       "name": {"en": "Spider Eggs", "es": "Huevos de Araña", "pt": "Ovos de aranha"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SPIDER_EGGS_3",
+      "scale": 0.3,
+      "shadow": false,
       "numbers": [
         {"number": 462, "maps": [58]}
       ]
@@ -2947,6 +5528,8 @@
       "name": {"en": "Fire Flame Ghost", "es": "Espíritu de Llama de Fuego", "pt": "Fantasma da chama de fogo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_FIRE_FLAME_GHOST",
+      "scale": 0.8,
+      "hiddenMesh": 2,
       "numbers": [
         {"number": 463}
       ]
@@ -2955,6 +5538,40 @@
       "name": {"en": "Reset Helper", "es": "Ayudante de Reinicio", "pt": "Assistente de Reinicialização"},
       "kind": "npc",
       "model": "player",
+      "scale": "character",
+      "outline": 1.15,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 11
+          },
+          {
+            "group": 4,
+            "number": 7
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 9
+        },
+        "armor": {
+          "group": 8,
+          "number": 9
+        },
+        "pants": {
+          "group": 9,
+          "number": 9
+        },
+        "gloves": {
+          "group": 10,
+          "number": 9
+        },
+        "boots": {
+          "group": 11,
+          "number": 9
+        }
+      },
       "numbers": [
         {"number": 464}
       ]
@@ -2963,6 +5580,8 @@
       "name": {"en": "Santa Claus", "es": "Santa", "pt": "Papai Noel"},
       "kind": "npc",
       "model": "MODEL_XMAS2008_SANTA_NPC",
+      "scale": 1.7,
+      "facing": 20,
       "numbers": [
         {"number": 465}
       ]
@@ -2980,6 +5599,7 @@
       "name": {"en": "Snowman", "es": "Hombre de nieve", "pt": "Homem de neve"},
       "kind": "npc",
       "model": "MODEL_XMAS2008_SNOWMAN_NPC",
+      "scale": 1.3,
       "numbers": [
         {"number": 467, "maps": [62]}
       ]
@@ -2988,6 +5608,7 @@
       "name": {"en": "Dasher", "es": "Brioso", "pt": "Corredora"},
       "kind": "npc",
       "model": "MODEL_LITTLESANTA",
+      "scale": 0.43,
       "numbers": [
         {"number": 468, "maps": [62]}
       ]
@@ -2996,6 +5617,8 @@
       "name": {"en": "Kermit", "es": "Kermit", "pt": "Kermit"},
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+1",
+      "scale": 0.43,
+      "facing": 90,
       "numbers": [
         {"number": 469, "maps": [62]}
       ]
@@ -3004,6 +5627,28 @@
       "name": {"en": "Little Santa", "es": "Pequeño Santa", "pt": "Pequeno Papai Noel"},
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+2",
+      "scale": 0.43,
+      "facing": 90,
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "message": {
+            "en": "Health has been recovered of 100%.",
+            "de": "Das Leben wurde zu 100% wiederhergestellt.",
+            "es": "La salud se ha recuperado del 100%.",
+            "id": "Kesehatan telah pulih 100%.",
+            "ja": "体力が100%回復しました。",
+            "pl": "Zdrowie zostało odzyskane w 100%.",
+            "pt": "A saúde foi recuperada de 100%.",
+            "ru": "Здоровье восстановлено на 100%.",
+            "tl": "Ang kalusugan ay nakuhang muli ng 100%.",
+            "uk": "Здоров'я відновлено на 100%.",
+            "zh-TW": "健康已恢復100%。"
+          }
+        }
+      ],
       "numbers": [
         {"number": 470, "maps": [62]}
       ]
@@ -3012,6 +5657,28 @@
       "name": {"en": "Cupid", "es": "Cupido", "pt": "Cupido"},
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+3",
+      "scale": 0.43,
+      "facing": 90,
+      "onTalk": [
+        {
+          "send": "talk"
+        },
+        {
+          "message": {
+            "en": "Mana has been recovered of 100%.",
+            "de": "Das Mana wurde zu 100% wiederhergestellt.",
+            "es": "Mana se ha recuperado del 100%.",
+            "id": "Mana telah pulih 100%.",
+            "ja": "マナが100%回復しました。",
+            "pl": "Mana została odzyskana w 100%.",
+            "pt": "Mana foi recuperada em 100%.",
+            "ru": "Мана восстановлена ​​на 100%.",
+            "tl": "Nabawi ang Mana ng 100%.",
+            "uk": "Мана була відновлена ​​на 100%.",
+            "zh-TW": "魔力已恢復100%。"
+          }
+        }
+      ],
       "numbers": [
         {"number": 471, "maps": [62]}
       ]
@@ -3020,6 +5687,8 @@
       "name": {"en": "Prancer", "es": "Acróbata", "pt": "Empinadora"},
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+4",
+      "scale": 0.43,
+      "facing": 90,
       "numbers": [
         {"number": 472, "maps": [62]}
       ]
@@ -3028,6 +5697,7 @@
       "name": {"en": "Donner", "es": "Trueno", "pt": "Trovão"},
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+5",
+      "scale": 0.43,
       "numbers": [
         {"number": 473, "maps": [62]}
       ]
@@ -3036,6 +5706,8 @@
       "name": {"en": "Vixen", "es": "Juguetón", "pt": "Raposa"},
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+6",
+      "scale": 0.43,
+      "facing": 90,
       "numbers": [
         {"number": 474, "maps": [62]}
       ]
@@ -3044,6 +5716,8 @@
       "name": {"en": "Blitzen", "es": "Relámpago", "pt": "Relâmpado"},
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+7",
+      "scale": 0.43,
+      "facing": 90,
       "numbers": [
         {"number": 475, "maps": [62]}
       ]
@@ -3053,6 +5727,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CURSED_SANTA",
       "soundSet": "Cursed Santa",
+      "scale": 1.7,
       "numbers": [
         {"number": 476}
       ]
@@ -3062,6 +5737,8 @@
       "kind": "monster",
       "model": "MODEL_XMAS2008_SNOWMAN",
       "soundSet": "Transformed Snowman",
+      "scale": 1.3,
+      "deathEffect": 100,
       "numbers": [
         {"number": 477}
       ]
@@ -3070,6 +5747,7 @@
       "name": {"en": "Delgado", "es": "Delgado", "pt": "Delgado"},
       "kind": "npc",
       "model": "MODEL_NPC_SERBIS",
+      "crywolfContract": true,
       "numbers": [
         {"number": 478, "maps": [2]}
       ]
@@ -3079,6 +5757,7 @@
       "kind": "npc",
       "model": "MODEL_DUEL_NPC_TITUS",
       "soundSet": "Doorkeeper Titus",
+      "scale": 1.1,
       "numbers": [
         {"number": 479, "maps": [63]}
       ]
@@ -3088,6 +5767,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ZOMBIE_FIGHTER",
       "soundSet": "Zombie Fighter",
+      "scale": 1,
       "numbers": [
         {"number": 480, "maps": [63]},
         {"number": 481, "maps": [63]}
@@ -3098,6 +5778,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GLADIATOR",
       "soundSet": "Resurrected Gladiator",
+      "scale": 1,
       "numbers": [
         {"number": 482, "maps": [63]},
         {"number": 483, "maps": [63]}
@@ -3108,6 +5789,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SLAUGTHERER",
       "soundSet": "Ash Slaughterer",
+      "scale": 0.7,
       "numbers": [
         {"number": 484, "maps": [63]},
         {"number": 485, "maps": [63]}
@@ -3118,6 +5800,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BLOOD_ASSASSIN",
       "soundSet": "Blood Assassin",
+      "scale": 1,
+      "deathEffect": 100,
       "numbers": [
         {"number": 486, "maps": [63]}
       ]
@@ -3127,6 +5811,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN",
       "soundSet": "Cruel Blood Assassin",
+      "scale": 1,
+      "deathEffect": 100,
       "numbers": [
         {"number": 487, "maps": [63]},
         {"number": 488, "maps": [63]}
@@ -3137,6 +5823,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BURNING_LAVA_GIANT",
       "soundSet": "Burning Lava Giant",
+      "scale": 1,
       "numbers": [
         {"number": 489, "maps": [63]}
       ]
@@ -3146,6 +5833,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_LAVA_GIANT",
       "soundSet": "Ruthless Lava Giant",
+      "scale": 1,
       "numbers": [
         {"number": 490, "maps": [63]},
         {"number": 491, "maps": [63]}
@@ -3155,6 +5843,9 @@
       "name": {"en": "Moss", "es": "Moss", "pt": "Moss"},
       "kind": "npc",
       "model": "MODEL_GAMBLE_NPC_MOSS",
+      "scale": 0.8,
+      "outline": 1.1,
+      "deathEffect": 100,
       "numbers": [
         {"number": 492, "maps": [51]}
       ]
@@ -3164,6 +5855,16 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_KNIGHT",
       "soundSet": "Dark Knight",
+      "scale": 0.8,
+      "lookLevel": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 13
+          }
+        ]
+      },
       "numbers": [
         {"number": 493}
       ]
@@ -3173,6 +5874,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DEVIL",
       "soundSet": "Devil",
+      "scale": 1.1,
       "numbers": [
         {"number": 494}
       ]
@@ -3182,6 +5884,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GOLDEN_STONE_GOLEM",
       "soundSet": "Blue Golem",
+      "scale": 1.35,
       "numbers": [
         {"number": 495}
       ]
@@ -3191,6 +5894,21 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CRUST",
       "soundSet": "Mega Crust",
+      "scale": 1.1,
+      "glowMesh": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 18,
+            "level": 5
+          },
+          {
+            "group": 6,
+            "number": 14
+          }
+        ]
+      },
       "numbers": [
         {"number": 496}
       ]
@@ -3200,6 +5918,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SATYROS",
       "soundSet": "Satyros",
+      "scale": 1.3,
       "numbers": [
         {"number": 497}
       ]
@@ -3209,6 +5928,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_TWIN_TAIL",
       "soundSet": "Twin Tail",
+      "scale": 1.3,
+      "randomStart": true,
       "numbers": [
         {"number": 498}
       ]
@@ -3218,6 +5939,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_IRON_KNIGHT",
       "soundSet": "Iron Knight",
+      "scale": 1.5,
       "numbers": [
         {"number": 499}
       ]
@@ -3227,6 +5949,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_NAPIN",
       "soundSet": "Thunder Napin",
+      "scale": 0.95,
       "numbers": [
         {"number": 500}
       ]
@@ -3236,6 +5959,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DRAGON",
       "soundSet": "Red Dragon",
+      "scale": 0.88,
       "numbers": [
         {"number": 501}
       ]
@@ -3245,6 +5969,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_RABBIT",
       "soundSet": "Strange Rabbit",
+      "scale": 0.95,
       "numbers": [
         {"number": 502}
       ]
@@ -3253,6 +5978,7 @@
       "name": {"en": "Transformed Panda", "es": "Panda transformado", "pt": "Panda transformado"},
       "kind": "monster",
       "model": "player",
+      "subType": 537,
       "numbers": [
         {"number": 503}
       ]
@@ -3267,6 +5993,13 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.4,
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Gaion"
+        }
+      ],
       "numbers": [
         {"number": 504, "maps": [72]}
       ]
@@ -3281,6 +6014,13 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.45,
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Jerint"
+        }
+      ],
       "numbers": [
         {"number": 505, "maps": [72]}
       ]
@@ -3295,6 +6035,13 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.45,
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Raymond"
+        }
+      ],
       "numbers": [
         {"number": 506, "maps": [71, 72]}
       ]
@@ -3318,6 +6065,13 @@
           }
         }
       ],
+      "scale": 1.25,
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Ercanne"
+        }
+      ],
       "numbers": [
         {"number": 507, "maps": [70, 72]}
       ]
@@ -3332,6 +6086,89 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.55,
+      "spawnEffects": [
+        {
+          "eyes": [
+            14,
+            15,
+            71,
+            72,
+            73,
+            74
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 24,
+          "scale": 10,
+          "color": [
+            0.7,
+            0.7,
+            1
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 25,
+          "scale": 10,
+          "color": [
+            0.7,
+            0.7,
+            1
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 54,
+          "scale": 100,
+          "key": 0,
+          "color": [
+            0.7,
+            0.7,
+            1
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 54,
+          "scale": 100,
+          "key": 1,
+          "color": [
+            0.7,
+            0.7,
+            1
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 54,
+          "scale": 100,
+          "key": 2,
+          "color": [
+            0.7,
+            0.7,
+            1
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 54,
+          "scale": 100,
+          "key": 3,
+          "color": [
+            0.7,
+            0.7,
+            1
+          ]
+        }
+      ],
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Daesuler"
+        }
+      ],
       "numbers": [
         {"number": 508, "maps": [69]}
       ]
@@ -3346,6 +6183,13 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.3,
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Bermont"
+        }
+      ],
       "numbers": [
         {"number": 509, "maps": [70]}
       ]
@@ -3360,6 +6204,13 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.35,
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Kato"
+        }
+      ],
       "numbers": [
         {"number": 510, "maps": [71]}
       ]
@@ -3374,6 +6225,13 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.35,
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Gallia"
+        }
+      ],
       "numbers": [
         {"number": 511, "maps": [69]}
       ]
@@ -3383,6 +6241,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_QUARTER_MASTER",
       "soundSet": "Quartermaster",
+      "scale": 1.27,
       "numbers": [
         {"number": 512, "maps": [69]}
       ]
@@ -3397,6 +6256,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.25,
       "numbers": [
         {"number": 513, "maps": [69]}
       ]
@@ -3411,6 +6271,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.35,
       "numbers": [
         {"number": 514, "maps": [70]}
       ]
@@ -3425,6 +6286,25 @@
         "otherwise": "attack1",
         "clearSkill": "afterAttack"
       },
+      "scale": 1.3,
+      "spawnEffects": [
+        {
+          "eyes": [
+            79,
+            33
+          ]
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 22,
+          "scale": 30
+        },
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 23,
+          "scale": 30
+        }
+      ],
       "numbers": [
         {"number": 515, "maps": [70]}
       ]
@@ -3439,6 +6319,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.55,
       "numbers": [
         {"number": 516, "maps": [71]}
       ]
@@ -3453,6 +6334,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.25,
       "numbers": [
         {"number": 517, "maps": [71]}
       ]
@@ -3467,6 +6349,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.2,
       "numbers": [
         {"number": 518, "maps": [69, 70, 71, 72]}
       ]
@@ -3489,6 +6372,7 @@
       "name": {"en": "Knights", "es": "Caballeros", "pt": "Cavaleiros"},
       "kind": "monster",
       "model": "MONSTER_MODEL_OCELOT",
+      "scale": 1.1,
       "numbers": [
         {"number": 520, "maps": [69, 70, 71]}
       ]
@@ -3497,6 +6381,7 @@
       "name": {"en": "Bodyguard", "es": "Guardaespaldas", "pt": "Guarda-costas"},
       "kind": "monster",
       "model": "MONSTER_MODEL_ERIC",
+      "scale": 1.1,
       "numbers": [
         {"number": 521, "maps": [69, 70, 71, 72]}
       ]
@@ -3506,15 +6391,21 @@
       "kind": "npc",
       "model": "MONSTER_MODEL_JERRY",
       "soundSet": "Jerint",
+      "scale": 1.45,
+      "hooks": [
+        {
+          "hook": "EmpireGuardianRageReset",
+          "boss": "Jerint"
+        }
+      ],
       "numbers": [
         {"number": 522, "maps": [2]}
       ]
     },
     {
       "name": {"en": "Trap", "es": "Trampa", "pt": "Armadilha"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "trap",
+      "model": "none",
       "numbers": [
         {"number": 523, "maps": [69, 70, 71, 72]}
       ]
@@ -3523,6 +6414,8 @@
       "name": {"en": "Castle Gate 1", "es": "Puerta del Castillo 1", "pt": "Portão 1 do castelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_EVIL_GATE",
+      "scale": 1.25,
+      "shadow": false,
       "numbers": [
         {"number": 524, "maps": [69, 70, 71]}
       ]
@@ -3531,6 +6424,9 @@
       "name": {"en": "Castle Gate 2", "es": "Puerta del Castillo 2", "pt": "Portão 2 do castelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_LION_GATE",
+      "scale": 1.25,
+      "shadow": false,
+      "deathEffect": 100,
       "numbers": [
         {"number": 525, "maps": [69, 70, 71]}
       ]
@@ -3539,6 +6435,9 @@
       "name": {"en": "Stone Statue 1", "es": "Estatua de Piedra 1", "pt": "Estátua de pedra 1"},
       "kind": "monster",
       "model": "MONSTER_MODEL_STATUE",
+      "scale": 0.6,
+      "shadow": false,
+      "deathEffect": 100,
       "numbers": [
         {"number": 526, "maps": [69, 70, 71, 72]}
       ]
@@ -3547,6 +6446,8 @@
       "name": {"en": "Castle Gate 3", "es": "Puerta del Castillo 3", "pt": "Portão 3 do castelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_STAR_GATE",
+      "scale": 1.25,
+      "shadow": false,
       "numbers": [
         {"number": 527, "maps": [72]}
       ]
@@ -3555,6 +6456,9 @@
       "name": {"en": "Castle Gate 4", "es": "Puerta del Castillo 4", "pt": "Portão 4 do castelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_RUSH_GATE",
+      "scale": 1.25,
+      "shadow": false,
+      "deathEffect": 100,
       "numbers": [
         {"number": 528, "maps": [72]}
       ]
@@ -3564,6 +6468,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_TERRIBLE_BUTCHER",
       "soundSet": "Furious Slaughterer",
+      "scale": 1,
       "numbers": [
         {"number": 529}
       ]
@@ -3573,6 +6478,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_MAD_BUTCHER",
       "soundSet": "Slaughterer",
+      "scale": 0.8,
       "numbers": [
         {"number": 530}
       ]
@@ -3582,6 +6488,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DOPPELGANGER",
       "soundSet": "Doppelganger",
+      "scale": 1.1,
+      "shadow": false,
       "numbers": [
         {"number": 533}
       ]
@@ -3590,6 +6498,40 @@
       "name": {"en": "Doppelganger Elf", "es": "Elfo Doppelganger", "pt": "Elfo Doppelganger "},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "class": "fairyElf",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 4,
+            "number": 15
+          },
+          {
+            "group": 4,
+            "number": 17
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 13
+        },
+        "armor": {
+          "group": 8,
+          "number": 13
+        },
+        "pants": {
+          "group": 9,
+          "number": 13
+        },
+        "gloves": {
+          "group": 10,
+          "number": 13
+        },
+        "boots": {
+          "group": 11,
+          "number": 13
+        }
+      },
       "numbers": [
         {"number": 534}
       ]
@@ -3598,6 +6540,36 @@
       "name": {"en": "Doppelganger Knight", "es": "Caballero Doppelganger", "pt": "Cavaleiro Doppelganger"},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "class": "darkKnight",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 13
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 1
+        },
+        "armor": {
+          "group": 8,
+          "number": 1
+        },
+        "pants": {
+          "group": 9,
+          "number": 1
+        },
+        "gloves": {
+          "group": 10,
+          "number": 1
+        },
+        "boots": {
+          "group": 11,
+          "number": 1
+        }
+      },
       "numbers": [
         {"number": 535}
       ]
@@ -3606,6 +6578,39 @@
       "name": {"en": "Doppelganger Wizard", "es": "Mago Doppelganger", "pt": "Mago Doppelganger"},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 9
+          },
+          {
+            "group": 6,
+            "number": 15
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 18
+        },
+        "armor": {
+          "group": 8,
+          "number": 18
+        },
+        "pants": {
+          "group": 9,
+          "number": 18
+        },
+        "gloves": {
+          "group": 10,
+          "number": 18
+        },
+        "boots": {
+          "group": 11,
+          "number": 18
+        }
+      },
       "numbers": [
         {"number": 536}
       ]
@@ -3614,6 +6619,35 @@
       "name": {"en": "Doppelganger Magic Gladiator", "es": "Gladiador Mágico Doppelganger", "pt": "Gladiador mágico Doppelganger"},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "class": "magicGladiator",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 0,
+            "number": 31
+          }
+        ],
+        "helm": {
+          "part": "MODEL_BODY_HELM+15"
+        },
+        "armor": {
+          "group": 8,
+          "number": 15
+        },
+        "pants": {
+          "group": 9,
+          "number": 15
+        },
+        "gloves": {
+          "group": 10,
+          "number": 15
+        },
+        "boots": {
+          "group": 11,
+          "number": 15
+        }
+      },
       "numbers": [
         {"number": 537}
       ]
@@ -3622,6 +6656,45 @@
       "name": {"en": "Doppelganger Dark Lord", "es": "Señor Oscuro Doppelganger", "pt": "Lorde negro Doppelganger"},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "class": "darkLord",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 2,
+            "number": 10
+          },
+          {
+            "group": 6,
+            "number": 7
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 27
+        },
+        "armor": {
+          "group": 8,
+          "number": 27
+        },
+        "pants": {
+          "group": 9,
+          "number": 27
+        },
+        "gloves": {
+          "group": 10,
+          "number": 27
+        },
+        "boots": {
+          "group": 11,
+          "number": 27
+        },
+        "helper": {
+          "group": 13,
+          "number": 4,
+          "mountLook": "doppelganger"
+        }
+      },
       "numbers": [
         {"number": 538}
       ]
@@ -3630,6 +6703,36 @@
       "name": {"en": "Doppelganger Summoner", "es": "Invocadora Doppelganger", "pt": "Invocador Doppelganger"},
       "kind": "monster",
       "model": "player",
+      "scale": 1,
+      "class": "summoner",
+      "equipment": {
+        "weapons": [
+          {
+            "group": 5,
+            "number": 18
+          }
+        ],
+        "helm": {
+          "group": 7,
+          "number": 40
+        },
+        "armor": {
+          "group": 8,
+          "number": 40
+        },
+        "pants": {
+          "group": 9,
+          "number": 40
+        },
+        "gloves": {
+          "group": 10,
+          "number": 40
+        },
+        "boots": {
+          "group": 11,
+          "number": 40
+        }
+      },
       "numbers": [
         {"number": 539}
       ]
@@ -3639,6 +6742,7 @@
       "kind": "npc",
       "model": "MODEL_DOPPELGANGER_NPC_LUGARD",
       "soundSet": "Lugard",
+      "scale": 1.1,
       "numbers": [
         {"number": 540, "maps": [2, 51]}
       ]
@@ -3648,6 +6752,8 @@
       "kind": "npc",
       "model": "MODEL_DOPPELGANGER_NPC_BOX",
       "soundSet": "Interim Reward Chest",
+      "scale": 2.3,
+      "outline": 1.1,
       "numbers": [
         {"number": 541}
       ]
@@ -3657,6 +6763,8 @@
       "kind": "npc",
       "model": "MODEL_DOPPELGANGER_NPC_GOLDENBOX",
       "soundSet": "Interim Reward Chest",
+      "scale": 3.3,
+      "outline": 1.1,
       "numbers": [
         {"number": 542}
       ]
@@ -3665,6 +6773,7 @@
       "name": {"en": "Gens Duprian Steward", "es": "Mayordomo Gens Duprian", "pt": "Gens Duprian Steward"},
       "kind": "npc",
       "model": "MODAL_GENS_NPC_DUPRIAN",
+      "scale": 1,
       "numbers": [
         {"number": 543, "maps": [0]}
       ]
@@ -3673,6 +6782,7 @@
       "name": {"en": "Gens Vanert Steward", "es": "Mayordomo Gens Vanert", "pt": "Gens Vanert Steward"},
       "kind": "npc",
       "model": "MODAL_GENS_NPC_BARNERT",
+      "scale": 1,
       "numbers": [
         {"number": 544, "maps": [3]}
       ]
@@ -3681,6 +6791,7 @@
       "name": {"en": "Christine the General Goods Merchant", "es": "Christine Mercader Art. Varios", "pt": "Christine, Merc. Prod. Gerais"},
       "kind": "npc",
       "model": "MODEL_UNITEDMARKETPLACE_CHRISTIN",
+      "scale": 1.1,
       "numbers": [
         {"number": 545, "maps": [79]}
       ]
@@ -3689,6 +6800,8 @@
       "name": {"en": "Jeweler Raul", "es": "Joyero Raul", "pt": "Joalheiro Raul"},
       "kind": "npc",
       "model": "MODEL_UNITEDMARKETPLACE_RAUL",
+      "scale": 1,
+      "outline": 1.15,
       "numbers": [
         {"number": 546, "maps": [79]}
       ]
@@ -3697,6 +6810,9 @@
       "name": {"en": "Market Union Member Julia", "es": "Julia Miembro Unión de Mercado", "pt": "Julia, Membro da Un. Mercantil"},
       "kind": "npc",
       "model": "MODEL_UNITEDMARKETPLACE_JULIA",
+      "scale": 1,
+      "outline": 1.1,
+      "facing": 49,
       "numbers": [
         {"number": 547, "maps": [0, 79]}
       ]
@@ -3705,6 +6821,7 @@
       "name": {"en": "Transformed Skeleton", "es": "Esqueleto transformado", "pt": "Esqueleto transformado"},
       "kind": "monster",
       "model": "player",
+      "subType": 555,
       "numbers": [
         {"number": 548}
       ]
@@ -3718,6 +6835,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.35,
       "numbers": [
         {"number": 549, "maps": [33]}
       ]
@@ -3731,6 +6849,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.2,
       "numbers": [
         {"number": 550, "maps": [33]}
       ]
@@ -3745,6 +6864,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.4,
       "numbers": [
         {"number": 551, "maps": [33]}
       ]
@@ -3759,6 +6879,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.75,
       "numbers": [
         {"number": 552, "maps": [33]}
       ]
@@ -3773,6 +6894,7 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1.15,
       "numbers": [
         {"number": 553, "maps": [37]}
       ]
@@ -3787,6 +6909,7 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1.3,
       "numbers": [
         {"number": 554, "maps": [37]}
       ]
@@ -3800,6 +6923,7 @@
         "otherwiseRandom": "rand",
         "clearSkill": "never"
       },
+      "scale": 1.5,
       "numbers": [
         {"number": 555, "maps": [37]}
       ]
@@ -3814,6 +6938,7 @@
         "otherwise": "attack1",
         "clearSkill": "onMatch"
       },
+      "scale": 1.35,
       "numbers": [
         {"number": 556, "maps": [37]}
       ]
@@ -3828,6 +6953,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.5,
       "numbers": [
         {"number": 557, "maps": [56]},
         {"number": 560}
@@ -3843,6 +6969,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.1,
       "numbers": [
         {"number": 558, "maps": [56]}
       ]
@@ -3857,6 +6984,8 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.56,
+      "deathEffect": 100,
       "numbers": [
         {"number": 559, "maps": [56]}
       ]
@@ -3870,6 +6999,8 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.5,
+      "deathEffect": 100,
       "numbers": [
         {"number": 561}
       ]
@@ -3884,6 +7015,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.9,
       "numbers": [
         {"number": 562, "maps": [57]}
       ]
@@ -3898,6 +7030,8 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.1,
+      "deathEffect": 100,
       "numbers": [
         {"number": 563, "maps": [57]}
       ]
@@ -3912,6 +7046,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.3,
       "numbers": [
         {"number": 564, "maps": [57]}
       ]
@@ -3926,6 +7061,7 @@
         "otherwise": "attack1",
         "clearSkill": "always"
       },
+      "scale": 1.8,
       "numbers": [
         {"number": 565, "maps": [57]}
       ]
@@ -3934,6 +7070,7 @@
       "name": {"en": "Mercenary Guild Manager Tercia", "es": "Tercia de Encargados del Gremio Mercenario", "pt": "Administrador da Guilda Mercenária Tercia"},
       "kind": "npc",
       "model": "MODEL_TERSIA",
+      "scale": 0.93,
       "numbers": [
         {"number": 566, "maps": [2]}
       ]
@@ -3942,6 +7079,7 @@
       "name": {"en": "Priestess Veina", "es": "Sacerdotisa Veina", "pt": "Sacerdotisa Veina"},
       "kind": "npc",
       "model": "MODEL_BENA",
+      "heightOffset": 145,
       "numbers": [
         {"number": 567}
       ]
@@ -3950,6 +7088,9 @@
       "name": {"en": "Wandering Merchant Zyro", "es": "Comerciante Vagabundo Zyro", "pt": "Mercador Nômade Zyro"},
       "kind": "npc",
       "model": "MODEL_GAMBLE_NPC_MOSS",
+      "scale": 0.8,
+      "outline": 1.1,
+      "deathEffect": 100,
       "numbers": [
         {"number": 568, "maps": [0, 2, 51]}
       ]
@@ -3959,6 +7100,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION",
       "soundSet": "Venomous Chain Scorpion",
+      "scale": 1,
       "numbers": [
         {"number": 569, "maps": [80]}
       ]
@@ -3968,6 +7110,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BONE_SCORPION",
       "soundSet": "Bone Scorpion",
+      "scale": 0.58,
       "numbers": [
         {"number": 570, "maps": [80]}
       ]
@@ -3977,6 +7120,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ORCUS",
       "soundSet": "Orcus",
+      "scale": 0.64,
       "numbers": [
         {"number": 571, "maps": [80, 81]}
       ]
@@ -3986,6 +7130,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GOLLOCK",
       "soundSet": "Gollock",
+      "scale": 1.5,
       "numbers": [
         {"number": 572, "maps": [81]}
       ]
@@ -3995,6 +7140,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CRYPTA",
       "soundSet": "Crypta",
+      "scale": 1.5,
       "numbers": [
         {"number": 573, "maps": [80]}
       ]
@@ -4004,6 +7150,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CRYPOS",
       "soundSet": "Crypos",
+      "scale": 1.25,
       "numbers": [
         {"number": 574, "maps": [80]}
       ]
@@ -4013,6 +7160,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CONDRA",
       "soundSet": "Condra",
+      "scale": 1.45,
+      "deathEffect": 100,
       "numbers": [
         {"number": 575, "maps": [81]}
       ]
@@ -4022,6 +7171,20 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_NACONDRA",
       "soundSet": "Narcondra",
+      "scale": 1.55,
+      "spawnEffects": [
+        {
+          "joint": "BITMAP_JOINT_ENERGY",
+          "subType": 24,
+          "scale": 10,
+          "color": [
+            1.5,
+            0.1,
+            0.5
+          ]
+        }
+      ],
+      "deathEffect": 100,
       "numbers": [
         {"number": 576, "maps": [81]}
       ]
@@ -4030,6 +7193,7 @@
       "name": {"en": "Leina the General Goods Merchant", "es": "Leina the General Goods Merchant", "pt": "Leina the General Goods Merchant"},
       "kind": "npc",
       "model": "MODEL_KARUTAN_NPC_REINA",
+      "scale": 1.1,
       "numbers": [
         {"number": 577, "maps": [80]}
       ]
@@ -4038,6 +7202,7 @@
       "name": {"en": "Weapons Merchant Bolo", "es": "Weapons Merchant Bolo", "pt": "Weapons Merchant Bolo"},
       "kind": "npc",
       "model": "MODEL_KARUTAN_NPC_VOLVO",
+      "repairShop": true,
       "numbers": [
         {"number": 578, "maps": [80]}
       ]
@@ -4046,6 +7211,7 @@
       "name": {"en": "David", "es": "David", "pt": "David"},
       "kind": "npc",
       "model": "MODEL_LUCKYITEM_NPC",
+      "scale": 0.95,
       "numbers": [
         {"number": 579, "maps": [51]}
       ]
@@ -4053,8 +7219,6 @@
     {
       "name": {"en": "Scarecrow", "es": "Scarecrow", "pt": "Scarecrow"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
       "numbers": [
         {"number": 585}
       ]
@@ -4062,98 +7226,109 @@
     {
       "name": {"en": "Cursed Statue"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 658, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (1)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 659, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (2)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 660, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (3)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 661, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (4)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 662, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (5)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 663, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (6)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 664, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (7)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 665, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (8)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 666, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (9)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 667, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
       "name": {"en": "Captured Stone Statue (10)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER",
-      "soundSet": "Bull Fighter",
+      "kind": "npc",
+      "model": "MODEL_CURSEDTEMPLE_STATUE",
+      "outline": 1.03,
+      "shadow": false,
       "numbers": [
         {"number": 668, "maps": [45, 46, 47, 48, 49, 50]}
       ]

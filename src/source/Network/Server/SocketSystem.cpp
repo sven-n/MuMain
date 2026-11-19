@@ -1,7 +1,8 @@
 ﻿#include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "SocketSystem.h"
 #include "Data/DataHandler/DataFileIO.h"
-#include "Core/Utilities/FileHandle.h"
+#include "Core/Content/ContentStore.h"
 #include "I18N/All.h"
 
 #include "Engine/Object/ZzzInventory.h"
@@ -61,6 +62,11 @@ BOOL CSocketItemMgr::IsSocketItem(const ITEM* pItem)
 BOOL CSocketItemMgr::IsSocketItem(const OBJECT* pObject)
 {
     return IsSocketItem(Data::Items::ToItemType(pObject->Type));
+}
+
+bool CSocketItemMgr::AreSocketOptionsActive(const ITEM* pItem)
+{
+    return IsSocketItem(pItem) && pItem->Durability != 0;
 }
 
 BOOL CSocketItemMgr::IsSocketItem(int iItemType)
@@ -468,6 +474,9 @@ void CSocketItemMgr::CheckSocketSetOption()
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
     {
         pItem = &CharacterMachine->Equipment[i];
+        if (!AreSocketOptionsActive(pItem))
+            continue;
+
         for (int j = 0; j < pItem->SocketCount; ++j)
         {
             if (pItem->SocketSeedID[j] != SOCKET_EMPTY)
@@ -520,7 +529,8 @@ void CSocketItemMgr::CalcSocketStatusBonus()
     {
         pItem = &CharacterMachine->Equipment[i];
 
-        if (!IsSocketItem(pItem)) continue;
+        if (!AreSocketOptionsActive(pItem))
+            continue;
 
         for (int j = 0; j < pItem->SocketCount; ++j)
         {
@@ -573,6 +583,15 @@ void CSocketItemMgr::CalcSocketStatusBonus()
                 case SOPT_ENERGY_BONUS:
                     m_StatusBonus.m_iEnergyBonus += iBonus;
                     break;
+                case SOPT_CRITICAL_DAMAGE_RATE_BONUS:
+                    m_StatusBonus.m_iCriticalDamageRateBonus += iBonus;
+                    break;
+                case SOPT_CRITICAL_DAMAGE_BONUS:
+                    m_StatusBonus.m_iCriticalDamageBonus += iBonus;
+                    break;
+                case SOPT_EXCELLENT_DAMAGE_BONUS:
+                    m_StatusBonus.m_iExcellentDamageBonus += iBonus;
+                    break;
                 }
             }
         }
@@ -606,14 +625,13 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 
 void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
 {
-    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    Content::Stream fp = Content::OpenIO(szFileName);
     if (!fp)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", szFileName);
         g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return;
     }
 

@@ -1,7 +1,18 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+
 #include <metal_stdlib>
 #include <simd/simd.h>
 
 using namespace metal;
+
+struct FSInput
+{
+    float4 pos;
+    float2 uv;
+    float4 color;
+    float fogFactor;
+    float eyeDepth;
+};
 
 struct SceneLighting
 {
@@ -13,6 +24,14 @@ struct SceneLighting
     float4 sceneFogColor;
     float4 sceneFogParameters;
     float4 cameraPosition;
+    float4x4 sunViewProjection;
+    float4 sunShadowParameters;
+    float4 lightingParameters;
+    float4 cloudParameters;
+    float4 cloudOffset;
+    float4 skyFill;
+    float4 sunTowards;
+    float4 sunColor;
 };
 
 struct FogUniforms
@@ -35,50 +54,61 @@ struct main0_in
 {
     float2 input_uv [[user(locn0)]];
     float4 input_color [[user(locn1)]];
+    float input_fogFactor [[user(locn2)]];
     float input_eyeDepth [[user(locn3)]];
 };
 
-fragment main0_out main0(main0_in in [[stage_in]], constant SceneLighting& _24 [[buffer(0)]], constant FogUniforms& _72 [[buffer(1)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]])
+static inline __attribute__((always_inline))
+float EnhancedFogAmount(thread const float& eyeDepth, constant SceneLighting& _25)
+{
+    float scaledDistance = fast::max(eyeDepth - _25.sceneFogParameters.x, 0.0) * _25.sceneFogParameters.z;
+    return fast::clamp(1.0 - exp((-scaledDistance) * scaledDistance), 0.0, 1.0);
+}
+
+static inline __attribute__((always_inline))
+float4 _main(thread const FSInput& _input, constant SceneLighting& _25, texture2d<float> tex, sampler s, constant FogUniforms& _73)
+{
+    float4 color = tex.sample(s, _input.uv) * _input.color;
+    if (_73.alphaToCoverage != 0u)
+    {
+        float edge = fast::clamp(((color.w - _73.alphaThreshold) / fast::max(fwidth(color.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
+        color.w *= edge;
+        if (color.w <= 0.0)
+        {
+            discard_fragment();
+        }
+    }
+    else
+    {
+        if ((_73.alphaDiscardEnabled != 0u) && (color.w <= _73.alphaThreshold))
+        {
+            discard_fragment();
+        }
+    }
+    if ((_73.fogEnabled != 0u) && (_25.sceneFogColor.w > 0.0))
+    {
+        float4 _134 = color;
+        float param = _input.eyeDepth;
+        float3 _146 = mix(_134.xyz, _25.sceneFogColor.xyz, float3(EnhancedFogAmount(param, _25)));
+        color.x = _146.x;
+        color.y = _146.y;
+        color.z = _146.z;
+    }
+    return color;
+}
+
+fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _73 [[buffer(0)]], constant SceneLighting& _25 [[buffer(1)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]], float4 gl_FragCoord [[position]])
 {
     main0_out out = {};
-    float4 _190 = tex.sample(s, in.input_uv);
-    float4 _193 = _190 * in.input_color;
-    float4 _310;
-    if (_72.alphaToCoverage != 0u)
-    {
-        float _213 = _193.w * fast::clamp(((_193.w - _72.alphaThreshold) / fast::max(fwidth(_193.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
-        float4 _301 = _193;
-        _301.w = _213;
-        if (_213 <= 0.0)
-        {
-            discard_fragment();
-        }
-        _310 = _301;
-    }
-    else
-    {
-        if ((_72.alphaDiscardEnabled != 0u) && (_193.w <= _72.alphaThreshold))
-        {
-            discard_fragment();
-        }
-        _310 = _193;
-    }
-    float4 _311;
-    if ((_72.fogEnabled != 0u) && (_24.sceneFogColor.w > 0.0))
-    {
-        float _270 = fast::max(in.input_eyeDepth - _24.sceneFogParameters.x, 0.0) * _24.sceneFogParameters.z;
-        float3 _250 = mix(_310.xyz, _24.sceneFogColor.xyz, float3(fast::clamp(1.0 - exp((-_270) * _270), 0.0, 1.0)));
-        float4 _305 = _310;
-        _305.x = _250.x;
-        _305.y = _250.y;
-        _305.z = _250.z;
-        _311 = _305;
-    }
-    else
-    {
-        _311 = _310;
-    }
-    out._entryPointOutput = _311;
+    FSInput _input;
+    _input.pos = gl_FragCoord;
+    _input.uv = in.input_uv;
+    _input.color = in.input_color;
+    _input.fogFactor = in.input_fogFactor;
+    _input.eyeDepth = in.input_eyeDepth;
+    FSInput param = _input;
+    float4 _180 = _main(param, _25, tex, s, _73);
+    out._entryPointOutput = _180;
     return out;
 }
 

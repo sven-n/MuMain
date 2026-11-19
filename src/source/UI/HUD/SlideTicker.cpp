@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/Random.h"
 #include "UI/HUD/SlideTicker.h"
 #include "Data/DataHandler/DataFileIO.h"
@@ -495,20 +497,18 @@ void SlideTicker::OpenSlideTextFile(const wchar_t* szFileName)
         }
     }
 
-    FILE* fp = _wfopen(szFileName, L"rb");
+    const Content::Stream fp = Content::OpenIO(szFileName);
     if (fp == nullptr)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", szFileName);
         g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, nullptr, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return;
     }
 
     SLIDEHELP SlideHelp;
-    const bool complete = DataFileIO::ReadExact(fp, &SlideHelp, sizeof(SLIDEHELP));
-    fclose(fp);
+    const bool complete = DataFileIO::ReadExact(fp.get(), &SlideHelp, sizeof(SLIDEHELP));
     if (!complete)
     {
         DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");

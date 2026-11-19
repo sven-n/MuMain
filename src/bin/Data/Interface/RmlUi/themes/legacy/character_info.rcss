@@ -107,7 +107,9 @@
 /* Attribute rows: textbox background (170x21) + centered label/value halves + a variable-length
    block of extra derived-stat lines below. HEIGHT_STRENGTH/DEXTERITY/VITALITY/ENERGY/CHARISMA
    (CharacterInfoWindow.h) are 120/175/240/295/350; every row and its lines sit --points-room lower
-   here, which makes the gap above STR tall enough for the points to spend (.levelup-point-text). */
+   here, which makes the gap above STR tall enough for the points to spend (.levelup-point-text).
+   AGI and VIT sit one line (13px) lower still, so STR has room for its third line (the critical
+   damage rate); VIT's room below takes the line back, so ENE and CMD keep their places. */
 .attr-textbox {
 	position: absolute;
 	left: 11px;
@@ -117,8 +119,8 @@
 	pointer-events: none;
 }
 .attr-textbox-str { top: calc(120px + var(--points-room)); }
-.attr-textbox-agi { top: calc(175px + var(--points-room)); }
-.attr-textbox-vit { top: calc(240px + var(--points-room)); }
+.attr-textbox-agi { top: calc(188px + var(--points-room)); }
+.attr-textbox-vit { top: calc(253px + var(--points-room)); }
 .attr-textbox-ene { top: calc(295px + var(--points-room)); }
 .attr-textbox-cmd { top: calc(350px + var(--points-room)); }
 
@@ -134,8 +136,8 @@
 .attr-label { left: 12px; width: 74px; color: rgb(230, 230, 0); }
 .attr-value { left: 86px; right: 18px; color: rgb(230, 230, 0); }
 .attr-label-str, .attr-value-str { top: calc(126px + var(--points-room)); }
-.attr-label-agi, .attr-value-agi { top: calc(181px + var(--points-room)); }
-.attr-label-vit, .attr-value-vit { top: calc(246px + var(--points-room)); }
+.attr-label-agi, .attr-value-agi { top: calc(194px + var(--points-room)); }
+.attr-label-vit, .attr-value-vit { top: calc(259px + var(--points-room)); }
 .attr-label-ene, .attr-value-ene { top: calc(301px + var(--points-room)); }
 .attr-label-cmd, .attr-value-cmd { top: calc(356px + var(--points-room)); }
 
@@ -148,8 +150,8 @@
 .attr-lines { position: absolute; transform-origin: left top; pointer-events: none; }
 .attr-lines span { display: block; white-space: nowrap; }
 .attr-lines-str { left: 20px; top: calc(145px + var(--points-room)); }
-.attr-lines-agi { left: 20px; top: calc(199px + var(--points-room)); }
-.attr-lines-vit { left: 20px; top: calc(264px + var(--points-room)); }
+.attr-lines-agi { left: 20px; top: calc(212px + var(--points-room)); }
+.attr-lines-vit { left: 20px; top: calc(277px + var(--points-room)); }
 .attr-lines-ene { left: 18px; top: calc(319px + var(--points-room)); }
 
 .stat-btn {
@@ -163,10 +165,16 @@
 }
 .stat-btn:hover { filter: brightness(1.25); }
 .stat-btn-str { top: calc(122px + var(--points-room)); }
-.stat-btn-agi { top: calc(177px + var(--points-room)); }
-.stat-btn-vit { top: calc(242px + var(--points-room)); }
+.stat-btn-agi { top: calc(190px + var(--points-room)); }
+.stat-btn-vit { top: calc(255px + var(--points-room)); }
 .stat-btn-ene { top: calc(297px + var(--points-room)); }
 .stat-btn-cmd { top: calc(352px + var(--points-room)); }
+/* The Rage Fighter's second Vitality line (melee damage) moves the Energy row down a line too; it has no
+   Command row, so Energy keeps its room below. */
+#panel.vitality-two-lines .attr-textbox-ene { top: calc(308px + var(--points-room)); }
+#panel.vitality-two-lines .attr-label-ene, #panel.vitality-two-lines .attr-value-ene { top: calc(314px + var(--points-room)); }
+#panel.vitality-two-lines .attr-lines-ene { top: calc(332px + var(--points-room)); }
+#panel.vitality-two-lines .stat-btn-ene { top: calc(310px + var(--points-room)); }
 
 /* Exit is fully shared now (docked_panel_frame.rcss's #btn_exit) -- only Quest/Pet/MasterLevel
    (this window's own extra shortcuts, not part of the shared frame) stay local. */
@@ -212,6 +220,8 @@
 .attr-lines span { color: #ffffff; }
 .attr-lines span.boosted { color: rgb(100, 150, 255); }
 .attr-lines span.buffed { color: rgb(255, 0, 240); }
+/* A line with a hint (the damage, the critical damage rate) shows it while the pointer is over it. */
+.attr-lines span.hinted { pointer-events: auto; }
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #name { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }

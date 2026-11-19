@@ -7,6 +7,7 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
+#include "../MuEditor/UI/ItemTools/ItemSelection.h"
 #include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -29,6 +30,7 @@ void CMuItemTranslationsUI::Render(bool* open)
         CItemEditorPopups::RenderAll();
         ImGui::SameLine();
         m_grid.RenderToolbar(m_rows);
+        m_forms.Render(g_ItemSelection.GetItemType());
         ImGui::Separator();
         m_grid.RenderTable(m_rows, "##ItemTranslations");
     }

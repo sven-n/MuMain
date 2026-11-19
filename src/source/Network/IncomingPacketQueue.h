@@ -7,7 +7,19 @@
 #include <memory>
 #include <mutex>
 
-struct PacketInfo;
+#include "Network/ConnectionLifecycle.h"
+
+// A received packet, or a connection event (Event set, no payload) queued in order with the packets.
+struct PacketInfo
+{
+    std::unique_ptr<std::uint8_t[]> ReceiveBuffer;
+    int32_t ConnectionHandle = 0;
+    int32_t Size = 0;
+    Network::ConnectionEvent Event = Network::ConnectionEvent::None;
+    std::chrono::steady_clock::time_point EnqueuedAt;
+    bool Superseded = false;
+    bool SuppressOptionalPresentation = false;
+};
 
 namespace Network
 {
@@ -43,11 +55,14 @@ namespace Network
         // thread once per frame. The queue is moved out under the lock and
         // drained after releasing it, so packet handling never blocks the
         // network thread.
-        void DrainTo(Processor process);
+        // While `hold` says so (checked before each packet), the rest of the packets wait for a later drain, in
+        // order; connection events among them are processed anyway.
+        void DrainTo(Processor process, bool (*hold)() = nullptr);
 
         // Discard all queued packets. Called on session teardown (disconnect /
         // reconnect) so packets for the old session are not processed against
-        // freed world data.
+        // freed world data. Connection events stay: a lost close would leave a
+        // dead connection looking open.
         void Clear();
         Stats GetStats() const;
 

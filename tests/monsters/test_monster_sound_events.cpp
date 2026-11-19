@@ -7,10 +7,12 @@
 
 #include "MonsterCreationScope.h"
 #include "MonsterModelRecorder.h"
+#include "../data/MovementTestScopes.h"
 
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
@@ -38,6 +40,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
@@ -1347,4 +1350,31 @@ TEST_CASE("Monster sounds: Kanturu's monsters sound each death when it starts, a
     CHECK(scope.Take() == Sounds({SOUND_KANTURU_1ST_BER_DIE}));
     // The drawn frames of the death play nothing more.
     CHECK(Draw(scope, *berserker, MONSTER01_DIE, 3).empty());
+}
+
+// A standing turn steps around with the walk and ends standing, but it isn't a walk: the Bull Fighter's idle sounds
+// (one time in 16 when it is set to walk or to stand) don't play for it, so they come no more often than the set says.
+TEST_CASE("Monster sounds: a standing turn's steps play no walk or stand sounds [monsters][sounds][movement]")
+{
+    const EnhancedMovementSwitch option(true);
+    const AnimationFactor factor(1.f);
+    SoundScope scope(WD_0LORENCIA);
+    CHARACTER* bull = scope.Creation().Create(BullFighter);
+    REQUIRE(bull != nullptr);
+    // In a safe zone its steps are the plain walk (no equipment to look at for a run).
+    bull->SafeZone = true;
+    SetPlayerStop(bull);
+    scope.Take();
+    for (int turn = 0; turn < 64; ++turn)
+    {
+        CAPTURE(turn);
+        StartStandingTurn(bull, std::fmod(bull->Object.Angle[2] + 180.f, 360.f));
+        REQUIRE(bull->TurnPending);
+        for (int frame = 0; frame < 600 && bull->TurnPending; ++frame)
+        {
+            FinishPendingTurn(bull);
+        }
+        REQUIRE(bull->TurnArrived);
+    }
+    CHECK(scope.Take().empty());
 }

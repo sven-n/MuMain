@@ -34,8 +34,13 @@ public:
 
     // The names of the row; nullptr when it is gone.
     virtual const Data::LocalizedString* FindNames(int id) const = 0;
-    // The id as the first column shows it.
+    // The id as the first column shows it (the grid has room for 63 bytes), and that column's width before the editor
+    // UI scale.
     virtual void FormatId(int id, char* buffer, std::size_t size) const = 0;
+    virtual float GetIdColumnWidth() const
+    {
+        return 60.0f;
+    }
     // Stores a changed name (an empty text removes a translation), with the
     // data's own checks and undo; the grid calls it only for a text that
     // differs from the row's own name.

@@ -29,13 +29,13 @@ void CItemEditorActions::RenderSaveButton()
     if (ImGui::Button(I18N::Editor::SaveItems))
     {
         std::vector<Data::Items::ItemDataIssue> issues;
-        const Data::Items::ItemDataSaveResult result = g_ItemDataHandler.Save(issues);
+        // With the monster references the item moves changed (D60).
+        const Data::Items::ItemDataSaveResult result = g_ItemEdits.Save(issues);
         LogIssues(issues);
         switch (result)
         {
         case Data::Items::ItemDataSaveResult::Saved:
             g_MuEditorConsoleUI.LogEditor("Items saved to " + Data::Items::GetItemDataDirectory().string());
-            g_ItemEdits.GetHistory().MarkSaved();
             LogMissingItemNames();
             ImGui::OpenPopup("Save Success");
             break;

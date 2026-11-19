@@ -28,10 +28,24 @@ const CommandForm CommandForms[] = {
     {L"$dynlights spell ", {LookValue::DynamicEffectGain, LookValue::DynamicEffectRange, LookValue::DynamicEffectFade}},
     {L"$dynlights cap ", {LookValue::DynamicEffectCap}},
     {L"$dynlights reach ", {LookValue::DynamicEffectRangeMax}},
+    {L"$dynlights shadow ", {LookValue::GroundShadowOpacity}},
+    {L"$dynlights shadowangle ", {LookValue::GroundShadowAngle}},
+    {L"$dynlights shadowlights ", {LookValue::GroundShadowLights}},
+    {L"$dynlights flatsun ", {LookValue::FlatSunShadow}},
     {L"$bloom falloff ", {LookValue::BloomLevelFalloff}},
+    {L"$ao radius ", {LookValue::AmbientOcclusionRadius}},
+    {L"$clouds scale ", {LookValue::CloudScale}},
+    {L"$clouds speed ", {LookValue::CloudSpeed}},
+    {L"$clouds cover ", {LookValue::CloudCover}},
+    {L"$clouds ", {LookValue::CloudStrength}},
+    {L"$sky ", {LookValue::SkyFill}},
+    {L"$rim sun ", {LookValue::RimSunFollow}},
+    {L"$ao ", {LookValue::AmbientOcclusionStrength}},
+    {L"$sun softness ", {LookValue::SunShadowSoftness}},
+    {L"$sun resolution ", {LookValue::SunShadowResolution}},
+    {L"$sun ", {LookValue::SunShadowStrength}},
     {L"$bloom ", {LookValue::BloomStrength}},
 };
-
 
 std::vector<std::wstring_view> Words(std::wstring_view text)
 {
@@ -142,6 +156,12 @@ std::optional<LookCommand> ParseLookCommand(std::wstring_view command)
     if (verb == L"save" && arguments == 0)
     {
         parsed.verb = LookVerb::Save;
+        return parsed;
+    }
+    if (verb == L"preview" && arguments == 1 && (words[2] == L"authoring" || words[2] == L"player"))
+    {
+        parsed.verb = LookVerb::Preview;
+        parsed.name = words[2] == L"authoring" ? "authoring" : "player";
         return parsed;
     }
     if (verb == L"show" || verb == L"reset" || verb == L"load")

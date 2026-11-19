@@ -7,8 +7,8 @@
 namespace Render::Lighting::LightMood
 {
 
-// Replaces the mood data (Data/Maps/LightMood.json as loaded or edited) and
-// rebuilds the current map's static light.
+// Replaces the mood data (every map's mood, as Data/Render/Look.json loaded or
+// edited gives it) and rebuilds the current map's static light.
 void SetMoodData(Data::Maps::LightMoodData data);
 
 // Switches the mood and sets its strength (0 to 100 percent) from the next
@@ -23,6 +23,10 @@ void UseMood(Data::Maps::LightMoodData data, bool enabled, int strengthPercent);
 // The scales of the active world. Classic (all 1) while the mood is off and
 // outside the world maps (login and character selection).
 const Scales& Active();
+
+// Changes whenever the active scales do (look values, the tint source): the map's static light built with
+// an older one is stale.
+[[nodiscard]] std::uint32_t Revision();
 
 // Logs the scales a map's static light was built with (map load and reload).
 void LogMapLight();

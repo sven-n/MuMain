@@ -4,8 +4,11 @@
 
 #include "Core/Text/WideString.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/UnknownMonsterLook.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 
+#include <cwchar>
 #include <iterator>
 
 namespace GameLogic::Monsters::Names
@@ -15,6 +18,13 @@ void WriteShownName(CHARACTER& character, int number)
     if (const wchar_t* name = g_MonsterDatabase.FindDisplayName(number))
     {
         Core::Text::CopyWideString(character.ID, std::size(character.ID), name);
+        return;
+    }
+    // A number without an entry has the unknown monsters' name when it has
+    // their look (D64).
+    if (Data::Monsters::IsFor(g_MonsterDatabase.GetUnknownLook(), Data::Monsters::UnknownReason::NoEntry))
+    {
+        std::swprintf(character.ID, std::size(character.ID), I18N::Game::UnknownMonsterName, number);
     }
 }
 

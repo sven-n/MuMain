@@ -154,7 +154,7 @@
     <value>To bardzo niebezpieczne miejsce, a 'Łzę Elfa' niezwykle trudno odnaleźć. Lecz jeśli ją znajdziesz, zostanie ci dana nowa moc. Idź więc, odnajdź 'Łzę Elfa' i wróć do mnie.</value>
   </data>
   <data name="Answer_65_Slot_0" xml:space="preserve">
-    <value>Pójdę odnaleźć 'Łzę Elfa'!</value>
+    <value>Pójdę odnaleźć '{item:14,25:acc}'!</value>
   </data>
   <data name="Text_66" xml:space="preserve">
     <value>Odnalazłeś 'Łzę Elfa'! Po wojnie Lunedil, królowa elfów, stworzyła kamień łzy, rzucając magię na kamień ducha, by elfy mogły przywoływać moc bogini i budować swą potęgę.</value>

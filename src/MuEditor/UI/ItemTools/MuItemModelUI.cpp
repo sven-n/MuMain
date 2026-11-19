@@ -5,6 +5,8 @@
 #include "MuItemModelUI.h"
 
 #include "ItemEdits.h"
+#include "ItemMeshRows.h"
+#include "ItemTextInput.h"
 #include "ItemLevelModels.h"
 #include "ItemMeshFocus.h"
 #include "ItemModelForms.h"
@@ -12,6 +14,9 @@
 #include "ItemToolWindow.h"
 
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/StyleEditor/MuStyleEditorUI.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ItemData/PartModelSlots.h"
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/LoadData.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -20,10 +25,15 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Render/Items/ItemRenderStyles.h"
+#include "Render/Models/ZzzBMD.h"
 #include "imgui.h"
 
+#include <algorithm>
 #include <optional>
+#include <sstream>
 #include <string>
+#include <vector>
 
 using namespace MuEditor::Items;
 using Data::Items::ItemModelDefinition;
@@ -31,6 +41,50 @@ using Data::Items::ItemModelDefinition;
 namespace
 {
 constexpr ImVec4 RemoveColor{0.7f, 0.2f, 0.2f, 1.0f};
+constexpr float PartFieldWidth = 320.0f;
+
+// "Item, Item/partCharge1" and back.
+std::string JoinFolders(const std::vector<std::string>& folders)
+{
+    std::string text;
+    for (const std::string& folder : folders)
+    {
+        text += (text.empty() ? "" : ", ") + folder;
+    }
+    return text;
+}
+
+std::vector<std::string> SplitFolders(const std::string& text)
+{
+    std::vector<std::string> folders;
+    std::stringstream stream(text);
+    std::string folder;
+    while (std::getline(stream, folder, ','))
+    {
+        const auto first = folder.find_first_not_of(' ');
+        const auto last = folder.find_last_not_of(' ');
+        if (first != std::string::npos)
+        {
+            folders.push_back(folder.substr(first, last - first + 1));
+        }
+    }
+    return folders;
+}
+
+// The part models with the one of `name` changed by `change`, as one undo step.
+template <typename TChange> void ChangePartModel(const char* label, const std::string& name, TChange&& change)
+{
+    const std::span<const Data::Items::PartModel> current = g_ItemModelDatabase.GetPartModels();
+    std::vector<Data::Items::PartModel> parts(current.begin(), current.end());
+    const auto part =
+        std::ranges::find(parts, name, [](const Data::Items::PartModel& entry) { return entry.model.name; });
+    if (part == parts.end())
+    {
+        return;
+    }
+    change(*part);
+    g_ItemEdits.SetPartModels(label, std::move(parts));
+}
 
 std::optional<ItemModelDefinition> LoadModel(int itemType)
 {
@@ -57,6 +111,18 @@ void CMuItemModelUI::Render(bool* open)
     if (ToolWindow::Begin(I18N::Editor::ItemModel, MuEditor::WindowIds::ItemModel, open))
     {
         const int itemType = g_ItemSelection.GetItemType();
+        RenderPartModelList();
+        if (!m_partModel.empty() && itemType != m_partModelItem)
+        {
+            // An item was picked: the window shows it again.
+            m_partModel.clear();
+        }
+        if (!m_partModel.empty())
+        {
+            RenderPartModel(m_partModel);
+            ToolWindow::End();
+            return;
+        }
         g_ItemMeshFocus.BeginFrame(itemType, ImGui::GetFrameCount());
         ItemModelDefinition* model = m_draft.Begin(itemType, ToolWindow::GetDataVersion());
         ShowInventoryDisplay(model, itemType);
@@ -83,6 +149,112 @@ void CMuItemModelUI::Render(bool* open)
         m_draft.End();
     }
     ToolWindow::End();
+}
+
+void CMuItemModelUI::RenderPartModelList()
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::PartModels))
+    {
+        return;
+    }
+    ImGui::PushID("PartModels");
+    for (const Data::Items::PartModelSlot& slot : Data::Items::PartModelSlots)
+    {
+        const std::string name(slot.name);
+        if (ImGui::Selectable(name.c_str(), m_partModel == name))
+        {
+            m_partModel = name;
+            m_partModelItem = g_ItemSelection.GetItemType();
+        }
+    }
+    ImGui::PopID();
+    ImGui::Separator();
+}
+
+void CMuItemModelUI::RenderPartModel(const std::string& name)
+{
+    ImGui::PushID("PartModel");
+    ImGui::TextUnformatted(name.c_str());
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextDisabled("%s", I18N::Editor::PartModelNote);
+    ImGui::PopTextWrapPos();
+    const Data::Items::PartModel* found = g_ItemModelDatabase.FindPartModel(name);
+    const auto slot =
+        std::ranges::find(Data::Items::PartModelSlots, std::string_view(name), &Data::Items::PartModelSlot::name);
+    if (found == nullptr || slot == std::end(Data::Items::PartModelSlots))
+    {
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::ThePartModel0HasNoEntry, {name}).c_str());
+        ImGui::PopID();
+        return;
+    }
+    // A copy: a change replaces the database's part models, which the fields after it still read this frame.
+    const Data::Items::PartModel part = *found;
+    if (ImGui::CollapsingHeader(I18N::Editor::Preview, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        m_preview.RenderModelSlot(slot->modelType);
+    }
+    if (ImGui::BeginChild("##PartFields"))
+    {
+        const float width = PartFieldWidth * ImGui::GetFontSize() / 13.0f;
+        if (ImGui::CollapsingHeader(I18N::Editor::ModelFile, ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            std::string typed;
+            ImGui::SetNextItemWidth(width);
+            if (InputStringOnLeave(I18N::Editor::ModelFile, "", part.model.file, typed) && typed.ends_with(".bmd"))
+            {
+                ChangePartModel(I18N::Editor::ModelFile, name,
+                                [&typed](Data::Items::PartModel& changed) { changed.model.file = typed; });
+            }
+            ImGui::SetNextItemWidth(width);
+            if (InputStringOnLeave(I18N::Editor::TextureFolders, "", JoinFolders(part.model.textureFolders), typed))
+            {
+                ChangePartModel(I18N::Editor::TextureFolders, name, [&typed](Data::Items::PartModel& changed)
+                                { changed.model.textureFolders = SplitFolders(typed); });
+            }
+        }
+        if (ImGui::CollapsingHeader(I18N::Editor::Meshes, ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            for (const ItemMeshRow& row : DescribeMeshes(Models[slot->modelType]))
+            {
+                ImGui::BulletText("%d  %s", row.mesh, row.texture.c_str());
+            }
+        }
+        if (ImGui::CollapsingHeader(I18N::Editor::StyleAndEffect, ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::SetNextItemWidth(width);
+            const char* shown = part.renderStyle.empty() ? I18N::Editor::None : part.renderStyle.c_str();
+            if (ImGui::BeginCombo(I18N::Editor::RenderStyle, shown))
+            {
+                std::optional<std::string> picked;
+                if (ImGui::Selectable(I18N::Editor::None, part.renderStyle.empty()))
+                {
+                    picked = "";
+                }
+                for (const std::string_view style : Render::Items::Styles::GetNames())
+                {
+                    if (ImGui::Selectable(std::string(style).c_str(), style == part.renderStyle))
+                    {
+                        picked = std::string(style);
+                    }
+                }
+                ImGui::EndCombo();
+                if (picked)
+                {
+                    ChangePartModel(I18N::Editor::RenderStyle, name,
+                                    [&picked](Data::Items::PartModel& changed) { changed.renderStyle = *picked; });
+                }
+            }
+            ImGui::SameLine();
+            ImGui::BeginDisabled(part.renderStyle.empty() || !Render::Items::Styles::Exists(part.renderStyle));
+            if (ImGui::SmallButton(I18N::Editor::OpenInStyleEditor))
+            {
+                g_MuStyleEditorUI.ShowRenderStyle(part.renderStyle);
+            }
+            ImGui::EndDisabled();
+        }
+    }
+    ImGui::EndChild();
+    ImGui::PopID();
 }
 
 void CMuItemModelUI::RenderPreview(const ItemModelDefinition* model, int itemType)

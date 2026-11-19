@@ -147,6 +147,8 @@ public:
     std::uint16_t    GetMixItemLevel(const int Type) const;
     bool	GetSetItemName(wchar_t* strName, const int iType, const int setType) const;
 
+    // The active set options' value of an AT_SET_OPTION_* effect, added up over the worn sets.
+    int GetSetOptionValue(int Special) const;
     void	PlusSpecial(std::uint16_t* Value, int Special) const;
     void	PlusSpecialPercent(std::uint16_t* Value, int Special) const;
     void    PlusMastery(int* Value, std::uint8_t MasteryType) const;
@@ -161,8 +163,8 @@ public:
     // `masteryType` (SKILL_ATTRIBUTE::MasteryType, the skill's element).
     static int GetMasteryBonus(const SET_SEARCH_RESULT_OPT& set, std::uint8_t masteryType);
 
-    static int     GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value);
-    static bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);
+    // Writes the item's ancient bonus lines from row TextNum on: the texts of its definition (GameLogic::Items::
+    // FindAncientBonus) and, for the elemental rings and pendants, "Increase Attribute Damage"; the next free row.
     static int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
 
     // The format a set option's value is described with (`option` counts from

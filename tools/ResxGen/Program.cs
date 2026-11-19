@@ -60,13 +60,25 @@ internal static class Program
             return 1;
         }
 
-        // Apply wide-group flag from the CLI; loader doesn't know about it.
-        groups = groups.Select(g => options.WideGroups.Contains(g.Name)
-                                        ? g with { IsWide = true }
-                                        : g)
+        // Apply the wide and item-text group flags from the CLI; the loader doesn't know about them.
+        groups = groups.Select(g => g with
+                                    {
+                                        IsWide = options.WideGroups.Contains(g.Name),
+                                        NamesItems = options.ItemTextGroups.Contains(g.Name),
+                                    })
                        .ToList();
 
         var masterLocales = CppEmitter.ComputeMasterLocales(groups);
+
+        var itemTextErrors = ItemTextChecks.Check(groups, masterLocales, options.ItemTextGroups);
+        if (itemTextErrors.Count > 0)
+        {
+            foreach (var itemTextError in itemTextErrors)
+            {
+                Console.Error.WriteLine(itemTextError);
+            }
+            return 1;
+        }
 
         foreach (var group in groups)
         {

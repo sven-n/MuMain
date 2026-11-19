@@ -1000,7 +1000,8 @@ void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber
 
     _connection = new Connection(MU_C16(pszIP), 55980, true, &HandlePacketS);
 
-    if (!_connection->IsConnected())
+    // Only a connect that couldn't start fails here; the authentication below waits until the connection opens.
+    if (_connection->State() == Network::ConnectionState::Closed)
     {
         // todo: write message, that it failed?
         return;
@@ -1017,7 +1018,7 @@ void CUIChatWindow::DisconnectToChatServer()
 {
     if (_connection != nullptr)
     {
-        if (_connection->IsConnected())
+        if (_connection->State() != Network::ConnectionState::Closed)
         {
             _connection->ToChatServer()->SendLeaveChatRoom();
             _connection->Close();

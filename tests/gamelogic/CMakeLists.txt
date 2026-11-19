@@ -25,6 +25,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_smooth_turning
+    SOURCES
+        test_smooth_turning.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_earthquake_falloff
     SOURCES
         test_earthquake_falloff.cpp
@@ -50,6 +59,8 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+# The shipped looks, which the item looks that are data draw with (ShippedLooksScope.h).
+target_compile_definitions(test_character_effects_phase PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
 
 # The draw guard on the gameplay random sequences: no control socket code, so it builds and runs without the socket.
 mu_add_test(
@@ -60,6 +71,7 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+target_compile_definitions(test_draw_random_guard PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
 
 mu_add_test(
     NAME test_repeated_draws
@@ -127,6 +139,16 @@ if(WIN32 AND TARGET ClientLibrary)
     )
 endif()
 
+# Skill aiming (direction skills, auto-attack). Its own target, so the helper rotation's ClientLibrary staging and
+# socket fixtures on Windows don't block it.
+mu_add_test(
+    NAME test_skill_aim
+    SOURCES
+        test_skill_aim.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
 mu_add_test(
     NAME test_ancient_set_options
     SOURCES
@@ -137,9 +159,45 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_party_member_skill
+    SOURCES
+        test_party_member_skill.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_helper_actions
     SOURCES
         test_helper_actions.cpp
+        test_skill_list_hotkeys.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME test_character_realism
+    SOURCES
+        test_character_realism.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_received_attack_target
+    SOURCES
+        test_received_attack_target.cpp
+        test_attack_target_effects.cpp
+        ../monsters/MonsterModelRecorder.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+target_compile_definitions(test_received_attack_target PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
+
+mu_add_test(
+    NAME test_skill_hotkey_configuration
+    SOURCES
+        test_skill_hotkey_configuration.cpp
 )

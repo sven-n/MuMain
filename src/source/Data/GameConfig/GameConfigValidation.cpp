@@ -1,6 +1,8 @@
 #include "GameConfigValidation.h"
 
 #include "GameConfigConstants.h"
+#include "Core/Text/Utf8Path.h"
+#include "Render/PostProcessing/RenderScale.h"
 
 #include <algorithm>
 #include <cwctype>
@@ -44,6 +46,17 @@ int ValidateAntialiasing(int value)
         return 2;
     }
     return 0;
+}
+
+int ValidateRenderScale(int value)
+{
+    return std::clamp(value, Render::PostProcessing::MinRenderScalePercent,
+                      Render::PostProcessing::MaxRenderScalePercent);
+}
+
+int ValidateSharpness(int value)
+{
+    return std::clamp(value, Render::PostProcessing::MinSharpnessPercent, Render::PostProcessing::MaxSharpnessPercent);
 }
 
 std::optional<LookPreset> ParseLook(std::wstring_view text)
@@ -102,5 +115,14 @@ std::wstring ValidateRenderBackend(const std::wstring& value, const std::wstring
         return L"direct3d12";
     }
     return trimmed;
+}
+
+std::filesystem::path ResolveConfigPath(const std::filesystem::path& userFolder, const char* overridePath)
+{
+    if (overridePath != nullptr && overridePath[0] != '\0')
+    {
+        return Core::Text::PathFromUtf8(overridePath);
+    }
+    return userFolder / CfgFiles::CfgFileName;
 }
 }

@@ -6,6 +6,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 
 namespace Render::Lighting
 {
@@ -51,6 +52,7 @@ void PackLight(const DynamicLight& light, std::size_t slot, mu::DynamicLightsUni
         uniform.color[slot][i] = std::max(light.color[i], 0.f);
     }
     uniform.positionAndRadius[slot][3] = light.radius;
+    uniform.color[slot][3] = light.castsShadows ? 1.f : 0.f;
 }
 } // namespace
 
@@ -96,6 +98,23 @@ DynamicLightSelection SelectDynamicLights(std::span<const DynamicLight> lights, 
         PackLight(lights[candidates[slot].index], slot, selection.uniform);
     }
     selection.uniform.lightCount = static_cast<std::uint32_t>(used);
+    return selection;
+}
+
+DynamicLightSelection SelectDynamicLights(const DynamicLightSelection& pinned,
+                                          std::span<const DynamicLight> laterLights, const float (&reference)[3])
+{
+    const DynamicLightSelection later = SelectDynamicLights(laterLights, reference);
+    DynamicLightSelection selection = pinned;
+    const std::size_t pinnedCount = pinned.uniform.lightCount;
+    const std::size_t added = std::min<std::size_t>(later.uniform.lightCount, mu::kMaxDynamicLights - pinnedCount);
+    std::memcpy(selection.uniform.positionAndRadius + pinnedCount, later.uniform.positionAndRadius,
+                added * sizeof(later.uniform.positionAndRadius[0]));
+    std::memcpy(selection.uniform.color + pinnedCount, later.uniform.color, added * sizeof(later.uniform.color[0]));
+    selection.uniform.lightCount = static_cast<std::uint32_t>(pinnedCount + added);
+    selection.uniform.worldLightCount = static_cast<std::uint32_t>(pinnedCount);
+    selection.brighteningLights += later.brighteningLights;
+    selection.dropped += later.brighteningLights - added;
     return selection;
 }
 

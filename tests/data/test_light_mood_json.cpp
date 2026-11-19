@@ -177,19 +177,18 @@ TEST_CASE("a broken or missing light mood file is an error [data][lightmood]")
     CHECK(missing.data.defaultMood == LightMood{});
 }
 
-TEST_CASE("the shipped light mood file has the tuned values [data][lightmood]")
+TEST_CASE("the last light mood file has the tuned values [data][lightmood]")
 {
-    // MU_TEST_DATA_DIR is the client folder's Data; the file name starts with it.
-    const std::filesystem::path file =
-        std::filesystem::path(MU_TEST_DATA_DIR).parent_path() / Data::Maps::LightMoodFile;
+    // The file as it was shipped before Look.json held the moods (tests/data/look_v1).
+    const std::filesystem::path file = std::filesystem::path(MU_TEST_LOOK_V1_DIR) / "LightMood.json";
     const Data::Maps::LightMoodLoadResult loaded = Data::Maps::LoadLightMoodFile(file);
 
     CHECK_MESSAGE(loaded.issues.empty(), Messages(loaded.issues));
     // The tuned Enhanced look: base, figures, dynamicGain, background, sun,
     // shadowKeep, shadeCool, brightScale.
-    CHECK(loaded.data.defaultMood == LightMood{0.45, 0.7, 1.7, 1.0, 0.8, 0.8, 0.1, 0.8});
+    CHECK(loaded.data.defaultMood == LightMood{0.6, 0.7, 1.7, 1.0, 0.8, 0.8, 0.1, 0.8});
     CHECK(loaded.data.ForWorld(Icarus) == LightMood{0.7, 0.7, 1.7, 0.7, 0.8, 0.8, 0.1, 0.95});
-    CHECK(loaded.data.ForWorld(LostTower) == LightMood{0.45, 0.7, 1.7, 1.0, 1.0, 0.8, 0.1, 0.8});
+    CHECK(loaded.data.ForWorld(LostTower) == LightMood{0.45, 0.7, 1.7, 1.0, 1.0, 0.0, 0.1, 0.8});
     CHECK(loaded.data.ForWorld(Atlans) == LightMood{0.8, 0.8, 1.7, 1.0, 1.0, 0.8, 0.1, 1.0});
     CHECK(loaded.data.ForWorld(Lorencia) == loaded.data.defaultMood);
 }

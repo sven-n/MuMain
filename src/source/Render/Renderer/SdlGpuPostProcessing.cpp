@@ -138,6 +138,8 @@ bool SdlGpuPostProcessing::CreatePipelines(SDL_GPUDevice* device, const SdlGpuPo
     m_bloomUpPipeline = BuildPipeline(device, shaders.fullscreenVertex, {shaders.bloomUp, bloomFormat, {}, true});
     m_compositePipeline =
         BuildPipeline(device, shaders.fullscreenVertex, {shaders.composite, frameFormat, sampleCount, false, true});
+    // Optional: without it there is no edge smoothing, the rest of post-processing stays.
+    m_compositeImagePipeline = BuildPipeline(device, shaders.fullscreenVertex, {shaders.composite, frameFormat});
     if (!m_bloomDownPipeline || !m_bloomUpPipeline || !m_compositePipeline || !CreateSamplers() ||
         !CreateGradingTexture())
     {
@@ -153,12 +155,18 @@ void SdlGpuPostProcessing::DestroyPipelines()
     ReleasePipeline(m_device, m_bloomDownPipeline);
     ReleasePipeline(m_device, m_bloomUpPipeline);
     ReleasePipeline(m_device, m_compositePipeline);
+    ReleasePipeline(m_device, m_compositeImagePipeline);
 }
 
 bool SdlGpuPostProcessing::IsAvailable() const
 {
     return m_bloomDownPipeline && m_bloomUpPipeline && m_compositePipeline && m_pointSampler && m_linearSampler &&
            m_gradingTexture;
+}
+
+bool SdlGpuPostProcessing::CanCompositeToImage() const
+{
+    return IsAvailable() && m_compositeImagePipeline;
 }
 
 bool SdlGpuPostProcessing::CreateSamplers()
@@ -209,22 +217,49 @@ bool SdlGpuPostProcessing::CreateGradingTexture()
     return m_gradingTexture != nullptr;
 }
 
-bool SdlGpuPostProcessing::EnsureTargets(SdlGpuTargetSize size)
+bool SdlGpuPostProcessing::EnsureTargets(SdlGpuTargetSize size, SDL_GPUTextureFormat sceneFormat)
 {
     if (!m_device || size.width == 0u || size.height == 0u)
     {
         return false;
     }
-    if (m_sceneTexture && m_targetSize.width == size.width && m_targetSize.height == size.height)
+    if (sceneFormat == SDL_GPU_TEXTUREFORMAT_INVALID)
+    {
+        sceneFormat = m_frameFormat;
+    }
+    if (m_sceneTexture && m_targetSize.width == size.width && m_targetSize.height == size.height &&
+        m_sceneFormat == sceneFormat)
     {
         return true;
     }
 
     ReleaseTargets();
-    m_sceneTexture = CreateTarget(m_device, m_frameFormat, size);
-    m_bloomSourceTexture = CreateTarget(m_device, m_frameFormat, size);
-    SdlGpuTargetSize levelSize = HalfSize(size);
-    bool created = m_sceneTexture && m_bloomSourceTexture;
+    m_sceneFormat = sceneFormat;
+    m_sceneTexture = CreateTarget(m_device, m_sceneFormat, size);
+    if (!m_sceneTexture)
+    {
+        log::Get("render")->error("SDL_gpu -- post-processing targets failed ({}x{}): {}", size.width, size.height,
+                                  SDL_GetError());
+        ReleaseTargets();
+        return false;
+    }
+    m_targetSize = size;
+    return true;
+}
+
+bool SdlGpuPostProcessing::EnsureBloomTargets()
+{
+    if (m_bloomSourceTexture)
+    {
+        return true;
+    }
+    if (!m_sceneTexture)
+    {
+        return false;
+    }
+    m_bloomSourceTexture = CreateTarget(m_device, m_sceneFormat, m_targetSize);
+    SdlGpuTargetSize levelSize = HalfSize(m_targetSize);
+    bool created = m_bloomSourceTexture != nullptr;
     for (BloomLevel& level : m_bloomLevels)
     {
         level.size = levelSize;
@@ -234,13 +269,28 @@ bool SdlGpuPostProcessing::EnsureTargets(SdlGpuTargetSize size)
     }
     if (!created)
     {
-        log::Get("render")->error("SDL_gpu -- post-processing targets failed ({}x{}): {}", size.width, size.height,
-                                  SDL_GetError());
-        ReleaseTargets();
+        log::Get("render")->error("SDL_gpu -- bloom targets failed ({}x{}): {}", m_targetSize.width,
+                                  m_targetSize.height, SDL_GetError());
+        ReleaseBloomTargets();
         return false;
     }
-    m_targetSize = size;
     return true;
+}
+
+void SdlGpuPostProcessing::ReleaseBloomTargets()
+{
+    ReleaseTexture(m_device, m_bloomSourceTexture);
+    for (BloomLevel& level : m_bloomLevels)
+    {
+        ReleaseTexture(m_device, level.texture);
+        level.size = {};
+    }
+    m_bloomRendered = false;
+}
+
+bool SdlGpuPostProcessing::IsHdrScene() const
+{
+    return m_sceneTexture && m_sceneFormat != m_frameFormat;
 }
 
 SDL_GPUTexture* SdlGpuPostProcessing::GetSceneTexture() const
@@ -256,14 +306,8 @@ SDL_GPUTexture* SdlGpuPostProcessing::GetBloomSourceTexture() const
 void SdlGpuPostProcessing::ReleaseTargets()
 {
     ReleaseTexture(m_device, m_sceneTexture);
-    ReleaseTexture(m_device, m_bloomSourceTexture);
-    for (BloomLevel& level : m_bloomLevels)
-    {
-        ReleaseTexture(m_device, level.texture);
-        level.size = {};
-    }
+    ReleaseBloomTargets();
     m_targetSize = {};
-    m_bloomRendered = false;
 }
 
 void SdlGpuPostProcessing::RunBloomPass(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUGraphicsPipeline* pipeline,
@@ -326,16 +370,23 @@ void SdlGpuPostProcessing::RenderBloom(SDL_GPUCommandBuffer* commandBuffer, floa
     m_bloomRendered = true;
 }
 
-void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* pass,
-                                         SdlGpuTargetSize size, const PostProcessingLook& look, PostProcessingView view)
+void SdlGpuPostProcessing::ForgetBloom()
 {
-    if (!IsAvailable() || !m_sceneTexture || size.width == 0u || size.height == 0u)
+    m_bloomRendered = false;
+}
+
+void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* pass,
+                                         SdlGpuTargetSize size, const PostProcessingLook& look, PostProcessingView view,
+                                         SDL_GPUTexture* ambientOcclusion, SdlGpuCompositeTarget target)
+{
+    SDL_GPUGraphicsPipeline* const pipeline =
+        target == SdlGpuCompositeTarget::Image ? m_compositeImagePipeline : m_compositePipeline;
+    if (!IsAvailable() || !pipeline || !m_sceneTexture || size.width == 0u || size.height == 0u)
     {
         return;
     }
 
     const bool bloomRendered = m_bloomRendered && look.bloomStrength > 0.0f;
-    m_bloomRendered = false;
 
     // The image shown as the scene: the scene itself, or a diagnostic view in
     // its place (black when the bloom was not rendered this frame).
@@ -376,6 +427,8 @@ void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SD
         {shown, shownSampler},
         {bloom ? m_bloomLevels[0].texture : m_sceneTexture, m_linearSampler},
         {grading ? m_gradingTexture : m_sceneTexture, m_linearSampler},
+        {ambientOcclusion ? ambientOcclusion : m_sceneTexture, m_linearSampler},
+        {bloomRendered ? m_bloomSourceTexture : m_sceneTexture, m_pointSampler},
     };
 
     const SDL_GPUViewport viewport{0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height),
@@ -383,10 +436,19 @@ void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SD
     const SDL_Rect scissor{0, 0, static_cast<int>(size.width), static_cast<int>(size.height)};
     SDL_SetGPUViewport(pass, &viewport);
     SDL_SetGPUScissor(pass, &scissor);
-    SDL_BindGPUGraphicsPipeline(pass, m_compositePipeline);
+    SDL_BindGPUGraphicsPipeline(pass, pipeline);
     SDL_BindGPUFragmentSamplers(pass, 0, bindings, static_cast<Uint32>(std::size(bindings)));
+    // One step of the 8-bit target: enough to break up banding in the smooth HDR gradients.
+    constexpr float DitherAmount = 1.0f / 255.0f;
+    const bool hdr = IsHdrScene() && view == PostProcessingView::Scene;
     const SdlGpuCompositeUniform uniform{
-        {1.0f / static_cast<float>(size.width), 1.0f / static_cast<float>(size.height)}, bloomScale, gradingStrength};
+        {1.0f / static_cast<float>(size.width), 1.0f / static_cast<float>(size.height)},
+        bloomScale,
+        gradingStrength,
+        hdr ? HdrToneMapKnee : 1.0f,
+        hdr ? DitherAmount : 0.0f,
+        ambientOcclusion && view == PostProcessingView::Scene ? look.ambientOcclusionStrength : 0.0f,
+        bloomRendered ? 1.0f : 0.0f};
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &uniform, sizeof(uniform));
     SDL_DrawGPUPrimitives(pass, FullscreenVertexCount, 1, 0, 0);
 }

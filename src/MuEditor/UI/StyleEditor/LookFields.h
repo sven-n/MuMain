@@ -17,7 +17,17 @@
 namespace MuEditor::Looks::Fields
 {
 bool Layer(Data::Looks::Layer& layer, const std::vector<LookPart>& parts = {});
-bool ItemValues(Data::Looks::ItemValues& values, const std::vector<LookPart>& parts = {});
+// The look's own options: Not for (doppelgangers, outside a monster's hands) and Draws alone (design L47).
+bool LookOptions(Data::Looks::LookDefinition& look);
+// `light`: whether the values can set the light; the values an item effect sets before the drawing can't.
+bool ItemValues(Data::Looks::ItemValues& values, const std::vector<LookPart>& parts = {}, bool light = true);
+// An item effect's entry before the drawing (design L13): when it holds, the item values it sets, the drawing's
+// opacity and the level the item glows like from then on.
+bool ItemValuesBeforeEntry(Data::Looks::ItemValuesBefore& entry, const std::vector<LookPart>& parts = {});
+// An item effect's light of the object (design L45): none, or red, green and blue, each a number or a shape.
+bool ObjectLight(std::optional<std::array<Data::Looks::Number, 3>>& light);
+// One line for an entry of the item effect's list: "Only when: glow mesh, glows like level +7".
+std::string DescribeItemValuesBefore(const Data::Looks::ItemValuesBefore& entry);
 // A layer as its effect (design L35, L40): its meshes, then only the fields of its main effect and of what else it
 // does, as `effect` describes it (a pulse's strength with its curve, a shine's motion, an overlay's texture).
 bool Effect(Data::Looks::Layer& layer, const Data::Looks::LayerEffect& effect, const std::vector<LookPart>& parts = {});

@@ -31,3 +31,13 @@ typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomClientLeft)(int32_t, BYTE , 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessage)(int32_t, BYTE , BYTE , const BYTE* , uint32_t);
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendKeepAlive)(int32_t);
+
+// The exports the senders above look up; the bridge resolves them all at startup.
+inline constexpr const char* kManagedExports_ChatServer[] = {
+    "SendAuthenticate",
+    "SendChatRoomClientJoined",
+    "SendLeaveChatRoom",
+    "SendChatRoomClientLeft",
+    "SendChatMessage",
+    "SendKeepAlive",
+};

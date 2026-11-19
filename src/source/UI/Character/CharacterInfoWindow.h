@@ -4,6 +4,9 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/Character/CriticalHitTexts.h"
+#include "UI/Character/DamageHint.h"
+#include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
@@ -93,6 +96,14 @@ namespace mu::ui::window
         void UnloadImages();
         void ResetEquipmentLevel();
 
+        // The hint a line shows while the pointer is over it, by its key in m_LineHint.
+        enum LineHint : int
+        {
+            NoLineHint = -1,
+            DamageHint = 0,
+            CriticalDamageRateHint = 1,
+        };
+
         // One derived-stat display line below an attribute's label/value row (attack, defense,
         // attack-speed, mana, magic/curse damage, class-specific bonus lines, etc.) -- count and
         // order vary per class, so these stack via normal block flow rather than fixed per-line
@@ -100,9 +111,12 @@ namespace mu::ui::window
         struct StatLine
         {
             Rml::String text;
-            // Why the row reads the way it does: "base", "boosted" by an item or set, or
-            // "buffed" by a consumable. Each theme's character_info.rcss owns the colours.
+            // Why the row reads the way it does: "base", "boosted" by an item or set, or "buffed" by
+            // a consumable or (the damage and critical damage rate lines) the hero's own skill buff.
+            // Each theme's character_info.rcss owns the colours.
             Rml::String source;
+            // Its LineHint.
+            int hint = NoLineHint;
         };
 
         void BuildRmlUi();
@@ -110,6 +124,9 @@ namespace mu::ui::window
         void BuildSubjectTexts();
         void BuildTableTexts();
         void BuildAttributeLines();
+        // The critical damage rate's line under the strength's lines, the damage line's colour while the hero's own
+        // Increase Critical Damage is on, and the hint of the line the pointer is over.
+        void BuildCriticalHits();
 
         struct CharacterInfoRmlModel
         {
@@ -144,6 +161,7 @@ namespace mu::ui::window
             std::vector<StatLine> agiLines;
             std::vector<StatLine> vitLines;
             std::vector<StatLine> eneLines;
+            StatLine criticalDamageRateLine;
 
             bool masterLevelEnabled = false;
 
@@ -158,6 +176,12 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
+        // The hint of the line the pointer is over (StatLine::hint), in the shared tooltip.
+        UI::RmlBridge::ElementTooltip m_LineHint;
+        // The damage the damage line shows, for its hint.
+        UI::Character::DamageRange m_DamageRange;
 
+        // The critical damage rate line and the hints, formatted again only when what they show changes.
+        UI::Character::CriticalHitTexts m_CriticalHitTexts;
     };
 }

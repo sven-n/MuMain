@@ -10,8 +10,9 @@ namespace MuEditor::Items::UsageView
 // entry and the shared model it names. Nothing when it has none.
 void RenderGoingWithItem(const ItemUsage& usage);
 // What uses the item by its number and stays there, as the remove and move
-// dialogs show it: the game data read by its item type and the source lines
-// that name it (the first of them, with the count).
+// dialogs show it: the monsters that wear it (their places), the game data
+// read by its item type, the texts that name it by its number and the source
+// lines that name it (the first of them, with the count).
 void RenderUsesAtNumber(const ItemUsage& usage);
 // What takes a number that is not free, below "This number is not free" of
 // the add, duplicate and move dialogs: the item on it, or the entry without a

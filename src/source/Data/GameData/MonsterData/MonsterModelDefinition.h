@@ -161,6 +161,9 @@ struct MonsterModelDefinition
     // The timers of its animations, at most MaxModelTimers; the names are
     // unique (Q-MN91).
     std::vector<MonsterModelTimer> timers;
+    // Names for bones that the code finds by name (BoneManager), registered in
+    // this order when one of its monsters appears (Q-MN37).
+    std::vector<std::pair<std::string, int>> namedBones;
     std::vector<MonsterModelBitmap> bitmaps;
     std::vector<MonsterModelPart> parts;
     MonsterModelBody body;

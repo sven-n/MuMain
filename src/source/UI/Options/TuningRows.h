@@ -23,6 +23,8 @@ enum class TuningLock : std::uint8_t
     FeatureOff,
     // Dynamic lights act only with Enhanced lighting.
     NeedsLighting,
+    // The sun acts only with dynamic lights.
+    NeedsDynamicLights,
     // The renderer could not build the feature here.
     Unavailable,
     // A developer command switched the feature off for this session.
@@ -44,7 +46,7 @@ struct TuningFeatureState
 // `enhanced`: the Enhanced look is active; `lightingChosen`: the player keeps Enhanced lighting on
 // (dynamic lights need it).
 [[nodiscard]] TuningLock TuningGroupLock(Render::Look::TuningGroup group, bool enhanced, bool lightingChosen,
-                                         const TuningFeatureState& feature);
+                                         bool dynamicLightsChosen, const TuningFeatureState& feature);
 [[nodiscard]] std::string TuningLockReason(TuningLock lock);
 
 enum class TuningRowState : std::uint8_t
@@ -89,5 +91,8 @@ struct TuningRow
 [[nodiscard]] std::string TuningResetAllLabel();
 // The visible failure of the last save, empty while what applies is saved or about to be.
 [[nodiscard]] std::string TuningSaveMessage(const Render::Look::TuningSession& session);
+// Above the tuning while a developer previews the look as authored, which leaves these values out; empty
+// otherwise (always in players' builds).
+[[nodiscard]] std::string TuningPreviewNote(Render::Look::LookPreview preview);
 
 } // namespace UI::Options

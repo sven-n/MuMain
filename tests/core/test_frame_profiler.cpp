@@ -89,3 +89,35 @@ TEST_CASE("completed frame includes late RmlUi work and stays stable during the 
     CHECK(FrameProfiler::CompletedCounter(Pass::RmlUiRender, Counter::DrawCalls) == 0);
     FrameProfiler::CompleteFrame();
 }
+
+TEST_CASE("a pass scope times itself only while something reads the timings [core][profiling][frame_profiler]")
+{
+    using Pass = FrameProfiler::Pass;
+    const auto busy = []
+    {
+        const auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(2);
+        while (std::chrono::steady_clock::now() < until)
+        {
+        }
+    };
+    FrameProfiler::ResetFrame();
+    FrameProfiler::g_CountersEnabled = false;
+    FrameProfiler::g_TimingForOverlay = false;
+    FrameProfiler::g_TimingForLog = false;
+    {
+        FRAME_PROFILE(Terrain);
+        CHECK(FrameProfiler::CurrentPass() == Pass::Terrain);
+        busy();
+    }
+    CHECK(FrameProfiler::AccumulatorMs(Pass::Terrain) == 0.0f);
+    CHECK(FrameProfiler::CurrentPass() == Pass::Other);
+
+    FrameProfiler::g_TimingForOverlay = true;
+    {
+        FRAME_PROFILE(Terrain);
+        busy();
+    }
+    CHECK(FrameProfiler::AccumulatorMs(Pass::Terrain) > 0.0f);
+    FrameProfiler::g_TimingForOverlay = false;
+    FrameProfiler::ResetFrame();
+}

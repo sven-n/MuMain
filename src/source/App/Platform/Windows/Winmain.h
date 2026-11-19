@@ -72,10 +72,8 @@ extern int  m_SoundOnOff;
 extern int  m_MusicOnOff;
 extern int  m_Resolution;
 extern int m_RememberMe;
-extern int g_MaxMessagePerCycle;
 extern double CPU_AVG;
 
-extern void SetMaxMessagePerCycle(int messages);
 extern void CheckHack(void);
 extern DWORD GetCheckSum(WORD wKey);
 extern void StopMp3(const char* Name, BOOL bEnforce = false);
@@ -99,6 +97,12 @@ extern void MuSetAnisotropyPreference(int anisotropy);
 extern void MuSetAntialiasingPreference(int samples);
 // Multisampling on (at [Render] Antialiasing) or off, as the active look asks.
 extern void MuSetAntialiasingActive(bool active);
+// Persists [Render] EdgeSmoothing; applied from the next frame while the Enhanced look is active.
+extern void MuSetEdgeSmoothingPreference(bool enabled);
+// Persist [Render] RenderScale (50 to 100) and Sharpness (0 to 100); applied from the next frame while
+// the Enhanced look is active.
+extern void MuSetRenderScalePreference(int percent);
+extern void MuSetSharpnessPreference(int percent);
 
 // Confines the mouse cursor to the window's client area when in fullscreen
 // and the window is active; releases clipping otherwise. Safe to call any

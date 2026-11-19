@@ -1,15 +1,19 @@
 #pragma once
 
+#include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/EffectData/Shines.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemOptionDatabase.h"
 #include "Data/GameData/ItemData/ItemOptionDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/OptionRule.h"
+#include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <bitset>
@@ -44,6 +48,8 @@ struct ItemModelDataLoadResult
     // model filled in.
     std::vector<ItemModelDefinition> models;
     std::vector<SharedItemModel> sharedModels;
+    // PartModels.json (design L28).
+    std::vector<PartModel> partModels;
     std::vector<ItemDataIssue> issues;
 };
 
@@ -138,6 +144,18 @@ std::filesystem::path GetGroundLabelsFile();
 
 GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file);
 
+struct ItemNameCasesLoadResult
+{
+    ItemNameCases cases;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/NameCases.json, relative to the client folder: the cases each language declines item names in,
+// see ItemNameCases.h. Next to the tooltip file; a client without it declines no names.
+std::filesystem::path GetItemNameCasesFile();
+
+ItemNameCasesLoadResult LoadItemNameCasesFile(const std::filesystem::path& file);
+
 struct GlowColorsLoadResult
 {
     std::vector<Effects::GlowColor> colors;
@@ -150,6 +168,17 @@ struct GlowColorsLoadResult
 std::filesystem::path GetGlowColorsFile();
 
 GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file);
+
+struct ShinesLoadResult
+{
+    std::vector<Effects::Shine> shines;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Effects/Shines.json, relative to the client folder: the shines below +3 that the item glows name, see Shines.h.
+std::filesystem::path GetShinesFile();
+
+ShinesLoadResult LoadShinesFile(const std::filesystem::path& file);
 
 enum class ItemDataSaveResult
 {
@@ -177,6 +206,13 @@ ItemDataSaveResult WriteItemTextFile(const std::filesystem::path& file, const st
                                      std::vector<ItemDataIssue>& issues);
 
 // The item models a save writes with the items.
+// A look file to write, and its text.
+struct LookFileToSave
+{
+    std::filesystem::path file;
+    std::string text;
+};
+
 struct ItemModelSave
 {
     std::filesystem::path directory;
@@ -187,6 +223,9 @@ struct ItemModelSave
     // Written to SharedModels.json when sharedModelsChanged.
     std::span<const SharedItemModel> sharedModels;
     bool sharedModelsChanged = false;
+    // Written to PartModels.json when partModelsChanged.
+    std::span<const PartModel> partModels;
+    bool partModelsChanged = false;
     // Written to glowColorsFile (GetGlowColorsFile) when glowColorsChanged.
     std::filesystem::path glowColorsFile;
     std::span<const Effects::GlowColor> glowColors;
@@ -201,10 +240,24 @@ struct ItemModelSave
     std::filesystem::path groundLabelsFile;
     const GroundLabelFile* groundLabels = nullptr;
     bool groundLabelsChanged = false;
-    // The text of the render style file (Data/Effects/RenderStyles.json), written when renderStylesChanged.
-    std::filesystem::path renderStylesFile;
-    std::string renderStylesText;
-    bool renderStylesChanged = false;
+    // The look files the Style Editor changed (Data/Effects/RenderStyles.json, ItemEffects.json), with their text.
+    std::vector<LookFileToSave> lookFiles;
+    // Other files written with them, all or none: the monster list with the
+    // item references a move changed (D60). Written when their text differs.
+    std::span<const TextFileToWrite> alsoWrite;
+    // Written to nameCasesFile (GetItemNameCasesFile) when nameCasesChanged.
+    std::filesystem::path nameCasesFile;
+    const ItemNameCases* nameCases = nullptr;
+    bool nameCasesChanged = false;
+    // Written when optionsChanged: each definition file of optionsDirectory (GetItemOptionsDirectory) with its
+    // definitions, optionRulesFile (GetOptionRulesFile) and optionTextsFile (GetOptionTextsFile). optionFiles are the
+    // definition files the folder had when it was read, so a file whose last definition went is written empty.
+    std::filesystem::path optionsDirectory;
+    std::filesystem::path optionRulesFile;
+    std::filesystem::path optionTextsFile;
+    const ItemOptionFiles* options = nullptr;
+    std::span<const std::string> optionFiles;
+    bool optionsChanged = false;
 #endif
 };
 
@@ -252,4 +305,7 @@ void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<Item
 // directory): a warning for each model, since the game starts without it and
 // draws nothing for the item.
 void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
+
+// A part model file that is not there: a warning for each part model, since the game draws nothing in its slot.
+void ValidatePartModelFilesExist(std::span<const PartModel> parts, std::vector<ItemDataIssue>& issues);
 } // namespace Data::Items

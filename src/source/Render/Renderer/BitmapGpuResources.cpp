@@ -3,6 +3,7 @@
 #include <SDL3/SDL_error.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <vector>
 
@@ -37,7 +38,7 @@ void BitmapGpuResources::AdvanceSlot()
 {
     do
     {
-        m_next = (m_next + 1) % kSlotCount;
+        m_next = (m_next + 1) % m_slots.size();
     } while (m_slots[m_next].lost);
 }
 
@@ -57,12 +58,14 @@ bool BitmapGpuResources::Initialize(SDL_GPUDevice* device)
     m_thread = std::this_thread::get_id();
     m_faulted = false;
     m_next = 0;
+    m_framesSinceGrowth = 0;
     m_stage.clear();
     m_error.clear();
 
     SDL_GPUTransferBufferCreateInfo transferInfo{};
     transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
     transferInfo.size = static_cast<Uint32>(kSlotCapacity);
+    m_slots.assign(kMinimumSlotCount, Slot{});
     for (auto& slot : m_slots)
     {
         slot.transfer = m_calls.createTransfer(device, &transferInfo);
@@ -102,13 +105,61 @@ bool BitmapGpuResources::Initialize(SDL_GPUDevice* device)
     return true;
 }
 
-bool BitmapGpuResources::Retire(Slot& slot)
+bool BitmapGpuResources::SubmitOpen()
+{
+    Slot& slot = m_slots[m_next];
+    // SDL consumes the command even on a failed submit. An uncertain slot is
+    // never reused; only device teardown may reclaim it after that failure.
+    SDL_GPUFence* fence = m_calls.submit(m_open);
+    m_open = nullptr;
+    if (!fence)
+    {
+        Fail("submit bitmap upload and acquire fence", true);
+        LoseSlot(slot);
+        return false;
+    }
+    slot.fence = fence;
+    AdvanceSlot();
+    return true;
+}
+
+bool BitmapGpuResources::Flush()
+{
+    if (!m_open || !OnOwnerThread())
+    {
+        return !m_open;
+    }
+    return SubmitOpen();
+}
+
+bool BitmapGpuResources::TryRetire(Slot& slot)
 {
     if (!slot.fence)
     {
         return true;
     }
-    if (!m_calls.wait(m_device, true, &slot.fence, 1))
+    if (!m_calls.query(m_device, slot.fence))
+    {
+        return false;
+    }
+    // Signaled, so this returns at once; it is still called because SDL's Vulkan backend cleans up finished
+    // submissions only on a fence wait or a frame submit, and texture creation slows as they pile up in a load.
+    m_calls.wait(m_device, true, &slot.fence, 1);
+    m_calls.releaseFence(m_device, slot.fence);
+    slot.fence = nullptr;
+    return true;
+}
+
+bool BitmapGpuResources::WaitRetire(Slot& slot)
+{
+    if (!slot.fence)
+    {
+        return true;
+    }
+    const auto start = std::chrono::steady_clock::now();
+    const bool waited = m_calls.wait(m_device, true, &slot.fence, 1);
+    m_fenceWaitSeconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    if (!waited)
     {
         Fail("wait for upload fence", true);
         LoseSlot(slot);
@@ -117,6 +168,97 @@ bool BitmapGpuResources::Retire(Slot& slot)
     m_calls.releaseFence(m_device, slot.fence);
     slot.fence = nullptr;
     return true;
+}
+
+bool BitmapGpuResources::PickFreeSlot()
+{
+    // The next slot the GPU is done with, in ring order.
+    for (std::size_t step = 0; step < m_slots.size(); ++step)
+    {
+        const std::size_t index = (m_next + step) % m_slots.size();
+        if (!m_slots[index].lost && TryRetire(m_slots[index]))
+        {
+            m_next = index;
+            return true;
+        }
+    }
+    // Every slot is still being copied: another one instead of waiting, which a browser frame can't do.
+    SDL_GPUTransferBufferCreateInfo transferInfo{};
+    transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+    transferInfo.size = static_cast<Uint32>(kSlotCapacity);
+    const bool mayGrow = m_slots.size() < kMaximumSlotCount || !m_calls.waitAtCeiling;
+    SDL_GPUTransferBuffer* transfer = mayGrow ? m_calls.createTransfer(m_device, &transferInfo) : nullptr;
+    if (transfer)
+    {
+        m_slots.push_back({transfer, nullptr, false});
+        m_next = m_slots.size() - 1;
+        m_framesSinceGrowth = 0;
+        return true;
+    }
+    // At the ceiling, or out of memory for staging: wait for the next slot after all.
+    return WaitRetire(m_slots[m_next]);
+}
+
+std::uint64_t BitmapGpuResources::BytesInFlight()
+{
+    // It retires finished slots: owner thread only, like every other call that touches them.
+    if (!m_device || !OnOwnerThread())
+    {
+        return 0;
+    }
+    std::uint64_t bytes = m_open ? m_openUsed : 0;
+    for (Slot& slot : m_slots)
+    {
+        if (!slot.lost && !TryRetire(slot))
+        {
+            bytes += kSlotCapacity;
+        }
+    }
+    return bytes;
+}
+
+bool BitmapGpuResources::OverStagingCap()
+{
+    return BytesInFlight() > kStagingSoftCap;
+}
+
+void BitmapGpuResources::TrimIdleSlots()
+{
+    // Only usable slots count towards the minimum: lost ones stay until Shutdown, so a trim never removes the last
+    // slot that can be staged into (a faulted ring, every slot lost, is left as it is).
+    const auto usableSlots = [this]
+    {
+        return static_cast<std::size_t>(
+            std::count_if(m_slots.begin(), m_slots.end(), [](const Slot& each) { return !each.lost; }));
+    };
+    if (!m_device || !OnOwnerThread() || m_faulted || usableSlots() <= kMinimumSlotCount ||
+        ++m_framesSinceGrowth < kIdleFramesBeforeTrim)
+    {
+        return;
+    }
+    std::size_t usable = usableSlots();
+    for (std::size_t index = m_slots.size(); index-- > 0 && usable > kMinimumSlotCount;)
+    {
+        Slot& slot = m_slots[index];
+        // The open slot and a lost one (whose GPU use is unknown) stay.
+        if ((m_open && index == m_next) || slot.lost || !TryRetire(slot))
+        {
+            continue;
+        }
+        m_calls.releaseTransfer(m_device, slot.transfer);
+        m_slots.erase(m_slots.begin() + static_cast<std::ptrdiff_t>(index));
+        --usable;
+        if (m_next > index)
+        {
+            --m_next;
+        }
+    }
+    m_next %= m_slots.size();
+    // Erasing the slot at m_next can leave it on a lost one, which must never be staged into; a usable slot is left.
+    if (m_slots[m_next].lost)
+    {
+        AdvanceSlot();
+    }
 }
 
 namespace
@@ -217,19 +359,39 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
                                                            : static_cast<Uint32>(mips.size() + 1);
 
     SDL_GPUTexture* texture = nullptr;
+    const auto fail = [&]
+    {
+        if (texture)
+        {
+            m_calls.releaseTexture(m_device, texture);
+        }
+        return Failure();
+    };
     std::size_t next = 0;
     while (next < pieces.size())
     {
-        auto& slot = m_slots[m_next];
-        if (!Retire(slot))
+        // A batch keeps staging into the open slot while the next piece fits.
+        if (m_open && AlignUp(m_openUsed, kLevelAlignment) + pieces[next].pitch * pieces[next].rows > kSlotCapacity &&
+            !SubmitOpen())
         {
-            if (texture)
+            return fail();
+        }
+        if (!m_open)
+        {
+            if (!PickFreeSlot())
             {
-                m_calls.releaseTexture(m_device, texture);
+                return fail();
             }
-            return Failure();
+            m_open = m_calls.acquire(m_device);
+            if (!m_open)
+            {
+                Fail("acquire bitmap upload command buffer", true);
+                return fail();
+            }
+            m_openUsed = 0;
         }
 
+        Slot& slot = m_slots[m_next];
         if (!texture)
         {
             SDL_GPUTextureCreateInfo textureInfo{};
@@ -247,7 +409,7 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
             if (!texture)
             {
                 Fail("create bitmap texture", true);
-                return Failure();
+                return fail();
             }
         }
 
@@ -255,17 +417,15 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
         if (!mapped)
         {
             Fail("map bitmap transfer buffer", true);
-            m_calls.releaseTexture(m_device, texture);
-            return Failure();
+            return fail();
         }
-        // As many consecutive pieces as fit the slot; a single piece always does.
+        // As many consecutive pieces as fit the slot; a single piece always fits an empty one.
         auto* target = static_cast<std::uint8_t*>(mapped);
         const std::size_t first = next;
-        std::uint64_t used = 0;
         while (next < pieces.size())
         {
             StagedPiece& piece = pieces[next];
-            const std::uint64_t offset = next == first ? 0 : AlignUp(used, kLevelAlignment);
+            const std::uint64_t offset = m_openUsed == 0 ? 0 : AlignUp(m_openUsed, kLevelAlignment);
             if (offset + piece.pitch * piece.rows > kSlotCapacity)
             {
                 break;
@@ -276,25 +436,21 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
                             static_cast<std::size_t>(piece.rowBytes));
             }
             piece.offset = offset;
-            used = offset + piece.pitch * piece.rows;
+            m_openUsed = offset + piece.pitch * piece.rows;
             ++next;
         }
         m_calls.unmap(m_device, slot.transfer);
 
-        SDL_GPUCommandBuffer* command = m_calls.acquire(m_device);
-        if (!command)
-        {
-            Fail("acquire bitmap upload command buffer", true);
-            m_calls.releaseTexture(m_device, texture);
-            return Failure();
-        }
-        SDL_GPUCopyPass* pass = m_calls.beginCopy(command);
+        SDL_GPUCopyPass* pass = m_calls.beginCopy(m_open);
         if (!pass)
         {
+            // shortcut: this also drops every upload staged in the open slot since the last flush (a whole load's or
+            // frame's worth, already reported as done); SDL fails here only on a lost device, when those textures are
+            // lost anyway.
             Fail("begin bitmap upload copy pass", true);
-            m_calls.cancel(command);
-            m_calls.releaseTexture(m_device, texture);
-            return Failure();
+            m_calls.cancel(m_open);
+            m_open = nullptr;
+            return fail();
         }
         for (std::size_t index = first; index < next; ++index)
         {
@@ -316,21 +472,14 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
         m_calls.endCopy(pass);
         if (generateMips && levelCount > 1 && next == pieces.size())
         {
-            m_calls.generateMipmaps(command, texture);
+            m_calls.generateMipmaps(m_open, texture);
         }
 
-        // SDL consumes the command even on a failed submit. An uncertain slot is
-        // never reused; only device teardown may reclaim it after that failure.
-        SDL_GPUFence* fence = m_calls.submit(command);
-        if (!fence)
+        // The open slot takes the next uploads too; it submits when full or at the next Flush (before every frame).
+        if (next < pieces.size() && !SubmitOpen())
         {
-            Fail("submit bitmap upload and acquire fence", true);
-            m_calls.releaseTexture(m_device, texture);
-            LoseSlot(slot);
-            return Failure();
+            return fail();
         }
-        slot.fence = fence;
-        AdvanceSlot();
     }
     m_stage.clear();
     m_error.clear();
@@ -377,10 +526,14 @@ bool BitmapGpuResources::Shutdown()
         // Preserve owner-thread diagnostics; lifecycle calls are externally serialized.
         return false;
     }
-    bool retired = true;
+    bool retired = Flush();
     for (auto& slot : m_slots)
     {
-        if (!slot.lost && !Retire(slot))
+        if (!retired)
+        {
+            break;
+        }
+        if (!slot.lost && !WaitRetire(slot))
         {
             retired = false;
             break;
@@ -389,10 +542,12 @@ bool BitmapGpuResources::Shutdown()
     // On device failure SDL handles remain valid until device destruction;
     // do not treat an unsuccessful wait as proof that staging can be reused.
     ReleaseHandles();
-    m_slots = {};
+    m_slots.clear();
     m_device = nullptr;
     m_thread = {};
     m_next = 0;
+    m_openUsed = 0;
+    m_framesSinceGrowth = 0;
     m_faulted = false;
     return retired;
 }

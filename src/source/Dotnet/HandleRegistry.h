@@ -21,6 +21,19 @@ public:
         m_targets[handle] = target;
     }
 
+    // Registers target under the handle create() returns, holding the lock throughout: a callback the new handle
+    // gets while create() runs waits and then finds the target. A handle of 0 or less registers nothing.
+    template <typename Create> int32_t AddCreated(Create&& create, Target* target)
+    {
+        const std::lock_guard lock(m_mutex);
+        const int32_t handle = create();
+        if (handle > 0)
+        {
+            m_targets[handle] = target;
+        }
+        return handle;
+    }
+
     void Remove(int32_t handle)
     {
         const std::lock_guard lock(m_mutex);

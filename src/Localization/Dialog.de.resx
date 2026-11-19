@@ -154,7 +154,7 @@
     <value>Jener Ort ist überaus gefährlich, und die 'Träne der Elfe' ist äußerst schwer zu finden. Doch wenn Ihr die 'Träne der Elfe' findet, wird Euch eine neue Kraft verliehen. Nun macht Euch auf, findet die 'Träne der Elfe' und kehrt zu mir zurück.</value>
   </data>
   <data name="Answer_65_Slot_0" xml:space="preserve">
-    <value> Ich werde die 'Träne der Elfe' suchen!</value>
+    <value> Ich werde die '{item:14,25}' suchen!</value>
   </data>
   <data name="Text_66" xml:space="preserve">
     <value>Ihr habt die 'Träne der Elfe' gefunden! Nach dem Krieg erschuf Lunedil, die Elfenkönigin, den Tränenstein, indem sie den Geiststein verzauberte, damit die Elfen die Macht der Göttin anrufen und ihre eigene Stärke aufbauen konnten.</value>

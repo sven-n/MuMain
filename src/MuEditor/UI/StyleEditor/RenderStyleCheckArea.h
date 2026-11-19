@@ -19,6 +19,8 @@ Data::Looks::RenderStyleCheckInput MakeEditorCheckInput();
 // read's problems). A problem names its look, and the item when it is about one; a click on it selects the item and
 // opens the Style Editor on the look (on the file for a problem of the whole file).
 std::unique_ptr<DataChecks::DataCheckArea> CreateRenderStyleCheckArea();
+// The item effects in Data Checks, alike (Data/Effects/ItemEffects.json; design L23, L44).
+std::unique_ptr<DataChecks::DataCheckArea> CreateItemEffectCheckArea();
 } // namespace MuEditor::Looks
 
 #endif // _EDITOR

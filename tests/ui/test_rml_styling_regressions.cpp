@@ -425,6 +425,57 @@ TEST_CASE("every legacy attribute row sits the points' room lower than the origi
     }
 }
 
+// The character window's attribute rows leave room for their lines: the strength's three (with the critical damage
+// rate), the agility's three, a Dark Lord's vitality line and two energy lines above its Command row, and a Rage
+// Fighter's two vitality lines (its energy row moves down a line) and three energy lines above the buttons. Classic
+// takes its base styles (the text's counter-scale) from legacy, which this fixture doesn't follow; its rows are 60px
+// apart with 12px lines, room for three under each.
+TEST_CASE("the legacy and modern character windows have room for each attribute row's lines [ui][styling]")
+{
+    constexpr float Tolerance = 0.5f;
+    UI::Tests::RmlLayoutFixture fixture;
+    fixture.Configure({1024, 768}, 100);
+    const auto fill = [](Rml::ElementDocument& document, const char* selector, int lines)
+    {
+        Rml::String markup;
+        for (int line = 0; line < lines; ++line)
+            markup += "<span>Defense (rate):1549 (313 +31)</span>";
+        Rml::Element& block = Required(document, selector);
+        block.SetInnerRML(markup);
+        return block.GetLastChild();
+    };
+    const auto top = [](Rml::ElementDocument& document, const char* selector)
+    { return Drawn(Required(document, selector)).top + Tolerance; };
+    for (const std::string theme : {"legacy", "modern"})
+    {
+        CAPTURE(theme);
+        auto* document = fixture.Load(theme, "character_info");
+        REQUIRE(document);
+        UI::RmlBridge::SlotPlacement placement;
+        placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(1024, 768).scaleX);
+        placement.Apply(document, "panel");
+        Rml::Element* strength = fill(*document, ".attr-lines-str", 3);
+        Rml::Element* agility = fill(*document, ".attr-lines-agi", 3);
+        Rml::Element* vitality = fill(*document, ".attr-lines-vit", 1);
+        Rml::Element* energy = fill(*document, ".attr-lines-ene", 2);
+        fixture.Refresh();
+        CHECK(Drawn(*strength).bottom <= top(*document, ".attr-textbox-agi"));
+        CHECK(Drawn(*agility).bottom <= top(*document, ".attr-textbox-vit"));
+        CHECK(Drawn(*vitality).bottom <= top(*document, ".attr-textbox-ene"));
+        CHECK(Drawn(*energy).bottom <= top(*document, ".attr-textbox-cmd"));
+
+        Required(*document, "#panel").SetClass("vitality-two-lines", true);
+        vitality = fill(*document, ".attr-lines-vit", 2);
+        energy = fill(*document, ".attr-lines-ene", 3);
+        fixture.Refresh();
+        CHECK(Drawn(*vitality).bottom <= top(*document, ".attr-textbox-ene"));
+        CHECK(Drawn(*energy).bottom <= top(*document, "#btn_quest"));
+
+        fixture.context->UnloadDocument(document);
+        fixture.Refresh();
+    }
+}
+
 TEST_CASE("the legacy options tabs each paint their own tab, so a separator sits between every two [ui][styling]")
 {
     // One 3-tab strip stretched under the whole row put its two separators across the labels. Each

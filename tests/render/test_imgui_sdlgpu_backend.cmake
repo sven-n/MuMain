@@ -358,7 +358,7 @@ foreach(symbol IN ITEMS "{0.0f, 0.0f" "s_swapW" "s_swapH" "0.0f, 1.0f}")
     endif()
 endforeach()
 require_match(replay_commands
-    "Render::SdlGpuReplayState[ \t]+replayState[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.viewport[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.scissor[ \t]*\\)[ \t]*;"
+    "Render::SdlGpuReplayState[ \t]+replayState[ \t]*;[ \t\r\n]*SDL_Rect[ \t]+scissor[ \t]*=[ \t]*AppliedScissor[ \t]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*ApplyViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&scissor[ \t]*\\)[ \t]*;"
     "each replay pass owns a render-pass-local replay cache and starts from the carried viewport and scissor")
 string(REGEX MATCHALL "Render::SdlGpuReplayState[ \t]+replayState" replay_caches "${replay_commands}")
 list(LENGTH replay_caches replay_cache_count)
@@ -366,10 +366,10 @@ if(NOT replay_cache_count EQUAL 1)
     message(FATAL_ERROR "Invalid SDL_GPU editor contract: ReplayCommands must own exactly one replay cache")
 endif()
 require_match(replay_commands
-    "case[ \t]+RenderCmdType::SetViewport[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.viewport[ \t]*=[ \t]*cmd\.viewport[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.viewport[ \t]*\\)[ \t]*;"
+    "case[ \t]+RenderCmdType::SetViewport[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.viewport[ \t]*=[ \t]*cmd\.viewport[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*ApplyViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*;"
     "replay caches and applies the active viewport")
 require_match(replay_commands
-    "case[ \t]+RenderCmdType::SetScissor[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.scissor[ \t]*=[ \t]*cmd\.scissor[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.scissor[ \t]*\\)[ \t]*;"
+    "case[ \t]+RenderCmdType::SetScissor[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.scissor[ \t]*=[ \t]*cmd\.scissor[ \t]*;[ \t\r\n]*scissor[ \t]*=[ \t]*AppliedScissor[ \t]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&scissor[ \t]*\\)[ \t]*;"
     "replay caches and applies the active scissor")
 foreach(helper IN ITEMS
         "BindReplayPipeline"
@@ -415,20 +415,15 @@ require_match(app_code
     "g_MuEditorCore\\.Initialize[ \t\r\n]*\\([ \t\r\n]*g_sdlWindow[ \t\r\n]*\\)[ \t]*;"
     "app initializes the editor with the SDL window only")
 
-string(FIND "${app_code}" "static void ShutdownRuntime" runtime_shutdown_start)
-string(FIND "${app_code}" "static void WriteStartupDiagnostics" runtime_shutdown_end)
-if(runtime_shutdown_start EQUAL -1 OR runtime_shutdown_end EQUAL -1 OR runtime_shutdown_end LESS runtime_shutdown_start)
-    message(FATAL_ERROR "Could not isolate ShutdownRuntime()")
-endif()
-math(EXPR runtime_shutdown_length "${runtime_shutdown_end} - ${runtime_shutdown_start}")
-string(SUBSTRING "${app_code}" ${runtime_shutdown_start} ${runtime_shutdown_length} runtime_shutdown)
-string(FIND "${runtime_shutdown}" "g_MuEditorCore.Shutdown()" editor_shutdown_position)
-string(FIND "${runtime_shutdown}" "ShutdownRendererWindow()" renderer_shutdown_position)
+# The teardown stack undoes the newest setup first, so the editor shuts down before the renderer
+# when its undo is pushed after the renderer's.
+string(FIND "${app_code}" "g_teardown.Push([] { g_MuEditorCore.Shutdown(); });" editor_shutdown_position)
+string(FIND "${app_code}" "g_teardown.Push([] { ShutdownRendererWindow(); });" renderer_shutdown_position)
 if(editor_shutdown_position EQUAL -1 OR renderer_shutdown_position EQUAL -1)
-    message(FATAL_ERROR "ShutdownRuntime must shut down both the editor and renderer window")
+    message(FATAL_ERROR "The teardown must shut down both the editor and renderer window")
 endif()
-if(NOT editor_shutdown_position LESS renderer_shutdown_position)
-    message(FATAL_ERROR "ShutdownRuntime must shut down the editor before renderer/device teardown")
+if(NOT renderer_shutdown_position LESS editor_shutdown_position)
+    message(FATAL_ERROR "The teardown must shut down the editor before renderer/device teardown")
 endif()
 
 # The editor's own windows (ImGui viewports outside the game window): updated after every frame ImGui

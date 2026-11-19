@@ -57,37 +57,40 @@ bool IsAboutAnItem(const ItemDataIssue& issue)
     return Data::Items::IsValidItemId(issue.group, issue.number);
 }
 
-class RenderStyleCheckArea final : public DataChecks::DataCheckArea
+class LookCheckArea final : public DataChecks::DataCheckArea
 {
 public:
+    explicit LookCheckArea(Data::Looks::LookKind kind) : m_kind(kind) {}
+
     const char* GetName() const override
     {
-        return I18N::Editor::RenderStyles;
+        return m_kind == Data::Looks::LookKind::ItemEffect ? I18N::Editor::ItemEffects : I18N::Editor::RenderStyles;
     }
 
     void Check(std::vector<ItemDataIssue>& issues) override
     {
+        const MuEditor::Looks::LookEdits& edits = MuEditor::Looks::LookEdits::Of(m_kind);
         const std::filesystem::path file =
-            Data::Effects::GetEffectDataDirectory() / Data::Looks::GetRenderStylesFileName();
-        if (!g_LookEdits.IsComplete())
+            Data::Effects::GetEffectDataDirectory() / Data::Looks::GetLookFileName(m_kind);
+        if (!edits.IsComplete())
         {
             // The file has a fatal problem, so the editor has the game's looks: the problems of the file as read.
             const std::optional<std::string> text = Data::Items::Json::ReadTextFile(file);
             m_lookNames = text ? Data::Looks::ReadLookNames(*text) : std::vector<std::string>{};
-            const std::vector<ItemDataIssue>& read = g_LookEdits.GetIssues();
+            const std::vector<ItemDataIssue>& read = edits.GetIssues();
             issues.insert(issues.end(), read.begin(), read.end());
             return;
         }
         // The looks as the Style Editor has them, as Save Items would write them and the game would read them back.
-        const MuEditor::Looks::LookEdits::State& state = g_LookEdits.GetState();
-        const std::string text = Data::Looks::WriteRenderStylesJson(state.looks, state.folders);
+        const MuEditor::Looks::LookEdits::State& state = edits.GetState();
+        const std::string text = Data::Looks::WriteLookFileJson(m_kind, state.looks, state.folders);
         m_lookNames = Data::Looks::ReadLookNames(text);
-        Data::Looks::RenderStylesFile written;
+        Data::Looks::LookFile written;
         std::vector<ItemDataIssue> found;
-        Data::Looks::ReadRenderStylesFile(text, file.generic_string(), written, found);
+        Data::Looks::ReadLookFile(text, file.generic_string(), m_kind, written, found);
         if (!Data::Items::HasFatal(found))
         {
-            Data::Looks::CheckRenderStyles(written.looks, file.generic_string(), MakeEditorCheckInput(), found);
+            Data::Looks::CheckLooks(m_kind, written.looks, file.generic_string(), MakeEditorCheckInput(), found);
         }
         issues.insert(issues.end(), std::make_move_iterator(found.begin()), std::make_move_iterator(found.end()));
     }
@@ -125,7 +128,14 @@ public:
         }
         if (const std::string look = LookOf(issue); !look.empty())
         {
-            g_MuStyleEditorUI.ShowRenderStyle(look);
+            if (m_kind == Data::Looks::LookKind::ItemEffect)
+            {
+                g_MuStyleEditorUI.ShowItemEffect(look);
+            }
+            else
+            {
+                g_MuStyleEditorUI.ShowRenderStyle(look);
+            }
             return;
         }
         g_MuEditorCore.GetToolWindows().styleEditor = true;
@@ -153,6 +163,7 @@ private:
         return m_lookNames[index];
     }
 
+    Data::Looks::LookKind m_kind;
     // The names of the checked looks in their order, at the last check.
     std::vector<std::string> m_lookNames;
 };
@@ -160,12 +171,20 @@ private:
 
 Data::Looks::RenderStyleCheckInput MakeEditorCheckInput()
 {
-    return {.models = g_ItemModelDatabase.GetAllSlots(), .textureExists = TextureFileExists, .meshCount = MeshCount};
+    return {.models = g_ItemModelDatabase.GetAllSlots(),
+            .partModels = g_ItemModelDatabase.GetPartModels(),
+            .textureExists = TextureFileExists,
+            .meshCount = MeshCount};
 }
 
 std::unique_ptr<DataChecks::DataCheckArea> CreateRenderStyleCheckArea()
 {
-    return std::make_unique<RenderStyleCheckArea>();
+    return std::make_unique<LookCheckArea>(Data::Looks::LookKind::RenderStyle);
+}
+
+std::unique_ptr<DataChecks::DataCheckArea> CreateItemEffectCheckArea()
+{
+    return std::make_unique<LookCheckArea>(Data::Looks::LookKind::ItemEffect);
 }
 } // namespace MuEditor::Looks
 

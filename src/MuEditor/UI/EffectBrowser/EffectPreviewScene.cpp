@@ -19,6 +19,7 @@
 #include "Engine/Object/w_CharacterInfo.h"
 #include "Render/Effects/EffectRegistry.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Render/Items/LookDrawing.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
@@ -29,6 +30,7 @@
 #include <array>
 #include <cfloat>
 #include <cmath>
+#include <optional>
 
 extern float BoneScale;
 
@@ -262,7 +264,8 @@ void EffectPreviewScene::DrawBase(const EffectPreviewRequest& request, float sub
 // particles and effects are removed again.
 void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
 {
-    const PreviewItemModels models = GetPreviewItemModels(request.itemType, request.itemLevel);
+    const PreviewItemModels models = request.modelSlot >= 0 ? PreviewItemModels{request.modelSlot, request.modelSlot, 0}
+                                                            : GetPreviewItemModels(request.itemType, request.itemLevel);
     if (!models.CanDraw())
         return;
     // Armor is drawn with its own meshes on the bones of the skeleton; both
@@ -313,6 +316,12 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
     const EffectPoolGuard removeItemEffects;
     // As the first Doppelganger map draws its monsters' items (RenderCharacter).
     const int renderType = request.itemAsDoppelganger ? RENDER_DOPPELGANGER | RENDER_TEXTURE : RENDER_TEXTURE;
+    // In the inventory pose the item is drawn as the inventory draws it: a layer's place "inventory" (design L16).
+    std::optional<Render::Items::Looks::InventoryDrawing> inventoryDrawing;
+    if (request.itemPose == PreviewItemPose::Inventory)
+    {
+        inventoryDrawing.emplace();
+    }
     RenderPartObject(o, models.model, nullptr, light, o->Alpha, models.drawLevel,
                      request.itemExcellent ? ExcellentFlags : 0, request.itemAncient ? AncientDiscriminator : 0, true,
                      true, true, 0, renderType);

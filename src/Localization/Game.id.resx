@@ -8935,6 +8935,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls Dari %ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Monster tak dikenal %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Saya adalah bug: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>%ls Apakah Anda ingin membatalkan?</value>
   </data>
@@ -9045,5 +9051,56 @@
   </data>
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
+  </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Tingkat kerusakan kritis: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Tingkat kerusakan kritis: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Tingkat kerusakan kritis</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Keberuntungan (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Opsi set: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Opsi soket: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Total: %d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Kerusakan</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>Serangan normal: %d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>Serangan kritis: %d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>Serangan luar biasa: %d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>sebelum pertahanan target</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>Kerusakan kritis</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>Opsi set: +%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>Opsi harmoni: +%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>Opsi soket: +%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>Total: +%d</value>
   </data>
 </root>

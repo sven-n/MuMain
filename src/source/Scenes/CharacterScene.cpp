@@ -221,11 +221,6 @@ static void MoveCharacterSceneState()
 
     MouseOnWindow = false;
 
-    if (!InitCharacterScene)
-    {
-        InitCharacterScene = true;
-        CreateCharacterScene();
-    }
     InitTerrainLight();
     MoveObjects();
     MoveMounts();
@@ -338,13 +333,15 @@ static void PlaceCharactersForDraw()
 
 void NewMoveCharacterScene()
 {
-    if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
+    // PrepareSceneBeforeFrame creates the scene, between frames, once the list is in.
+    if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST || !InitCharacterScene)
     {
         return;
     }
     MoveCharacterSceneState();
     PlaceCharactersForDraw();
     CullWorld();
+    Scenes::Lighting::PinWorldDynamicLights();
 }
 
 /**

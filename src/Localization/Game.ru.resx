@@ -8935,6 +8935,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls Из %ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Неизвестный монстр %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Я — баг: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>%ls Хотите отменить?</value>
   </data>
@@ -9045,5 +9051,56 @@
   </data>
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
+  </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Коэффициент критического урона: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Коэффициент критического урона: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Коэффициент критического урона</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Удача (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Опции сета: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Опции сокетов: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Итого: %d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Урон</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>Обычный удар: %d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>Критический удар: %d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>Превосходный удар: %d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>до защиты цели</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>Критический урон</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>Опции сета: +%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>Опции гармонии: +%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>Опции сокетов: +%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>Итого: +%d</value>
   </data>
 </root>

@@ -6,6 +6,7 @@
 
 #include "ItemEdits.h"
 #include "ItemLayoutChangeNotes.h"
+#include "ItemPreviewOptions.h"
 #include "ItemSelection.h"
 #include "ItemToolWindow.h"
 #include "TooltipLineLooks.h"
@@ -15,6 +16,8 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemOptionDatabase.h"
+#include "Data/GameData/ItemData/ItemOptionDefinition.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ItemDropModel.h"
@@ -26,6 +29,7 @@
 #include <algorithm>
 #include <optional>
 #include <string>
+#include <vector>
 
 using namespace MuEditor::Items;
 using Data::Items::ItemDefinition;
@@ -40,10 +44,9 @@ constexpr float LevelFieldWidth = 40.0f;
 constexpr float SetComboWidth = 200.0f;
 constexpr float LayoutComboWidth = 240.0f;
 constexpr int MaxLevel = Data::Items::ItemLevelCount - 1;
-// Every excellent option: the label only asks whether the item has one.
-constexpr BYTE AllExcellentOptions = 0x3F;
-// The option level the preview gives: the label only asks whether the item has one.
-constexpr BYTE PreviewOptionLevel = 1;
+// The option byte's level and the ancient byte's bonus level, as a server can send them.
+constexpr int MaxOptionLevel = 15;
+constexpr int MaxAncientBonusLevel = 2;
 
 std::optional<ItemDefinition> LoadItem(int itemType)
 {
@@ -154,11 +157,14 @@ void CMuItemTooltipUI::RenderPreview(const ItemDefinition& item, int itemType)
     ImGui::Checkbox(I18N::Editor::Skill, &m_skill);
     ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::Luck, &m_luck);
-    ImGui::SameLine();
-    ImGui::Checkbox(I18N::Editor::Option, &m_option);
-    ImGui::SameLine();
-    ImGui::Checkbox(I18N::Editor::Excellent, &m_excellent);
+    RenderOptionControls(itemType);
     RenderSetCombo(itemType);
+    if (m_set > 0)
+    {
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(LevelSliderWidth * 0.6f * g_MuEditorCore.GetUIScale());
+        ImGui::SliderInt(I18N::Editor::AncientBonusLevel, &m_ancientBonusLevel, 0, MaxAncientBonusLevel);
+    }
 
     // The two places the item's name shows, each a row with its caption in front and where its look comes from after.
     const ITEM preview = MakePreviewItem(itemType);
@@ -204,6 +210,84 @@ void CMuItemTooltipUI::RenderPreview(const ItemDefinition& item, int itemType)
             : std::string(I18N::Editor::TheStandardRules);
     ImGui::SameLine();
     ImGui::TextDisabled("%s", source.c_str());
+}
+
+const MuEditor::Items::PreviewOptionControls& CMuItemTooltipUI::FindOptionControls(int itemType) const
+{
+    const long long version = ToolWindow::GetDataVersion();
+    if (itemType != m_controlsItem || version != m_controlsVersion)
+    {
+        const ItemDefinition* definition = g_ItemDatabase.Find(itemType);
+        m_controls = definition != nullptr
+                         ? MuEditor::Items::FindPreviewOptionControls(*definition, g_ItemDatabase.GetOptions())
+                         : MuEditor::Items::PreviewOptionControls{};
+        m_controlsItem = itemType;
+        m_controlsVersion = version;
+    }
+    return m_controls;
+}
+
+namespace
+{
+// The checkbox of the excellent byte's bit with the number (1 to 6), named by what the item's code reads from it.
+std::string DescribeExcellentByteBit(const MuEditor::Items::PreviewOptionControls& controls, int number)
+{
+    using MuEditor::Items::ExcellentByteUse;
+    if (controls.byteUse == ExcellentByteUse::Kinds)
+    {
+        return MuEditor::Items::DescribeKind(controls, number, I18N::GetCurrentLocale());
+    }
+    const char* format = controls.byteUse == ExcellentByteUse::WingOptions ? I18N::Editor::WingOptionBit0
+                                                                           : I18N::Editor::ExcellentOption0;
+    return I18N::Format(format, {std::to_string(number)});
+}
+} // namespace
+
+void CMuItemTooltipUI::RenderOptionControls(int itemType)
+{
+    const MuEditor::Items::PreviewOptionControls& controls = FindOptionControls(itemType);
+
+    // The additional option's level, and its type where the definition numbers its options by it (wings).
+    ImGui::BeginDisabled(controls.additional == nullptr);
+    ImGui::SetNextItemWidth(LevelSliderWidth * g_MuEditorCore.GetUIScale());
+    ImGui::SliderInt(I18N::Editor::OptionLevel, &m_optionLevel, 0, MaxOptionLevel);
+    ImGui::EndDisabled();
+    if (controls.highestType > 0)
+    {
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(LevelSliderWidth * 0.5f * g_MuEditorCore.GetUIScale());
+        ImGui::SliderInt(I18N::Editor::AdditionalOptionType, &m_optionType, 0, controls.highestType);
+    }
+
+    // One checkbox per bit of controls.excellentBits (bit number - 1), named by what controls.byteUse says the item's
+    // code reads from it.
+    if (controls.excellentBits == 0)
+    {
+        return;
+    }
+    for (int number = 1; number <= Data::Items::MaxExcellentOptionNumber; ++number)
+    {
+        const BYTE bit = static_cast<BYTE>(1 << (number - 1));
+        if ((controls.excellentBits & bit) == 0)
+        {
+            continue;
+        }
+        ImGui::PushID(number);
+        bool on = (m_excellentFlags & bit) != 0;
+        const std::string label = DescribeExcellentByteBit(controls, number);
+        if (ImGui::Checkbox(label.c_str(), &on))
+        {
+            m_excellentFlags = static_cast<BYTE>(on ? (m_excellentFlags | bit) : (m_excellentFlags & ~bit));
+        }
+        const std::string_view attribute = MuEditor::Items::DescribeExcellentBit(controls.excellent, number);
+        if (!attribute.empty() && ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%.*s", static_cast<int>(attribute.size()), attribute.data());
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+    }
+    ImGui::NewLine();
 }
 
 void CMuItemTooltipUI::RenderSetCombo(int itemType)
@@ -403,12 +487,17 @@ ITEM CMuItemTooltipUI::MakePreviewItem(int itemType) const
     params.Level = static_cast<BYTE>(m_level);
     params.WithSkill = m_skill;
     params.WithLuck = m_luck;
-    params.WithOption = m_option;
-    params.OptionLevel = m_option ? PreviewOptionLevel : 0;
-    params.HasExcellentOption = m_excellent;
-    params.ExcellentFlags = m_excellent ? AllExcellentOptions : 0;
+    // Only what the item's controls show: a type or excellent bit set for another item stays out.
+    const MuEditor::Items::PreviewOptionBytes bytes = MuEditor::Items::ResolvePreviewOptions(
+        FindOptionControls(itemType), m_optionLevel, m_optionType, m_excellentFlags);
+    params.WithOption = bytes.optionLevel > 0;
+    params.OptionLevel = static_cast<BYTE>(bytes.optionLevel);
+    params.OptionType = static_cast<BYTE>(bytes.optionType);
+    params.HasExcellentOption = bytes.excellentFlags != 0;
+    params.ExcellentFlags = bytes.excellentFlags;
     params.IsAncient = m_set > 0;
     params.AncientDiscriminator = static_cast<BYTE>(m_set);
+    params.AncientBonusOption = m_set > 0 ? static_cast<BYTE>(m_ancientBonusLevel) : 0;
     ITEM item;
     FillItemFromParameters(item, params);
     return item;

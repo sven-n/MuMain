@@ -8,7 +8,8 @@
       "textureFolders": ["Item"],
       "inventory": {
         "anchor": [0.5, 0.7]
-      }
+      },
+      "itemEffect": "glowingMesh"
     },
     {
       "number": 1,
@@ -142,7 +143,7 @@
         "anchor": [0.6, 1],
         "scale": 0.003
       },
-      "itemEffect": "fruits"
+      "renderStyle": "fruits"
     },
     {
       "number": 16,
@@ -305,7 +306,7 @@
         "anchor": [0.5, 0.9],
         "rotation": [-90, -90, 0]
       },
-      "itemEffect": "spirit"
+      "renderStyle": "spirit"
     },
     {
       "number": 32,
@@ -399,7 +400,9 @@
         "offset": [0, 0.02],
         "rotation": [-198, 0, 0]
       },
-      "renderStyle": "harmonyShine"
+      "glow": {
+        "shineBelowPlus3": "harmony"
+      }
     },
     {
       "number": 39,
@@ -459,6 +462,9 @@
         "rotation": [90, 0, -45],
         "scale": 0.5
       },
+      "glow": {
+        "shineBelowPlus3": "seal"
+      },
       "renderStyle": "sealOfAscension"
     },
     {
@@ -475,6 +481,9 @@
         "rotation": [90, 0, -45],
         "scale": 0.5
       },
+      "glow": {
+        "shineBelowPlus3": "seal"
+      },
       "renderStyle": "sealOfWealth"
     },
     {
@@ -490,6 +499,9 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
+      },
+      "glow": {
+        "shineBelowPlus3": "seal"
       },
       "renderStyle": "sealOfSustenance"
     },
@@ -571,7 +583,8 @@
         "scale": 0.6
       },
       "glow": {
-        "shineHiddenMesh": 1
+        "shineHiddenMesh": 1,
+        "shineBelowPlus3": "harmony"
       },
       "renderStyle": "illusionSorcererCovenant"
     },
@@ -1159,6 +1172,9 @@
         "rotation": [0, 0, 90],
         "scale": 0.5
       },
+      "glow": {
+        "shineBelowPlus3": "seal"
+      },
       "renderStyle": "sealOfAscension"
     },
     {
@@ -1170,6 +1186,9 @@
         "offset": [0.005, 0],
         "rotation": [-90, 0, 0],
         "scale": 0.0021
+      },
+      "glow": {
+        "shineBelowPlus3": "seal"
       },
       "renderStyle": "sealOfWealth"
     },
@@ -1186,7 +1205,8 @@
         "rotation": [270, 0, -45],
         "scale": 1
       },
-      "renderStyle": "characterCard"
+      "renderStyle": "characterCard",
+      "renderStyleValues": {"glowTexture": "Item/Ingameshop/kacama_R.jpg"}
     },
     {
       "number": 98,
@@ -1201,7 +1221,8 @@
         "rotation": [270, 0, -45],
         "scale": 1
       },
-      "renderStyle": "characterCard"
+      "renderStyle": "characterCard",
+      "renderStyleValues": {"glowTexture": "Item/Ingameshop/kacada_R.jpg"}
     },
     {
       "number": 103,
@@ -1398,6 +1419,9 @@
       "ground": {
         "rotation": [90, 0, -45],
         "scale": 0.5
+      },
+      "glow": {
+        "shineBelowPlus3": "seal"
       },
       "renderStyle": "sealOfWealth"
     },

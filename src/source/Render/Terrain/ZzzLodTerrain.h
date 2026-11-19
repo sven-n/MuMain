@@ -40,7 +40,8 @@ void CreateTerrainLight_Part(int xi, int yi);
 
 void CreateTerrain(wchar_t* FileName, bool bNew = false);
 
-bool IsTerrainHeightExtMap(int iWorld);
+// Whether a world's height map (the .OZB of `FileName`) holds 24-bit heights, by its size.
+bool IsTerrainHeightExtFile(const wchar_t* FileName);
 
 int OpenTerrainMapping(wchar_t* FileName);
 bool SaveTerrainMapping(wchar_t* FileName, int iMapNumber);
@@ -58,6 +59,8 @@ void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer
 
 void InitTerrainRay(int HeroX, int HeroY);
 void InitTerrainLight();
+// The ground's light without the pinned lights, over the frame's culled terrain: built by the update, read by the draw.
+void BuildGroundLight();
 void InitTerrainShadow();
 void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void AddTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
@@ -165,42 +168,4 @@ typedef std::map<unsigned int, CFrustrum* > FrustrumMap_t;
 extern FrustrumMap_t g_FrustrumMap; //전체 프러스텀과 별개로 아이디로 지정할 수 있는 프러스텀
 #endif //DYNAMIC_FRUSTRUM
 
-inline int MapFileEncrypt(BYTE* pbyDst, BYTE* pbySrc, int iSize)
-{
-    if (!pbyDst)
-    {
-        return (iSize);
-    }
-    BYTE byMapXorKey[16] = { 0xD1, 0x73, 0x52, 0xF6, 0xD2, 0x9A, 0xCB, 0x27,
-                            0x3E, 0xAF, 0x59, 0x31, 0x37, 0xB3, 0xE7, 0xA2 };
-
-    WORD wMapKey = 0x5E;
-    for (int i = 0; i < iSize; ++i)
-    {
-        pbyDst[i] = (pbySrc[i] + (BYTE)wMapKey) ^ byMapXorKey[i % 16];
-
-        wMapKey = pbyDst[i] + 0x3D;
-        wMapKey = wMapKey & 0xFF;
-    }
-
-    return (iSize);
-}
-
-inline int MapFileDecrypt(BYTE* pbyDst, BYTE* pbySrc, int iSize)
-{
-    if (!pbyDst)
-    {
-        return (iSize);
-    }
-    BYTE byMapXorKey[16] = { 0xD1, 0x73, 0x52, 0xF6, 0xD2, 0x9A, 0xCB, 0x27,
-                            0x3E, 0xAF, 0x59, 0x31, 0x37, 0xB3, 0xE7, 0xA2 };
-
-    WORD wMapKey = 0x5E;
-    for (int i = 0; i < iSize; ++i)
-    {
-        pbyDst[i] = (pbySrc[i] ^ byMapXorKey[i % 16]) - (BYTE)wMapKey;
-        wMapKey = pbySrc[i] + 0x3D;
-        wMapKey = wMapKey & 0xFF;
-    }
-    return (iSize);
-}
+#include "Render/Terrain/MapFileCipher.h"

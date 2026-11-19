@@ -191,6 +191,12 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
                 return false;
             }
             break;
+        case ItemEditStep::Kind::NameCases:
+            if (m_hooks.readNameCases && m_hooks.readNameCases() != (undoing ? step.casesAfter : step.casesBefore))
+            {
+                return false;
+            }
+            break;
         case ItemEditStep::Kind::ColorFolders:
             if (m_hooks.readColorFolders &&
                 m_hooks.readColorFolders(step.folderRoot) != (undoing ? step.foldersAfter : step.foldersBefore))
@@ -199,12 +205,55 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
             }
             break;
         case ItemEditStep::Kind::RenderStyles:
-            if (m_hooks.readRenderStyles &&
-                m_hooks.readRenderStyles() != *(undoing ? step.renderStylesAfter : step.renderStylesBefore))
+            if (m_hooks.readRenderStyles && m_hooks.readRenderStyles(step.lookKind) !=
+                                                *(undoing ? step.renderStylesAfter : step.renderStylesBefore))
             {
                 return false;
             }
             break;
+        case ItemEditStep::Kind::PartModels:
+            if (m_hooks.readPartModels &&
+                m_hooks.readPartModels() != (undoing ? step.partModelsAfter : step.partModelsBefore))
+            {
+                return false;
+            }
+            break;
+        case ItemEditStep::Kind::Options:
+            if (m_hooks.readOptions && m_hooks.readOptions() != *(undoing ? step.optionsAfter : step.optionsBefore))
+            {
+                return false;
+            }
+            break;
+        case ItemEditStep::Kind::MonsterItems:
+            if (!AreMonstersAsLeft(step, undoing))
+            {
+                return false;
+            }
+            break;
+        }
+    }
+    return true;
+}
+
+bool ItemEditHistory::AreMonstersAsLeft(const ItemEditStep& step, bool undoing) const
+{
+    if (!m_hooks.readMonster || !m_hooks.readMonsterGroup)
+    {
+        return false;
+    }
+    for (const Data::Monsters::MonsterSnapshot& snapshot : undoing ? step.monstersAfter : step.monstersBefore)
+    {
+        if (m_hooks.readMonster(snapshot.number) != snapshot.monster)
+        {
+            return false;
+        }
+    }
+    for (const Data::Monsters::MonsterGroupSnapshot& snapshot :
+         undoing ? step.monsterGroupsAfter : step.monsterGroupsBefore)
+    {
+        if (m_hooks.readMonsterGroup(snapshot.id) != snapshot.group)
+        {
+            return false;
         }
     }
     return true;
@@ -243,6 +292,10 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
         case ItemEditStep::Kind::GroundLabelStyles:
         case ItemEditStep::Kind::ColorFolders:
         case ItemEditStep::Kind::RenderStyles:
+        case ItemEditStep::Kind::MonsterItems:
+        case ItemEditStep::Kind::NameCases:
+        case ItemEditStep::Kind::PartModels:
+        case ItemEditStep::Kind::Options:
             break;
         }
     }
@@ -312,6 +365,12 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
     case ItemEditStep::Kind::GroundLabelStyles:
         m_hooks.restoreGroundLabelStyles(undoing ? step.stylesBefore : step.stylesAfter);
         break;
+    case ItemEditStep::Kind::NameCases:
+        if (m_hooks.restoreNameCases)
+        {
+            m_hooks.restoreNameCases(undoing ? step.casesBefore : step.casesAfter);
+        }
+        break;
     case ItemEditStep::Kind::ColorFolders:
         if (m_hooks.restoreColorFolders)
         {
@@ -321,7 +380,28 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
     case ItemEditStep::Kind::RenderStyles:
         if (m_hooks.restoreRenderStyles)
         {
-            m_hooks.restoreRenderStyles(*(undoing ? step.renderStylesBefore : step.renderStylesAfter));
+            m_hooks.restoreRenderStyles(step.lookKind, *(undoing ? step.renderStylesBefore : step.renderStylesAfter));
+        }
+        break;
+    case ItemEditStep::Kind::PartModels:
+        if (m_hooks.restorePartModels)
+        {
+            m_hooks.restorePartModels(undoing ? step.partModelsBefore : step.partModelsAfter);
+        }
+        break;
+    case ItemEditStep::Kind::Options:
+        if (m_hooks.restoreOptions)
+        {
+            m_hooks.restoreOptions(*(undoing ? step.optionsBefore : step.optionsAfter));
+        }
+        break;
+    case ItemEditStep::Kind::MonsterItems:
+        // IsAsLeft refused the step without the hooks.
+        m_hooks.restoreMonsters(undoing ? step.monstersBefore : step.monstersAfter);
+        m_hooks.restoreMonsterGroups(undoing ? step.monsterGroupsBefore : step.monsterGroupsAfter);
+        if (m_hooks.monstersRestored)
+        {
+            m_hooks.monstersRestored(step, undoing);
         }
         break;
     }

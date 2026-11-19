@@ -26,19 +26,20 @@ void SaveLook(LookPreset preset)
 // so the light mood rebuilt from them never reads the value of a feature it could not draw.
 void ApplyFeatures(const LookFeatures& features)
 {
-    ApplyLookFeatures(features, {MuSetTextureFilteringEnabled,
-                                 [](bool enabled)
-                                 {
-                                     (void)Lighting::SetEnhancedLightingEnabled(enabled);
-                                     return Lighting::EnhancedLightingActive();
-                                 },
-                                 [](bool enabled)
-                                 {
-                                     (void)PostProcessing::SetPostProcessingEnabled(enabled);
-                                     return PostProcessing::PostProcessingActive();
-                                 },
-                                 Lighting::SetDynamicLightsEnabled, SetPersonalTuningGroups,
-                                 Lighting::LightMood::SetMoodSwitch, MuSetAntialiasingActive});
+    ApplyLookFeatures(features,
+                      {MuSetTextureFilteringEnabled,
+                       [](bool enabled)
+                       {
+                           (void)Lighting::SetEnhancedLightingEnabled(enabled);
+                           return Lighting::EnhancedLightingActive();
+                       },
+                       [](bool enabled)
+                       {
+                           (void)PostProcessing::SetPostProcessingEnabled(enabled);
+                           return PostProcessing::PostProcessingActive();
+                       },
+                       Lighting::SetDynamicLightsEnabled, SetPersonalTuningGroups, Lighting::LightMood::SetMoodSwitch,
+                       MuSetAntialiasingActive, Lighting::SetSunlightEnabled});
 }
 
 void ApplyMood(const LookFeatures& features)
@@ -58,6 +59,7 @@ FeatureOverrides SavedChoices()
     const auto offOnly = [](bool enabled) { return enabled ? std::nullopt : std::optional<bool>(false); };
     choices.enhancedLighting = offOnly(config.GetEnhancedLighting());
     choices.dynamicLights = offOnly(config.GetDynamicLights());
+    choices.sunlight = offOnly(config.GetSunlight());
     choices.lightMood = offOnly(config.GetLightMood());
     choices.postProcessing = offOnly(config.GetPostProcessing());
     choices.lightMoodStrength = s_moodStrengthChoice;
@@ -96,6 +98,8 @@ bool EnhancedFeatureChosen(EnhancedFeature feature)
         return config.GetLightMood();
     case EnhancedFeature::PostProcessing:
         return config.GetPostProcessing();
+    case EnhancedFeature::Sun:
+        return config.GetSunlight();
     }
     return true;
 }
@@ -116,6 +120,9 @@ void ChooseEnhancedFeature(EnhancedFeature feature, bool enabled)
         break;
     case EnhancedFeature::PostProcessing:
         config.SetPostProcessing(enabled);
+        break;
+    case EnhancedFeature::Sun:
+        config.SetSunlight(enabled);
         break;
     }
     config.Save();

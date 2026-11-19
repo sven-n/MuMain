@@ -16,7 +16,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Data/GameConfig/GameConfigValidation.h"
-#include "../data/ExecutableConfigFile.h"
+#include "../data/UserConfigFile.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/Look/LookPreset.h"
 #include "UI/Social/SocialWorkspace.h"
@@ -871,30 +871,39 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
         std::string key;
         bool (GameConfig::*get)() const;
         void (GameConfig::*set)(bool);
+        // Without its key: the graphics switches are on, Enhanced Movement is off (the player turns it on).
+        bool byDefault;
     };
-    const std::array<Switch, 4> switches{{
-        {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting},
-        {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights},
-        {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood},
-        {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing},
+    const std::array<Switch, 6> switches{{
+        {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting, true},
+        {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights, true},
+        {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood, true},
+        {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing, true},
+        {"EnhancedMovement", &GameConfig::GetEnhancedMovement, &GameConfig::SetEnhancedMovement, false},
+        {"Sunlight", &GameConfig::GetSunlight, &GameConfig::SetSunlight, true},
     }};
-    const ExecutableConfigFile file;
+    const UserConfigFile file;
     GameConfig& config = GameConfig::GetInstance();
 
-    // Without the keys every switch is on.
+    // Without the keys every switch has its default.
     file.Write("[Render]\nVSync=1\n");
     config.Load();
     for (const Switch& each : switches)
     {
         CAPTURE(each.key);
-        CHECK((config.*each.get)());
+        CHECK((config.*each.get)() == each.byDefault);
     }
 
     for (const Switch& off : switches)
     {
         CAPTURE(off.key);
-        // Loading: the key the file sets to 0 turns off its switch and no other.
-        file.Write("[Render]\n" + off.key + "=0\n");
+        // Loading: the key the file sets to 0 turns off its switch and no other (the others set to 1).
+        std::string ini = "[Render]\n";
+        for (const Switch& each : switches)
+        {
+            ini += each.key + (&each == &off ? "=0\n" : "=1\n");
+        }
+        file.Write(ini);
         config.Load();
         for (const Switch& each : switches)
         {
@@ -915,6 +924,32 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
             CHECK(file.ReadRender(each.key) == (&each == &off ? 1 : 0));
         }
     }
+}
+
+TEST_CASE("a new player's config.ini starts with Enhanced Movement off [config][render][movement]")
+{
+    // The client copies the template into the player's folder on the first start.
+    std::ifstream ini(std::filesystem::path(MU_BIN_DIR) / "config.ini.template");
+    REQUIRE(ini.is_open());
+    std::string section;
+    std::string value;
+    for (std::string line; std::getline(ini, line);)
+    {
+        if (!line.empty() && line.back() == '\r')
+        {
+            line.pop_back();
+        }
+        if (!line.empty() && line.front() == '[')
+        {
+            section = line;
+        }
+        else if (section == "[Render]" && line.rfind("EnhancedMovement=", 0) == 0)
+        {
+            value = line.substr(std::string("EnhancedMovement=").size());
+        }
+    }
+    CHECK(value == "0");
+    CHECK_FALSE(CfgDefaults::CfgDefaultEnhancedMovement);
 }
 
 TEST_CASE(
@@ -979,6 +1014,7 @@ TEST_CASE(
     CHECK(enhanced.textureFiltering);
     CHECK(enhanced.enhancedLighting);
     CHECK(enhanced.dynamicLights);
+    CHECK(enhanced.sunlight);
     CHECK(enhanced.lightMood);
     CHECK(enhanced.postProcessing);
     CHECK(enhanced.lightMoodStrength == 100);
@@ -988,6 +1024,7 @@ TEST_CASE(
     CHECK_FALSE(classic.textureFiltering);
     CHECK_FALSE(classic.enhancedLighting);
     CHECK_FALSE(classic.dynamicLights);
+    CHECK_FALSE(classic.sunlight);
     CHECK_FALSE(classic.lightMood);
     CHECK_FALSE(classic.postProcessing);
     CHECK_FALSE(classic.antialiasing);
