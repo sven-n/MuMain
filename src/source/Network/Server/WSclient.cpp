@@ -15527,13 +15527,6 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_Defense:
-    {
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
-    }
-    break;
-
     case eBuff_AddAG:
     {
         DeleteEffect(BITMAP_LIGHT, o, 2);
@@ -15555,20 +15548,11 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_HelpNpc:
-    {
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
-    }
-    break;
-
     case eBuff_RemovalMagic:
     {
         DeleteEffect(BITMAP_LIGHT, o, 2);
         DeleteEffect(BITMAP_LIGHT, o, 1);
         DeleteEffect(BITMAP_SKULL, o, 0);
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
         DeleteJoint(MODEL_SPEARSKILL, o, 0);
     }
     break;

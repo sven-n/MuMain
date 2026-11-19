@@ -4,9 +4,12 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemOptionEffects.h"
+#include "ItemOptionsJson.h"
+#include "OptionRulesJson.h"
 #include "OptionTextsJson.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <set>
 
@@ -194,8 +197,7 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                               "links two definitions whose options the same part of the server's item data turns on "
                               "(of one type): the later one is left out"});
         }
-        // The excellent byte of wings holds their wing options, the Horn of Fenrir's its kind; no horn is excellent.
-        const bool byteMeansOther = item.slot == ItemSlot::Wings || item.tags.Has(ItemTag::HornMount);
+        const bool byteMeansOther = ExcellentByteMeansOther(item);
         const bool linksExcellent = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
                                                 { return options.Get(link).type == ItemOptionType::Excellent; });
         if (byteMeansOther && linksExcellent)
@@ -265,5 +267,26 @@ void ValidateAncientBonusNames(const ItemOptionDatabase& options, std::vector<It
                      " show and add no ancient bonus"});
         }
     }
+}
+void ValidateItemOptionFilesAsWritten(const ItemOptionFiles& files, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<std::string> names;
+    AddDefinitionFiles(files.definitions, names);
+    std::vector<ItemOptionDefinition> definitions;
+    for (const std::string& name : names)
+    {
+        ReadItemOptionsJson(WriteItemOptionsJson(FindDefinitionsInFile(files.definitions, name)), "Options/" + name,
+                            name, definitions, issues);
+    }
+    const std::string textsSource = "Tooltips/OptionTexts.json";
+    ItemOptionTexts texts;
+    ReadOptionTextsJson(WriteOptionTextsJson(files.texts), textsSource, texts, issues);
+    const std::string rulesSource = std::string("Options/") + OptionRulesFileName;
+    std::vector<OptionRule> rules;
+    ReadOptionRulesJson(WriteOptionRulesJson(files.rules), rulesSource, rules, issues);
+    ValidateItemOptions(definitions, texts, textsSource, issues);
+    ValidateOptionRules(rules, definitions, rulesSource, issues);
+    // The items pick the ancient bonus definitions by name (attackType), not by links.
+    ValidateAncientBonusNames(ItemOptionDatabase(ItemOptionFiles{definitions, texts, rules}), issues);
 }
 } // namespace Data::Items

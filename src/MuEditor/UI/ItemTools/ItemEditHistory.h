@@ -8,6 +8,7 @@
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemOptionDatabase.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
@@ -72,6 +73,8 @@ struct ItemEditStep
         NameCases,
         // The part models went from `partModelsBefore` to `partModelsAfter` (design L50).
         PartModels,
+        // The option files (definitions, texts, rules) went from `optionsBefore` to `optionsAfter`.
+        Options,
     };
 
     Kind kind = Kind::Slot;
@@ -103,6 +106,9 @@ struct ItemEditStep
     Data::Looks::LookKind lookKind = Data::Looks::LookKind::RenderStyle;
     std::vector<Data::Items::PartModel> partModelsBefore;
     std::vector<Data::Items::PartModel> partModelsAfter;
+    // Shared, as the stat file.
+    std::shared_ptr<const Data::Items::ItemOptionFiles> optionsBefore;
+    std::shared_ptr<const Data::Items::ItemOptionFiles> optionsAfter;
 };
 
 // What one action of a tool changed, undone and redone as a whole: an edited
@@ -173,6 +179,9 @@ public:
         // The part models, and putting them back. Optional.
         std::function<std::vector<Data::Items::PartModel>()> readPartModels;
         std::function<void(const std::vector<Data::Items::PartModel>& parts)> restorePartModels;
+        // The option files, and putting them back (the items' links resolve again). Optional.
+        std::function<Data::Items::ItemOptionFiles()> readOptions;
+        std::function<void(const Data::Items::ItemOptionFiles& files)> restoreOptions;
     };
 
     // Why the last Undo or Redo did nothing.

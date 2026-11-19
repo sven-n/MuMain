@@ -65,6 +65,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME sdl_gpu_depth_state_tests
+    SOURCES
+        test_sdl_gpu_depth_state.cpp
+    LINK_LIBS
+        SDL3::SDL3
+)
+
+mu_add_test(
     NAME mip_chain_tests
     SOURCES
         test_mip_chain.cpp
@@ -150,6 +158,18 @@ mu_add_test(
         MuDep::Cryptopp
 )
 
+# The formats of a world's terrain files (Render/Terrain/TerrainFileFormat): the classic and the later seasons'
+# .map/.att cipher, object record sizes by version, 24-bit height maps by size, light bitmaps.
+mu_add_test(
+    NAME terrain_file_format_tests
+    SOURCES
+        test_terrain_file_format.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/TerrainFileFormat.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/BmdModulusCipher.cpp
+    LINK_LIBS
+        MuDep::Cryptopp
+)
+
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer, and the holes it finds in a texture's alpha.
 # It also reads the OZT files shipped in src/bin/Data.
 mu_add_test(
@@ -199,12 +219,6 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/GpuDevice.cpp
     LINK_LIBS
         SDL3::SDL3
-)
-
-mu_add_test(
-    NAME aura_joint_lifecycle_tests
-    SOURCES
-        test_aura_joint_lifecycle.cpp
 )
 
 mu_add_test(

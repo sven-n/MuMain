@@ -4,6 +4,7 @@
 
 #include "Core/Globals/_enum.h"
 
+#include <algorithm>
 #include <array>
 
 namespace Data::Items
@@ -69,5 +70,18 @@ std::optional<ItemOptionEffect> FindItemOptionEffect(ItemOptionType type, std::s
         }
     }
     return std::nullopt;
+}
+
+std::vector<std::string_view> FindItemOptionAttributes(ItemOptionType type)
+{
+    std::vector<std::string_view> attributes;
+    for (const EffectRow& row : EffectRows)
+    {
+        if (row.type == type && std::ranges::find(attributes, row.attribute) == attributes.end())
+        {
+            attributes.push_back(row.attribute);
+        }
+    }
+    return attributes;
 }
 } // namespace Data::Items

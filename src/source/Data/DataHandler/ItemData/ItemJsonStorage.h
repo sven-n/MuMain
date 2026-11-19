@@ -249,6 +249,15 @@ struct ItemModelSave
     std::filesystem::path nameCasesFile;
     const ItemNameCases* nameCases = nullptr;
     bool nameCasesChanged = false;
+    // Written when optionsChanged: each definition file of optionsDirectory (GetItemOptionsDirectory) with its
+    // definitions, optionRulesFile (GetOptionRulesFile) and optionTextsFile (GetOptionTextsFile). optionFiles are the
+    // definition files the folder had when it was read, so a file whose last definition went is written empty.
+    std::filesystem::path optionsDirectory;
+    std::filesystem::path optionRulesFile;
+    std::filesystem::path optionTextsFile;
+    const ItemOptionFiles* options = nullptr;
+    std::span<const std::string> optionFiles;
+    bool optionsChanged = false;
 #endif
 };
 

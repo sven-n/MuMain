@@ -5,6 +5,7 @@
 #include <array>
 #include <optional>
 #include <string_view>
+#include <vector>
 
 // What an option of the option definitions does in the client: the effect id it writes into the item's option slots
 // (ITEM::Special, the AT_* ids the stat code, the price and the mixes read) for its type, attribute and way of adding,
@@ -64,4 +65,8 @@ inline void ResolveTermAttributes(ItemOptionValue& value)
 // The effect of an option, or none when the client doesn't compute its attribute that way.
 std::optional<ItemOptionEffect> FindItemOptionEffect(ItemOptionType type, std::string_view attribute,
                                                      ItemOptionAdd add);
+
+// The attributes the client computes for options of the type, each once, in the effects table's order (the editor
+// offers them).
+std::vector<std::string_view> FindItemOptionAttributes(ItemOptionType type);
 } // namespace Data::Items

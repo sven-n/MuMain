@@ -19,6 +19,7 @@
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemOptionValidation.h"
+#include "Data/GameData/ItemData/ItemOptionsJson.h"
 #include "Data/GameData/ItemData/OptionRule.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/ItemData/ItemNames.h"
@@ -302,6 +303,9 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     m_statFileChanged = false;
     m_groundLabelsChanged = false;
     m_nameCasesChanged = false;
+    m_optionFiles.clear();
+    AddDefinitionFiles(options.GetDefinitions(), m_optionFiles);
+    m_optionsChanged = false;
 #endif
 
     const auto buildStart = std::chrono::steady_clock::now();
@@ -962,6 +966,10 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     {
         ValidateGroundLabelsAsWritten(g_ItemDatabase.GetGroundLabels(), issues);
     }
+    if (m_optionsChanged)
+    {
+        ValidateItemOptionFilesAsWritten(g_ItemDatabase.GetOptions().GetFiles(), issues);
+    }
 
     std::vector<ItemModelDefinition> models;
     std::ranges::copy_if(g_ItemModelDatabase.GetAllSlots(), std::back_inserter(models), &ItemModelDefinition::Exists);
@@ -1045,7 +1053,21 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues,
     models.nameCasesFile = GetItemNameCasesFile();
     models.nameCases = &g_ItemDatabase.GetNameCases();
     models.nameCasesChanged = m_nameCasesChanged;
-    return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
+    const ItemOptionFiles optionFiles = g_ItemDatabase.GetOptions().GetFiles();
+    models.optionsDirectory = GetItemOptionsDirectory();
+    models.optionRulesFile = GetOptionRulesFile();
+    models.optionTextsFile = GetOptionTextsFile();
+    models.options = &optionFiles;
+    models.optionFiles = m_optionFiles;
+    models.optionsChanged = m_optionsChanged;
+    const ItemDataSaveResult result =
+        WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
+    if (result == ItemDataSaveResult::Saved && m_optionsChanged)
+    {
+        // The definition files written are in the folder now: one whose last definition goes later is written empty.
+        AddDefinitionFiles(optionFiles.definitions, m_optionFiles);
+    }
+    return result;
 }
 
 void CItemDataHandler::SetStatFile(const ItemStatFile& file)
@@ -1053,6 +1075,12 @@ void CItemDataHandler::SetStatFile(const ItemStatFile& file)
     m_statFile = InWriterOrder(file);
     m_statFileChanged = true;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(m_statFile));
+}
+
+void CItemDataHandler::SetOptions(const ItemOptionFiles& files)
+{
+    g_ItemDatabase.SetOptions(ItemOptionDatabase(files));
+    m_optionsChanged = true;
 }
 
 void CItemDataHandler::SetNameCases(const ItemNameCases& cases)
