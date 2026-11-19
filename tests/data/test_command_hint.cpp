@@ -120,6 +120,30 @@ TEST_CASE("Pet names in Command hints follow item translations and preserve lite
     CHECK(lines[3] == "Raven 100% (%d) attack speed: +6");
 }
 
+TEST_CASE("Long pet name forms preserve the entire Command contribution [data][items]")
+{
+    CommandHintScope scope;
+    REQUIRE(scope.Loaded());
+    I18N::SetLocale("de");
+
+    const auto* raven = g_ItemDatabase.Find(ITEM_DARK_RAVEN_ITEM);
+    REQUIRE(raven != nullptr);
+    const auto originalRaven = *raven;
+    auto renamedRaven = originalRaven;
+    const std::string genitive = std::string(256, 'R') + " 100%";
+    renamedRaven.nameForms.Set("de", "gen", genitive);
+    g_ItemDatabase.Set(renamedRaven);
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+
+    const auto lines = Texts(UI::Character::BuildCommandHint(Effects(250, 300)));
+    g_ItemDatabase.Set(originalRaven);
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+
+    REQUIRE(lines.size() == 7);
+    CHECK(lines[2] == "Schaden des " + genitive + ": +37~75");
+    CHECK(lines[3] == "Angriffsgeschwindigkeit des " + genitive + ": +6");
+}
+
 // A part that adds nothing has no line, like the damage and critical damage rate hints; without any part the row has
 // no hint.
 TEST_CASE("The command row's hint leaves out what the command does not add [data][items]")

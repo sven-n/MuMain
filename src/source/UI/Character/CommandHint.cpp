@@ -6,6 +6,10 @@
 #include "UI/Character/HintLines.h"
 
 #include <algorithm>
+#include <cwchar>
+#include <limits>
+#include <string>
+#include <type_traits>
 
 namespace UI::Character
 {
@@ -17,9 +21,20 @@ namespace
 // Adds the line of a part only when the part adds something, like the damage and critical damage rate hints.
 template <typename... Args> void AddPartLine(std::vector<Line>& lines, int value, const wchar_t* format, Args... args)
 {
-    if (value > 0)
+    if (value <= 0)
     {
-        lines.push_back(MakeHintLine(FormatHintText(format, args...)));
+        return;
+    }
+
+    // The localized formats use %d. The expanded format already includes the full item name.
+    static_assert((std::is_same_v<Args, int> && ...));
+    constexpr size_t MaxIntCharacters = std::numeric_limits<int>::digits10 + 2;
+    std::wstring text(std::wcslen(format) + sizeof...(args) * MaxIntCharacters + 1, L'\0');
+    const int length = std::swprintf(text.data(), text.size(), format, args...);
+    if (length >= 0 && static_cast<size_t>(length) < text.size())
+    {
+        text.resize(static_cast<size_t>(length));
+        lines.push_back(MakeHintLine(StringUtils::WideToNarrow(text.c_str())));
     }
 }
 } // namespace
