@@ -16,6 +16,18 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_buff_time
+    SOURCES
+        test_buff_time.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(test_buff_time PRIVATE
+    MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
+)
+
+mu_add_test(
     NAME test_head_movement
     SOURCES
         test_head_movement.cpp
