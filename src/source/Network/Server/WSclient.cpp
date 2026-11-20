@@ -13166,7 +13166,8 @@ bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
     }
     else
     {
-        ITEM* pItem = UI::Inventory::FindMainInventoryItem(Data->wItemSlotIndex);
+        // The main inventory or its extension.
+        ITEM* pItem = UI::Inventory::FindPlayerItem(Data->wItemSlotIndex);
 
         if (pItem == nullptr)
             return false;
