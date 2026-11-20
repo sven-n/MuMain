@@ -11,6 +11,7 @@
 #include "Character/CharacterManager.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Engine/Object/CompareItemResult.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
@@ -1310,4 +1311,49 @@ TEST_CASE("The elemental rings' second ancient bonus line follows the bonus line
     g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
     ClearTooltipRows();
     CHECK(g_csItemOption.RenderDefaultOptionText(&ring, 0) == 0);
+}
+
+TEST_CASE("Trade compares lower Jewel of Life values on actual items [items][trade]")
+{
+    using namespace Engine::Items::CompareResult;
+    const std::array options{
+        OptionSlot{AT_IMPROVE_DAMAGE, 16},
+        OptionSlot{AT_LIFE_REGENERATION, 4},
+        OptionSlot{AT_IMPROVE_MAX_MANA, 4},
+        OptionSlot{AT_IMPROVE_MAX_AG, 4},
+    };
+    for (const auto& [kind, highValue] : options)
+    {
+        CAPTURE(kind);
+        ITEM remembered{};
+        remembered.Type = ITEM_BLADE;
+        remembered.SpecialNum = 1;
+        remembered.Special[0] = kind;
+        remembered.SpecialValue[0] = highValue;
+
+        ITEM offered = remembered;
+        offered.SpecialValue[0] = highValue / 4;
+        CHECK(CompareItem(remembered, offered) == FirstIsBetter);
+        CHECK(CompareItem(offered, remembered) == SecondIsBetter);
+        CHECK(CompareItem(remembered, remembered) == Same);
+    }
+}
+
+TEST_CASE("Trade compares durability when Jewel of Life option kinds differ [items][trade]")
+{
+    using namespace Engine::Items::CompareResult;
+    ITEM remembered{};
+    remembered.Type = ITEM_WING;
+    remembered.SpecialNum = 1;
+    remembered.Special[0] = AT_LIFE_REGENERATION;
+    remembered.SpecialValue[0] = 4;
+    remembered.Durability = 10;
+
+    ITEM offered = remembered;
+    offered.Special[0] = AT_IMPROVE_DAMAGE;
+    offered.SpecialValue[0] = 16;
+    CHECK(CompareItem(remembered, offered) == Same);
+
+    offered.Durability = 9;
+    CHECK(CompareItem(remembered, offered) == FirstIsBetter);
 }
