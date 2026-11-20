@@ -89,6 +89,15 @@ public:
     void CalculateBasicState();
     void getAllAddStateOnlyExValues(int& iAddStrengthExValues, int& iAddDexterityExValues, int& iAddVitalityExValues,
                                     int& iAddEnergyExValues, int& iAddCharismaExValues);
+
+    // The item of an equipment slot as the game uses it: an expired rented item has no effect, so its slot counts
+    // as empty, for the stats, the item options, the drawing of the hero and the pets. Never nullptr: an empty
+    // slot gives an item with Type -1. Use Equipment directly for what the player sees in the inventory.
+    ITEM* GetEffectiveEquipment(int slot);
+
+private:
+    // What GetEffectiveEquipment gives for a slot without effect; emptied again at every call.
+    ITEM m_NoEffectEquipment{};
 };
 
 inline DWORD GenerateCheckSum2(const BYTE* pbyBuffer, DWORD dwSize, WORD wKey)

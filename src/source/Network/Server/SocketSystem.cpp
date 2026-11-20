@@ -473,7 +473,7 @@ void CSocketItemMgr::CheckSocketSetOption()
 
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
     {
-        pItem = &CharacterMachine->Equipment[i];
+        pItem = CharacterMachine->GetEffectiveEquipment(i);
         if (!AreSocketOptionsActive(pItem))
             continue;
 
@@ -527,7 +527,7 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
     {
-        pItem = &CharacterMachine->Equipment[i];
+        pItem = CharacterMachine->GetEffectiveEquipment(i);
 
         if (!AreSocketOptionsActive(pItem))
             continue;

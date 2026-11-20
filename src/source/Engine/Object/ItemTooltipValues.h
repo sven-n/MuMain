@@ -90,6 +90,9 @@ struct ItemTooltipValues
     bool gloves = false;
     // A timed item whose time is up.
     bool expired = false;
+    // A timed item which isn't expired and whose end the server has sent (expireDate). The server sends it a moment
+    // after the item, and not for every place an item can be in.
+    bool hasExpireDate = false;
     // For a line written once for each class (a layout line's "forEachClass"): the class at the level the item needs
     // ({className}, "Dark Knight", "Blade Master", ...), and whether the hero is that class at that level or above
     // (classUsable). No class and false on the other lines.

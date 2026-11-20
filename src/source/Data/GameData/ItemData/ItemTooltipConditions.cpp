@@ -59,7 +59,7 @@ bool ReadComparison(std::string_view text, TooltipCondition& condition)
     return false;
 }
 
-constexpr std::array<std::string_view, 25> States = {
+constexpr std::array<std::string_view, 26> States = {
     "hasDamage",
     "skillBook",
     "twoHanded",
@@ -85,6 +85,7 @@ constexpr std::array<std::string_view, 25> States = {
     "boots",
     "gloves",
     "expired",
+    "hasExpireDate",
 };
 static_assert(States.size() == static_cast<size_t>(TooltipState::Count), "a name for every TooltipState, in order");
 } // namespace

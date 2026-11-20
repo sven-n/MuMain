@@ -657,6 +657,7 @@ bool CInventoryActionController::ApplyJewel(CInventoryCtrl* targetControl, CPick
     }
 
     SendRequestUse(iSourceIndex, targetIndex);
+    pPickedItem->MarkUsedOnItem();
     PlayBuffer(SOUND_GET_ITEM01);
     return true;
 }

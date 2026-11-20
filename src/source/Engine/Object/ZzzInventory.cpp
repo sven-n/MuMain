@@ -1806,10 +1806,6 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
     if (ip->Type == -1)
         return ItemTooltipBuild::Nothing;
 
-    // A timed item whose end time hasn't come yet shows no tooltip.
-    if (ip->bPeriodItem && !ip->bExpiredPeriod && ip->lExpireTime == 0)
-        return ItemTooltipBuild::Nothing;
-
     TextNum = 0;
     SkipNum = 0;
     ClearTooltipRows();
