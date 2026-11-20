@@ -3,6 +3,8 @@
 #include "Core/Text/TextLineWrap.h"
 
 #include <cwchar>
+#include <string>
+#include <vector>
 
 TEST_CASE("guards: null or non-positive args return 0")
 {
@@ -320,4 +322,49 @@ TEST_CASE("wrap to width: an indented word wider than the line gets no empty lin
     CHECK(afterBreak[3] == L"nts");
     CHECK(afterBreak[4].empty());
     CHECK(afterBreak[5] == L"end");
+}
+
+namespace
+{
+// One unit per character, as a fixed-width font would measure.
+int MeasureByCharacters(const wchar_t*, size_t length)
+{
+    return static_cast<int>(length);
+}
+} // namespace
+
+TEST_CASE("KeepFirstLinesWithEllipsis leaves lines alone when they are not too many")
+{
+    std::vector<std::wstring> lines = {L"one", L"two"};
+
+    KeepFirstLinesWithEllipsis(lines, 3, 10, MeasureByCharacters, L"...");
+
+    CHECK(lines == std::vector<std::wstring>{L"one", L"two"});
+}
+
+TEST_CASE("KeepFirstLinesWithEllipsis drops the rest and marks the last kept line")
+{
+    std::vector<std::wstring> lines = {L"one", L"two", L"three", L"four"};
+
+    KeepFirstLinesWithEllipsis(lines, 3, 10, MeasureByCharacters, L"...");
+
+    CHECK(lines == std::vector<std::wstring>{L"one", L"two", L"three..."});
+}
+
+TEST_CASE("KeepFirstLinesWithEllipsis shortens a full last line so the ellipsis fits")
+{
+    std::vector<std::wstring> lines = {L"abcdefghij", L"more"};
+
+    KeepFirstLinesWithEllipsis(lines, 1, 10, MeasureByCharacters, L"...");
+
+    CHECK(lines == std::vector<std::wstring>{L"abcdefg..."});
+}
+
+TEST_CASE("KeepFirstLinesWithEllipsis does not leave a space before the ellipsis")
+{
+    std::vector<std::wstring> lines = {L"abcde fghij", L"more"};
+
+    KeepFirstLinesWithEllipsis(lines, 1, 9, MeasureByCharacters, L"...");
+
+    CHECK(lines == std::vector<std::wstring>{L"abcde..."});
 }

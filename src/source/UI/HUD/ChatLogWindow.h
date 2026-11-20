@@ -4,6 +4,7 @@
 #pragma once
 
 #include "GameLogic/KeyConfiguration/ChatBoxConfiguration.h"
+#include "Core/Text/TextLineWrap.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Chat/MessageType.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -268,8 +269,31 @@ namespace mu::ui::window
         type_vector_msgs* GetMsgs(MESSAGE_TYPE MsgType);
         void ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType);
 
-        void SeparateText(IN const type_string& strID, IN const type_string& strText, MESSAGE_TYPE MsgType,
-                          OUT type_string& strText1, OUT type_string& strText2);
+        // The display lines of one message, wrapped where the chat really runs out of room; at most
+
+        // MAX_WRAPPED_LINES, the last ending in an ellipsis when the text is longer.
+
+        std::vector<type_string> WrapText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType);
+
+        // Measures with a hidden probe that has the chat line's class and font (chat_log.rml), against
+
+        // the message well's width. False until the document has laid the probe out.
+
+        bool GetRmlLineMeasure(MESSAGE_TYPE MsgType, MeasureTextWidth& measure, int& maxWidth);
+
+        // The native text renderer's measure, for messages that arrive before the document is ready.
+
+        void GetNativeLineMeasure(MESSAGE_TYPE MsgType, MeasureTextWidth& measure, int& maxWidth);
+
+        // Adds one display line to the message type's list, the all list and, for errors, the error
+
+        // list. True when the line shows in the current tab.
+
+        bool AddLine(const type_string& strID, const type_string& strLine, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType,
+
+                     type_vector_msgs& vecMsgs);
+
+        static constexpr size_t MAX_WRAPPED_LINES = 3;
 
         bool CheckFilterText(const type_string& strTestText);
         void AddFilterWord(const type_string& strWord);

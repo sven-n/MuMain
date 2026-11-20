@@ -39,6 +39,13 @@ using MeasureTextWidth = std::function<int(const wchar_t* text, size_t length)>;
 std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth, const MeasureTextWidth& measureWidth);
 
 /**
+ * @brief Keeps at most maxLines of wrapped lines; when lines are dropped, the last kept one ends in
+ *        the ellipsis, shortened (and trailing spaces removed) until it fits maxWidth with it.
+ */
+void KeepFirstLinesWithEllipsis(std::vector<std::wstring>& lines, size_t maxLines, int maxWidth,
+                                const MeasureTextWidth& measureWidth, const std::wstring& ellipsis);
+
+/**
  * @brief Splits Text into two parts near its midpoint at a space.
  * @param Text       Source string.
  * @param Text1      Receives the first part (up to maxLength, truncated).

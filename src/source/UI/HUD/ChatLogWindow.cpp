@@ -24,6 +24,22 @@
 #include "Render/Text/CUIRenderText.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/ElementUtilities.h>
+#include <algorithm>
+#include <memory>
+#include <vector>
+
+namespace
+{
+// The widest scrollbar a theme gives the shown frame (chat_log.rcss; legacy and classic).
+constexpr float kScrollbarWidthDp = 15.0f;
+// GetStringWidth() is a font-metrics estimate; one pixel of slack keeps a line from touching the edge.
+constexpr int kMeasureSlackPx = 1;
+const std::wstring kSenderSeparator = L" : ";
+const std::wstring kEllipsis = L"...";
+// The text the measuring probes in chat_log.rml hold.
+const Rml::String kProbeText = ".";
+} // namespace
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -154,136 +170,13 @@ void mu::ui::window::CChatLogWindow::ProcessAddText(const type_string& strID, co
     }
 
     int nScrollLines = 0;
-    if (strText.size() >= 20)
+    const std::vector<type_string> lines = WrapText(strID, strText, MsgType);
+    for (size_t i = 0; i < lines.size(); ++i)
     {
-        type_string	strText1, strText2;
-        SeparateText(strID, strText, MsgType, strText1, strText2);
-        if (!strText1.empty())
-        {
-            const auto pMsgText = new CMessageText;
-            if (!pMsgText->Create(strID, strText, MsgType))
-                delete pMsgText;
-            else
-            {
-                pvecMsgs->push_back(pMsgText);
-            }
-
-            const auto pAllMsgText = new CMessageText;
-            if (!pAllMsgText->Create(strID, strText1, MsgType))
-            {
-                delete pAllMsgText;
-            }
-            else
-            {
-                m_vecAllMsgs.push_back(pAllMsgText);
-            }
-
-            if ((MsgType == TYPE_ERROR_MESSAGE) && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE))
-            {
-                type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-                if (pErrvecMsgs == nullptr)
-                {
-                    assert(!"Error Chat");
-                    return;
-                }
-
-                const auto pErrMsgText = new CMessageText;
-                if (!pErrMsgText->Create(strID, strText1, MsgType))
-                    delete pErrMsgText;
-                else
-                {
-                    pErrvecMsgs->push_back(pErrMsgText);
-                }
-            }
-
-            if (GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
-            {
-                nScrollLines++;
-            }
-        }
-        if (!strText2.empty())
-        {
-            const auto pMsgText = new CMessageText;
-            if (!pMsgText->Create(L"", strText2, MsgType))
-                delete pMsgText;
-            else
-            {
-                pvecMsgs->push_back(pMsgText);
-            }
-
-            const auto pAllMsgText = new CMessageText;
-            if (!pAllMsgText->Create(L"", strText2, MsgType))
-                delete pAllMsgText;
-            else
-            {
-                m_vecAllMsgs.push_back(pAllMsgText);
-            }
-
-            if ((MsgType == TYPE_ERROR_MESSAGE) && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE))
-            {
-                type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-                if (pErrvecMsgs == nullptr)
-                {
-                    assert(!"Error chat 2");
-                    return;
-                }
-
-                const auto pErrMsgText = new CMessageText;
-                if (!pErrMsgText->Create(L"", strText2, MsgType))
-                    delete pErrMsgText;
-                else
-                {
-                    pErrvecMsgs->push_back(pErrMsgText);
-                }
-            }
-
-            if (GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
-            {
-                nScrollLines++;
-            }
-        }
-    }
-    else
-    {
-        const auto pMsgText = new CMessageText;
-        if (!pMsgText->Create(strID, strText, MsgType))
-            delete pMsgText;
-        else
-        {
-            pvecMsgs->push_back(pMsgText);
-        }
-
-        const auto pAllMsgText = new CMessageText;
-        if (!pAllMsgText->Create(strID, strText, MsgType))
-            delete pAllMsgText;
-        else
-        {
-            m_vecAllMsgs.push_back(pAllMsgText);
-        }
-
-        if ((MsgType == TYPE_ERROR_MESSAGE)
-            && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE))
-        {
-            type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-            if (pErrvecMsgs == nullptr)
-            {
-                assert(!"Error chat 3");
-                return;
-            }
-
-            const auto pErrMsgText = new CMessageText;
-            if (!pErrMsgText->Create(strID, strText, MsgType))
-                delete pErrMsgText;
-            else
-            {
-                pErrvecMsgs->push_back(pErrMsgText);
-            }
-        }
-
-        if (GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
-        {
+        // Only the first display line carries the sender.
+        const type_string strLineID = (i == 0) ? strID : type_string();
+        if (AddLine(strLineID, lines[i], MsgType, ErrMsgType, *pvecMsgs))
             nScrollLines++;
-        }
     }
 
     pvecMsgs = GetMsgs(GetCurrentMsgType());
@@ -936,45 +829,90 @@ float mu::ui::window::CChatLogWindow::GetKeyEventOrder()
     return 8.0f;
 }
 
-void mu::ui::window::CChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText,
-                                                 MESSAGE_TYPE MsgType, OUT type_string& strText1,
-                                                 OUT type_string& strText2)
+bool mu::ui::window::CChatLogWindow::AddLine(const type_string& strID, const type_string& strLine,
+                                             MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType,
+                                             type_vector_msgs& vecMsgs)
+{
+    auto addTo = [&](type_vector_msgs& target)
+    {
+        auto pMsgText = std::make_unique<CMessageText>();
+        if (pMsgText->Create(strID, strLine, MsgType))
+            target.push_back(pMsgText.release());
+    };
+
+    addTo(vecMsgs);
+    addTo(m_vecAllMsgs);
+    if (MsgType == TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE)
+    {
+        type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
+        assert(pErrvecMsgs != nullptr && "Error chat");
+        if (pErrvecMsgs != nullptr)
+            addTo(*pErrvecMsgs);
+    }
+
+    return GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType;
+}
+
+std::vector<mu::ui::window::CChatLogWindow::type_string>
+mu::ui::window::CChatLogWindow::WrapText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType)
+{
+    MeasureTextWidth measure;
+    int maxWidth = 0;
+    if (!GetRmlLineMeasure(MsgType, measure, maxWidth))
+        GetNativeLineMeasure(MsgType, measure, maxWidth);
+
+    // The sender is drawn in front of the first line, so it is wrapped with the text and taken off
+    // the first line again.
+    const type_string prefix = strID.empty() ? type_string() : strID + kSenderSeparator;
+    std::vector<type_string> lines = WrapTextToWidth(prefix + strText, maxWidth, measure);
+    KeepFirstLinesWithEllipsis(lines, MAX_WRAPPED_LINES, maxWidth, measure, kEllipsis);
+    if (lines.empty())
+        return {strText};
+
+    lines.front().erase(0, std::min(prefix.size(), lines.front().size()));
+    if (lines.front().empty() && lines.size() > 1)
+        lines.erase(lines.begin());  // the first word did not fit behind the sender
+    return lines;
+}
+
+bool mu::ui::window::CChatLogWindow::GetRmlLineMeasure(MESSAGE_TYPE MsgType, MeasureTextWidth& measure, int& maxWidth)
+{
+    auto* document = m_RmlView.Document();
+    if (document == nullptr)
+        return false;
+
+    Rml::Element* probe = document->GetElementById(MsgType == TYPE_GM_MESSAGE ? "measure_gm" : "measure");
+    Rml::Element* well = document->GetElementById("lines");
+    if (probe == nullptr || well == nullptr || probe->GetFontFaceHandle() == 0)
+        return false;
+
+    // Room for the scrollbar is always kept: a line wrapped while the frame is hidden must still
+    // fit once F5 shows the frame and its scrollbar. The probe holds one character, so its box
+    // minus that character is what a line adds around its text (padding, border).
+    const float dpRatio = RmlUiRuntime::Instance().GetContext()->GetDensityIndependentPixelRatio();
+    const float lineDecoration =
+        probe->GetOffsetWidth() - static_cast<float>(Rml::ElementUtilities::GetStringWidth(probe, kProbeText));
+    maxWidth =
+        static_cast<int>(well->GetOffsetWidth() - kScrollbarWidthDp * dpRatio - lineDecoration) - kMeasureSlackPx;
+    if (maxWidth <= 0)
+        return false;
+
+    measure = [probe](const wchar_t* text, size_t length)
+    {
+        const type_string piece(text, length);
+        return Rml::ElementUtilities::GetStringWidth(probe, StringUtils::WideToNarrow(piece.c_str()));
+    };
+    return true;
+}
+
+void mu::ui::window::CChatLogWindow::GetNativeLineMeasure(MESSAGE_TYPE MsgType, MeasureTextWidth& measure, int& maxWidth)
 {
     g_pRenderText->SetFont(MsgType == TYPE_GM_MESSAGE ? g_hFontBold : g_hFont);
-    int max_first_line_size = CLIENT_WIDTH;
-    if (!strID.empty())
+    maxWidth = static_cast<int>(CLIENT_WIDTH);
+    measure = [](const wchar_t* text, size_t length)
     {
-        const type_string strIDPart = strID + L" : ";
-        max_first_line_size -= g_pRenderText->MeasureText(
-            strIDPart.c_str(), static_cast<int>(strIDPart.length())).cx;
-    }
-
-    int required_size = g_pRenderText->MeasureText(strText.c_str(), static_cast<int>(strText.length())).cx;
-
-    if (required_size <= max_first_line_size)
-    {
-        strText1 = strText;
-        strText2 = L"";
-        return;
-    }
-
-    BOOL bSpaceExist = (strText.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
-    int iLocToken = strText.length();
-
-    while ((required_size > max_first_line_size) && (iLocToken > -1))
-    {
-        iLocToken = (bSpaceExist) ? strText.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
-        if (iLocToken <= 0)
-        {
-            strText1.clear();
-            strText2 = strText;
-            return;
-        }
-        required_size = g_pRenderText->MeasureText(strText.c_str(), iLocToken).cx;
-    }
-
-    strText1 = strText.substr(0, iLocToken);
-    strText2 = strText.substr(iLocToken, strText.length() - iLocToken);
+        return static_cast<int>(g_pRenderText->MeasureText(text, static_cast<int>(length)).cx);
+    };
 }
 
 bool mu::ui::window::CChatLogWindow::CheckFilterText(const type_string& strTestText)
