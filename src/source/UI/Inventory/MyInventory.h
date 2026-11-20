@@ -228,6 +228,8 @@ namespace mu::ui::window
         void DeleteEquippingEffectBug(ITEM* pItem);
 
     private:
+        // The pet or mount which accompanies the hero for an equipped helper item.
+        void CreatePetOrMount(ITEM* pItem);
         void LoadImages() const;
         void UnloadImages();
 

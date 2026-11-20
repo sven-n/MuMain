@@ -5386,7 +5386,7 @@ static bool FullSetOf(const CHARACTER* c, int& levelSet, bool& addDefense)
             if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
                 continue;
 
-            if (CharacterMachine->Equipment[i].Type == -1)
+            if (CharacterMachine->GetEffectiveEquipment(i)->Type == -1)
             {
                 Success = false;
                 break;
@@ -5395,20 +5395,20 @@ static bool FullSetOf(const CHARACTER* c, int& levelSet, bool& addDefense)
 
         if (Success)
         {
-            int Type = Data::Items::GetItemNumber(CharacterMachine->Equipment[EQUIPMENT_BOOTS].Type);
-            tmpLevel = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Level;
+            int Type = Data::Items::GetItemNumber(CharacterMachine->GetEffectiveEquipment(EQUIPMENT_BOOTS)->Type);
+            tmpLevel = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_BOOTS)->Level;
             for (int i = start; i >= end; i--)
             {
                 if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
                     continue;
-                int Level = CharacterMachine->Equipment[i].Level;
+                int Level = CharacterMachine->GetEffectiveEquipment(i)->Level;
                 if (Level < 9)
                 {
                     levelSet = 0;
                     Success = false;
                     break;
                 }
-                if (Type != Data::Items::GetItemNumber(CharacterMachine->Equipment[i].Type))
+                if (Type != Data::Items::GetItemNumber(CharacterMachine->GetEffectiveEquipment(i)->Type))
                 {
                     levelSet = 0;
                     Success = false;
@@ -5427,14 +5427,10 @@ static bool FullSetOf(const CHARACTER* c, int& levelSet, bool& addDefense)
 
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK && Success)
         {
-            if (CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_STORM_CROW_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_THUNDER_HAWK_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_HURRICANE_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_VOLCANO_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_VALIANT_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_DESTORY_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_PHANTOM_ARMOR
-                )
+            const int armorType = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_ARMOR)->Type;
+            if (armorType != ITEM_STORM_CROW_ARMOR && armorType != ITEM_THUNDER_HAWK_ARMOR &&
+                armorType != ITEM_HURRICANE_ARMOR && armorType != ITEM_VOLCANO_ARMOR &&
+                armorType != ITEM_VALIANT_ARMOR && armorType != ITEM_DESTORY_ARMOR && armorType != ITEM_PHANTOM_ARMOR)
             {
                 addDefense = false;
             }
@@ -13030,11 +13026,11 @@ void SetCharacterScale(CHARACTER* c)
 
 namespace
 {
-// An equipment slot is drawn if it holds an item, unless it's an expired rented item: that one has no effect,
-// so the hero looks as if the slot was empty.
-bool IsShownEquipment(const ITEM& item)
+// An equipment slot of the hero is drawn if it holds an item with effect: an expired rented item has none, so
+// the hero looks as if the slot was empty.
+bool IsShownEquipment(int slot)
 {
-    return item.Type != -1 && !(item.bPeriodItem && item.bExpiredPeriod);
+    return CharacterMachine->GetEffectiveEquipment(slot)->Type != -1;
 }
 } // namespace
 
@@ -13047,7 +13043,7 @@ void SetCharacterClass(CHARACTER* c)
 
     ITEM* p = CharacterMachine->Equipment;
 
-    if (!IsShownEquipment(p[EQUIPMENT_WEAPON_RIGHT]))
+    if (!IsShownEquipment(EQUIPMENT_WEAPON_RIGHT))
     {
         c->Weapon[0].Type = -1;
     }
@@ -13056,7 +13052,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Weapon[0].Type = Data::Items::ToModelSlot(p[EQUIPMENT_WEAPON_RIGHT].Type);
     }
 
-    if (!IsShownEquipment(p[EQUIPMENT_WEAPON_LEFT]))
+    if (!IsShownEquipment(EQUIPMENT_WEAPON_LEFT))
     {
         c->Weapon[1].Type = -1;
     }
@@ -13065,7 +13061,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Weapon[1].Type = Data::Items::ToModelSlot(p[EQUIPMENT_WEAPON_LEFT].Type);
     }
 
-    if (!IsShownEquipment(p[EQUIPMENT_WING]))
+    if (!IsShownEquipment(EQUIPMENT_WING))
     {
         c->Wing.Type = -1;
     }
@@ -13074,7 +13070,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Wing.Type = Data::Items::ToModelSlot(p[EQUIPMENT_WING].Type);
     }
 
-    if (!IsShownEquipment(p[EQUIPMENT_HELPER]))
+    if (!IsShownEquipment(EQUIPMENT_HELPER))
     {
         c->Helper.Type = -1;
     }
@@ -13111,7 +13107,7 @@ void SetCharacterClass(CHARACTER* c)
         SetPlayerStop(c);
     }
 
-    if (!IsShownEquipment(p[EQUIPMENT_HELM]))
+    if (!IsShownEquipment(EQUIPMENT_HELM))
     {
         c->BodyPart[BODYPART_HELM].Type = static_cast<int>(MODEL_BODY_HELM) + c->SkinIndex;
         c->BodyPart[BODYPART_HELM].Level = 0;
@@ -13126,7 +13122,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_HELM].AncientDiscriminator = p[EQUIPMENT_HELM].AncientDiscriminator;
     }
 
-    if (!IsShownEquipment(p[EQUIPMENT_ARMOR]))
+    if (!IsShownEquipment(EQUIPMENT_ARMOR))
     {
         c->BodyPart[BODYPART_ARMOR].Type = static_cast<int>(MODEL_BODY_ARMOR) + c->SkinIndex;
         c->BodyPart[BODYPART_ARMOR].Level = 0;
@@ -13141,7 +13137,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = p[EQUIPMENT_ARMOR].AncientDiscriminator;
     }
 
-    if (!IsShownEquipment(p[EQUIPMENT_PANTS]))
+    if (!IsShownEquipment(EQUIPMENT_PANTS))
     {
         c->BodyPart[BODYPART_PANTS].Type = static_cast<int>(MODEL_BODY_PANTS) + c->SkinIndex;
         c->BodyPart[BODYPART_PANTS].Level = 0;
@@ -13156,7 +13152,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_PANTS].AncientDiscriminator = p[EQUIPMENT_PANTS].AncientDiscriminator;
     }
 
-    if (!IsShownEquipment(p[EQUIPMENT_GLOVES]))
+    if (!IsShownEquipment(EQUIPMENT_GLOVES))
     {
         c->BodyPart[BODYPART_GLOVES].Type = static_cast<int>(MODEL_BODY_GLOVES) + c->SkinIndex;
         c->BodyPart[BODYPART_GLOVES].Level = 0;
@@ -13171,7 +13167,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = p[EQUIPMENT_GLOVES].AncientDiscriminator;
     }
 
-    if (!IsShownEquipment(p[EQUIPMENT_BOOTS]))
+    if (!IsShownEquipment(EQUIPMENT_BOOTS))
     {
         c->BodyPart[BODYPART_BOOTS].Type = static_cast<int>(MODEL_BODY_BOOTS) + c->SkinIndex;
         c->BodyPart[BODYPART_BOOTS].Level = 0;

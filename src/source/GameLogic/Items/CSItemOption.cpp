@@ -612,7 +612,7 @@ bool CSItemOption::IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill)
 
     for (int i = 0; i < 2; i++)
     {
-        const ITEM* item = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT + i];
+        const ITEM* item = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT + i);
         if (item == nullptr || item->Type <= -1)
         {
             continue;
@@ -653,7 +653,7 @@ void CSItemOption::getAllAddState(std::uint16_t* Strength, std::uint16_t* Dexter
 {
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < MAX_EQUIPMENT; ++i)
     {
-        ITEM* item = &CharacterMachine->Equipment[i];
+        ITEM* item = CharacterMachine->GetEffectiveEquipment(i);
 
         if (item->Durability <= 0)
         {
@@ -736,7 +736,7 @@ void CSItemOption::getAllAddOptionStatesbyCompare(std::uint16_t* Strength, std::
 {
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < MAX_EQUIPMENT; ++i)
     {
-        ITEM* item = &CharacterMachine->Equipment[i];
+        ITEM* item = CharacterMachine->GetEffectiveEquipment(i);
 
         if (item->RequireStrength > iCompareStrength ||
             item->RequireDexterity > iCompareDexterity ||
@@ -789,7 +789,7 @@ void CSItemOption::CheckItemSetOptions()
             continue;
         }
 
-        const ITEM* item = &CharacterMachine->Equipment[i];
+        const ITEM* item = CharacterMachine->GetEffectiveEquipment(i);
 
         if (item->Durability <= 0)
         {
@@ -838,7 +838,7 @@ void CSItemOption::CheckItemSetOptions()
             continue;
         }
 
-        ITEM* ip = &CharacterMachine->Equipment[i];
+        ITEM* ip = CharacterMachine->GetEffectiveEquipment(i);
 
         if (ip->RequireDexterity > AllDexterity || ip->RequireEnergy > AllEnergy || ip->RequireStrength > AllStrength || ip->RequireLevel > AllLevel || ip->RequireCharisma > AllCharisma || ip->Durability <= 0 || (IsRequireEquipItem(ip) == false)) {
             continue;
