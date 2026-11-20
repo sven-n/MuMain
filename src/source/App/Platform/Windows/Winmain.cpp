@@ -38,6 +38,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/PostProcessing/RenderScale.h"
 #include "Render/Look/LookPresetSetting.h"
 #include "Render/Look/LookProfileSetting.h"
 #include "Render/Look/TuningSetting.h"
@@ -50,6 +51,8 @@
 #include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "World/MapInfra/MapLoad.h"
+#include "Render/Renderer/BitmapUpload.h"
 #include "Network/EndpointForLog.h"
 #include "Dotnet/ManagedSymbols.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -427,11 +430,92 @@ void MuSetAnisotropyPreference(int anisotropy)
 // Whether the active look renders with multisampling (Enhanced does, Classic does not).
 static bool g_antialiasingActive = false;
 
+// Edge smoothing follows the anti-aliasing of the look: on in Enhanced when the player chose it.
+static void ApplyEdgeSmoothing(bool enabled)
+{
+    if (!mu::GetRenderer().SetEdgeSmoothing(enabled))
+    {
+        mu::log::Get("render")->warn("Edge smoothing requested but unavailable; frames stay unsmoothed");
+        return;
+    }
+    mu::log::Get("render")->info("Edge smoothing {}", enabled ? "on" : "off");
+}
+
+// The render scale and sharpening follow the look the same way: the player's in Enhanced, none in
+// Classic.
+static void ApplyRenderScale(int percent)
+{
+    if (!mu::GetRenderer().SetRenderScale(percent))
+    {
+        mu::log::Get("render")->warn("Render scale {}% requested but upscaling is unavailable; the scene stays "
+                                     "at the window's size",
+                                     percent);
+        return;
+    }
+    mu::log::Get("render")->info("Render scale {}%", percent);
+}
+
+static void ApplySharpness(int percent)
+{
+    if (!mu::GetRenderer().SetSharpness(percent))
+    {
+        mu::log::Get("render")->warn("Sharpness {} requested but sharpening is unavailable", percent);
+        return;
+    }
+    mu::log::Get("render")->info("Sharpness {}", percent);
+}
+
 void MuSetAntialiasingActive(bool active)
 {
     g_antialiasingActive = active;
     // The renderer rebuilds its pipelines and targets at the next BeginFrame, if the count changed.
     mu::GetRenderer().SetAntialiasingSamples(active ? GameConfig::GetInstance().GetAntialiasing() : 0);
+    const GameConfig& config = GameConfig::GetInstance();
+    ApplyEdgeSmoothing(active && config.GetEdgeSmoothing());
+    ApplyRenderScale(active ? config.GetRenderScale() : Render::PostProcessing::MaxRenderScalePercent);
+    ApplySharpness(active ? config.GetSharpness() : Render::PostProcessing::MinSharpnessPercent);
+}
+
+void MuSetRenderScalePreference(int percent)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetRenderScale(percent);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Render scale: {}% saved for the Enhanced look; Classic renders without",
+                                     config.GetRenderScale());
+        return;
+    }
+    ApplyRenderScale(config.GetRenderScale());
+}
+
+void MuSetSharpnessPreference(int percent)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetSharpness(percent);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Sharpness: {} saved for the Enhanced look; Classic renders without",
+                                     config.GetSharpness());
+        return;
+    }
+    ApplySharpness(config.GetSharpness());
+}
+
+void MuSetEdgeSmoothingPreference(bool enabled)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetEdgeSmoothing(enabled);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Edge smoothing: {} saved for the Enhanced look; Classic renders without",
+                                     enabled ? "on" : "off");
+        return;
+    }
+    ApplyEdgeSmoothing(enabled);
 }
 
 void MuSetAntialiasingPreference(int samples)
@@ -931,6 +1015,16 @@ static void RenderProfiledFrame()
     }
     FrameProfiler::CompleteFrame();
     Core::Benchmark::Recorder::Instance().Tick();
+}
+
+static void RenderMapLoadingFrame()
+{
+    ShowLoadingSceneOverlay();
+    mu::GetRenderer().BeginFrame();
+    ::BeginOpengl();
+    mu::GetRenderer().ClearScreen();
+    ::EndOpengl();
+    mu::GetRenderer().EndFrame();
 }
 
 void RecordCpuUsage()
@@ -1586,7 +1680,15 @@ bool IterateClient()
 
     // Process server packets handed over from the network thread. Replaces
     // the old WM_RECEIVE_BUFFER message round-trip; runs on the main thread.
-    Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback);
+    Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback, World::MapLoad::Active);
+    // The scene loop, which notices a lost connection, doesn't run while a map loads.
+    if (World::MapLoad::Active() &&
+        (SocketClient == nullptr || SocketClient->State() == Network::ConnectionState::Closed))
+    {
+        ReconnectManager::Instance().OnConnectionLostDuringMapLoad();
+    }
+    // A map change a packet started: the next steps, between frames.
+    World::MapLoad::Pump(mu::BitmapUploadsOverStagingCap);
 
     // Run a pending reconnect teardown between frames (self-guards on its
     // pending flag). Replaces the old WM_START_RECONNECT round-trip.
@@ -1643,7 +1745,12 @@ bool IterateClient()
             // The first frame has something to draw now.
             if ((SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_HIDDEN) != 0)
                 SDL_ShowWindow(g_sdlWindow);
-            RenderProfiledFrame();
+            // While a map change loads, the game draws nothing: a short load holds the last frame, a long one
+            // shows the loading screen.
+            if (!World::MapLoad::Active())
+                RenderProfiledFrame();
+            else if (World::MapLoad::LoadingScreenDue())
+                RenderMapLoadingFrame();
 #ifdef _EDITOR
             // The editor's own windows, now that the game's frame went to the GPU.
             g_MuEditorCore.RenderPlatformWindows();
@@ -2508,6 +2615,8 @@ bool StartClient(char* szCmdLine)
     g_teardown.Push(
         []
         {
+            // A map load quit midway holds world state (a texture batch) that the teardown after this releases.
+            World::MapLoad::Cancel();
             if (SocketClient != nullptr)
             {
                 SocketClient->Close();

@@ -1300,6 +1300,24 @@
   <data name="Anti-aliasing Tooltip" xml:space="preserve">
     <value>Wygładza krawędzie w Ulepszonej grafice; tryb klasyczny zawsze renderuje bez wygładzania</value>
   </data>
+  <data name="Edge Smoothing" xml:space="preserve">
+    <value>Wygładzanie FXAA</value>
+  </data>
+  <data name="Edge Smoothing Tooltip" xml:space="preserve">
+    <value>Wygładza też to, czego nie wygładza wygładzanie krawędzi: migotanie odblasków, poświaty i drobnych tekstur. Tylko w Ulepszonej grafice; obraz staje się nieco mniej ostry</value>
+  </data>
+  <data name="Render Scale" xml:space="preserve">
+    <value>Skala renderowania</value>
+  </data>
+  <data name="Render Scale Tooltip" xml:space="preserve">
+    <value>Rysuje świat 3D w części rozmiaru okna i skaluje go w górę (FSR 1), dla większej liczby klatek na sekundę; interfejs pozostaje ostry. Tylko w Ulepszonej grafice</value>
+  </data>
+  <data name="Sharpness" xml:space="preserve">
+    <value>Wyostrzanie</value>
+  </data>
+  <data name="Sharpness Tooltip" xml:space="preserve">
+    <value>Wyostrza świat 3D (FSR 1), najbardziej przydatne przy skali renderowania poniżej 100%. Tylko w Ulepszonej grafice</value>
+  </data>
   <data name="Anisotropic filtering" xml:space="preserve">
     <value>Filtrowanie anizotropowe</value>
   </data>

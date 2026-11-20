@@ -65,6 +65,9 @@ public:
     void Begin();         // performs the teardown between frames; the main loop calls it once m_beginPending is set
     void Update();        // per-frame driver (runs in the scene-update phase)
     void RequestCancel(); // dialog's Cancel button; processed by Update()
+    // Between frames, the connection closed while a map loaded: tears the half-built world down now and, with a
+    // session to restore, reconnects from the login scene.
+    void OnConnectionLostDuringMapLoad();
 
     // Read by ReconnectDialog.
     bool IsActive() const { return m_active || m_beginPending; }

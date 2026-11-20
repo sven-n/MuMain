@@ -626,7 +626,7 @@ bool CMyInventory::UpdateMouseEvent()
     if (m_pNewInventoryCtrl && !m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
 
-    if (true == EquipmentWindowProcess())
+    if (!ReleaseGoesToGrid() && EquipmentWindowProcess())
         return false;
     if (true == InventoryProcess())
         return false;
@@ -1593,6 +1593,14 @@ bool CMyInventory::CheckTakeOff(int equipmentSlot) const
 
     g_pSystemLogBox->AddText(I18N::Game::KeepFlightEquipmentInIcarus, TYPE_ERROR_MESSAGE);
     return false;
+}
+
+bool CMyInventory::ReleaseGoesToGrid() const
+{
+    if (!IsRelease(VK_LBUTTON) || m_pNewInventoryCtrl == nullptr)
+        return false;
+
+    return m_ActionController.DropOutcomeOn(m_pNewInventoryCtrl) != DropOutcome::None;
 }
 
 bool CMyInventory::InventoryProcess() const

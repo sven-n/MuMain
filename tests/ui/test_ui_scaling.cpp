@@ -237,13 +237,18 @@ TEST_CASE("inventory drag keeps border drops in their original slots [ui][invent
 {
     constexpr int gridLeft = 100;
     constexpr int gridTop = 200;
+    const UI::Items::GridGeometry grid{
+        gridLeft, gridTop, mu::ui::window::INVENTORY_SQUARE_WIDTH, mu::ui::window::INVENTORY_SQUARE_HEIGHT, 8, 8};
+    int column = -1;
+    int row = -1;
 
     const POINT leftOffset = UI::Items::Drag::PickupOffset(gridLeft, gridTop, 40, 40, 101, 201, true);
     const POINT leftTopLeft = UI::Items::Drag::ItemTopLeft(101, 201, leftOffset);
     CHECK(leftTopLeft.x == gridLeft);
     CHECK(leftTopLeft.y == gridTop);
-    CHECK((leftTopLeft.x - gridLeft) / mu::ui::window::INVENTORY_SQUARE_WIDTH == 0);
-    CHECK((leftTopLeft.y - gridTop) / mu::ui::window::INVENTORY_SQUARE_HEIGHT == 0);
+    REQUIRE(grid.ItemCellAt(static_cast<float>(leftTopLeft.x), static_cast<float>(leftTopLeft.y), column, row));
+    CHECK(column == 0);
+    CHECK(row == 0);
 
     constexpr int rightItemLeft = gridLeft + 6 * mu::ui::window::INVENTORY_SQUARE_WIDTH;
     const POINT rightOffset = UI::Items::Drag::PickupOffset(rightItemLeft, gridTop, 40, 40,
@@ -251,8 +256,9 @@ TEST_CASE("inventory drag keeps border drops in their original slots [ui][invent
     const POINT rightTopLeft = UI::Items::Drag::ItemTopLeft(rightItemLeft + 39, gridTop + 39, rightOffset);
     CHECK(rightTopLeft.x == rightItemLeft);
     CHECK(rightTopLeft.y == gridTop);
-    CHECK((rightTopLeft.x - gridLeft) / mu::ui::window::INVENTORY_SQUARE_WIDTH == 6);
-    CHECK((rightTopLeft.y - gridTop) / mu::ui::window::INVENTORY_SQUARE_HEIGHT == 0);
+    REQUIRE(grid.ItemCellAt(static_cast<float>(rightTopLeft.x), static_cast<float>(rightTopLeft.y), column, row));
+    CHECK(column == 6);
+    CHECK(row == 0);
 }
 
 TEST_CASE("inventory drag anchor survives dock scaling [ui][inventory]")

@@ -24,6 +24,10 @@ int ValidateAnisotropy(int value);
 // below are off, above 8 is 8. What the GPU supports is applied by the
 // renderer, which logs the count it uses.
 int ValidateAntialiasing(int value);
+// 50 to 100 (percent of the window's size); a value outside is the nearest end.
+int ValidateRenderScale(int value);
+// 0 to 100; a value outside is the nearest end.
+int ValidateSharpness(int value);
 // "Classic" or "Enhanced" in any case, surrounding blanks ignored; nothing otherwise.
 std::optional<LookPreset> ParseLook(std::wstring_view text);
 // The text ParseLook reads back as `preset`.
