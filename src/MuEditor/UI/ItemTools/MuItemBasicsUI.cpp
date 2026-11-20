@@ -341,6 +341,7 @@ void CMuItemBasicsUI::RenderPetStats(ItemDefinition& item)
     RenderPetStatFormula(I18N::Metadata::MinDamage, item.petStats.minimumDamage, false);
     RenderPetStatFormula(I18N::Metadata::MaxDamage, item.petStats.maximumDamage, true);
     RenderPetStatFormula(I18N::Metadata::AttackSpeed, item.petStats.attackSpeed, true);
+    RenderPetStatFormula(I18N::Editor::AttackSuccessRate, item.petStats.attackSuccess, true);
 }
 
 void CMuItemBasicsUI::RenderPetStatFormula(const char* label, Data::Items::PetStatFormula& formula, bool shareOfMinimum)

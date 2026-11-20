@@ -1212,8 +1212,8 @@ attributes have: the row is the window's last, with no room under it.
 
 ### Pet stats
 
-The Dark Raven's and the Dark Horse's damage and attack speed, which the pet
-window shows, are formulas in their items' `petStats`. The game reads the
+The Dark Raven's and the Dark Horse's damage, attack speed and attack
+success rate, which the pet window shows, are formulas in their items' `petStats`. The game reads the
 Dark Raven's (13,5) for the raven and the Dark Horse's (13,4) for the horse:
 
 ```json
@@ -1224,7 +1224,7 @@ Dark Raven's (13,5) for the raven and the Dark Horse's (13,4) for the horse:
 }
 ```
 
-Each of `minimumDamage`, `maximumDamage` and `attackSpeed` is
+Each of `minimumDamage`, `maximumDamage`, `attackSpeed` and `attackSuccess` is
 
 `add` + pet level × `perPetLevel` / `petLevelDivisor` + strength /
 `strengthDivisor` + command / `commandDivisor` + minimum damage ×
@@ -1232,14 +1232,16 @@ Each of `minimumDamage`, `maximumDamage` and `attackSpeed` is
 
 with each division rounded down. A divisor of 0 leaves its term out, and a
 left-out term is 0 (`petLevelDivisor`: 1). Strength and command count with
-what items and buffs add to them. The minimum damage comes first, so the other
-two can take a share of it. Each stat is limited to 0–65,535, the range the
+what items and buffs add to them. The minimum damage comes first, so the
+other formulas can take a share of it. Each stat is limited to 0–65,535, the range the
 pet window supports. The shipped
 Dark Raven has OpenMU's `ClassDarkLord` formulas (180 + 15 per level +
 command / 8 to 200 + 15 per level + command / 4, attack speed 20 + level × 4
 / 5 + command / 50); the shipped Dark Horse has the original client's (strength
 / 10 + command / 10 + 5 per level, its maximum 150 % of that, and the raven's
-attack speed). OpenMU defines the raven formulas on the character class, so
+attack speed). The shipped attack success rate is 1,000 plus 16 per pet
+level for both pets. Older item files without that formula use the same
+calculation. OpenMU defines the raven formulas on the character class, so
 the item exchange omits `petStats`.
 
 Loading and the item checks report a value that is not a whole number, an

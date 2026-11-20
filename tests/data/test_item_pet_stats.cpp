@@ -37,6 +37,7 @@ ItemDefinition MakeHorse()
     horse.petStats.minimumDamage = {0, 5, 1, 10, 10, 0};
     horse.petStats.maximumDamage = {0, 0, 1, 0, 0, 150};
     horse.petStats.attackSpeed = {20, 4, 5, 0, 50, 0};
+    horse.petStats.attackSuccess = {1000, 16};
     return horse;
 }
 } // namespace

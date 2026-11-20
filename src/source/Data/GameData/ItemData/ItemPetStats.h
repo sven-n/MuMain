@@ -30,10 +30,11 @@ struct ItemPetStats
     PetStatFormula minimumDamage;
     PetStatFormula maximumDamage;
     PetStatFormula attackSpeed;
+    PetStatFormula attackSuccess;
 
     bool IsEmpty() const
     {
-        return minimumDamage.IsEmpty() && maximumDamage.IsEmpty() && attackSpeed.IsEmpty();
+        return minimumDamage.IsEmpty() && maximumDamage.IsEmpty() && attackSpeed.IsEmpty() && attackSuccess.IsEmpty();
     }
 
     bool operator==(const ItemPetStats& other) const = default;

@@ -5611,4 +5611,7 @@
   <data name="Wing option bit {0}" xml:space="preserve">
     <value>Flügeloptions-Bit {0}</value>
   </data>
+  <data name="Attack success rate" xml:space="preserve">
+    <value>Angriffserfolgsrate</value>
+  </data>
 </root>

@@ -227,6 +227,10 @@ TEST_CASE("The shipped pets' stats give what the pet window's code gave [data][i
     int mismatches = 0;
     for (int level = 0; level <= MaxPetLevel; ++level)
     {
+        const Data::Items::PetStatInputs levelOnly{level, 0, 0};
+        const int oldAttackSuccess = 1000 + 16 * level;
+        CHECK(Data::Items::EvaluatePetStat(raven.attackSuccess, levelOnly, 0) == oldAttackSuccess);
+        CHECK(Data::Items::EvaluatePetStat(horse.attackSuccess, levelOnly, 0) == oldAttackSuccess);
         for (int strength = 0; strength <= MaxStat; strength += StatStep * 11)
         {
             for (int command = 0; command <= MaxStat; command += StatStep)

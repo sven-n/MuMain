@@ -5887,4 +5887,7 @@
   <data name="Wing option bit {0}" xml:space="preserve">
     <value>Wing option bit {0}</value>
   </data>
+  <data name="Attack success rate" xml:space="preserve">
+    <value>Attack success rate</value>
+  </data>
 </root>

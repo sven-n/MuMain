@@ -292,6 +292,10 @@
           "perPetLevel": 4,
           "petLevelDivisor": 5,
           "commandDivisor": 50
+        },
+        "attackSuccess": {
+          "add": 1000,
+          "perPetLevel": 16
         }
       }
     },
@@ -360,6 +364,10 @@
           "perPetLevel": 4,
           "petLevelDivisor": 5,
           "commandDivisor": 50
+        },
+        "attackSuccess": {
+          "add": 1000,
+          "perPetLevel": 16
         }
       }
     },

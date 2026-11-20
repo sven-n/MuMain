@@ -128,6 +128,7 @@ template <typename TStats, typename TVisitor> void VisitPetStatFormulas(TStats& 
     visit("minimumDamage", stats.minimumDamage);
     visit("maximumDamage", stats.maximumDamage);
     visit("attackSpeed", stats.attackSpeed);
+    visit("attackSuccess", stats.attackSuccess);
 }
 
 template <typename TFormula, typename TVisitor> void VisitPetStatFormulaFields(TFormula& formula, TVisitor&& visit)

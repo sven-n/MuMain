@@ -339,6 +339,7 @@ void ValidatePetStats(const ItemDefinition& definition, std::vector<ItemDataIssu
     ValidatePetStatFormula(definition, definition.petStats.minimumDamage, "petStats.minimumDamage", true, issues);
     ValidatePetStatFormula(definition, definition.petStats.maximumDamage, "petStats.maximumDamage", false, issues);
     ValidatePetStatFormula(definition, definition.petStats.attackSpeed, "petStats.attackSpeed", false, issues);
+    ValidatePetStatFormula(definition, definition.petStats.attackSuccess, "petStats.attackSuccess", false, issues);
 }
 
 // The highest level an item can need of a class: its third class.
