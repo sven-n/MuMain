@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "Core/Platform/ProcessLocale.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -38,6 +39,7 @@ class CommandHintScope
 public:
     CommandHintScope() : m_client(ClientDirectory)
     {
+        Core::Platform::ApplyProcessLocale();
         I18N::SetLocale("en");
         std::string errorMessage;
         m_loaded = g_ItemDataHandler.Load(errorMessage);

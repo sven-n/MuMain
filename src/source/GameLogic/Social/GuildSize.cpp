@@ -11,6 +11,6 @@ int GetMaxGuildMembers(CLASS_TYPE baseClass, int level, int command)
     {
         return byLevel;
     }
-    return std::min(byLevel + command / CommandPerGuildMember, MaxDarkLordGuildMembers);
+    return (std::min)(byLevel + command / CommandPerGuildMember, MaxDarkLordGuildMembers);
 }
 } // namespace GameLogic::Social
