@@ -6192,6 +6192,10 @@ void RequestInventorySync()
 extern int ItemKey;
 void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 {
+    // Any reply answers the pending pick up, also one which can't be read:
+    // otherwise no further pick up is sent until the next login.
+    SendGetItem = -1;
+
     auto Data = safe_cast<PHEADER_DEFAULT>(ReceiveBuffer);
     if (Data == nullptr)
     {
@@ -6204,7 +6208,12 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        if (Data->Value == GET_ITEM_ZEN)
+        if (Data->Value == GET_ITEM_ZEN && ReceiveBuffer.size() < sizeof(PRECEIVE_INVENTORY_MONEY))
+        {
+            // Without the amount it is a refusal: OpenMU sends it when the
+            // pile doesn't fit into the inventory money.
+        }
+        else if (Data->Value == GET_ITEM_ZEN)
         {
             auto Data2 = safe_cast<PRECEIVE_INVENTORY_MONEY>(ReceiveBuffer);
             if (Data2 == nullptr)
@@ -6284,7 +6293,6 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                 PlayBuffer(SOUND_GET_ITEM01, &Hero->Object);
         }
     }
-    SendGetItem = -1;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x22 [ReceiveGetItem(%d)]", Data->Value);
 }
