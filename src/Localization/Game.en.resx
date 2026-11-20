@@ -9672,4 +9672,7 @@ Fullscreen changes the monitor to the chosen resolution.</value>
   <data name="Guild members as guild master: +%d" xml:space="preserve">
     <value>Guild members as guild master: +%d</value>
   </data>
+  <data name="The files of this map could not be downloaded." xml:space="preserve">
+    <value>The files of this map could not be downloaded.</value>
+  </data>
 </root>

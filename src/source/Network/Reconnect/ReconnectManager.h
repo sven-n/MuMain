@@ -68,6 +68,9 @@ public:
     // Between frames, the connection closed while a map loaded: tears the half-built world down now and, with a
     // session to restore, reconnects from the login scene.
     void OnConnectionLostDuringMapLoad();
+    // Between frames, a map change's files couldn't be delivered: back to the login scene with a message. No
+    // reconnect, which would load the same map again; the player logs in when they choose.
+    void OnMapFilesFailed();
 
     // Read by ReconnectDialog.
     bool IsActive() const { return m_active || m_beginPending; }
