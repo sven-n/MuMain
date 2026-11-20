@@ -3,6 +3,7 @@
 #include "I18N/All.h"
 
 #include "UI/Inventory/Trade.h"
+#include "UI/Inventory/TradeChangeWarning.h"
 #include "UI/Inventory/HeldItemPlacement.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlElementBox.h"
@@ -753,16 +754,8 @@ void CTrade::BackUpYourInven(int nYourInvenIndex)
 
 void CTrade::BackUpYourInven(ITEM* pYourItemObj)
 {
-    if ((pYourItemObj->Type >= ITEM_HELPER && pYourItemObj->Type <= ITEM_DARK_HORSE_ITEM)
-        || (pYourItemObj->Type == ITEM_JEWEL_OF_BLESS || pYourItemObj->Type == ITEM_JEWEL_OF_SOUL || pYourItemObj->Type == ITEM_JEWEL_OF_LIFE)
-        || (pYourItemObj->Type >= ITEM_JEWEL_OF_GUARDIAN)
-        || (COMGEM::isCompiledGem(pYourItemObj))
-        || (pYourItemObj->Type >= ITEM_WING && pYourItemObj->Type <= ITEM_WINGS_OF_DARKNESS)
-        || (pYourItemObj->Type >= ITEM_CAPE_OF_LORD)
-        || (pYourItemObj->Type >= ITEM_WING_OF_STORM && pYourItemObj->Type <= ITEM_WING_OF_DIMENSION)
-        || (pYourItemObj->Type == ITEM_JEWEL_OF_CHAOS)
-        || (pYourItemObj->Type >= ITEM_CAPE_OF_FIGHTER && pYourItemObj->Type <= ITEM_CAPE_OF_OVERRULE)
-        || ((pYourItemObj->Level > 4 && pYourItemObj->Type < ITEM_WING) || pYourItemObj->ExcellentFlags > 0))
+    if (UI::Inventory::IsTrackedForChangeWarning(pYourItemObj->Type, pYourItemObj->Level, pYourItemObj->ExcellentFlags,
+                                                 COMGEM::isCompiledGem(pYourItemObj)))
     {
         int nCompareValue;
         bool bSameItem = false;
