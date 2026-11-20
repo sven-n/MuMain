@@ -6332,6 +6332,29 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
     return (TRUE);
 }
 
+namespace
+{
+// The sound of an item which the player changed, e.g. with a jewel. An equipped item is only updated by the server
+// (a rented item expired), so it plays none.
+void PlayModifiedItemSound(int itemindex)
+{
+    const ITEM* pItem = IsPlayerInventorySlot(itemindex) ? UI::Inventory::FindPlayerItem(itemindex) : nullptr;
+    if (pItem == nullptr || GambleSystem::Instance().IsGambleShop())
+    {
+        return;
+    }
+
+    if (pItem->Type == ITEM_LOST_MAP || pItem->Type == ITEM_POTION + 111)
+    {
+        PlayBuffer(SOUND_KUNDUN_ITEM_SOUND);
+    }
+    else
+    {
+        PlayBuffer(SOUND_JEWEL01);
+    }
+}
+} // namespace
+
 void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
 {
     auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_ITEM_EXTENDED>(ReceiveBuffer);
@@ -6362,20 +6385,10 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     if (shouldResyncInventory)
     {
         RequestInventorySync();
+        return;
     }
 
-    int iType = Items[itemindex].Item.Type;
-    if (iType == ITEM_LOST_MAP || iType == ITEM_POTION + 111)
-    {
-        PlayBuffer(SOUND_KUNDUN_ITEM_SOUND);
-    }
-    else if (GambleSystem::Instance().IsGambleShop())
-    {
-    }
-    else
-    {
-        PlayBuffer(SOUND_JEWEL01);
-    }
+    PlayModifiedItemSound(itemindex);
 }
 
 BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
