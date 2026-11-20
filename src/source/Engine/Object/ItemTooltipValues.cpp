@@ -310,6 +310,7 @@ bool NeedsAllTooltipValues(Data::Items::TooltipState state)
     case TooltipState::Boots:
     case TooltipState::Gloves:
     case TooltipState::Expired:
+    case TooltipState::HasExpireDate:
     case TooltipState::Count:
         break;
     }
