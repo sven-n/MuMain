@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 using namespace Data::Looks;
@@ -207,6 +208,182 @@ TEST_CASE("An item effect sets item values before the drawing, by level, and the
     REQUIRE(again.looks.size() == 4);
     CHECK(text.find(R"({"glowMesh": "all"})") != std::string::npos);
     CHECK(again.looks[0] == eye);
+}
+
+TEST_CASE("An item effect's things on bones are read, single and in groups, and written back as they were read "
+          "(design L55, L56) [looks][files]")
+{
+    const ReadResult result = ReadEffects(EffectFile(R"([
+        {"name": "wings", "onBones": [
+            {"together": {"between": [[30, 22], [29, 21]], "chance": {"oneIn": 1}},
+             "things": [{"joint": "jointThunder", "subType": 14,
+                         "scale": {"shape": "wave", "from": 20, "to": 26, "seconds": 1.5707963}},
+                        {"joint": "jointSpirit", "subType": 4, "reversed": true, "scale": 25}]},
+            {"sprite": "flareBlue", "bones": [22, 21], "scale": 0.75, "color": [0.6, 0.3, 0.8]},
+            {"together": {"bones": [11, 21], "chance": {"oneIn": 2, "per": "once"}},
+             "things": [{"effect": "fenrirThunder", "subType": 1, "color": [0.6, 0.6, 0.9],
+                         "chance": {"oneIn": 20, "draw": "plain"}}]},
+            {"particle": "chromeEnergy2", "bones": [7], "scale": 0.1, "chance": {"oneIn": 1}},
+            {"sprite": "cloud64", "at": "origin", "subType": 1, "rotation": {"shape": "scroll", "perSecond": 10}}]}])"));
+    INFO(Describe(result.issues));
+    CHECK(result.issues.empty());
+    REQUIRE(result.looks.size() == 1);
+    const std::vector<OnBones>& onBones = result.looks[0].onBones;
+    REQUIRE(onBones.size() == 5);
+
+    const OnBones& lightning = onBones[0];
+    CHECK(lightning.together);
+    CHECK(lightning.places.between == std::vector<std::pair<int, int>>{{30, 22}, {29, 21}});
+    REQUIRE(lightning.chance);
+    CHECK(lightning.chance->oneIn == 1);
+    CHECK_FALSE(lightning.chance->once);
+    REQUIRE(lightning.things.size() == 2);
+    CHECK(lightning.things[0].kind == BoneThingKind::Joint);
+    CHECK(lightning.things[0].type == "jointThunder");
+    CHECK(lightning.things[0].subType == 14);
+    CHECK(std::holds_alternative<Shape>(lightning.things[0].scale));
+    CHECK(lightning.things[1].reversed);
+    CHECK(lightning.things[1].scale == Number{25.f});
+
+    const OnBones& flares = onBones[1];
+    CHECK_FALSE(flares.together);
+    CHECK(flares.places.bones == std::vector<int>{22, 21});
+    CHECK_FALSE(flares.chance);
+    REQUIRE(flares.things.size() == 1);
+    CHECK(flares.things[0].color[1] == Number{0.3f});
+
+    const OnBones& thunder = onBones[2];
+    REQUIRE(thunder.chance);
+    CHECK(thunder.chance->once);
+    CHECK(thunder.chance->oneIn == 2);
+    REQUIRE(thunder.things[0].chance);
+    CHECK(thunder.things[0].chance->draw == ChanceDraw::Plain);
+    CHECK(thunder.things[0].chance->oneIn == 20);
+    CHECK(thunder.things[0].kind == BoneThingKind::Effect);
+
+    // A single thing's chance is its entry's.
+    REQUIRE(onBones[3].chance);
+    CHECK_FALSE(onBones[3].things[0].chance);
+    CHECK(onBones[4].places.origin);
+    CHECK(std::holds_alternative<Shape>(onBones[4].things[0].rotation));
+
+    const std::string text = WriteLookFileJson(LookKind::ItemEffect, result.looks);
+    CHECK(text.find(R"({"sprite": "flareBlue", "bones": [22, 21], "scale": 0.75, "color": [0.6, 0.3, 0.8]})") !=
+          std::string::npos);
+    CHECK(text.find(R"("chance": {"oneIn": 20, "draw": "plain"})") != std::string::npos);
+    CHECK(text.find(R"("at": "origin")") != std::string::npos);
+    const ReadResult again = ReadEffects(text);
+    INFO(text);
+    CHECK(again.issues.empty());
+    REQUIRE(again.looks.size() == 1);
+    CHECK(again.looks[0] == result.looks[0]);
+    CHECK(WriteLookFileJson(LookKind::ItemEffect, again.looks) == text);
+}
+
+TEST_CASE("A layer value can be the item's times a number, a layer can darken, and an item effect can play the "
+          "object's animation (design L59, L29) [looks][files]")
+{
+    const ReadResult styles = Read(File(R"([{"name": "water", "layers": [
+        {"kind": "texture", "glowStrength": {"itemTimes": 1.5}},
+        {"kind": "reflection", "blend": "darken", "meshes": [1], "opacity": {"itemTimes": 0.25}}]}])"));
+    INFO(Describe(styles.issues));
+    CHECK(styles.issues.empty());
+    REQUIRE(styles.looks.size() == 1);
+    REQUIRE(styles.looks[0].layers.size() == 2);
+    CHECK(styles.looks[0].layers[0].glowStrength == Value{FromItem{1.5f}});
+    CHECK(styles.looks[0].layers[1].blend == Blend::Darken);
+    CHECK(styles.looks[0].layers[1].opacity == Value{FromItem{0.25f}});
+    // The factor is a value's only: a layer's glow mesh is the item's by a tag of its own.
+    static_assert(!std::is_constructible_v<GlowMesh, FromItem>);
+    CHECK(Layer{}.glowMesh == GlowMesh{ItemGlowMesh{}});
+    const std::string text = WriteLookFileJson(LookKind::RenderStyle, styles.looks);
+    CHECK(text.find(R"("glowStrength": {"itemTimes": 1.5})") != std::string::npos);
+    CHECK(text.find(R"("blend": "darken")") != std::string::npos);
+    CHECK(Read(text).looks == styles.looks);
+
+    const ReadResult effects = ReadEffects(EffectFile(R"([{"name": "water", "animationSpeed": 0.2857143}])"));
+    CHECK(effects.issues.empty());
+    REQUIRE(effects.looks.size() == 1);
+    CHECK(effects.looks[0].animationSpeed == 0.2857143f);
+    CHECK(WriteLookFileJson(LookKind::ItemEffect, effects.looks).find(R"("animationSpeed": 0.2857143)") !=
+          std::string::npos);
+
+    CHECK(Find(Read(File(R"([{"name": "a", "layers": [{"kind": "texture", "opacity": {"itemTimes": "x"}}]}])"))
+                   .issues,
+               ItemDataIssueSeverity::Fatal, "looks[0].layers[0].opacity.itemTimes") != nullptr);
+    CHECK(Find(ReadEffects(EffectFile(R"([{"name": "a", "animationSpeed": 0}])")).issues, ItemDataIssueSeverity::Fatal,
+               "looks[0].animationSpeed") != nullptr);
+    CHECK(Find(Read(File(R"([{"name": "a", "layers": [], "animationSpeed": 1}])")).issues,
+               ItemDataIssueSeverity::Fatal, "looks[0].animationSpeed") != nullptr);
+}
+
+TEST_CASE("Things on bones that can't be created as written are fatal and name their field (design L55, L56) "
+          "[looks][files]")
+{
+    const struct
+    {
+        const char* onBones;
+        const char* field;
+    } cases[] = {
+        {R"({"onBones": {"sprite": "light"}})", "looks[0].onBones"},
+        {R"({"onBones": [{"bones": [1]}]})", "looks[0].onBones[0]"},
+        {R"({"onBones": [{"sprite": "light", "particle": "shiny", "bones": [1]}]})", "looks[0].onBones[0]"},
+        {R"({"onBones": [{"sprite": "", "bones": [1]}]})", "looks[0].onBones[0].sprite"},
+        {R"({"onBones": [{"sprite": "light"}]})", "looks[0].onBones[0]"},
+        {R"({"onBones": [{"sprite": "light", "bones": [1], "at": "origin"}]})", "looks[0].onBones[0]"},
+        {R"({"onBones": [{"sprite": "light", "bones": []}]})", "looks[0].onBones[0].bones"},
+        {R"({"onBones": [{"sprite": "light", "bones": [-1]}]})", "looks[0].onBones[0].bones[0]"},
+        {R"({"onBones": [{"sprite": "light", "bones": [200]}]})", "looks[0].onBones[0].bones[0]"},
+        {R"({"onBones": [{"joint": "jointThunder", "between": [[1, 200]]}]})", "looks[0].onBones[0].between[0][1]"},
+        {R"({"onBones": [{"sprite": "light", "at": "hand"}]})", "looks[0].onBones[0].at"},
+        {R"({"onBones": [{"sprite": "light", "between": [[1, 2]]}]})", "looks[0].onBones[0]"},
+        {R"({"onBones": [{"joint": "jointThunder", "bones": [1]}]})", "looks[0].onBones[0]"},
+        {R"({"onBones": [{"joint": "jointThunder", "between": [[1]]}]})", "looks[0].onBones[0].between[0]"},
+        {R"({"onBones": [{"particle": "shiny", "bones": [1], "rotation": 1}]})", "looks[0].onBones[0].rotation"},
+        {R"({"onBones": [{"sprite": "light", "bones": [1], "reversed": true}]})", "looks[0].onBones[0].reversed"},
+        {R"({"onBones": [{"sprite": "light", "bones": [1], "color": [1, 1]}]})", "looks[0].onBones[0].color"},
+        {R"({"onBones": [{"sprite": "light", "bones": [1], "subType": 1.5}]})", "looks[0].onBones[0].subType"},
+        {R"({"onBones": [{"sprite": "light", "bones": [1], "chance": {}}]})", "looks[0].onBones[0].chance.oneIn"},
+        {R"({"onBones": [{"sprite": "light", "bones": [1], "chance": {"oneIn": 0}}]})",
+         "looks[0].onBones[0].chance.oneIn"},
+        {R"({"onBones": [{"sprite": "light", "bones": [1], "chance": {"oneIn": 2, "draw": "dice"}}]})",
+         "looks[0].onBones[0].chance.draw"},
+        {R"({"onBones": [{"sprite": "light", "bones": [1], "chance": {"oneIn": 2, "per": "bone"}}]})",
+         "looks[0].onBones[0].chance.per"},
+        {R"({"onBones": [{"together": {"bones": [1]}, "things": []}]})", "looks[0].onBones[0].things"},
+        {R"({"onBones": [{"together": {"bones": [1]}, "things": [{"sprite": "light", "bones": [2]}]}]})",
+         "looks[0].onBones[0].things[0].bones"},
+        {R"({"onBones": [{"together": {"bones": [1]}, "things": [{"joint": "jointThunder"}]}]})",
+         "looks[0].onBones[0].things[0]"},
+        {R"({"onBones": [{"together": {}, "things": [{"sprite": "light"}]}]})", "looks[0].onBones[0].together"},
+        {R"({"onBones": [{"sprite": "light", "at": "origin", "chance": {"oneIn": 2, "per": "once"}}]})",
+         "looks[0].onBones[0].chance.per"},
+        {R"({"onBones": [{"together": {"at": "origin", "chance": {"oneIn": 2, "per": "each"}}, "things": [{"sprite": "light"}]}]})",
+         "looks[0].onBones[0].together.chance.per"},
+        {R"({"onBones": [{"together": {"at": "origin", "chance": {"oneIn": 2, "per": "bogus"}}, "things": [{"sprite": "light"}]}]})",
+         "looks[0].onBones[0].together.chance.per"},
+        // A thing that doesn't fit the places is named after another that failed before it.
+        {R"({"onBones": [{"together": {"between": [[1, 2]]}, "things": [{"joint": "jointThunder", "subType": 5000}, {"sprite": "light"}]}]})",
+         "looks[0].onBones[0].things[1]"},
+        {R"({"onBones": [{"together": {"bones": [1]}, "things": [{"sprite": "light", "chance": {"oneIn": 2, "per": "each"}}]}]})",
+         "looks[0].onBones[0].things[0].chance.per"},
+    };
+    for (const auto& item : cases)
+    {
+        const std::string look = std::string(R"([{"name": "a", )") + (item.onBones + 1) + "]";
+        CAPTURE(look);
+        const ReadResult result = ReadEffects(EffectFile(look));
+        INFO(Describe(result.issues));
+        CHECK(Find(result.issues, ItemDataIssueSeverity::Fatal, item.field) != nullptr);
+    }
+    // A group's wrong "per" at the item's place is named once, as in the single form.
+    const ReadResult wrongPer = ReadEffects(EffectFile(
+        R"([{"name": "a", "onBones": [{"together": {"at": "origin", "chance": {"oneIn": 2, "per": "bogus"}}, "things": [{"sprite": "light"}]}]}])"));
+    CHECK(std::ranges::count_if(wrongPer.issues, [](const ItemDataIssue& issue)
+                                { return issue.field == "looks[0].onBones[0].together.chance.per"; }) == 1);
+    // Render styles have no things on bones.
+    CHECK(Find(Read(File(R"([{"name": "a", "layers": [], "onBones": []}])")).issues, ItemDataIssueSeverity::Fatal,
+               "looks[0].onBones") != nullptr);
 }
 
 TEST_CASE("A look file has only its kind's parts: render style parts in an item effect and the other way round are "

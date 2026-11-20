@@ -7,8 +7,12 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Data/GameData/Common/MeshLimits.h"
+#include "Data/GameData/EffectData/EffectTypeCatalogue.h"
+#include "Data/GameData/LookData/BoneThingTypes.h"
+#include "Data/GameData/LookData/LookJson.h"
 #include "I18N/All.h"
 #include "Render/Items/LookDrawing.h"
+#include "Render/Models/ZzzBMD.h"
 #include "imgui.h"
 
 #include <algorithm>
@@ -169,6 +173,7 @@ const Names<Blend>& BlendNames()
 {
     static const Names<Blend> names{{Blend::Normal, &I18N::Editor::Normal},
                                     {Blend::Glow, &I18N::Editor::Glow},
+                                    {Blend::Darken, &I18N::Editor::Darken},
                                     {Blend::AsDrawing, &I18N::Editor::AsTheDrawingAsks}};
     return names;
 }
@@ -177,6 +182,7 @@ const Names<Blend>& BlendTips()
 {
     static const Names<Blend> tips{{Blend::Normal, &I18N::Editor::BlendNormalTooltip},
                                    {Blend::Glow, &I18N::Editor::BlendGlowTooltip},
+                                   {Blend::Darken, &I18N::Editor::BlendDarkenTooltip},
                                    {Blend::AsDrawing, &I18N::Editor::BlendAsTheDrawingAsksTooltip}};
     return tips;
 }
@@ -452,6 +458,16 @@ bool ValueField(const char* label, Value& value, const char* tip, bool drawing, 
         changed |= ImGui::DragFloat("##Number", number, ValueSpeed, 0.0f, 0.0f, "%.7g");
         Tip(tip, true);
     }
+    else if (FromItem* fromItem = std::get_if<FromItem>(&value))
+    {
+        // The item's value times a number (design L59), 1 for the item's as it is.
+        ImGui::SameLine();
+        ImGui::TextUnformatted("x");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(Scaled(NumberWidth));
+        changed |= ImGui::DragFloat("##Times", &fromItem->times, ValueSpeed, 0.0f, 0.0f, "%.7g");
+        Tip(tip, true);
+    }
     else if (Shape* shape = std::get_if<Shape>(&value))
     {
         changed |= ShapeFields(*shape, item);
@@ -699,7 +715,7 @@ bool GlowMeshField(GlowMesh& mesh, const std::vector<LookPart>& parts)
         switch (choice)
         {
         case GlowMeshChoice::Item:
-            mesh = FromItem{};
+            mesh = ItemGlowMesh{};
             break;
         case GlowMeshChoice::None:
             mesh = NoGlowMesh{};
@@ -1540,6 +1556,443 @@ std::string DescribeItemValuesBefore(const Data::Looks::ItemValuesBefore& entry)
     return text.empty() ? std::string(I18N::Editor::None) : text;
 }
 
+namespace
+{
+// A bone number field's width before the UI scale, and the most bones a model has.
+constexpr float BoneWidth = 45.0f;
+constexpr int LastBone = Data::MaxModelBones - 1;
+constexpr float MaxAnimationSpeed = 10.0f;
+// The slowest speed too: the files take only speeds above 0.
+constexpr float AnimationSpeedStep = 0.005f;
+constexpr float NewAnimationSpeed = 0.25f;
+constexpr int NewOneIn = 2;
+
+const Names<BoneThingKind>& BoneThingKindNames()
+{
+    static const Names<BoneThingKind> names{{BoneThingKind::Sprite, &I18N::Editor::BoneThingSprite},
+                                            {BoneThingKind::Particle, &I18N::Editor::BoneThingParticle},
+                                            {BoneThingKind::Joint, &I18N::Editor::BoneThingLightning},
+                                            {BoneThingKind::Effect, &I18N::Editor::BoneThingEffect}};
+    return names;
+}
+
+const Names<ChanceDraw>& ChanceDrawNames()
+{
+    static const Names<ChanceDraw> names{{ChanceDraw::Fps, &I18N::Editor::ChanceAtTheFrameRate},
+                                         {ChanceDraw::Plain, &I18N::Editor::ChancePlain}};
+    return names;
+}
+
+const Names<ChanceDraw>& ChanceDrawTips()
+{
+    static const Names<ChanceDraw> tips{{ChanceDraw::Fps, &I18N::Editor::ChanceAtTheFrameRateTooltip},
+                                        {ChanceDraw::Plain, &I18N::Editor::ChancePlainTooltip}};
+    return tips;
+}
+
+// Puts the next item on this line while `width` more fits, else on the next.
+void SameLineIfFits(float width)
+{
+    ImGui::SameLine();
+    const float right = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+    if (ImGui::GetCursorScreenPos().x + width > right)
+    {
+        ImGui::NewLine();
+    }
+}
+
+// One bone by its number; `pointed` gets it while the mouse is on it or it is typed into, for the preview's ring.
+bool BoneNumber(const char* id, int& bone, std::optional<int>& pointed)
+{
+    ImGui::SetNextItemWidth(Scaled(BoneWidth));
+    const bool changed = ImGui::InputInt(id, &bone, 0, 0);
+    if (changed)
+    {
+        bone = std::clamp(bone, 0, LastBone);
+    }
+    if (ImGui::IsItemHovered() || ImGui::IsItemActive())
+    {
+        pointed = bone;
+    }
+    Tip(I18N::Editor::BoneNumberTooltip);
+    return changed;
+}
+
+bool BonesField(std::vector<int>& bones, std::optional<int>& pointed)
+{
+    bool changed = false;
+    std::optional<std::size_t> takenOut;
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float itemWidth = Scaled(BoneWidth) + ImGui::GetFrameHeight() + style.ItemSpacing.x;
+    for (std::size_t i = 0; i < bones.size(); ++i)
+    {
+        ImGui::PushID(static_cast<int>(i));
+        if (i > 0)
+        {
+            SameLineIfFits(itemWidth);
+        }
+        ImGui::BeginGroup();
+        changed |= BoneNumber("##Bone", bones[i], pointed);
+        ImGui::SameLine(0.0f, style.ItemInnerSpacing.x);
+        if (ImGui::SmallButton(I18N::Editor::TakeOut))
+        {
+            takenOut = i;
+        }
+        ImGui::EndGroup();
+        ImGui::PopID();
+    }
+    if (!bones.empty())
+    {
+        SameLineIfFits(ImGui::CalcTextSize(I18N::Editor::AddBone).x + 2.0f * style.FramePadding.x);
+    }
+    if (ImGui::SmallButton(I18N::Editor::AddBone))
+    {
+        bones.push_back(bones.empty() ? 0 : std::min(bones.back() + 1, LastBone));
+        changed = true;
+    }
+    if (takenOut)
+    {
+        bones.erase(bones.begin() + static_cast<std::ptrdiff_t>(*takenOut));
+        changed = true;
+    }
+    return changed;
+}
+
+bool PairsField(std::vector<std::pair<int, int>>& pairs, std::optional<int>& pointed)
+{
+    bool changed = false;
+    std::optional<std::size_t> takenOut;
+    const float inner = ImGui::GetStyle().ItemInnerSpacing.x;
+    for (std::size_t i = 0; i < pairs.size(); ++i)
+    {
+        ImGui::PushID(static_cast<int>(i));
+        changed |= BoneNumber("##From", pairs[i].first, pointed);
+        ImGui::SameLine(0.0f, inner);
+        ImGui::TextUnformatted("->");
+        ImGui::SameLine(0.0f, inner);
+        changed |= BoneNumber("##To", pairs[i].second, pointed);
+        ImGui::SameLine(0.0f, inner);
+        if (ImGui::SmallButton(I18N::Editor::TakeOut))
+        {
+            takenOut = i;
+        }
+        ImGui::PopID();
+    }
+    if (ImGui::SmallButton(I18N::Editor::AddBonePair))
+    {
+        pairs.push_back(pairs.empty() ? std::pair<int, int>{0, 1} : pairs.back());
+        changed = true;
+    }
+    if (takenOut)
+    {
+        pairs.erase(pairs.begin() + static_cast<std::ptrdiff_t>(*takenOut));
+        changed = true;
+    }
+    return changed;
+}
+
+// A chance per frame (design L56); `forEach` offers rolling once for all bones or pairs.
+bool ChanceFields(const char* label, std::optional<Chance>& chance, bool forEach)
+{
+    namespace Text = I18N::Editor;
+    ImGui::PushID(label);
+    bool set = chance.has_value();
+    bool changed = false;
+    if (ImGui::Checkbox(label, &set))
+    {
+        chance = set ? std::optional<Chance>(Chance{.oneIn = NewOneIn}) : std::nullopt;
+        changed = true;
+    }
+    Tip(Text::ChanceTooltip);
+    if (chance)
+    {
+        ImGui::Indent();
+        ImGui::SetNextItemWidth(Scaled(NumberWidth));
+        changed |= ImGui::DragInt(Text::OnceIn, &chance->oneIn, CountSpeed, 1, MaxBoneThingOneIn, "%d",
+                                  ImGuiSliderFlags_AlwaysClamp);
+        Tip(Text::OnceInTooltip, true);
+        const char* const* drawTip = Find(&ChanceDrawTips(), chance->draw);
+        changed |= Choice(Text::ChanceDraw, chance->draw, ChanceDrawNames(), drawTip != nullptr ? *drawTip : "",
+                          &ChanceDrawTips());
+        if (forEach)
+        {
+            changed |= ImGui::Checkbox(Text::OnceForAll, &chance->once);
+            Tip(Text::OnceForAllTooltip);
+        }
+        ImGui::Unindent();
+    }
+    ImGui::PopID();
+    return changed;
+}
+
+// The type by its name, from the effect catalogue's types of the thing's kind, with a filter.
+bool TypeField(BoneThingKind kind, std::string& type)
+{
+    namespace Text = I18N::Editor;
+    ImGui::SetNextItemWidth(Scaled(ComboWidth));
+    if (!ImGui::BeginCombo(Text::BoneThingType, type.empty() ? Text::BoneThingTypeMissing : type.c_str(),
+                           ImGuiComboFlags_HeightLarge))
+    {
+        Tip(Text::BoneThingTypeTooltip);
+        return false;
+    }
+    static ImGuiTextFilter filter;
+    if (ImGui::IsWindowAppearing())
+    {
+        filter.Clear();
+        ImGui::SetKeyboardFocusHere();
+    }
+    filter.Draw(Text::BoneThingFilter);
+    bool changed = false;
+    for (const std::string_view name : g_EffectTypeCatalogue.GetNames(CatalogueKindOf(kind)))
+    {
+        const std::string text(name);
+        if (!filter.PassFilter(text.c_str()))
+        {
+            continue;
+        }
+        if (ImGui::Selectable(text.c_str(), text == type) && text != type)
+        {
+            type = text;
+            changed = true;
+        }
+    }
+    ImGui::EndCombo();
+    return changed;
+}
+
+bool ThingFields(BoneThing& thing, bool ownChance)
+{
+    namespace Text = I18N::Editor;
+    bool changed = false;
+    BoneThingKind kind = thing.kind;
+    if (Choice(Text::Kind, kind, BoneThingKindNames(), Text::BoneThingKindTooltip))
+    {
+        ChangeKind(thing, kind);
+        changed = true;
+    }
+    changed |= TypeField(thing.kind, thing.type);
+    ImGui::SetNextItemWidth(Scaled(NumberWidth));
+    changed |= ImGui::DragInt(Text::SubType, &thing.subType, CountSpeed, 0, MaxBoneThingSubType, "%d",
+                              ImGuiSliderFlags_AlwaysClamp);
+    Tip(Text::BoneThingSubtypeTooltip, true);
+    changed |= NumberField(Text::Scale, thing.scale, Text::BoneThingScaleTooltip);
+    changed |= ColorField(thing.color);
+    if (thing.kind == BoneThingKind::Sprite)
+    {
+        changed |= NumberField(Text::Rotation, thing.rotation, Text::BoneThingRotationTooltip);
+    }
+    if (thing.kind == BoneThingKind::Joint)
+    {
+        changed |= ImGui::Checkbox(Text::ReversedLightning, &thing.reversed);
+        Tip(Text::ReversedLightningTooltip);
+    }
+    if (ownChance)
+    {
+        changed |= ChanceFields(Text::ThingChance, thing.chance, false);
+    }
+    return changed;
+}
+
+std::string DescribeThing(const BoneThing& thing)
+{
+    std::string text = NameIn(BoneThingKindNames(), thing.kind) + " " + (thing.type.empty() ? "?" : thing.type);
+    if (thing.subType != 0)
+    {
+        text += " (" + std::to_string(thing.subType) + ")";
+    }
+    return text;
+}
+} // namespace
+
+void ChangePlaceMode(Data::Looks::OnBones& entry, PlaceMode mode)
+{
+    entry.places = {};
+    entry.places.origin = mode == PlaceMode::Origin;
+    if (entry.places.origin && entry.chance)
+    {
+        entry.chance->once = false;
+    }
+}
+
+void ChangeKind(Data::Looks::BoneThing& thing, Data::Looks::BoneThingKind kind)
+{
+    const BoneThing fresh;
+    thing.kind = kind;
+    thing.type.clear();
+    thing.rotation = fresh.rotation;
+    thing.reversed = fresh.reversed;
+}
+
+bool OnBonesEntry(Data::Looks::OnBones& entry, OnBonesShown& shown, bool& chosenBetween)
+{
+    namespace Text = I18N::Editor;
+    bool changed = false;
+    BonePlaces& places = entry.places;
+    PlaceMode mode = PlaceMode::Bones;
+    if (places.origin)
+    {
+        mode = PlaceMode::Origin;
+    }
+    else if (!places.between.empty() || (places.bones.empty() && chosenBetween))
+    {
+        mode = PlaceMode::Between;
+    }
+    const auto radio = [&](const char* label, PlaceMode choice)
+    {
+        if (ImGui::RadioButton(label, mode == choice) && mode != choice)
+        {
+            mode = choice;
+            ChangePlaceMode(entry, choice);
+            chosenBetween = choice == PlaceMode::Between;
+            changed = true;
+        }
+        Tip(Text::BonePlacesTooltip);
+    };
+    radio(Text::AtBones, PlaceMode::Bones);
+    ImGui::SameLine();
+    radio(Text::BetweenBones, PlaceMode::Between);
+    ImGui::SameLine();
+    radio(Text::AtTheItemSPlace, PlaceMode::Origin);
+    shown.between = mode == PlaceMode::Between;
+    if (mode == PlaceMode::Bones)
+    {
+        changed |= BonesField(places.bones, shown.pointedBone);
+    }
+    else if (mode == PlaceMode::Between)
+    {
+        changed |= PairsField(places.between, shown.pointedBone);
+    }
+    changed |= ChanceFields(Text::Chance, entry.chance, mode != PlaceMode::Origin);
+
+    // A group keeps Together while it has more than one thing.
+    ImGui::BeginDisabled(entry.together && entry.things.size() > 1);
+    if (ImGui::Checkbox(Text::Together, &entry.together))
+    {
+        if (!entry.together)
+        {
+            for (BoneThing& thing : entry.things)
+            {
+                thing.chance.reset();
+            }
+        }
+        changed = true;
+    }
+    ImGui::EndDisabled();
+    Tip(Text::TogetherTooltip);
+    if (!entry.together)
+    {
+        if (entry.things.empty())
+        {
+            entry.things.emplace_back();
+            changed = true;
+        }
+        ImGui::PushID("Thing");
+        changed |= ThingFields(entry.things.front(), false);
+        ImGui::PopID();
+        return changed;
+    }
+    std::optional<std::size_t> removed;
+    for (std::size_t i = 0; i < entry.things.size(); ++i)
+    {
+        ImGui::PushID(static_cast<int>(i));
+        const std::string header = std::to_string(i + 1) + ". " + DescribeThing(entry.things[i]);
+        if (ImGui::TreeNodeEx("##Thing", ImGuiTreeNodeFlags_DefaultOpen, "%s", header.c_str()))
+        {
+            ImGui::BeginDisabled(entry.things.size() <= 1);
+            if (ImGui::SmallButton(Text::Remove))
+            {
+                removed = i;
+            }
+            ImGui::EndDisabled();
+            changed |= ThingFields(entry.things[i], true);
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+    }
+    if (removed)
+    {
+        entry.things.erase(entry.things.begin() + static_cast<std::ptrdiff_t>(*removed));
+        changed = true;
+    }
+    if (ImGui::SmallButton(Text::AddThing))
+    {
+        BoneThing thing = entry.things.empty() ? BoneThing{} : entry.things.back();
+        thing.chance.reset();
+        entry.things.push_back(std::move(thing));
+        changed = true;
+    }
+    return changed;
+}
+
+bool AnimationSpeed(std::optional<float>& speed)
+{
+    namespace Text = I18N::Editor;
+    ImGui::PushID("AnimationSpeed");
+    bool set = speed.has_value();
+    bool changed = ImGui::Checkbox(Text::AnimationSpeed, &set);
+    Tip(Text::AnimationSpeedTooltip);
+    if (changed)
+    {
+        speed = set ? std::optional<float>(NewAnimationSpeed) : std::nullopt;
+    }
+    if (speed)
+    {
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(Scaled(NumberWidth));
+        changed |= ImGui::DragFloat("##Speed", &*speed, AnimationSpeedStep, AnimationSpeedStep, MaxAnimationSpeed,
+                                    "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        Tip(Text::AnimationSpeedTooltip, true);
+    }
+    ImGui::PopID();
+    return changed;
+}
+
+std::string DescribeOnBones(const Data::Looks::OnBones& entry, bool betweenChosen)
+{
+    std::string text;
+    for (const BoneThing& thing : entry.things)
+    {
+        AddPart(text, DescribeThing(thing), " + ");
+    }
+    if (text.empty())
+    {
+        text = I18N::Editor::None;
+    }
+    const BonePlaces& places = entry.places;
+    if (places.origin)
+    {
+        text += std::string(", ") + I18N::Editor::AtTheItemSPlace;
+    }
+    else if (!places.between.empty() || (places.bones.empty() && betweenChosen))
+    {
+        std::string pairs;
+        for (const auto& [from, to] : places.between)
+        {
+            AddPart(pairs, std::to_string(from) + "->" + std::to_string(to));
+        }
+        text += std::string(", ") + I18N::Editor::BetweenBones + " " + pairs;
+    }
+    else
+    {
+        text += std::string(", ") + I18N::Editor::AtBones + " " + JoinMeshes(places.bones);
+    }
+    if (entry.chance)
+    {
+        text += std::string(", ") + I18N::Editor::OnceIn + " " + std::to_string(entry.chance->oneIn);
+    }
+    return text;
+}
+
+namespace
+{
+// A layer value the look sets: anything but the item's own value or glow mesh (the item's value times a number is set).
+template <typename T> bool SetsValue(const T& value)
+{
+    return value != T{};
+}
+} // namespace
+
 std::string DescribeLayer(const Data::Looks::Layer& layer)
 {
     std::string text = NameIn(KindNames(), layer.kind);
@@ -1565,23 +2018,23 @@ std::string DescribeLayer(const Data::Looks::Layer& layer)
     {
         AddPart(fields, I18N::Editor::Light);
     }
-    if (!std::holds_alternative<FromItem>(layer.opacity))
+    if (SetsValue(layer.opacity))
     {
         AddPart(fields, I18N::Editor::Opacity);
     }
-    if (!std::holds_alternative<FromItem>(layer.glowMesh))
+    if (SetsValue(layer.glowMesh))
     {
         AddPart(fields, I18N::Editor::GlowMesh);
     }
-    if (!std::holds_alternative<FromItem>(layer.glowStrength))
+    if (SetsValue(layer.glowStrength))
     {
         AddPart(fields, I18N::Editor::GlowStrength);
     }
-    if (!std::holds_alternative<FromItem>(layer.scrollU))
+    if (SetsValue(layer.scrollU))
     {
         AddPart(fields, I18N::Editor::ScrollU);
     }
-    if (!std::holds_alternative<FromItem>(layer.scrollV))
+    if (SetsValue(layer.scrollV))
     {
         AddPart(fields, I18N::Editor::ScrollV);
     }

@@ -186,8 +186,8 @@ bool BitmapGpuResources::PickFreeSlot()
     SDL_GPUTransferBufferCreateInfo transferInfo{};
     transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
     transferInfo.size = static_cast<Uint32>(kSlotCapacity);
-    SDL_GPUTransferBuffer* transfer =
-        m_slots.size() < kMaximumSlotCount ? m_calls.createTransfer(m_device, &transferInfo) : nullptr;
+    const bool mayGrow = m_slots.size() < kMaximumSlotCount || !m_calls.waitAtCeiling;
+    SDL_GPUTransferBuffer* transfer = mayGrow ? m_calls.createTransfer(m_device, &transferInfo) : nullptr;
     if (transfer)
     {
         m_slots.push_back({transfer, nullptr, false});

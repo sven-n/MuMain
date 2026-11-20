@@ -189,6 +189,13 @@
       "itemValuesAfter": {"scrollingMesh": 1}
     },
     {
+      "name": "cursedCastleWater",
+      "layers": [
+        {"kind": "texture", "blend": "asDrawing", "meshes": "allEvenHidden", "opacity": "drawing", "glowStrength": {"itemTimes": 1.5}},
+        {"kind": "texture", "blend": "glow", "meshes": {"allBut": [0]}, "opacity": "drawing", "glowStrength": {"itemTimes": 0.25}, "scrollU": {"shape": "scroll", "perSecond": 5}, "scrollV": {"shape": "scroll", "perSecond": -5}}
+      ]
+    },
+    {
       "name": "darkHorse",
       "layers": [
         {"kind": "texture", "blend": "asDrawing", "meshes": "allEvenHidden", "opacity": "drawing"},
@@ -719,6 +726,13 @@
         {"kind": "texture", "blend": "glow", "meshes": [1], "opacity": 1, "glowMesh": 1, "scrollU": {"shape": "scroll", "perSecond": 0.9}, "scrollV": {"shape": "scroll", "perSecond": 0.9}}
       ],
       "itemValuesAfter": {"hiddenMesh": 1}
+    },
+    {
+      "name": "pumpkinOfLuck",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "darken", "meshes": [1], "texture": "Effect/Chrome01.jpg", "scrollU": {"shape": "scroll", "perSecond": -0.2}}
+      ]
     },
     {
       "name": "rareItemTicket",

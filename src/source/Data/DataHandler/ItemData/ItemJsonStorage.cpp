@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <iterator>
 #include <optional>
 
 #include "Core/Content/ContentStore.h"
@@ -174,6 +175,23 @@ void ValidateExistingItemModels(std::span<const ItemModelDefinition> models, std
     ValidateItemModels(existingModels, issues);
 }
 
+#ifdef _EDITOR
+// The option files: each definition file with its definitions in their order (also the files read that have none
+// left), the rules and the texts.
+void AddOptionFiles(const ItemModelSave& models, std::vector<FileToSave>& files)
+{
+    std::vector<std::string> names(models.optionFiles.begin(), models.optionFiles.end());
+    AddDefinitionFiles(models.options->definitions, names);
+    for (const std::string& name : names)
+    {
+        files.push_back({models.optionsDirectory / name,
+                         WriteItemOptionsJson(FindDefinitionsInFile(models.options->definitions, name))});
+    }
+    files.push_back({models.optionRulesFile, WriteOptionRulesJson(models.options->rules)});
+    files.push_back({models.optionTextsFile, WriteOptionTextsJson(models.options->texts)});
+}
+#endif
+
 void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& files)
 {
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
@@ -213,6 +231,10 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     if (models.nameCasesChanged && models.nameCases != nullptr)
     {
         files.push_back({models.nameCasesFile, WriteItemNameCasesJson(*models.nameCases)});
+    }
+    if (models.optionsChanged && models.options != nullptr)
+    {
+        AddOptionFiles(models, files);
     }
 #endif
 }

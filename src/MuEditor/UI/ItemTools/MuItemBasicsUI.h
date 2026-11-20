@@ -27,6 +27,8 @@ private:
     // excellent or ancient, while a value is still being typed.
     void RenderStatTable(const Data::Items::ItemDefinition& item);
     void RenderPrices(Data::Items::ItemDefinition& item);
+    // The item's option links (RenderOptionLinks).
+    void RenderOptions(Data::Items::ItemDefinition& item);
     void RenderResistances(Data::Items::ItemDefinition& item);
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemDefinition> m_draft;

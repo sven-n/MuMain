@@ -13,6 +13,8 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "Network/Server/WSclient.h"
+#include "Render/Effects/AuraJointLifecycle.h"
 #include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -580,6 +582,9 @@ TEST_CASE("A character's mark spawns its sprite in the update, and its draw spaw
 TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and its draw spawns none [effects]")
 {
     FenrirScope scope;
+    // The Wing of Eternal's lights are data (section 7b).
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
     ItemModelDatabaseScope restoreModels;
     Data::Items::ItemModelDefinition eternal;
     eternal.group = 12;
@@ -588,6 +593,8 @@ TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and 
     eternal.itemEffect = "wingOfEternal";
     g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{eternal}, Data::Effects::GlowColorList{});
     BMD* b = &Models[MODEL_WING_OF_ETERNAL];
+    // The scope's models aren't loaded: the wing has as many bones as its pose holds.
+    b->NumBones = MAX_BONES;
     b->BodyScale = 1.f;
     Vector(0.f, 0.f, 0.f, b->BodyOrigin);
     OBJECT wing;
@@ -1332,15 +1339,21 @@ TEST_CASE("A character drawn before the update posed it is posed into draw bones
 TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")
 {
     FenrirScope scope;
+    // Its look and its light are data (design L29, section 7b).
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
     ItemModelDatabaseScope restoreModels;
     Data::Items::ItemModelDefinition water;
     water.group = 14;
     water.number = 64;
     water.file = "Data/Item/Water.bmd";
     water.renderStyle = "cursedCastleWater";
+    water.itemEffect = "cursedCastleWater";
     g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{water}, Data::Effects::GlowColorList{});
     const int model = Data::Items::ToModelSlot(Data::Items::MakeItemType(14, 64));
     BMD* b = &Models[model];
+    // The scope's models aren't loaded: the water has as many bones as its pose holds.
+    b->NumBones = MAX_BONES;
     b->BodyScale = 1.f;
     Vector(0.f, 0.f, 0.f, b->BodyOrigin);
     OBJECT item;
@@ -1355,8 +1368,8 @@ TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and 
     for (int i = 0; i < MAX_SPRITES; ++i)
         CHECK_FALSE(Sprites[i].Live);
 
-    REQUIRE(Render::Items::Styles::Spawns(model));
-    Render::Items::Styles::Spawn(b, &item, model, scope.bones.get());
+    REQUIRE(Render::Items::ItemEffects::Spawns(model));
+    Render::Items::ItemEffects::Spawn(b, &item, model, scope.bones.get());
     int onPose = 0;
     for (int i = 0; i < MAX_SPRITES; ++i)
     {
@@ -1868,4 +1881,134 @@ TEST_CASE("Dark Side's fingerprint follows a dummy's step, not only how many dum
     float frame = 0.f;
     monk.IsDummyRender(placed, target, frame, 1);
     CHECK(monk.DarksideStateHash() != before);
+}
+
+namespace
+{
+int LiveAuraJoints(const OBJECT* target)
+{
+    int live = 0;
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        const JOINT& joint = Joints[i];
+        live += joint.Live && joint.Type == MODEL_SPEARSKILL && joint.Target == target &&
+                        (joint.SubType == 4 || joint.SubType == 9)
+                    ? 1
+                    : 0;
+    }
+    return live;
+}
+
+// The character index the aura's joints carry: MoveJoint reads that character's Helper and SafeZone.
+bool AuraJointsBelongTo(const OBJECT* target, int characterIndex)
+{
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        const JOINT& joint = Joints[i];
+        if (joint.Live && joint.Type == MODEL_SPEARSKILL && joint.Target == target &&
+            (joint.SubType == 4 || joint.SubType == 9) && joint.m_iChaIndex != characterIndex)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void ClearJoints()
+{
+    for (int i = 0; i < MAX_JOINTS; ++i)
+        Joints[i].Live = false;
+}
+
+// What UnRegisterBuff does to the look when a buff ends.
+void EndBuff(OBJECT* o, eBuffState buff)
+{
+    ClearBuffPhysicalEffect(buff, o);
+    g_CharacterUnRegisterBuff(o, buff);
+}
+} // namespace
+
+TEST_CASE("Greater Damage alone spawns no swirling aura, Greater Defense and the Elf Soldier buff spawn it [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER& c = scope.character();
+    OBJECT* o = &c.Object;
+    o->Kind = KIND_PLAYER;
+    for (auto& weapon : c.Weapon)
+        weapon.LinkBone = 33;
+    ClearJoints();
+    FenrirScope::ClearSpawns();
+
+    SUBCASE("Greater Damage")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Attack);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    SUBCASE("Greater Defense")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        CHECK(LiveAuraJoints(o) == 5);
+        CHECK(AuraJointsBelongTo(o, 1));
+    }
+
+    SUBCASE("Elf Soldier buff")
+    {
+        g_CharacterRegisterBuff(o, eBuff_HelpNpc);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        CHECK(LiveAuraJoints(o) == 5);
+        CHECK(AuraJointsBelongTo(o, 1));
+    }
+
+    SUBCASE("Greater Defense ends while the Elf Soldier buff stays")
+    {
+        g_CharacterRegisterBuff(o, eBuff_HelpNpc);
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        EndBuff(o, eBuff_Defense);
+        MoveJoints();
+        CHECK(LiveAuraJoints(o) == 5);
+    }
+
+    SUBCASE("Greater Defense ends alone")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        EndBuff(o, eBuff_Defense);
+        MoveJoints();
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    SUBCASE("An aura left on a Greater Damage player ends")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Attack);
+        Render::Effects::SpawnDefenseAura(o, 1);
+        REQUIRE(LiveAuraJoints(o) == 5);
+        MoveJoints();
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    SUBCASE("The aura ends when a Greater Defense player is cloaked")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        REQUIRE(LiveAuraJoints(o) == 5);
+        g_CharacterRegisterBuff(o, eBuff_Cloaking);
+        MoveJoints();
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    SUBCASE("Greater Defense on a cloaked player")
+    {
+        g_CharacterRegisterBuff(o, eBuff_Defense);
+        g_CharacterRegisterBuff(o, eBuff_Cloaking);
+        UpdateBuffAuraEffects(&c, o, &Models[MODEL_PLAYER]);
+        CHECK(LiveAuraJoints(o) == 0);
+    }
+
+    g_CharacterClearBuff(o);
+    ClearJoints();
+    FenrirScope::ClearSpawns();
 }

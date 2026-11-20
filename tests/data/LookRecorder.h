@@ -2,6 +2,7 @@
 
 #include "Data/GameData/LookData/LookDefinition.h"
 
+#include <array>
 #include <span>
 #include <string>
 #include <string_view>
@@ -110,6 +111,14 @@ Record RecordItem(int itemType, const Situation& situation);
 Record RecordItemWithCode(int itemType, const Situation& situation, std::string_view renderStyle,
                           Data::Looks::LookKind kind = Data::Looks::LookKind::RenderStyle);
 
+// Lets the item's look create its things in the update as the game does for an item on the ground
+// (SpawnGroundItemEffects through SpawnPartObjectEffect): the model posed at the pinned clock, the random sequences
+// seeded with `seed` and the frame factor at 1. The record holds one entry per thing alive in the effect, sprite,
+// particle and joint lists afterwards, sorted (which slot a thing takes is not the look's), and, as "the model after",
+// the object's light and animation frame and the states of the random sequences, so a look that draws one random
+// number more or less shows.
+Record RecordSpawn(int itemType, double worldTime, std::uint32_t seed);
+
 // How far a number of a mesh draw may be from the code's when every GPU call is the same (design L34): a pulse the
 // code wrote as (sin + 1.2) * 0.4 and the data draws as sin * 0.4 + 0.48 rounds in another order, a few float steps
 // (units in the last place) away.
@@ -120,13 +129,30 @@ constexpr int AllowedFloatSteps = 8;
 // draws and model after the drawing, their numbers at most AllowedFloatSteps apart.
 std::string FirstDifference(const Record& code, const Record& data);
 
+// The grid of a Digest: steps of 0.0001 for the drawings, whose numbers are near 1; relative to each number's size
+// (about a ten-thousandth of it) for the things an item effect creates, whose places in the world are near 13000,
+// where a float step is about ten steps of 0.0001.
+enum class Grid
+{
+    Fixed,
+    Relative,
+};
+// The first edge between two step sizes of each relative grid, in the order of a digest's hashes: 1.37 times 2 to the
+// power of the grid's offset (0.5, 0.7, 0.9, 0.1, 0.3), as decimals, which every platform reads alike.
+inline constexpr std::array<double, 5> RelativeFirstEdges{1.9375, 2.2256, 2.5565, 1.4683, 1.6867};
+
 // A digest of the mesh draws and of what the drawing left on the model, for the baseline: GPU calls carry vertex hashes
 // that differ between compilers, and the drawing of one mesh draw is the same code for every look.
 // "7 <hash> ... <hash>": the number of mesh draws, then a hash of the numbers in steps of 0.0001 on each of five grids
 // whose edges are a fifth of a step apart. A number a float step of a sine away (macOS's sine, a fused multiply and
 // add) crosses the edge of one grid at most, so a drawing keeps a hash unless five of its numbers each sit at another
-// grid's edge.
-std::string Digest(const Record& record);
+// grid's edge. On the Relative grid each number's step grows with its size, from a size of its own for each of the five
+// grids (RelativeFirstEdges), and a thing's type and subType stay exact: a place in the world near 13000 is seen to
+// about 1.6 units. Where two grids round a number with steps of s and 2s their edges are at least about a twentieth of
+// s apart, not a fifth; near 13000 that is still about forty float steps.
+std::string Digest(const Record& record, Grid grid = Grid::Fixed);
+// The record's mesh draws (things) and the model after, one per line, as a failed check shows them.
+std::string Describe(const Record& record);
 // Whether a drawing's Digest is the baseline's: the same number of mesh draws, and one of the hashes the same.
 bool SameDigest(const std::string& digest, const std::string& baseline);
 } // namespace LookRecorder

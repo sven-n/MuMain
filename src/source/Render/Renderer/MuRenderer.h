@@ -523,6 +523,12 @@ public:
     {
         return false;
     }
+    // False where the window has no present mode that isn't tied to the display (a browser canvas, which the
+    // browser paces): there VSync can't be turned off.
+    [[nodiscard]] virtual bool CanTurnOffVSync() const
+    {
+        return true;
+    }
     // Multisample anti-aliasing: `samples` is the `[Render] Antialiasing`
     // value (0 or 1 off, 2, 4, 8), lowered to what the GPU supports. Before
     // initialisation it sets the count the renderer starts with; afterwards
@@ -560,6 +566,24 @@ public:
     [[nodiscard]] virtual bool SetPostProcessing(bool enabled)
     {
         return !enabled;
+    }
+    // Edge smoothing (FXAA) of the 3D scene, before the UI; it works with or without the rest of
+    // post-processing. Returns false when it was requested but this backend could not build it.
+    [[nodiscard]] virtual bool SetEdgeSmoothing(bool enabled)
+    {
+        return !enabled;
+    }
+    // The 3D scene drawn at `percent` (50 to 100) of the window's size and upscaled to it before the
+    // UI (FSR 1). Returns false when a scale below 100 was requested but this backend cannot upscale.
+    [[nodiscard]] virtual bool SetRenderScale(int percent)
+    {
+        return percent >= 100;
+    }
+    // Sharpening of the 3D scene before the UI, 0 (none) to 100 (FSR 1's strongest). Returns false
+    // when sharpening was requested but this backend cannot sharpen.
+    [[nodiscard]] virtual bool SetSharpness(int percent)
+    {
+        return percent <= 0;
     }
     // The look profile's bloom and grading values; a bloom strength of 0 is no bloom.
     virtual void SetPostProcessingLook(const PostProcessingLook& /*look*/) {}

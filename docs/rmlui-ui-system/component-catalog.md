@@ -401,6 +401,15 @@ items and remaining effects draw into the window's item-camera target.
 `--item-cell` and grid dimensions. `PickupAnchor` stores a drag's hold point in cells so it works
 between grids with different pitches. `CMyInventory` is the reference, including equipment slots.
 
+A held item lands on the cell under the centre of its first cell (`GridGeometry::ItemCellOf`),
+as in the original client, so a box a few pixels off a cell line still lands on the nearest cell.
+The drop preview and the drop share that lookup (`UI::Items::PlaceHeldItem`, through
+`CPickedItem::PlaceIn`). When that cell is in a grid, the grid takes the release, even with the
+pointer in the gap between extension grids. On an equipment slot just above the inventory, the
+grid takes it only where the drop does something there (`CInventoryActionController::DropOutcomeOn`,
+the same rule the drop runs: apply a jewel, stack, move or put back); otherwise the slot takes
+the release.
+
 ## Native 3D viewer input
 
 **Domain adapter:** [`PhotoViewerControl`](../../src/source/UI/Social/PhotoViewerControl.h)

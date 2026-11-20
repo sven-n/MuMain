@@ -97,13 +97,6 @@ void CopyCharacter(OBJECT& copy, const OBJECT& character, std::unique_ptr<vec34_
     copy.m_pCloth = nullptr;
     CopyBones(bones.get(), character);
 }
-
-// Removes an effect as the game does when its life ends, with its trails.
-void RemoveGameEffect(OBJECT& effect)
-{
-    RemoveObjectBlurs(&effect, 0);
-    EffectDestructor(&effect);
-}
 } // namespace
 
 WorldPreviewCall DefaultWorldPreviewCall(Data::Effects::EffectKind kind)

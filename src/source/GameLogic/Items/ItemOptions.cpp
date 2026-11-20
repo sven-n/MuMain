@@ -66,9 +66,13 @@ bool IsOptionTurnedOn(const ITEM& item, ItemOptionType type, const ItemOption& o
     case ItemOptionType::Excellent:
         return IsExcellentBitSet(item.ExcellentFlags, option);
     case ItemOptionType::Luck:
+        return true;
+    // The ancient types take no option slots (IsTurnedOn gives them none).
+    case ItemOptionType::AncientOption:
+    case ItemOptionType::AncientBonus:
         break;
     }
-    return true;
+    return false;
 }
 
 // The value of a hero attribute a term reads; 0 for one the client doesn't read.
@@ -109,7 +113,8 @@ std::optional<OptionSource> FindValidSource(const ITEM& item, int slot)
     return source;
 }
 
-// The level the option's value is taken at: the additional option's level, else the constant's.
+// The level the option's value is taken at: the additional option's level, else the constant's. The ancient bonus
+// takes no option slot; FindAncientBonus takes its value at the bonus level.
 int GetOptionLevel(const ITEM& item, ItemOptionType type)
 {
     return type == ItemOptionType::Option ? item.OptionLevel : LevelOfTypesWithoutLevels;
@@ -309,6 +314,26 @@ int GetCurrentSlotValue(const ITEM& item, int slot)
         }
     }
     return item.SpecialValue[slot];
+}
+
+std::optional<AncientBonus> FindAncientBonus(const ITEM& item)
+{
+    if (item.AncientBonusOption == 0 || item.Type < 0 || item.Type >= MAX_ITEM)
+    {
+        return std::nullopt;
+    }
+    const Data::Items::ItemOptionDatabase& options = g_ItemDatabase.GetOptions();
+    const int index = options.FindAncientBonus(ItemAttribute[item.Type].AttType);
+    if (index == Data::Items::ItemOptionDatabase::NoDefinition)
+    {
+        return std::nullopt;
+    }
+    const auto definitionIndex = static_cast<Data::Items::ItemOptionIndex>(index);
+    const ItemOptionDefinition& definition = options.Get(definitionIndex);
+    // The loader gives an ancient bonus definition exactly one option.
+    const ItemOption& option = definition.options.front();
+    return AncientBonus{&definition, &option, options.GetEffect(definitionIndex, 0).effect,
+                        ComputeOptionValue(option.value, item.AncientBonusOption)};
 }
 
 int GetItemOptionValue(const ITEM& item, int slot)

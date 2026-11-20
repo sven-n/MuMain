@@ -200,6 +200,7 @@ void Initialize()
 void Update(const FrameSummary& summary)
 {
     const bool shown = summary.details || summary.counters || summary.fpsOnly;
+    FrameProfiler::g_TimingForOverlay = shown;
     if (!shown && !g_view)
         return;
     if (!EnsureView())

@@ -8,7 +8,8 @@ set(MU_TARGET_ADAPTERS
   "Core/Platform/Adapters/CredentialHostWin32.cpp"
   "GameShop/FileDownloader/Adapters/CurlShopDownload.cpp"
   "Core/Utilities/Adapters/CpuUsageWin32.cpp"
-  "Render/Renderer/Adapters/GpuDevicePreferVulkan.cpp")
+  "Render/Renderer/Adapters/GpuDevicePreferVulkan.cpp"
+  "Core/Utilities/Log/Adapters/LogSinksNone.cpp")
 set(MU_TARGET_DEPENDENCIES OpenSSL CURL Cryptopp TurboJPEG)
 set(MU_TARGET_SYSTEM_LIBRARIES imm32 vfw32 dxguid winmm ws2_32 version shlwapi crypt32)
 if(CMAKE_CXX_COMPILER MATCHES "mingw32")

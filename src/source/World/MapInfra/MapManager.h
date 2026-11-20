@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "Core/Utilities/StagedLoad.h"
+
+#include <vector>
+
 enum ENUM_WORLD
 {
     WD_0LORENCIA = 0,
@@ -79,6 +83,8 @@ public:
     CMapManager();
     virtual ~CMapManager();
     void Load();
+    // A map load as steps, to run across frames; LoadWorld runs them all at once.
+    std::vector<Core::StagedLoad::Step> LoadWorldSteps(int Map);
     void LoadWorld(int Map);
     void DeleteObjects();
     bool InChaosCastle(int iMap = -1);
@@ -129,6 +135,15 @@ private:
     int m_serverStage = 0;
     // WorldActive when SetServerMap ran.
     int m_serverMapWorld = -1;
+
+    struct WorldLoad;
+    void LoadMapModels();
+    void LoadWorldObjects(int first, int last);
+    void LoadWorldClear(WorldLoad& load, int Map);
+    void LoadWorldTerrainFiles(WorldLoad& load);
+    void LoadWorldTerrain(WorldLoad& load);
+    void LoadWorldTextures(WorldLoad& load);
+    void LoadWorldFinish(WorldLoad& load);
 };
 
 extern CMapManager gMapManager;

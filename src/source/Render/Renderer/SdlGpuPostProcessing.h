@@ -55,6 +55,14 @@ static_assert(offsetof(SdlGpuCompositeUniform, gradingStrength) == 12);
 static_assert(offsetof(SdlGpuCompositeUniform, toneMapKnee) == 16);
 static_assert(sizeof(SdlGpuCompositeUniform) == 32);
 
+// Where the composite draws: inside the frame's UI pass (multisampled like it, with its depth), or
+// alone into a single-sample image of the frame's format that a later pass reads (edge smoothing).
+enum class SdlGpuCompositeTarget : unsigned char
+{
+    FramePass,
+    Image,
+};
+
 // Where the HDR scene's tone map starts rolling channels off: below it the scene is unchanged.
 inline constexpr float HdrToneMapKnee = 0.9f;
 
@@ -74,12 +82,14 @@ public:
 
     // Builds the pipelines for frames of `frameFormat` with `sampleCount`
     // samples per pixel. The composite draws inside the frame's UI pass, which
-    // has a depth target. False when any is missing: post-processing is then
-    // unavailable.
+    // has a depth target, or into an image (SdlGpuCompositeTarget). False when
+    // any pipeline of the UI pass is missing: post-processing is then unavailable.
     [[nodiscard]] bool CreatePipelines(SDL_GPUDevice* device, const SdlGpuPostShaders& shaders,
                                        SDL_GPUTextureFormat frameFormat, SDL_GPUSampleCount sampleCount);
     void DestroyPipelines();
     [[nodiscard]] bool IsAvailable() const;
+    // The composite can also draw into an image (SdlGpuCompositeTarget::Image).
+    [[nodiscard]] bool CanCompositeToImage() const;
 
     // The scene texture for frames of `size` in `sceneFormat` (INVALID: the frame's format; another
     // one makes an HDR scene, which the composite tone maps and dithers), recreated when either changed.
@@ -95,6 +105,10 @@ public:
     // Blurs the bloom source down and back up the chain, each level added to the
     // next larger one at `levelFalloff`; the composite of the same frame adds the result.
     void RenderBloom(SDL_GPUCommandBuffer* commandBuffer, float levelFalloff);
+    // Every composite adds the bloom RenderBloom made until this is called: call it before the
+    // frame's own bloom, so a frame without one never adds the last frame's. A composite that is
+    // drawn again in the same frame (a final pass that could not run) keeps the bloom.
+    void ForgetBloom();
 
     // Draws the processed scene over the whole target of `pass`: the scene,
     // plus this frame's bloom scaled by the look's bloom strength when
@@ -102,9 +116,10 @@ public:
     // table at the look's grading strength when one is set. The diagnostic
     // views show the bloom source or the bloom instead, ungraded.
     // `ambientOcclusion` (SdlGpuAmbientOcclusion, or null for none) darkens the scene at the look's
-    // strength.
+    // strength. `target` says what kind of pass `pass` is.
     void DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* pass, SdlGpuTargetSize size,
-                       const PostProcessingLook& look, PostProcessingView view, SDL_GPUTexture* ambientOcclusion);
+                       const PostProcessingLook& look, PostProcessingView view, SDL_GPUTexture* ambientOcclusion,
+                       SdlGpuCompositeTarget target = SdlGpuCompositeTarget::FramePass);
 
     // Replaces the grading table (Render::PostProcessing::LoadGradingTable's
     // RGBA8 texels), or empty for none. False (and no table) when it cannot be uploaded.
@@ -134,6 +149,7 @@ private:
     SDL_GPUGraphicsPipeline* m_bloomDownPipeline = nullptr;
     SDL_GPUGraphicsPipeline* m_bloomUpPipeline = nullptr;
     SDL_GPUGraphicsPipeline* m_compositePipeline = nullptr;
+    SDL_GPUGraphicsPipeline* m_compositeImagePipeline = nullptr;
     SDL_GPUSampler* m_pointSampler = nullptr;
     SDL_GPUSampler* m_linearSampler = nullptr;
 

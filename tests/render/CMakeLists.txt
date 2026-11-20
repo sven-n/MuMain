@@ -65,6 +65,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME sdl_gpu_depth_state_tests
+    SOURCES
+        test_sdl_gpu_depth_state.cpp
+    LINK_LIBS
+        SDL3::SDL3
+)
+
+mu_add_test(
     NAME mip_chain_tests
     SOURCES
         test_mip_chain.cpp
@@ -108,7 +116,12 @@ mu_add_test(
     SOURCES
         test_post_processing.cpp
         test_color_grading_table.cpp
+        test_edge_smoothing.cpp
+        test_render_scale.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/BloomSource.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/EdgeSmoothing.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/RenderScale.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/ColorGradingTable.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/SceneBoundary.cpp
     LINK_LIBS SDL3::SDL3 mu_test_content mu_test_path_resolve
@@ -140,6 +153,18 @@ mu_add_test(
     NAME bmd_modulus_cipher_tests
     SOURCES
         test_bmd_modulus_cipher.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/BmdModulusCipher.cpp
+    LINK_LIBS
+        MuDep::Cryptopp
+)
+
+# The formats of a world's terrain files (Render/Terrain/TerrainFileFormat): the classic and the later seasons'
+# .map/.att cipher, object record sizes by version, 24-bit height maps by size, light bitmaps.
+mu_add_test(
+    NAME terrain_file_format_tests
+    SOURCES
+        test_terrain_file_format.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/TerrainFileFormat.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Models/BmdModulusCipher.cpp
     LINK_LIBS
         MuDep::Cryptopp
@@ -194,12 +219,6 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/GpuDevice.cpp
     LINK_LIBS
         SDL3::SDL3
-)
-
-mu_add_test(
-    NAME aura_joint_lifecycle_tests
-    SOURCES
-        test_aura_joint_lifecycle.cpp
 )
 
 mu_add_test(

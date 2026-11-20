@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/PreviewSlots.h"
 #include "Core/Utilities/Random.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
@@ -73,6 +74,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
         if (!o->Live)
         {
             o->Live = true;
+            Render::Effects::PreviewSlots::Born(Render::Effects::PreviewSlots::List::Particle, i);
             o->Type = Type;
             o->TexType = Type;
             o->SubType = SubType;
@@ -3880,8 +3882,10 @@ void MoveParticles()
     {
         PARTICLE* o = &Particles[i];
 
-        if (o->Live)
+        if (o->Live && Render::Effects::PreviewSlots::Moves(Render::Effects::PreviewSlots::List::Particle, i))
         {
+            const Render::Effects::PreviewSlots::MoveSoundScope previewSound(
+                Render::Effects::PreviewSlots::List::Particle, i);
             count++;
             o->LifeTime -= FPS_ANIMATION_FACTOR;
             if (o->LifeTime <= 0)
@@ -9334,7 +9338,8 @@ void DescribeParticle(const PARTICLE& particle, int i, float Width, float Height
 
 void RenderParticles(BYTE byRenderOneMore)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    // As RenderSprites: without the option window (a test, the editor's preview before the UI) every effect draws.
+    if (g_pOption && !g_pOption->GetRenderAllEffects())
     {
         return;
     }
@@ -9347,7 +9352,8 @@ void RenderParticles(BYTE byRenderOneMore)
     static Entry drawOrder[MAX_PARTICLES];
     static Entry drawOrderScratch[MAX_PARTICLES];
 
-    const bool cullOffscreen = !IsEffectCullingDisabledDebug();
+    // A preview view's capture draws its particles whatever the world's camera sees (design 7a).
+    const bool cullOffscreen = !IsEffectCullingDisabledDebug() && !Render::Effects::PreviewSlots::IsCapturing();
     const bool sortDraws = GameConfig::GetInstance().GetSortParticleDraws();
     std::size_t drawCount = MAX_PARTICLES;
     if (sortDraws)
@@ -9361,7 +9367,7 @@ void RenderParticles(BYTE byRenderOneMore)
     {
         const int i = sortDraws ? drawOrder[drawIndex].particleIndex : static_cast<int>(drawIndex);
         const PARTICLE* o = &Particles[i];
-        if (o->Live)
+        if (o->Live && Render::Effects::PreviewSlots::Draws(Render::Effects::PreviewSlots::List::Particle, i))
         {
             if (byRenderOneMore == 1)
             {
