@@ -3,8 +3,8 @@
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_enum.h"
 
-// How many members a guild master's guild can have: the original client's rule, which the guild window and the Dark
-// Lord's command hint show. OpenMU does not check the guild size, so a server can allow more.
+// The guild window and Command hint use the original client's guild limit formula and include Command bonuses from
+// items and buffs. OpenMU does not enforce this limit.
 namespace GameLogic::Social
 {
 // Levels per guild member, for every class.

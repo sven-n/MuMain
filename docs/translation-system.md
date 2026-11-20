@@ -470,8 +470,8 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
   language stayed. Before the item data is loaded a text shows `{item:...}`
   as written (no such text is shown that early). A number no item has, or a
   level above +15, stays as written, and the rest of the text is still filled
-  in. When an English resource key declares a printf format, item-name
-  percent signs are escaped so the formatted text shows them literally.
+  in. When the English or displayed resource value contains a printf conversion,
+  item-name percent signs are escaped so the formatted text shows them literally.
 - **Grammar:** languages that decline names, such as German and Polish can ask for a form
   with `:gen`, `:dat`, `:acc`, `:ins` or `:loc`. The forms are part of the item
   data (`nameForms`, [item-data.md](item-data.md#name-forms)) and edited in Item

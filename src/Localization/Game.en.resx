@@ -9625,13 +9625,13 @@
     <value>Attack rate (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
-    <value>{item:13,5} damage: +%d~%d</value>
+    <value>{item:13,5} damage: +%d~%+d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>{item:13,5} attack speed: +%d</value>
   </data>
   <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
-    <value>{item:13,4} damage: +%d~%d</value>
+    <value>{item:13,4} damage: +%d~%+d</value>
   </data>
   <data name="Dark Horse attack speed: +%d" xml:space="preserve">
     <value>{item:13,4} attack speed: +%d</value>

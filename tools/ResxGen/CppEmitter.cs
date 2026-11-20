@@ -246,7 +246,7 @@ internal static class CppEmitter
                 const wchar_t* const* values;  // one per locale in GetAvailableLocales order; the
                                                // English text where a locale has none of its own
                 std::uint32_t ownLocales;      // bit i: locale i has a text of its own
-                bool isPrintfFormat;           // item names inserted here need escaped percent signs
+                std::uint32_t printfLocales;   // bit i: escape item names in locale i before formatting
             };
 
             // Every text that names an item, group by group in file order. The
@@ -522,7 +522,8 @@ internal static class CppEmitter
                     const wchar_t* written = text.values[g_currentLocaleIndex];
                     const bool own = ((text.ownLocales >> g_currentLocaleIndex) & 1u) != 0;
                     const int textLocale = own ? g_currentLocaleIndex : kDefaultLocaleIndex;
-                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale, text.isPrintfFormat) : written;
+                    const bool isPrintfFormat = ((text.printfLocales >> g_currentLocaleIndex) & 1u) != 0;
+                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale, isPrintfFormat) : written;
                     if (shown == nullptr) shown = written;
                     if (*text.slot != shown)
                     {
@@ -641,15 +642,23 @@ internal static class CppEmitter
             foreach (var (entry, row) in rows)
             {
                 uint own = 0;
+                uint printfLocales = 0;
+                var englishValue = entry.Translations[ResxLoader.DefaultLocale];
+                var englishFormat = HasPrintfConversion(englishValue);
                 for (var i = 0; i < masterLocales.Count; i++)
                 {
-                    if (entry.Translations.ContainsKey(masterLocales[i])) own |= 1u << i;
+                    var bit = 1u << i;
+                    if (entry.Translations.TryGetValue(masterLocales[i], out var value))
+                    {
+                        own |= bit;
+                    }
+                    if (englishFormat || (value != null && HasPrintfConversion(value)))
+                    {
+                        printfLocales |= bit;
+                    }
                 }
-                // The English key declares the format contract shared by its translations.
-                var isPrintfFormat = Regex.IsMatch(entry.Key.Replace("%%", ""),
-                    @"%(?:[0-9]+\$)?[-+ #0']*(?:\d+|\*)?(?:\.(?:\d*|\*))?(?:hh|ll|I32|I64|[hlLjztI])?[cCdiouxXeEfgGaAnpsS]");
                 sb.AppendLine($"    {{ {Naming.EscapeCppString(group.Name)}, {Naming.EscapeCppString(entry.Key)}, &{entry.Identifier}, " +
-                              $"kSlots[{row}].values, 0x{own:X}u, {(isPrintfFormat ? "true" : "false")} }},");
+                              $"kSlots[{row}].values, 0x{own:X}u, 0x{printfLocales:X}u }},");
             }
             sb.AppendLine("};");
         }
@@ -660,6 +669,10 @@ internal static class CppEmitter
         sb.AppendLine(rows.Count > 0 ? "    return kItemTexts;" : "    return {};");
         sb.AppendLine("}");
     }
+
+    private static bool HasPrintfConversion(string value) =>
+        Regex.IsMatch(value.Replace("%%", ""),
+            @"%(?:[0-9]+\$)?[-+ #0']*(?:\d+|\*(?:[0-9]+\$)?)?(?:\.(?:\d*|\*(?:[0-9]+\$)?))?(?:hh|ll|I32|I64|[hlLjztI])?[cCdiouxXeEfgGaAnpsS]");
 
     /// "Game" -> "game", for local variable names in the emitted code.
     private static string CamelCase(string name) => char.ToLowerInvariant(name[0]) + name[1..];

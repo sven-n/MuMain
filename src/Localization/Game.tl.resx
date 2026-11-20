@@ -9107,13 +9107,13 @@
     <value>Rate ng pag-atake (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
-    <value>Damage ng {item:13,5}: +%d~%d</value>
+    <value>Damage ng {item:13,5}: +%d~%+d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>Bilis ng atake ng {item:13,5}: +%d</value>
   </data>
   <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
-    <value>Damage ng {item:13,4}: +%d~%d</value>
+    <value>Damage ng {item:13,4}: +%d~%+d</value>
   </data>
   <data name="Dark Horse attack speed: +%d" xml:space="preserve">
     <value>Bilis ng atake ng {item:13,4}: +%d</value>

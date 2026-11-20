@@ -78,8 +78,8 @@ TEST_CASE("The command row's hint lists what the Dark Lord's command adds [data]
     REQUIRE(scope.Loaded());
 
     const std::vector<UI::RmlBridge::Tooltip::Line> hint = UI::Character::BuildCommandHint(Effects(250, 300));
-    CHECK(Texts(hint) == std::vector<std::string>{"Command", "Attack rate (PvM): +30", "Dark Raven damage: +37~75",
-                                                  "Dark Raven attack speed: +6", "Dark Horse damage: +30~45",
+    CHECK(Texts(hint) == std::vector<std::string>{"Command", "Attack rate (PvM): +30", "Dark Raven damage: +37~+75",
+                                                  "Dark Raven attack speed: +6", "Dark Horse damage: +30~+45",
                                                   "Dark Horse attack speed: +6", "Guild members as guild master: +30"});
     CHECK(hint.front().bold);
     CHECK(hint.front().color == UI::RmlBridge::Tooltip::LineColor::Yellow);
@@ -87,8 +87,8 @@ TEST_CASE("The command row's hint lists what the Dark Lord's command adds [data]
     // German names the pets in the genitive.
     I18N::SetLocale("de");
     const std::vector<std::string> german = Texts(UI::Character::BuildCommandHint(Effects(250, 300)));
-    CHECK(german[2] == "Schaden des Dunklen Raben: +37~75");
-    CHECK(german[4] == "Schaden des Dunklen Pferdes: +30~45");
+    CHECK(german[2] == "Schaden des Dunklen Raben: +37~+75");
+    CHECK(german[4] == "Schaden des Dunklen Pferdes: +30~+45");
 }
 
 TEST_CASE("Pet names in Command hints follow item translations and preserve literal percent signs [data][items]")
@@ -100,23 +100,27 @@ TEST_CASE("Pet names in Command hints follow item translations and preserve lite
     I18N::SetLocale("ru");
     auto lines = Texts(UI::Character::BuildCommandHint(effects));
     REQUIRE(lines.size() == 7);
-    CHECK(lines[2] == "Урон Тёмного ворона: +37~75");
-    CHECK(lines[4] == "Урон Тёмного коня: +30~45");
+    CHECK(lines[2] == "Урон Тёмного ворона: +37~+75");
+    CHECK(lines[4] == "Урон Тёмного коня: +30~+45");
 
     g_ItemDataHandler.SetTranslateItemNames(false);
     lines = Texts(UI::Character::BuildCommandHint(effects));
-    CHECK(lines[2] == "Урон Dark Raven: +37~75");
-    CHECK(lines[4] == "Урон Dark Horse: +30~45");
+    CHECK(lines[2] == "Урон Dark Raven: +37~+75");
+    CHECK(lines[4] == "Урон Dark Horse: +30~+45");
 
     I18N::SetLocale("en");
     const auto* raven = g_ItemDatabase.Find(ITEM_DARK_RAVEN_ITEM);
     REQUIRE(raven != nullptr);
-    auto renamedRaven = *raven;
+    const auto originalRaven = *raven;
+    auto renamedRaven = originalRaven;
     renamedRaven.names.Set("en", "Raven 100% (%d)");
     g_ItemDatabase.Set(renamedRaven);
     g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
     lines = Texts(UI::Character::BuildCommandHint(effects));
-    CHECK(lines[2] == "Raven 100% (%d) damage: +37~75");
+    g_ItemDatabase.Set(originalRaven);
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+    REQUIRE(lines.size() == 7);
+    CHECK(lines[2] == "Raven 100% (%d) damage: +37~+75");
     CHECK(lines[3] == "Raven 100% (%d) attack speed: +6");
 }
 
@@ -140,7 +144,7 @@ TEST_CASE("Long pet name forms preserve the entire Command contribution [data][i
     g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
 
     REQUIRE(lines.size() == 7);
-    CHECK(lines[2] == "Schaden des " + genitive + ": +37~75");
+    CHECK(lines[2] == "Schaden des " + genitive + ": +37~+75");
     CHECK(lines[3] == "Angriffsgeschwindigkeit des " + genitive + ": +6");
 }
 
@@ -153,8 +157,8 @@ TEST_CASE("The command row's hint leaves out what the command does not add [data
 
     // Under 50 command the pets' attack speed gets nothing; at the cap of 80 members the command adds none.
     CHECK(Texts(UI::Character::BuildCommandHint(Effects(800, 49))) ==
-          std::vector<std::string>{"Command", "Attack rate (PvM): +4", "Dark Raven damage: +6~12",
-                                   "Dark Horse damage: +4~6"});
+          std::vector<std::string>{"Command", "Attack rate (PvM): +4", "Dark Raven damage: +6~+12",
+                                   "Dark Horse damage: +4~+6"});
     CHECK(UI::Character::BuildCommandHint(Effects(400, 0)).empty());
     CHECK(UI::Character::BuildCommandHint(Effects(400, 3)).empty());
 
@@ -162,7 +166,7 @@ TEST_CASE("The command row's hint leaves out what the command does not add [data
     minimumOnly.raven.minimumDamage = 37;
     minimumOnly.horse.minimumDamage = 30;
     CHECK(Texts(UI::Character::BuildCommandHint(minimumOnly)) ==
-          std::vector<std::string>{"Command", "Dark Raven damage: +37~0", "Dark Horse damage: +30~0"});
+          std::vector<std::string>{"Command", "Dark Raven damage: +37~+0", "Dark Horse damage: +30~+0"});
 }
 
 // The hint is formatted again only when the command's effects change, or when the window invalidates it after its
@@ -194,14 +198,14 @@ TEST_CASE("The command hint is built again only when what it shows changes [data
     I18N::SetLocale("es");
     sync();
     CHECK(texts.Update(Effects(250, 310)));
-    CHECK(Texts(texts.Lines())[2] == "Daño del Cuervo Oscuro: +38~77");
+    CHECK(Texts(texts.Lines())[2] == "Daño del Cuervo Oscuro: +38~+77");
     sync();
     CHECK_FALSE(texts.Update(Effects(250, 310)));
 
     g_ItemDataHandler.SetTranslateItemNames(false);
     sync();
     CHECK(texts.Update(Effects(250, 310)));
-    CHECK(Texts(texts.Lines())[2] == "Daño del Dark Raven: +38~77");
+    CHECK(Texts(texts.Lines())[2] == "Daño del Dark Raven: +38~+77");
     sync();
     CHECK_FALSE(texts.Update(Effects(250, 310)));
 }

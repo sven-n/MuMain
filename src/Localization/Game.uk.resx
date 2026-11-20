@@ -9107,13 +9107,13 @@
     <value>Точність (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
-    <value>Шкода {item:13,5:gen}: +%d~%d</value>
+    <value>Шкода {item:13,5:gen}: +%d~%+d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
     <value>Швидкість атаки {item:13,5:gen}: +%d</value>
   </data>
   <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
-    <value>Шкода {item:13,4:gen}: +%d~%d</value>
+    <value>Шкода {item:13,4:gen}: +%d~%+d</value>
   </data>
   <data name="Dark Horse attack speed: +%d" xml:space="preserve">
     <value>Швидкість атаки {item:13,4:gen}: +%d</value>

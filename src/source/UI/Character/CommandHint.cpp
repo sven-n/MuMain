@@ -6,10 +6,6 @@
 #include "UI/Character/HintLines.h"
 
 #include <algorithm>
-#include <cwchar>
-#include <limits>
-#include <string>
-#include <type_traits>
 
 namespace UI::Character
 {
@@ -26,15 +22,10 @@ template <typename... Args> void AddPartLine(std::vector<Line>& lines, int value
         return;
     }
 
-    // The localized formats use %d. The expanded format already includes the full item name.
-    static_assert((std::is_same_v<Args, int> && ...));
-    constexpr size_t MaxIntCharacters = std::numeric_limits<int>::digits10 + 2;
-    std::wstring text(std::wcslen(format) + sizeof...(args) * MaxIntCharacters + 1, L'\0');
-    const int length = std::swprintf(text.data(), text.size(), format, args...);
-    if (length >= 0 && static_cast<size_t>(length) < text.size())
+    std::string text = FormatHintText(format, args...);
+    if (!text.empty())
     {
-        text.resize(static_cast<size_t>(length));
-        lines.push_back(MakeHintLine(StringUtils::WideToNarrow(text.c_str())));
+        lines.push_back(MakeHintLine(std::move(text)));
     }
 }
 } // namespace
