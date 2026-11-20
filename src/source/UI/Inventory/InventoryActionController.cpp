@@ -631,6 +631,7 @@ bool CInventoryActionController::ApplyJewels(CInventoryCtrl* targetControl, CPic
     {
         const int targetIndex = targetControl->GetIndexByItem(pItem);
         SendRequestUse(iSourceIndex, targetIndex);
+        pPickedItem->MarkUsedOnItem();
         PlayBuffer(SOUND_GET_ITEM01);
         return true;
     }

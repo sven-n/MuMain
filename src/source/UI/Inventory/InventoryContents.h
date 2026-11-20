@@ -14,6 +14,10 @@ void RemoveItem(int index);
 void RemoveDroppedItem(int index);
 bool InsertItem(int index, std::span<const std::uint8_t> itemData);
 void DiscardPickedItem();
+// After the server updated the item at `index`: discards the held item if that update ends it, i.e. it was used on
+// another item (the update of the target answers the use) or it's the updated item itself. Any other held item stays
+// in the hand, e.g. when a rented item expires while the player moves something else.
+void DiscardPickedItemUpdatedBy(int index);
 void RestorePickedItem();
 int TransferSourceIndex();
 bool ReceivePlayerTransfer(int index, std::span<const std::uint8_t> itemData);

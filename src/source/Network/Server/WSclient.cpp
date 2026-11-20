@@ -6346,12 +6346,9 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     int length = CalcItemLength(itemData);
     itemData = itemData.subspan(0, length);
 
-    if (UI::Inventory::HasPickedItem())
-    {
-        UI::Inventory::DiscardPickedItem();
-    }
-
     int itemindex = Data->Index;
+    UI::Inventory::DiscardPickedItemUpdatedBy(itemindex);
+
     if (IsPlayerInventorySlot(itemindex) && UI::Inventory::FindPlayerItem(itemindex))
         UI::Inventory::RemoveItem(itemindex);
 
