@@ -19,6 +19,7 @@
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Colors/MuColorsUI.h"
+#include "../MuEditor/UI/StyleEditor/BoneThingsPreview.h"
 #include "../MuEditor/UI/StyleEditor/MuStyleEditorUI.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/DataChecks/MuDataChecksUI.h"
@@ -58,6 +59,7 @@
 #include "GameLogic/Monsters/MonsterModelChanges.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
+#include "Core/Utilities/EffectSpawnHook.h"
 #include "Core/Utilities/WorldClearing.h"
 #include "Core/Utilities/StringUtils.h"
 #include "World/MapInfra/MapManager.h"
@@ -496,9 +498,17 @@ void CMuEditorCore::ConnectGameHooks()
     // The effect browser shows what loaded each model and texture; the
     // records take the map of the moment from the map manager.
     Core::AssetLoadWorld::SetSource([] { return gMapManager.WorldActive; });
-    // The effect browser's world preview removes its objects before the game
-    // clears its pools.
-    Core::WorldClearing::SetListener([] { g_MuEffectBrowserUI.OnWorldClearing(); });
+    // The effect browser's world preview and the Style Editor's views remove
+    // their objects before the game clears its pools.
+    Core::WorldClearing::SetListener(
+        []
+        {
+            g_MuEffectBrowserUI.OnWorldClearing();
+            MuEditor::Looks::g_BoneThingsPreview.OnWorldClearing();
+        });
+    // The Style Editor's views create their items' things on bones in the
+    // game's update (design section 7a).
+    Core::EffectSpawnHook::SetListener([] { MuEditor::Looks::g_BoneThingsPreview.Update(); });
     // The game's key reads leave out what is pressed in the editor's own windows.
     Core::Input::SetOtherWindowQuery([](int virtualKey) { return g_MuEditorCore.IsWithEditorWindow(virtualKey); });
     // The cloth of worn pants keeps data of its model's slot: it goes before

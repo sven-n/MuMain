@@ -53,6 +53,8 @@ enum class Blend
     Normal,
     // Added (RENDER_BRIGHT).
     Glow,
+    // Darkens what is below it (RENDER_DARK), as the Pumpkin of Luck's reflection.
+    Darken,
     // The drawing's own render type, which a doppelganger or a monster's hands set (RenderBody(RenderType, ...)).
     AsDrawing,
 };
@@ -125,6 +127,9 @@ using Number = std::variant<float, Shape>;
 // drawing's opacity, a number, or a shape.
 struct FromItem
 {
+    // The item's value times this (design L59): the Cursed Castle Water glows at 1.5 and 0.25 of the item's.
+    float times = 1.f;
+
     bool operator==(const FromItem&) const = default;
 };
 struct FromDrawing
@@ -134,6 +139,10 @@ struct FromDrawing
 using Value = std::variant<FromItem, FromDrawing, float, Shape>;
 
 // The glow mesh of a layer: the item's, none, every mesh, or a mesh.
+struct ItemGlowMesh
+{
+    bool operator==(const ItemGlowMesh&) const = default;
+};
 struct NoGlowMesh
 {
     bool operator==(const NoGlowMesh&) const = default;
@@ -142,7 +151,7 @@ struct AllGlowMeshes
 {
     bool operator==(const AllGlowMeshes&) const = default;
 };
-using GlowMesh = std::variant<FromItem, NoGlowMesh, AllGlowMeshes, int>;
+using GlowMesh = std::variant<ItemGlowMesh, NoGlowMesh, AllGlowMeshes, int>;
 
 // The light a layer is drawn in, red, green and blue. Without one a layer is drawn in the light the layer before left
 // on the model: for the first layer the model's light, the one the drawing hands the look (the item's, darker at +14
@@ -225,7 +234,7 @@ struct Layer
     // A texture file under Data, instead of the mesh's own; empty for the mesh's own.
     std::string texture;
     Value opacity = FromItem{};
-    GlowMesh glowMesh = FromItem{};
+    GlowMesh glowMesh = ItemGlowMesh{};
     Value glowStrength = FromItem{};
     Value scrollU = FromItem{};
     Value scrollV = FromItem{};
@@ -301,6 +310,77 @@ struct ItemValuesBefore
     bool operator==(const ItemValuesBefore&) const = default;
 };
 
+// What a thing on bones is (design L7, step 3; section 7b): a type of the effect catalogue (FX1) of this kind.
+enum class BoneThingKind
+{
+    Sprite,
+    Particle,
+    // Lightning between two bones (CreateJoint).
+    Joint,
+    Effect,
+};
+
+// How a chance draws (design L56): once in `oneIn` frames at the game's reference frame rate (rand_fps_check), or
+// Random::Rand() % oneIn == 0, as the monster sounds draw theirs.
+enum class ChanceDraw
+{
+    Fps,
+    Plain,
+};
+
+// A chance per frame (design L56), for each bone or pair, or once for all of them.
+struct Chance
+{
+    int oneIn = 1;
+    ChanceDraw draw = ChanceDraw::Fps;
+    bool once = false;
+
+    bool operator==(const Chance&) const = default;
+};
+
+// Where things on bones are created (design L55): at each bone, between each pair of bones (lightning, from the first
+// to the second), or at the item object's own place.
+struct BonePlaces
+{
+    std::vector<int> bones;
+    std::vector<std::pair<int, int>> between;
+    bool origin = false;
+
+    bool operator==(const BonePlaces&) const = default;
+};
+
+// One thing an item effect creates on the item's bones each frame (section 7b), in the update from the item's pose.
+struct BoneThing
+{
+    BoneThingKind kind = BoneThingKind::Sprite;
+    // The type's name in the effect catalogue.
+    std::string type;
+    int subType = 0;
+    Number scale = 1.f;
+    // Red, green and blue: the sprite's color, the light of a particle, lightning or effect.
+    std::array<Number, 3> color{1.f, 1.f, 1.f};
+    // A sprite's rotation.
+    Number rotation = 0.f;
+    // Lightning from the second bone of each pair to the first.
+    bool reversed = false;
+    // A thing of a group rolls this too, after the group's (the Wing of Storm's thunder).
+    std::optional<Chance> chance;
+
+    bool operator==(const BoneThing&) const = default;
+};
+
+// An entry of "onBones": one thing, or a group of things ("together") that share its places and its chance, so they
+// come together (design L56). A single thing's chance is the entry's.
+struct OnBones
+{
+    BonePlaces places;
+    std::optional<Chance> chance;
+    std::vector<BoneThing> things;
+    bool together = false;
+
+    bool operator==(const OnBones&) const = default;
+};
+
 struct LookDefinition
 {
     std::string name;
@@ -317,6 +397,11 @@ struct LookDefinition
     // light.
     std::vector<ItemValuesBefore> itemValuesBefore;
     std::optional<std::array<Number, 3>> objectLight;
+    // The things it creates on the item's bones each frame (design L7, step 3).
+    std::vector<OnBones> onBones;
+    // How fast the update plays the item object's animation (BMD::PlayAnimation), as the Cursed Castle Water's ground
+    // item moves (design L29); without one the update plays none.
+    std::optional<float> animationSpeed;
 
     bool operator==(const LookDefinition&) const = default;
 };

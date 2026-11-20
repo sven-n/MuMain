@@ -135,7 +135,8 @@ PreviewFraming EffectPreviewScene::Prepare(const EffectPreviewRequest& request)
     return {CenterOf(min, max), std::max(RadiusOf(min, max), MinFramingRadius)};
 }
 
-void EffectPreviewScene::Draw(const EffectPreviewRequest& request, const EffectPreviewCamera& camera, float aspect)
+void EffectPreviewScene::Draw(const EffectPreviewRequest& request, const EffectPreviewCamera& camera, float aspect,
+                              const std::function<void()>& afterItem)
 {
     const SavedGameRenderState savedState;
     mu::IMuRenderer& renderer = mu::GetRenderer();
@@ -154,6 +155,8 @@ void EffectPreviewScene::Draw(const EffectPreviewRequest& request, const EffectP
     DrawBase(request, RadiusOf(extent.min, extent.max));
     if (request.showOn == PreviewShowOn::Item)
         DrawItem(request);
+    if (afterItem)
+        afterItem();
     DrawSubject(request, camera);
     CoverAlpha(camera, aspect);
 
@@ -262,28 +265,23 @@ void EffectPreviewScene::DrawBase(const EffectPreviewRequest& request, float sub
 // the scale it has on the ground: turned as it lies on the ground, or upright
 // as the inventory turns it, facing the camera. The item's own sprites,
 // particles and effects are removed again.
-void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
+PreviewItemModels PreviewItemModelsOf(const EffectPreviewRequest& request)
 {
-    const PreviewItemModels models = request.modelSlot >= 0 ? PreviewItemModels{request.modelSlot, request.modelSlot, 0}
-                                                            : GetPreviewItemModels(request.itemType, request.itemLevel);
-    if (!models.CanDraw())
-        return;
-    // Armor is drawn with its own meshes on the bones of the skeleton; both
-    // keep their fields.
-    BMD& b = Models[models.skeleton];
-    const ScopedModelState savedSkeleton(b);
-    const ScopedModelState savedModel(Models[models.model]);
-    const Render::Items::Display::GroundDisplay ground = Render::Items::Display::GetGroundDisplay(models.model);
+    return request.modelSlot >= 0 ? PreviewItemModels{request.modelSlot, request.modelSlot, 0}
+                                  : GetPreviewItemModels(request.itemType, request.itemLevel);
+}
 
-    CHARACTER item;
-    OBJECT* o = &item.Object;
-    o->Type = models.model;
-    ItemObjectAttribute(o);
-    o->LightEnable = false;
-    item.Class = CLASS_ELF;
+void PosePreviewItem(const EffectPreviewRequest& request, const PreviewItemModels& models, float turnDegrees, OBJECT& o,
+                     vec34_t* bones)
+{
+    BMD& b = Models[models.skeleton];
+    const Render::Items::Display::GroundDisplay ground = Render::Items::Display::GetGroundDisplay(models.model);
+    o.Type = models.model;
+    ItemObjectAttribute(&o);
+    o.LightEnable = false;
     if (ground.scale)
-        o->Scale = *ground.scale;
-    Vector(0.0f, 0.0f, 0.0f, o->Position);
+        o.Scale = *ground.scale;
+    Vector(0.0f, 0.0f, 0.0f, o.Position);
     b.CurrentAction = 0;
     if (request.itemPose == PreviewItemPose::Inventory)
     {
@@ -296,20 +294,37 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
         float sceneMatrix[3][4];
         float root[3][4];
         AngleMatrix(inventoryAngle, inventoryMatrix);
-        InventoryViewToScene(m_turnDegrees, sceneMatrix);
+        InventoryViewToScene(turnDegrees, sceneMatrix);
         R_ConcatTransforms(sceneMatrix, inventoryMatrix, root);
         b.BodyHeight = inventory.bodyHeight;
-        b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, true, false, root);
+        b.Animation(bones, 0.0f, 0.0f, 0, o.Angle, o.HeadAngle, true, false, root);
     }
     else
     {
-        Vector(ground.rotation[0], ground.rotation[1], ground.rotation[2] + m_turnDegrees, o->Angle);
+        Vector(ground.rotation[0], ground.rotation[1], ground.rotation[2] + turnDegrees, o.Angle);
         b.BodyHeight = ground.bodyHeight;
-        b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, false, false);
-        if (request.itemGroundPlane)
-        {
-            DrawGroundUnderItem(models.model);
-        }
+        b.Animation(bones, 0.0f, 0.0f, 0, o.Angle, o.HeadAngle, false, false);
+    }
+}
+
+void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
+{
+    const PreviewItemModels models = PreviewItemModelsOf(request);
+    if (!models.CanDraw())
+        return;
+    // Armor is drawn with its own meshes on the bones of the skeleton; both
+    // keep their fields.
+    BMD& b = Models[models.skeleton];
+    const ScopedModelState savedSkeleton(b);
+    const ScopedModelState savedModel(Models[models.model]);
+
+    CHARACTER item;
+    OBJECT* o = &item.Object;
+    item.Class = CLASS_ELF;
+    PosePreviewItem(request, models, m_turnDegrees, *o, BoneTransform);
+    if (request.itemPose == PreviewItemPose::Ground && request.itemGroundPlane)
+    {
+        DrawGroundUnderItem(models.model);
     }
 
     vec3_t light = {1.0f, 1.0f, 1.0f};

@@ -3,11 +3,14 @@
 #ifdef _EDITOR
 
 #include "EffectPreviewCamera.h"
+#include "EffectPreviewItems.h"
 #include "EffectPreviewSubject.h"
 
+#include "Core/Globals/_types.h"
 #include "Data/GameData/EffectData/EffectKind.h"
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 
 class OBJECT;
@@ -71,6 +74,15 @@ struct EffectPreviewRequest
     bool turn = true;
 };
 
+// The models the scene draws the item of `request` with.
+PreviewItemModels PreviewItemModelsOf(const EffectPreviewRequest& request);
+
+// Poses the item of `request` as the scene draws it, turned by `turnDegrees`: its object at the origin (the model's
+// type, ItemObjectAttribute, the scale and angle of the pose) and the bones of `models.skeleton` in `bones`. The model
+// fields it sets (the action, the body height) are the caller's to keep (ScopedModelState).
+void PosePreviewItem(const EffectPreviewRequest& request, const PreviewItemModels& models, float turnDegrees, OBJECT& o,
+                     vec34_t* bones);
+
 // Where the camera looks and the size of what it shows.
 struct PreviewFraming
 {
@@ -91,8 +103,16 @@ public:
     PreviewFraming Prepare(const EffectPreviewRequest& request);
 
     // Draws `request` as `camera` sees it, at the aspect width / height of
-    // the view. Leaves the game's render state as it was.
-    void Draw(const EffectPreviewRequest& request, const EffectPreviewCamera& camera, float aspect);
+    // the view, running `afterItem` (if set) right after the item, with the
+    // view's matrices. Leaves the game's render state as it was.
+    void Draw(const EffectPreviewRequest& request, const EffectPreviewCamera& camera, float aspect,
+              const std::function<void()>& afterItem = {});
+
+    // How far the turn has turned the item, in degrees.
+    float GetTurnDegrees() const
+    {
+        return m_turnDegrees;
+    }
 
     // The PreviewNote flags of the effect's object.
     std::uint16_t GetObjectNotes() const

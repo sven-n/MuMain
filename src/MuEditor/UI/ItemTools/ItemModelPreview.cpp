@@ -34,10 +34,9 @@ constexpr float MaxViewHeight = 360.0f;
 constexpr int MaxItemLevel = 15;
 constexpr float LevelWidth = 120.0f;
 
-// After the view: a left click that did not turn it gives the ray through the clicked point. The second click of a
-// double click puts the view back (EffectPreviewInput) and gives none.
-std::optional<MeshPicking::Ray> ClickedRay(const MuEditor::Effects::EffectPreviewCamera& camera, const ImVec2& min,
-                                           const ImVec2& max)
+// After the view: a left click that did not turn it gives the clicked point. The second click of a double click puts
+// the view back (EffectPreviewInput) and gives none.
+std::optional<ImVec2> ClickedPoint(const ImVec2& min, const ImVec2& max)
 {
     if (!ImGui::IsItemDeactivated() || !ImGui::IsMouseReleased(ImGuiMouseButton_Left))
     {
@@ -65,6 +64,20 @@ std::optional<MeshPicking::Ray> ClickedRay(const MuEditor::Effects::EffectPrevie
     {
         return std::nullopt;
     }
+    return io.MousePos;
+}
+
+std::optional<MeshPicking::Ray> RayThrough(const MuEditor::Effects::EffectPreviewCamera& camera, const ImVec2& min,
+                                           const ImVec2& max, const std::optional<ImVec2>& point)
+{
+    if (!point)
+    {
+        return std::nullopt;
+    }
+    const float width = max.x - min.x;
+    const float height = max.y - min.y;
+    const float viewX = (point->x - min.x) / width * 2.0f - 1.0f;
+    const float viewY = 1.0f - (point->y - min.y) / height * 2.0f;
     return MeshPicking::RayThroughView(camera, width / height, viewX, viewY);
 }
 
@@ -91,7 +104,7 @@ bool CItemModelPreview::ShowsListedModel(int itemType) const
     return ListedModelInView(itemType, m_level) != nullptr;
 }
 
-void CItemModelPreview::Render(int itemType)
+void CItemModelPreview::Render(int itemType, const AfterItem& afterItem)
 {
     RenderControls();
     const MuEditor::Effects::EffectPreviewRequest request = MakeRequest(itemType);
@@ -100,7 +113,13 @@ void CItemModelPreview::Render(int itemType)
     // the scrollbar show and hide by turns (as the effect browser's view).
     const ImGuiStyle& style = ImGui::GetStyle();
     const float widthInWindow = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
-    RenderView(request, m_views[0], "##ModelView", width, ViewHeight(widthInWindow), nullptr);
+    View& view = m_views[0];
+    std::function<void()> after;
+    if (afterItem)
+    {
+        after = [&afterItem, &request, &view, this] { afterItem(0, request, view.scene.GetTurnDegrees(), m_camera); };
+    }
+    RenderView(request, view, "##ModelView", width, ViewHeight(widthInWindow), nullptr, after);
 }
 
 void CItemModelPreview::RenderModelSlot(int modelSlot)
@@ -115,7 +134,8 @@ void CItemModelPreview::RenderModelSlot(int modelSlot)
     RenderView(request, m_views[0], "##ModelView", width, ViewHeight(widthInWindow), nullptr);
 }
 
-void CItemModelPreview::RenderSideBySide(int itemType, int count, const Header& header, const DrawIn& drawIn)
+void CItemModelPreview::RenderSideBySide(int itemType, int count, const Header& header, const DrawIn& drawIn,
+                                         const AfterItem& afterItem, const Overlay& overlay)
 {
     RenderControls();
     count = std::clamp(count, 1, MaxViews);
@@ -138,8 +158,22 @@ void CItemModelPreview::RenderSideBySide(int itemType, int count, const Header& 
         const float top = ImGui::GetCursorPosY();
         header(view, width);
         ImGui::SetCursorPosY(std::max(ImGui::GetCursorPosY(), top + ImGui::GetFrameHeightWithSpacing()));
-        RenderView(request, m_views[static_cast<std::size_t>(view)], "##ModelView", width, height,
-                   [&drawIn, view](const std::function<void()>& draw) { drawIn(view, draw); });
+        View& shown = m_views[static_cast<std::size_t>(view)];
+        std::function<void()> after;
+        if (afterItem)
+        {
+            after = [&afterItem, &request, &shown, view, this]
+            { afterItem(view, request, shown.scene.GetTurnDegrees(), m_camera); };
+        }
+        std::function<void(const ViewOnScreen&)> over;
+        if (overlay)
+        {
+            over = [&overlay, &request, &shown, view, this](const ViewOnScreen& screen)
+            { overlay(view, request, shown.scene.GetTurnDegrees(), m_camera, screen); };
+        }
+        RenderView(
+            request, shown, "##ModelView", width, height,
+            [&drawIn, view](const std::function<void()>& draw) { drawIn(view, draw); }, after, over);
         ImGui::PopID();
         ImGui::EndGroup();
     }
@@ -198,7 +232,9 @@ float CItemModelPreview::ViewHeight(float widthInWindow) const
 
 void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest& request, View& view, const char* id,
                                    float width, float height,
-                                   const std::function<void(const std::function<void()>&)>& drawIn)
+                                   const std::function<void(const std::function<void()>&)>& drawIn,
+                                   const std::function<void()>& afterItem,
+                                   const std::function<void(const ViewOnScreen&)>& overlay)
 {
     if (width < 1.0f)
     {
@@ -208,8 +244,11 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     TakeBackPickOnDoubleClick();
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
-    const std::optional<MeshPicking::Ray> pickRay = ClickedRay(m_camera, min, max);
-    if (ImGui::IsItemHovered() && !ImGui::IsItemActive())
+    const std::optional<ImVec2> click = ClickedPoint(min, max);
+    const bool hovered = ImGui::IsItemHovered();
+    const std::optional<MeshPicking::Ray> pickRay =
+        m_meshPicking ? RayThrough(m_camera, min, max, click) : std::nullopt;
+    if (hovered && !ImGui::IsItemActive())
     {
         // Over the effect browser's controls text, which RenderView set.
         ImGui::SetTooltip("%s %s", I18N::Editor::PreviewControls, I18N::Editor::PreviewPickNote);
@@ -239,7 +278,7 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
             return;
         }
         const MuEditor::ScopedOffscreenCapture endCapture;
-        const auto draw = [&] { DrawScene(request, view, width / height, pickRay); };
+        const auto draw = [&] { DrawScene(request, view, width / height, pickRay, afterItem); };
         if (drawIn)
         {
             drawIn(draw);
@@ -258,17 +297,22 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     {
         ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)pointer, min, max);
     }
+    if (overlay)
+    {
+        overlay({min, max, click, hovered});
+    }
 }
 
 void CItemModelPreview::DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, View& view, float aspect,
-                                  const std::optional<MeshPicking::Ray>& pickRay)
+                                  const std::optional<MeshPicking::Ray>& pickRay,
+                                  const std::function<void()>& afterItem)
 {
     const BMD* model = ListedModelInView(request.itemType, request.itemLevel);
     std::optional<int> hitMesh;
     {
         // Without the listed model the drawer leaves every draw alone.
         CItemMeshPreviewDrawer drawer(model, g_ItemMeshFocus.Shown(), pickRay);
-        view.scene.Draw(request, m_camera, aspect);
+        view.scene.Draw(request, m_camera, aspect, afterItem);
         hitMesh = drawer.HitMesh();
     }
     // A click on another model finds none of the listed meshes, so it keeps the kept one.

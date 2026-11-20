@@ -3,6 +3,7 @@
 #include "LookChecks.h"
 
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/LookData/BoneThingTypes.h"
 #include "Data/GameData/LookData/LookJson.h"
 
 #include <algorithm>
@@ -34,6 +35,72 @@ std::string LookField(std::size_t look)
 std::string LayerField(std::size_t look, std::size_t layer)
 {
     return LookField(look) + ".layers[" + std::to_string(layer) + "]";
+}
+
+// A bone a thing on bones names and the field it is in.
+struct NamedBone
+{
+    std::string field;
+    int bone = 0;
+};
+
+std::string OnBonesField(std::size_t look, std::size_t entry)
+{
+    return LookField(look) + ".onBones[" + std::to_string(entry) + "]";
+}
+
+// The field of an entry's places: its own, or its group's.
+std::string PlacesField(const OnBones& entry, std::size_t look, std::size_t index)
+{
+    return OnBonesField(look, index) + (entry.together ? ".together" : "");
+}
+
+std::vector<NamedBone> NamedBones(const LookDefinition& look, std::size_t index)
+{
+    std::vector<NamedBone> named;
+    for (std::size_t i = 0; i < look.onBones.size(); ++i)
+    {
+        const OnBones& entry = look.onBones[i];
+        const std::string field = PlacesField(entry, index, i);
+        for (const int bone : entry.places.bones)
+        {
+            named.push_back({field + ".bones", bone});
+        }
+        for (const auto& [from, to] : entry.places.between)
+        {
+            named.push_back({field + ".between", from});
+            named.push_back({field + ".between", to});
+        }
+    }
+    return named;
+}
+
+// A type the effect catalogue doesn't have is an error: the game creates nothing of that thing.
+void CheckBoneThingTypes(const LookDefinition& look, std::size_t index, const std::string& source,
+                         const RenderStyleCheckInput& input, std::vector<ItemDataIssue>& issues)
+{
+    if (!input.typeExists)
+    {
+        return;
+    }
+    for (std::size_t i = 0; i < look.onBones.size(); ++i)
+    {
+        const OnBones& entry = look.onBones[i];
+        for (std::size_t j = 0; j < entry.things.size(); ++j)
+        {
+            const BoneThing& thing = entry.things[j];
+            if (input.typeExists(thing.kind, thing.type))
+            {
+                continue;
+            }
+            const std::string field =
+                OnBonesField(index, i) + (entry.together ? ".things[" + std::to_string(j) + "]" : "");
+            issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              field + "." + BoneThingKey(thing.kind),
+                              "\"" + thing.type + "\" is no " + BoneThingKey(thing.kind) +
+                                  " type of the effect catalogue; it is not created"});
+        }
+    }
 }
 
 // The meshes of a look that an item's model must have; "none" and "every mesh" are none of them.
@@ -186,6 +253,7 @@ void CheckUsers(const LookDefinition& look, std::size_t index, const std::string
 {
     const bool effect = kind == LookKind::ItemEffect;
     const std::vector<NamedMesh> named = NamedMeshes(look, index);
+    const std::vector<NamedBone> bones = NamedBones(look, index);
     bool used = false;
     for (const Items::ItemModelDefinition& model : input.models)
     {
@@ -200,7 +268,20 @@ void CheckUsers(const LookDefinition& look, std::size_t index, const std::string
         {
             itemNamed = NamedMeshes(CheckItemValues(look, index, source, input, model, kind, issues), index);
         }
-        const int meshCount = input.meshCount ? input.meshCount(Items::MakeItemType(model.group, model.number)) : 0;
+        const int itemType = Items::MakeItemType(model.group, model.number);
+        if (const int boneCount = input.boneCount ? input.boneCount(itemType) : 0; boneCount > 0)
+        {
+            for (const NamedBone& bone : bones)
+            {
+                if (bone.bone >= boneCount)
+                {
+                    issues.push_back({ItemDataIssueSeverity::Warning, source, model.group, model.number, bone.field,
+                                      "bone " + std::to_string(bone.bone) + " is not in this item's model, which has " +
+                                          std::to_string(boneCount) + (boneCount == 1 ? " bone" : " bones")});
+                }
+            }
+        }
+        const int meshCount = input.meshCount ? input.meshCount(itemType) : 0;
         if (meshCount <= 0)
         {
             continue;
@@ -255,6 +336,7 @@ void CheckItemEffects(std::span<const LookDefinition> looks, const std::string& 
 {
     for (std::size_t i = 0; i < looks.size(); ++i)
     {
+        CheckBoneThingTypes(looks[i], i, source, input, issues);
         CheckUsers(looks[i], i, source, input, LookKind::ItemEffect, issues);
     }
 }

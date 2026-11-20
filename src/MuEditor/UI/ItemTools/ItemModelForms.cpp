@@ -462,7 +462,7 @@ void RenderLooks(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCount
     }
     LookCombo(
         draft, I18N::Editor::ItemEffect, model.itemEffect, Render::Items::ItemEffects::GetNames(),
-        [&](std::string_view name) { return counts.ItemEffect(name); }, &Render::Items::ItemEffects::ExistsInCode);
+        [&](std::string_view name) { return counts.ItemEffect(name); }, [](std::string_view) { return false; });
     ImGui::SameLine();
     ImGui::PushID("ItemEffect");
     ImGui::BeginDisabled(model.itemEffect.empty() || !Render::Items::ItemEffects::Exists(model.itemEffect));
