@@ -33,6 +33,7 @@ void CDuelMgr::Reset()
     m_DuelChannels = {};
     m_iCurrentChannel = -1;
     m_bRegenerated = FALSE;
+    m_bIsDuelFinished = FALSE;
     RemoveAllDuelWatchUser();
 }
 

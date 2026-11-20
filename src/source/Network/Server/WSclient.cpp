@@ -9049,6 +9049,7 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
     if (Data->nResult == 0)
     {
         g_DuelMgr.EnableDuel(TRUE);
+        g_DuelMgr.SetDuelFinished(FALSE);
         g_DuelMgr.SetHeroAsDuelPlayer(DUEL_HERO);
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
         mu_swprintf(szMessage, I18N::Game::SHasAcceptedYourChallenge, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
@@ -9090,23 +9091,28 @@ void ReceiveDuelEnd(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_ANS_DUEL_EXIT)ReceiveBuffer;
 
-    if (Data->nResult == 0)
+    if (Data->nResult != 0)
     {
-        wchar_t playerName[MAX_USERNAME_SIZE + 1]{};
-        CMultiLanguage::ConvertFromUtf8(playerName, Data->szID, MAX_USERNAME_SIZE);
-        UI::Windows::Hide(mu::ui::window::INTERFACE_DUEL_WINDOW);
-        g_DuelMgr.EnableDuel(FALSE);
-        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
+        return;
+    }
 
+    wchar_t playerName[MAX_USERNAME_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(playerName, Data->szID, MAX_USERNAME_SIZE);
+    UI::Windows::Hide(mu::ui::window::INTERFACE_DUEL_WINDOW);
+    g_DuelMgr.EnableDuel(FALSE);
+    g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
+
+    // After a won duel the winner was already announced (ReceiveDuelResult), so the duel end only closes the duel.
+    if (!g_DuelMgr.IsDuelFinished())
+    {
         UI::Chat::PostSystem(I18N::Game::TheDuelHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
+    }
 
-        if (g_wtMatchTimeLeft.m_Type == 2)
-            g_wtMatchTimeLeft.m_Time = 0;
-        g_DuelMgr.EnablePetDuel(FALSE);
-    }
-    else
-    {
-    }
+    g_DuelMgr.SetDuelFinished(FALSE);
+
+    if (g_wtMatchTimeLeft.m_Type == 2)
+        g_wtMatchTimeLeft.m_Time = 0;
+    g_DuelMgr.EnablePetDuel(FALSE);
 }
 
 void ReceiveDuelScore(const BYTE* ReceiveBuffer)
@@ -9244,6 +9250,7 @@ void ReceiveDuelWatcherList(const BYTE* ReceiveBuffer)
 void ReceiveDuelResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DUEL_RESULT_BROADCAST)ReceiveBuffer;
+    g_DuelMgr.SetDuelFinished(TRUE);
 
     wchar_t szMessage[256];
     mu_swprintf(szMessage, I18N::Game::DuelFinishedYouWillBeWarpedBackToTheViallageInDSeconds, 10);
