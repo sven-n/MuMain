@@ -672,21 +672,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             iAttackRatingPK = iPlusRating;
         }
     }
-    if (g_isCharacterBuff((&Hero->Object), eBuff_HelpNpc))
-    {
-        int iTemp = 0;
-        if (CharacterAttribute->Level > 180)
-        {
-            iTemp = (180 / 3) + 45;
-        }
-        else
-        {
-            iTemp = (CharacterAttribute->Level / 3) + 45;
-        }
-
-        iAttackDamageMin += iTemp;
-        iAttackDamageMax += iTemp;
-    }
+    const auto buffBonuses = Hero->Object.m_BuffMap.GetLevelScaledStatBonuses(CharacterAttribute->Level);
+    iAttackDamageMin += buffBonuses.attackDamage;
+    iAttackDamageMax += buffBonuses.attackDamage;
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
     {
@@ -1029,17 +1017,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     int t_adjdef = CharacterAttribute->Defense + add_defense;
 
-    if (g_isCharacterBuff((&Hero->Object), eBuff_HelpNpc))
-    {
-        if (CharacterAttribute->Level > 180)
-        {
-            t_adjdef += 180 / 5 + 50;
-        }
-        else
-        {
-            t_adjdef += (CharacterAttribute->Level / 5 + 50);
-        }
-    }
+    t_adjdef += buffBonuses.defense;
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
     {
