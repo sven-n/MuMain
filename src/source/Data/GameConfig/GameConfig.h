@@ -24,10 +24,13 @@ public:
     // Window
     int  GetWindowWidth()  const { return m_windowWidth; }
     int  GetWindowHeight() const { return m_windowHeight; }
-    bool GetWindowMode()   const { return m_windowMode; }
+    WindowMode GetWindowMode() const
+    {
+        return m_windowMode;
+    }
 
     void SetWindowSize(int width, int height);
-    void SetWindowMode(bool windowed);
+    void SetWindowMode(WindowMode mode);
 
     // Audio — volume 0 = off, >0 = on. No separate Enabled flag.
     int  GetSoundVolume()  const { return m_soundVolume; }
@@ -248,7 +251,7 @@ private:
 
     int  m_windowWidth;
     int  m_windowHeight;
-    bool m_windowMode;
+    WindowMode m_windowMode;
 
     int  m_soundVolume;
     int  m_musicVolume;
@@ -308,6 +311,9 @@ private:
     void WriteStringList(const wchar_t* section, const wchar_t* keyPrefix, const std::vector<std::wstring>& values);
     std::wstring ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue);
     void WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value);
+
+    // [Window] Mode, or the Windowed key of an older client's config.ini when Mode is missing.
+    WindowMode ReadWindowMode();
 
     void RemoveObsoleteKey(const wchar_t* section, const wchar_t* key);
     void RemoveObsoleteSection(const wchar_t* section);

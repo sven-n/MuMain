@@ -1024,8 +1024,22 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>Traducir nombres de objetos</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>Modo ventana</value>
+  <data name="Display mode" xml:space="preserve">
+    <value>Modo de pantalla</value>
+  </data>
+  <data name="Windowed" xml:space="preserve">
+    <value>Ventana</value>
+  </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Pantalla completa sin bordes</value>
+  </data>
+  <data name="Fullscreen" xml:space="preserve">
+    <value>Pantalla completa</value>
+  </data>
+  <data name="Display mode tooltip" xml:space="preserve">
+    <value>Pantalla completa sin bordes cubre la pantalla con la resolución
+del escritorio y cambia a otras ventanas al instante.
+Pantalla completa cambia el monitor a la resolución elegida.</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Cerca</value>

@@ -135,8 +135,8 @@ want it, or restart the client. The resolution is already saved when you apply
 it, and the compositor places the new window. On COSMIC the window can also snap
 back to the previous size after you switch to another window; that is an SDL
 bug tracked in [#607](https://github.com/sven-n/MuMain/issues/607), and the
-same restart works around it. If you toggled windowed/fullscreen after the
-snap-back, select the resolution again before restarting: the toggle saves the
+same restart works around it. If you changed the display mode after the
+snap-back, select the resolution again before restarting: the change saves the
 reverted size.
 
 ## Reporting a Wayland problem

@@ -433,6 +433,9 @@
   <data name="Fullscreen" xml:space="preserve">
     <value>Fullscreen</value>
   </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Borderless fullscreen</value>
+  </data>
   <data name="Actual Window Client" xml:space="preserve">
     <value>Actual Window Client</value>
   </data>

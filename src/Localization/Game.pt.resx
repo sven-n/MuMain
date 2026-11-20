@@ -1024,8 +1024,22 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>Traduzir nomes dos itens</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>Modo janela</value>
+  <data name="Display mode" xml:space="preserve">
+    <value>Modo de exibição</value>
+  </data>
+  <data name="Windowed" xml:space="preserve">
+    <value>Janela</value>
+  </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Tela cheia sem bordas</value>
+  </data>
+  <data name="Fullscreen" xml:space="preserve">
+    <value>Tela cheia</value>
+  </data>
+  <data name="Display mode tooltip" xml:space="preserve">
+    <value>Tela cheia sem bordas cobre a tela na resolução da área de trabalho
+e troca para outras janelas na hora.
+Tela cheia muda o monitor para a resolução escolhida.</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Fechar</value>

@@ -1024,8 +1024,22 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>Gegenstandsnamen übersetzen</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>Fenstermodus</value>
+  <data name="Display mode" xml:space="preserve">
+    <value>Anzeigemodus</value>
+  </data>
+  <data name="Windowed" xml:space="preserve">
+    <value>Fenster</value>
+  </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Randloses Vollbild</value>
+  </data>
+  <data name="Fullscreen" xml:space="preserve">
+    <value>Vollbild</value>
+  </data>
+  <data name="Display mode tooltip" xml:space="preserve">
+    <value>Randloses Vollbild füllt den Bildschirm in der Desktop-Auflösung
+und wechselt sofort zu anderen Fenstern.
+Vollbild stellt den Monitor auf die gewählte Auflösung um.</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Schließen</value>

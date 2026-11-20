@@ -353,6 +353,15 @@
 	cursor: default;
 }
 
+/* Borderless fullscreen runs at the desktop's resolution: the Resolution row shows it, dimmed, and
+   its list does not open. */
+.option-select-row.locked {
+	opacity: 0.45;
+}
+.option-select-row.locked .option-dropdown-value {
+	cursor: default;
+}
+
 /* The player's tuning of each Enhanced feature (OptionWindow.h's tuning rows), under the feature's
    row. The feature's label and chevron expand its sliders; only the checkbox switches the feature.
    A locked feature dims its checkbox, not its label, which still expands the tuning. */
