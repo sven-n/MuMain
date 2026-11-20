@@ -3951,6 +3951,13 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         memcpy(m.Normals, data + ptr, m.NumNormals * sizeof(Normal_t));   ptr += m.NumNormals * sizeof(Normal_t);
         memcpy(m.TexCoords, data + ptr, m.NumTexCoords * sizeof(TexCoord_t)); ptr += m.NumTexCoords * sizeof(TexCoord_t);
 
+        // A few shipped models give some vertices bone -8888; every per-bone table is indexed by it.
+        const auto onBone = [this](short node) { return node >= 0 && node < NumBones ? node : short{0}; };
+        for (int j = 0; j < m.NumVertices; ++j)
+            m.Vertices[j].Node = onBone(m.Vertices[j].Node);
+        for (int j = 0; j < m.NumNormals; ++j)
+            m.Normals[j].Node = onBone(m.Normals[j].Node);
+
         for (int j = 0; j < m.NumTriangles; ++j)
         {
             memcpy(&m.Triangles[j], data + ptr, sizeof(Triangle_t));
