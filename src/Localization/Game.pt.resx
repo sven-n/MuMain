@@ -9120,4 +9120,13 @@ Tela cheia muda o monitor para a resolução escolhida.</value>
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Total: +%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>Você não pode se teletransportar para lá com seu equipamento.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>NM %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
+  </data>
 </root>

@@ -48,6 +48,10 @@
 					<span class="col col-map">{{row.map_name}}</span>
 					<span class="col col-level" data-class-unmet="row.level_unmet">{{row.req_level}}</span>
 					<span class="col col-zen" data-class-unmet="row.zen_unmet">{{row.req_zen}}</span>
+					<!-- The master level and resets a warp needs don't fit beside the level (they would run
+					     into the zen), so they get a line of the row of their own, under the level. -->
+					<div class="mc-second-line" data-if="row.req_ml_resets != ''">&#160;<span
+					     class="col col-level" data-class-unmet="row.ml_resets_unmet">{{row.req_ml_resets}}</span></div>
 				</div>
 			</div>
 		</div>

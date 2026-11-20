@@ -49,6 +49,7 @@
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "../MuEditor/UI/GraphicsLook/MuGraphicsLookUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
+#include "../MuEditor/UI/WarpList/MuWarpListUI.h"
 #include "Network/Server/ServerListManager.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
@@ -975,6 +976,10 @@ void CMuEditorCore::Render()
         if (m_windows.serverList)
         {
             g_MuServerListUI.Render(&m_windows.serverList);
+        }
+        if (m_windows.warpList)
+        {
+            g_MuWarpListUI.Render(&m_windows.warpList);
         }
         if (m_windows.graphicsLook)
         {

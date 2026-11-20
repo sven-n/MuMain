@@ -20,7 +20,7 @@ std::string ReadFile(const std::filesystem::path& path)
     return contents.str();
 }
 
-std::string AssetMarkup(const std::string& theme, const std::string& name)
+std::string AssetMarkup(const std::string& theme, const std::string& name, bool keepBindings)
 {
     const std::filesystem::path root = MU_RMLUI_DIR;
     const auto themed = root / "themes" / theme;
@@ -29,8 +29,12 @@ std::string AssetMarkup(const std::string& theme, const std::string& name)
         path = root / (name + ".rml");
     // Supply state directly to the real DOM without registering the game's networked models.
     const std::regex bindings(R"(\sdata-(?:model|for|if|class-[\w-]+|style-[\w-]+|attr-[\w-]+|event-[\w-]+)="[^"]*")");
-    std::string markup = std::regex_replace(ReadFile(path), bindings, "");
-    markup = std::regex_replace(markup, std::regex(R"(\{\{[^}]*\}\})"), "");
+    std::string markup = ReadFile(path);
+    if (!keepBindings)
+    {
+        markup = std::regex_replace(markup, bindings, "");
+        markup = std::regex_replace(markup, std::regex(R"(\{\{[^}]*\}\})"), "");
+    }
     const std::regex links(R"rcss(href="([^"]+\.rcss)")rcss");
     std::string resolved;
     size_t end = 0;

@@ -142,7 +142,6 @@ using namespace mu::ui::window;
 
 extern BYTE m_AltarState[];
 extern int g_iChatInputType;
-extern BOOL g_bUseChatListBox;
 
 extern BOOL g_bUseWindowMode;
 
@@ -1008,7 +1007,6 @@ void InitGame()
     SelectedItem = -1;
 
     Attacking = -1;
-    UI::Options::ResetForNewGame();
 
     CheckInventory = nullptr;
 
@@ -1393,6 +1391,12 @@ static void FinishJoinMapServer(CHARACTER* c, const PRECEIVE_JOIN_MAP_SERVER_EXT
     // ones of a previous character before asking for them again.
     GameLogic::Commands::Catalog().Reset();
     GameLogic::Commands::Catalog().RequestOnce();
+
+    // A character without a stored key configuration gets none from the server
+    // (OpenMU sends it right after the join packet, or not at all; it waited in
+    // the queue while the map loaded), so its settings are saved a moment after
+    // this, too.
+    SetJoinedMapServer();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
 }
@@ -10107,12 +10111,11 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
     UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::W, Data->KeyQWE[1] + ITEM_POTION, byWLevel);
     UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::E, Data->KeyQWE[2] + ITEM_POTION, byELevel);
 
-    BYTE wChatListBoxSize = (Data->ChatLogBox >> 4) * 3;
-    BYTE wChatListBoxBackAlpha = Data->ChatLogBox & 0x0F;
+    const bool chatBoxRestored = UI::Options::ApplySavedChatBox(Data->ChatLogBox);
 
     UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::R, Data->KeyR + ITEM_POTION, byRLevel);
 
-    SetKeyConfigurationReceived(true);
+    SetKeyConfigurationReceived(true, chatBoxRestored);
 }
 
 void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer)
@@ -14018,6 +14021,18 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             else
             {
                 g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x09] (too short: %d bytes)", Size);
+            }
+        }
+        else if (subcode == 0x0B)
+        {
+            // The minimum master level and resets of the warps of the server's list, right after it.
+            if (const auto requirements = GameLogic::Warps::ReadServerWarpRequirements(ReceiveBuffer, Size))
+            {
+                SEASON3B::CMoveCommandData::GetInstance()->ApplyServerWarpRequirements(*requirements);
+            }
+            else
+            {
+                g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x0B] (too short: %d bytes)", Size);
             }
         }
         else

@@ -34,6 +34,7 @@ struct ToolWindows
     bool soundMixer = false;
     bool soundEditor = false;
     bool serverList = false;
+    bool warpList = false;
     bool graphicsLook = false;
     bool skillEditor = false;
     bool devEditor = false;

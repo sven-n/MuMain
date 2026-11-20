@@ -56,13 +56,17 @@ target_compile_definitions(buff_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
-# The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1) and
-# the Map Editor's Sounds tab. The tab needs the client globals of Winmain.cpp.
+# The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1),
+# the Map Editor's Sounds tab and the warp list (Data/Maps/Warps.json) with the
+# editor's Warp List window. The tab needs the client globals of Winmain.cpp.
 mu_add_test(
     NAME map_data_tests
     SOURCES
         test_map_object_sounds.cpp
         test_map_sounds_tab.cpp
+        test_warp_list_window.cpp
+        test_warp_rules.cpp
+        test_warps.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient

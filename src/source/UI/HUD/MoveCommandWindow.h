@@ -2,10 +2,13 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "GameLogic/Warps/WarpRules.h"
 #include "Network/MoveCommandData.h"
 #include "UI/HUD/MoveCommandRmlModel.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
+
+#include <optional>
 
 namespace Rml
 {
@@ -30,6 +33,17 @@ namespace mu::ui::window
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*>	m_listMoveInfoData;
         // The version of CMoveCommandData's list which m_listMoveInfoData is a copy of.
         uint32_t m_listVersion = 0;
+        // What the rows were built from: they are built again only when it changes.
+        struct RowInputs
+        {
+            uint32_t listVersion = 0;
+            int rulesVersion = 0;
+            GameLogic::Warps::WarpCharacter character;
+            bool nonPvP = false;
+
+            bool operator==(const RowInputs&) const = default;
+        };
+        std::optional<RowInputs> m_rowInputs;
         DWORD						m_dwMoveCommandKey;
 
         void BindRmlModel(Rml::DataModelConstructor& c, MoveCommandRmlModel& model);
@@ -66,13 +80,10 @@ namespace mu::ui::window
         void ClosingProcess();
         float GetLayerDepth() override;
 
-        bool IsLuckySealBuff();
-        bool IsMapMove(const std::wstring& src);
 
         void SetMoveCommandKey(DWORD dwKey);
         DWORD GetMoveCommandKey();
 
-        BOOL IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const;
         int GetMapIndexFromMovereq(const wchar_t* pszMapName);
         // Whether the character currently meets a warp list entry's own
         // requirements - level, zen, the wings for Icarus, the Uniria rule

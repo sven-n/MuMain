@@ -668,6 +668,16 @@ Buff names and descriptions are not in the `.resx` files either. They are in
 `displayName` and `description` hold the texts by language code. The game
 shows them in the UI language and falls back to English.
 
+## Warp names
+
+The names of the M window's warps are in `src/bin/Data/Maps/Warps.json`
+([warp-list.md](warp-list.md)): each warp's `name` holds the names by
+language code (`en`, `es` and `pt`, from the original client's movereq
+files). The game shows them in the UI language and falls back to English;
+the list is renamed when the language changes. `/move` and `/warp` take the
+shown name or the English `command`. The **Warp List** window of the editor
+edits the names in every UI language.
+
 ## Migration history
 
 If you're trying to understand why a string lives in resx instead of the old
