@@ -386,11 +386,19 @@ PackSource& Packs()
     static PackSource source;
     return source;
 }
+
+// The packs that reached Ready from the current source.
+std::set<std::string, std::less<>>& Delivered()
+{
+    static std::set<std::string, std::less<>> packs;
+    return packs;
+}
 } // namespace
 
 void SetPackSource(PackSource source)
 {
     Packs() = std::move(source);
+    Delivered().clear();
 }
 
 PackStatus RequestPack(std::string_view pack)
@@ -400,19 +408,10 @@ PackStatus RequestPack(std::string_view pack)
         return {};
     }
     PackStatus status = Packs()(pack);
-    // A pack that arrives brings files the folder listings don't hold yet.
-    static std::set<std::string, std::less<>> pending;
-    if (status.state == PackStatus::State::Pending)
+    // A pack that arrives, later or during this very ask, brings files the folder listings don't hold yet.
+    if (status.state == PackStatus::State::Ready && Delivered().emplace(pack).second)
     {
-        pending.emplace(pack);
-    }
-    else if (const auto it = pending.find(pack); it != pending.end())
-    {
-        pending.erase(it);
-        if (status.state == PackStatus::State::Ready)
-        {
-            Refresh();
-        }
+        Refresh();
     }
     return status;
 }

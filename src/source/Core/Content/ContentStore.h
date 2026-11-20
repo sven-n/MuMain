@@ -81,8 +81,8 @@ struct PackStatus
     std::string error;
 };
 // Asks the target for a pack: the first ask starts its delivery, later asks report on it. Called once a frame while
-// it is pending; once a pending pack is ready, the folder listings are refreshed. A source that delivers a pack no one
-// asked for calls Refresh itself. Thread: the main thread.
+// it is pending; the first time a pack is ready, the folder listings are refreshed. A source that delivers a pack no
+// one asked for calls Refresh itself. Thread: the main thread.
 using PackSource = std::function<PackStatus(std::string_view pack)>;
 // Without a source, as on desktop where every file is on disk, every pack is ready.
 void SetPackSource(PackSource source);

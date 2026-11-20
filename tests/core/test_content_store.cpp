@@ -149,6 +149,26 @@ TEST_CASE("a file of a pack that arrived is found in another case [content]")
     Content::Close();
 }
 
+TEST_CASE("a file of a pack delivered during the ask is found in another case [content]")
+{
+    auto files =
+        std::make_shared<ContentMemoryStorage::Files>(ContentMemoryStorage::Files{{"Data/Object92/Tree01.bmd", "x"}});
+    Content::Open(ContentMemoryStorage::Open(files));
+    Content::SetPackSource(
+        [files](std::string_view)
+        {
+            (*files)["Data/Object92/bird.OZT"] = "x";
+            return Content::PackStatus{};
+        });
+
+    CHECK_FALSE(Content::Exists(P("data/object92/bird.ozt")));
+    CHECK(Content::RequestPack("map0").state == Content::PackStatus::State::Ready);
+    CHECK(Content::Exists(P("data/object92/bird.ozt")));
+
+    Content::SetPackSource({});
+    Content::Close();
+}
+
 TEST_CASE("a file a saver writes is found in another case once the saver returns [content]")
 {
     const std::filesystem::path folder = std::filesystem::temp_directory_path() / "mu_content_saver_test";
