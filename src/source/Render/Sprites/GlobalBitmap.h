@@ -221,6 +221,8 @@ public:
                            bool hasAlpha, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     void UnloadImage(GLuint uiBitmapIndex, bool bForce = false);
     void UnloadAllImages();
+    // The indices of the loaded textures, in order.
+    std::vector<GLuint> LoadedIndices() const;
 
     BITMAP_t* GetTexture(GLuint uiBitmapIndex);
     BITMAP_t* FindTexture(GLuint uiBitmapIndex);

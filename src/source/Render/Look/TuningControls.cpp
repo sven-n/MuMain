@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iomanip>
 #include <locale>
+#include <optional>
 #include <sstream>
 
 namespace Render::Look
@@ -294,53 +295,6 @@ std::optional<double> TuningPointerValue(const TuningControl& control, double cu
     return value;
 }
 
-void DeveloperLookEdits::Mark(LookValue value, const std::optional<std::vector<int>>& entryMaps)
-{
-    const auto index = static_cast<std::size_t>(value);
-    if (!entryMaps)
-    {
-        defaults[index] = true;
-        return;
-    }
-    for (const int world : *entryMaps)
-    {
-        worlds[world][index] = true;
-    }
-}
-
-void DeveloperLookEdits::Clear(LookValue value, const std::vector<int>& entryMaps)
-{
-    const auto index = static_cast<std::size_t>(value);
-    defaults[index] = false;
-    for (const int world : entryMaps)
-    {
-        const auto entry = worlds.find(world);
-        if (entry != worlds.end())
-        {
-            entry->second[index] = false;
-        }
-    }
-}
-
-bool DeveloperLookEdits::Covers(const Data::Maps::LookProfileData& profile, int world, LookValue value) const
-{
-    const auto index = static_cast<std::size_t>(value);
-    const auto entry = worlds.find(world);
-    if (entry != worlds.end() && entry->second[index])
-    {
-        return true;
-    }
-    if (!defaults[index])
-    {
-        return false;
-    }
-    // An edited default shows only where neither the world's entry nor its environment overrides it.
-    const Data::Maps::MapLookOverrides* map = profile.FindMap(world);
-    return !map || !(map->overrides[value].has_value() ||
-                     (map->environment && *map->environment < profile.environments.size() &&
-                      profile.environments[*map->environment].overrides[value].has_value()));
-}
-
 TuningGroupSet TuningGroupsApplying(const LookFeatures& features)
 {
     TuningGroupSet applying{};
@@ -393,30 +347,23 @@ void ApplyLookFeatures(const LookFeatures& requested, const LookFeatureAppliers&
     }
 }
 
-bool PersonalValueApplies(const Data::Maps::LookProfileData& profile, int world,
-                          const Data::Maps::LookOverrides& personal, const DeveloperLookEdits& developerEdits,
-                          const TuningGroupSet& applying, LookValue value)
+bool PersonalValueApplies(const Data::Maps::LookOverrides& personal, const TuningGroupSet& applying, LookValue value)
 {
     if (!personal[value])
     {
         return false;
     }
     const std::optional<TuningControlId> control = FindTuningControl(value);
-    if (!control || !applying[static_cast<std::size_t>(Control(*control).group)])
-    {
-        return false;
-    }
-    return !developerEdits.Covers(profile, world, value);
+    return control && applying[static_cast<std::size_t>(Control(*control).group)];
 }
 
 Data::Maps::LookValues ResolveLookValues(const Data::Maps::LookProfileData& profile, int world,
-                                         const Data::Maps::LookOverrides& personal,
-                                         const DeveloperLookEdits& developerEdits, const TuningGroupSet& applying)
+                                         const Data::Maps::LookOverrides& personal, const TuningGroupSet& applying)
 {
     Data::Maps::LookValues values = profile.ForWorld(world);
     for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
     {
-        if (PersonalValueApplies(profile, world, personal, developerEdits, applying, info.value))
+        if (PersonalValueApplies(personal, applying, info.value))
         {
             values[info.value] = *personal[info.value];
         }

@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemOptionDefinition.h"
 
+#include <array>
 #include <span>
 #include <string>
 #include <string_view>
@@ -35,6 +36,9 @@ namespace Data::Items
 {
 constexpr int ItemOptionsFormatVersion = 1;
 
+// The keys of the ways a value adds, in the order of ItemOptionAdd.
+inline constexpr std::array<const char*, 3> ItemOptionAddKeys = {"add", "addFinal", "percent"};
+
 // Reads one file's definitions into `definitions`, each with `file` set to `fileName`, and its problems into `issues`
 // (`source` names the file in them); a definition with fatal problems is left out. Which names are used twice, across
 // the files too, which texts the options name and which attributes the client knows are checked with all of them
@@ -44,4 +48,11 @@ void ReadItemOptionsJson(std::string_view text, const std::string& source, const
 
 // The text of a file with these definitions, in this order.
 std::string WriteItemOptionsJson(std::span<const ItemOptionDefinition> definitions);
+
+// Adds the files of `definitions` that `files` does not list yet, in the order of their first definition.
+void AddDefinitionFiles(std::span<const ItemOptionDefinition> definitions, std::vector<std::string>& files);
+
+// The definitions of `definitions` in the file, in their order.
+std::vector<ItemOptionDefinition> FindDefinitionsInFile(std::span<const ItemOptionDefinition> definitions,
+                                                        std::string_view file);
 } // namespace Data::Items

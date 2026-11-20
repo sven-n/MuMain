@@ -6,11 +6,12 @@
 
 #include "ItemEdits.h"
 #include "ItemFieldWidgets.h"
-#include "ItemGroupNames.h"
+#include "ItemRuleConditionWidgets.h"
 #include "ItemSelection.h"
 #include "ItemStatFileChange.h"
 #include "ItemStatTermFields.h"
 #include "ItemTextInput.h"
+#include "ItemToolWidgets.h"
 #include "ItemToolWindow.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -19,7 +20,6 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
-#include "Data/GameData/ItemData/ItemEnumNames.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "I18N/All.h"
@@ -38,6 +38,10 @@ using Data::Items::StatProfileRule;
 using Data::Items::WrittenStatProfile;
 using Data::Items::WrittenStatSection;
 using Entry = CMuItemFormulasUI::Entry;
+using ToolWidgets::ErrorColor;
+using ToolWidgets::RenderNote;
+using ToolWidgets::SmallButtonUnlessUnapplied;
+using ToolWidgets::WarningColor;
 
 namespace
 {
@@ -46,13 +50,10 @@ constexpr char NamePopupId[] = "###StatFileName";
 // Pixel widths before the editor UI scale.
 constexpr float ListWidth = 240.0f;
 constexpr float LevelValueWidth = 52.0f;
-constexpr float UserListLines = 8.0f;
 // The item levels shown in one row of a table's values.
 constexpr int LevelsPerRow = 8;
 constexpr int MaxDropLevelBonus = 1000;
 constexpr int MaxValue = 65535;
-const ImVec4 WarningColor(1.0f, 0.8f, 0.3f, 1.0f);
-const ImVec4 ErrorColor(1.0f, 0.4f, 0.4f, 1.0f);
 
 const ItemStatFile& Stored()
 {
@@ -165,105 +166,6 @@ ItemStatFile Compose(const ItemStatFile& stored, const ItemStatFile& edit, const
     return file;
 }
 
-bool HasValue(const Data::Items::ItemTagSet& values, Data::Items::ItemTag tag)
-{
-    return values.Has(tag);
-}
-
-void SetValue(Data::Items::ItemTagSet& values, Data::Items::ItemTag tag, bool on)
-{
-    values.Set(tag, on);
-}
-
-template <size_t Size, typename TEnum> bool HasValue(const std::bitset<Size>& values, TEnum value)
-{
-    const auto index = static_cast<size_t>(value);
-    return index < Size && values.test(index);
-}
-
-template <size_t Size, typename TEnum> void SetValue(std::bitset<Size>& values, TEnum value, bool on)
-{
-    values.set(static_cast<size_t>(value), on);
-}
-
-// The names of the values a condition has, in the order of the enum's names.
-template <typename TEnum, typename TSet> std::string DescribeValues(const TSet& values)
-{
-    std::vector<std::string> names;
-    for (const Data::Items::EnumName<TEnum>& entry : Data::Items::GetEnumNames(TEnum{}))
-    {
-        if (HasValue(values, entry.value))
-        {
-            names.push_back(entry.name);
-        }
-    }
-    return JoinNames(names);
-}
-
-std::string DescribeGroups(const std::bitset<MAX_ITEM_TYPE>& groups)
-{
-    std::vector<std::string> names;
-    for (size_t group = 0; group < groups.size(); ++group)
-    {
-        if (groups.test(group))
-        {
-            names.push_back(std::to_string(group));
-        }
-    }
-    return JoinNames(names);
-}
-
-// "slot: helm, boots; group: 15", or that it matches every item.
-std::string DescribeConditions(const Data::Items::ItemRuleConditions& conditions)
-{
-    std::vector<std::string> parts;
-    const auto add = [&parts](const char* label, const std::string& values)
-    {
-        if (!values.empty())
-        {
-            parts.push_back(std::string(label) + ": " + values);
-        }
-    };
-    add(I18N::Editor::Group, DescribeGroups(conditions.groups));
-    add(I18N::Metadata::Slot, DescribeValues<Data::Items::ItemSlot>(conditions.slots));
-    add(I18N::Editor::WingTier, DescribeValues<Data::Items::WingTier>(conditions.wingTiers));
-    add(I18N::Editor::WeaponKind, DescribeValues<Data::Items::WeaponKind>(conditions.weaponKinds));
-    add(I18N::Editor::Tags, DescribeValues<Data::Items::ItemTag>(conditions.tags));
-    add(I18N::Editor::BaseRequirementAbove0, DescribeValues<Data::Items::ItemRequirement>(conditions.requirements));
-    if (parts.empty())
-    {
-        return I18N::Editor::EveryItem;
-    }
-    std::string text;
-    for (const std::string& part : parts)
-    {
-        text += (text.empty() ? "" : "; ") + part;
-    }
-    return text;
-}
-
-// A condition as a list to tick its values in; true when it changed.
-template <typename TEnum, typename TSet> bool ConditionCombo(const char* label, TSet& values)
-{
-    bool changed = false;
-    const std::string preview = DescribeValues<TEnum>(values);
-    ImGui::SetNextItemWidth(Fields::ScaledWidth(Fields::NumberWidth * 3.0f));
-    if (ImGui::BeginCombo(label, preview.empty() ? I18N::Editor::Any : preview.c_str()))
-    {
-        for (const Data::Items::EnumName<TEnum>& entry : Data::Items::GetEnumNames(TEnum{}))
-        {
-            const bool on = HasValue(values, entry.value);
-            if (ImGui::Selectable(entry.name, on, ImGuiSelectableFlags_NoAutoClosePopups))
-            {
-                SetValue(values, entry.value, !on);
-                changed = true;
-            }
-        }
-        ImGui::EndCombo();
-    }
-    return changed;
-}
-
 // The item types of the stored items that match `rule` first in `rules`.
 std::vector<int> FindRuleItems(std::span<const StatProfileRule> rules, int rule)
 {
@@ -276,47 +178,6 @@ std::vector<int> FindRuleItems(std::span<const StatProfileRule> rules, int rule)
         }
     }
     return items;
-}
-
-// A grey line that wraps at the window's edge.
-void RenderNote(const char* text)
-{
-    ImGui::PushTextWrapPos(0.0f);
-    ImGui::TextDisabled("%s", text);
-    ImGui::PopTextWrapPos();
-}
-
-// A small button that is off while the picked entry has unapplied changes,
-// which its change of the stored file would drop.
-bool SmallButtonUnlessUnapplied(const char* label, bool unapplied)
-{
-    ImGui::BeginDisabled(unapplied);
-    const bool clicked = ImGui::SmallButton(label);
-    ImGui::EndDisabled();
-    if (unapplied && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-    {
-        ImGui::SetTooltip("%s", I18N::Editor::ApplyOrRevertTheChangesFirst);
-    }
-    return clicked;
-}
-
-// The items as a list; a click selects one.
-void RenderUsers(const char* id, const std::vector<int>& users)
-{
-    if (!ImGui::BeginListBox(id, ImVec2(-FLT_MIN, UserListLines * ImGui::GetTextLineHeightWithSpacing())))
-    {
-        return;
-    }
-    for (const int user : users)
-    {
-        ImGui::PushID(user);
-        if (ImGui::Selectable(g_ItemDatabase.GetLogName(user).c_str(), user == g_ItemSelection.GetItemType()))
-        {
-            g_ItemSelection.Select(user);
-        }
-        ImGui::PopID();
-    }
-    ImGui::EndListBox();
 }
 
 const char* StatLabel(ItemStat stat)
@@ -622,7 +483,7 @@ void CMuItemFormulasUI::RenderDefault(ItemStatFile& file)
     if (ImGui::TreeNode("##Users", "%s",
                         I18N::Format(I18N::Editor::UsedBy0Items, {std::to_string(users.size())}).c_str()))
     {
-        RenderUsers("##UserList", users);
+        ToolWidgets::RenderItemList("##UserList", users);
         ImGui::TreePop();
     }
     RenderSections(file.defaults, file.defaultRequirements, Stored(), false);
@@ -673,7 +534,7 @@ void CMuItemFormulasUI::RenderProfile(ItemStatFile& file)
         I18N::Format(I18N::Editor::UsedBy0ItemsAnd1Rules, {std::to_string(items), std::to_string(rules)});
     if (ImGui::TreeNode("##Users", "%s", usedBy.c_str()))
     {
-        RenderUsers("##UserList", users);
+        ToolWidgets::RenderItemList("##UserList", users);
         ImGui::TreePop();
     }
     RenderNote(I18N::Editor::AProfileWritesOnlyWhatDiffersFromTheDefault);
@@ -726,7 +587,7 @@ void CMuItemFormulasUI::RenderTable(ItemStatFile& file)
     {
         // D26: where a shared definition is used.
         ImGui::TextDisabled("%s", I18N::Editor::ItemDescriptionsThatNameIt);
-        RenderUsers("##DescriptionUsers", descriptions);
+        ToolWidgets::RenderItemList("##DescriptionUsers", descriptions);
     }
 
     std::string caption = table->caption.GetNeutral();
@@ -814,7 +675,7 @@ void CMuItemFormulasUI::RenderRules(ItemStatFile& file)
             }
             ImGui::TableSetColumnIndex(2);
             ImGui::PushTextWrapPos(0.0f);
-            ImGui::TextUnformatted(DescribeConditions(rule.conditions).c_str());
+            ImGui::TextUnformatted(DescribeRuleConditions(rule.conditions).c_str());
             ImGui::PopTextWrapPos();
             ImGui::TableSetColumnIndex(3);
             ImGui::Text("%d", static_cast<int>(FindRuleItems(rules, static_cast<int>(index)).size()));
@@ -863,39 +724,15 @@ void CMuItemFormulasUI::RenderRules(ItemStatFile& file)
     if (picked)
     {
         ImGui::SeparatorText(I18N::Format(I18N::Editor::Rule0, {std::to_string(m_pickedRule + 1)}).c_str());
-        RenderRuleConditions(rules[static_cast<size_t>(m_pickedRule)].conditions);
+        RenderRuleConditionFields(rules[static_cast<size_t>(m_pickedRule)].conditions, false);
         const std::vector<int> items = FindRuleItems(rules, m_pickedRule);
         if (ImGui::TreeNode("##RuleItems", "%s",
                             I18N::Format(I18N::Editor::Matches0Items, {std::to_string(items.size())}).c_str()))
         {
-            RenderUsers("##RuleItemList", items);
+            ToolWidgets::RenderItemList("##RuleItemList", items);
             ImGui::TreePop();
         }
     }
-}
-
-void CMuItemFormulasUI::RenderRuleConditions(Data::Items::ItemRuleConditions& conditions)
-{
-    std::string groups = DescribeGroups(conditions.groups);
-    ImGui::SetNextItemWidth(Fields::ScaledWidth(Fields::NumberWidth * 3.0f));
-    if (ImGui::BeginCombo(I18N::Editor::Group, groups.empty() ? I18N::Editor::Any : groups.c_str()))
-    {
-        for (int group = 0; group < MAX_ITEM_TYPE; ++group)
-        {
-            const bool on = conditions.groups.test(static_cast<size_t>(group));
-            if (ImGui::Selectable(MuEditor::Items::GetItemGroupLabel(group).c_str(), on,
-                                  ImGuiSelectableFlags_NoAutoClosePopups))
-            {
-                conditions.groups.set(static_cast<size_t>(group), !on);
-            }
-        }
-        ImGui::EndCombo();
-    }
-    ConditionCombo<Data::Items::ItemSlot>(I18N::Metadata::Slot, conditions.slots);
-    ConditionCombo<Data::Items::WingTier>(I18N::Editor::WingTier, conditions.wingTiers);
-    ConditionCombo<Data::Items::WeaponKind>(I18N::Editor::WeaponKind, conditions.weaponKinds);
-    ConditionCombo<Data::Items::ItemTag>(I18N::Editor::Tags, conditions.tags);
-    ConditionCombo<Data::Items::ItemRequirement>(I18N::Editor::BaseRequirementAbove0, conditions.requirements);
 }
 
 void CMuItemFormulasUI::Apply(ItemStatFile file, std::string label, std::string renamedFrom, std::string renamedTo,
@@ -970,7 +807,7 @@ void CMuItemFormulasUI::RenderConfirm()
     }
     ImGui::TextUnformatted(
         I18N::Format(I18N::Editor::TheChangeReachesThese0Items, {std::to_string(m_pending.reached.size())}).c_str());
-    RenderUsers("##Reached", m_pending.reached);
+    ToolWidgets::RenderItemList("##Reached", m_pending.reached);
     if (ImGui::Button(I18N::Editor::ApplyToTheFormulas))
     {
         Commit();

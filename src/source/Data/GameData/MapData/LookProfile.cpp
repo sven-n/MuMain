@@ -11,7 +11,9 @@
 #include <charconv>
 #include <cmath>
 #include <map>
+#include <set>
 #include <sstream>
+#include <string_view>
 #include <system_error>
 #include <utility>
 
@@ -562,6 +564,21 @@ bool ValidateLookProfile(const LookProfileData& data, const std::string& source,
     LookValues defaults = BuiltInLookValues();
     data.defaultOverrides.ApplyTo(defaults);
     bool valid = CheckFiguresNotBelowBase(defaults, DefaultKey, list);
+    std::set<std::string_view> environmentNames;
+    for (std::size_t index = 0; index < data.environments.size(); ++index)
+    {
+        const std::string& name = data.environments[index].name;
+        if (name.empty())
+        {
+            list.Fatal(std::string(EnvironmentsKey) + "[" + std::to_string(index) + "]", "has no name");
+            valid = false;
+        }
+        else if (!environmentNames.insert(name).second)
+        {
+            list.Fatal(Field(EnvironmentsKey, name), "is the name of another environment too");
+            valid = false;
+        }
+    }
     for (std::size_t index = 0; index < data.environments.size(); ++index)
     {
         valid = CheckFiguresNotBelowBase(data.ForEnvironment(index),

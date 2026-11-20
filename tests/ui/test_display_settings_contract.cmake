@@ -159,6 +159,11 @@ require_text(winmain_source
     "g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());"
     "Winmain.cpp must apply translated item names at startup")
 
+# Enhanced Movement changes how every character moves, so players switch it on: off without the key (the template
+# the client copies into a new player's folder is checked by ui_scaling_tests, since this check runs without src/bin).
+require_text(config_constants "CfgDefaultEnhancedMovement = false;"
+    "GameConfigConstants.h must turn Enhanced Movement off by default")
+
 # A missing or invalid Look counts as CfgDefaultLook, which is Classic: Enhanced is opt-in.
 require_text(config_constants "CfgDefaultLook[] = L\"Classic\""
     "GameConfigConstants.h must default the look preset to Classic")

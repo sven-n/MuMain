@@ -100,6 +100,16 @@ void mu::ui::window::CMoveCommandWindow::Release()
 void mu::ui::window::CMoveCommandWindow::RefreshData()
 {
     m_listMoveInfoData = CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
+    m_listVersion = CMoveCommandData::GetInstance()->GetListVersion();
+}
+
+void mu::ui::window::CMoveCommandWindow::RefreshDataIfChanged()
+{
+    if (m_listVersion == CMoveCommandData::GetInstance()->GetListVersion())
+        return;
+
+    RefreshData();
+    SetStrifeMap();
 }
 
 void mu::ui::window::CMoveCommandWindow::SetFillPlacementSize(float width, float height)
@@ -478,6 +488,7 @@ void mu::ui::window::CMoveCommandWindow::BuildRmlUi()
 
 void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
 {
+    RefreshDataIfChanged();
     BuildRmlUi();
     if (!m_RmlView.Document())
         return;
@@ -635,6 +646,7 @@ bool CMoveCommandWindow::CanMoveToMap(const wchar_t* pszMapName)
     // clears it and it was the hovered row's highlight -- the hover is an RCSS :hover rule now,
     // so nothing reads _bSelected any more and there is nothing to preserve.
     // The strife flags are otherwise only set when the window opens, and a query may come first.
+    RefreshDataIfChanged();
     SetStrifeMap();
     SettingCanMoveMap();
 
@@ -644,6 +656,7 @@ bool CMoveCommandWindow::CanMoveToMap(const wchar_t* pszMapName)
 
 int CMoveCommandWindow::GetMapIndexFromMovereq(const wchar_t* pszMapName)
 {
+    RefreshDataIfChanged();
     const CMoveCommandData::MOVEINFODATA* moveInfo = FindMoveInfo(pszMapName);
     return moveInfo != NULL ? moveInfo->_ReqInfo.index : -1;
 }

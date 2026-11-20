@@ -77,7 +77,7 @@
 #igs_page_next:active { decorator: image(igs-page-right-down); }
 
 /* "current / total" in bold: the current page right-aligned to the slash, the total after it. */
-.igs-page-numbers { position: absolute; left: 0; width: 640px; height: 1px; color: #ffffff; font-weight: bold; }
+.igs-page-numbers { position: absolute; left: 0; width: 640px; height: 1px; color: #ffffff; font-weight: bold; pointer-events: none; }
 .igs-page-numbers .sharp-right { transform-origin: right top; }
 #igs_page { top: 404px; }
 #igs_page .igs-page-current { right: 369px; }
@@ -90,8 +90,8 @@
 
 /* The player: the name in bold centred over 122 from (498, 23), then three balance rows from
    (498, 50) 15 apart, each value right-aligned to 622. */
-#igs_character { position: absolute; left: 498px; top: 23px; width: 122px; height: 1px; color: #ffffff; font-weight: bold; }
-#igs_wallet { position: absolute; left: 0; top: 50px; width: 640px; }
+#igs_character { position: absolute; left: 498px; top: 23px; width: 122px; height: 1px; color: #ffffff; font-weight: bold; pointer-events: none; }
+#igs_wallet { position: absolute; left: 0; top: 50px; width: 640px; pointer-events: none; }
 .igs-wallet-row { position: relative; display: block; height: 15px; color: #ffeea1; }
 .igs-wallet-label { left: 498px; }
 .igs-wallet-value { right: 18px; transform-origin: right top; }
@@ -117,7 +117,7 @@
 .igs-storage-tab.selected { decorator: image(igs-tab-left); }
 .igs-storage-tab.selected.gift { decorator: image(igs-tab-right); }
 
-.igs-storage-header { position: absolute; top: 233px; height: 1px; color: #ffffff; font-weight: bold; }
+.igs-storage-header { position: absolute; top: 233px; height: 1px; color: #ffffff; font-weight: bold; pointer-events: none; }
 #igs_storage_header_name { left: 492px; width: 96px; }
 #igs_storage_header_period { left: 592px; width: 34px; }
 
@@ -144,7 +144,7 @@
 .igs-cell-name   { left: 0; width: 74.809%; }
 .igs-cell-period { right: 0; width: 25.191%; text-align: right; }
 
-#igs_storage_page_back { position: absolute; left: 518px; top: 366px; width: 80px; height: 30px; decorator: image(igs-storage-page); }
+#igs_storage_page_back { position: absolute; left: 518px; top: 366px; width: 80px; height: 30px; decorator: image(igs-storage-page); pointer-events: none; }
 .igs-storage-page-btn { position: absolute; top: 369px; width: 20px; height: 22px; pointer-events: auto; }
 #igs_storage_prev { left: 500px; decorator: image(igs-storage-left-up); }
 #igs_storage_prev:hover { decorator: image(igs-storage-left-over); }

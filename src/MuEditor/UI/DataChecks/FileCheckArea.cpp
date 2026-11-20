@@ -129,7 +129,7 @@ std::unique_ptr<DataCheckArea> CreateLookCheckArea()
             Render::Look::DiskLookFileSystem files;
             return Render::Look::LoadLookFiles(files, Data::Maps::LookProfileFile, Data::Maps::LightMoodFile).issues;
         },
-        &ToolWindows::devEditor, WindowIds::DevEditor);
+        &ToolWindows::graphicsLook, WindowIds::GraphicsLook);
 }
 
 std::unique_ptr<DataCheckArea> CreateItemOptionCheckArea()
@@ -144,10 +144,11 @@ std::unique_ptr<DataCheckArea> CreateItemOptionCheckArea()
             if (!Data::Items::HasFatal(issues))
             {
                 Data::Items::ValidateOptionDefinitionUse(g_ItemDatabase.GetAllSlots(), options, issues);
+                Data::Items::ValidateAncientBonusNames(options, issues);
             }
             return issues;
         },
-        nullptr, nullptr);
+        &ToolWindows::itemOptions, WindowIds::ItemOptions);
 }
 } // namespace MuEditor::DataChecks
 

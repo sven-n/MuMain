@@ -15,7 +15,9 @@ Content is everything the game ships and only reads:
 
 These are not content and stay on the file system:
 
-- `config.ini`, logs, screenshots, macros, the shop's download cache: per-user files;
+- `config.ini`, logs, screenshots, macros: per-user files in the user folder
+  ([where settings and logs live](build/README.md#where-settings-and-logs-live));
+- the shop's download cache, still under `Data/`;
 - what the editor and the developer tools save.
 
 ## Paths
@@ -141,3 +143,58 @@ passes. When every call is on the layer or has its reason, the check prints noth
 - A file that lost calls also fails it until the baseline is lowered with
   `python tests/check_content_io.py . --update`. The update keeps the reason of each line that
   remains; a new line gets none.
+
+## Per-map file lists
+
+`src/bin/Data/Maps/Files` says which content files each part of the game needs, so a port can ship,
+preload or download one map's data on its own:
+
+- `Shared.json`: what start-up, the login scene and character selection read, plus the folders
+  shipped whole (`Data/Interface`, `Data/Local`, `Data/Render`, `fonts`) and the images the
+  interface documents name outside their folder. Every player, item and skill model loads at
+  start-up, so other players' equipment and dropped items are here, with the player bodies of both
+  player-model choices (the option applies at the next start) and the dragons an event sends over
+  any map.
+- `Map<n>.json`, by the map number the server sends: what entering the map reads beyond the shared
+  files, in each of its event states (castle siege, Crywolf, Kanturu, Raklion), with the monsters
+  and NPCs the server spawns there. Lists may overlap; a file read from another map's folder at
+  start-up (`Object31/flag.OZT`) is only in the shared list.
+- `Monsters.json`, by monster number: what one monster or NPC reads beyond the shared files. A
+  server can spawn any monster on any map (invasions, events, summons, transformation rings, GM
+  commands), so a port fetches the monster's files when the spawn arrives if the map did not bring
+  them. At start-up the game checks `Data/Monsters/Models.json` against the content and gives a
+  model whose file is missing no body; a client that adds monster files later has to run that check
+  again.
+
+Paths are the files' stored names, as `Content::List` gives them.
+
+### How they are made
+
+`map_file_lists_tests` (`tests/monsters/test_map_file_lists.cpp`) runs the game's own loaders on the
+shipped client folder, without a window or a server, through a `ContentMemoryStorage` that names
+every file read. Each map and monster starts from the state right after start-up, as a port that
+enters it first would. The test fails when the lists in the repository differ from what it recorded.
+
+Every server map whose world folder has a terrain and a height map gets a list; the login and
+character scenes' worlds are not maps and are left out. The maps' spawns come from
+`tools/MapFileLists/openmu-spawns.json`, which `python tools/MapFileLists/export_openmu_spawns.py`
+writes from an initialized OpenMU database (with `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`).
+Another server can export its own spawns in the same format.
+
+The run has no frames, so what the game opens only while it plays a map is named in the test:
+`FrameModels` (Kalima's Bahamut), and the event dragons are opened in the shared phase.
+
+To rewrite the lists, build `map_file_lists_tests` and run it with `MU_WRITE_MAP_FILE_LISTS=1`.
+Rerun it, and commit the lists, after:
+
+- a loader reads another file, or content files are added, renamed or removed;
+- a new map, a new event state that loads other files (add it to `MapStates`), or a model the
+  game opens while it plays a map (add it to `FrameModels`);
+- a new monster or NPC in `Data/Monsters/Monsters.json`;
+- a new spawn export, when OpenMU's spawns changed. CI has no OpenMU database, so it cannot tell
+  that the spawn file is old; a stale one only makes a port fetch a monster later.
+
+The run uses the English language files; the other languages ship whole in `Data/Local`. Sounds
+(`Data/Sound`) and music (`Data/Music`) are not in the repository, so no list names them: a port
+that has them ships both folders with the shared files. The same holds for an installed texture
+pack (`Data/TexturePacks`).

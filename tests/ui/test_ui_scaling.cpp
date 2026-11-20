@@ -16,7 +16,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Data/GameConfig/GameConfigValidation.h"
-#include "../data/ExecutableConfigFile.h"
+#include "../data/UserConfigFile.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/Look/LookPreset.h"
 #include "UI/Social/SocialWorkspace.h"
@@ -237,13 +237,18 @@ TEST_CASE("inventory drag keeps border drops in their original slots [ui][invent
 {
     constexpr int gridLeft = 100;
     constexpr int gridTop = 200;
+    const UI::Items::GridGeometry grid{
+        gridLeft, gridTop, mu::ui::window::INVENTORY_SQUARE_WIDTH, mu::ui::window::INVENTORY_SQUARE_HEIGHT, 8, 8};
+    int column = -1;
+    int row = -1;
 
     const POINT leftOffset = UI::Items::Drag::PickupOffset(gridLeft, gridTop, 40, 40, 101, 201, true);
     const POINT leftTopLeft = UI::Items::Drag::ItemTopLeft(101, 201, leftOffset);
     CHECK(leftTopLeft.x == gridLeft);
     CHECK(leftTopLeft.y == gridTop);
-    CHECK((leftTopLeft.x - gridLeft) / mu::ui::window::INVENTORY_SQUARE_WIDTH == 0);
-    CHECK((leftTopLeft.y - gridTop) / mu::ui::window::INVENTORY_SQUARE_HEIGHT == 0);
+    REQUIRE(grid.ItemCellAt(static_cast<float>(leftTopLeft.x), static_cast<float>(leftTopLeft.y), column, row));
+    CHECK(column == 0);
+    CHECK(row == 0);
 
     constexpr int rightItemLeft = gridLeft + 6 * mu::ui::window::INVENTORY_SQUARE_WIDTH;
     const POINT rightOffset = UI::Items::Drag::PickupOffset(rightItemLeft, gridTop, 40, 40,
@@ -251,8 +256,9 @@ TEST_CASE("inventory drag keeps border drops in their original slots [ui][invent
     const POINT rightTopLeft = UI::Items::Drag::ItemTopLeft(rightItemLeft + 39, gridTop + 39, rightOffset);
     CHECK(rightTopLeft.x == rightItemLeft);
     CHECK(rightTopLeft.y == gridTop);
-    CHECK((rightTopLeft.x - gridLeft) / mu::ui::window::INVENTORY_SQUARE_WIDTH == 6);
-    CHECK((rightTopLeft.y - gridTop) / mu::ui::window::INVENTORY_SQUARE_HEIGHT == 0);
+    REQUIRE(grid.ItemCellAt(static_cast<float>(rightTopLeft.x), static_cast<float>(rightTopLeft.y), column, row));
+    CHECK(column == 6);
+    CHECK(row == 0);
 }
 
 TEST_CASE("inventory drag anchor survives dock scaling [ui][inventory]")
@@ -871,31 +877,39 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
         std::string key;
         bool (GameConfig::*get)() const;
         void (GameConfig::*set)(bool);
+        // Without its key: the graphics switches are on, Enhanced Movement is off (the player turns it on).
+        bool byDefault;
     };
-    const std::array<Switch, 5> switches{{
-        {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting},
-        {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights},
-        {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood},
-        {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing},
-        {"Sunlight", &GameConfig::GetSunlight, &GameConfig::SetSunlight},
+    const std::array<Switch, 6> switches{{
+        {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting, true},
+        {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights, true},
+        {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood, true},
+        {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing, true},
+        {"EnhancedMovement", &GameConfig::GetEnhancedMovement, &GameConfig::SetEnhancedMovement, false},
+        {"Sunlight", &GameConfig::GetSunlight, &GameConfig::SetSunlight, true},
     }};
-    const ExecutableConfigFile file;
+    const UserConfigFile file;
     GameConfig& config = GameConfig::GetInstance();
 
-    // Without the keys every switch is on.
+    // Without the keys every switch has its default.
     file.Write("[Render]\nVSync=1\n");
     config.Load();
     for (const Switch& each : switches)
     {
         CAPTURE(each.key);
-        CHECK((config.*each.get)());
+        CHECK((config.*each.get)() == each.byDefault);
     }
 
     for (const Switch& off : switches)
     {
         CAPTURE(off.key);
-        // Loading: the key the file sets to 0 turns off its switch and no other.
-        file.Write("[Render]\n" + off.key + "=0\n");
+        // Loading: the key the file sets to 0 turns off its switch and no other (the others set to 1).
+        std::string ini = "[Render]\n";
+        for (const Switch& each : switches)
+        {
+            ini += each.key + (&each == &off ? "=0\n" : "=1\n");
+        }
+        file.Write(ini);
         config.Load();
         for (const Switch& each : switches)
         {
@@ -916,6 +930,32 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
             CHECK(file.ReadRender(each.key) == (&each == &off ? 1 : 0));
         }
     }
+}
+
+TEST_CASE("a new player's config.ini starts with Enhanced Movement off [config][render][movement]")
+{
+    // The client copies the template into the player's folder on the first start.
+    std::ifstream ini(std::filesystem::path(MU_BIN_DIR) / "config.ini.template");
+    REQUIRE(ini.is_open());
+    std::string section;
+    std::string value;
+    for (std::string line; std::getline(ini, line);)
+    {
+        if (!line.empty() && line.back() == '\r')
+        {
+            line.pop_back();
+        }
+        if (!line.empty() && line.front() == '[')
+        {
+            section = line;
+        }
+        else if (section == "[Render]" && line.rfind("EnhancedMovement=", 0) == 0)
+        {
+            value = line.substr(std::string("EnhancedMovement=").size());
+        }
+    }
+    CHECK(value == "0");
+    CHECK_FALSE(CfgDefaults::CfgDefaultEnhancedMovement);
 }
 
 TEST_CASE(

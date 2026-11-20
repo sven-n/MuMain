@@ -13,31 +13,6 @@
 
 namespace
 {
-constexpr MUCompatGLenum kGLDepthTest = 0x0B71;
-constexpr MUCompatGLenum kGLAlphaTest = 0x0BC0;
-constexpr MUCompatGLenum kGLTexture2D = 0x0DE1;
-constexpr MUCompatGLenum kGLBlend = 0x0BE2;
-constexpr MUCompatGLenum kGLCullFace = 0x0B44;
-constexpr MUCompatGLenum kGLFog = 0x0B60;
-constexpr MUCompatGLenum kGLStencilTest = 0x0B90;
-constexpr MUCompatGLenum kGLQuads = 0x0007;
-constexpr MUCompatGLenum kGLTriangles = 0x0004;
-constexpr MUCompatGLenum kGLLines = 0x0001;
-constexpr MUCompatGLenum kGLTriangleFan = 0x0006;
-constexpr MUCompatGLenum kGLQuadStrip = 0x0008;
-constexpr MUCompatGLenum kGLModelViewMatrix = 0x0BA6;
-constexpr MUCompatGLenum kGLProjectionMatrix = 0x0BA7;
-constexpr MUCompatGLenum kGLSrcAlpha = 0x0302;
-constexpr MUCompatGLenum kGLOneMinusSrcAlpha = 0x0303;
-constexpr MUCompatGLenum kGLOne = 1;
-constexpr MUCompatGLenum kGLZero = 0;
-constexpr MUCompatGLenum kGLOneMinusSrcColor = 0x0301;
-constexpr MUCompatGLenum kGLOneMinusDstColor = 0x0306;
-constexpr MUCompatGLenum kGLSrcColor = 0x0300;
-constexpr MUCompatGLenum kGLUnsignedByte = 0x1401;
-constexpr MUCompatGLenum kGLRgb = 0x1907;
-constexpr MUCompatGLenum kGLRgba = 0x1908;
-
 struct ImmediateVertex
 {
     float x = 0.0f;
@@ -143,19 +118,19 @@ void SubmitTriangleFan()
 
 void ApplyBlend(MUCompatGLenum sfactor, MUCompatGLenum dfactor)
 {
-    if (sfactor == kGLSrcAlpha && dfactor == kGLOneMinusSrcAlpha)
+    if (sfactor == GL_SRC_ALPHA && dfactor == GL_ONE_MINUS_SRC_ALPHA)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
-    else if (sfactor == kGLSrcAlpha && dfactor == kGLOne)
+    else if (sfactor == GL_SRC_ALPHA && dfactor == GL_ONE)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::Additive);
-    else if (sfactor == kGLZero && dfactor == kGLOneMinusSrcColor)
+    else if (sfactor == GL_ZERO && dfactor == GL_ONE_MINUS_SRC_COLOR)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::Subtract);
-    else if (sfactor == kGLOneMinusDstColor && dfactor == kGLZero)
+    else if (sfactor == GL_ONE_MINUS_DST_COLOR && dfactor == GL_ZERO)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::InverseColor);
-    else if (sfactor == kGLOne && dfactor == kGLOneMinusSrcAlpha)
+    else if (sfactor == GL_ONE && dfactor == GL_ONE_MINUS_SRC_ALPHA)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::Mixed);
-    else if (sfactor == kGLZero && dfactor == kGLSrcColor)
+    else if (sfactor == GL_ZERO && dfactor == GL_SRC_COLOR)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::LightMap);
-    else if (sfactor == kGLOne && dfactor == kGLOne)
+    else if (sfactor == GL_ONE && dfactor == GL_ONE)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::Glow);
 }
 
@@ -163,17 +138,17 @@ void ApplyBlend(MUCompatGLenum sfactor, MUCompatGLenum dfactor)
                                                MUCompatGLsizei width, MUCompatGLsizei height,
                                                std::vector<std::uint8_t>& rgbaScratch)
 {
-    if (!pixels || width <= 0 || height <= 0 || type != kGLUnsignedByte)
+    if (!pixels || width <= 0 || height <= 0 || type != GL_UNSIGNED_BYTE)
     {
         return pixels;
     }
 
-    if (format == kGLRgba)
+    if (format == GL_RGBA)
     {
         return pixels;
     }
 
-    if (format != kGLRgb)
+    if (format != GL_RGB)
     {
         return pixels;
     }
@@ -202,13 +177,14 @@ void mu_glEnd()
 {
     switch (s_mode)
     {
-    case kGLQuads:
+    case GL_QUADS:
         SubmitQuads();
         break;
-    case kGLTriangles:
+    case GL_TRIANGLES:
         SubmitTriangles(s_vertices);
         break;
-    case kGLLines: {
+    case GL_LINES:
+    {
         std::vector<mu::Vertex3D> lines;
         lines.reserve(s_vertices.size());
         for (const ImmediateVertex& v : s_vertices)
@@ -216,10 +192,11 @@ void mu_glEnd()
         mu::GetRenderer().RenderLines(lines, s_texture2D ? s_boundTexture : 0u);
         break;
     }
-    case kGLTriangleFan:
+    case GL_TRIANGLE_FAN:
         SubmitTriangleFan();
         break;
-    case kGLQuadStrip: {
+    case GL_QUAD_STRIP:
+    {
         std::vector<mu::Vertex3D> strip;
         strip.reserve(s_vertices.size());
         for (const ImmediateVertex& v : s_vertices)
@@ -252,35 +229,98 @@ void mu_glColor4ub(MUCompatGLubyte r, MUCompatGLubyte g, MUCompatGLubyte b, MUCo
 
 void mu_glEnable(MUCompatGLenum cap)
 {
-    if (cap == kGLDepthTest) { s_depthTest = true; mu::GetRenderer().SetDepthTest(true); }
-    else if (cap == kGLTexture2D) { s_texture2D = true; mu::GetRenderer().SetTexture2D(true); }
-    else if (cap == kGLBlend) { s_blend = true; mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha); }
-    else if (cap == kGLAlphaTest) { s_alphaTest = true; mu::GetRenderer().SetAlphaTest(true); }
-    else if (cap == kGLCullFace) { s_cullFace = true; mu::GetRenderer().SetCullFace(true); }
-    else if (cap == kGLFog) { s_fog = true; mu::GetRenderer().SetFogEnabled(true); }
-    else if (cap == kGLStencilTest) { s_stencil = true; mu::GetRenderer().SetStencilTest(true); }
+    if (cap == GL_DEPTH_TEST)
+    {
+        s_depthTest = true;
+        mu::GetRenderer().SetDepthTest(true);
+    }
+    else if (cap == GL_TEXTURE_2D)
+    {
+        s_texture2D = true;
+        mu::GetRenderer().SetTexture2D(true);
+    }
+    else if (cap == GL_BLEND)
+    {
+        s_blend = true;
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
+    }
+    else if (cap == GL_ALPHA_TEST)
+    {
+        s_alphaTest = true;
+        mu::GetRenderer().SetAlphaTest(true);
+    }
+    else if (cap == GL_CULL_FACE)
+    {
+        s_cullFace = true;
+        mu::GetRenderer().SetCullFace(true);
+    }
+    else if (cap == GL_FOG)
+    {
+        s_fog = true;
+        mu::GetRenderer().SetFogEnabled(true);
+    }
+    else if (cap == GL_STENCIL_TEST)
+    {
+        s_stencil = true;
+        mu::GetRenderer().SetStencilTest(true);
+    }
 }
 
 void mu_glDisable(MUCompatGLenum cap)
 {
-    if (cap == kGLDepthTest) { s_depthTest = false; mu::GetRenderer().SetDepthTest(false); }
-    else if (cap == kGLTexture2D) { s_texture2D = false; mu::GetRenderer().SetTexture2D(false); }
-    else if (cap == kGLBlend) { s_blend = false; mu::GetRenderer().DisableBlend(); }
-    else if (cap == kGLAlphaTest) { s_alphaTest = false; mu::GetRenderer().SetAlphaTest(false); }
-    else if (cap == kGLCullFace) { s_cullFace = false; mu::GetRenderer().SetCullFace(false); }
-    else if (cap == kGLFog) { s_fog = false; mu::GetRenderer().SetFogEnabled(false); }
-    else if (cap == kGLStencilTest) { s_stencil = false; mu::GetRenderer().SetStencilTest(false); }
+    if (cap == GL_DEPTH_TEST)
+    {
+        s_depthTest = false;
+        mu::GetRenderer().SetDepthTest(false);
+    }
+    else if (cap == GL_TEXTURE_2D)
+    {
+        s_texture2D = false;
+        mu::GetRenderer().SetTexture2D(false);
+    }
+    else if (cap == GL_BLEND)
+    {
+        s_blend = false;
+        mu::GetRenderer().DisableBlend();
+    }
+    else if (cap == GL_ALPHA_TEST)
+    {
+        s_alphaTest = false;
+        mu::GetRenderer().SetAlphaTest(false);
+    }
+    else if (cap == GL_CULL_FACE)
+    {
+        s_cullFace = false;
+        mu::GetRenderer().SetCullFace(false);
+    }
+    else if (cap == GL_FOG)
+    {
+        s_fog = false;
+        mu::GetRenderer().SetFogEnabled(false);
+    }
+    else if (cap == GL_STENCIL_TEST)
+    {
+        s_stencil = false;
+        mu::GetRenderer().SetStencilTest(false);
+    }
 }
 
 MUCompatGLboolean mu_glIsEnabled(MUCompatGLenum cap)
 {
-    if (cap == kGLDepthTest) return s_depthTest;
-    if (cap == kGLTexture2D) return s_texture2D;
-    if (cap == kGLBlend) return s_blend;
-    if (cap == kGLAlphaTest) return s_alphaTest;
-    if (cap == kGLCullFace) return s_cullFace;
-    if (cap == kGLFog) return s_fog;
-    if (cap == kGLStencilTest) return s_stencil;
+    if (cap == GL_DEPTH_TEST)
+        return s_depthTest;
+    if (cap == GL_TEXTURE_2D)
+        return s_texture2D;
+    if (cap == GL_BLEND)
+        return s_blend;
+    if (cap == GL_ALPHA_TEST)
+        return s_alphaTest;
+    if (cap == GL_CULL_FACE)
+        return s_cullFace;
+    if (cap == GL_FOG)
+        return s_fog;
+    if (cap == GL_STENCIL_TEST)
+        return s_stencil;
     return 0;
 }
 
@@ -298,7 +338,8 @@ void mu_glRotatef(MUCompatGLfloat angle, MUCompatGLfloat x, MUCompatGLfloat y, M
 void mu_glScalef(MUCompatGLfloat x, MUCompatGLfloat y, MUCompatGLfloat z) { mu::GetRenderer().Scale(x, y, z); }
 void mu_glGetFloatv(MUCompatGLenum pname, MUCompatGLfloat* data)
 {
-    if (pname == kGLModelViewMatrix || pname == kGLProjectionMatrix) mu::GetRenderer().GetMatrix(static_cast<int>(pname), data);
+    if (pname == GL_MODELVIEW_MATRIX || pname == GL_PROJECTION_MATRIX)
+        mu::GetRenderer().GetMatrix(static_cast<int>(pname), data);
 }
 void mu_glGetIntegerv(MUCompatGLenum, MUCompatGLint* data)
 {

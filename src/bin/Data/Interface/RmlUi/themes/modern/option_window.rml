@@ -55,9 +55,10 @@
 						<span class="opt-label">{{windowed_mode_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="windowed_mode"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_vsync">
+					<div class="opt-row opt-toggle-row opt-row-tipped" data-class-locked="vsync_locked" data-event-click="option_toggle_vsync">
 						<span class="opt-label">{{vsync_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="vsync_enabled"><div class="opt-toggle-knob"></div></div></div>
+						<span class="opt-row-tip" data-if="vsync_locked">{{vsync_locked_reason}}</span>
 					</div>
 					<div class="opt-row">
 						<span class="opt-label">{{fps_cap_row_label}}</span>
@@ -101,6 +102,7 @@
 					     checkbox switches the feature. Each group starts collapsed; specialist rows wait under its
 					     own "More settings". A slider previews while pressed, dragged or stepped by an arrow key
 					     and is saved on release, when it loses focus or when the window closes. -->
+					<div class="opt-tuning-reason" data-class-hidden="tuning_preview_note == ''">{{tuning_preview_note}}</div>
 					<div class="opt-row opt-toggle-row opt-sub-row opt-tuning-group-row" data-class-locked="look_features_locked">
 						<span class="opt-label opt-tuning-group-label" data-event-click="option_toggle_tuning_group(0)"><span class="opt-tuning-chevron" data-class-expanded="tuning_expanded_0"></span>{{look_lighting_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_lighting" data-event-click="option_toggle_enhanced_feature(0)"><div class="opt-toggle-knob"></div></div></div>
@@ -338,6 +340,10 @@
 						<div class="opt-tuning-reset" data-event-click="option_reset_all_tuning">{{tuning_reset_all_label}}</div>
 					</div>
 					<div class="opt-tuning-error" data-class-hidden="tuning_save_message == ''">{{tuning_save_message}}</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_enhanced_movement">
+						<span class="opt-label">{{enhanced_movement_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="enhanced_movement"><div class="opt-toggle-knob"></div></div></div>
+					</div>
 					<div class="opt-row opt-row-tipped">
 						<span class="opt-label">{{antialiasing_row_label}}</span>
 						<div class="opt-control">
@@ -351,6 +357,39 @@
 							</div>
 						</div>
 						<span class="opt-row-tip">{{antialiasing_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-toggle-row opt-row-tipped" data-event-click="option_toggle_edge_smoothing">
+						<span class="opt-label">{{edge_smoothing_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="edge_smoothing"><div class="opt-toggle-knob"></div></div></div>
+						<span class="opt-row-tip">{{edge_smoothing_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{render_scale_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 9" data-event-click="option_toggle_dropdown(9)">{{render_scale_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 9">
+									<div class="option-dropdown-option" data-for="label : render_scale_labels"
+									     data-class-selected="it_index == render_scale_index"
+									     data-event-click="option_dropdown_option_click(9, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{render_scale_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{sharpness_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 10" data-event-click="option_toggle_dropdown(10)">{{sharpness_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 10">
+									<div class="option-dropdown-option" data-for="label : sharpness_labels"
+									     data-class-selected="it_index == sharpness_index"
+									     data-event-click="option_dropdown_option_click(10, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{sharpness_tooltip}}</span>
 					</div>
 					<div class="opt-row opt-row-tipped">
 						<span class="opt-label">{{anisotropy_row_label}}</span>

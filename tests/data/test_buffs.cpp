@@ -7,6 +7,7 @@
 #include "Data/GameData/BuffData/BuffDatabase.h"
 #include "Data/GameData/BuffData/BuffsJson.h"
 #include "GameLogic/Buffs/w_BuffScriptLoader.h"
+#include "BuffTableScope.h"
 #include "TestFiles.h"
 
 #include <algorithm>
@@ -109,23 +110,6 @@ std::vector<bool> ShownOnStrip(const std::vector<int>& active)
     return std::vector<bool>(shown.get(), shown.get() + active.size());
 }
 
-// Puts the buffs into the table for one test case, and empties it again.
-class BuffTableScope
-{
-public:
-    BuffTableScope(const std::vector<BuffDefinition>& buffs, std::string_view locale)
-    {
-        g_BuffDatabase.Build(buffs, locale);
-    }
-
-    ~BuffTableScope()
-    {
-        g_BuffDatabase.Build({}, "en");
-    }
-
-    BuffTableScope(const BuffTableScope&) = delete;
-    BuffTableScope& operator=(const BuffTableScope&) = delete;
-};
 } // namespace
 
 TEST_CASE("Buffs: entries read back as written (buffs design B1, B10, B12) [data][buffs]")

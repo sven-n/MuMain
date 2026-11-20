@@ -90,6 +90,8 @@ namespace mu::ui::window
             DropdownAntialiasing = 6,
             DropdownAnisotropy = 7,
             DropdownTexturePack = 8,
+            DropdownRenderScale = 9,
+            DropdownSharpness = 10,
             DropdownCount
         };
 
@@ -182,6 +184,10 @@ namespace mu::ui::window
         void RmlToggleEnhancedGraphics();
         // The Enhanced features (Render::Look::EnhancedFeature, by index).
         void RmlToggleEnhancedFeature(int feature);
+        // Enhanced Movement ([Render] EnhancedMovement), in both looks; read live like the features.
+        void RmlToggleEnhancedMovement();
+        // Edge smoothing ([Render] EdgeSmoothing), applied while the Enhanced look is active.
+        void RmlToggleEdgeSmoothing();
         // The player's tuning under each feature (Render/Look/TuningControls.h): a group's label
         // or chevron expands it (never its switch), "More settings" its specialist rows. A slider
         // previews while it is pressed, dragged or stepped by a key and is saved when the pointer
@@ -203,6 +209,10 @@ namespace mu::ui::window
         // from GameConfig, since `$msaa` changes the first outside this window too.
         void RmlAntialiasingChanged(int index);
         void RmlAnisotropyChanged(int index);
+        // Render scale and Sharpness rows ([Render] RenderScale, Sharpness), read live from GameConfig
+        // as `$renderscale` and `$sharpness` change them too.
+        void RmlRenderScaleChanged(int index);
+        void RmlSharpnessChanged(int index);
         // Interface/UI tab -- Show FPS Counter/Show Debug Info stay ephemeral (SceneManager.h
         // globals, no GameConfig persistence), matching $fpscounter/$details today.
         void RmlToggleShowFpsCounter();
@@ -311,6 +321,9 @@ namespace mu::ui::window
 
             // Video tab additions.
             bool vsyncEnabled = true;
+            // Where VSync can't be turned off (CanDisableVSync): shown on and locked, with the reason.
+            bool vsyncLocked = false;
+            Rml::String vsyncLockedReason;
             Rml::String vsyncLabel;
             std::vector<Rml::String> fpsCapLabels;
             int fpsCapIndex = 0;
@@ -355,6 +368,11 @@ namespace mu::ui::window
             Rml::String lookSunlightLabel;
             Rml::String lookLightMoodLabel;
             Rml::String lookPostProcessingLabel;
+            bool enhancedMovement = false;
+            Rml::String enhancedMovementLabel;
+            bool edgeSmoothing = false;
+            Rml::String edgeSmoothingLabel;
+            Rml::String edgeSmoothingTooltip;
             // The player's tuning, per group (Render::Look::TuningGroup): its common and its "More
             // settings" rows, whether it is expanded, and why its sliders do not apply (empty when
             // they do).
@@ -370,6 +388,9 @@ namespace mu::ui::window
             Rml::String tuningResetAllLabel;
             // Shown while the last save failed; empty otherwise.
             Rml::String tuningSaveMessage;
+            Rml::String tuningPreviewNote;
+            // The localized text used by the cached render-option lists, not a bound field.
+            std::wstring renderOptionsOffText;
             // [Render] Antialiasing (the Enhanced look's samples) and Anisotropy.
             std::vector<Rml::String> antialiasingLabels;
             int antialiasingIndex = 0;
@@ -381,6 +402,17 @@ namespace mu::ui::window
             Rml::String anisotropyRowLabel;
             Rml::String anisotropyValueLabel;
             Rml::String anisotropyTooltip;
+            // [Render] RenderScale and Sharpness.
+            std::vector<Rml::String> renderScaleLabels;
+            int renderScaleIndex = 0;
+            Rml::String renderScaleRowLabel;
+            Rml::String renderScaleValueLabel;
+            Rml::String renderScaleTooltip;
+            std::vector<Rml::String> sharpnessLabels;
+            int sharpnessIndex = 0;
+            Rml::String sharpnessRowLabel;
+            Rml::String sharpnessValueLabel;
+            Rml::String sharpnessTooltip;
 
             // Interface/UI tab.
             bool showFpsCounter = false;
@@ -410,11 +442,14 @@ namespace mu::ui::window
             Rml::String s6PlayerModelsLabel;
             Rml::String s6PlayerModelsTooltip;
         };
+        void BindRenderOptionModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);
         // The model's copy of a UI text, marked dirty when the text changed.
         void SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text);
         void SyncTuningModel(OptionRmlModel& model);
+        void SyncRenderOptionLabels(OptionRmlModel& model);
+        void SyncRenderOptionModel(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
             [this](Rml::DataModelConstructor& c, OptionRmlModel& model) { BindRmlModel(c, model); },

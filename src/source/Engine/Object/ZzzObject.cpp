@@ -1,6 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Terrain/TerrainFileFormat.h"
+#include "Core/Platform/Quit.h"
 #include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Utilities/FileHandle.h"
@@ -20,6 +22,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/Movement/MovementBones.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
@@ -86,6 +89,8 @@ OBJECT_BLOCK ObjectBlock[256];
 OBJECT       Boids[MAX_BOIDS];
 OBJECT       Fishs[MAX_FISHS];
 OBJECT       Mounts[MAX_MOUNTS];
+float MountHeadTurn[MAX_MOUNTS] = {};
+float MountHeadRoll[MAX_MOUNTS] = {};
 OPERATE      Operates[MAX_OPERATES];
 //int   World = -1;
 float EarthQuake;
@@ -290,8 +295,7 @@ static float (*DrawPose(const OBJECT* o, BMD* b, bool Translate, const ObjectGho
     const float frame = ghost != nullptr ? ghost->animationFrame : o->AnimationFrame;
     if (!o->EnableBoneMatrix)
     {
-        b->Animation(BoneTransform, frame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
-                     !Translate);
+        Engine::Characters::AnimateBones(o, *b, BoneTransform, frame, !Translate);
         return BoneTransform;
     }
     const bool world = !Translate;
@@ -301,7 +305,7 @@ static float (*DrawPose(const OBJECT* o, BMD* b, bool Translate, const ObjectGho
     if (!reused)
     {
         bones = Engine::Object::Attachments::DrawBones();
-        b->Animation(bones, frame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, world);
+        Engine::Characters::AnimateBones(o, *b, bones, frame, world);
     }
 #ifdef MU_ENABLE_CONTROL_SOCKET
     CheckCharacterPose(o, b, reused);
@@ -5883,6 +5887,23 @@ void DeleteObjectTile(int x, int y)
     }
 }
 
+namespace
+{
+// Creates the object of one .obj record: type (int16), position, angle (three floats each) and scale.
+void CreateObjectFromRecord(const unsigned char* record)
+{
+    short Type = 0;
+    vec3_t Position;
+    vec3_t Angle;
+    float Scale = 0.f;
+    memcpy(&Type, record, sizeof(Type));
+    memcpy(Position, record + sizeof(Type), sizeof(vec3_t));
+    memcpy(Angle, record + sizeof(Type) + sizeof(vec3_t), sizeof(vec3_t));
+    memcpy(&Scale, record + sizeof(Type) + 2 * sizeof(vec3_t), sizeof(Scale));
+    CreateObject(Type, Position, Angle, Scale);
+}
+} // namespace
+
 int OpenObjectsEnc(wchar_t* FileName)
 {
     Content::Stream file = Content::OpenIO(FileName);
@@ -5890,8 +5911,7 @@ int OpenObjectsEnc(wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return (-1);
     }
     std::optional<std::vector<BYTE>> EncData = DataFileIO::ReadAll(file.get());
@@ -5908,29 +5928,28 @@ int OpenObjectsEnc(wchar_t* FileName)
     MapFileDecrypt(Decrypted.data(), EncData->data(), EncBytes);
     const unsigned char* Data = Decrypted.data();
 
-    int DataPtr = 0;
-    DataPtr += 1;
-    int iMapNumber = static_cast<int>(Data[DataPtr]);
-    DataPtr += 1;
+    // Header: version, map number and the object count (int16); then the records, whose size the version gives.
+    constexpr std::size_t HeaderSize = 4;
+    const std::size_t RecordSize =
+        Decrypted.size() < HeaderSize ? 0 : Render::Terrain::FileFormat::ObjectRecordSize(Data[0]);
+    if (RecordSize == 0)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"Unknown object file version.");
+        return (-1);
+    }
+    const int iMapNumber = static_cast<int>(Data[1]);
     short Count = 0;
-    memcpy(&Count, Data + DataPtr, sizeof(Count));
-    DataPtr += sizeof(Count);
+    memcpy(&Count, Data + 2, sizeof(Count));
+    if (Count < 0 || HeaderSize + static_cast<std::size_t>(Count) * RecordSize > Decrypted.size())
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return (-1);
+    }
+
     g_iTotalObj = Count;
     for (int i = 0; i < Count; i++)
     {
-        vec3_t Position;
-        vec3_t Angle;
-        short Type = 0;
-        memcpy(&Type, Data + DataPtr, sizeof(Type));
-        DataPtr += sizeof(Type);
-        memcpy(Position, Data + DataPtr, sizeof(vec3_t));
-        DataPtr += sizeof(vec3_t);
-        memcpy(Angle, Data + DataPtr, sizeof(vec3_t));
-        DataPtr += sizeof(vec3_t);
-        float Scale = 0.f;
-        memcpy(&Scale, Data + DataPtr, sizeof(Scale));
-        DataPtr += sizeof(Scale);
-        CreateObject(Type, Position, Angle, Scale);
+        CreateObjectFromRecord(Data + HeaderSize + i * RecordSize);
     }
 
     return iMapNumber;

@@ -78,6 +78,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME shop_pages_tests
+    SOURCES
+        test_shop_pages.cpp
+)
+
+mu_add_test(
     NAME shop_script_list_tests
     SOURCES
         test_shop_script_list.cpp
@@ -196,12 +202,14 @@ mu_add_test(
     NAME ui_scaling_tests
     SOURCES
         test_ui_scaling.cpp
-        ${CMAKE_SOURCE_DIR}/tests/data/ExecutableConfigFile.cpp
+        ${CMAKE_SOURCE_DIR}/tests/data/UserConfigFile.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
     # Saves the config.ini beside the executable, as theme_file_interface_tests does.
     RESOURCE_LOCK ui_executable_config_ini
 )
+# config.ini.template, the config a new player starts with.
+target_compile_definitions(ui_scaling_tests PRIVATE MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin")
 
 mu_add_test(
     NAME mu_helper_tests
@@ -387,6 +395,7 @@ mu_add_test(
     NAME rml_styling_regression_tests
     SOURCES
         test_rml_styling_regressions.cpp
+        test_rml_in_game_shop_hits.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient mu_test_rml_layout_fixture
 )

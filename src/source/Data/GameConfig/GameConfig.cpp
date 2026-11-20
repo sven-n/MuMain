@@ -11,9 +11,11 @@
 
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
+#include "Core/Content/ContentStore.h"
+#include "Core/Platform/UserFolder.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/WinIni.h"  // private-profile (.ini) API
-#include "Core/Platform/Dpapi.h"   // Legacy credential format migration
 #include "Core/Platform/PlatformCrypto.h"
 
 GameConfig& GameConfig::GetInstance()
@@ -53,9 +55,38 @@ GameConfig::GameConfig()
 #else
     const char* overridePath = nullptr;
 #endif
-    m_configPath = GameConfigValidation::ResolveConfigPath(exePath, overridePath);
+    m_configPath = GameConfigValidation::ResolveConfigPath(Core::Platform::UserFolder(), overridePath);
+    if (overridePath == nullptr || overridePath[0] == '\0')
+    {
+        SeedFromExecutableFolder(std::filesystem::path(exePath) / CfgFiles::CfgFileName);
+    }
 
     Load();
+}
+
+void GameConfig::SeedFromExecutableFolder(const std::filesystem::path& legacyConfig) const
+{
+    using Core::Platform::Seeded;
+    const Seeded seeded = Core::Platform::SeedUserFile(m_configPath, legacyConfig,
+                                                       Content::ReadFile(Core::Platform::ShippedDefaultsFile));
+    const auto log = mu::log::Get("core");
+    switch (seeded)
+    {
+    case Seeded::FromLegacy:
+        log->info("config.ini: copied from the one next to the executable; that one is no longer read");
+        break;
+    case Seeded::FromDefaults:
+        log->info("config.ini: created from {}", Core::Platform::ShippedDefaultsFile);
+        break;
+    case Seeded::Nothing:
+        log->warn("config.ini: no {} to create it from; using built-in defaults", Core::Platform::ShippedDefaultsFile);
+        break;
+    case Seeded::Failed:
+        log->error("config.ini: could not be created in the user folder");
+        break;
+    case Seeded::Existing:
+        break;
+    }
 }
 
 void GameConfig::Load()
@@ -95,31 +126,7 @@ void GameConfig::Load()
         ReadBool(CfgSectionUI, CfgKeyEnableAnimationTaskPool, CfgDefaultEnableAnimationTaskPool);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
-    m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
-    m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
-    m_look = ReadLookPreset(m_configPath);
-    m_anisotropy =
-        GameConfigValidation::ValidateAnisotropy(ReadInt(CfgSectionRender, CfgKeyAnisotropy, CfgDefaultAnisotropy));
-    m_antialiasing = GameConfigValidation::ValidateAntialiasing(
-        ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
-    m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
-    m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
-    m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
-    m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
-    m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
-
-    m_renderBackend = GameConfigValidation::ValidateRenderBackend(
-        ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
-    m_disableEffects = ReadBool(CfgSectionRender, CfgKeyDisableEffects, CfgDefaultDisableEffects);
-    m_disableParticles = ReadBool(CfgSectionRender, CfgKeyDisableParticles, CfgDefaultDisableParticles);
-    m_disableSkillEffectModels =
-        ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
-    m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
-    m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
-    m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
-    m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
-    m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
-    m_useS6PlayerModels = ReadBool(CfgSectionRender, CfgKeyUseS6PlayerModels, CfgDefaultUseS6PlayerModels);
+    LoadRenderSettings();
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -167,15 +174,66 @@ void GameConfig::Save()
     WriteInt(CfgSectionUI, CfgKeyUIScalePercent, m_uiScalePercent);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
+    SaveRenderSettings();
+}
+
+void GameConfig::LoadRenderSettings()
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+    using namespace CfgDefaults;
+
+    m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
+    m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
+    m_look = ReadLookPreset(m_configPath);
+    m_anisotropy =
+        GameConfigValidation::ValidateAnisotropy(ReadInt(CfgSectionRender, CfgKeyAnisotropy, CfgDefaultAnisotropy));
+    m_antialiasing = GameConfigValidation::ValidateAntialiasing(
+        ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
+    m_edgeSmoothing = ReadBool(CfgSectionRender, CfgKeyEdgeSmoothing, CfgDefaultEdgeSmoothing);
+    m_renderScale =
+        GameConfigValidation::ValidateRenderScale(ReadInt(CfgSectionRender, CfgKeyRenderScale, CfgDefaultRenderScale));
+    m_sharpness =
+        GameConfigValidation::ValidateSharpness(ReadInt(CfgSectionRender, CfgKeySharpness, CfgDefaultSharpness));
+    m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
+    m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
+    m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
+    m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
+    m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
+    m_enhancedMovement = ReadBool(CfgSectionRender, CfgKeyEnhancedMovement, CfgDefaultEnhancedMovement);
+
+    m_renderBackend = GameConfigValidation::ValidateRenderBackend(
+        ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
+    m_disableEffects = ReadBool(CfgSectionRender, CfgKeyDisableEffects, CfgDefaultDisableEffects);
+    m_disableParticles = ReadBool(CfgSectionRender, CfgKeyDisableParticles, CfgDefaultDisableParticles);
+    m_disableSkillEffectModels =
+        ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
+    m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
+    m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
+    m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
+    m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
+    m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
+    m_useS6PlayerModels = ReadBool(CfgSectionRender, CfgKeyUseS6PlayerModels, CfgDefaultUseS6PlayerModels);
+}
+
+void GameConfig::SaveRenderSettings()
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
     WriteString(CfgSectionRender, CfgKeyLook, GameConfigValidation::FormatLook(m_look));
     WriteInt(CfgSectionRender, CfgKeyAnisotropy, m_anisotropy);
     WriteInt(CfgSectionRender, CfgKeyAntialiasing, m_antialiasing);
+    WriteBool(CfgSectionRender, CfgKeyEdgeSmoothing, m_edgeSmoothing);
+    WriteInt(CfgSectionRender, CfgKeyRenderScale, m_renderScale);
+    WriteInt(CfgSectionRender, CfgKeySharpness, m_sharpness);
     WriteBool(CfgSectionRender, CfgKeyEnhancedLighting, m_enhancedLighting);
     WriteBool(CfgSectionRender, CfgKeyDynamicLights, m_dynamicLights);
     WriteBool(CfgSectionRender, CfgKeySunlight, m_sunlight);
     WriteBool(CfgSectionRender, CfgKeyLightMood, m_lightMood);
     WriteBool(CfgSectionRender, CfgKeyPostProcessing, m_postProcessing);
+    WriteBool(CfgSectionRender, CfgKeyEnhancedMovement, m_enhancedMovement);
     WriteBool(CfgSectionRender, CfgKeyDisableEffects, m_disableEffects);
     WriteBool(CfgSectionRender, CfgKeyDisableParticles, m_disableParticles);
     WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);
@@ -272,6 +330,16 @@ void GameConfig::SetAnisotropy(int anisotropy)
 void GameConfig::SetAntialiasing(int samples)
 {
     m_antialiasing = GameConfigValidation::ValidateAntialiasing(samples);
+}
+
+void GameConfig::SetRenderScale(int percent)
+{
+    m_renderScale = GameConfigValidation::ValidateRenderScale(percent);
+}
+
+void GameConfig::SetSharpness(int percent)
+{
+    m_sharpness = GameConfigValidation::ValidateSharpness(percent);
 }
 
 void GameConfig::SetDisableEffects(bool disabled)
@@ -525,22 +593,13 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
     if (encryptedData.empty()) return L"";
 
     std::vector<std::uint8_t> decryptedData;
-    if (mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decryptedData))
+    if (mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decryptedData) ||
+        mu_decrypt_legacy_blob(encryptedData.data(), encryptedData.size(), decryptedData))
     {
         std::wstring result(reinterpret_cast<const wchar_t*>(decryptedData.data()), decryptedData.size() / sizeof(wchar_t));
         if (!result.empty() && result.back() == L'\0') {
             result.pop_back();
         }
-        return result;
-    }
-
-    DATA_BLOB dataIn = { static_cast<DWORD>(encryptedData.size()), encryptedData.data() };
-    DATA_BLOB dataOut = {};
-    if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
-    {
-        std::wstring result(reinterpret_cast<wchar_t*>(dataOut.pbData), dataOut.cbData / sizeof(wchar_t));
-        LocalFree(dataOut.pbData);
-        if (!result.empty() && result.back() == L'\0') result.pop_back();
         return result;
     }
 
@@ -562,6 +621,17 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
 
 void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* pass)
 {
+    if (!mu_credentials_available())
+    {
+        static bool reported = false;
+        if (!reported)
+        {
+            g_ErrorReport.Write(L"Saved logins are not available on this platform.\r\n");
+            reported = true;
+        }
+        return;
+    }
+
     std::wstring encUser = EncryptSetting(user);
     if (encUser.empty())
     {

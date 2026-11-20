@@ -104,6 +104,11 @@ std::uint32_t Revision()
     return s_state.layers.Revision();
 }
 
+LookPreview ActivePreview()
+{
+    return s_state.layers.Preview();
+}
+
 Lighting::LightHistorySettings LightHistorySettings()
 {
     const LookValues& values = Active();
@@ -120,15 +125,31 @@ Lighting::LightHistorySettings LightHistorySettings()
 #if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
 namespace
 {
+const char* PreviewName(LookPreview preview)
+{
+    return preview == LookPreview::Authoring ? "authoring" : "player";
+}
+
+// After an edit: says when it switched the Player preview to Authoring.
+void LogPreviewSwitch(LookPreview before)
+{
+    if (before != s_state.layers.Preview())
+    {
+        mu::log::Get("render")->info("Look preview: authoring (the look as edited, without the player's values); "
+                                     "`$look preview player` shows them again");
+    }
+}
+
 // An edit's result: applied, the next frame uses the live values (Render/Look/LookLayers.h has
 // already rebuilt the map light for a mood edit); refused, nothing changed.
-bool Applied(const LookEditResult& result, const char* what)
+bool Applied(const LookEditResult& result, const char* what, LookPreview before)
 {
     if (!result.applied)
     {
         mu::log::Get("render")->warn("$look {} refused: {}", what, result.error);
         return false;
     }
+    LogPreviewSwitch(before);
     return true;
 }
 
@@ -164,7 +185,8 @@ bool Show(std::optional<std::string_view> name)
         return false;
     }
     const int world = gMapManager.WorldActive;
-    mu::log::Get("render")->info("$look values on world {} from {}; preset {}, overrides: {}", world, s_state.source,
+    mu::log::Get("render")->info("$look values on world {} from {}; preview {}, preset {}, overrides: {}", world,
+                                 s_state.source, PreviewName(s_state.layers.Preview()),
                                  ActiveLookPreset() == LookPreset::Enhanced ? "Enhanced" : "Classic",
                                  DescribeFeatureOverrides());
     for (const LookValueState& state : states)
@@ -200,8 +222,9 @@ bool SetLive(std::span<const LookEdit> edits, bool currentMap)
         return false;
     }
     const std::optional<int> scope = currentMap ? std::optional<int>(world) : std::nullopt;
+    const LookPreview before = s_state.layers.Preview();
     const LookEditResult result = s_state.layers.Set(edits, scope, currentMap ? MapName(world) : std::string());
-    if (!Applied(result, "set"))
+    if (!Applied(result, "set", before))
     {
         return false;
     }
@@ -220,8 +243,9 @@ bool SetLive(std::span<const LookEdit> edits, bool currentMap)
 
 bool ResetLive(std::optional<std::string_view> name)
 {
+    const LookPreview before = s_state.layers.Preview();
     const LookEditResult result = s_state.layers.Reset(name, gMapManager.WorldActive);
-    if (!Applied(result, "reset"))
+    if (!Applied(result, "reset", before))
     {
         return false;
     }
@@ -229,6 +253,40 @@ bool ResetLive(std::optional<std::string_view> name)
         "$look reset {} to the values loaded from {}{}", name ? std::string(*name) : "every value", s_state.source,
         result.entryMaps.size() > 1 ? ", on maps " + DescribeMaps(result.entryMaps) : std::string());
     return true;
+}
+
+void SetLivePreview(LookPreview preview)
+{
+    s_state.layers.SetPreview(preview);
+    mu::log::Get("render")->info("Look preview: {}", preview == LookPreview::Authoring
+                                                         ? "authoring (the look as edited, without the player's values)"
+                                                         : "player (the look as players see it)");
+}
+
+LookEditResult ReplaceLive(const Data::Maps::LookProfileData& profile)
+{
+    const LookPreview before = s_state.layers.Preview();
+    LookEditResult result = s_state.layers.Replace(profile);
+    // Not logged when applied: a slider drag replaces the profile every frame.
+    if (result.applied)
+    {
+        LogPreviewSwitch(before);
+    }
+    else
+    {
+        mu::log::Get("render")->warn("Graphics Look: change refused: {}", result.error);
+    }
+    return result;
+}
+
+const LookFiles& LoadedFiles()
+{
+    return s_state.layers.Loaded();
+}
+
+std::uint32_t LiveFilesGeneration()
+{
+    return s_state.layers.FilesGeneration();
 }
 
 bool LoadLive(std::string_view candidate)
@@ -264,8 +322,9 @@ bool SaveLive()
         mu::log::Get("render")->error("$look save failed: {}", result.message);
         return false;
     }
-    // What was saved is now what a reset goes back to.
+    // What was saved is now what a reset goes back to, and the shipped file has it (also from a candidate).
     s_state.layers.MarkSaved();
+    s_state.source = "shipped";
     ++s_state.saves;
     mu::log::Get("render")->info("$look save: {}", result.message);
     return true;
@@ -316,6 +375,9 @@ bool HandleDeveloperCommand(std::wstring_view command)
         break;
     case LookVerb::Save:
         (void)SaveLive();
+        break;
+    case LookVerb::Preview:
+        SetLivePreview(look->name == "authoring" ? LookPreview::Authoring : LookPreview::Player);
         break;
     }
     return true;

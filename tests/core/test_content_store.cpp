@@ -222,3 +222,24 @@ TEST_CASE("without opened content, files are read from the working directory in 
     std::filesystem::current_path(previous);
     std::filesystem::remove_all(folder);
 }
+
+TEST_CASE("a folder storage names each file the game read, by its stored name [content]")
+{
+    const std::filesystem::path folder = std::filesystem::temp_directory_path() / "mu_content_read_log_test";
+    std::filesystem::remove_all(folder);
+    std::filesystem::create_directories(folder / "Data");
+    std::ofstream(folder / "Data" / "Hit.txt", std::ios::binary) << "hit";
+    std::ofstream(folder / "Data" / "Probed.txt", std::ios::binary) << "probed";
+    auto reads = std::make_shared<ContentMemoryStorage::ReadLog>();
+    Content::Open(ContentMemoryStorage::OpenFolder(folder, reads));
+
+    CHECK(Content::ReadAll(P("data/HIT.txt")) == "hit");
+    CHECK(Content::OpenIO("Data/Hit.txt") != nullptr);
+    CHECK(Content::Exists(P("Data/Probed.txt")));
+    CHECK_FALSE(Content::ReadAll(P("Data/Missing.txt")));
+
+    CHECK(reads->Take() == std::set<std::string>{"Data/Hit.txt"});
+    CHECK(reads->Take().empty());
+    Content::Close();
+    std::filesystem::remove_all(folder);
+}

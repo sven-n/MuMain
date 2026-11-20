@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -24,8 +25,7 @@ JewelHarmonyInfo::JewelHarmonyInfo()
 
     mu::log::Get("ui")->error("{} {}", StringUtils::WideToNarrow(filename.c_str()), StringUtils::WideToNarrow(problem));
     const std::wstring message = filename + L" " + problem + L"\r\n";
-    ::MessageBox(g_hWnd, message.c_str(), NULL, MB_OK);
-    ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+    Core::Platform::ShowFatalError(L"Error", message.c_str());
 }
 
 JewelHarmonyInfo::~JewelHarmonyInfo() {}

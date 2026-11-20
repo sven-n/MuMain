@@ -53,5 +53,6 @@ cd out/build/windows-x64-mueditor/src/Debug
 ```
 
 Run from the build output's `src/<config>` directory so the client finds its
-assets, `config.ini`, and `MUnique.Client.Library.dll` (all placed there by the
-post-build step).
+assets and `MUnique.Client.Library.dll` (both placed there by the post-build
+step). `config.ini` and `MuError.log` are in `%APPDATA%\MuMain\<install>\`, such as `RelWithDebInfo-3f9a2c1b` (see
+[where settings and logs live](../README.md#where-settings-and-logs-live)).

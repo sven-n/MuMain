@@ -511,7 +511,7 @@ public:
             }
 
             SaveOptions();
-            SaveMacro(L"Data\\Macro.txt");
+            SaveMacro();
             MUHelper::g_MuHelper.TriggerStop();
             g_pNewUIMng->ResetActiveUIObj();
 
@@ -661,7 +661,7 @@ std::string Quit(const Request& request, std::unique_ptr<Act>&)
     // connection at all, so the goodbye needs the connection.
     if (SocketClient != nullptr && g_bGameServerConnected)
     {
-        SaveMacro(L"Data\\Macro.txt");
+        SaveMacro();
         MUHelper::g_MuHelper.TriggerStop();
 
         LogOut = true;

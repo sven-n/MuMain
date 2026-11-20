@@ -112,6 +112,7 @@ the rule that holds.
 | O33 | Item files saved before 9a1 (R11, 2026-11-06) | No warning and no new `formatVersion`: O24 stays as written. The shipped item files get their lists in 9a1's data commit; an item file someone saved before 9a1 has no lists, so its items have no options in the client (OpenMU still applies its own) until the editor writes them. Unlike a missing `statProfile` (`ValidateStatProfileGiven`, `ItemDataValidation.cpp:266-279`), the game gives no warning, because it never reads the rules (O34). |
 | O34 | Where the option rules build (R12, 2026-11-06) | In every build, as `StatProfileRule` and `DeriveStatProfile` (`ItemAttributeConversion.h:51`): `ItemRuleConditions`, `OptionRule` and the `OptionRules.json` reader. Only the editor loads the file (`CItemDataHandler::Load`, `#ifdef _EDITOR`) and writes lists from it (`WithDerivedFields`, P18); the game never reads it. The data test that checks every shipped item's list against its rules is outside `#ifdef _EDITOR` and reads the file itself, so upstream's pull request checks, which build with the editor off, run it. |
 | O35 | The critical damage rate (2026-11-08) | Luck's slot value alone would change nothing: the only code that adds it up (`CalculateCriticalDamage`) had no caller, and its sum no reader. Season 6 and OpenMU add up the critical damage chance from luck (5 % per worn item), ancient set options, the Lightning seed sphere option, two mastered buffs (Expansion of Wizardry, Critical Damage Increase) and, on OpenMU since 2026-11-02, the Scroll of Battle (20 %), never from a stat (checked in OpenMU's code and a live database). So luck writes its value, and the character window shows the rate as a line under the strength's lines: the worn items' part, the hero's own buff in brackets (`33% (+9%)`, the window's colours), and while the pointer is over it each part above 0 and the total. Own buff: the hero has the master skill whose value the server sends; the client can't tell who cast a buff, so a buff the hero can't cast is not counted, and one the hero can is counted with the hero's values. `CalculateCriticalDamage` and the two `CriticalDamage` fields go. The damage line gets a hint with a normal, critical and excellent hit and the critical damage bonus's parts (set, harmony and socket options, the own Increase Critical Damage, which also colours the line) |
+| O36 | Highest option level per list (2026-11-16) | A server with +28 items (option level 7) shows +16 today: the lists end at level 4 and a level above a list's end shows its last value. No setting of its own: each value list's highest level is its length, which Item Options shows per definition. The user first asked for one number for all lists, but the jewelry lists end at level 3 (`[1, 2, 3]` %, Season 6 jewelry has 1 to 3, the others 1 to 4), so one number would either give the rings +7 % or need exceptions. Instead **Fill levels of the marked definitions** makes each marked list end at one level, each going on by its own step (the difference of its last two values) or cut: the five damage and defense lists to 7 give `[4, … 28]`, the shields' `[5, … 35]`, and the jewelry lists stay unless marked. Nothing in the game changes: it already counts a level above a list's end as the end. The editor's option level controls go to 15, what the option byte holds. |
 
 ## Current state
 
@@ -942,7 +943,7 @@ grows by one), its title an `I18N::Editor` text. Built like Item Formulas
   the save checks (as Item Formulas); a value editor that fits the value (a
   number, a level grid for lists, `per` terms); **Fill levels** writes a
   list from a start level, a start value, a step and a last level (O11,
-  O25); OpenMU's labels (O27) are shown and set by Update from server, and
+  O25), and makes the marked definitions' lists end at one level (O36); OpenMU's labels (O27) are shown and set by Update from server, and
   a change of the English display name warns first, because OpenMU's code
   looks definitions up by it; **Used by**
   lists the items; D26: a definition that is used cannot be removed (the
@@ -957,7 +958,7 @@ grows by one), its title an `I18N::Editor` text. Built like Item Formulas
   definitions; a list that differs from its rules is marked, with "Use the
   rules" to reset it.
 - **Item Tooltip** (`MuItemTooltipUI.cpp:153-161`): the Option checkbox
-  becomes an option level (0 to 7) and type (for wings); Excellent becomes
+  becomes an option level (0 to 15, O36) and type (for wings); Excellent becomes
   one checkbox per option of the item's excellent or wing definition; with
   9a4 an ancient bonus level (0 to 2); 9b adds harmony option and level, 380,
   sockets.

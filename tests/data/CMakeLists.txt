@@ -9,6 +9,8 @@ mu_add_test(
         test_item_edit_history.cpp
         test_item_ground_labels.cpp
         test_item_json.cpp
+        test_item_option_file_change.cpp
+        test_item_preview_options.cpp
         test_item_references.cpp
         test_item_list_model.cpp
         test_item_model_json.cpp
@@ -180,12 +182,14 @@ target_compile_definitions(monster_data_tests PRIVATE
 # GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
 mu_allow_gcc13_stringop_overflow(monster_data_tests test_monster_npc_name_files.cpp)
 
-# The look profile of the Enhanced rendering features (Data/Render/Look.json), its edit operations
-# and the player's own tuning of it ([EnhancedTuning] of config.ini). look_v1 holds the last shipped
-# pair of format 1 files, which the shipped file must match on every map.
+# The look profile of the Enhanced rendering features (Data/Render/Look.json), its edit operations,
+# the player's own tuning of it ([EnhancedTuning] of config.ini) and the Graphics Look window's
+# undo history. look_v1 holds the last shipped pair of format 1 files, which the shipped file must
+# match on every map.
 mu_add_test(
     NAME look_profile_data_tests
     SOURCES
+        test_look_edit_history.cpp
         test_look_profile_json.cpp
         test_look_profile_edits.cpp
         test_personal_tuning.cpp
@@ -196,6 +200,18 @@ target_compile_definitions(look_profile_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_LOOK_V1_DIR="${CMAKE_CURRENT_SOURCE_DIR}/look_v1"
 )
+
+# The editor's Graphics Look window, drawn and clicked; it needs the client globals of Winmain.cpp.
+if(ENABLE_EDITOR)
+    mu_add_test(
+        NAME graphics_look_window_tests
+        SOURCES
+            test_graphics_look_window.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+endif()
 
 # Reads the item and item model files shipped in src/bin/Data through the real
 # loader. The loader pulls in client globals defined in Winmain.cpp, so it is
@@ -232,7 +248,7 @@ mu_add_test(
         # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
         mu_test_rml_layout_fixture
         # The test's version 14 model is encrypted with Crypto++'s ciphers.
-        MuCryptopp
+        MuDep::Cryptopp
 )
 target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
@@ -247,6 +263,7 @@ mu_add_test(
     NAME test_character_bones
     SOURCES
         test_character_bones.cpp
+        test_character_realism_bones.cpp
         test_player_body_models.cpp
         ClientFolderScope.cpp
         PlayerTextureScope.cpp
@@ -329,7 +346,7 @@ mu_add_test(
     NAME player_model_selector_tests
     SOURCES test_player_model_selector.cpp
         ClientFolderScope.cpp
-        ExecutableConfigFile.cpp
+        UserConfigFile.cpp
         PlayerTextureScope.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
@@ -372,3 +389,8 @@ foreach(data_test IN ITEMS monster_data_tests test_item_database_files)
             FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}"
             SKIP_REGULAR_EXPRESSION "${MU_TEST_SKIPPED}")
 endforeach()
+
+# Every model file of the shipped data is one the model loader can read: a header-only file loads as nothing and logs
+# an error on every load of its map.
+add_test(NAME model_files_are_readable
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/check_model_files.py" "${CMAKE_SOURCE_DIR}/src/bin/Data")

@@ -27,6 +27,7 @@
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemFormulasUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemOptionsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemSyncUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemTooltipUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
@@ -45,6 +46,7 @@
 #include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
+#include "../MuEditor/UI/GraphicsLook/MuGraphicsLookUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "Network/Server/ServerListManager.h"
 #include "../UI/Common/MuEditorUI.h"
@@ -642,6 +644,10 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemFormulasUI.Render(&m_windows.itemFormulas);
     }
+    if (m_windows.itemOptions)
+    {
+        g_MuItemOptionsUI.Render(&m_windows.itemOptions);
+    }
     if (m_windows.itemSync)
     {
         g_MuItemSyncUI.Render(&m_windows.itemSync);
@@ -959,6 +965,10 @@ void CMuEditorCore::Render()
         if (m_windows.serverList)
         {
             g_MuServerListUI.Render(&m_windows.serverList);
+        }
+        if (m_windows.graphicsLook)
+        {
+            g_MuGraphicsLookUI.Render(&m_windows.graphicsLook);
         }
         RenderItemTools();
         RenderMonsterTools();

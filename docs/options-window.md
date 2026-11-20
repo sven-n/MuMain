@@ -47,7 +47,7 @@ The window has five tabs:
 | Tab | Settings |
 |---|---|
 | Display | Resolution, windowed mode, VSync, FPS limit, UI scale |
-| Graphics | Quality: Enhanced graphics, anti-aliasing, anisotropic filtering, render level. Effects: the effect toggles. Shadows: the shadow toggles |
+| Graphics | Quality: Enhanced graphics, Enhanced movement, anti-aliasing, anisotropic filtering, render level. Effects: the effect toggles. Shadows: the shadow toggles |
 | Audio | Sound and music volume, whisper sound |
 | Gameplay | Auto attack, slide help |
 | Interface | Language, translate item names, font, UI theme, S6 player models, FPS counter, debug info |
@@ -65,12 +65,13 @@ so a tab can take more rows.
 - **Modern theme:** a full-screen settings page with the tabs on the left.
   The page scrolls when its rows don't fit.
 
-Rows with a hint (UI Scale, Anti-aliasing, Anisotropic filtering and the
+Rows with a hint (UI Scale, Anti-aliasing, Edge smoothing, Render scale, Sharpness, Anisotropic filtering and the
 Enhanced tuning sliders) show it while the pointer is over the row.
 
 ## What it stores in `config.ini`
 
-Settings are written next to the executable as `config.ini`. The options
+Settings are written to `config.ini` in the player's user folder (see
+[where settings and logs live](build/README.md#where-settings-and-logs-live)). The options
 window writes to these sections:
 
 - `[Window]` - width, height, windowed flag.
@@ -82,6 +83,15 @@ window writes to these sections:
     the Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
   - `Antialiasing` (`0`, `2`, `4`, `8`; default `4`): the Anti-aliasing row,
     the samples of the Enhanced look. Classic always renders without it.
+  - `EdgeSmoothing` (default `0`): the "Edge smoothing (FXAA)" checkbox under
+    it, edge smoothing of the Enhanced look; see
+    [`post-processing.md`](post-processing.md#edge-smoothing).
+  - `RenderScale` (`50` to `100`; default `100`) and `Sharpness` (`0` to `100`;
+    default `0`): the Render scale and Sharpness rows under it, the 3D scene of
+    the Enhanced look drawn smaller and upscaled, and sharpened; see
+    [`post-processing.md`](post-processing.md#render-scale-and-sharpening). The
+    rows offer 50, 59, 67, 77, 85 and 100 percent, and Off, 25, 50, 75 and 100;
+    `$renderscale` and `$sharpness` take any value in range.
   - `Anisotropy` (`1` is off, up to `16`; default `8`): the Anisotropic
     filtering row, for every texture with mip levels: world textures in the
     Enhanced look, upscaled textures in both.
@@ -89,6 +99,13 @@ window writes to these sections:
     (default `1`): the checkboxes of the rows under "Enhanced graphics", each a
     feature of the Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
     Clicking a row's name opens its tuning sliders instead.
+  - `EnhancedMovement` (default `0`): the "Enhanced movement" checkbox in the
+    Quality section, in both looks. Off, characters move and are drawn as
+    they were before the character realism features (facing snaps instead of
+    easing, the head turns alone, no look-at, nods, flight bank, wing lag,
+    mount lean, stride matching, slope lean, foot placement or pose fades);
+    see [`characters/animation-pipeline.md`](characters/animation-pipeline.md).
+    It takes effect on the next frame.
   - `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`,
     `DisableBoids`, `DisableBodyShadows`, `DisableWingShadow`: the Graphics
     tab's toggles. A toggle another one already covers shows ticked and

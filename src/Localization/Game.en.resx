@@ -1075,6 +1075,9 @@
   <data name="Light Mood" xml:space="preserve">
     <value>Darker map light</value>
   </data>
+  <data name="Enhanced Movement" xml:space="preserve">
+    <value>Enhanced movement</value>
+  </data>
   <data name="Bloom And Colour Grading" xml:space="preserve">
     <value>Bloom and colour grading</value>
   </data>
@@ -1327,11 +1330,17 @@
   <data name="Tuning Locked Session Value" xml:space="preserve">
     <value>Set for this session by a developer command.</value>
   </data>
+  <data name="Tuning Preview Authoring" xml:space="preserve">
+    <value>The look is being edited and shows as authored, without these settings; $look preview player shows them again.</value>
+  </data>
   <data name="Tuning Save Failed" xml:space="preserve">
     <value>Your graphics tuning could not be saved; the change is shown but not saved:</value>
   </data>
   <data name="VSync" xml:space="preserve">
     <value>VSync</value>
+  </data>
+  <data name="VSync Always On" xml:space="preserve">
+    <value>Always on here: this display paces every frame itself.</value>
   </data>
   <data name="FPS Limit" xml:space="preserve">
     <value>FPS Limit</value>
@@ -1401,6 +1410,24 @@
   </data>
   <data name="Anti-aliasing Tooltip" xml:space="preserve">
     <value>Smooths edges in the Enhanced look; Classic always renders without it</value>
+  </data>
+  <data name="Edge Smoothing" xml:space="preserve">
+    <value>Edge smoothing (FXAA)</value>
+  </data>
+  <data name="Edge Smoothing Tooltip" xml:space="preserve">
+    <value>Also smooths what anti-aliasing misses: shimmer on highlights, rim light and fine texture. Enhanced look only; costs a little sharpness</value>
+  </data>
+  <data name="Render Scale" xml:space="preserve">
+    <value>Render scale</value>
+  </data>
+  <data name="Render Scale Tooltip" xml:space="preserve">
+    <value>Draws the 3D world at a share of the window's size and upscales it (FSR 1) for more frames per second; the interface stays sharp. Enhanced look only</value>
+  </data>
+  <data name="Sharpness" xml:space="preserve">
+    <value>Sharpness</value>
+  </data>
+  <data name="Sharpness Tooltip" xml:space="preserve">
+    <value>Sharpens the 3D world (FSR 1), most useful with a render scale below 100%. Enhanced look only</value>
   </data>
   <data name="Anisotropic filtering" xml:space="preserve">
     <value>Anisotropic filtering</value>

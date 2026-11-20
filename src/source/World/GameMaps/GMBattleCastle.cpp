@@ -359,7 +359,10 @@ namespace battleCastle
         Vector(0.f, 0.f, 0.f, Angle);
         Vector(0.f, 0.f, 0.f, Position);
 
-        SocketClient->ToGameServer()->SendGuildLogoOfCastleOwnerRequest();
+        if (SocketClient != nullptr)
+        {
+            SocketClient->ToGameServer()->SendGuildLogoOfCastleOwnerRequest();
+        }
 
         OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD2);
 

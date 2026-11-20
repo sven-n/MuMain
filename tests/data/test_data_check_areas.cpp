@@ -59,8 +59,9 @@ void OpenInFrame(DataCheckArea& area, const ItemDataIssue& issue, bool clicked)
 bool AnyToolWindowOpen()
 {
     const ToolWindows& windows = g_MuEditorCore.GetToolWindows();
-    return windows.serverList || windows.effectBrowser || windows.devEditor || windows.itemBasics ||
-           windows.itemFormulas || windows.itemTranslations || windows.itemBrowser;
+    return windows.serverList || windows.graphicsLook || windows.effectBrowser || windows.devEditor ||
+           windows.itemBasics || windows.itemFormulas || windows.itemOptions || windows.itemTranslations ||
+           windows.itemBrowser;
 }
 } // namespace
 
@@ -111,10 +112,9 @@ TEST_CASE("Data Checks: a click on a file area's problem opens its window, the m
     Case cases[] = {
         {MuEditor::DataChecks::CreateServerListCheckArea(), &ToolWindows::serverList, I18N::Editor::ServerList},
         {MuEditor::DataChecks::CreateEffectCheckArea(), &ToolWindows::effectBrowser, I18N::Editor::Effects},
-        {MuEditor::DataChecks::CreateLookCheckArea(), &ToolWindows::devEditor, I18N::Editor::GraphicsLook},
+        {MuEditor::DataChecks::CreateLookCheckArea(), &ToolWindows::graphicsLook, I18N::Editor::GraphicsLook},
         {MuEditor::DataChecks::CreateModelFileCheckArea(), nullptr, I18N::Editor::ModelFiles},
-        // No tool edits the item options yet.
-        {MuEditor::DataChecks::CreateItemOptionCheckArea(), nullptr, I18N::Editor::ItemOptions},
+        {MuEditor::DataChecks::CreateItemOptionCheckArea(), &ToolWindows::itemOptions, I18N::Editor::ItemOptions},
         // No tool edits the buffs yet.
         {MuEditor::DataChecks::CreateBuffCheckArea(), nullptr, I18N::Editor::Buffs},
     };

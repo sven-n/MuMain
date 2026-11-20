@@ -174,10 +174,12 @@ mu_add_test(
 # control_socket_leak test proves that none of its sources were compiled into
 # the client (same mechanics as tests/editor's editor_leak).
 if(ENABLE_CONTROL_SOCKET)
+    # The frames command's handler sits with the other queries, which need the client globals of Winmain.cpp.
     mu_add_test(
         NAME test_control_protocol
         SOURCES
             test_control_protocol.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
         LINK_LIBS
             MuClient
     )
@@ -223,6 +225,14 @@ mu_add_test(
     SOURCES
         test_chat_command_catalog.cpp
         ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Commands/ChatCommandCatalog.cpp
+)
+
+mu_add_test(
+    NAME test_warp_list
+    SOURCES
+        test_warp_list.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Warps/ServerWarpList.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Warps/WarpListMerge.cpp
 )
 
 if(DOTNET_EXECUTABLE)

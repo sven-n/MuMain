@@ -29,18 +29,18 @@ class EarlySink final : public spdlog::sinks::base_sink<std::mutex>
 public:
     static constexpr std::size_t Capacity = 1024;
 
-    // Sends every later line to target, after the kept ones when replay is set; returns how many were dropped.
+    // Sends every later line to target, after the kept ones to each sink in replayTo; returns how many were dropped.
     // Under the sink's lock, so a line another thread logs meanwhile still comes after the kept ones.
-    std::size_t ForwardTo(spdlog::sink_ptr target, bool replay)
+    std::size_t ForwardTo(spdlog::sink_ptr target, const std::vector<spdlog::sink_ptr>& replayTo)
     {
         std::lock_guard lock(mutex_);
-        if (replay)
+        for (const auto& sink : replayTo)
         {
             try
             {
                 for (const auto& line : m_lines)
-                    target->log(line);
-                target->flush();
+                    sink->log(line);
+                sink->flush();
             }
             catch (const spdlog::spdlog_ex&)
             {
@@ -118,7 +118,7 @@ std::shared_ptr<spdlog::logger> CreateLogger(LoggerState& state, const std::stri
 
 } // namespace
 
-void Init(const std::filesystem::path& logDirectory)
+void Init(const std::filesystem::path& logDirectory, std::vector<spdlog::sink_ptr> targetSinks)
 {
     LoggerState& state = State();
     std::lock_guard lock(state.mutex);
@@ -134,16 +134,22 @@ void Init(const std::filesystem::path& logDirectory)
     spdlog::sink_ptr sink;
     try
     {
-        sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(file.string(), 5 * 1024 * 1024, 3);
+        // The native name (wide on Windows): string() would throw for a folder name outside the ANSI code page.
+        sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(file.native(), 5 * 1024 * 1024, 3);
     }
-    catch (const spdlog::spdlog_ex& exception)
+    catch (const std::exception& exception)
     {
         fileError = exception.what();
         sink = std::make_shared<spdlog::sinks::stderr_sink_mt>();
     }
-    // Without a file the early lines are on stderr already.
-    const std::size_t dropped = state.early->ForwardTo(sink, fileError.empty());
-    state.sink->set_sinks({sink});
+    // Without a file the early lines are on stderr already; the target's sinks haven't seen them.
+    std::vector<spdlog::sink_ptr> replayTo = targetSinks;
+    if (fileError.empty())
+        replayTo.push_back(sink);
+    std::vector<spdlog::sink_ptr> sinks = std::move(targetSinks);
+    sinks.insert(sinks.begin(), sink);
+    const std::size_t dropped = state.early->ForwardTo(std::make_shared<spdlog::sinks::dist_sink_mt>(sinks), replayTo);
+    state.sink->set_sinks(sinks);
 
     for (const char* name : kLoggerNames)
     {
@@ -154,7 +160,11 @@ void Init(const std::filesystem::path& logDirectory)
     if (dropped > 0)
         core->warn("{} log lines from before the log opened were dropped", dropped);
     if (!fileError.empty())
-        core->warn("No log file: {} could not be opened ({}); logging to stderr", file.string(), fileError);
+    {
+        const std::u8string name = file.u8string();
+        core->warn("No log file: {} could not be opened ({}); logging to stderr", std::string(name.begin(), name.end()),
+                   fileError);
+    }
     state.early = std::make_shared<EarlySink>();
 
     state.explicitlyInitialized = true;

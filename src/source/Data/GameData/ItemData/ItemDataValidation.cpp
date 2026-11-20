@@ -5,6 +5,7 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonFormat.h"
+#include "ItemOptionDatabase.h"
 #include "ItemModelJsonFormat.h"
 #include "ItemTooltipLines.h"
 #include "ItemType.h"
@@ -225,6 +226,19 @@ void ValidateExcellentBonus(const ItemDefinition& definition, std::vector<ItemDa
     }
 }
 
+// attackType picks the item's ancient bonus definition (AncientBonusNames, 1 to 4) until the item sets link one.
+void ValidateAttackType(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    if (definition.attackType > AncientBonusNames.size())
+    {
+        AddIssue(
+            issues, ItemDataIssueSeverity::Warning, definition,
+            std::to_string(definition.attackType) +
+                " picks no ancient bonus (0: none, 1 strength, 2 agility, 3 energy, 4 vitality): the item has none",
+            "attackType");
+    }
+}
+
 // Item files saved before the stat profiles have none; the item then has the
 // default until an edit or a bmd import gives it the profile its data gives.
 void ValidateStatProfileGiven(const ItemDefinition& definition, const ItemStatProfiles& profiles,
@@ -366,6 +380,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateClassRequirements(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
+        ValidateAttackType(definition, issues);
         ValidateRequirementsByLevel(definition, issues);
     }
 }

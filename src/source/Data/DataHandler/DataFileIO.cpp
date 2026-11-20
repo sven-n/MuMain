@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "DataFileIO.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Core/Platform/WinCompat.h"
@@ -68,8 +69,7 @@ void ReportUnusableFile(const wchar_t* fileName, const wchar_t* issue)
     wchar_t text[256]{};
     mu_swprintf(text, L"%ls - %ls", fileName, issue);
     g_ErrorReport.Write(L"%ls\r\n", text);
-    MessageBox(g_hWnd, text, nullptr, MB_OK);
-    SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+    Core::Platform::ShowFatalError(L"Error", text);
 }
 
 #ifdef _EDITOR

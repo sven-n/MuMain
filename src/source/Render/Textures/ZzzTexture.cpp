@@ -5,6 +5,7 @@
 #include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Core/Platform/ErrorDialog.h"
+#include "Core/Platform/Quit.h"
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include <setjmp.h>
@@ -16,7 +17,6 @@
 #include "ZzzTexture.h"
 #include "TextureFailure.h"
 
-#include "Network/Server/WSclient.h"
 #include "turbojpeg.h"
 
 CGlobalBitmap Bitmaps;
@@ -190,8 +190,7 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", fileName.c_str());
         mu::log::Get("render")->error("{} - File not exist.", mu_wchar_to_utf8(fileName.c_str()));
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", Text);
         return false;
     }
 
@@ -325,18 +324,15 @@ void PopUpErrorCheckMsgBox(const std::string& title, const std::string& message,
     const Render::Textures::TextureErrorActions actions{
         [](const std::string& dialogTitle, const std::string& dialogMessage, bool forceDestroy)
         {
+            // Once the game is quitting, later texture errors of the same load show no dialog.
+            if (Core::Platform::QuitRequested())
+            {
+                return false;
+            }
             using Core::Platform::ErrorDialog::Choice;
             return Core::Platform::ErrorDialog::Show(dialogTitle, dialogMessage, !forceDestroy) == Choice::Continue;
         },
-        []()
-        {
-            if (SocketClient != nullptr)
-            {
-                SocketClient->Close();
-            }
-        },
-        []() { DestroySound(); },
-        []() { DestroyWindow(); },
+        &Core::Platform::RequestQuit,
     };
     Render::Textures::DispatchTextureError(title, message, !canContinue, actions);
 }

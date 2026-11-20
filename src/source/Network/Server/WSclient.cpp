@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Platform/Quit.h"
 #include "Core/Utilities/Random.h"
 #include "App/Control/ControlTaps.h"
 #include "Audio/SoundPlaces.h"
@@ -35,7 +36,9 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/Movement/FlightFeel.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Effects/StatDownDebuffLights.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -69,12 +72,15 @@
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/Inventory/InventoryContents.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
+#include "GameLogic/Warps/ServerWarpList.h"
+#include "Network/MoveCommandData.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Character/CSParts.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Events/Event.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "World/MapInfra/MapManager.h"
+#include "World/MapInfra/MapLoad.h"
 #include "GameLogic/Events/SenatusInfo.h"
 #include "GameLogic/Events/SiegeRegistration.h"
 #include "UI/Dialogs/ConfirmRequest.h"
@@ -428,7 +434,7 @@ void ReportConnectFailure(const ConnectAttempt& attempt)
         if (!connectErrorDisplayed)
         {
             connectErrorDisplayed = true;
-            MessageBoxW(nullptr, connectError, L"Connection Error", MB_ICONERROR | MB_OK);
+            Core::Platform::ShowError("Connection Error", mu_wchar_to_utf8(connectError));
         }
     }
 }
@@ -1057,6 +1063,9 @@ void InitGame()
     UI::Chat::ResetLogFilter();
 
     UI::Guild::ClearNotices();
+
+    // A warp list of the previous server doesn't apply to the next one; it sends its own, if any.
+    SEASON3B::CMoveCommandData::GetInstance()->RestoreDataFileWarpList();
 }
 
 BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
@@ -1070,7 +1079,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
         memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
         SelectMarkColor = 0;
-        PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::RequestQuit();
         break;
     case 1:
         App::Control::Events::RecordDisconnected("the session went back to the character list");
@@ -1136,6 +1145,8 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 void ResetClientToLoginScene()
 {
     App::Control::Events::RecordDisconnected("the game session was torn down");
+    // Before ReleaseMainData: a map load's steps hold world state that it releases.
+    World::MapLoad::Cancel();
 
     // Mirror of the in-game logout path (see ReceiveLogOut, case 2): release the
     // active game session and return to a clean login scene. The auto-reconnect
@@ -1199,6 +1210,8 @@ int GetJoinMapServerStage(std::span<const BYTE> packet)
     return packet.size() > StageIndex ? packet[StageIndex] : 0;
 }
 
+static void FinishJoinMapServer(CHARACTER* c, const PRECEIVE_JOIN_MAP_SERVER_EXTENDED* Data);
+
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
     MouseLButton = false;
@@ -1247,8 +1260,14 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     // Before LoadWorld, which loads the stage's map parts.
     gMapManager.SetServerStage(GetJoinMapServerStage(ReceiveBuffer));
     gMapManager.WorldActive = Data->Map;
-    gMapManager.LoadWorld(gMapManager.WorldActive);
+    World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+                          [c, data = *Data] { FinishJoinMapServer(c, &data); });
+    return TRUE;
+}
 
+// ReceiveJoinMapServer once the map is ready.
+static void FinishJoinMapServer(CHARACTER* c, const PRECEIVE_JOIN_MAP_SERVER_EXTENDED* Data)
+{
     if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
     {
         SocketClient->ToGameServer()->SendCrywolfInfoRequest();
@@ -1373,9 +1392,10 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     GameLogic::Commands::Catalog().RequestOnce();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
-
-    return (TRUE);
 }
+
+static void RevivalAfterMapLoad(CHARACTER* c, int OldWorld);
+static void FinishRevival(CHARACTER* c);
 
 void ReceiveRevival(const BYTE* ReceiveBuffer)
 {
@@ -1495,45 +1515,61 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     gMapManager.SetServerStage(0);
     if (!gMapManager.IsServerMapLoaded(Data->Map))
     {
-        int OldWorld = gMapManager.WorldActive;
+        const int OldWorld = gMapManager.WorldActive;
 
         gMapManager.WorldActive = Data->Map;
-        gMapManager.LoadWorld(gMapManager.WorldActive);
+        World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+                              [c, OldWorld]
+                              {
+                                  RevivalAfterMapLoad(c, OldWorld);
+                                  FinishRevival(c);
+                              });
+        return;
+    }
+    FinishRevival(c);
+}
 
-        if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) ||
-            gMapManager.InChaosCastle() == true)
-        {
-            SetCharacterClass(Hero);
-        }
-
-        if (gMapManager.InChaosCastle() == false)
-        {
-            StopBuffer(SOUND_CHAOSCASTLE, true);
-            StopBuffer(SOUND_CHAOS_ENVIR, true);
-        }
-
-        if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
-            gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
-        {
-            StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
-            StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
-            StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
-            StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
-        }
-
-        if (gMapManager.WorldActive == -1 || c->Helper.Type != MODEL_HORN_OF_DINORANT || c->SafeZone)
-        {
-            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        }
-        else
-        {
-            if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
-                o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 90.f;
-            else
-                o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-        }
+// ReceiveRevival on another map, once that map is ready.
+static void RevivalAfterMapLoad(CHARACTER* c, int OldWorld)
+{
+    OBJECT* o = &c->Object;
+    if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) ||
+        gMapManager.InChaosCastle() == true)
+    {
+        SetCharacterClass(Hero);
     }
 
+    if (gMapManager.InChaosCastle() == false)
+    {
+        StopBuffer(SOUND_CHAOSCASTLE, true);
+        StopBuffer(SOUND_CHAOS_ENVIR, true);
+    }
+
+    if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
+        gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
+    {
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
+    }
+
+    if (gMapManager.WorldActive == -1 || c->Helper.Type != MODEL_HORN_OF_DINORANT || c->SafeZone)
+    {
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+    }
+    else
+    {
+        if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 90.f;
+        else
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+    }
+}
+
+// The end of ReceiveRevival, on its map.
+static void FinishRevival(CHARACTER* c)
+{
     CreatePetDarkSpirit_Now(c);
     SummonLife = 0;
     GuildTeam(c);
@@ -2242,6 +2278,9 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer)
     c->Path.PathNum = 0;
     c->Path.CurrentPath = 0;
     c->Path.CurrentPathFloat = 0;
+    // It slides to the server's tile (PushingCharacter) from where it is drawn, without the sideways shift of a flying
+    // bank.
+    Engine::Characters::ForgetFlightPivotShift(c);
     SetPlayerStop(c);
 }
 
@@ -2257,6 +2296,10 @@ int GetTeleportStage(const PRECEIVE_TELEPORT_POSITION& packet)
     return packet.Header.Size > offsetof(PRECEIVE_TELEPORT_POSITION, MapDiscriminator) ? packet.MapDiscriminator : 0;
 }
 
+static void TeleportAfterMapLoad(OBJECT* o, int OldWorld);
+static void TeleportIntoView(OBJECT* o);
+static void FinishTeleport(BYTE flag, int iEtcPart);
+
 BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     UI::Inventory::RestorePickedItem();
@@ -2271,6 +2314,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     OBJECT* o = &Hero->Object;
     o->Position[0] = ((float)(Hero->PositionX) + 0.5f) * TERRAIN_SCALE;
     o->Position[1] = ((float)(Hero->PositionY) + 0.5f) * TERRAIN_SCALE;
+    Engine::Characters::ForgetFlightPivotShift(Hero);
 
     if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
     {
@@ -2313,107 +2357,131 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         RemoveAllShopTitleExceptHero();
         if (!gMapManager.IsServerMapLoaded(Data->Map))
         {
-            int OldWorld = gMapManager.WorldActive;
+            const int OldWorld = gMapManager.WorldActive;
+            const BYTE flag = Data->Flag;
 
             gMapManager.WorldActive = Data->Map;
-            gMapManager.LoadWorld(gMapManager.WorldActive);
-
-            if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
-            {
-                SocketClient->ToGameServer()->SendCrywolfInfoRequest();
-            }
-
-            if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) ||
-                gMapManager.InChaosCastle() == true)
-            {
-                PlayBuffer(SOUND_CHAOS_ENVIR, nullptr, true);
-
-                UI::Windows::Hide(mu::ui::window::INTERFACE_FRIEND);
-
-                SetCharacterClass(Hero);
-                DeleteMount(&Hero->Object);
-            }
-            if (gMapManager.InChaosCastle() == false)
-            {
-                StopBuffer(SOUND_CHAOSCASTLE, true);
-                StopBuffer(SOUND_CHAOS_ENVIR, true);
-            }
-
-            if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
-                gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
-            {
-                StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
-                StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
-                StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
-                StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
-            }
-
-            matchEvent::CreateEventMatch(gMapManager.WorldActive);
-
-            if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
-            {
-                o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-            }
-            else
-            {
-                if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
-                    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 90.f;
-                else
-                    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-            }
-
-            if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
-                ;
-            else
-            {
-                wchar_t Text[256];
-                mu_swprintf(Text, I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
-
-                UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            }
+            World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+                                  [o, OldWorld, flag, iEtcPart]
+                                  {
+                                      TeleportAfterMapLoad(o, OldWorld);
+                                      TeleportIntoView(o);
+                                      FinishTeleport(flag, iEtcPart);
+                                  });
+            return TRUE;
         }
-
-        SocketClient->ToGameServer()->SendClientReadyAfterMapChange();
-
-        g_dwLatestZoneMoving = GetTickCount();
-        g_bWhileMovingZone = FALSE;
-
-        LoadingWorld = 30;
-
-        MouseUpdateTime = 0;
-        MouseUpdateTimeMax = 6;
-
-        if (gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4)
-        {
-            UI::Windows::Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
-        }
-        if (gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
-        {
-            UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
-        }
-
-        UI::Windows::HideAll();
-
-        CreatePetDarkSpirit_Now(Hero);
-        CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
-
-        o->Alpha = 0.f;
-        EnableEvent = 0; // USE_EVENT_ELDORADO
-
-        SelectedItem = -1;
-        SelectedNpc = -1;
-        SelectedCharacter = -1;
-        SelectedOperate = -1;
-        Attacking = -1;
-        RepairEnable = 0;
+        TeleportIntoView(o);
     }
 
+    FinishTeleport(Data->Flag, iEtcPart);
+    return TRUE;
+}
+
+// ReceiveTeleport to another map, once that map is ready.
+static void TeleportAfterMapLoad(OBJECT* o, int OldWorld)
+{
+    if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
+    {
+        SocketClient->ToGameServer()->SendCrywolfInfoRequest();
+    }
+
+    if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) ||
+        gMapManager.InChaosCastle() == true)
+    {
+        PlayBuffer(SOUND_CHAOS_ENVIR, nullptr, true);
+
+        UI::Windows::Hide(mu::ui::window::INTERFACE_FRIEND);
+
+        SetCharacterClass(Hero);
+        DeleteMount(&Hero->Object);
+    }
+    if (gMapManager.InChaosCastle() == false)
+    {
+        StopBuffer(SOUND_CHAOSCASTLE, true);
+        StopBuffer(SOUND_CHAOS_ENVIR, true);
+    }
+
+    if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
+        gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
+    {
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
+        StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
+    }
+
+    matchEvent::CreateEventMatch(gMapManager.WorldActive);
+
+    if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
+    {
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+    }
+    else
+    {
+        if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 90.f;
+        else
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+    }
+
+    if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
+        ;
+    else
+    {
+        wchar_t Text[256];
+        mu_swprintf(Text, I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
+
+        UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    }
+}
+
+// A teleport that empties the view: the server sends the new one once the client is ready.
+static void TeleportIntoView(OBJECT* o)
+{
+    SocketClient->ToGameServer()->SendClientReadyAfterMapChange();
+
+    g_dwLatestZoneMoving = GetTickCount();
+    g_bWhileMovingZone = FALSE;
+
+    LoadingWorld = 30;
+
+    MouseUpdateTime = 0;
+    MouseUpdateTimeMax = 6;
+
+    if (gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4)
+    {
+        UI::Windows::Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
+    }
+    if (gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
+    {
+        UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
+    }
+
+    UI::Windows::HideAll();
+
+    CreatePetDarkSpirit_Now(Hero);
+    CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
+
+    o->Alpha = 0.f;
+    EnableEvent = 0; // USE_EVENT_ELDORADO
+
+    SelectedItem = -1;
+    SelectedNpc = -1;
+    SelectedCharacter = -1;
+    SelectedOperate = -1;
+    Attacking = -1;
+    RepairEnable = 0;
+}
+
+// The end of ReceiveTeleport, on its map.
+static void FinishTeleport(BYTE flag, int iEtcPart)
+{
     MUHelper::g_MuHelper.TriggerStop();
 
     Hero->Movement = false;
     SetPlayerStop(Hero);
 
-    if (Data->Flag)
+    if (flag)
         UI::Hud::ShowMapName();
 
     CreateMyGensInfluenceGroundEffect();
@@ -2423,11 +2491,9 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         Hero->EtcPart = iEtcPart;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1C [ReceiveTeleport(%d)]", Data->Flag);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1C [ReceiveTeleport(%d)]", flag);
 
     App::Control::Events::RecordTeleportPacket();
-
-    return (TRUE);
 }
 
 void ReceiveEquipment(std::span<const BYTE> ReceiveBuffer)
@@ -3583,16 +3649,28 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     }
     // if(c->Helper.Type == MODEL_HELPER+37) return;
 
-    c->Object.Angle[2] = ((float)(Data->Angle) - 1.f) * 45.f;
+    const float angle = ((float)(Data->Angle) - 1.f) * 45.f;
+    // Standing, another character turns toward the new direction with its feet stepping around; any other action
+    // (an attack, a skill) faces it at once.
+    const bool standing = Data->Action == AT_STAND1 || Data->Action == AT_STAND2;
+    if (!standing || c == Hero)
+    {
+        c->Object.Angle[2] = angle;
+    }
     c->Movement = false;
 
     c->Object.Position[0] = c->TargetX * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
     c->Object.Position[1] = c->TargetY * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
+    Engine::Characters::ForgetFlightPivotShift(c);
     switch (Data->Action)
     {
     case AT_STAND1:
     case AT_STAND2:
         SetPlayerStop(c);
+        if (c != Hero)
+        {
+            StartStandingTurn(c, angle);
+        }
         break;
     case AT_ATTACK1:
     case AT_ATTACK2:
@@ -13918,12 +13996,24 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         break;
     case 0xF5:
     {
-        // The chat commands which are available to this player. It's only sent
-        // by servers which know the request, so an unknown sub code is no error.
+        // Messages of OpenMU for the open source client, so an unknown sub code is no error.
         const auto subcode = bIsC1C3 ? ReceiveBuffer[3] : ReceiveBuffer[4];
         if (subcode == 0x01)
         {
+            // The chat commands which are available to this player.
             GameLogic::Commands::Catalog().AddFromPacket(ReceiveBuffer, Size);
+        }
+        else if (subcode == 0x09)
+        {
+            // The warp list of the server, which replaces the one of the data files until the next connection.
+            if (const auto warps = GameLogic::Warps::ReadServerWarpList(ReceiveBuffer, Size))
+            {
+                SEASON3B::CMoveCommandData::GetInstance()->ApplyServerWarpList(*warps);
+            }
+            else
+            {
+                g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x09] (too short: %d bytes)", Size);
+            }
         }
         else
         {
@@ -15386,22 +15476,9 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
     case eDeBuff_AttackDown:
-    {
-        vec3_t vLight;
-        Vector(1.4f, 0.2f, 0.2f, vLight);
-        CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 0.5f);
-        CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.f);
-    }
-    break;
-
     case eDeBuff_DefenseDown:
-    {
-        vec3_t vLight;
-        Vector(0.25f, 1.0f, 0.7f, vLight);
-        CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 0.5f);
-        CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.f);
-    }
-    break;
+        Render::Effects::StatDownDebuffLights::Create(o, buff);
+        break;
     case eBuff_Berserker:
     {
         vec3_t vLight[2];
@@ -15504,13 +15581,6 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_Defense:
-    {
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
-    }
-    break;
-
     case eBuff_AddAG:
     {
         DeleteEffect(BITMAP_LIGHT, o, 2);
@@ -15532,20 +15602,11 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_HelpNpc:
-    {
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
-    }
-    break;
-
     case eBuff_RemovalMagic:
     {
         DeleteEffect(BITMAP_LIGHT, o, 2);
         DeleteEffect(BITMAP_LIGHT, o, 1);
         DeleteEffect(BITMAP_SKULL, o, 0);
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
         DeleteJoint(MODEL_SPEARSKILL, o, 0);
     }
     break;
@@ -15601,13 +15662,8 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     break;
 
     case eDeBuff_AttackDown:
-        DeleteEffect(BITMAP_SHINY + 6, o, 1);
-        DeleteEffect(BITMAP_PIN_LIGHT, o, 1);
-        break;
-
     case eDeBuff_DefenseDown:
-        DeleteEffect(BITMAP_SHINY + 6, o, 2);
-        DeleteEffect(BITMAP_PIN_LIGHT, o, 2);
+        Render::Effects::StatDownDebuffLights::Delete(o, buff);
         break;
     case eBuff_Berserker:
     {

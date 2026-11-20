@@ -14,8 +14,8 @@ public:
     void Load();
     void Save();
 
-    // config.ini beside the executable. Its [EnhancedTuning] section is read and written on its own
-    // (Data/GameConfig/PersonalTuning.h); Save() leaves it as it is.
+    // config.ini in the user folder (Core/Platform/UserFolder.h). Its [EnhancedTuning] section is read
+    // and written on its own (Data/GameConfig/PersonalTuning.h); Save() leaves it as it is.
     const std::filesystem::path& GetConfigPath() const
     {
         return m_configPath;
@@ -136,6 +136,26 @@ public:
         return m_antialiasing;
     }
     void SetAntialiasing(int samples);
+    // Edge smoothing (FXAA) of the Enhanced look.
+    bool GetEdgeSmoothing() const
+    {
+        return m_edgeSmoothing;
+    }
+    void SetEdgeSmoothing(bool enabled)
+    {
+        m_edgeSmoothing = enabled;
+    }
+    // The render scale (50 to 100 percent) and sharpness (0 to 100) of the Enhanced look.
+    int GetRenderScale() const
+    {
+        return m_renderScale;
+    }
+    void SetRenderScale(int percent);
+    int GetSharpness() const
+    {
+        return m_sharpness;
+    }
+    void SetSharpness(int percent);
     bool GetEnhancedLighting() const { return m_enhancedLighting; }
     void SetEnhancedLighting(bool enabled) { m_enhancedLighting = enabled; }
     bool GetDynamicLights() const { return m_dynamicLights; }
@@ -152,6 +172,14 @@ public:
     void SetLightMood(bool enabled) { m_lightMood = enabled; }
     bool GetPostProcessing() const { return m_postProcessing; }
     void SetPostProcessing(bool enabled) { m_postProcessing = enabled; }
+    bool GetEnhancedMovement() const
+    {
+        return m_enhancedMovement;
+    }
+    void SetEnhancedMovement(bool enabled)
+    {
+        m_enhancedMovement = enabled;
+    }
 
     // DXP-23's per-system effect-cost toggles, promoted from console-only ($effects ...)
     // diagnostics to persisted, in-game-options-exposed settings -- see MainScene.h's
@@ -209,6 +237,13 @@ private:
     GameConfig(const GameConfig&) = delete;
     GameConfig& operator=(const GameConfig&) = delete;
 
+    // A missing config.ini: a copy of the one an older client kept next to the executable, else of the shipped
+    // defaults.
+    void SeedFromExecutableFolder(const std::filesystem::path& legacyConfig) const;
+
+    void LoadRenderSettings();
+    void SaveRenderSettings();
+
     std::filesystem::path m_configPath;
 
     int  m_windowWidth;
@@ -243,11 +278,15 @@ private:
     LookPreset m_look;
     int m_anisotropy;
     int m_antialiasing;
+    bool m_edgeSmoothing;
+    int m_renderScale;
+    int m_sharpness;
     bool m_enhancedLighting;
     bool m_dynamicLights;
     bool m_sunlight;
     bool m_lightMood;
     bool m_postProcessing;
+    bool m_enhancedMovement;
     std::wstring m_renderBackend;
     bool m_disableEffects;
     bool m_disableParticles;

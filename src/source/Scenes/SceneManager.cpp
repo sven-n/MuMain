@@ -8,7 +8,9 @@
 #include "Audio/SoundSource.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Platform/UserFolder.h"
 #include <cstdio>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -256,24 +258,47 @@ double GetTargetFps()
     return g_frameTiming.GetTargetFps();
 }
 
+// Where a screenshot without a path of its own goes, in the user folder.
+static constexpr char ScreenshotFolderName[] = "Screenshots";
+// "Screen(11_15-14_05)-0001.jpg" and its terminator, with room to spare.
+static constexpr std::size_t ScreenshotNameCapacity = 64;
+
+static std::wstring InScreenshotFolder(const wchar_t* fileName)
+{
+    const std::filesystem::path folder = Core::Platform::UserFolder() / ScreenshotFolderName;
+    std::error_code error;
+    std::filesystem::create_directories(folder, error);
+    return (folder / fileName).wstring();
+}
+
 /**
- * @brief Generates a timestamped filename and message for screenshot capture.
- * @param outFileName Buffer to receive the filename
+ * @brief Generates a timestamped file path and message for screenshot capture.
+ * @param outFileName Buffer to receive the file's path
+ * @param fileNameSize Its size, in characters
  * @param outMessage Buffer to receive the log message
  * @param messageSize Its size, in characters
+ * @return false when the path doesn't fit the buffer
  */
-static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage, size_t messageSize)
+static bool GenerateScreenshotFilename(wchar_t* outFileName, size_t fileNameSize, wchar_t* outMessage,
+                                       size_t messageSize)
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
-    mu_swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg",
-        st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-    mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
+    wchar_t name[ScreenshotNameCapacity];
+    mu_swprintf(name, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
+    outFileName[0] = L'\0';
+    if (!Core::Text::AppendWideString(outFileName, fileNameSize, InScreenshotFolder(name).c_str()))
+    {
+        mu::log::Get("core")->warn("Screenshot: the screenshot folder's path is too long");
+        return false;
+    }
+    mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, name);
 
     // The server list's screenshot template, " [Valhalla / MaxiDK]", as much of it as fits.
     const std::wstring server =
         L" " + g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::Screenshot, Hero->ID);
     Core::Text::AppendWideString(outMessage, messageSize, server.c_str());
+    return true;
 }
 
 /**
@@ -295,7 +320,7 @@ static std::wstring GenerateScriptedScreenshotFilename()
                 st.wSecond, scriptedCaptureCount);
     scriptedCaptureCount = (scriptedCaptureCount + 1) % 10000;
 
-    return fileName;
+    return InScreenshotFolder(fileName);
 }
 
 static ScreenshotCaptureState g_screenshotCapture;
@@ -431,7 +456,10 @@ static bool BeginScreenshotCapture(const std::wstring& fileName, const std::wstr
 static void RequestScreenshot()
 {
     wchar_t screenshotText[256];
-    GenerateScreenshotFilename(GrabFileName, screenshotText, std::size(screenshotText));
+    if (!GenerateScreenshotFilename(GrabFileName, std::size(GrabFileName), screenshotText, std::size(screenshotText)))
+    {
+        return;
+    }
 
     if (BeginScreenshotCapture(GrabFileName, screenshotText))
     {
@@ -1168,6 +1196,7 @@ static void LogFrameTiming()
 {
     static bool enabled = std::getenv("MU_RENDER_TIMING") != nullptr;
     static unsigned frameCounter = 0;
+    FrameProfiler::g_TimingForLog = enabled;
     constexpr unsigned kLogInterval = 60;
     if (!enabled || ++frameCounter % kLogInterval != 0)
         return;

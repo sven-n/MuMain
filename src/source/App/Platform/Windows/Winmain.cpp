@@ -6,7 +6,10 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/TeardownStack.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Platform/ErrorDialog.h"
 #include "Core/Platform/GameWindow.h"
+#include "Core/Platform/Quit.h"
+#include "Core/Platform/UserFolder.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
 #include "App/Platform/ClientMain.h"
@@ -19,9 +22,6 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
 
-#ifdef _WIN32
-#include <dpapi.h>
-#endif
 #include <clocale>
 #include <cstring>
 #include <filesystem>
@@ -38,6 +38,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/PostProcessing/RenderScale.h"
 #include "Render/Look/LookPresetSetting.h"
 #include "Render/Look/LookProfileSetting.h"
 #include "Render/Look/TuningSetting.h"
@@ -50,6 +51,8 @@
 #include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "World/MapInfra/MapLoad.h"
+#include "Render/Renderer/BitmapUpload.h"
 #include "Network/EndpointForLog.h"
 #include "Dotnet/ManagedSymbols.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -74,6 +77,7 @@
 #include "Core/Platform/sdl3/SDLWindowFlags.h"
 #include "Core/Platform/BundledFonts.h"
 #include "Engine/Pathing/ZzzPath.h"
+#include "Engine/Object/EnhancedMovement.h"
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
@@ -85,7 +89,6 @@
 #include "MUHelper/MuHelper.h"
 #include "Camera/CameraManager.h"
 
-#include "UI/Windows/CBTMessageBox.h"
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #ifdef _WIN32
@@ -100,6 +103,7 @@
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/Log/SdlLogBridge.h"
+#include "Core/Utilities/Log/TargetLogSinks.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "Character/CharMakeWin.h"
@@ -366,6 +370,17 @@ void ApplyVSyncPreferenceNow(bool enabled)
         return;
     }
 
+    if (!enabled && !CanDisableVSync())
+    {
+        static bool logged = false;
+        if (!logged)
+        {
+            mu::log::Get("render")->info("VSync stays on: this display has no present mode that isn't tied to it");
+            logged = true;
+        }
+        enabled = true;
+    }
+
     if (enabled)
     {
         EnableVSync();
@@ -415,11 +430,92 @@ void MuSetAnisotropyPreference(int anisotropy)
 // Whether the active look renders with multisampling (Enhanced does, Classic does not).
 static bool g_antialiasingActive = false;
 
+// Edge smoothing follows the anti-aliasing of the look: on in Enhanced when the player chose it.
+static void ApplyEdgeSmoothing(bool enabled)
+{
+    if (!mu::GetRenderer().SetEdgeSmoothing(enabled))
+    {
+        mu::log::Get("render")->warn("Edge smoothing requested but unavailable; frames stay unsmoothed");
+        return;
+    }
+    mu::log::Get("render")->info("Edge smoothing {}", enabled ? "on" : "off");
+}
+
+// The render scale and sharpening follow the look the same way: the player's in Enhanced, none in
+// Classic.
+static void ApplyRenderScale(int percent)
+{
+    if (!mu::GetRenderer().SetRenderScale(percent))
+    {
+        mu::log::Get("render")->warn("Render scale {}% requested but upscaling is unavailable; the scene stays "
+                                     "at the window's size",
+                                     percent);
+        return;
+    }
+    mu::log::Get("render")->info("Render scale {}%", percent);
+}
+
+static void ApplySharpness(int percent)
+{
+    if (!mu::GetRenderer().SetSharpness(percent))
+    {
+        mu::log::Get("render")->warn("Sharpness {} requested but sharpening is unavailable", percent);
+        return;
+    }
+    mu::log::Get("render")->info("Sharpness {}", percent);
+}
+
 void MuSetAntialiasingActive(bool active)
 {
     g_antialiasingActive = active;
     // The renderer rebuilds its pipelines and targets at the next BeginFrame, if the count changed.
     mu::GetRenderer().SetAntialiasingSamples(active ? GameConfig::GetInstance().GetAntialiasing() : 0);
+    const GameConfig& config = GameConfig::GetInstance();
+    ApplyEdgeSmoothing(active && config.GetEdgeSmoothing());
+    ApplyRenderScale(active ? config.GetRenderScale() : Render::PostProcessing::MaxRenderScalePercent);
+    ApplySharpness(active ? config.GetSharpness() : Render::PostProcessing::MinSharpnessPercent);
+}
+
+void MuSetRenderScalePreference(int percent)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetRenderScale(percent);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Render scale: {}% saved for the Enhanced look; Classic renders without",
+                                     config.GetRenderScale());
+        return;
+    }
+    ApplyRenderScale(config.GetRenderScale());
+}
+
+void MuSetSharpnessPreference(int percent)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetSharpness(percent);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Sharpness: {} saved for the Enhanced look; Classic renders without",
+                                     config.GetSharpness());
+        return;
+    }
+    ApplySharpness(config.GetSharpness());
+}
+
+void MuSetEdgeSmoothingPreference(bool enabled)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetEdgeSmoothing(enabled);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Edge smoothing: {} saved for the Enhanced look; Classic renders without",
+                                     enabled ? "on" : "off");
+        return;
+    }
+    ApplyEdgeSmoothing(enabled);
 }
 
 void MuSetAntialiasingPreference(int samples)
@@ -661,10 +757,6 @@ void DestroyWindow()
     PtrReset(g_petProcess);
 
     g_ErrorReport.Write(L"Destroy");
-
-    HWND shWnd = FindWindow(nullptr, L"MuPlayer");
-    if (shWnd)
-        SendMessage(shWnd, WM_DESTROY, 0, 0);
 }
 void DestroySound()
 {
@@ -723,11 +815,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     // WM_ACTIVATE is handled via SDL window focus events (issue #442).
     case WM_NPROTECT_EXIT_TWO:
         SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
-        // Inform the user, then close. A frame-ticked timer cannot fire while
-        // this modal dialog blocks the main loop, so close right after the
-        // dialog is dismissed instead of via a timer.
-        MessageBox(nullptr, I18N::Game::Error9AHackingToolHasBeen, L"Error", MB_OK);
-        PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", I18N::Game::Error9AHackingToolHasBeen);
         break;
     case WM_ERASEBKGND:
         return TRUE;
@@ -741,20 +829,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
         return 0;
         break;
-    case WM_DESTROY:
-    {
-        // Just request shutdown; the main loop exits on Destroy and the teardown
-        // (sound, GL, window) runs after it. SDL owns the window now, so the GL
-        // context and window must not be torn down from inside a message.
-        SaveOptionsBeforeClose();
-        Destroy = true;
-        if (SocketClient != nullptr)
-        {
-            SocketClient->Close();
-            g_bGameServerConnected = false;
-        }
-    }
-    break;
     case WM_SETCURSOR:
 #ifdef _EDITOR
         // When hovering UI (including Open Editor button), let Windows show cursor
@@ -926,6 +1000,7 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
     return true;
 }
 
+// -1 on a target that can't measure the process's CPU use.
 double CPU_AVG = 0.0;
 static void RenderProfiledFrame()
 {
@@ -942,6 +1017,16 @@ static void RenderProfiledFrame()
     Core::Benchmark::Recorder::Instance().Tick();
 }
 
+static void RenderMapLoadingFrame()
+{
+    ShowLoadingSceneOverlay();
+    mu::GetRenderer().BeginFrame();
+    ::BeginOpengl();
+    mu::GetRenderer().ClearScreen();
+    ::EndOpengl();
+    mu::GetRenderer().EndFrame();
+}
+
 void RecordCpuUsage()
 {
     constexpr int max_recordings = 60;
@@ -954,7 +1039,13 @@ void RecordCpuUsage()
 
     while (!Destroy)
     {
-        double currentUsage = CpuUsage::Instance()->GetUsage() * 100.0;
+        const std::optional<double> sample = CpuUsage::Instance()->GetUsage();
+        if (!sample)
+        {
+            CPU_AVG = -1.0;
+            return;
+        }
+        double currentUsage = *sample * 100.0;
 
         currentUsage = std::clamp(currentUsage, 0.0, 100.0);
 
@@ -1008,11 +1099,11 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
     if (msg->hwnd != nullptr && msg->hwnd != g_hWnd)
         return true;
 
-    // Only F10's zoom lock, Enter's legacy input flag and posted WM_DESTROY
-    // shutdown requests need this bridge. SDL dispatches everything else.
+    // Only F10's zoom lock and Enter's legacy input flag need this bridge. SDL
+    // dispatches everything else.
     const bool isZoomLockKey = msg->message == WM_SYSKEYDOWN && msg->wParam == VK_F10;
     const bool isEnterKey = msg->message == WM_CHAR && msg->wParam == VK_RETURN;
-    if (isZoomLockKey || isEnterKey || msg->message == WM_DESTROY)
+    if (isZoomLockKey || isEnterKey)
     {
         WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     }
@@ -1573,6 +1664,13 @@ bool HandleClientEvent(SDL_Event& event)
 // One frame, as SDL_AppIterate calls it after handing over the frame's events; false once the client should quit.
 bool IterateClient()
 {
+    // A quit requested before SDL's events ran (during startup) arrives as the flag alone.
+    if (Core::Platform::QuitRequested() && !Destroy)
+    {
+        SaveOptionsBeforeClose();
+        Destroy = true;
+    }
+
     // Nothing runs, not even the packets or the timers; the events still arrive, so the window can close.
     if (FramesPaused())
     {
@@ -1582,7 +1680,15 @@ bool IterateClient()
 
     // Process server packets handed over from the network thread. Replaces
     // the old WM_RECEIVE_BUFFER message round-trip; runs on the main thread.
-    Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback);
+    Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback, World::MapLoad::Active);
+    // The scene loop, which notices a lost connection, doesn't run while a map loads.
+    if (World::MapLoad::Active() &&
+        (SocketClient == nullptr || SocketClient->State() == Network::ConnectionState::Closed))
+    {
+        ReconnectManager::Instance().OnConnectionLostDuringMapLoad();
+    }
+    // A map change a packet started: the next steps, between frames.
+    World::MapLoad::Pump(mu::BitmapUploadsOverStagingCap);
 
     // Run a pending reconnect teardown between frames (self-guards on its
     // pending flag). Replaces the old WM_START_RECONNECT round-trip.
@@ -1639,7 +1745,12 @@ bool IterateClient()
             // The first frame has something to draw now.
             if ((SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_HIDDEN) != 0)
                 SDL_ShowWindow(g_sdlWindow);
-            RenderProfiledFrame();
+            // While a map change loads, the game draws nothing: a short load holds the last frame, a long one
+            // shows the loading screen.
+            if (!World::MapLoad::Active())
+                RenderProfiledFrame();
+            else if (World::MapLoad::LoadingScreenDue())
+                RenderMapLoadingFrame();
 #ifdef _EDITOR
             // The editor's own windows, now that the game's frame went to the GPU.
             g_MuEditorCore.RenderPlatformWindows();
@@ -1970,18 +2081,23 @@ static void SelectConnectServer(wchar_t* commandLine)
                         fromCommandLine ? L"the command line" : L"config.ini");
 }
 
-static void InitializeWorkingDirectoryAndLog()
+// The content opens first: the user folder's name comes from the shipped defaults, and the log goes into that folder.
+// Returns OpenContent's line for the error report.
+static std::string InitializeWorkingDirectoryAndLog()
 {
     SetWorkingDirectoryToBasePath();
-    mu::log::Init();
+    std::string contentRoot = OpenContent();
+    mu::log::Init(Core::Platform::UserFolder(), mu::log::TargetLogSinks());
+    return contentRoot;
 }
 
 // Everything up to the first frame, as SDL_AppInit calls it; false when the client can't start. Each step that
 // succeeds pushes how to undo it, so ShutdownClient undoes a failed startup and a normal quit the same way.
 bool StartClient(char* szCmdLine)
 {
-    InitializeWorkingDirectoryAndLog();
+    const std::string contentRoot = InitializeWorkingDirectoryAndLog();
     g_teardown.Push([] { mu::log::Shutdown(); });
+    g_teardown.Push([] { Content::Close(); });
     // Installed before SDL starts so init failures are captured; SDL_Quit may still log, so it outlives SDL.
     static std::optional<Core::Log::Sdl::ScopedLogOutput> sdlLogOutput;
     sdlLogOutput.emplace();
@@ -2012,9 +2128,6 @@ bool StartClient(char* szCmdLine)
             }
         }
     }
-
-    const std::string contentRoot = OpenContent();
-    g_teardown.Push([] { Content::Close(); });
 
     WriteStartupDiagnostics(lpszExeVersion, wVersion);
     g_ErrorReport.Write(L"> Content: %hs\r\n", contentRoot.c_str());
@@ -2116,7 +2229,7 @@ bool StartClient(char* szCmdLine)
         const std::wstring videoInitError = Utf8ToWide(SDL_GetError());
         g_ErrorReport.Write(L"> SDL video init failed. Requested driver: %ls. SDL error: %ls\r\n",
                             requestedDriver.c_str(), videoInitError.c_str());
-        MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
+        Core::Platform::ErrorDialog::Show("Aplication Error", "Windows aplication error!", false);
         return false;
     }
     g_teardown.Push([] { SDL_Quit(); });
@@ -2140,7 +2253,7 @@ bool StartClient(char* szCmdLine)
     if (!g_sdlWindow)
     {
         g_ErrorReport.Write(L"> SDL_CreateWindow failed.\r\n");
-        MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
+        Core::Platform::ErrorDialog::Show("Aplication Error", "Windows aplication error!", false);
         return false;
     }
     Core::Platform::SetGameWindow(g_sdlWindow);
@@ -2178,8 +2291,8 @@ bool StartClient(char* szCmdLine)
                                 static_cast<float>(initialFontSizes.fixed)))
     {
         g_ErrorReport.Write(L"SDL_gpu renderer init failed.\r\n");
-        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"SDL_gpu Renderer Error.",
-                   MB_OK | MB_ICONEXCLAMATION);
+        Core::Platform::ErrorDialog::Show("SDL_gpu Renderer Error.",
+                                          mu_wchar_to_utf8(I18N::Game::InstallTheLatestGraphicsCardDriver), false);
         return false;
     }
 
@@ -2301,6 +2414,7 @@ bool StartClient(char* szCmdLine)
     I18N::RegisterLocaleObserver(&LogUiLanguageChange, nullptr);
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
     g_MonsterDataHandler.SetMonstersChangedCallback(&World::Monsters::ApplyLiveSetup);
+    Engine::Characters::SetEnhancedMovementEnabled(GameConfig::GetInstance().GetEnhancedMovement());
 
 #ifdef _EDITOR
     // Initialize MU Editor with the live SDL GPU window.
@@ -2496,6 +2610,18 @@ bool StartClient(char* szCmdLine)
             // The recorder polls process state until Destroy is set.
             Destroy = true;
             g_cpuUsageRecorder.join();
+        });
+    // Pushed last so a quit leaves the server first, however it was asked for.
+    g_teardown.Push(
+        []
+        {
+            // A map load quit midway holds world state (a texture batch) that the teardown after this releases.
+            World::MapLoad::Cancel();
+            if (SocketClient != nullptr)
+            {
+                SocketClient->Close();
+                g_bGameServerConnected = false;
+            }
         });
     return true;
 }

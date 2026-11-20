@@ -4,8 +4,10 @@
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
 
+#include <algorithm>
 #include <array>
 #include <cctype>
+#include <iterator>
 #include <set>
 
 namespace Data::Items
@@ -38,9 +40,6 @@ constexpr const char* Times = "times";
 constexpr const char* Divisor = "divisor";
 } // namespace Keys
 
-// The keys of the ways a value adds, in the order of ItemOptionAdd.
-constexpr std::array<const char*, 3> AddKeys = {"add", "addFinal", "percent"};
-
 constexpr int MaxValue = 65535;
 constexpr int MaxNumber = 255;
 // The additional option's number is the option type the server sends, the option byte's high four bits.
@@ -53,7 +52,8 @@ const KeySet RootKeys = {Json::Keys::FormatVersion, Keys::Definitions};
 const KeySet DefinitionKeys = {Keys::Name, Keys::Type, Keys::DisplayName, Keys::OpenMu, Keys::Server, Keys::Options};
 const KeySet OpenMuKeys = {Keys::Id, Keys::Name};
 const KeySet ServerKeys = {Keys::AddsRandomly, Keys::AddChance, Keys::MaximumOptionsPerItem};
-const KeySet OptionKeys = {Keys::Number, Keys::Attribute, AddKeys[0], AddKeys[1], AddKeys[2], Keys::Text};
+const KeySet OptionKeys = {Keys::Number,         Keys::Attribute,      ItemOptionAddKeys[0],
+                           ItemOptionAddKeys[1], ItemOptionAddKeys[2], Keys::Text};
 // perLevel has an error of its own, so it is no unknown field.
 const KeySet ValueKeys = {Keys::Values, Keys::PerLevel, Keys::Per};
 const KeySet TermKeys = {Keys::Attribute, Keys::Times, Keys::Divisor};
@@ -62,12 +62,19 @@ const KeySet TermKeys = {Keys::Attribute, Keys::Times, Keys::Divisor};
 // option only.
 bool HasNumbers(ItemOptionType type)
 {
-    return type != ItemOptionType::Luck;
+    return type != ItemOptionType::Luck && type != ItemOptionType::AncientBonus;
 }
 
 bool HasOneOption(ItemOptionType type)
 {
-    return type == ItemOptionType::Luck;
+    return type == ItemOptionType::Luck || type == ItemOptionType::AncientBonus;
+}
+
+// "a luck", "an ancientBonus": a type name with its article, for the messages.
+std::string WithArticle(std::string_view name)
+{
+    const bool vowel = !name.empty() && std::string_view("aeiou").find(name.front()) != std::string_view::npos;
+    return (vowel ? "an " : "a ") + std::string(name);
 }
 
 bool IsGuid(std::string_view text)
@@ -393,7 +400,7 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
         if (number != json.end())
         {
             AddFatal(field + "." + Keys::Number,
-                     std::string("a ") + FindEnumName(type) + " option has no number; leave it out");
+                     WithArticle(FindEnumName(type)) + " option has no number; leave it out");
         }
         return;
     }
@@ -402,7 +409,8 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
         AddFatal(field + "." + Keys::Number, "missing");
         return;
     }
-    const int minimum = type == ItemOptionType::Excellent ? 1 : 0;
+    // Excellent options count from 1 (bit number - 1), an ancient set's options in the order the set gives them.
+    const int minimum = type == ItemOptionType::Excellent || type == ItemOptionType::AncientOption ? 1 : 0;
     const int maximum = type == ItemOptionType::Option      ? MaxOptionTypeNumber
                         : type == ItemOptionType::Excellent ? MaxExcellentOptionNumber
                                                             : MaxNumber;
@@ -412,9 +420,9 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
 void ItemOptionsReader::ReadAdd(const OrderedJson& json, const std::string& field, ItemOption& option)
 {
     const OrderedJson* value = nullptr;
-    for (size_t add = 0; add < AddKeys.size(); ++add)
+    for (size_t add = 0; add < ItemOptionAddKeys.size(); ++add)
     {
-        const auto found = json.find(AddKeys[add]);
+        const auto found = json.find(ItemOptionAddKeys[add]);
         if (found == json.end())
         {
             continue;
@@ -432,7 +440,7 @@ void ItemOptionsReader::ReadAdd(const OrderedJson& json, const std::string& fiel
         AddFatal(field, R"(needs its value as "add", "addFinal" or "percent")");
         return;
     }
-    ReadValue(*value, field + "." + AddKeys[static_cast<size_t>(option.add)], option.value);
+    ReadValue(*value, field + "." + ItemOptionAddKeys[static_cast<size_t>(option.add)], option.value);
 }
 
 void ItemOptionsReader::ReadOption(const OrderedJson& json, const std::string& field, ItemOptionType type,
@@ -469,7 +477,7 @@ void ItemOptionsReader::ReadOptions(const OrderedJson& json, const std::string& 
     }
     if (HasOneOption(definition.type) && options->size() > 1)
     {
-        AddFatal(optionsField, std::string("a ") + FindEnumName(definition.type) + " definition has one option");
+        AddFatal(optionsField, WithArticle(FindEnumName(definition.type)) + " definition has one option");
     }
     std::set<int> numbers;
     for (size_t index = 0; index < options->size(); ++index)
@@ -548,7 +556,7 @@ OrderedJson WriteOption(const ItemOption& option, ItemOptionType type)
         json[Keys::Number] = option.number;
     }
     json[Keys::Attribute] = option.attribute;
-    json[AddKeys[static_cast<size_t>(option.add)]] = WriteValue(option.value);
+    json[ItemOptionAddKeys[static_cast<size_t>(option.add)]] = WriteValue(option.value);
     json[Keys::Text] = option.texts.size() == 1 ? OrderedJson(option.texts.front()) : OrderedJson(option.texts);
     return json;
 }
@@ -637,5 +645,25 @@ std::string WriteItemOptionsJson(std::span<const ItemOptionDefinition> definitio
     text = Json::PutObjectsOnOneLine(text, Keys::OpenMu);
     text = Json::PutObjectsOnOneLine(text, Keys::Server);
     return Json::PutListEntriesOnOneLine(text, Keys::Options) + "\n";
+}
+
+void AddDefinitionFiles(std::span<const ItemOptionDefinition> definitions, std::vector<std::string>& files)
+{
+    for (const ItemOptionDefinition& definition : definitions)
+    {
+        if (std::ranges::find(files, definition.file) == files.end())
+        {
+            files.push_back(definition.file);
+        }
+    }
+}
+
+std::vector<ItemOptionDefinition> FindDefinitionsInFile(std::span<const ItemOptionDefinition> definitions,
+                                                        std::string_view file)
+{
+    std::vector<ItemOptionDefinition> inFile;
+    std::ranges::copy_if(definitions, std::back_inserter(inFile),
+                         [file](const ItemOptionDefinition& definition) { return definition.file == file; });
+    return inFile;
 }
 } // namespace Data::Items

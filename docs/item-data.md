@@ -180,7 +180,7 @@ variants or option words. An online keyword need not select the same items offli
 | `excellentBonus` | A fixed excellent bonus of damage and magic power instead of the [item stat file's](#item-stats-by-level) excellent term; left out = the term. The Chaos Dragon Axe has 15, the Chaos Nature Bow 30 and the Chaos Lightning Staff 25. The bmd import keeps it |
 | `excellentRaisesLevel` | `false`: excellent options do not raise the level requirement by the [item stat file's](#item-stats-by-level) `excellentLevelAdd`. Left out = they do. The shipped data has it on the Dragon Knight, Venom Mist, Sylphid Ray, Volcano, Sunlight and Storm Blitz armour, the Bone Blade, Explosion Blade, Soleil Scepter, Sylph Wind Bow, Grand Viper Staff and Storm Blitz Stick, the lucky items and the Horn of Fenrir. The bmd import keeps it |
 | `defense`, `magicDefense`, `blockRate` | Armor and shield values |
-| `attackType` | Attack type used by the client |
+| `attackType` | Which [ancient bonus](#item-options) an item of an ancient set has: 1 strength, 2 agility, 3 energy, 4 vitality, until the item sets link one |
 | `sellValue` | Value factor used by the price calculation of some items |
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
 | `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership`. The stat requirements of the orbs, crystals and scrolls (groups 12 and 15, without a slot) are the values the game asks for, as OpenMU stores them: their profiles keep them as they are. The original client's bmd files hold weights for them, which Import from bmd turns into the values and Export as bmd and Export as S6E3 turn back (the smallest weight that gives each value). Which ones convert follows the item's profile: a requirement it keeps as it is while the default grows it (an orb given the default profile holds weights like any item) |
@@ -927,11 +927,12 @@ definitions: the files of `Data/Items/Options` hold the definitions, one
 file per option group, and each item names the ones it can have in its
 `options` list. Which of them an item has comes from the server: its item
 data turns them on (luck by the luck flag, the additional option by its
-level, the excellent options by the excellent byte). Luck, the additional
-option of the items that are no wings and the excellent options are in data
+level, the excellent options by the excellent byte, the ancient bonus by
+the ancient byte's bonus level). Luck, the additional option of the items
+that are no wings, the excellent options and the ancient bonus are in data
 so far; the wings' and the Horn of Dinorant's options, the Wizard's rings',
-the harmony, guardian, socket and pet options and the ancient bonus are
-still code and move into data one group at a time.
+the harmony, guardian, socket and pet options and the ancient set options
+are still code and move into data one group at a time.
 
 ```json
 {
@@ -959,9 +960,13 @@ still code and move into data one group at a time.
   low four bits, 1 to 15; Season 6 sends 1 to 4), its options numbered
   (`"number": 0`) by the option type the server sends in the byte's high
   four bits, their value by that level; `excellent` is the excellent byte,
-  its options numbered 1 to 6, each turned on by the byte's bit number - 1.
-  Each option group brings its type when it moves into data. An item links
-  at most one definition of a type.
+  its options numbered 1 to 6, each turned on by the byte's bit number - 1;
+  `ancientBonus` is the ancient byte's bonus level (its high four bits),
+  with one option without a number, its value by that level;
+  `ancientOption` is an ancient set's options, numbered from 1 (no
+  definition has it yet: the item sets bring them). Each option group
+  brings its type when it moves into data. An item links at most one
+  definition of a type.
 - `displayName`: the definition's name by language, English first.
 - `openMu` and `server`: OpenMU's labels of the same definition (its GUID
   and its English name, which the exchange with the server will match by)
@@ -1039,8 +1044,9 @@ known difference from OpenMU) and the pendants 13/12, 13/25 and 13/27.
 Arrows and bolts have none, as on Season 6 and OpenMU.
 
 The Zen option is +30 %, Season 6's value; OpenMU has +40 %. "Level / 20"
-divides the hero's level, as the client did; OpenMU divides level plus
-master level (`totalLevel`).
+divides level plus master level (`totalLevel`), rounded down, as the
+Season 6 servers and OpenMU do; the client before divided the hero's level
+only, so a level 400 hero with 200 master levels now gets +30, not +20.
 
 "Excellent" (the name's prefix and green colour, the excellent +15
 durability, the tooltip state `excellent`, the ground label's excellent
@@ -1056,6 +1062,26 @@ the drop level's excellent bonus still read the byte. The durability per
 cent (what wear takes off the stats) reads it only for weapons, shields
 and armour, whose byte holds excellent options; wings pass no excellent
 flags to it.
+
+`Options/Ancient.json` holds the ancient bonus, as OpenMU's "Ancient Bonus
+of Total Strength" and the others: an item of an ancient set raises a stat
+by its bonus level, +5 at level 1 and +10 at level 2.
+
+| Name | Attribute | Value | `attackType` |
+|---|---|---|---|
+| `ancientBonusStrength` | `totalStrength` | `[5, 10]` | 1 |
+| `ancientBonusAgility` | `totalAgility` | `[5, 10]` | 2 |
+| `ancientBonusEnergy` | `totalEnergy` | `[5, 10]` | 3 |
+| `ancientBonusVitality` | `totalVitality` | `[5, 10]` | 4 |
+
+No item links them: until the item sets link a bonus to each item of a
+set, the item's `attackType` picks the definition by these names (the last
+column), as the code before them picked the stat. The attribute decides the
+stat the bonus adds to (strength, agility, energy, vitality; another one
+adds nothing), and the value list its value; a bonus level above the list
+takes its last entry (servers send 1 and 2; the ancient byte holds up to
+15). The elemental rings and pendants keep their second line,
+"Increase Attribute Damage", in code until the item sets.
 
 `Tooltips/OptionTexts.json` holds the lines' texts:
 
@@ -1142,7 +1168,8 @@ way, since its value comes from that member's energy and command.
 ### Option rules
 
 `Options/OptionRules.json` says which definitions an item's data gives it.
-The game does not read it: the editor writes the items' lists from it.
+The game does not read it: the editor writes the items' lists from it (Item
+Options' **Rules** tab edits it).
 
 ```json
 {
@@ -1188,8 +1215,9 @@ an option without `attribute` or with none or more than one of `add`,
 0 to 65535 or that has `perLevel`, a term (`per`) without `attribute` or
 without exactly one of `times` and `divisor` (whole numbers from 1), a
 number used twice in a definition, an additional option's number above 15,
-an excellent option's number outside 1 to 6, a luck definition with more
-than one option or a numbered one, OpenMU
+an excellent option's number outside 1 to 6, an ancient set option's
+number below 1, a luck or ancient bonus definition with more than one
+option or a numbered one, OpenMU
 labels or server values of the wrong kind, and a rule naming a
 definition that does not exist or a condition it does not have. Errors:
 an item linking a definition that does not exist (the link is left out)
@@ -1203,8 +1231,12 @@ unknown fields, an attribute the client does not compute, a term on a hero
 attribute the client does not read, a text with `{divisor}` on an option
 without a term that has a divisor (the line shows 0 there) or with several
 (it shows the first one's), a definition no
-item and no rule links, a text no option names and a text in a language
-the game has no texts in.
+item and no rule links (but the four ancient bonus definitions the item's
+`attackType` picks), an item linking an ancient
+bonus or set options (the link does nothing), an ancient bonus name
+`attackType` picks that no `ancientBonus` definition has (those items show
+and add no bonus), a text no option names and a text in a language the
+game has no texts in.
 
 ---
 
@@ -1288,6 +1320,8 @@ item and the field (**Copy text** copies it). All problems are also written to
   stat profile has no excellent term for its damage or magic power (the
   bonus takes the term's place, so it does not count there)
 - `excellentRaisesLevel: false` on an item without a level requirement
+- an `attackType` above 4: it picks no [ancient bonus](#item-options)
+  (1 strength, 2 agility, 3 energy, 4 vitality), so the item has none
 - a `requirementsByLevel` entry next to a base value of the same requirement
 - a name in a language the game has no UI texts for (it is never shown)
 - no `statProfile` on an item the profile rules give one, as in item files
@@ -1863,7 +1897,14 @@ shows it in the others.
   the stat profile (*By the rules* takes what the
   [profile rules](#item-stats-by-level) give; beside the list, the rule that
   gives the item its profile, or that it is picked for the item; **Item
-  Formulas** opens the profile there) and the resistances. Below the stats, what the game
+  Formulas** opens the profile there), the resistances and the item's
+  [option links](#item-options): each definition it links with its type and
+  English name (a click opens it in Item Options, **x** takes the link out),
+  a list to link another (without the links that would do nothing: a
+  second definition of a type it links, the ancient types, excellent
+  options on wings and horns), and, when the list is not the one the
+  [option rules](#option-rules) give, what they give and **Use the rules**.
+  A list that differs from the rules stays so until it is changed. Below the stats, what the game
   makes of them at each + level (damage, magic power, defense, magic
   defense, block rate), also as excellent or ancient, while a value is still
   being typed, and under that the formula of each with the item's numbers
@@ -2211,8 +2252,16 @@ problem is never written; the editor then shows the looks the game has.
 
 How the selected item is shown, for now its name in the tooltip and on the
 ground, and its [tooltip layout](#presets). The preview takes a level, skill,
-luck, an option, the excellent options and a set (one of the item's sets),
-and shows such an item's name in two rows:
+luck, the additional option's level (0 to 15, the option byte's four bits;
+off while the item links no `option` definition) and, for a definition whose
+options are numbered by it (wings), its type (0 to the highest number of
+its options), one checkbox per excellent option of the item's excellent
+definition (without one: the bits the item's name lines name as the whole
+byte, as the Horn of Fenrir's `excellentFlags=1`, `=2` and `=4` kinds, each
+named by its line; else all six bits on wings, whose own code reads the byte),
+and a set (one of the
+item's sets) with its ancient bonus level (0 to 2), and shows such an item's
+name in two rows:
 
 - **In the tooltip**: the name row its tooltip writes, bold, in the colors the
   game's tooltip has in the active UI theme (its line's color and highlight
@@ -2293,6 +2342,63 @@ The server keeps its own formulas until they are synced (see
 [Item Sync](#item-sync)), so what it checks and computes can differ from
 what changed formulas give. Items your character already has keep their
 values until they are made again.
+
+### Item Options
+
+The [option definitions](#item-options) of `Options/*.json` with their
+options, the [option rules](#option-rules) and the option texts, in three
+tabs. The files are changed on a copy (a definition, rule or text with
+changes not applied is marked with `*`) and **Apply to the options** takes
+all of it: the files are checked first (each written and read back, as Save
+Items does; a fatal problem refuses the change, the others are listed under
+the buttons), and when the change reaches items they are listed before it is
+applied: the items that link a definition whose options or texts changed,
+and the items that follow the rules and take another list with the change.
+Every change is one step of the undo history, and Save Items writes the
+definition files, `Options/OptionRules.json` and `Tooltips/OptionTexts.json`.
+While the copy has changes that are not applied, **New**, **Copy**,
+**Rename**, **Remove** and **Fill levels of … marked** wait until they are
+applied or reverted. An undo or redo of the option files while the copy has
+such changes stops **Apply to the options** (it would write the undone change
+back) until **Revert**.
+
+- **Definitions**: the definitions with a search, a type filter, how many
+  items link each (unused ones are grey) and the highest level its value
+  lists give a value of their own (`-` for constants). The picked definition
+  shows its type, file, OpenMU's labels (read-only), its display name in
+  every language, its server values (only the server reads them), and its
+  options: number (not for `luck` and `ancientBonus`), attribute (the ones
+  the client computes for the type, or another, which is warned about), how
+  it adds its value, the value (a constant, or one value per level with
+  **+**, **-** and **Fill levels** from a start level, a value there and a
+  step to a last level), its terms (`level` / 20 and the like) and the names
+  of its texts with their English text. **New** adds a definition of a type
+  with one option to fill in, **Copy** a copy without OpenMU's labels; both
+  are applied with the other changes. **Rename** renames the definition in
+  the rules and every item that links it; the four ancient bonus definitions
+  keep their names, since the items' `attackType` picks them by name (and
+  counts as a use). **Remove** works while no item and no rule uses it.
+- **Highest level per list**: the checkbox before a definition marks it, and
+  **Fill levels of … marked** makes each of their value lists end at one
+  level: a shorter list goes on by its own step (the difference of its last
+  two values), a longer one is cut. So all damage and defense lists go from
+  +16 to +28 at once (`[4, 8, 12, 16]` to `[4, … 28]`), while the jewelry
+  lists (`[1, 2, 3]`) are marked or not on their own. A level above a list's
+  end shows its last value in the game, so the levels a server sends decide
+  nothing else.
+- **Rules**: the rules in order, each with its definitions, its conditions
+  and how many items take their list from it (the selected item's rule is
+  marked). **New rule**, **Move up**, **Move down** and **Remove the rule**
+  as in Item Formulas; the picked rule's definitions (**x** takes one out,
+  the list adds one) and its conditions, with the item numbers (`0, 1,
+  41-49`) and the tags an item must not have, which only the option rules
+  have.
+- **Texts**: the texts in the names grid (names by language, missing
+  translations counted); **New text** adds one, its English text `{value}`
+  until it is written.
+
+The server keeps its own option definitions until they are synced, so what
+it adds to an item can differ from what changed definitions show.
 
 ### Item Sync
 

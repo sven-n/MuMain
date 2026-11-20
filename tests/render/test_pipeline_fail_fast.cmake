@@ -40,9 +40,8 @@ function(require_shader_load_assignment handle asset stage stage_enum)
 endfunction()
 
 string(FIND "${renderer_source}" "[[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily" init_start)
-string(FIND "${renderer_source}" "[[nodiscard]] static bool LoadShaders(const char* driverName)" load_start)
+string(FIND "${renderer_source}" "[[nodiscard]] static bool LoadShaders()" load_start)
 string(FIND "${renderer_source}" "static void ReleaseShaders()" release_start)
-string(FIND "${renderer_source}" "[[nodiscard]] static SDL_GPUDepthStencilState MakeDepthStencilState" depth_state_start)
 string(FIND "${renderer_source}" "[[nodiscard]] static PipelineBuildResult BuildBlendPipeline" build_start)
 string(FIND "${renderer_source}" "static void LogPipelineFailure" log_start)
 string(FIND "${renderer_source}" "[[nodiscard]] static bool CreatePipelines()" create_start)
@@ -50,8 +49,6 @@ string(FIND "${renderer_source}" "static void DestroyPipelines()" destroy_start)
 if(init_start EQUAL -1
         OR load_start EQUAL -1
         OR release_start EQUAL -1
-        OR depth_state_start EQUAL -1
-        OR build_start LESS depth_state_start
         OR log_start EQUAL -1
         OR create_start EQUAL -1
         OR destroy_start EQUAL -1)
@@ -59,13 +56,11 @@ if(init_start EQUAL -1
 endif()
 
 math(EXPR load_length "${release_start} - ${load_start}")
-math(EXPR depth_state_length "${build_start} - ${depth_state_start}")
 math(EXPR build_length "${log_start} - ${build_start}")
 math(EXPR log_length "${create_start} - ${log_start}")
 math(EXPR init_length "${create_start} - ${init_start}")
 math(EXPR create_length "${destroy_start} - ${create_start}")
 string(SUBSTRING "${renderer_source}" ${load_start} ${load_length} load_source)
-string(SUBSTRING "${renderer_source}" ${depth_state_start} ${depth_state_length} depth_state_source)
 string(SUBSTRING "${renderer_source}" ${build_start} ${build_length} build_source)
 string(SUBSTRING "${renderer_source}" ${log_start} ${log_length} log_source)
 string(SUBSTRING "${renderer_source}" ${init_start} ${init_length} init_source)
@@ -200,14 +195,10 @@ require_source("${renderer_source}"
 require_source("${renderer_source}"
     "case FragmentShader::Textured:[ \t\r\n]*break;[ \t\r\n]*\\}[ \t\r\n]*return s_fragShaderTex;"
     "the Textured fragment shader must remain basic_textured.frag")
-# The classic client compares depth with GL_LEQUAL. With strict LESS, a later depth-writing pass
-# over the same mesh (the Bill of Balrog's textured body over its chrome body) loses every
-# equal-depth fragment.
+# The depth state itself (LESS_OR_EQUAL, as the classic client's GL_LEQUAL) is covered by sdl_gpu_depth_state_tests.
 require_source("${build_source}"
-    "pipelineInfo\\.depth_stencil_state[ \t\r\n]*=[ \t\r\n]*MakeDepthStencilState[ \t\r\n]*\\([ \t\r\n]*description[ \t\r\n]*\\)"
+    "pipelineInfo\\.depth_stencil_state[ \t\r\n]*=[ \t\r\n]*Render::MakeDepthStencilState[ \t\r\n]*\\([ \t\r\n]*description\\.depthTestEnabled[ \t\r\n]*,[ \t\r\n]*description\\.depthWriteEnabled[ \t\r\n]*\\)"
     "every pipeline must take its depth state from MakeDepthStencilState")
-require_source("${depth_state_source}" "\\.compare_op[ \t\r\n]*=[ \t\r\n]*SDL_GPU_COMPAREOP_LESS_OR_EQUAL;"
-    "pipelines must compare depth with LESS_OR_EQUAL, as the classic client's GL_LEQUAL")
 reject_source("${renderer_source}" "SDL_GPU_COMPAREOP_LESS([^_]|$)"
     "no pipeline may compare depth with strict LESS")
 require_source("${log_source}"

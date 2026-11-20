@@ -118,6 +118,19 @@
       "uk": "Відмінний рівень шкоди +{value}%",
       "zh-TW": "優 破損率+{value}%"
     },
+    "increaseAgility": {
+      "en": "Increase agility +{value}",
+      "de": "Beweglichkeit erhöhen +{value}",
+      "es": "Aumentar la agilidad +{value}",
+      "id": "Meningkatkan kelincahan +{value}",
+      "ja": "敏捷増加 +{value}",
+      "pl": "Zwiększa zwinność +{value}",
+      "pt": "Aumente a agilidade +{value}",
+      "ru": "Увеличение ловкости +{value}",
+      "tl": "Dagdagan ang liksi +{value}",
+      "uk": "Збільшення спритності +{value}",
+      "zh-TW": "增加敏捷性+{value}"
+    },
     "increaseAttackSpeed": {
       "en": "Increase Attacking(Wizardry)speed +{value}",
       "de": "Erhöht Angriffsgeschwindigkeit (Zauberei) +{value}",
@@ -157,6 +170,19 @@
       "uk": "Збільшення шкоди +{value}%",
       "zh-TW": "增加傷害+{value}%"
     },
+    "increaseEnergy": {
+      "en": "Increase energy +{value}",
+      "de": "Energie erhöhen +{value}",
+      "es": "Aumentar energía +{value}",
+      "id": "Meningkatkan energi +{value}",
+      "ja": "エナジー増加 +{value}",
+      "pl": "Zwiększa energię +{value}",
+      "pt": "Aumentar energia +{value}",
+      "ru": "Увеличение энергии +{value}",
+      "tl": "Dagdagan ang enerhiya +{value}",
+      "uk": "Збільшити енергію +{value}",
+      "zh-TW": "增加能量+{value}"
+    },
     "increaseMaxHp": {
       "en": "Increase Max HP +{value}%",
       "de": "Erhöht max. HP +{value}%",
@@ -182,6 +208,32 @@
       "tl": "Taasan ang Max Mana +{value}%",
       "uk": "Збільшення максимальної мани +{value}%",
       "zh-TW": "增加最大法力 +{value}%"
+    },
+    "increaseStrength": {
+      "en": "Increase strength +{value}",
+      "de": "Stärke erhöhen +{value}",
+      "es": "Aumentar la fuerza +{value}",
+      "id": "Meningkatkan kekuatan +{value}",
+      "ja": "力増加 +{value}",
+      "pl": "Zwiększa siłę +{value}",
+      "pt": "Aumentar força +{value}",
+      "ru": "Увеличение силы +{value}",
+      "tl": "Dagdagan ang lakas +{value}",
+      "uk": "Збільшити силу +{value}",
+      "zh-TW": "增加強度+{value}"
+    },
+    "increaseVitality": {
+      "en": "Increase stamina +{value}",
+      "de": "Vitalität erhöhen +{value}",
+      "es": "Aumentar la resistencia +{value}",
+      "id": "Meningkatkan stamina +{value}",
+      "ja": "体力増加 +{value}",
+      "pl": "Zwiększa wytrzymałość +{value}",
+      "pt": "Aumenta a resistência +{value}",
+      "ru": "Увеличение выносливости +{value}",
+      "tl": "Dagdagan ang tibay +{value}",
+      "uk": "Підвищення витривалості +{value}",
+      "zh-TW": "增加體力+{value}"
     },
     "increaseWizardryLevel20": {
       "en": "Increase Wizardry Dmg +level/{divisor}",

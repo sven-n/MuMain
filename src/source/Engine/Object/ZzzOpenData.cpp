@@ -1,4 +1,8 @@
 ﻿#include "stdafx.h"
+#include "Core/Platform/Quit.h"
+#include "Core/Platform/UserFolder.h"
+#include "Core/Content/ContentStore.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -52,7 +56,6 @@
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/LookDrawing.h"
 #include "Render/Items/ItemRenderStyles.h"
-#include "Core/Platform/ErrorDialog.h"
 #include "Core/Text/Utf8.h"
 #include "Network/Server/SocketSystem.h"
 #include "Render/Text/CUIRenderText.h"
@@ -74,8 +77,7 @@ void OpenPlayers()
     if (Models[MODEL_PLAYER].NumMeshs > 0)
     {
         g_ErrorReport.Write(L"Player.bmd file error.\r\n");
-        MessageBox(g_hWnd, L"Player.bmd file error!!!", NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        Core::Platform::ShowFatalError(L"Error", L"Player.bmd file error!!!");
     }
 
     const bool useS6 = GameConfig::GetInstance().GetUseS6PlayerModels();
@@ -308,8 +310,7 @@ static void StopOnDataError(const char* title, const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);
     g_ErrorReport.Write(L"%ls\r\n", message.c_str());
-    Core::Platform::ErrorDialog::Show(title, errorMessage, false);
-    SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+    Core::Platform::ShowFatalError(title, errorMessage);
 }
 
 static void StopOnItemDataError(const std::string& errorMessage)
@@ -1446,9 +1447,29 @@ bool OpenFont()
     return g_pRenderText->Create(g_hDC);
 }
 
-void SaveMacro(const wchar_t* FileName)
+// The chat macros, in the user folder; created once from the file an older client wrote into the content.
+static constexpr char MacroFileName[] = "Macro.txt";
+static constexpr char LegacyMacroFile[] = "Data/Macro.txt";
+
+static const std::filesystem::path& MacroFile()
 {
-    FILE* fp = _wfopen(FileName, L"wt");
+    static const std::filesystem::path file = []
+    {
+        std::filesystem::path path = Core::Platform::UserFolder() / MacroFileName;
+        (void)Core::Platform::SeedUserFile(path, {}, Content::ReadFile(LegacyMacroFile));
+        return path;
+    }();
+    return file;
+}
+
+void SaveMacro()
+{
+    FILE* fp = _wfopen(MacroFile().wstring().c_str(), L"wt");
+    if (fp == nullptr)
+    {
+        mu::log::Get("core")->warn("Chat macros: cannot write Macro.txt in the user folder");
+        return;
+    }
     for (int i = 0; i < 10; i++)
     {
         fwprintf(fp, L"%ls\n", MacroText[i]);
@@ -1456,9 +1477,9 @@ void SaveMacro(const wchar_t* FileName)
     fclose(fp);
 }
 
-void OpenMacro(const wchar_t* FileName)
+void OpenMacro()
 {
-    FILE* fp = _wfopen(FileName, L"rt");
+    FILE* fp = _wfopen(MacroFile().wstring().c_str(), L"rt");
     if (fp == NULL) return;
     for (int i = 0; i < 10; i++)
     {
@@ -2158,7 +2179,7 @@ static void OpenBasicDataStep9()
     mu_swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SocketItemMgr.OpenSocketItemScript(Text);
 
-    OpenMacro(L"Data\\Macro.txt");
+    OpenMacro();
 
     g_csItemOption.OpenItemSetScript();
 

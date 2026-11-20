@@ -54,12 +54,24 @@ add_test(NAME content_io_goes_through_the_content_layer
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_content_io.py" "${MU_REPO_ROOT}")
 add_test(NAME content_io_check_fixtures
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_content_io.py")
+add_test(NAME model_files_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_model_files.py")
 
 # The network library's exports are all resolved at startup, and its headers stay free of platform code.
 add_test(NAME network_bridge_exports_listed_and_headers_platform_free
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_network_bridge.py" "${MU_REPO_ROOT}")
 add_test(NAME network_bridge_check_fixtures
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_network_bridge.py")
+add_test(NAME platform_services_only_in_adapters
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_platform_services.py" "${MU_REPO_ROOT}")
+add_test(NAME platform_services_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_platform_services.py")
+
+# The game quits and shows errors through Core/Platform/Quit.h and ErrorDialog, not Win32 messages and MessageBox.
+add_test(NAME quit_and_errors_through_core_platform
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_quit_paths.py" "${MU_REPO_ROOT}")
+add_test(NAME quit_paths_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_quit_paths.py")
 
 add_test(
     NAME msvc_runtime_dll_staging_contract

@@ -6,9 +6,9 @@
 
 #include <cstdint>
 
-// The effective look profile: the live values of Data/Render/Look.json for the active world, then
-// the player's own values (Render/Look/TuningSetting.h), then the values a developer changed this
-// session (Render/Look/LookTuning.h).
+// The effective look profile: the live values of Data/Render/Look.json for the active world (a
+// developer edits them live, Render/Look/LookTuning.h), then the player's own values
+// (Render/Look/TuningSetting.h) unless the Authoring preview leaves them out.
 namespace Render::Look
 {
 
@@ -24,6 +24,9 @@ void LoadProfile();
 // Changes whenever the live profile changes (not with the world), so a cache of derived values
 // knows when to recompute.
 [[nodiscard]] std::uint32_t Revision();
+
+// What the effective values preview: Player until a developer edits the look (Render/Look/LookTuning.h).
+[[nodiscard]] LookPreview ActivePreview();
 
 // The light history's settings from the active profile.
 [[nodiscard]] Lighting::LightHistorySettings LightHistorySettings();

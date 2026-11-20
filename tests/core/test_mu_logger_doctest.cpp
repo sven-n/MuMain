@@ -18,6 +18,7 @@
 #include "Core/Utilities/Log/SdlLogBridge.h"
 
 #include <SDL3/SDL.h>
+#include <spdlog/sinks/ringbuffer_sink.h>
 
 std::shared_ptr<spdlog::logger> GetEarlyLogger();
 std::string GetEarlyLine();
@@ -240,5 +241,31 @@ TEST_CASE("an unwritable log folder costs the file log, not the process")
     CHECK(warning.find("No log file") != std::string::npos);
     CHECK(warning.find("logged without a log file") != std::string::npos);
     CHECK_FALSE(std::filesystem::exists(blocker / "logs" / "MuError.log"));
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("a target's log sinks get the lines from before Init and after it")
+{
+    const auto directory = TestDirectory("mu_logger_target_sinks");
+    std::filesystem::remove_all(directory);
+    // Start with no early lines: run alone, this case would also hold the static-init line.
+    mu::log::Init(directory / "before");
+    mu::log::Shutdown();
+
+    const auto console = std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(16);
+    {
+        StreamCapture capture(stderr);
+        MU_LOG_INFO(mu::log::Get("core"), "target sink: before Init");
+        mu::log::Init(directory, {console});
+        MU_LOG_INFO(mu::log::Get("core"), "target sink: after Init");
+        mu::log::Shutdown();
+    }
+
+    const std::vector<std::string> lines = console->last_formatted();
+    REQUIRE(lines.size() == 2);
+    CHECK(lines[0].find("target sink: before Init") != std::string::npos);
+    CHECK(lines[1].find("target sink: after Init") != std::string::npos);
+    const std::string logContents = ReadFile(directory / "MuError.log");
+    CHECK(logContents.find("target sink: before Init") < logContents.find("target sink: after Init"));
     std::filesystem::remove_all(directory);
 }

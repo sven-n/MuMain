@@ -107,6 +107,16 @@ void RestoreNameCases(const Data::Items::ItemNameCases& cases)
     g_ItemDataHandler.SetNameCases(cases);
 }
 
+Data::Items::ItemOptionFiles ReadOptions()
+{
+    return g_ItemDatabase.GetOptions().GetFiles();
+}
+
+void RestoreOptions(const Data::Items::ItemOptionFiles& files)
+{
+    g_ItemDataHandler.SetOptions(files);
+}
+
 std::vector<Data::Items::GroundLabelStyle> ReadGroundLabelStyles()
 {
     return g_ItemDatabase.GetGroundLabels().styles;
@@ -211,7 +221,9 @@ ItemEdits::ItemEdits()
                  &ReadNameCases,
                  &RestoreNameCases,
                  &ReadPartModels,
-                 &RestorePartModels})
+                 &RestorePartModels,
+                 &ReadOptions,
+                 &RestoreOptions})
 {
 }
 
@@ -789,6 +801,42 @@ void ItemEdits::SetStatFile(std::string label, const Data::Items::ItemStatFile& 
     Record(std::move(entry));
 }
 
+void ItemEdits::SetOptions(std::string label, const Data::Items::ItemOptionFiles& files,
+                           std::span<const ItemDefinition> relinked)
+{
+    auto before = std::make_shared<const Data::Items::ItemOptionFiles>(ReadOptions());
+    std::vector<ItemSlotState> slotsBefore;
+    for (const ItemDefinition& item : relinked)
+    {
+        slotsBefore.push_back(ReadSlot(Data::Items::MakeItemType(item.group, item.number)));
+    }
+
+    // The files first, so the items' new links resolve.
+    g_ItemDataHandler.SetOptions(files);
+    g_ItemDataHandler.RestoreItems(relinked);
+
+    ItemEditEntry entry{std::move(label), {}};
+    auto after = std::make_shared<const Data::Items::ItemOptionFiles>(ReadOptions());
+    if (*after != *before)
+    {
+        ItemEditStep step{ItemEditStep::Kind::Options};
+        step.optionsBefore = std::move(before);
+        step.optionsAfter = std::move(after);
+        entry.steps.push_back(std::move(step));
+    }
+    for (size_t index = 0; index < relinked.size(); ++index)
+    {
+        const int itemType = Data::Items::MakeItemType(relinked[index].group, relinked[index].number);
+        ItemSlotState slotAfter = ReadSlot(itemType);
+        if (slotAfter != slotsBefore[index])
+        {
+            entry.steps.push_back({ItemEditStep::Kind::Slot, itemType, 0, std::move(slotsBefore[index]),
+                                   std::move(slotAfter), std::nullopt, std::nullopt});
+        }
+    }
+    Record(std::move(entry));
+}
+
 void ItemEdits::BeginGroup(std::string label)
 {
     if (m_groupDepth++ == 0)
@@ -832,7 +880,7 @@ void ItemEdits::Record(ItemEditEntry entry)
                         step.kind == ItemEditStep::Kind::GlowColors || step.kind == ItemEditStep::Kind::StatFile ||
                         step.kind == ItemEditStep::Kind::GroundLabelStyles ||
                         (step.kind == ItemEditStep::Kind::RenderStyles && grouped.lookKind == step.lookKind) ||
-                        step.kind == ItemEditStep::Kind::PartModels ||
+                        step.kind == ItemEditStep::Kind::PartModels || step.kind == ItemEditStep::Kind::Options ||
                         (step.kind == ItemEditStep::Kind::ColorFolders && grouped.folderRoot == step.folderRoot));
             });
         if (same == m_group->steps.end())
@@ -862,6 +910,10 @@ void ItemEdits::Record(ItemEditEntry entry)
         else if (step.kind == ItemEditStep::Kind::PartModels)
         {
             same->partModelsAfter = std::move(step.partModelsAfter);
+        }
+        else if (step.kind == ItemEditStep::Kind::Options)
+        {
+            same->optionsAfter = std::move(step.optionsAfter);
         }
         else
         {

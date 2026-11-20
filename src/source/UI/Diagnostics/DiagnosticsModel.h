@@ -26,6 +26,7 @@ struct DiagnosticsModel
     double slowestFps = 0;
     double frameMs = 0;
     double cpu = 0;
+    bool cpuAvailable = true;
     bool vsync = false;
     Rml::String driver;
     float uiUpdate = 0;

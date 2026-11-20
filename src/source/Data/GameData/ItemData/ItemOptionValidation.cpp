@@ -4,9 +4,12 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemOptionEffects.h"
+#include "ItemOptionsJson.h"
+#include "OptionRulesJson.h"
 #include "OptionTextsJson.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <set>
 
@@ -15,6 +18,25 @@ namespace Data::Items
 namespace
 {
 constexpr const char* OptionsField = "options";
+
+// The types the item sets give an item (phase 10), which no item links.
+bool IsAncientType(ItemOptionType type)
+{
+    return type == ItemOptionType::AncientOption || type == ItemOptionType::AncientBonus;
+}
+
+// Whether an item's attackType picks the definition at `index` (ItemOptionDatabase::FindAncientBonus).
+bool IsPickedByAttackType(const ItemOptionDatabase& options, size_t index)
+{
+    for (int attackType = 1; attackType <= static_cast<int>(AncientBonusNames.size()); ++attackType)
+    {
+        if (options.FindAncientBonus(attackType) == static_cast<int>(index))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 // A definition's problems name its file in Data/Items/Options and its place there.
 std::string DefinitionField(std::span<const ItemOptionDefinition> definitions, size_t index)
@@ -175,8 +197,7 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                               "links two definitions whose options the same part of the server's item data turns on "
                               "(of one type): the later one is left out"});
         }
-        // The excellent byte of wings holds their wing options, the Horn of Fenrir's its kind; no horn is excellent.
-        const bool byteMeansOther = item.slot == ItemSlot::Wings || item.tags.Has(ItemTag::HornMount);
+        const bool byteMeansOther = ExcellentByteMeansOther(item);
         const bool linksExcellent = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
                                                 { return options.Get(link).type == ItemOptionType::Excellent; });
         if (byteMeansOther && linksExcellent)
@@ -185,6 +206,16 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                 {ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
                  "links excellent options, but its excellent byte holds its wing options or a horn's kind, "
                  "or nothing: no horn is excellent"});
+        }
+        // Until the item sets link them (phase 10), the item's attackType picks its ancient bonus; its set options come
+        // from its set (the ancient byte's set number).
+        const bool linksAncient = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
+                                              { return IsAncientType(options.Get(link).type); });
+        if (linksAncient)
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", item.group, item.number, OptionsField,
+                              "links an ancient bonus or set options, which the item sets give: the link does "
+                              "nothing, the item's attackType picks its ancient bonus"});
         }
     }
 }
@@ -207,7 +238,8 @@ void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const It
     const std::span<const ItemOptionDefinition> definitions = options.GetDefinitions();
     for (size_t index = 0; index < definitions.size(); ++index)
     {
-        if (!linked.contains(definitions[index].name))
+        // The item's attackType links the four ancient bonus definitions of AncientBonusNames.
+        if (!linked.contains(definitions[index].name) && !IsPickedByAttackType(options, index))
         {
             issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definitions[index]),
                               ItemDataIssue::NoItem, ItemDataIssue::NoItem,
@@ -215,5 +247,46 @@ void ValidateOptionDefinitionUse(std::span<const ItemDefinition> items, const It
                               "no item and no option rule links \"" + definitions[index].name + "\""});
         }
     }
+}
+
+void ValidateAncientBonusNames(const ItemOptionDatabase& options, std::vector<ItemDataIssue>& issues)
+{
+    for (size_t attackType = 0; attackType < AncientBonusNames.size(); ++attackType)
+    {
+        if (options.FindAncientBonus(static_cast<int>(attackType) + 1) == ItemOptionDatabase::NoDefinition)
+        {
+            // The file of a definition of that name of another type, else the file the four belong in.
+            const int named = options.Find(AncientBonusNames[attackType]);
+            const std::string source = named != ItemOptionDatabase::NoDefinition
+                                           ? DefinitionSource(options.Get(static_cast<ItemOptionIndex>(named)))
+                                           : std::string("Options/Ancient.json");
+            issues.push_back(
+                {ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "definitions",
+                 "no definition of type ancientBonus is named \"" + std::string(AncientBonusNames[attackType]) +
+                     "\": the ancient items with attackType " + std::to_string(attackType + 1) +
+                     " show and add no ancient bonus"});
+        }
+    }
+}
+void ValidateItemOptionFilesAsWritten(const ItemOptionFiles& files, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<std::string> names;
+    AddDefinitionFiles(files.definitions, names);
+    std::vector<ItemOptionDefinition> definitions;
+    for (const std::string& name : names)
+    {
+        ReadItemOptionsJson(WriteItemOptionsJson(FindDefinitionsInFile(files.definitions, name)), "Options/" + name,
+                            name, definitions, issues);
+    }
+    const std::string textsSource = "Tooltips/OptionTexts.json";
+    ItemOptionTexts texts;
+    ReadOptionTextsJson(WriteOptionTextsJson(files.texts), textsSource, texts, issues);
+    const std::string rulesSource = std::string("Options/") + OptionRulesFileName;
+    std::vector<OptionRule> rules;
+    ReadOptionRulesJson(WriteOptionRulesJson(files.rules), rulesSource, rules, issues);
+    ValidateItemOptions(definitions, texts, textsSource, issues);
+    ValidateOptionRules(rules, definitions, rulesSource, issues);
+    // The items pick the ancient bonus definitions by name (attackType), not by links.
+    ValidateAncientBonusNames(ItemOptionDatabase(ItemOptionFiles{definitions, texts, rules}), issues);
 }
 } // namespace Data::Items
