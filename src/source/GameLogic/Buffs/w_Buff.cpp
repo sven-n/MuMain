@@ -6,6 +6,7 @@
 #include "w_Buff.h"
 #include "w_BuffScriptLoader.h"
 #include "Core/Utilities/_GlobalFunctions.h"
+#include "Data/GameData/BuffData/BuffDatabase.h"
 
 namespace
 {
@@ -251,6 +252,29 @@ void Buff::UnRegisterBuff(std::list<eBuffState> buffstate)
 
         UnRegisterBuff(tempdata);
     }
+}
+
+GameLogic::Buffs::StatBonuses Buff::GetLevelScaledStatBonuses(std::uint16_t level) const
+{
+    GameLogic::Buffs::StatBonuses bonuses;
+    const auto& database = g_BuffDatabase;
+    for (const auto& [state, count] : m_Buff)
+    {
+        const auto* definition = database.Find(state);
+        if (definition == nullptr)
+        {
+            continue;
+        }
+        if (definition->attackDamageBonus)
+        {
+            bonuses.attackDamage += definition->attackDamageBonus->Evaluate(level);
+        }
+        if (definition->defenseBonus)
+        {
+            bonuses.defense += definition->defenseBonus->Evaluate(level);
+        }
+    }
+    return bonuses;
 }
 
 void Buff::ClearBuff()

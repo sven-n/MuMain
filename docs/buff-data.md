@@ -38,6 +38,7 @@ The design and the steps still to come are in
 | `family`, `tier` | Buffs of one family are tiers of the same buff: when several are on, the buff strip shows only the highest tier. `tier` is left out for 0, the lowest. |
 | `hidden` | `true`: the effect gets no icon on the buff strip. |
 | `cancelSkill` | A right-click on the icon asks to cancel the buff and sends this skill to the server. The server decides whether it may be cancelled; OpenMU allows it for Infinity Arrow and Expansion of Wizardry and their strengthened tiers (skills 77, 441, 233, 380, 383). |
+| `attackDamageBonus`, `defenseBonus` | Optional bonuses added to the character window's attack damage range and defense while this effect is active. Each adds `base + level / levelDivisor` using whole-number division. `base` is a whole number from 0 to 65,535 and `levelDivisor` is a whole number from 1 to 65,535. Bonuses from multiple active effects are added together. |
 
 A number or a name used twice, one tier of a family used twice, or a family of
 buffs and debuffs stops the game. An item the item list does not have is an
@@ -62,11 +63,6 @@ editor's Data Checks (area **Buffs**,
 
 ## What the character window adds
 
-Some buffs still add their values to the character window's damage and defense
-in code, until their values come from the data (see the buffs design). The Elf
-Soldier's buff (number 3, `eBuff_HelpNpc`) adds 45 + level / 3 damage and
-50 + level / 5 defense (`GameLogic/Buffs/ElfSoldierBuff.h`), as the server
-does. She gives it up to level 220, and the bonus grows up to there: a level
-200 character gets 111 damage and 90 defense. The original client stopped the
-growth at level 180, so the window showed less than the character got above
-it.
+The Elf Soldier's buff (number 3) adds `45 + level / 3` damage and
+`50 + level / 5` defense, matching the server. She gives it up to level 220.
+At level 200, the character window shows 111 extra damage and 90 extra defense.

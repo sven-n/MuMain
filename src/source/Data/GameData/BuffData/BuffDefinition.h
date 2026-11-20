@@ -32,6 +32,22 @@ struct BuffItemLink
     bool operator==(const BuffItemLink& other) const = default;
 };
 
+// A bonus adds base + level / levelDivisor, with whole-number division.
+struct BuffLevelBonus
+{
+    static constexpr int MaxParameter = UINT16_MAX;
+
+    int base = 0;
+    int levelDivisor = 1;
+
+    constexpr int Evaluate(std::uint16_t level) const
+    {
+        return base + level / levelDivisor;
+    }
+
+    bool operator==(const BuffLevelBonus& other) const = default;
+};
+
 struct BuffDefinition
 {
     int number = 0;
@@ -51,6 +67,9 @@ struct BuffDefinition
     bool hidden = false;
     // The skill a right-click on its icon asks to cancel; 0 when it can't be cancelled.
     int cancelSkill = 0;
+
+    std::optional<BuffLevelBonus> attackDamageBonus;
+    std::optional<BuffLevelBonus> defenseBonus;
 
     bool operator==(const BuffDefinition& other) const = default;
 };

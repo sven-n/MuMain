@@ -32,6 +32,10 @@ constexpr const char* Family = "family";
 constexpr const char* Tier = "tier";
 constexpr const char* Hidden = "hidden";
 constexpr const char* CancelSkill = "cancelSkill";
+constexpr const char* AttackDamageBonus = "attackDamageBonus";
+constexpr const char* DefenseBonus = "defenseBonus";
+constexpr const char* Base = "base";
+constexpr const char* LevelDivisor = "levelDivisor";
 } // namespace Keys
 
 constexpr const char* BuffKindName = "buff";
@@ -39,10 +43,11 @@ constexpr const char* DebuffKindName = "debuff";
 // A buff's group is a byte, as in the old BuffEffect files.
 constexpr int MaxBuffGroup = 255;
 
-const Items::Json::KeySet EntryKeys{Keys::Number,      Keys::Name,        Keys::Kind,       Keys::Group,
-                                    Keys::DisplayName, Keys::Description, Keys::Item,       Keys::Family,
-                                    Keys::Tier,        Keys::Hidden,      Keys::CancelSkill};
+const Items::Json::KeySet EntryKeys{
+    Keys::Number, Keys::Name, Keys::Kind,   Keys::Group,       Keys::DisplayName,       Keys::Description, Keys::Item,
+    Keys::Family, Keys::Tier, Keys::Hidden, Keys::CancelSkill, Keys::AttackDamageBonus, Keys::DefenseBonus};
 const Items::Json::KeySet ItemKeys{Keys::Group, Keys::Number};
+const Items::Json::KeySet LevelBonusKeys{Keys::Base, Keys::LevelDivisor};
 
 void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const std::string& source,
               const std::string& field, const std::string& message)
@@ -70,7 +75,8 @@ public:
                ReadText(json, Keys::DisplayName, true, buff.displayName) &&
                ReadText(json, Keys::Description, false, buff.description) && ReadItem(json, buff.item) &&
                ReadFamily(json, buff) && ReadHidden(json, buff.hidden) && ReadCancelSkill(json, buff.cancelSkill) &&
-               WarnUnknown(json, EntryKeys, "");
+               ReadLevelBonus(json, Keys::AttackDamageBonus, buff.attackDamageBonus) &&
+               ReadLevelBonus(json, Keys::DefenseBonus, buff.defenseBonus) && WarnUnknown(json, EntryKeys, "");
     }
 
 private:
@@ -164,6 +170,27 @@ private:
         return WarnUnknown(*field, ItemKeys, Keys::Item);
     }
 
+    bool ReadLevelBonus(const OrderedJson& json, const char* key, std::optional<BuffLevelBonus>& bonus)
+    {
+        const auto field = json.find(key);
+        if (field == json.end())
+        {
+            return true;
+        }
+        if (!field->is_object())
+        {
+            return Fail(key, "must be an object with base and levelDivisor");
+        }
+        BuffLevelBonus value;
+        if (!ReadWhole(*field, key, Keys::Base, 0, BuffLevelBonus::MaxParameter, value.base) ||
+            !ReadWhole(*field, key, Keys::LevelDivisor, 1, BuffLevelBonus::MaxParameter, value.levelDivisor))
+        {
+            return false;
+        }
+        bonus = value;
+        return WarnUnknown(*field, LevelBonusKeys, key);
+    }
+
     bool ReadFamily(const OrderedJson& json, BuffDefinition& buff)
     {
         const auto family = json.find(Keys::Family);
@@ -213,6 +240,14 @@ private:
     std::vector<ItemDataIssue>& m_issues;
 };
 
+void WriteLevelBonus(OrderedJson& json, const char* key, const std::optional<BuffLevelBonus>& bonus)
+{
+    if (bonus)
+    {
+        json[key] = {{Keys::Base, bonus->base}, {Keys::LevelDivisor, bonus->levelDivisor}};
+    }
+}
+
 OrderedJson WriteEntry(const BuffDefinition& buff)
 {
     OrderedJson json = OrderedJson::object();
@@ -248,6 +283,8 @@ OrderedJson WriteEntry(const BuffDefinition& buff)
     {
         json[Keys::CancelSkill] = buff.cancelSkill;
     }
+    WriteLevelBonus(json, Keys::AttackDamageBonus, buff.attackDamageBonus);
+    WriteLevelBonus(json, Keys::DefenseBonus, buff.defenseBonus);
     return json;
 }
 } // namespace
