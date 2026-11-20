@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include <optional>
 
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
@@ -97,7 +98,7 @@ void GameConfig::Load()
 
     m_windowWidth  = ReadInt(CfgSectionWindow, CfgKeyWidth, CfgDefaultWindowWidth);
     m_windowHeight = ReadInt(CfgSectionWindow, CfgKeyHeight, CfgDefaultWindowHeight);
-    m_windowMode   = ReadBool(CfgSectionWindow, CfgKeyWindowed, CfgDefaultWindowed);
+    m_windowMode = ReadWindowMode();
 
     m_soundVolume  = ReadInt(CfgSectionAudio, CfgKeySoundVolume, CfgDefaultSoundVolume);
     m_musicVolume  = ReadInt(CfgSectionAudio, CfgKeyMusicVolume, CfgDefaultMusicVolume);
@@ -150,7 +151,9 @@ void GameConfig::Save()
 
     WriteInt(CfgSectionWindow, CfgKeyWidth, m_windowWidth);
     WriteInt(CfgSectionWindow, CfgKeyHeight, m_windowHeight);
-    WriteBool(CfgSectionWindow, CfgKeyWindowed, m_windowMode);
+    WriteString(CfgSectionWindow, CfgKeyWindowMode, GameConfigValidation::FormatWindowMode(m_windowMode));
+    // Mode replaces it; removed only now that Mode is written, so an older config.ini keeps its choice.
+    RemoveObsoleteKey(CfgSectionWindow, CfgKeyWindowed);
 
     WriteInt(CfgSectionAudio, CfgKeySoundVolume, m_soundVolume);
     WriteInt(CfgSectionAudio, CfgKeyMusicVolume, m_musicVolume);
@@ -297,9 +300,22 @@ void GameConfig::SetWindowSize(int width, int height)
     m_windowHeight = height;
 }
 
-void GameConfig::SetWindowMode(bool windowed)
+void GameConfig::SetWindowMode(WindowMode mode)
 {
-    m_windowMode = windowed;
+    m_windowMode = mode;
+}
+
+WindowMode GameConfig::ReadWindowMode()
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+
+    std::optional<bool> legacyWindowed;
+    if (!ReadString(CfgSectionWindow, CfgKeyWindowed, L"").empty())
+    {
+        legacyWindowed = ReadBool(CfgSectionWindow, CfgKeyWindowed, true);
+    }
+    return GameConfigValidation::ResolveWindowMode(ReadString(CfgSectionWindow, CfgKeyWindowMode, L""), legacyWindowed);
 }
 
 void GameConfig::SetSoundVolume(int level)

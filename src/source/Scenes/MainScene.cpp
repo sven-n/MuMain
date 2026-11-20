@@ -30,6 +30,7 @@
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/EffectSpawnHook.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Engine/AI/GOBoid.h"
@@ -344,6 +345,10 @@ static void UpdateGameEntities()
         UpdateTerrainEffects();
         UpdateTerrainWaterSpots();
     }
+#ifdef _EDITOR
+    // The Style Editor's views create their items' things on bones (design section 7a).
+    Core::EffectSpawnHook::Notify();
+#endif
     MoveWaterTerrain();
 
     g_Direction.CheckDirection();

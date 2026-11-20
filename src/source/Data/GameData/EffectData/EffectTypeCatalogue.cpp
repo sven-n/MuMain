@@ -86,6 +86,18 @@ size_t EffectTypeCatalogue::GetTypeCount(EffectKind kind) const
     return m_byName[ToIndex(kind)].size();
 }
 
+std::vector<std::string_view> EffectTypeCatalogue::GetNames(EffectKind kind) const
+{
+    std::vector<std::string_view> names;
+    const std::vector<NamedType>& byName = m_byName[ToIndex(kind)];
+    names.reserve(byName.size());
+    for (const NamedType& named : byName)
+    {
+        names.emplace_back(named.name);
+    }
+    return names;
+}
+
 std::span<const EffectTypeCreateParams> EffectTypeCatalogue::GetCreateParams() const
 {
     return m_createParams;

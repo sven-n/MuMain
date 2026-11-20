@@ -4,6 +4,8 @@
 
 #include "EffectPreviewTracker.h"
 
+#include "Render/Effects/ZzzEffect.h"
+
 #include <algorithm>
 #include <climits>
 #include <cstddef>
@@ -74,6 +76,12 @@ int SlotOf(std::span<OBJECT> pool, const OBJECT* object)
     return static_cast<int>(object - pool.data());
 }
 } // namespace
+
+void RemoveGameEffect(OBJECT& effect)
+{
+    RemoveObjectBlurs(&effect, 0);
+    EffectDestructor(&effect);
+}
 
 void EffectPreviewTracker::Fit(const EffectPools& pools)
 {
@@ -242,6 +250,19 @@ void EffectPreviewTracker::Forget()
     {
         std::fill(kept.begin(), kept.end(), NotKept);
     }
+}
+
+void EffectPreviewTracker::ForgetSlots(const std::function<bool(const EffectPoolSlot&)>& notOurs)
+{
+    std::erase_if(m_kept,
+                  [&](const EffectPoolSlot& slot)
+                  {
+                      if (!notOurs(slot))
+                          return false;
+                      m_keptTypes[IndexOf(slot.pool)][static_cast<size_t>(slot.index)] = NotKept;
+                      return true;
+                  });
+    std::erase_if(m_created, notOurs);
 }
 
 EffectPreviewCounts EffectPreviewTracker::Count() const

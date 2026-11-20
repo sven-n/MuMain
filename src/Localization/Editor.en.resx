@@ -433,6 +433,9 @@
   <data name="Fullscreen" xml:space="preserve">
     <value>Fullscreen</value>
   </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Borderless fullscreen</value>
+  </data>
   <data name="Actual Window Client" xml:space="preserve">
     <value>Actual Window Client</value>
   </data>
@@ -759,6 +762,12 @@
   </data>
   <data name="Blend glow tooltip" xml:space="preserve">
     <value>Adds its light to what is drawn before it: bright places glow, dark ones stay see-through.</value>
+  </data>
+  <data name="Darken" xml:space="preserve">
+    <value>Darken</value>
+  </data>
+  <data name="Blend darken tooltip" xml:space="preserve">
+    <value>Darkens what is drawn before it by its light: a dark layer makes a shadow.</value>
   </data>
   <data name="Blend as the drawing asks tooltip" xml:space="preserve">
     <value>Blends as the item's drawing chooses, as the item's own texture does.</value>
@@ -5889,5 +5898,146 @@
   </data>
   <data name="Attack success rate" xml:space="preserve">
     <value>Attack success rate</value>
+  </data>
+  <data name="On bones" xml:space="preserve">
+    <value>On bones</value>
+  </data>
+  <data name="On bones note" xml:space="preserve">
+    <value>Each entry creates its things on the item's bones in every update: at each bone, between each pair of bones (lightning, from the first to the second) or at the item's own place. The preview's views show them live, each from its own look.</value>
+  </data>
+  <data name="Animation speed" xml:space="preserve">
+    <value>Animation speed</value>
+  </data>
+  <data name="Animation speed tooltip" xml:space="preserve">
+    <value>How fast the update plays the item's animation, as the Cursed Castle Water's ground item moves; without one it plays none.</value>
+  </data>
+  <data name="Bone thing sprite" xml:space="preserve">
+    <value>Sprite</value>
+  </data>
+  <data name="Bone thing particle" xml:space="preserve">
+    <value>Particle</value>
+  </data>
+  <data name="Bone thing lightning" xml:space="preserve">
+    <value>Lightning</value>
+  </data>
+  <data name="Bone thing effect" xml:space="preserve">
+    <value>Effect</value>
+  </data>
+  <data name="Bone thing kind tooltip" xml:space="preserve">
+    <value>What is created: a sprite (it lives one frame), a particle, lightning between two bones, or an effect.</value>
+  </data>
+  <data name="Bone thing type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Bone thing type tooltip" xml:space="preserve">
+    <value>The type by its name in the effect catalogue (the Effect Browser lists them).</value>
+  </data>
+  <data name="Bone thing type missing" xml:space="preserve">
+    <value>Pick a type</value>
+  </data>
+  <data name="Bone thing filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Bone thing subtype tooltip" xml:space="preserve">
+    <value>The SubType the type is created with; the type's code reads it.</value>
+  </data>
+  <data name="Bone thing scale tooltip" xml:space="preserve">
+    <value>The thing's scale, a number or a shape.</value>
+  </data>
+  <data name="Bone thing rotation tooltip" xml:space="preserve">
+    <value>The sprite's rotation in degrees, a number or a shape.</value>
+  </data>
+  <data name="Reversed lightning" xml:space="preserve">
+    <value>From the second bone to the first</value>
+  </data>
+  <data name="Reversed lightning tooltip" xml:space="preserve">
+    <value>The lightning runs from the second bone of each pair to the first.</value>
+  </data>
+  <data name="At bones" xml:space="preserve">
+    <value>At bones</value>
+  </data>
+  <data name="Between bones" xml:space="preserve">
+    <value>Between bones</value>
+  </data>
+  <data name="At the item's place" xml:space="preserve">
+    <value>At the item's place</value>
+  </data>
+  <data name="Bone places tooltip" xml:space="preserve">
+    <value>Where the entry's things are created: at each of its bones, between each of its pairs of bones, or once at the item object's own place.</value>
+  </data>
+  <data name="Bone number tooltip" xml:space="preserve">
+    <value>A bone of the item's model by its number; the preview rings it while the mouse is here.</value>
+  </data>
+  <data name="Add bone" xml:space="preserve">
+    <value>+ Bone</value>
+  </data>
+  <data name="Add bone pair" xml:space="preserve">
+    <value>+ Pair</value>
+  </data>
+  <data name="Take out" xml:space="preserve">
+    <value>x</value>
+  </data>
+  <data name="Pick in the preview" xml:space="preserve">
+    <value>Pick in the preview</value>
+  </data>
+  <data name="Pick in the preview tooltip" xml:space="preserve">
+    <value>A click on a bone's dot in a view adds the bone or takes it out; between bones, click the start of the lightning, then its end.</value>
+  </data>
+  <data name="Pick the end from 0" xml:space="preserve">
+    <value>Now click the end of the lightning from bone {0}.</value>
+  </data>
+  <data name="Show bones" xml:space="preserve">
+    <value>Show bones</value>
+  </data>
+  <data name="Show bones tooltip" xml:space="preserve">
+    <value>Draws every bone of the previewed item as a dot, joined by a line to the bone it hangs on; pointing at one shows its number and name.</value>
+  </data>
+  <data name="No bones for this item" xml:space="preserve">
+    <value>This item is drawn on the character's skeleton: the game creates no things on bones for it.</value>
+  </data>
+  <data name="Chance" xml:space="preserve">
+    <value>Chance</value>
+  </data>
+  <data name="Chance tooltip" xml:space="preserve">
+    <value>Without a chance the thing comes in every update.</value>
+  </data>
+  <data name="Once in" xml:space="preserve">
+    <value>Once in</value>
+  </data>
+  <data name="Once in tooltip" xml:space="preserve">
+    <value>Once in this many frames.</value>
+  </data>
+  <data name="Chance draw" xml:space="preserve">
+    <value>Draw</value>
+  </data>
+  <data name="Chance at the frame rate" xml:space="preserve">
+    <value>At the game's frame rate</value>
+  </data>
+  <data name="Chance at the frame rate tooltip" xml:space="preserve">
+    <value>Once in N frames at the game's reference frame rate, the same at any frame rate.</value>
+  </data>
+  <data name="Chance plain" xml:space="preserve">
+    <value>Plain</value>
+  </data>
+  <data name="Chance plain tooltip" xml:space="preserve">
+    <value>A plain random draw in each update, as the monster sounds draw theirs: more often at a higher frame rate.</value>
+  </data>
+  <data name="Once for all" xml:space="preserve">
+    <value>Once for all</value>
+  </data>
+  <data name="Once for all tooltip" xml:space="preserve">
+    <value>Rolls once for the entry, not for each bone or pair.</value>
+  </data>
+  <data name="Together" xml:space="preserve">
+    <value>Together</value>
+  </data>
+  <data name="Together tooltip" xml:space="preserve">
+    <value>The entry's things share its places and its chance, so they come together (the Wings of Darkness' two lightnings); a thing inside can roll a chance of its own after it.</value>
+  </data>
+  <data name="Add thing" xml:space="preserve">
+    <value>+ Thing</value>
+  </data>
+  <data name="Thing chance" xml:space="preserve">
+    <value>Its own chance</value>
   </data>
 </root>

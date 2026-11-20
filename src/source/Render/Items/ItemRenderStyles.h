@@ -58,11 +58,6 @@ public:
 };
 #endif
 
-// Whether the item's style spawns lights or animates where it is drawn.
-bool Spawns(int modelType);
-// Spawns them from the model's pose, in the update; b is placed where the model is drawn.
-void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4]);
-
 // The lights and tint the helper NPCs' plate armor keeps on them, for the update to spawn while it is drawn.
 void SpawnHelperNpcPlateLights(OBJECT* o);
 } // namespace Render::Items::Styles

@@ -2131,6 +2131,7 @@ static void OpenBasicDataStep5()
 {
     OpenItemTextures();
     Render::Items::Looks::PrepareTextures();
+    Render::Items::Looks::LogUnknownBoneThingTypes();
 }
 
 static void OpenBasicDataStep6()

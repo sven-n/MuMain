@@ -184,9 +184,6 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>翻译物品名称</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>窗口模式</value>
-  </data>
   <data name="Enhanced graphics" xml:space="preserve">
     <value>增强画面</value>
   </data>

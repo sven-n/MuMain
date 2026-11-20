@@ -367,6 +367,7 @@ mu_add_test(
         test_look_effects.cpp
         test_look_drawing.cpp
         test_look_recorder.cpp
+        test_bone_things_preview.cpp
         LookRecorder.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
@@ -375,6 +376,7 @@ mu_add_test(
 target_compile_definitions(render_style_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
+    MU_SPAWN_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/ItemEffectSpawns.txt"
 )
 
 # Each case of the data tests once more, with the shipped client data read from a storage of the test's own and the

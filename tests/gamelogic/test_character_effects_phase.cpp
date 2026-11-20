@@ -582,6 +582,9 @@ TEST_CASE("A character's mark spawns its sprite in the update, and its draw spaw
 TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and its draw spawns none [effects]")
 {
     FenrirScope scope;
+    // The Wing of Eternal's lights are data (section 7b).
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
     ItemModelDatabaseScope restoreModels;
     Data::Items::ItemModelDefinition eternal;
     eternal.group = 12;
@@ -590,6 +593,8 @@ TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and 
     eternal.itemEffect = "wingOfEternal";
     g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{eternal}, Data::Effects::GlowColorList{});
     BMD* b = &Models[MODEL_WING_OF_ETERNAL];
+    // The scope's models aren't loaded: the wing has as many bones as its pose holds.
+    b->NumBones = MAX_BONES;
     b->BodyScale = 1.f;
     Vector(0.f, 0.f, 0.f, b->BodyOrigin);
     OBJECT wing;
@@ -1334,15 +1339,21 @@ TEST_CASE("A character drawn before the update posed it is posed into draw bones
 TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")
 {
     FenrirScope scope;
+    // Its look and its light are data (design L29, section 7b).
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
     ItemModelDatabaseScope restoreModels;
     Data::Items::ItemModelDefinition water;
     water.group = 14;
     water.number = 64;
     water.file = "Data/Item/Water.bmd";
     water.renderStyle = "cursedCastleWater";
+    water.itemEffect = "cursedCastleWater";
     g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{water}, Data::Effects::GlowColorList{});
     const int model = Data::Items::ToModelSlot(Data::Items::MakeItemType(14, 64));
     BMD* b = &Models[model];
+    // The scope's models aren't loaded: the water has as many bones as its pose holds.
+    b->NumBones = MAX_BONES;
     b->BodyScale = 1.f;
     Vector(0.f, 0.f, 0.f, b->BodyOrigin);
     OBJECT item;
@@ -1357,8 +1368,8 @@ TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and 
     for (int i = 0; i < MAX_SPRITES; ++i)
         CHECK_FALSE(Sprites[i].Live);
 
-    REQUIRE(Render::Items::Styles::Spawns(model));
-    Render::Items::Styles::Spawn(b, &item, model, scope.bones.get());
+    REQUIRE(Render::Items::ItemEffects::Spawns(model));
+    Render::Items::ItemEffects::Spawn(b, &item, model, scope.bones.get());
     int onPose = 0;
     for (int i = 0; i < MAX_SPRITES; ++i)
     {

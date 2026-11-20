@@ -250,6 +250,51 @@ TEST_CASE("Item effects are checked against the items that name them: meshes, va
     CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].name") == 0);
 }
 
+TEST_CASE("Things on bones are checked: a type the effect catalogue doesn't have is an error, a bone an item's model "
+          "doesn't have a warning about the item (design L55) [looks][checks]")
+{
+    LookDefinition effect{"wings"};
+    OnBones flares;
+    flares.places.bones = {3, 12};
+    flares.things.push_back({.kind = BoneThingKind::Sprite, .type = "flare"});
+    OnBones lightning;
+    lightning.together = true;
+    lightning.places.between = {{2, 30}};
+    lightning.things.push_back({.kind = BoneThingKind::Joint, .type = "jointThunder"});
+    lightning.things.push_back({.kind = BoneThingKind::Joint, .type = "noSuchJoint"});
+    effect.onBones = {flares, lightning};
+    ItemModelDefinition model = Model(12, 6, "");
+    model.itemEffect = "wings";
+    const std::vector<ItemModelDefinition> models{model};
+    std::vector<ItemDataIssue> issues;
+    const RenderStyleCheckInput input{
+        .models = models,
+        .typeExists = [](BoneThingKind kind, const std::string& type)
+        { return kind == BoneThingKind::Sprite ? type == "flare" : type == "jointThunder"; },
+        .boneCount = [](int) { return 10; }};
+    CheckItemEffects(std::vector{effect}, Source, input, issues);
+    INFO(Describe(issues));
+    REQUIRE(issues.size() == 3);
+    CHECK(Count(issues, ItemDataIssueSeverity::Error, "looks[0].onBones[1].things[1].joint") == 1);
+    // Bones 12 and 30 are not in the item's model of ten bones; 2 and 3 are.
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].onBones[0].bones") == 1);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].onBones[1].together.between") == 1);
+    for (const ItemDataIssue& issue : issues)
+    {
+        if (issue.severity == ItemDataIssueSeverity::Warning)
+        {
+            CHECK(issue.group == 12);
+            CHECK(issue.number == 6);
+        }
+    }
+
+    // A model that is not loaded skips the bone checks.
+    issues.clear();
+    const RenderStyleCheckInput unloaded{.models = models, .boneCount = [](int) { return 0; }};
+    CheckItemEffects(std::vector{effect}, Source, unloaded, issues);
+    CHECK(issues.empty());
+}
+
 TEST_CASE("The shipped item effects are used by items [looks][checks]")
 {
     const std::filesystem::path data = MU_TEST_DATA_DIR;
