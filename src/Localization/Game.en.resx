@@ -9654,4 +9654,7 @@ Fullscreen changes the monitor to the chosen resolution.</value>
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Total: +%d</value>
   </data>
+  <data name="The files of this map could not be downloaded." xml:space="preserve">
+    <value>The files of this map could not be downloaded.</value>
+  </data>
 </root>

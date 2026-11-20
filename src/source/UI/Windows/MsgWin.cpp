@@ -309,6 +309,9 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         lpszMsg = I18N::Game::YouAreDisconnectedFromTheServer;
         eType = MWT_BTN_BOTH;
         break;
+    case MESSAGE_MAP_FILES_FAILED:
+        lpszMsg = I18N::Game::TheFilesOfThisMapCouldNotBeDownloaded;
+        break;
     case MESSAGE_VERSION:
     case RECEIVE_LOG_IN_FAIL_VERSION:
         lpszMsg = I18N::Game::NewVersionOfGameIsRequired;

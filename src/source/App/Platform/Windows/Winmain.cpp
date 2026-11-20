@@ -1721,6 +1721,10 @@ bool IterateClient()
     }
     // A map change a packet started: the next steps, between frames.
     World::MapLoad::Pump(mu::BitmapUploadsOverStagingCap);
+    if (World::MapLoad::TakeFailure())
+    {
+        ReconnectManager::Instance().OnMapFilesFailed();
+    }
 
     // Run a pending reconnect teardown between frames (self-guards on its
     // pending flag). Replaces the old WM_START_RECONNECT round-trip.

@@ -12,6 +12,8 @@
 #include "Character/CharSelMainWin.h"
 #include "Character/CharMakeWin.h"
 #include "Character/CharInfoBalloonMng.h"
+
+#include <utility>
 #include "UI/Windows/LoginMainWin.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
@@ -87,6 +89,10 @@ void CSceneUICoordinator::CreateLoginScene()
 
     m_nScene = UIM_SCENE_LOGIN;
     RepositionSceneUI();
+    if (m_nLoginSceneMsgCode >= 0)
+    {
+        g_MsgWin.PopUp(std::exchange(m_nLoginSceneMsgCode, -1));
+    }
 }
 
 void CSceneUICoordinator::CreateCharacterScene()
@@ -233,6 +239,11 @@ void CSceneUICoordinator::PopUpMsgWin(int nMsgCode, wchar_t* pszMsg)
         return;
 
     g_MsgWin.PopUp(nMsgCode, pszMsg);
+}
+
+void CSceneUICoordinator::PopUpMsgWinOnLoginScene(int nMsgCode)
+{
+    m_nLoginSceneMsgCode = nMsgCode;
 }
 
 void CSceneUICoordinator::AddServerMsg(wchar_t* pszMsg)

@@ -11,6 +11,7 @@
 #include "Scenes/CharacterScene.h"     // StartGame
 #include "Engine/Object/ZzzCharacter.h"// CharactersClient
 #include "UI/Windows/LoginWin.h"       // g_LoginWin
+#include "UI/Windows/LoginSceneUpdates.h"
 #include "MUHelper/MuHelper.h"         // MUHelper::g_MuHelper
 #include "UI/Chat/ChatMessages.h"
 #include "I18N/All.h"
@@ -171,6 +172,20 @@ void ReconnectManager::OnConnectionLostDuringMapLoad()
         EnterPhase(Phase::Retrying);
         m_phaseStartTime = WorldTime - RETRY_INTERVAL_MS;
     }
+}
+
+void ReconnectManager::OnMapFilesFailed()
+{
+    g_ErrorReport.Write(L"> A map's files couldn't be delivered - back to the login scene. ");
+    g_ErrorReport.WriteCurrentTime();
+    m_active = false;
+    m_beginPending = false;
+    m_cancelRequested = false;
+    m_abortAfterTeardown = false;
+    m_phase = Phase::Idle;
+    m_standby.reset();
+    ResetClientToLoginScene();
+    UI::LoginScene::ShowMessageOnReturn(MESSAGE_MAP_FILES_FAILED);
 }
 
 void ReconnectManager::RequestCancel()

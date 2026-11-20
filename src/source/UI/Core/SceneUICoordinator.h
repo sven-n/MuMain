@@ -20,6 +20,7 @@ class CSceneUICoordinator
 protected:
     bool m_bCursorOnUI;
     int m_nScene;
+    int m_nLoginSceneMsgCode = -1;
 
     // True only during the Update() in which the ESC-toggle-system-menu block itself opened/closed
     // g_SysMenuWin; reset at the top of every Update(). That block runs before m_NewStyleMng's
@@ -57,6 +58,8 @@ public:
         return m_bCursorOnUI;
     }
     void PopUpMsgWin(int nMsgCode, wchar_t* pszMsg = NULL);
+    // For a session torn down from another scene: shown once the login scene's windows are created.
+    void PopUpMsgWinOnLoginScene(int nMsgCode);
     void AddServerMsg(wchar_t* pszMsg);
     void CloseMsgWin()
     {
