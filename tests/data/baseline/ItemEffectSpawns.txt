@@ -1,0 +1,98 @@
+# What the looks whose things on bones moved from code into Data/Effects/ItemEffects.json create in the update:
+# one line per item, clock time and random seed, the look, the item and the moment, then the number of things
+# and five digests of them and of what the look left on the object, rounded on five grids
+# (tests/data/LookRecorder.h). First recorded from the old code before each look moved
+# (MU_SPAWN_RECORDER_WRITE=<names>), so a moved look still creates what its code did. The Devil's Key's and
+# Invitation's lines were written again when their sparks moved onto the scaled bones (design L57). All lines
+# were written again from the data when the digest changed (the relative grid, exact types, the things' order),
+# each time right after the data matched the old code's lines on the digest before, in the Windows x64 Release
+# build, last against the old code's lines as first recorded in the pull request that moved these looks into
+# data.
+spawn cursedCastleWater (14,64) t=0.00 seed=1	1 36bc835a6f84dc39 36bc835a6f84dc39 94192e24e19ef6d6 7c35829cd84a3b73 36bc835a6f84dc39
+spawn cursedCastleWater (14,64) t=0.00 seed=5	1 13bde0348b8c7f54 13bde0348b8c7f54 e5b2d6d08f92d089 33955015c385932e 13bde0348b8c7f54
+spawn cursedCastleWater (14,64) t=1000.25 seed=2	1 f0380effb6dcd589 f0380effb6dcd589 239265ac89edd8ec 962e64f0210276c7 f0380effb6dcd589
+spawn cursedCastleWater (14,64) t=1000.25 seed=6	1 66c2d550f39757db 66c2d550f39757db 54afc6b0f9e8a546 a4269b7f8343e781 66c2d550f39757db
+spawn cursedCastleWater (14,64) t=2718.50 seed=3	1 ef3c32557e75c9d8 ef3c32557e75c9d8 8ba1f43c09124e5f 99a49e3ccc947142 ef3c32557e75c9d8
+spawn cursedCastleWater (14,64) t=2718.50 seed=7	1 16e50a4e4894605c 16e50a4e4894605c c16039e1930ef3fb cd24e04f713a5f5a 16e50a4e4894605c
+spawn cursedCastleWater (14,64) t=65536.75 seed=4	1 677adcd96042725f 677adcd96042725f 606c8534ea444666 a6f0eb068da34461 677adcd96042725f
+spawn cursedCastleWater (14,64) t=65536.75 seed=8	1 209739574353dfb8 209739574353dfb8 53e9830a6e7d903b a53cdf5ea9c2df1e 209739574353dfb8
+spawn devilsInvitation (14,19) t=0.00 seed=1	2 4c8d5a0183f78a22 2037196ea9bdae8a d36ddec6358ba9c3 95b64b30a2d38b67 4c8d5a0183f78a22
+spawn devilsInvitation (14,19) t=0.00 seed=5	2 8a54056eacf72ca5 8860e5529da3c44d b4cbc9d72bdb7cbe 27cd179a360eb482 8a54056eacf72ca5
+spawn devilsInvitation (14,19) t=1000.25 seed=2	2 9c130ef0af571b0c 3d3bc8ec8befca08 e730bb579982d41b 67dfce3dc01acfe9 cff849e30e646698
+spawn devilsInvitation (14,19) t=1000.25 seed=6	2 502a0269addec1e6 5b0e3e40dc3b5ae2 982a4df0d4e2a195 f294ee3bcc15813b 816f7bb86b1fd832
+spawn devilsInvitation (14,19) t=2718.50 seed=3	2 09d17d46af6080f1 ed473929325e6401 516d81c4fd1ebc42 1f0401e623872402 c2d7654cf9e8ea23
+spawn devilsInvitation (14,19) t=2718.50 seed=7	2 d4922b835f637c59 0584044664414a69 84edc3d7a1c4aa5a 5ab7c8494089591a 74909c07c6c7c0cf
+spawn devilsInvitation (14,19) t=65536.75 seed=4	2 47124c7d9e9e0b9a ec3e2b729486062a ae1e605f5ac7ed23 8c7f587ffedaea6b 68035c08c02d764a
+spawn devilsInvitation (14,19) t=65536.75 seed=8	2 aa37e734a5a1be3f b5fa6ac6fd50020f a2eaa0909158a2ac c6c4bb557d0695d4 4d3a96aa62d9d72f
+spawn devilsKey (14,18) t=0.00 seed=1	2 bc87c0b294b2fd19 66ac385d033a8270 43496a30d0b570df d6199301128a9a9b bc87c0b294b2fd19
+spawn devilsKey (14,18) t=0.00 seed=5	2 7caae8c6ee4e1734 c05cd5fe5fb92d2b e7d11109077eb75a d59752ab022ef776 7caae8c6ee4e1734
+spawn devilsKey (14,18) t=1000.25 seed=2	2 1d3907c8887d7375 db232482e0585dba 00c3bccf07304a0b 0b4f2dc32a219a8f 37af8af90360addd
+spawn devilsKey (14,18) t=1000.25 seed=6	2 620a82bef3e576a7 7100e55c5bf8781c 207a02e1c9047c85 9a051c3ac9588fb9 b8bef08c37ced47f
+spawn devilsKey (14,18) t=2718.50 seed=3	2 b87e4f2056a7caf2 c33b38e0103e1281 f7b4ba44f2f545b8 bd451b664194a728 aad895b7da60b898
+spawn devilsKey (14,18) t=2718.50 seed=7	2 2a795d880ecf138a db7803fd4220f8e9 2d358535a00f5a3c a6a033d3398dbf2c d9c0751e638d9a1c
+spawn devilsKey (14,18) t=65536.75 seed=4	2 a58c64a3b78f2633 d5a5da17ee0f9e0e 0a1cc75d65ee2af5 96c3170ae06b7911 921f02423daf63b7
+spawn devilsKey (14,18) t=65536.75 seed=8	2 209a1626b56812bc 933a1d61ba2b7923 c5a774dc5926b402 ff528ba90909090e 03dad445597876f0
+spawn pumpkinOfLuck (14,45) t=0.00 seed=1	3 ea923611a7003ed0 e6f0985addc788f1 fc985d4b3099b556 f2c7afaf9c4901e5 ea923611a7003ed0
+spawn pumpkinOfLuck (14,45) t=0.00 seed=5	3 d79a60ea1e74220b a149f0196be07fcc 71cbd4dd01ecd809 56712d513d1e46c0 d79a60ea1e74220b
+spawn pumpkinOfLuck (14,45) t=1000.25 seed=2	3 14f2e7b6b88f7194 9de8063994067727 bb8c5866c83e30c4 533a6c3c0e48b4fb 14f2e7b6b88f7194
+spawn pumpkinOfLuck (14,45) t=1000.25 seed=6	3 f059e109c76cf51e 2ede1592b9085c61 94a5bb76282d200e 1094c7f2c224de75 f059e109c76cf51e
+spawn pumpkinOfLuck (14,45) t=2718.50 seed=3	3 574473043005d993 95dec6e96790e36a 769e2ead9ff9baf1 97787479209f8d98 feaaaac6f7170401
+spawn pumpkinOfLuck (14,45) t=2718.50 seed=7	3 c420dcb3c047e8bf fbbcdddf12d1d072 415edcea4ffcb659 c66053dfa9cc6f1c 16e775e428f9ea69
+spawn pumpkinOfLuck (14,45) t=65536.75 seed=4	3 f0dce95f151585fa dc890cd1ce1326f1 7a243dcc7f399070 eb56790afce19007 f0dce95f151585fa
+spawn pumpkinOfLuck (14,45) t=65536.75 seed=8	3 6924e09072f8bc9f 94b0a6c67473d5ee fe06156917fec591 a1ab66d295b975c0 6924e09072f8bc9f
+spawn rena (14,21) t=0.00 seed=1	1 463fc954b29a4388 9c84930abe9d1cbc 6a9dd87d056f5916 6571debf1b306b9b 463fc954b29a4388
+spawn rena (14,21) t=0.00 seed=5	1 d6a8211ac02eb6c3 07f295a4fa8bcdf7 aff1de7517793849 01490237827f6276 d6a8211ac02eb6c3
+spawn rena (14,21) t=1000.25 seed=2	1 2e3b041e5d98086f 1453c77a491d63d6 744e5c058020e4e8 dd1db80db010ffb5 2e3b041e5d98086f
+spawn rena (14,21) t=1000.25 seed=6	1 05fc2c3c3e706399 454616e6074a8588 0df0449bd3035242 c1db8f93a91bfee7 05fc2c3c3e706399
+spawn rena (14,21) t=2718.50 seed=3	1 3148343d3380f06a 3a037e507f1aa5e6 dcfa0e4df98a8511 15b7b5b753817b3d 3148343d3380f06a
+spawn rena (14,21) t=2718.50 seed=7	1 97264b32dec1dd72 3760294cc78b632e bb73c8d2f139fbf9 429783cf5f2f1895 97264b32dec1dd72
+spawn rena (14,21) t=65536.75 seed=4	1 87dfa854b3b05467 d55975f50e40e21b 43202d680e241c7d dc4101abe2fed8b8 87dfa854b3b05467
+spawn rena (14,21) t=65536.75 seed=8	1 48e7a875db9b4c20 f36334bd2d319904 8aea871f4206ef6a 3ebad8bdc6efe739 48e7a875db9b4c20
+spawn wingOfDimension (12,43) t=0.00 seed=1	12 92c97cd2c9d77133 b1c631519c4ae136 265904acf169b2a4 5a3688769d3809f7 836b6623269f786b
+spawn wingOfDimension (12,43) t=0.00 seed=5	12 458f4683e588d76e 4be0b509ab827fe9 51b202743398ee5f b4aca1f99b0f9712 b70f3ae819184ac6
+spawn wingOfDimension (12,43) t=1000.25 seed=2	12 915aee3a076ac835 6dbb19241a432524 0f7b0e938df84958 4b7ddc33a76a95d9 9e9a8727af322663
+spawn wingOfDimension (12,43) t=1000.25 seed=6	12 7618c5c00075c767 430bbb91e326966e bdf19a136da5d6f2 001e4e6c945d422b 25694c861d8568ad
+spawn wingOfDimension (12,43) t=2718.50 seed=3	12 6e4f25cdb7715890 0b55a944c5625603 8fa137fffe64f60f 0f52f0eefe59c06e da35b46d77e8c6a4
+spawn wingOfDimension (12,43) t=2718.50 seed=7	12 f422d44ba24fd3c4 91b4b7a1a248882f 1ac90bbd7898c7ab 38841d0ae8418766 bd257b0363c76988
+spawn wingOfDimension (12,43) t=65536.75 seed=4	12 d2406a0d7529a013 55c45fc39129d3ae 33bf5894cb1f9f12 2f43be9c1d717d45 6333a2679e600467
+spawn wingOfDimension (12,43) t=65536.75 seed=8	12 8ad8bc9da4b3599c e606bd4a9806f2c3 2157605f15819177 048b479e0f225492 a849969aa4235c20
+spawn wingOfEternal (12,37) t=0.00 seed=1	28 6ed84d5aadab43ec 6f3f93ecc76df679 f8fa4c6fbfd1afe3 d9d10030db5e0ca3 9df3948c2d2fb821
+spawn wingOfEternal (12,37) t=0.00 seed=5	28 f33f47fa7ef34867 82bbc188717d2a14 720f480ab0404e5e 509be71591d1ed9e 410f4e046eea087c
+spawn wingOfEternal (12,37) t=1000.25 seed=2	28 7f686d3c6b3a0aa6 cdd6298ae6ad5bd9 cf388cd384834627 140aac5ac0846e21 bf43b808fa793773
+spawn wingOfEternal (12,37) t=1000.25 seed=6	28 251f61dccd8204d8 82769bc3d3a0082b 602e9c2ca9852b61 7f1c322191929343 47f1be5ef21d40bd
+spawn wingOfEternal (12,37) t=2718.50 seed=3	28 e5e5148fff38c331 7ec2e90c00386fb4 166c5df97a33f92e da710c44e0ea18de be0d5245381cf06a
+spawn wingOfEternal (12,37) t=2718.50 seed=7	28 2201069619305a99 b987b46d5e6ff718 ee0ff9180412b626 d2380e88a48b9cd6 23eb693ae35ddd72
+spawn wingOfEternal (12,37) t=65536.75 seed=4	28 e5fa13b673af07c4 efa1861f48c91e2f 5fa641be0ab4eafd 366b3236d06e1369 06e66454cac732e3
+spawn wingOfEternal (12,37) t=65536.75 seed=8	28 29b5726aadd83265 48c7bb6ac3a07408 938d953b6c15d2ea 8522ce6e409529a6 fb5823ba506300ec
+spawn wingOfIllusion (12,38) t=0.00 seed=1	21 e7e8219afd0a5a0a 67687d8ef32619f8 36069f8d5a14d3d2 77cf9a2fa43569fe 5248175642bb54ba
+spawn wingOfIllusion (12,38) t=0.00 seed=5	23 3b9f50a5d3735afa 373de0d7ae8ce73b ebdbb551c2a9bb3f 8fd4abd54dc950ed b5ef81235e249ab9
+spawn wingOfIllusion (12,38) t=1000.25 seed=2	23 9c0afc47eb15a575 9f1e18ae067db01c a65ac4e6d0320956 91ef16c0d42d2096 eaec69738b880a3b
+spawn wingOfIllusion (12,38) t=1000.25 seed=6	21 5fd4062519c134f7 e1a316d14c07f015 ee77c667634aa1ee 73264e7606be2fbd 8eb06d9bf77657a3
+spawn wingOfIllusion (12,38) t=2718.50 seed=3	23 5876e0a2740a5205 07824e82127dc2e0 7f479af622c3ebe4 67153f0fd5f735a4 2298be4f0e2031fc
+spawn wingOfIllusion (12,38) t=2718.50 seed=7	23 128f19ad8bbce7f0 87b413dc3898bb49 acc105cba2c4ae93 ab548df8630f157f 2a0b36660442d2f7
+spawn wingOfIllusion (12,38) t=65536.75 seed=4	21 30bc9352ead8b955 6916053be0a4cd53 9b528194aa6224d1 cb2fd7384e382218 b2d39b2ac42d9631
+spawn wingOfIllusion (12,38) t=65536.75 seed=8	23 012c783691f9ac58 aefdba73c8b12696 bf8d87b7e91edb1c 388b09bc51eef5bd ec786a84255fa513
+spawn wingOfRuin (12,39) t=0.00 seed=1	44 e0ea7b12528a7395 7538fc2916b1d15b d089020cd1705792 d79ae1d594f58b3a 90ee2c148df44ffd
+spawn wingOfRuin (12,39) t=0.00 seed=5	44 b7a34afc5d3599fc f4a1a63083bfd63a 5142bd39c90049c5 27b2c1c47781425d f7e657080b471652
+spawn wingOfRuin (12,39) t=1000.25 seed=2	44 5f5147f2d284520c 600ce8b358d80546 437d2181b3e568a7 de0e5676110b5f91 be356b3438e215f4
+spawn wingOfRuin (12,39) t=1000.25 seed=6	44 8aa8837b6724fe00 15e4cd7ee93a64a6 cb2f5fd7e94da17f 4e34b657ca2bd519 45045e4b32abd2a2
+spawn wingOfRuin (12,39) t=2718.50 seed=3	44 d7b56d622d47d2d7 4395dfaa381fb205 86e0da1bdde49938 0d3b2826610ad124 f4114000a792130f
+spawn wingOfRuin (12,39) t=2718.50 seed=7	44 1bda2bc86ce0e471 1aaa03f213b8cdb1 177b2973e84b59b4 7ef43b209bf8fb46 8a7cc88cd4ce7b1f
+spawn wingOfRuin (12,39) t=65536.75 seed=4	44 70624631968c8aea e25e1a609720e492 313b812ca26a0b97 7007162c5dcc50c7 5b53f016f7b85960
+spawn wingOfRuin (12,39) t=65536.75 seed=8	44 57c19138007cb65a 961be00083480cda cef58d4857dc0313 056b3eedf2118997 2204c25a44f990fe
+spawn wingOfStorm (12,36) t=0.00 seed=1	47 8ba4f6862502cf04 4eceb1058d894456 cfe95a8c27658d8b c84490827044218d 13f037370b058e40
+spawn wingOfStorm (12,36) t=0.00 seed=5	49 b4c5b16166f027f6 dd8a0385ca54072b 02813c790d353958 7f5c47879ff33062 4d0fc38729c8bb0d
+spawn wingOfStorm (12,36) t=1000.25 seed=2	47 8341eec4fb1ec7a7 4a0365af413c3ceb c232a588b1f10edd 4c94b96e09c3b1aa 26829ecc872234c5
+spawn wingOfStorm (12,36) t=1000.25 seed=6	47 9d3f6a94d79e9e00 67b4d00ce79af5ac c6f17fd60c3b7d5e cb0f4962004db89f d5d4c12248d44916
+spawn wingOfStorm (12,36) t=2718.50 seed=3	47 6cf899d5f32a6132 b7d5026133b507c2 a833e25191c79aff ce1f23c24d8f8a50 c95e19f78d79a183
+spawn wingOfStorm (12,36) t=2718.50 seed=7	49 6afa56dae224a122 daa38189dae98c0b edf6c25c9b75b56f 35fc0dfa58e0123f 6e0a970f364b687d
+spawn wingOfStorm (12,36) t=65536.75 seed=4	47 f0d26733ee0875be 3386d0e17a4960c4 ce66363d9f1514f4 0b8492b22c302134 c4dc367100bbecfb
+spawn wingOfStorm (12,36) t=65536.75 seed=8	47 472088dba74f1323 d765203cc66849d9 885822c87808f0c9 2100a28cf6d76e09 bcd750c407aca696
+spawn wingsOfDarkness (12,6) t=0.00 seed=1	30 2cfab44b7e6a3b6d fef3857087a8fb3e 2a06fb639c716605 82a7730905191c3e db0052b992e60d17
+spawn wingsOfDarkness (12,6) t=0.00 seed=5	30 fee883d7642f54bb 5cc2c7885f802300 94a5434462456673 e076b520dcf04400 df2ef7281f964d95
+spawn wingsOfDarkness (12,6) t=1000.25 seed=2	30 1ff7b631dc8e033d 5c6a3ebc8629b4b2 74d8aac9cde7ab95 3a480a22b5c68230 3b1480b085907f43
+spawn wingsOfDarkness (12,6) t=1000.25 seed=6	30 f4132be1c89a35a0 47fc8c8a3f8074cf a398e5493588cbc8 c4d0e442d5939b85 d347af41bdd3e79e
+spawn wingsOfDarkness (12,6) t=2718.50 seed=3	30 495f1d4894af0972 2953c00cd3698ca7 be0e85c2b7e28d1a 71120a57fbe38503 1e13902f92ab3858
+spawn wingsOfDarkness (12,6) t=2718.50 seed=7	30 28fc7ac97704a955 8206e09187744d1c d10fd2c140c3ea7d aecc2964f1c6f438 8dacab14d9b0cea7
+spawn wingsOfDarkness (12,6) t=65536.75 seed=4	30 06e99d8b0f56f397 f28f014b88e59ac4 f451ce69c3eb7ed7 ba4ee9d0dc44ae72 b8dd373132fa761d
+spawn wingsOfDarkness (12,6) t=65536.75 seed=8	30 984fdad5cedda7fe 41657519ad99e841 13cd1b65d98eb83e 15f911811363b7af 1a6c55938b4aa2ac

@@ -1511,10 +1511,8 @@ shine (`shineBelowPlus3`, see the glow values above).
 ```
 
 An item effect is a named look in `Data/Effects/ItemEffects.json` (see
-[Render styles and item effects](#render-styles-and-item-effects)), or one
-still in code, listed at the end of `src/source/Render/Items/ItemEffects.cpp`;
-the game looks a name up in the file first. An item effect runs every frame
-before the model is drawn and can:
+[Render styles and item effects](#render-styles-and-item-effects)). An item
+effect runs every frame before the model is drawn and can:
 
 - place sprites, particles and lightning on bones of the model, so they
   follow its animation (the Devil's Key and Invitation, Rena, the wings of
@@ -1644,7 +1642,7 @@ drawing hands the look.
 | `kind` | `texture`: the mesh's own texture, or the layer's; `reflection`: a reflection that moves over the mesh (chrome); `flatColor`: the mesh in the light alone, without a texture |
 | `motion` | How a reflection moves: `slowDrift` (left out), `fastSweep`, `followsLight`, `swirl`, `strongSwirl`, `stripes`, `verySlowDrift`, `oilSheen`, `stillShine` |
 | `where` | Where a reflection goes: `over` the texture (left out), or `underHoles`: on a mesh whose texture has holes, drawn before the texture, solid and on both faces, so it fills the holes (the Magic Gladiator sets); over a texture without holes, a glowing mesh and a see-through item it goes over with its blend. A look with such a layer draws mesh by mesh, every layer of a mesh before the next mesh, and the layer leaves the light as it found it |
-| `blend` | `normal` (left out), `glow` (added to what is below), `asDrawing` (the drawing's own: a doppelganger draws see-through) |
+| `blend` | `normal` (left out), `glow` (added to what is below), `darken` (darkens what is below, the Pumpkin of Luck's reflection), `asDrawing` (the drawing's own: a doppelganger draws see-through) |
 | `meshes` | Left out: every mesh, with the model's texture scripts, without the item's hidden mesh; `"allEvenHidden"`: every mesh, the hidden one too; `[0, 2]`: those meshes; `{"allBut": [2]}`: every mesh but those; `"none"`: no mesh, a layer that draws nothing, the default of a layer the values of some items turn on |
 | `texture` | A texture file under `Data` (`Effect/Chrome01.jpg`) instead of the mesh's own: a `.jpg` or a `.tga`, which the game reads from its `.OZJ` or `.OZT` file |
 | `light` | The light the layer is drawn in: `[red, green, blue]`, or `{"tint": [red, green, blue]}`, the item's light times those; each a number or a shape. `{"brightness": 0.8}` is the item's light scaled so its brightest channel is 0.8 (a grey for a black light). It stays for the layers after it, and `{"tint": [1, 1, 1]}` is the item's light again. Left out: the light the layer before left |
@@ -1687,7 +1685,10 @@ item's value times the shape (`"timesItem": true`), as the Phoenix Soul items
 pulse their own opacity and glow strength. Its numbers give the
 code's values exactly, so a look moved from code keeps them:
 `{"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}` is the
-code's `sin(WorldTime * 0.001f) * 0.6f + 0.4f`.
+code's `sin(WorldTime * 0.001f) * 0.6f + 0.4f`. A layer's opacity, glow
+strength or scroll can also be the item's value times a fixed number,
+`{"itemTimes": 1.5}`, as the Cursed Castle Water glows at 1.5 and 0.25 of
+the item's.
 
 | Shape | Fields | Value |
 |---|---|---|
@@ -1754,6 +1755,53 @@ look (a layer's `"drawing"`; the Devil's Eye draws at 2), and
 update puts on the item's object, which the ground item's next draw adds to
 its light (the Devil's Eye's pulse). A field of an entry can be one each
 item sets, which the model entry sets in `itemEffectValues`.
+`animationSpeed` plays the item object's animation in the update at that
+speed, as the Cursed Castle Water's ground item moves; without it the update
+plays none.
+
+`onBones` lists the **things** an item effect creates on the item's bones in
+every update, from the item's pose in that update: sprites, particles,
+lightning and effects of the effect catalogue, each by its name there (the
+**Effect Browser** lists them) with a `subType` number.
+
+```json
+{"name": "wingOfStorm", "onBones": [
+  {"sprite": "cloud64", "subType": 1, "bones": [9, 20, 19], "scale": 0.5, "rotation": {"shape": "scroll", "perSecond": 10}},
+  {"together": {"bones": [11, 21, 29], "chance": {"oneIn": 2, "per": "once"}},
+   "things": [{"effect": "fenrirThunder", "subType": 1, "color": [0.6, 0.6, 0.9], "chance": {"oneIn": 20, "draw": "plain"}}]}]},
+{"name": "wingsOfDarkness", "onBones": [
+  {"together": {"between": [[30, 22], [29, 21]], "chance": {"oneIn": 1}},
+   "things": [{"joint": "jointThunder", "subType": 14, "scale": 20},
+              {"joint": "jointSpirit", "subType": 4, "reversed": true, "scale": 25}]}]}
+```
+
+An entry is one thing, named by its kind (`"sprite"`, `"particle"`,
+`"joint"` for lightning, `"effect"`), with its places and values; or a group,
+`"together"` with the places and the chance its `"things"` share, so they
+come together (the Wings of Darkness' two lightnings strike at once).
+
+| Field | Values |
+|---|---|
+| `bones` | The bone numbers of the item's model the thing is created at, each once a frame; 0 to 199 |
+| `between` | Lightning only: pairs of bones, `[from, to]`, 0 to 199, the lightning goes from the first to the second |
+| `at` | `"origin"`: once at the item object's own place (Rena's spark) |
+| `subType` | The SubType the type is created with, 0 to 1000 (left out: 0) |
+| `scale` | A number or a shape (left out: 1) |
+| `color` | `[red, green, blue]`, each a number or a shape: a sprite's color, the light of a particle, lightning or effect |
+| `rotation` | A sprite's rotation in degrees, a number or a shape |
+| `reversed` | Lightning from the second bone of each pair to the first |
+| `chance` | `{"oneIn": N}`, N from 1 to 10000: once in N frames at the game's reference frame rate, the same at any frame rate; `"draw": "plain"`: a plain random draw each update, as the monster sounds draw theirs; `"per": "once"`: one roll for the entry instead of one for each bone or pair. A thing inside a group can roll its own chance after the group's (the Wing of Storm's thunder), once each time the group's holds, so it has no `"per"` |
+
+An entry names exactly one of `bones`, `between` and `at`. The checks:
+**fatal** a thing of an unknown kind, lightning at bones or a thing that
+isn't lightning between bones, places named twice or not at all, a bone,
+SubType or `oneIn` out of its range, a chance without `oneIn`, `"per"` on
+the chance of a thing inside a group or of an entry at the item's place; **error** a type the effect catalogue
+doesn't have (it is not created, and the game logs it when it loads its
+data); **warning** a bone an item's model doesn't have (about that item:
+nothing is created at it, nor lightning of a pair with it). The things are created as the game moves them, so they look as in
+the game; the Devil's Key's and Invitation's sparks sit on their bones as
+the item is scaled, as every other thing on bones.
 
 ### Shared models
 
@@ -2235,12 +2283,48 @@ The picked look shows:
   change over time.
 - The items that use the look; a click selects one.
 
-A picked **item effect** shows, instead of parts and layers, its entries
-**Before drawing** in their order (**Add**, **Remove**, **Move up**, **Move
-down**), each with its Only when, the item values it sets (no light), the
-drawing's opacity, the level the item glows like and Each item sets, and the
-**Object light** as the last line. Its preview runs the edited effect on the
-picked item; Apply, Revert and the problems work as for a render style.
+A picked **item effect** shows, instead of parts and layers, its lines: its
+entries **Before drawing** in their order, each with its Only when, the item
+values it sets (no light), the drawing's opacity, the level the item glows
+like and Each item sets; the **Object light**; the **Animation speed**; and
+its entries **On bones**. **Add** beside Before drawing and beside On bones
+adds an entry to that list, and **Copy**, **Move up**, **Move down** and
+**Remove** change the picked one. An entry on bones has:
+
+- where its things go: **At bones**, **Between bones** (lightning, from the
+  first bone of a pair to the second) or **At the item's place**, with its
+  bones as number fields (**+ Bone**, **+ Pair**, `x` takes one out);
+- its **Chance**: **Once in** so many frames, drawn **At the game's frame
+  rate** or **Plain**, and **Once for all** bones or pairs;
+- **Together**, a group whose things share the entry's places and chance,
+  each thing with **Its own chance**;
+- each thing's **Kind**, its **Type** from the effect catalogue (a list with
+  a filter), **SubType**, **Scale**, **Color**, a sprite's **Rotation** and
+  lightning's **From the second bone to the first**.
+
+The views of the preview show the things on bones **live**: each view runs
+its own effect (the item's, the chosen look, the edited one) in the game's
+own effect lists, so they move and fade as in the game, and the views can be
+compared. They are created at your character's place, which the world
+doesn't draw them at, and each view draws only its own. **Stop time** stops
+them too: lightning and particles hold still, sprites and lights follow the
+time slider. A view creates nothing while the game's effect lists are
+nearly full, so the game's own effects come first. The Item Model window's
+preview shows them too.
+
+**Show bones**, beside Stop time, draws the item's skeleton over each view:
+each bone a dot joined by a line to the bone it hangs on, with its number and
+name when the mouse points at it. The picked entry's bones are orange with
+their numbers, its pairs joined from start to end, and a bone the mouse
+points at in the entry's fields is ringed. **Pick in the preview**, above the
+entry's fields, makes a click on a bone's dot add the bone or take it out;
+between bones, click the start of the lightning, then its end, which adds the
+pair or, when the entry has it, takes it out. Armor has no bones of its own
+there: it is drawn on the character's skeleton, and the game creates nothing
+on bones for it.
+
+Its preview runs the edited effect on the picked item; Apply, Revert and the
+problems work as for a render style.
 
 Each change of the looks or their folders is a step of the item undo history
 and reaches the game at once. **Save Items** writes

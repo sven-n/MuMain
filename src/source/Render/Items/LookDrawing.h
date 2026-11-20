@@ -3,6 +3,8 @@
 #include "Data/GameData/LookData/LookDefinition.h"
 #include "Render/Models/DrawLook.h"
 
+#include <vector>
+
 class BMD;
 class OBJECT;
 
@@ -46,12 +48,24 @@ public:
 // item glows like (`level`, which the later entries' conditions read).
 void ApplyItemEffect(const Data::Looks::LookDefinition& effect, BMD* b, const OBJECT* o, DrawLook& look, float& alpha,
                      int& level);
-// Puts the light of an item effect that is data on the item's object, in the update (design L45).
-void SpawnItemEffect(const Data::Looks::LookDefinition& effect, OBJECT* o);
+// The effect catalogue's type numbers of an item effect's things on bones, by entry and thing; -1 for a name the
+// catalogue doesn't have (Data Checks names it), which creates nothing. Resolved when the effect table is built, not
+// per frame.
+using BoneThingTypes = std::vector<std::vector<int>>;
+BoneThingTypes ResolveBoneThingTypes(const Data::Looks::LookDefinition& effect);
+
+// What an item effect that is data does in the update: puts its light on the item's object (design L45) and creates
+// its things on bones (section 7b) at `bones`, the item's pose in this update (its bone matrices, placed by the
+// model's BodyOrigin and BodyScale); without bones only the things at the origin.
+void SpawnItemEffect(const Data::Looks::LookDefinition& effect, const BoneThingTypes& types, BMD* b, OBJECT* o,
+                     float (*bones)[3][4]);
 
 // Finds the texture each layer names, loading the ones no code loaded; done after the item textures are loaded. A layer
 // whose texture is missing is skipped, and that is logged as an error.
 void PrepareTextures();
+// Logs as an error each thing on bones of the item effects whose type the effect catalogue doesn't have, which is not
+// created; done when the looks and the catalogue are loaded (Data Checks names them too).
+void LogUnknownBoneThingTypes();
 // The same for one look when the looks change (an edit, an undo): the textures not found yet, also those missing
 // before, as their file may have come since. A missing texture is logged once.
 void PrepareTextures(const Data::Looks::LookDefinition& style);
