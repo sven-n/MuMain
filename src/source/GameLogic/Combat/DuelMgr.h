@@ -110,12 +110,23 @@ public:
         m_bRegenerated = bFlag;
     }
 
+    // Set when the server announced the winner, so the following duel end isn't reported as a cancel.
+    BOOL IsDuelFinished()
+    {
+        return m_bIsDuelFinished;
+    }
+    void SetDuelFinished(BOOL bFlag)
+    {
+        m_bIsDuelFinished = bFlag;
+    }
+
 protected:
     std::array<DUEL_PLAYER_INFO, MAX_DUEL_PLAYERS> m_DuelPlayer{};
     std::array<DUEL_CHANNEL_INFO, MAX_DUEL_CHANNELS> m_DuelChannels{};
     int m_iCurrentChannel;
 
     BOOL m_bRegenerated;
+    BOOL m_bIsDuelFinished;
 
     std::vector<std::wstring> m_DuelWatchUserList;
 };
