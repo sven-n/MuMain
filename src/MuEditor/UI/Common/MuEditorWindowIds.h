@@ -29,6 +29,7 @@ inline constexpr char DevEditor[] = "###DevEditor";
 inline constexpr char EffectBrowser[] = "###EffectBrowser";
 inline constexpr char ItemTranslations[] = "###ItemTranslations";
 inline constexpr char ServerList[] = "###ServerList";
+inline constexpr char WarpList[] = "###WarpList";
 inline constexpr char GraphicsLook[] = "###GraphicsLook";
 inline constexpr char DataChecks[] = "###DataChecks";
 inline constexpr char SoundMixer[] = "###SoundMixer";

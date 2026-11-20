@@ -7732,4 +7732,13 @@
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>合計: +%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>その装備ではそこへ移動できません。</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>ML %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
+  </data>
 </root>

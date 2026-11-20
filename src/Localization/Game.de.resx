@@ -9230,4 +9230,13 @@ Vollbild stellt den Monitor auf die gewählte Auflösung um.</value>
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Gesamt: +%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>Mit Ihrer Ausrüstung können Sie sich nicht dorthin teleportieren.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>ML %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
+  </data>
 </root>

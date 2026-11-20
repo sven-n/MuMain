@@ -8,7 +8,9 @@
 namespace UI::Tests
 {
 std::string ReadFile(const std::filesystem::path& path);
-std::string AssetMarkup(const std::string& theme, const std::string& name);
+// The asset's markup with its stylesheets linked by absolute path; without its data bindings unless `keepBindings`
+// (the test then creates the document's data model before loading it).
+std::string AssetMarkup(const std::string& theme, const std::string& name, bool keepBindings = false);
 class RmlLayoutFixture
 {
     struct NullRenderer : Rml::RenderInterface

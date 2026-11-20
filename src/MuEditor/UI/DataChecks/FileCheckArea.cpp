@@ -10,12 +10,14 @@
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
+#include "Data/DataHandler/MapData/WarpStorage.h"
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemOptionValidation.h"
 #include "Data/GameData/MapData/LightMood.h"
 #include "Data/GameData/MapData/LookProfile.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
+#include "Data/GameData/MapData/WarpDatabase.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
 #include "Render/Look/LookFileSystem.h"
@@ -118,6 +120,22 @@ std::unique_ptr<DataCheckArea> CreateMapSoundCheckArea()
             return issues;
         },
         &ToolWindows::mapEditor, WindowIds::MapEditor);
+}
+
+std::unique_ptr<DataCheckArea> CreateWarpCheckArea()
+{
+    return std::make_unique<FileCheckArea>(
+        &I18N::Editor::WarpList,
+        []
+        {
+            // The list as the game and the Warp List have it, read back as the file would be.
+            std::vector<ItemDataIssue> issues;
+            const std::string source = Data::Maps::GetWarpsFile().generic_string();
+            Data::Maps::MakeWarpsFileText(Data::Maps::GetWarpsFile(), g_WarpDatabase.GetList(), issues);
+            Data::Maps::ValidateWarpItemsInGame(g_WarpDatabase.GetList(), source, issues);
+            return issues;
+        },
+        &ToolWindows::warpList, WindowIds::WarpList);
 }
 
 std::unique_ptr<DataCheckArea> CreateLookCheckArea()

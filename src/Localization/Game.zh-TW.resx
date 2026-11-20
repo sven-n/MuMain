@@ -9100,4 +9100,13 @@
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>合計：+%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>你無法攜帶目前的裝備傳送到那裡。</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>大師 %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>轉生 %d</value>
+  </data>
 </root>

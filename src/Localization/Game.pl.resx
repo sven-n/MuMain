@@ -9539,4 +9539,13 @@ Pełny ekran przełącza monitor na wybraną rozdzielczość.</value>
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Łącznie: +%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>Nie możesz się tam przenieść z tym ekwipunkiem.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>ML %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
+  </data>
 </root>

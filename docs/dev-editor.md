@@ -43,7 +43,7 @@ screen has room (else over its right side), and stays in front of the game. Its
 Style Editor ([item-data.md](item-data.md#style-editor)), Data Checks
 ([below](#data-checks)), the Sound Mixer ([below](#sound-mixer)),
 the Sound Editor ([below](#sound-editor)), Server List
-([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
+([server-list.md](server-list.md)), Warp List ([warp-list.md](warp-list.md)), Skill, Dev and Map Editor, the Effect
 Browser and the console. They open as tabs docked in the editor window, the
 console along the bottom. Drag a tab out to float a tool window anywhere, over
 the game window too, or onto another window to dock it there; **Windows > Reset
@@ -52,7 +52,8 @@ between sessions (`imgui.ini` in the game folder).
 
 The editor window's bar has the **Windows** menu, **Undo** and **Redo**, the UI
 scale and the language. Undo and Redo act on the tool used last: after a click
-into the Server List window on its changes, after a click into a monster tool
+into the Server List window on its changes, after a click into the Warp
+List window on its changes, after a click into a monster tool
 on monster edits, after a click into an item tool (the Style Editor is one)
 on item edits. While the
 tool used last is closed (for the monster tools: all of them), they act on
@@ -120,7 +121,8 @@ area **Graphics look**), the item options
 [item-data.md](item-data.md#item-options)) and the buffs (area **Buffs**,
 [buff-data.md](buff-data.md)) as the game reads their files at
 start, and the map object sounds as the Map Editor's Sounds tab has them
-([map-data.md](map-data.md)).
+([map-data.md](map-data.md)) and the warps as the Warp List window has them
+([warp-list.md](warp-list.md)).
 
 Problems have three levels, the same in every area: **fatal** (the data
 cannot be used: Save refuses it, and the game does not start with it; only
@@ -138,7 +140,7 @@ since the last check.
 
 A click on a problem selects what it is about and opens its tool: the item
 or monster tool of its field, Item Formulas for the item stat file, the
-Server List, the Effect Browser, the Map Editor for the map sounds, the Style
+Server List, the Warp List, the Effect Browser, the Map Editor for the map sounds, the Style
 Editor on the look (and the item a problem is about), or the Graphics Look
 window for the graphics look. An arrow key onto a problem only selects it.
 

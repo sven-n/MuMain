@@ -189,12 +189,12 @@ extern bool LogOut;
 
 // Closing the window skips the menu exit, which is what sends the key configuration (skill and item hotkeys,
 // options, chat box); send it here while still connected. Once is enough: several close events can arrive, and the
-// menu exit has already saved before it logs out and closes the window.
+// menu exit has had its turn to save before it logs out and closes the window.
 void SaveOptionsBeforeClose()
 {
     if (!Destroy && !LogOut)
     {
-        SaveOptionsIfInGame();
+        SaveOptionsBeforeLeaving();
     }
 }
 
