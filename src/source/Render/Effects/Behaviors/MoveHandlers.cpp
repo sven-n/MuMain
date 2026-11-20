@@ -9329,7 +9329,7 @@ namespace Render::Effects::Behaviors
         vec3_t Light;
         Vector(1.f, 1.f, 1.f, Light);
     {
-        if (o->Owner->Live)
+        if (o->Owner != nullptr && o->Owner->Live)
         {
             BMD* pModel = &Models[o->Type];
             pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
@@ -9339,7 +9339,7 @@ namespace Render::Effects::Behaviors
 
             if (o->AnimationFrame >= 5.0f && o->LifeTime > 50)
             {
-                if (o->Owner->m_sTargetIndex < 0)
+                if (o->Owner->m_sTargetIndex < 0 || o->Owner->m_sTargetIndex >= MAX_CHARACTERS_CLIENT)
                     return true;
                 CreateBomb3(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, 3, 0.9f);
                 StopBuffer(SOUND_RAGESKILL_STAMP_ATTACK, true);
@@ -9373,20 +9373,26 @@ namespace Render::Effects::Behaviors
         vec3_t Light;
         Vector(1.f, 1.f, 1.f, Light);
     {
-        if (o->Owner->Live)
+        if (o->Owner != nullptr && o->Owner->Live)
         {
             BMD* pModel = &Models[o->Type];
             pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
 
-            if (o->AnimationFrame >= 6.0f || !o->Owner->Live)
+            if (o->AnimationFrame >= 6.0f)
             {
+                // The right fist is done; the left one follows. The new effect may take this very slot (it is
+                // free now), so nothing of `o` is read after it: the old code went on with o->Owner, which the
+                // new effect had cleared, and crashed (Beast Uppercut).
+                OBJECT* owner = o->Owner;
                 o->Live = false;
-                CreateEffectFpsChecked(MODEL_DOWN_ATTACK_DUMMY_L, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 0, o->Owner);
+                CreateEffectFpsChecked(MODEL_DOWN_ATTACK_DUMMY_L, owner->Position, owner->Angle, owner->Light, 0,
+                                       owner);
+                return true;
             }
 
             if (o->AnimationFrame >= 3.0f && o->LifeTime > 50)
             {
-                if (o->Owner->m_sTargetIndex < 0)
+                if (o->Owner->m_sTargetIndex < 0 || o->Owner->m_sTargetIndex >= MAX_CHARACTERS_CLIENT)
                     return true;
                 CreateBomb3(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, 3, 0.9f);
                 StopBuffer(SOUND_RAGESKILL_STAMP_ATTACK, true);
