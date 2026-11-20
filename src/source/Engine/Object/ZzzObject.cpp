@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Terrain/TerrainFileFormat.h"
 #include "Core/Platform/Quit.h"
 #include "Core/Content/ContentStore.h"
 #include "Data/DataHandler/DataFileIO.h"
@@ -5886,6 +5887,23 @@ void DeleteObjectTile(int x, int y)
     }
 }
 
+namespace
+{
+// Creates the object of one .obj record: type (int16), position, angle (three floats each) and scale.
+void CreateObjectFromRecord(const unsigned char* record)
+{
+    short Type = 0;
+    vec3_t Position;
+    vec3_t Angle;
+    float Scale = 0.f;
+    memcpy(&Type, record, sizeof(Type));
+    memcpy(Position, record + sizeof(Type), sizeof(vec3_t));
+    memcpy(Angle, record + sizeof(Type) + sizeof(vec3_t), sizeof(vec3_t));
+    memcpy(&Scale, record + sizeof(Type) + 2 * sizeof(vec3_t), sizeof(Scale));
+    CreateObject(Type, Position, Angle, Scale);
+}
+} // namespace
+
 int OpenObjectsEnc(wchar_t* FileName)
 {
     Content::Stream file = Content::OpenIO(FileName);
@@ -5910,29 +5928,28 @@ int OpenObjectsEnc(wchar_t* FileName)
     MapFileDecrypt(Decrypted.data(), EncData->data(), EncBytes);
     const unsigned char* Data = Decrypted.data();
 
-    int DataPtr = 0;
-    DataPtr += 1;
-    int iMapNumber = static_cast<int>(Data[DataPtr]);
-    DataPtr += 1;
+    // Header: version, map number and the object count (int16); then the records, whose size the version gives.
+    constexpr std::size_t HeaderSize = 4;
+    const std::size_t RecordSize =
+        Decrypted.size() < HeaderSize ? 0 : Render::Terrain::FileFormat::ObjectRecordSize(Data[0]);
+    if (RecordSize == 0)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"Unknown object file version.");
+        return (-1);
+    }
+    const int iMapNumber = static_cast<int>(Data[1]);
     short Count = 0;
-    memcpy(&Count, Data + DataPtr, sizeof(Count));
-    DataPtr += sizeof(Count);
+    memcpy(&Count, Data + 2, sizeof(Count));
+    if (Count < 0 || HeaderSize + static_cast<std::size_t>(Count) * RecordSize > Decrypted.size())
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return (-1);
+    }
+
     g_iTotalObj = Count;
     for (int i = 0; i < Count; i++)
     {
-        vec3_t Position;
-        vec3_t Angle;
-        short Type = 0;
-        memcpy(&Type, Data + DataPtr, sizeof(Type));
-        DataPtr += sizeof(Type);
-        memcpy(Position, Data + DataPtr, sizeof(vec3_t));
-        DataPtr += sizeof(vec3_t);
-        memcpy(Angle, Data + DataPtr, sizeof(vec3_t));
-        DataPtr += sizeof(vec3_t);
-        float Scale = 0.f;
-        memcpy(&Scale, Data + DataPtr, sizeof(Scale));
-        DataPtr += sizeof(Scale);
-        CreateObject(Type, Position, Angle, Scale);
+        CreateObjectFromRecord(Data + HeaderSize + i * RecordSize);
     }
 
     return iMapNumber;
@@ -7338,7 +7355,7 @@ static bool IsSparkingEventModel(const OBJECT* o)
 
 bool PartObjectSpawns(const OBJECT* o, int Type)
 {
-    return Render::Items::ItemEffects::Spawns(Type) || Render::Items::Styles::Spawns(Type) || IsSparkingEventModel(o);
+    return Render::Items::ItemEffects::Spawns(Type) || IsSparkingEventModel(o);
 }
 
 void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones)
@@ -7346,11 +7363,6 @@ void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones)
     if (Render::Items::ItemEffects::Spawns(Type))
     {
         Render::Items::ItemEffects::Spawn(b, o, Type, bones);
-        return;
-    }
-    if (Render::Items::Styles::Spawns(Type))
-    {
-        Render::Items::Styles::Spawn(b, o, Type, bones);
         return;
     }
     if (!IsSparkingEventModel(o))

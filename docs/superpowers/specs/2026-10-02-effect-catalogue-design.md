@@ -158,8 +158,9 @@ joint types are created with more than one SubType.
 - The only effect data so far is `Data/Effects/GlowColors.json` (45 glow
   colors), read with the item data helpers and loaded on the loading screen
   (`OpenBasicData`, before any scene creates effects).
-- Tests: `tests/effects/test_particle_draw_order` and
-  `test_aura_joint_lifecycle`; none for the registry. `tests/data` links the
+- Tests: `tests/effects/test_particle_draw_order`; the defense aura is
+  covered in `tests/gamelogic/test_character_effects_phase`; none for the
+  registry. `tests/data` links the
   whole client, so a test can call `CreateEffect`, but `Hero` is not set
   there and `IsSkillEffect` reads it.
 - CI: cppcheck checks every changed file in full. It failed on

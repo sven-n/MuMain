@@ -3,12 +3,14 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <spdlog/spdlog.h>
 
 namespace mu::log
 {
-void Init(const std::filesystem::path& logDirectory = {});
+// targetSinks get every line the file gets, the ones logged before Init included (TargetLogSinks.h).
+void Init(const std::filesystem::path& logDirectory = {}, std::vector<spdlog::sink_ptr> targetSinks = {});
 void Shutdown();
 std::shared_ptr<spdlog::logger> Get(const std::string& name);
 

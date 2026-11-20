@@ -14,6 +14,7 @@
 #include "ItemToolWindow.h"
 
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/StyleEditor/BoneThingsPreview.h"
 #include "../MuEditor/UI/StyleEditor/MuStyleEditorUI.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/PartModelSlots.h"
@@ -25,6 +26,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
 #include "imgui.h"
@@ -265,7 +267,17 @@ void CMuItemModelUI::RenderPreview(const ItemModelDefinition* model, int itemTyp
     if ((model != nullptr || drawnByCode) &&
         ImGui::CollapsingHeader(I18N::Editor::Preview, ImGuiTreeNodeFlags_DefaultOpen))
     {
-        m_preview.Render(itemType);
+        // The item's things on bones, as the Style Editor's views show them (design section 7a).
+        m_preview.Render(itemType,
+                         [](int, const MuEditor::Effects::EffectPreviewRequest& request, float turnDegrees,
+                            const MuEditor::Effects::EffectPreviewCamera& camera)
+                         {
+                             const int drawn = MuEditor::Effects::PreviewItemModelsOf(request).model;
+                             MuEditor::Looks::g_BoneThingsPreview.Draw(
+                                 MuEditor::Looks::BoneThingsPreview::ItemModelView,
+                                 {request, Render::Items::ItemEffects::EffectOf(drawn), turnDegrees, std::nullopt},
+                                 camera);
+                         });
     }
 }
 

@@ -5,6 +5,7 @@
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/Common/MeshLimits.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
+#include "Data/GameData/LookData/BoneThingTypes.h"
 #include "Data/GameData/MonsterData/MonsterJsonCommon.h"
 
 #include <algorithm>
@@ -71,6 +72,24 @@ constexpr const char* DrawingOpacity = "drawingOpacity";
 constexpr const char* GlowsLikeLevel = "glowsLikeLevel";
 constexpr const char* ObjectLight = "objectLight";
 constexpr const char* DrawsAlone = "drawsAlone";
+constexpr const char* OnBones = "onBones";
+constexpr const char* SubType = "subType";
+constexpr const char* Bones = "bones";
+constexpr const char* Between = "between";
+constexpr const char* At = "at";
+constexpr const char* Origin = "origin";
+constexpr const char* Scale = "scale";
+constexpr const char* Color = "color";
+constexpr const char* Rotation = "rotation";
+constexpr const char* Reversed = "reversed";
+constexpr const char* Chance = "chance";
+constexpr const char* OneIn = "oneIn";
+constexpr const char* Draw = "draw";
+constexpr const char* Per = "per";
+constexpr const char* Together = "together";
+constexpr const char* Things = "things";
+constexpr const char* ItemTimes = "itemTimes";
+constexpr const char* AnimationSpeed = "animationSpeed";
 } // namespace Keys
 
 constexpr const char* RenderStyleKind = "renderStyle";
@@ -102,9 +121,10 @@ constexpr std::array<std::pair<Motion, const char*>, 9> MotionNames{{
     {Motion::StillShine, "stillShine"},
 }};
 
-constexpr std::array<std::pair<Blend, const char*>, 3> BlendNames{{
+constexpr std::array<std::pair<Blend, const char*>, 4> BlendNames{{
     {Blend::Normal, "normal"},
     {Blend::Glow, "glow"},
+    {Blend::Darken, "darken"},
     {Blend::AsDrawing, "asDrawing"},
 }};
 
@@ -146,6 +166,17 @@ constexpr std::array<std::pair<Place, const char*>, 4> PlaceNames{{
 constexpr std::array<std::pair<LookBuff, const char*>, 1> BuffNames{{
     {LookBuff::InfinityArrow, "infinityArrow"},
 }};
+
+constexpr std::array<std::pair<ChanceDraw, const char*>, 2> ChanceDrawNames{{
+    {ChanceDraw::Fps, "fps"},
+    {ChanceDraw::Plain, "plain"},
+}};
+
+constexpr const char* PerEach = "each";
+constexpr const char* PerOnce = "once";
+
+// The highest bone number a thing on bones names; a model's own bones are checked when it is created.
+constexpr int MaxBone = MaxModelBones - 1;
 
 // The highest item level, for a layer's level condition.
 constexpr long long MaxItemLevel = 15;
@@ -280,6 +311,16 @@ private:
     void ReadNotFor(const OrderedJson& json, const std::string& field, NotFor& notFor);
     OrderedJson TakeEachItem(const OrderedJson& json, const std::string& field, EachItemFields& eachItem);
     void ReadOnlyWhen(const OrderedJson& json, const std::string& field, OnlyWhen& onlyWhen);
+    void ReadOnBones(const OrderedJson& json, const std::string& field, std::vector<OnBones>& onBones);
+    bool ReadOnBonesEntry(const OrderedJson& json, const std::string& field, OnBones& entry);
+    bool ReadBoneThing(const OrderedJson& json, const std::string& field, bool inGroup, BoneThing& thing);
+    bool ReadBonePlaces(const OrderedJson& json, const std::string& field, BonePlaces& places);
+    bool ReadChance(const OrderedJson& json, const std::string& field, std::optional<Chance>& chance,
+                    bool ofPlaces = true);
+    bool ReadColor(const OrderedJson& json, const std::string& field, std::array<Number, 3>& color);
+    // Whether the thing's kind fits the places: lightning goes between pairs, everything else at bones or the origin.
+    bool PlacesFit(const BoneThing& thing, const BonePlaces& places, const std::string& field);
+    bool ChanceFitsPlaces(const OrderedJson& json, const std::string& field, const BonePlaces& places);
 
     template <typename T, std::size_t N>
     bool ReadName(const OrderedJson& json, const char* key, const std::string& field,
@@ -395,13 +436,16 @@ void LookReader::ReadRenderStyleParts(const OrderedJson& json, const std::string
         AddFatal(field + "." + Keys::ItemValuesBefore,
                  "is a part of item effects; a render style leaves its item values after drawing (itemValuesAfter)");
     }
-    if (json.contains(Keys::ObjectLight))
+    for (const char* part : {Keys::ObjectLight, Keys::OnBones, Keys::AnimationSpeed})
     {
-        AddFatal(field + "." + Keys::ObjectLight, "is a part of item effects");
+        if (json.contains(part))
+        {
+            AddFatal(field + "." + part, "is a part of item effects");
+        }
     }
     WarnAboutUnknownKeys(json,
                          {Keys::Name, Keys::NotFor, Keys::DrawsAlone, Keys::Layers, Keys::ItemValuesAfter,
-                          Keys::ItemValuesBefore, Keys::ObjectLight},
+                          Keys::ItemValuesBefore, Keys::ObjectLight, Keys::OnBones, Keys::AnimationSpeed},
                          field);
 }
 
@@ -451,15 +495,378 @@ void LookReader::ReadItemEffectParts(const OrderedJson& json, const std::string&
             look.objectLight = color;
         }
     }
-    if (look.itemValuesBefore.empty() && !look.objectLight)
+    ReadOnBones(json, field, look.onBones);
+    if (const auto speed = json.find(Keys::AnimationSpeed); speed != json.end())
+    {
+        if (!speed->is_number() || speed->get<float>() <= 0.f)
+        {
+            AddFatal(field + "." + Keys::AnimationSpeed,
+                     "must be a number above 0: how fast the object's animation plays");
+        }
+        else
+        {
+            look.animationSpeed = speed->get<float>();
+        }
+    }
+    if (look.itemValuesBefore.empty() && !look.objectLight && look.onBones.empty() && !look.animationSpeed)
     {
         AddIssue(ItemDataIssueSeverity::Warning, field,
-                 "does nothing: no item values before the drawing, no object light");
+                 "does nothing: no item values before the drawing, no object light, nothing on bones, no animation");
     }
     WarnAboutUnknownKeys(json,
-                         {Keys::Name, Keys::ItemValuesBefore, Keys::ObjectLight, Keys::Layers, Keys::NotFor,
-                          Keys::DrawsAlone, Keys::ItemValuesAfter},
+                         {Keys::Name, Keys::ItemValuesBefore, Keys::ObjectLight, Keys::OnBones, Keys::AnimationSpeed,
+                          Keys::Layers, Keys::NotFor, Keys::DrawsAlone, Keys::ItemValuesAfter},
                          field);
+}
+
+// The things an item effect creates on the item's bones (section 7b): a list of entries, each one thing or a group.
+void LookReader::ReadOnBones(const OrderedJson& json, const std::string& field, std::vector<OnBones>& onBones)
+{
+    const auto list = json.find(Keys::OnBones);
+    if (list == json.end())
+    {
+        return;
+    }
+    const std::string listField = field + "." + Keys::OnBones;
+    if (!list->is_array())
+    {
+        AddFatal(listField, "must be a list of things on bones");
+        return;
+    }
+    for (std::size_t i = 0; i < list->size(); ++i)
+    {
+        OnBones entry;
+        if (ReadOnBonesEntry((*list)[i], listField + "[" + std::to_string(i) + "]", entry))
+        {
+            onBones.push_back(std::move(entry));
+        }
+    }
+}
+
+bool LookReader::PlacesFit(const BoneThing& thing, const BonePlaces& places, const std::string& field)
+{
+    const bool joint = thing.kind == BoneThingKind::Joint;
+    if (joint == !places.between.empty())
+    {
+        return true;
+    }
+    AddFatal(field, joint ? "is lightning: it goes between pairs of bones (\"between\")"
+                          : "goes at bones or at the origin: only lightning goes between pairs of bones");
+    return false;
+}
+
+// The item's place is one place: a chance there rolls once, so it has no "per".
+bool LookReader::ChanceFitsPlaces(const OrderedJson& json, const std::string& field, const BonePlaces& places)
+{
+    const auto chance = json.find(Keys::Chance);
+    if (!places.origin || chance == json.end() || !chance->is_object() || !chance->contains(Keys::Per))
+    {
+        return true;
+    }
+    AddFatal(field + "." + Keys::Chance + "." + Keys::Per,
+             "is for bones and pairs: the item's place is one place, its chance rolls once");
+    return false;
+}
+
+bool LookReader::ReadOnBonesEntry(const OrderedJson& json, const std::string& field, OnBones& entry)
+{
+    if (!json.is_object())
+    {
+        AddFatal(field, "must be a thing on bones, e.g. {\"sprite\": \"light\", \"bones\": [8]}, or a group");
+        return false;
+    }
+    const auto together = json.find(Keys::Together);
+    if (together == json.end())
+    {
+        // One thing: its places and its chance are the entry's.
+        BoneThing thing;
+        if (!ReadBoneThing(json, field, false, thing))
+        {
+            return false;
+        }
+        if (!ReadBonePlaces(json, field, entry.places) || !PlacesFit(thing, entry.places, field) ||
+            !ChanceFitsPlaces(json, field, entry.places))
+        {
+            return false;
+        }
+        entry.chance = thing.chance;
+        thing.chance.reset();
+        entry.things.push_back(std::move(thing));
+        return true;
+    }
+    // A group: its places and chance in "together", its things in "things".
+    entry.together = true;
+    const std::string groupField = field + "." + Keys::Together;
+    if (!together->is_object())
+    {
+        AddFatal(groupField, "must hold the group's places (\"bones\", \"between\" or \"at\") and its chance");
+        return false;
+    }
+    const bool placesRead = ReadBonePlaces(*together, groupField, entry.places);
+    const bool chanceRead = ReadChance(*together, groupField, entry.chance);
+    bool valid = placesRead && chanceRead;
+    // Against places and a chance that were read: a fault in either is named already, as the single form stops there.
+    if (valid && !ChanceFitsPlaces(*together, groupField, entry.places))
+    {
+        valid = false;
+    }
+    WarnAboutUnknownKeys(*together, {Keys::Bones, Keys::Between, Keys::At, Keys::Chance}, groupField);
+    WarnAboutUnknownKeys(json, {Keys::Together, Keys::Things}, field);
+    const auto things = json.find(Keys::Things);
+    const std::string thingsField = field + "." + Keys::Things;
+    if (things == json.end() || !things->is_array() || things->empty())
+    {
+        AddFatal(thingsField, "must be a list of the things the group creates together");
+        return false;
+    }
+    for (std::size_t i = 0; i < things->size(); ++i)
+    {
+        const std::string thingField = thingsField + "[" + std::to_string(i) + "]";
+        BoneThing thing;
+        if (!ReadBoneThing((*things)[i], thingField, true, thing))
+        {
+            valid = false;
+            continue;
+        }
+        // Against places that were read (a fault in them is named already), whatever failed before this thing.
+        if (placesRead)
+        {
+            valid = PlacesFit(thing, entry.places, thingField) && valid;
+        }
+        entry.things.push_back(std::move(thing));
+    }
+    return valid;
+}
+
+// The kind and type, sub type, values and (in a group) the thing's own chance; places are read by the caller.
+bool LookReader::ReadBoneThing(const OrderedJson& json, const std::string& field, bool inGroup, BoneThing& thing)
+{
+    if (!json.is_object())
+    {
+        AddFatal(field, "must be a thing on bones, e.g. {\"sprite\": \"light\"}");
+        return false;
+    }
+    int kinds = 0;
+    for (const auto& [kind, key] : BoneThingKeys)
+    {
+        const auto type = json.find(key);
+        if (type == json.end())
+        {
+            continue;
+        }
+        ++kinds;
+        thing.kind = kind;
+        if (!type->is_string() || type->get_ref<const std::string&>().empty())
+        {
+            AddFatal(field + "." + key, "must be the name of a type in the effect catalogue");
+            return false;
+        }
+        thing.type = type->get<std::string>();
+    }
+    if (kinds != 1)
+    {
+        AddFatal(field, "must name one type: " + ListOf(BoneThingKeys));
+        return false;
+    }
+    const auto addFatal = [this](const std::string& at, const std::string& message) { AddFatal(at, message); };
+    bool valid = true;
+    if (const auto subType = json.find(Keys::SubType); subType != json.end())
+    {
+        valid = Items::Json::ReadWholeNumberInRange(*subType, field + "." + Keys::SubType, 0, MaxBoneThingSubType,
+                                                    thing.subType, addFatal);
+    }
+    if (const auto scale = json.find(Keys::Scale); scale != json.end())
+    {
+        valid = ReadNumber(*scale, field + "." + Keys::Scale, thing.scale) && valid;
+    }
+    if (const auto color = json.find(Keys::Color); color != json.end())
+    {
+        valid = ReadColor(*color, field + "." + Keys::Color, thing.color) && valid;
+    }
+    if (const auto rotation = json.find(Keys::Rotation); rotation != json.end())
+    {
+        if (thing.kind != BoneThingKind::Sprite)
+        {
+            AddFatal(field + "." + Keys::Rotation, "is only for a sprite");
+            valid = false;
+        }
+        valid = ReadNumber(*rotation, field + "." + Keys::Rotation, thing.rotation) && valid;
+    }
+    if (const auto reversed = json.find(Keys::Reversed); reversed != json.end())
+    {
+        if (!reversed->is_boolean() || thing.kind != BoneThingKind::Joint)
+        {
+            AddFatal(field + "." + Keys::Reversed, "is true or false, only for lightning");
+            valid = false;
+        }
+        else
+        {
+            thing.reversed = reversed->get<bool>();
+        }
+    }
+    valid = ReadChance(json, field, thing.chance, !inGroup) && valid;
+    Items::Json::KeySet known{Keys::SubType, Keys::Scale, Keys::Color, Keys::Rotation, Keys::Reversed, Keys::Chance};
+    for (const auto& [kind, key] : BoneThingKeys)
+    {
+        known.insert(key);
+    }
+    if (inGroup)
+    {
+        for (const char* key : {Keys::Bones, Keys::Between, Keys::At})
+        {
+            if (json.contains(key))
+            {
+                AddFatal(field + "." + key, "is the group's: the things of a group share its places");
+                valid = false;
+            }
+        }
+    }
+    else
+    {
+        known.insert({Keys::Bones, Keys::Between, Keys::At});
+    }
+    WarnAboutUnknownKeys(json, known, field);
+    return valid;
+}
+
+// "bones": [8, 9], "between": [[30, 22]] or "at": "origin", exactly one of them.
+bool LookReader::ReadBonePlaces(const OrderedJson& json, const std::string& field, BonePlaces& places)
+{
+    const auto bones = json.find(Keys::Bones);
+    const auto between = json.find(Keys::Between);
+    const auto at = json.find(Keys::At);
+    const int named = (bones != json.end() ? 1 : 0) + (between != json.end() ? 1 : 0) + (at != json.end() ? 1 : 0);
+    if (named != 1)
+    {
+        AddFatal(field, "must name its places once: \"bones\", \"between\" or \"at\": \"origin\"");
+        return false;
+    }
+    const auto addFatal = [this](const std::string& at, const std::string& message) { AddFatal(at, message); };
+    if (at != json.end())
+    {
+        if (!at->is_string() || at->get_ref<const std::string&>() != Keys::Origin)
+        {
+            AddFatal(field + "." + Keys::At, "must be \"origin\": the item object's own place");
+            return false;
+        }
+        places.origin = true;
+        return true;
+    }
+    if (bones != json.end())
+    {
+        const std::string bonesField = field + "." + Keys::Bones;
+        if (!bones->is_array() || bones->empty())
+        {
+            AddFatal(bonesField, "must be a list of bone numbers");
+            return false;
+        }
+        bool valid = true;
+        for (std::size_t i = 0; i < bones->size(); ++i)
+        {
+            int bone = 0;
+            valid = Items::Json::ReadWholeNumberInRange((*bones)[i], bonesField + "[" + std::to_string(i) + "]", 0,
+                                                        MaxBone, bone, addFatal) &&
+                    valid;
+            places.bones.push_back(bone);
+        }
+        return valid;
+    }
+    const std::string betweenField = field + "." + Keys::Between;
+    if (!between->is_array() || between->empty())
+    {
+        AddFatal(betweenField, "must be a list of pairs of bones, [from, to]");
+        return false;
+    }
+    bool valid = true;
+    for (std::size_t i = 0; i < between->size(); ++i)
+    {
+        const std::string pairField = betweenField + "[" + std::to_string(i) + "]";
+        const OrderedJson& pair = (*between)[i];
+        if (!pair.is_array() || pair.size() != 2)
+        {
+            AddFatal(pairField, "must be a pair of bones, [from, to]");
+            valid = false;
+            continue;
+        }
+        std::pair<int, int> bonePair;
+        valid = Items::Json::ReadWholeNumberInRange(pair[0], pairField + "[0]", 0, MaxBone, bonePair.first, addFatal) &&
+                valid;
+        valid =
+            Items::Json::ReadWholeNumberInRange(pair[1], pairField + "[1]", 0, MaxBone, bonePair.second, addFatal) &&
+            valid;
+        places.between.push_back(bonePair);
+    }
+    return valid;
+}
+
+// "chance": {"oneIn": 2, "draw": "plain", "per": "once"}; without draw and per: rand_fps_check for each place. A
+// thing's own chance in a group (not ofPlaces) rolls once each time the group's holds, so it has no "per".
+bool LookReader::ReadChance(const OrderedJson& json, const std::string& field, std::optional<Chance>& chance,
+                            bool ofPlaces)
+{
+    const auto entry = json.find(Keys::Chance);
+    if (entry == json.end())
+    {
+        return true;
+    }
+    const std::string chanceField = field + "." + Keys::Chance;
+    if (!entry->is_object())
+    {
+        AddFatal(chanceField, "must be {\"oneIn\": N}: once in N frames");
+        return false;
+    }
+    const auto oneIn = entry->find(Keys::OneIn);
+    if (oneIn == entry->end())
+    {
+        AddFatal(chanceField + "." + Keys::OneIn, "is missing: once in how many frames");
+        return false;
+    }
+    const auto addFatal = [this](const std::string& at, const std::string& message) { AddFatal(at, message); };
+    Chance read;
+    bool valid = Items::Json::ReadWholeNumberInRange(*oneIn, chanceField + "." + Keys::OneIn, 1, MaxBoneThingOneIn,
+                                                     read.oneIn, addFatal);
+    if (entry->contains(Keys::Draw))
+    {
+        valid = ReadName(*entry, Keys::Draw, chanceField, ChanceDrawNames, read.draw) && valid;
+    }
+    if (const auto per = entry->find(Keys::Per); per != entry->end() && !ofPlaces)
+    {
+        AddFatal(chanceField + "." + Keys::Per,
+                 "is the group's: a thing's own chance rolls once each time the group's chance holds");
+        valid = false;
+    }
+    else if (per != entry->end())
+    {
+        const std::string text = per->is_string() ? per->get<std::string>() : std::string();
+        read.once = text == PerOnce;
+        if (text != PerEach && text != PerOnce)
+        {
+            AddFatal(chanceField + "." + Keys::Per,
+                     std::string("must be \"") + PerEach + "\" (each place) or \"" + PerOnce + "\" (all at once)");
+            valid = false;
+        }
+    }
+    WarnAboutUnknownKeys(*entry, {Keys::OneIn, Keys::Draw, Keys::Per}, chanceField);
+    if (valid)
+    {
+        chance = read;
+    }
+    return valid;
+}
+
+bool LookReader::ReadColor(const OrderedJson& json, const std::string& field, std::array<Number, 3>& color)
+{
+    if (!json.is_array() || json.size() != 3)
+    {
+        AddFatal(field, "must be [red, green, blue]: three numbers or shapes");
+        return false;
+    }
+    bool valid = true;
+    for (std::size_t i = 0; i < 3; ++i)
+    {
+        valid = ReadNumber(json[i], field + "[" + std::to_string(i) + "]", color[i]) && valid;
+    }
+    return valid;
 }
 
 void LookReader::ReadItemValuesBefore(const OrderedJson& marked, const std::string& field, ItemValuesBefore& entry)
@@ -757,6 +1164,20 @@ void LookReader::ReadValue(const OrderedJson& json, const char* key, const std::
         value = FromDrawing{};
         return;
     }
+    if (entry->is_object() && entry->contains(Keys::ItemTimes))
+    {
+        // The item's value times a number (design L59).
+        const OrderedJson& times = (*entry)[Keys::ItemTimes];
+        if (!times.is_number())
+        {
+            AddFatal(field + "." + key + "." + Keys::ItemTimes,
+                     "must be a number: the item's value is multiplied by it");
+            return;
+        }
+        WarnAboutUnknownKeys(*entry, {Keys::ItemTimes}, field + "." + key);
+        value = FromItem{times.get<float>()};
+        return;
+    }
     if (entry->is_object())
     {
         Shape shape;
@@ -771,7 +1192,8 @@ void LookReader::ReadValue(const OrderedJson& json, const char* key, const std::
         value = entry->get<float>();
         return;
     }
-    AddFatal(field + "." + key, drawing ? "must be a number, \"drawing\" or a shape" : "must be a number or a shape");
+    AddFatal(field + "." + key, drawing ? "must be a number, \"drawing\", a shape or {\"itemTimes\": N}"
+                                        : "must be a number, a shape or {\"itemTimes\": N}");
 }
 
 // A number, or a shape: {"shape": "wave", ...}.
@@ -1063,6 +1485,116 @@ OrderedJson WriteNumber(const Number& number)
     return WriteFloat(std::get<float>(number));
 }
 
+OrderedJson WriteColor(const std::array<Number, 3>& color)
+{
+    OrderedJson json = OrderedJson::array();
+    for (const Number& channel : color)
+    {
+        json.push_back(WriteNumber(channel));
+    }
+    return json;
+}
+
+void WriteBonePlaces(const BonePlaces& places, OrderedJson& json)
+{
+    if (places.origin)
+    {
+        json[Keys::At] = Keys::Origin;
+    }
+    else if (!places.between.empty())
+    {
+        OrderedJson pairs = OrderedJson::array();
+        for (const auto& [from, to] : places.between)
+        {
+            pairs.push_back(OrderedJson::array({from, to}));
+        }
+        json[Keys::Between] = std::move(pairs);
+    }
+    else
+    {
+        json[Keys::Bones] = places.bones;
+    }
+}
+
+void WriteChance(const std::optional<Chance>& chance, OrderedJson& json)
+{
+    if (!chance)
+    {
+        return;
+    }
+    OrderedJson written = OrderedJson::object();
+    written[Keys::OneIn] = chance->oneIn;
+    if (chance->draw != ChanceDraw::Fps)
+    {
+        written[Keys::Draw] = NameOf(ChanceDrawNames, chance->draw);
+    }
+    if (chance->once)
+    {
+        written[Keys::Per] = PerOnce;
+    }
+    json[Keys::Chance] = std::move(written);
+}
+
+// A thing's kind and type, sub type and values that are not the defaults; its places go after, or to the group.
+OrderedJson WriteBoneThing(const BoneThing& thing)
+{
+    OrderedJson json = OrderedJson::object();
+    json[NameOf(BoneThingKeys, thing.kind)] = thing.type;
+    if (thing.subType != 0)
+    {
+        json[Keys::SubType] = thing.subType;
+    }
+    if (thing.reversed)
+    {
+        json[Keys::Reversed] = true;
+    }
+    return json;
+}
+
+void WriteBoneThingValues(const BoneThing& thing, OrderedJson& json)
+{
+    if (thing.scale != Number{1.f})
+    {
+        json[Keys::Scale] = WriteNumber(thing.scale);
+    }
+    if (thing.color != std::array<Number, 3>{1.f, 1.f, 1.f})
+    {
+        json[Keys::Color] = WriteColor(thing.color);
+    }
+    if (thing.rotation != Number{0.f})
+    {
+        json[Keys::Rotation] = WriteNumber(thing.rotation);
+    }
+}
+
+OrderedJson WriteOnBones(const OnBones& entry)
+{
+    if (!entry.together && entry.things.size() == 1)
+    {
+        const BoneThing& thing = entry.things.front();
+        OrderedJson json = WriteBoneThing(thing);
+        WriteBonePlaces(entry.places, json);
+        WriteBoneThingValues(thing, json);
+        WriteChance(entry.chance, json);
+        return json;
+    }
+    OrderedJson group = OrderedJson::object();
+    WriteBonePlaces(entry.places, group);
+    WriteChance(entry.chance, group);
+    OrderedJson things = OrderedJson::array();
+    for (const BoneThing& thing : entry.things)
+    {
+        OrderedJson json = WriteBoneThing(thing);
+        WriteBoneThingValues(thing, json);
+        WriteChance(thing.chance, json);
+        things.push_back(std::move(json));
+    }
+    OrderedJson json = OrderedJson::object();
+    json[Keys::Together] = std::move(group);
+    json[Keys::Things] = std::move(things);
+    return json;
+}
+
 OrderedJson WriteValue(const Value& value)
 {
     if (std::holds_alternative<FromDrawing>(value))
@@ -1073,12 +1605,19 @@ OrderedJson WriteValue(const Value& value)
     {
         return WriteShape(*shape);
     }
+    if (const FromItem* item = std::get_if<FromItem>(&value))
+    {
+        OrderedJson json = OrderedJson::object();
+        json[Keys::ItemTimes] = WriteFloat(item->times);
+        return json;
+    }
     return WriteFloat(std::get<float>(value));
 }
 
 void PutValue(OrderedJson& json, const char* key, const Value& value)
 {
-    if (!std::holds_alternative<FromItem>(value))
+    // The item's value as it is is a layer's default.
+    if (value != Value{FromItem{}})
     {
         json[key] = WriteValue(value);
     }
@@ -1520,6 +2059,19 @@ std::string WriteLookFileJson(LookKind kind, std::vector<LookDefinition> looks,
                 }
                 json[Keys::ObjectLight] = std::move(light);
             }
+            if (!look.onBones.empty())
+            {
+                OrderedJson onBones = OrderedJson::array();
+                for (const OnBones& entry : look.onBones)
+                {
+                    onBones.push_back(WriteOnBones(entry));
+                }
+                json[Keys::OnBones] = std::move(onBones);
+            }
+            if (look.animationSpeed)
+            {
+                json[Keys::AnimationSpeed] = WriteFloat(*look.animationSpeed);
+            }
             list.push_back(std::move(json));
             continue;
         }
@@ -1560,6 +2112,7 @@ std::string WriteLookFileJson(LookKind kind, std::vector<LookDefinition> looks,
     text = Items::Json::PutObjectsOnOneLine(text, Keys::ItemValuesAfter);
     text = Items::Json::PutListEntriesOnOneLine(text, Keys::ItemValuesBefore);
     text = Items::Json::PutListsOnOneLine(text, Keys::ObjectLight);
+    text = Items::Json::PutListEntriesOnOneLine(text, Keys::OnBones);
     return text + "\n";
 }
 

@@ -30,6 +30,7 @@
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/EffectSpawnHook.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Engine/AI/GOBoid.h"
@@ -146,9 +147,10 @@ static bool ShouldRenderLeaves()
  */
 static void InitializeMainScene()
 {
-    g_pMainFrame->ResetSkillHotKey();
-    // The character's key configuration arrives after the selection below.
-    SetKeyConfigurationReceived(false);
+    // The hotkeys and options live across character switches, so the ones of the character before would be saved
+    // as this one's when the server sends no key configuration (a new character). The character's configuration
+    // arrives after the selection below.
+    ResetKeyConfiguration();
 
     MU_LOG_INFO(mu::log::Get("scenes"), "Character selected: slot {}", SelectedHero + 1);
 
@@ -344,6 +346,10 @@ static void UpdateGameEntities()
         UpdateTerrainEffects();
         UpdateTerrainWaterSpots();
     }
+#ifdef _EDITOR
+    // The Style Editor's views create their items' things on bones (design section 7a).
+    Core::EffectSpawnHook::Notify();
+#endif
     MoveWaterTerrain();
 
     g_Direction.CheckDirection();
@@ -402,6 +408,9 @@ void MoveMainScene()
     {
         return;
     }
+
+    // A key configuration save asked right after the join goes once the wait for the stored one is over.
+    SaveOptionsIfDue();
 
     // Picks what the cursor is over in what the last frame drew, and highlights it.
     Input::Selection::SelectObjects();

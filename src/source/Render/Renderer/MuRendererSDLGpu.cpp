@@ -41,6 +41,8 @@
 #include "RangeAllocator.h"
 #include "SdlGpuPixelFormat.h"
 #include "SdlGpuAmbientOcclusion.h"
+#include "SdlGpuFinalPasses.h"
+#include "SdlGpuDepthState.h"
 #include "ShadowPassSelection.h"
 #include "SdlGpuSunShadowMap.h"
 #include "SdlGpuPostProcessing.h"
@@ -52,6 +54,8 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/PostProcessing/BloomSource.h"
+#include "Render/PostProcessing/EdgeSmoothing.h"
+#include "Render/PostProcessing/RenderScale.h"
 #include "Render/PostProcessing/SceneBoundary.h"
 #include "Render/Lighting/SunShadow.h"
 #include "Render/Terrain/TerrainHeightGrid.h"
@@ -257,7 +261,13 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 static SDL_GPUDevice* s_device = nullptr;
 // The device's shader format, picked once at Init.
 static const Render::ShaderFormat* s_shaderFormat = nullptr;
-static Render::Renderer::BitmapGpuResources s_bitmapGpuResources;
+static Render::Renderer::BitmapGpuResources::Calls BitmapCallsForTarget()
+{
+    Render::Renderer::BitmapGpuResources::Calls calls;
+    calls.waitAtCeiling = Render::TargetFramesMayWait();
+    return calls;
+}
+static Render::Renderer::BitmapGpuResources s_bitmapGpuResources{BitmapCallsForTarget()};
 static SDL_Window* s_window = nullptr;
 
 // Uncapped present mode for VSync off: IMMEDIATE when the window supports it, otherwise
@@ -598,6 +608,16 @@ static mu::SdlGpuPostProcessing s_postProcessing;
 static bool s_postProcessingEnabled = false;
 static mu::PostProcessingLook s_postProcessingLook{};
 static mu::PostProcessingView s_postProcessingView = mu::PostProcessingView::Scene;
+// The passes between the composite and the UI: edge smoothing (FXAA), and FSR 1's upscale from the
+// render scale and sharpening. They take the post-processed path too, with a composite that changes
+// nothing when post-processing itself is off.
+static mu::SdlGpuFinalPasses s_finalPasses;
+static bool s_edgeSmoothingEnabled = false;
+static int s_renderScalePercent = Render::PostProcessing::MaxRenderScalePercent;
+static int s_sharpnessPercent = Render::PostProcessing::MinSharpnessPercent;
+// The size of the target the scene passes replay into, while it differs from the window's: the views
+// recorded for the window are scaled to it. Empty otherwise.
+static Render::PostProcessing::FrameSize s_replayTargetSize{};
 static Render::PostProcessing::SceneBoundary s_sceneBoundary;
 static int s_bloomExclusionDepth = 0;
 static int s_worldLitGeometryDepth = 0;
@@ -1306,6 +1326,9 @@ static SDL_GPUShader* s_fragShaderBloomUp = nullptr;        // post_bloom_up.fra
 static SDL_GPUShader* s_fragShaderComposite = nullptr;      // post_composite.frag
 static SDL_GPUShader* s_fragShaderAmbientOcclusion = nullptr;     // post_ao.frag
 static SDL_GPUShader* s_fragShaderAmbientOcclusionBlur = nullptr; // post_ao_blur.frag
+static SDL_GPUShader* s_fragShaderFxaa = nullptr;                 // post_fxaa.frag
+static SDL_GPUShader* s_fragShaderFsrEasu = nullptr;              // post_fsr_easu.frag
+static SDL_GPUShader* s_fragShaderFsrRcas = nullptr;              // post_fsr_rcas.frag
 // The scene's ambient occlusion (one sample only), and the scene's projection it reconstructs from.
 static mu::SdlGpuAmbientOcclusion s_ambientOcclusion;
 static float s_sceneProjection[16]{};
@@ -1345,9 +1368,21 @@ static bool s_alphaCoverageDrawLogged = false;
 static Render::Antialiasing::SupportedSampleCounts s_supportedSampleCounts{};
 static SDL_GPUTexture* s_multisampleColorTexture = nullptr;
 static SDL_GPUTextureCreateInfo s_multisampleColorInfo{};
-// The HDR scene's multisampled colour target (kHdrSceneFormat), while anti-aliasing is on.
-static SDL_GPUTexture* s_hdrMultisampleColorTexture = nullptr;
-static SDL_GPUTextureCreateInfo s_hdrMultisampleColorInfo{};
+// The scene's own multisampled colour target while anti-aliasing is on and the scene is not drawn
+// like the frame: HDR (kHdrSceneFormat), or at the render size.
+static SDL_GPUTexture* s_sceneMultisampleColorTexture = nullptr;
+static SDL_GPUTextureCreateInfo s_sceneMultisampleColorInfo{};
+// A depth target of its own size and sample count, created when either changes.
+struct SizedDepthTexture
+{
+    SDL_GPUTexture* texture = nullptr;
+    Render::PostProcessing::FrameSize size{};
+    SDL_GPUSampleCount sampleCount = SDL_GPU_SAMPLECOUNT_1;
+};
+// The scene's depth while it is drawn at the render size: with the frame's samples, and with one for
+// the ambient occlusion of a multisampled frame.
+static SizedDepthTexture s_scaledSceneDepth;
+static SizedDepthTexture s_scaledSingleSampleDepth;
 // The depth of a single-sample pass at the frame's size while the frame's own depth is multisampled.
 static SDL_GPUTexture* s_singleSampleDepthTexture = nullptr;
 static Uint32 s_singleSampleDepthW = 0u;
@@ -2242,6 +2277,8 @@ public:
         ReleaseShaders();
         ReleaseGroundShadowMask();
         s_ambientOcclusion.Release();
+        s_finalPasses.Release();
+        ReleaseScaledSceneDepths();
         s_postProcessing.Release();
 
         SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
@@ -2257,7 +2294,7 @@ public:
     // Waits on the same frame-in-flight fence as BeginFrame's acquire, so the acquire after it returns at once.
     void WaitForSwapchain() override
     {
-        if (!s_device || !s_window)
+        if (!s_device || !s_window || !Render::TargetFramesMayWait())
         {
             return;
         }
@@ -2380,10 +2417,14 @@ public:
         // the frames in flight are full, and the loop ran on without drawing, several times per displayed frame on
         // Vulkan and Direct3D 12 alike. The game loop already waited in WaitForSwapchain, before reading input, so
         // this returns at once there; it still paces the frames drawn outside it (the title and loading screens).
-        if (!SDL_WaitAndAcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
+        // Where the host paces the frames instead, a frame without a free texture is skipped.
+        const bool mayWait = Render::TargetFramesMayWait();
+        const auto acquire = mayWait ? &SDL_WaitAndAcquireGPUSwapchainTexture : &SDL_AcquireGPUSwapchainTexture;
+        if (!acquire(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
         {
-            mu::log::Get("render")->error("SDL_gpu -- SDL_WaitAndAcquireGPUSwapchainTexture failed: {}",
-                                          SDL_GetError());
+            mu::log::Get("render")->error(
+                "SDL_gpu -- {} failed: {}",
+                mayWait ? "SDL_WaitAndAcquireGPUSwapchainTexture" : "SDL_AcquireGPUSwapchainTexture", SDL_GetError());
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             FailPendingFrameReadback();
@@ -2391,7 +2432,8 @@ public:
         }
 
         // If swapchain texture is null, skip the frame: a hidden window, or on Vulkan a minimized one whose
-        // surface the driver reports as 0x0 (Direct3D 12 keeps rendering a minimized window).
+        // surface the driver reports as 0x0 (Direct3D 12 keeps rendering a minimized window), or no texture free yet
+        // where frames may not wait.
         if (!s_swapchainTexture)
         {
             // A requested readback stays pending for the next frame that renders;
@@ -2456,7 +2498,72 @@ public:
 
     [[nodiscard]] static bool IsPostProcessingActive()
     {
-        return s_postProcessingEnabled && s_postProcessing.IsAvailable();
+        return Render::PostProcessing::UsesPostProcessedFrame(s_postProcessingEnabled, FinalPasses().Any()) &&
+               s_postProcessing.IsAvailable();
+    }
+
+    [[nodiscard]] static Render::PostProcessing::FrameSize WindowSize()
+    {
+        return {s_swapW, s_swapH};
+    }
+
+    // The passes this frame takes between the composite and the UI: the chosen ones that are available.
+    [[nodiscard]] static Render::PostProcessing::FinalPassPlan FinalPasses()
+    {
+        using Pass = mu::SdlGpuFinalPasses::Pass;
+        if (!s_postProcessing.CanCompositeToImage())
+        {
+            return {};
+        }
+        const Render::PostProcessing::FrameSize window = WindowSize();
+        Render::PostProcessing::FinalPassPlan plan = Render::PostProcessing::PlanFinalPasses(
+            s_edgeSmoothingEnabled, Render::PostProcessing::ScaledSize(window, s_renderScalePercent), window,
+            s_sharpnessPercent);
+        plan.edgeSmoothing = plan.edgeSmoothing && s_finalPasses.IsAvailable(Pass::EdgeSmoothing);
+        plan.upscale = plan.upscale && s_finalPasses.IsAvailable(Pass::Upscale);
+        plan.sharpen = plan.sharpen && s_finalPasses.IsAvailable(Pass::Sharpen);
+        return plan;
+    }
+
+    // The size a post-processed frame's scene is drawn at: the render size while it is upscaled.
+    [[nodiscard]] static Render::PostProcessing::FrameSize SceneSize()
+    {
+        return FinalPasses().upscale ? Render::PostProcessing::ScaledSize(WindowSize(), s_renderScalePercent)
+                                     : WindowSize();
+    }
+
+    [[nodiscard]] static mu::SdlGpuTargetSize TargetSize(Render::PostProcessing::FrameSize size)
+    {
+        return {size.width, size.height};
+    }
+
+    // The viewport and scissor the replay applies: as recorded, or scaled to a scene at the render size.
+    [[nodiscard]] static SDL_GPUViewport AppliedViewport(const SDL_GPUViewport& viewport)
+    {
+        if (s_replayTargetSize == Render::PostProcessing::FrameSize{})
+        {
+            return viewport;
+        }
+        const Render::PostProcessing::ViewRect scaled = Render::PostProcessing::ScaleViewRect(
+            {viewport.x, viewport.y, viewport.w, viewport.h}, WindowSize(), s_replayTargetSize);
+        return {scaled.x, scaled.y, scaled.width, scaled.height, viewport.min_depth, viewport.max_depth};
+    }
+
+    [[nodiscard]] static SDL_Rect AppliedScissor(const SDL_Rect& scissor)
+    {
+        if (s_replayTargetSize == Render::PostProcessing::FrameSize{})
+        {
+            return scissor;
+        }
+        const Render::PostProcessing::PixelRect scaled = Render::PostProcessing::ScalePixelRect(
+            {scissor.x, scissor.y, scissor.w, scissor.h}, WindowSize(), s_replayTargetSize);
+        return {scaled.x, scaled.y, scaled.width, scaled.height};
+    }
+
+    // The look this frame's composite applies: none of it while only edge smoothing is on.
+    [[nodiscard]] static mu::PostProcessingLook CompositedLook()
+    {
+        return Render::PostProcessing::CompositedLook(s_postProcessingEnabled, s_postProcessingLook);
     }
 
     // The pipeline a bloom source replays with into the bloom pass, or null for
@@ -2533,10 +2640,11 @@ public:
         // Track explicit state. Pipeline changes re-apply the active scissor because
         // SDL GPU backends may discard it while binding a new pipeline.
         Render::SdlGpuReplayState replayState;
+        SDL_Rect scissor = AppliedScissor(view.scissor);
         if (replayState.SelectViewport(view.viewport))
-            SDL_SetGPUViewport(s_renderPass, &view.viewport);
+            ApplyViewport(view.viewport);
         if (replayState.SelectScissor(view.scissor))
-            SDL_SetGPUScissor(s_renderPass, &view.scissor);
+            SDL_SetGPUScissor(s_renderPass, &scissor);
 
         const bool allCommands = selection == ReplaySelection::AllCommands;
         // The shadow map keeps its own viewport and scissor.
@@ -2569,15 +2677,16 @@ public:
             {
                 view.viewport = cmd.viewport;
                 if (replayState.SelectViewport(view.viewport))
-                    SDL_SetGPUViewport(s_renderPass, &view.viewport);
+                    ApplyViewport(view.viewport);
                 break;
             }
 
             case RenderCmdType::SetScissor:
             {
                 view.scissor = cmd.scissor;
+                scissor = AppliedScissor(view.scissor);
                 if (replayState.SelectScissor(view.scissor))
-                    SDL_SetGPUScissor(s_renderPass, &view.scissor);
+                    SDL_SetGPUScissor(s_renderPass, &scissor);
                 break;
             }
 
@@ -2591,7 +2700,7 @@ public:
                 SDL_GPUGraphicsPipeline* pipeline = GetReplayPipeline(cmd, selection);
                 if (pipeline)
                 {
-                    ReplayDrawCommand(cmd, pipeline, boneDataReady, view.scissor, replayState);
+                    ReplayDrawCommand(cmd, pipeline, boneDataReady, scissor, replayState);
                 }
                 break;
             }
@@ -2599,10 +2708,18 @@ public:
         }
     }
 
-    [[nodiscard]] static SDL_GPUDepthStencilTargetInfo MakeDepthTarget(SDL_GPULoadOp loadOp, SDL_GPUStoreOp storeOp)
+    static void ApplyViewport(const SDL_GPUViewport& viewport)
+    {
+        const SDL_GPUViewport applied = AppliedViewport(viewport);
+        SDL_SetGPUViewport(s_renderPass, &applied);
+    }
+
+    // A pass's depth target: the frame's own depth unless `texture` names another.
+    [[nodiscard]] static SDL_GPUDepthStencilTargetInfo MakeDepthTarget(SDL_GPULoadOp loadOp, SDL_GPUStoreOp storeOp,
+                                                                       SDL_GPUTexture* texture = s_depthTexture)
     {
         SDL_GPUDepthStencilTargetInfo depthTarget{};
-        depthTarget.texture = s_depthTexture;
+        depthTarget.texture = texture;
         depthTarget.clear_depth = 1.0f;
         depthTarget.load_op = loadOp;
         depthTarget.store_op = storeOp;
@@ -2633,7 +2750,7 @@ public:
     [[nodiscard]] static bool BeginReplayPass(const SDL_GPUColorTargetInfo& colorTarget,
                                               const SDL_GPUDepthStencilTargetInfo& depthTarget)
     {
-        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
+        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, depthTarget.texture ? &depthTarget : nullptr);
         if (!s_renderPass)
         {
             return false;
@@ -2663,10 +2780,10 @@ public:
         }
     }
 
-    // The ground shadow mask at the frame's size, recreated when that changed. Null when it fails.
-    [[nodiscard]] static SDL_GPUTexture* EnsureGroundShadowMask()
+    // The ground shadow mask at the scene's size, recreated when that changed. Null when it fails.
+    [[nodiscard]] static SDL_GPUTexture* EnsureGroundShadowMask(Render::PostProcessing::FrameSize size)
     {
-        if (s_groundShadowMask && s_groundShadowMaskW == s_swapW && s_groundShadowMaskH == s_swapH)
+        if (s_groundShadowMask && s_groundShadowMaskW == size.width && s_groundShadowMaskH == size.height)
         {
             return s_groundShadowMask;
         }
@@ -2674,8 +2791,8 @@ public:
         SDL_GPUTextureCreateInfo maskInfo{};
         maskInfo.type = SDL_GPU_TEXTURETYPE_2D;
         maskInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8_UNORM;
-        maskInfo.width = s_swapW;
-        maskInfo.height = s_swapH;
+        maskInfo.width = size.width;
+        maskInfo.height = size.height;
         maskInfo.layer_count_or_depth = 1;
         maskInfo.num_levels = 1;
         maskInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
@@ -2683,12 +2800,12 @@ public:
         s_groundShadowMask = SDL_CreateGPUTexture(s_device, &maskInfo);
         if (!s_groundShadowMask)
         {
-            mu::log::Get("render")->error("SDL_gpu -- ground shadow mask creation failed ({}x{}): {}", s_swapW, s_swapH,
-                                          SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- ground shadow mask creation failed ({}x{}): {}", size.width,
+                                          size.height, SDL_GetError());
             return nullptr;
         }
-        s_groundShadowMaskW = s_swapW;
-        s_groundShadowMaskH = s_swapH;
+        s_groundShadowMaskW = size.width;
+        s_groundShadowMaskH = size.height;
         return s_groundShadowMask;
     }
 
@@ -2703,11 +2820,11 @@ public:
         s_groundShadowMaskH = 0u;
     }
 
-    // In a frame with world-lit ground, its shadows [0, end) into the ground shadow mask, after which
-    // the other passes leave them out.
-    static void RenderGroundShadowMask(std::size_t end, bool boneDataReady)
+    // In a frame with world-lit ground, its shadows [0, end) into the ground shadow mask of the scene's
+    // `size`, after which the other passes leave them out.
+    static void RenderGroundShadowMask(std::size_t end, bool boneDataReady, Render::PostProcessing::FrameSize size)
     {
-        if (!s_frameHasWorldLit || !s_groundShadowMaskPipelines[0][0] || !EnsureGroundShadowMask())
+        if (!s_frameHasWorldLit || !s_groundShadowMaskPipelines[0][0] || !EnsureGroundShadowMask(size))
         {
             return;
         }
@@ -2778,10 +2895,13 @@ public:
     {
         if (!IsMultisampled())
         {
-            return s_depthTexture;
+            return ScenePassDepth();
         }
         FRAME_PROFILE(SceneDepth);
-        SDL_GPUTexture* const depth = SingleSamplePassDepth();
+        const bool scaled = SceneSize() != WindowSize();
+        SDL_GPUTexture* const depth =
+            scaled ? EnsureDepthTexture(s_scaledSingleSampleDepth, SceneSize(), SDL_GPU_SAMPLECOUNT_1)
+                   : SingleSamplePassDepth();
         if (!depth || !s_sceneDepthPipelines[0] || !s_sceneDepthPipelines[1] ||
             (s_renderPass = BeginDepthOnlyPass(depth)) == nullptr)
         {
@@ -2811,7 +2931,7 @@ public:
         const SDL_GPUDepthStencilTargetInfo depthTarget =
             MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, IsMultisampled() ? SDL_GPU_STOREOP_DONT_CARE : SDL_GPU_STOREOP_STORE);
         RenderSunShadowMap(s_renderCmds.size(), boneDataReady);
-        RenderGroundShadowMask(s_renderCmds.size(), boneDataReady);
+        RenderGroundShadowMask(s_renderCmds.size(), boneDataReady, WindowSize());
         if (!BeginReplayPass(colorTarget, depthTarget))
         {
             return false;
@@ -2899,14 +3019,15 @@ public:
         const SDL_GPUColorTargetInfo colorTarget = CycledTarget(mu::GetSdlGpuFrameColorTarget(
             {s_postProcessing.GetBloomSourceTexture(), SceneMultisampleTexture()}, noLight));
         // The UI pass tests against the same depth, so it is kept.
-        if (!BeginReplayPass(colorTarget, MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE)))
+        if (!BeginReplayPass(colorTarget,
+                             MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE, ScenePassDepth())))
         {
             return;
         }
         ReplayView view = FullFrameView();
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::BloomSources, view);
         EndReplayPass();
-        s_postProcessing.RenderBloom(s_cmdBuf, s_postProcessingLook.bloomLevelFalloff);
+        s_postProcessing.RenderBloom(s_cmdBuf, CompositedLook().bloomLevelFalloff);
     }
 
     // The multisampled colour target of the scene and bloom-source passes: the HDR one with the HDR
@@ -2917,7 +3038,72 @@ public:
         {
             return nullptr;
         }
-        return s_hdrScenePass ? s_hdrMultisampleColorTexture : s_multisampleColorTexture;
+        if (!s_hdrScenePass && SceneSize() == WindowSize())
+        {
+            return s_multisampleColorTexture;
+        }
+        const SDL_GPUTextureFormat format =
+            s_hdrScenePass ? kHdrSceneFormat : SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
+        return EnsureSceneMultisampleColorTexture(format, SceneSize()) ? s_sceneMultisampleColorTexture : nullptr;
+    }
+
+    // The depth of the scene's passes: the frame's own, or its own at the render size.
+    [[nodiscard]] static SDL_GPUTexture* ScenePassDepth()
+    {
+        if (SceneSize() == WindowSize())
+        {
+            return s_depthTexture;
+        }
+        return EnsureDepthTexture(s_scaledSceneDepth, SceneSize(),
+                                  mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1));
+    }
+
+    // `depth` at `size` with `sampleCount` samples, recreated when either changed. Null when it fails.
+    [[nodiscard]] static SDL_GPUTexture*
+    EnsureDepthTexture(SizedDepthTexture& depth, Render::PostProcessing::FrameSize size, SDL_GPUSampleCount sampleCount)
+    {
+        if (depth.texture && depth.size == size && depth.sampleCount == sampleCount)
+        {
+            return depth.texture;
+        }
+        ReleaseDepthTexture(depth);
+        const auto info = mu::GetSdlGpuDepthTextureInfo(TargetSize(size), sampleCount);
+        depth.texture = info ? SDL_CreateGPUTexture(s_device, &*info) : nullptr;
+        if (!depth.texture)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- scene depth creation failed ({}x{}): {}", size.width, size.height,
+                                          SDL_GetError());
+            return nullptr;
+        }
+        depth.size = size;
+        depth.sampleCount = sampleCount;
+        return depth.texture;
+    }
+
+    static void ReleaseDepthTexture(SizedDepthTexture& depth)
+    {
+        if (depth.texture)
+        {
+            SDL_ReleaseGPUTexture(s_device, depth.texture);
+        }
+        depth = {};
+    }
+
+    static void ReleaseScaledSceneDepths()
+    {
+        ReleaseDepthTexture(s_scaledSceneDepth);
+        ReleaseDepthTexture(s_scaledSingleSampleDepth);
+    }
+
+    // Validate both attachments before a scene pass can begin. A missing multisampled colour
+    // target must not silently pair a single-sample scene image with multisampled depth/pipelines.
+    [[nodiscard]] static bool PrepareSceneAttachments(SDL_GPUTexture*& color, SDL_GPUTexture*& depth)
+    {
+        s_hdrScenePass = s_postProcessing.IsHdrScene();
+        color = SceneMultisampleTexture();
+        depth = ScenePassDepth();
+        s_hdrScenePass = false;
+        return (!IsMultisampled() || color) && depth;
     }
 
     // The scene into the scene texture, its bloom, then the processed scene and
@@ -2925,56 +3111,114 @@ public:
     [[nodiscard]] static bool ReplayPostProcessedFrame(SDL_GPUTexture* destination, std::size_t sceneEnd,
                                                        bool boneDataReady)
     {
+        SDL_GPUTexture* sceneMultisampled = nullptr;
+        SDL_GPUTexture* sceneDepthTarget = nullptr;
+        if (!PrepareSceneAttachments(sceneMultisampled, sceneDepthTarget))
+        {
+            // BeginFrame already prepared the window-sized attachments and pipelines. Replay
+            // every command there, with the original viewport/scissor and no processed scene.
+            return ReplayFrame(destination, boneDataReady);
+        }
         SDL_GPUTexture* const multisampled = IsMultisampled() ? s_multisampleColorTexture : nullptr;
         ReplayView view = FullFrameView();
+        const mu::PostProcessingLook look = CompositedLook();
         RenderSunShadowMap(sceneEnd, boneDataReady);
-        RenderGroundShadowMask(sceneEnd, boneDataReady);
+        // The scene's passes draw at the render size, into targets of that size.
+        const bool scaled = SceneSize() != WindowSize();
+        s_replayTargetSize = scaled ? SceneSize() : Render::PostProcessing::FrameSize{};
+        RenderGroundShadowMask(sceneEnd, boneDataReady, SceneSize());
         const bool sceneView = s_postProcessingView == mu::PostProcessingView::Scene;
-        // The scene texture's format says whether this frame's scene is HDR (EnsureTargets).
         s_hdrScenePass = s_postProcessing.IsHdrScene();
 
         // Its depth stays for the bloom and UI passes, which test against it as
         // the UI did when it shared the scene's pass.
-        const SDL_GPUColorTargetInfo sceneTarget = CycledTarget(mu::GetSdlGpuFrameColorTarget(
-            {s_postProcessing.GetSceneTexture(), SceneMultisampleTexture()}, s_clearColor));
-        if (!BeginReplayPass(sceneTarget, MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE)))
+        const SDL_GPUColorTargetInfo sceneTarget = CycledTarget(
+            mu::GetSdlGpuFrameColorTarget({s_postProcessing.GetSceneTexture(), sceneMultisampled}, s_clearColor));
+        if (!BeginReplayPass(sceneTarget,
+                             MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE, sceneDepthTarget)))
         {
             s_hdrScenePass = false;
+            s_replayTargetSize = {};
             return false;
         }
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
 
-        if (s_postProcessingLook.bloomStrength > 0.0f && s_postProcessing.EnsureBloomTargets())
+        s_postProcessing.ForgetBloom();
+        if (look.bloomStrength > 0.0f && s_postProcessing.EnsureBloomTargets())
         {
             RenderBloomSources(sceneEnd, boneDataReady);
         }
         s_hdrScenePass = false;
 
-        SDL_GPUTexture* const sceneDepth = s_postProcessingLook.ambientOcclusionStrength > 0.0f && sceneView
-                                               ? RenderSceneDepth(sceneEnd, boneDataReady)
-                                               : nullptr;
+        SDL_GPUTexture* const sceneDepth =
+            look.ambientOcclusionStrength > 0.0f && sceneView ? RenderSceneDepth(sceneEnd, boneDataReady) : nullptr;
         SDL_GPUTexture* const ambientOcclusion =
-            sceneDepth ? s_ambientOcclusion.Render(s_cmdBuf, sceneDepth, {s_swapW, s_swapH}, s_sceneProjection,
-                                                   s_postProcessingLook.ambientOcclusionRadius)
+            sceneDepth ? s_ambientOcclusion.Render(s_cmdBuf, sceneDepth, TargetSize(SceneSize()), s_sceneProjection,
+                                                   look.ambientOcclusionRadius)
                        : nullptr;
+        s_replayTargetSize = {};
+        const bool finalPasses = sceneView && RunFinalPasses(look, ambientOcclusion);
 
         // The composite covers every pixel: the target's old content is not loaded.
         // A diagnostic view without its image this frame leaves black instead.
         constexpr SDL_FColor black{0.0f, 0.0f, 0.0f, 1.0f};
         SDL_GPUColorTargetInfo uiTarget = mu::GetSdlGpuFrameColorTarget({destination, multisampled}, black);
-        if (s_postProcessingView == mu::PostProcessingView::Scene)
+        if (sceneView)
         {
             uiTarget.load_op = SDL_GPU_LOADOP_DONT_CARE;
         }
-        if (!BeginReplayPass(uiTarget, MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_DONT_CARE)))
+        // A scene drawn at the render size has its own depth: the UI then starts from a cleared one.
+        const SDL_GPULoadOp uiDepthLoad = scaled ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
+        if (!BeginReplayPass(uiTarget, MakeDepthTarget(uiDepthLoad, SDL_GPU_STOREOP_DONT_CARE)))
         {
             return false;
         }
-        s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, {s_swapW, s_swapH}, s_postProcessingLook,
-                                       s_postProcessingView, ambientOcclusion);
+        if (finalPasses)
+        {
+            s_finalPasses.DrawLast(s_cmdBuf, s_renderPass);
+        }
+        else
+        {
+            s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, TargetSize(WindowSize()), look, s_postProcessingView,
+                                           ambientOcclusion);
+        }
         ReplayCommands(sceneEnd, s_renderCmds.size(), boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
+        return true;
+    }
+
+    // With a final pass planned, the composite into the image the first one reads, then all of them but
+    // the last, which draws in the UI pass. False when none is planned or one could not run: the UI
+    // pass then composites itself.
+    [[nodiscard]] static bool RunFinalPasses(const mu::PostProcessingLook& look, SDL_GPUTexture* ambientOcclusion)
+    {
+        const Render::PostProcessing::FinalPassPlan plan = FinalPasses();
+        return plan.Any() && CompositeToImage(look, ambientOcclusion) &&
+               s_finalPasses.RunAllButLast(s_cmdBuf, plan, SceneSize(), WindowSize(), s_sharpnessPercent);
+    }
+
+    [[nodiscard]] static bool CompositeToImage(const mu::PostProcessingLook& look, SDL_GPUTexture* ambientOcclusion)
+    {
+        SDL_GPUTexture* const image = s_finalPasses.EnsureCompositeImage(SceneSize());
+        if (!image)
+        {
+            return false;
+        }
+        SDL_GPUColorTargetInfo target{};
+        target.texture = image;
+        target.load_op = SDL_GPU_LOADOP_DONT_CARE;
+        target.store_op = SDL_GPU_STOREOP_STORE;
+        // Not loaded: a fresh texture instead of waiting for the frame still reading it.
+        target.cycle = true;
+        SDL_GPURenderPass* const pass = SDL_BeginGPURenderPass(s_cmdBuf, &target, 1, nullptr);
+        if (!pass)
+        {
+            return false;
+        }
+        s_postProcessing.DrawComposite(s_cmdBuf, pass, TargetSize(SceneSize()), look, s_postProcessingView,
+                                       ambientOcclusion, mu::SdlGpuCompositeTarget::Image);
+        SDL_EndGPURenderPass(pass);
         return true;
     }
 
@@ -3356,11 +3600,15 @@ public:
         // Passes that will not run this frame free their targets, whichever way the frame is drawn.
         {
             const bool scene = split.postProcessed && s_postProcessingView == mu::PostProcessingView::Scene;
-            if (!scene || s_postProcessingLook.ambientOcclusionStrength <= 0.0f)
+            if (!scene || CompositedLook().ambientOcclusionStrength <= 0.0f)
                 s_ambientOcclusion.ReleaseTargets();
             // The bloom views show the bloom too.
-            if (!split.postProcessed || s_postProcessingLook.bloomStrength <= 0.0f)
+            if (!split.postProcessed || CompositedLook().bloomStrength <= 0.0f)
                 s_postProcessing.ReleaseBloomTargets();
+            if (!scene || !FinalPasses().Any())
+                s_finalPasses.ReleaseImages();
+            if (!split.postProcessed || SceneSize() == WindowSize())
+                ReleaseScaledSceneDepths();
         }
         if (s_mainColorPassOpenedThisFrame && frameColorTexture == FrameColorTexture())
         {
@@ -3369,8 +3617,7 @@ public:
             renderPassCompleted = ContinueFlushedFrame(frameColorTexture, boneDataReady);
         }
         else if (split.postProcessed &&
-                 s_postProcessing.EnsureTargets({s_swapW, s_swapH},
-                                                UsesHdrScene() ? kHdrSceneFormat : SDL_GPU_TEXTUREFORMAT_INVALID))
+                 s_postProcessing.EnsureTargets(TargetSize(SceneSize()), PostProcessedSceneFormat()))
         {
             renderPassCompleted = ReplayPostProcessedFrame(frameColorTexture, split.sceneEnd, boneDataReady);
         }
@@ -4008,6 +4255,26 @@ public:
         return !enabled || s_postProcessing.IsAvailable();
     }
 
+    [[nodiscard]] bool SetEdgeSmoothing(bool enabled) override
+    {
+        s_edgeSmoothingEnabled = enabled;
+        return !enabled || !s_device || s_finalPasses.IsAvailable(mu::SdlGpuFinalPasses::Pass::EdgeSmoothing);
+    }
+
+    [[nodiscard]] bool SetRenderScale(int percent) override
+    {
+        s_renderScalePercent = Render::PostProcessing::ClampRenderScale(percent);
+        return s_renderScalePercent == Render::PostProcessing::MaxRenderScalePercent || !s_device ||
+               s_finalPasses.IsAvailable(mu::SdlGpuFinalPasses::Pass::Upscale);
+    }
+
+    [[nodiscard]] bool SetSharpness(int percent) override
+    {
+        s_sharpnessPercent = Render::PostProcessing::ClampSharpness(percent);
+        return s_sharpnessPercent == Render::PostProcessing::MinSharpnessPercent || !s_device ||
+               s_finalPasses.IsAvailable(mu::SdlGpuFinalPasses::Pass::Sharpen);
+    }
+
     void SetPostProcessingLook(const mu::PostProcessingLook& look) override
     {
         s_postProcessingLook = look;
@@ -4093,6 +4360,13 @@ public:
     [[nodiscard]] bool SetColorGradingTable(std::span<const std::uint8_t> rgba) override
     {
         return s_postProcessing.SetGradingTable(rgba);
+    }
+
+    [[nodiscard]] bool CanTurnOffVSync() const override
+    {
+        return s_device && s_window &&
+               (SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_IMMEDIATE) ||
+                SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_MAILBOX));
     }
 
     [[nodiscard]] bool SetVSyncEnabled(bool enabled) override
@@ -6050,6 +6324,34 @@ private:
     // Returns false if the primary shader (basic_textured.vert) cannot be loaded
     // (fatal for 2D rendering). Other shaders log warnings but are non-fatal.
     // -----------------------------------------------------------------------
+    static void LoadPostProcessingShaders(const auto& createShader)
+    {
+        // Post-processing — non-fatal: without them post-processing is unavailable.
+        // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
+        // grading textures (t0-t2) and CompositeUniforms (b0).
+        s_vertShaderPostFullscreen =
+            createShader("post_fullscreen", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, /*fatal=*/false);
+        s_fragShaderBloomDown =
+            createShader("post_bloom_down", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderBloomUp =
+            createShader("post_bloom_up", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        // The composite also reads the ambient occlusion and the bloom source (t3, t4).
+        s_fragShaderComposite =
+            createShader("post_composite", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 5, 0, 1, /*fatal=*/false);
+        // Ambient occlusion: the depth (t0), and for the blur the occlusion (t1); AmbientOcclusion (b0).
+        s_fragShaderAmbientOcclusion =
+            createShader("post_ao", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderAmbientOcclusionBlur =
+            createShader("post_ao_blur", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 1, /*fatal=*/false);
+        // Edge smoothing: the processed image (t0) and FxaaUniforms (b0).
+        s_fragShaderFxaa = createShader("post_fxaa", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        // FSR 1 upscale and sharpening: the image (t0) and EasuUniforms or RcasUniforms (b0).
+        s_fragShaderFsrEasu =
+            createShader("post_fsr_easu", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderFsrRcas =
+            createShader("post_fsr_rcas", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+    }
+
     [[nodiscard]] static bool LoadShaders()
     {
         const Render::ShaderFormat& shaderFormat = *s_shaderFormat;
@@ -6184,23 +6486,7 @@ private:
         s_fragShaderSunDepth =
             createShader("sun_depth", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
 
-        // Post-processing — non-fatal: without them post-processing is unavailable.
-        // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
-        // grading textures (t0-t2) and CompositeUniforms (b0).
-        s_vertShaderPostFullscreen =
-            createShader("post_fullscreen", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, /*fatal=*/false);
-        s_fragShaderBloomDown =
-            createShader("post_bloom_down", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        s_fragShaderBloomUp =
-            createShader("post_bloom_up", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        // The composite also reads the ambient occlusion and the bloom source (t3, t4).
-        s_fragShaderComposite =
-            createShader("post_composite", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 5, 0, 1, /*fatal=*/false);
-        // Ambient occlusion: the depth (t0), and for the blur the occlusion (t1); AmbientOcclusion (b0).
-        s_fragShaderAmbientOcclusion =
-            createShader("post_ao", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
-        s_fragShaderAmbientOcclusionBlur =
-            createShader("post_ao_blur", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 1, /*fatal=*/false);
+        LoadPostProcessingShaders(createShader);
 
         mu::log::Get("render")->info("SDL_gpu -- shaders loaded, format: {}", shaderFormat.extension);
         return true;
@@ -6270,7 +6556,8 @@ private:
         for (SDL_GPUShader** shader :
              {&s_vertShaderWorldLit, &s_fragShaderWorldLit, &s_fragShaderShadowMask, &s_vertShaderPostFullscreen,
               &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite, &s_fragShaderAmbientOcclusion,
-              &s_fragShaderAmbientOcclusionBlur, &s_fragShaderSunDepth})
+              &s_fragShaderAmbientOcclusionBlur, &s_fragShaderFxaa, &s_fragShaderFsrEasu, &s_fragShaderFsrRcas,
+              &s_fragShaderSunDepth})
         {
             if (*shader)
             {
@@ -6450,22 +6737,6 @@ private:
         PipelineBuildDescription description;
         std::string error;
     };
-
-    // Every variant compares depth with LESS_OR_EQUAL, as the classic MU OpenGL client set
-    // glDepthFunc(GL_LEQUAL) at the start of each 3D scene (SetDepthFunc, which this backend
-    // doesn't propagate). Depth-read-only and 2D pipelines always did. Depth-writing ones need it
-    // for models drawn in several depth-writing passes over the same mesh, like the Bill of
-    // Balrog's textured body over its chrome body: with LESS the later pass lost every
-    // equal-depth fragment, so only the first pass showed.
-    [[nodiscard]] static SDL_GPUDepthStencilState MakeDepthStencilState(const PipelineBuildDescription& description)
-    {
-        SDL_GPUDepthStencilState depthState{};
-        depthState.enable_depth_test = description.depthTestEnabled;
-        depthState.enable_depth_write = description.depthWriteEnabled;
-        depthState.enable_stencil_test = false;
-        depthState.compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
-        return depthState;
-    }
 
     [[nodiscard]] static PipelineBuildResult BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
                                                                 const PipelineBuildDescription& description)
@@ -6667,7 +6938,8 @@ private:
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
         pipelineInfo.rasterizer_state = rasterState;
-        pipelineInfo.depth_stencil_state = MakeDepthStencilState(description);
+        pipelineInfo.depth_stencil_state =
+            Render::MakeDepthStencilState(description.depthTestEnabled, description.depthWriteEnabled);
         pipelineInfo.target_info = targetInfo;
         pipelineInfo.props = 0;
 
@@ -7199,48 +7471,61 @@ private:
     }
 
     // The HDR scene this frame: its pipelines, and with anti-aliasing its multisampled target.
-    [[nodiscard]] static bool UsesHdrScene()
+    // The scene texture's format for a post-processed frame: HDR with post-processing itself on and
+    // the HDR pipelines there; the frame's own (INVALID) when only edge smoothing takes the frame.
+    [[nodiscard]] static SDL_GPUTextureFormat PostProcessedSceneFormat()
     {
-        return !s_hdrScenePipelines.empty() && (!IsMultisampled() || EnsureHdrMultisampleColorTexture());
+        // The flag first: UsesHdrScene creates the HDR multisampled target, which only post-processing reads.
+        return s_postProcessingEnabled && UsesHdrScene() ? kHdrSceneFormat : SDL_GPU_TEXTUREFORMAT_INVALID;
     }
 
-    [[nodiscard]] static bool EnsureHdrMultisampleColorTexture()
+    [[nodiscard]] static bool UsesHdrScene()
+    {
+        return !s_hdrScenePipelines.empty() &&
+               (!IsMultisampled() || EnsureSceneMultisampleColorTexture(kHdrSceneFormat, SceneSize()));
+    }
+
+    // The scene's own multisampled colour target in `format` at `size`, recreated when any of them or
+    // the sample count changed.
+    [[nodiscard]] static bool EnsureSceneMultisampleColorTexture(SDL_GPUTextureFormat format,
+                                                                 Render::PostProcessing::FrameSize size)
     {
         const SDL_GPUSampleCount sampleCount = mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1);
-        if (s_hdrMultisampleColorTexture && s_hdrMultisampleColorInfo.width == s_swapW &&
-            s_hdrMultisampleColorInfo.height == s_swapH && s_hdrMultisampleColorInfo.sample_count == sampleCount)
+        if (s_sceneMultisampleColorTexture && s_sceneMultisampleColorInfo.format == format &&
+            s_sceneMultisampleColorInfo.width == size.width && s_sceneMultisampleColorInfo.height == size.height &&
+            s_sceneMultisampleColorInfo.sample_count == sampleCount)
         {
             return true;
         }
-        ReleaseHdrMultisampleColorTexture();
+        ReleaseSceneMultisampleColorTexture();
         SDL_GPUTextureCreateInfo info{};
         info.type = SDL_GPU_TEXTURETYPE_2D;
-        info.format = kHdrSceneFormat;
+        info.format = format;
         info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
-        info.width = s_swapW;
-        info.height = s_swapH;
+        info.width = size.width;
+        info.height = size.height;
         info.layer_count_or_depth = 1;
         info.num_levels = 1;
         info.sample_count = sampleCount;
-        s_hdrMultisampleColorTexture = SDL_CreateGPUTexture(s_device, &info);
-        if (!s_hdrMultisampleColorTexture)
+        s_sceneMultisampleColorTexture = SDL_CreateGPUTexture(s_device, &info);
+        if (!s_sceneMultisampleColorTexture)
         {
-            mu::log::Get("render")->error("SDL_gpu -- HDR multisampled colour target creation failed ({}x{}): {}",
-                                          s_swapW, s_swapH, SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- scene multisampled colour target creation failed ({}x{}): {}",
+                                          size.width, size.height, SDL_GetError());
             return false;
         }
-        s_hdrMultisampleColorInfo = info;
+        s_sceneMultisampleColorInfo = info;
         return true;
     }
 
-    static void ReleaseHdrMultisampleColorTexture()
+    static void ReleaseSceneMultisampleColorTexture()
     {
-        if (s_hdrMultisampleColorTexture)
+        if (s_sceneMultisampleColorTexture)
         {
-            SDL_ReleaseGPUTexture(s_device, s_hdrMultisampleColorTexture);
-            s_hdrMultisampleColorTexture = nullptr;
+            SDL_ReleaseGPUTexture(s_device, s_sceneMultisampleColorTexture);
+            s_sceneMultisampleColorTexture = nullptr;
         }
-        s_hdrMultisampleColorInfo = {};
+        s_sceneMultisampleColorInfo = {};
     }
 
     // Every pipeline slot CreatePipelines() fills, in one fixed order.
@@ -7343,6 +7628,11 @@ private:
         s_singleSamplePipelines.clear();
     }
 
+    [[nodiscard]] static const char* AvailableText(bool available)
+    {
+        return available ? "available" : "unavailable";
+    }
+
     // Optional: without them every frame stays unprocessed.
     static void CreatePostProcessingPipelines()
     {
@@ -7355,6 +7645,15 @@ private:
                                      s_sampleCount);
         (void)s_ambientOcclusion.CreatePipelines(
             s_device, {s_vertShaderPostFullscreen, s_fragShaderAmbientOcclusion, s_fragShaderAmbientOcclusionBlur});
+        s_finalPasses.CreatePipelines(
+            s_device, {s_vertShaderPostFullscreen, s_fragShaderFxaa, s_fragShaderFsrEasu, s_fragShaderFsrRcas},
+            SDL_GetGPUSwapchainTextureFormat(s_device, s_window),
+            mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1));
+        using Pass = mu::SdlGpuFinalPasses::Pass;
+        mu::log::Get("render")->info("SDL_gpu -- edge smoothing {}, upscale {}, sharpening {}",
+                                     AvailableText(s_finalPasses.IsAvailable(Pass::EdgeSmoothing)),
+                                     AvailableText(s_finalPasses.IsAvailable(Pass::Upscale)),
+                                     AvailableText(s_finalPasses.IsAvailable(Pass::Sharpen)));
     }
 
     // The pipelines replaying solid draws into the sun shadow map, with its comparison sampler and far
@@ -7549,7 +7848,7 @@ private:
         }
         s_multisampleColorInfo = {};
         ReleaseSingleSampleDepthTexture();
-        ReleaseHdrMultisampleColorTexture();
+        ReleaseSceneMultisampleColorTexture();
     }
 
     // The multisampled colour target for this frame's swapchain format, size
@@ -8370,7 +8669,8 @@ void FlushBitmapUploads()
 
 void WaitForSDLGpuIdle()
 {
-    if (s_device && !SDL_WaitForGPUIdle(s_device))
+    // Where frames may not wait, neither may teardown: the host keeps the device until the page goes away.
+    if (s_device && Render::TargetFramesMayWait() && !SDL_WaitForGPUIdle(s_device))
     {
         mu::log::Get("render")->error("SDL_gpu -- failed to wait for idle before resource teardown: {}",
                                       SDL_GetError());

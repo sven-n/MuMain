@@ -34,7 +34,8 @@ TEST_CASE("tooltip refuses a value its item's fields can't hold [core][control]"
     for (const char* fields :
          {R"("level":-1)", R"("level":16)", R"("durability":-1)", R"("durability":256)", R"("option":-1)",
           R"("option":16)", R"("excellent":64)", R"("excellent":256)", R"("ancient":-1)", R"("ancient":256)",
-          R"("harmony":16)", R"("harmony":1,"harmony_level":16)", R"("level":"high")"})
+          R"("harmony":16)", R"("harmony":1,"harmony_level":16)", R"("option":1,"option_type":16)",
+          R"("ancient":1,"ancient_bonus":16)", R"("level":"high")"})
     {
         INFO(fields);
         const std::string response = tooltip(fields);
@@ -49,6 +50,17 @@ TEST_CASE("tooltip refuses a harmony level without a harmony option [core][contr
                                      R"({"cmd":"tooltip","group":0,"number":0,"harmony_level":13})");
     CHECK(IsBadRequest(response));
     CHECK(response.find("`harmony_level` needs `harmony`") != std::string::npos);
+}
+
+TEST_CASE("tooltip refuses an option type without an option and a bonus level without a set [core][control]")
+{
+    std::string response = Run(&App::Control::Commands::ItemTooltip,
+                               R"({"cmd":"tooltip","group":0,"number":0,"option_type":2})");
+    CHECK(IsBadRequest(response));
+    CHECK(response.find("`option_type` needs `option`") != std::string::npos);
+    response = Run(&App::Control::Commands::ItemTooltip, R"({"cmd":"tooltip","group":0,"number":0,"ancient_bonus":1})");
+    CHECK(IsBadRequest(response));
+    CHECK(response.find("`ancient_bonus` needs `ancient`") != std::string::npos);
 }
 
 TEST_CASE("tooltip refuses an item number no item uses [core][control]")

@@ -64,3 +64,63 @@ TEST_CASE("Clearing the queue drops packets but keeps connection events [network
     CHECK(IncomingPacketQueue::Instance().GetStats().depth == 2);
     CHECK(Drain() == std::vector<int>{-1, -2});
 }
+
+namespace
+{
+// A map load starts at packet 2: the rest waits until it is done.
+bool s_loading = false;
+
+void RecordAndStartLoadAtTwo(const PacketInfo* entry)
+{
+    Record(entry);
+    s_loading = s_loading || (entry->Event == ConnectionEvent::None && entry->ReceiveBuffer[0] == 2);
+}
+
+bool Loading()
+{
+    return s_loading;
+}
+
+std::vector<int> DrainHeld()
+{
+    s_drained.clear();
+    IncomingPacketQueue::Instance().DrainTo(&RecordAndStartLoadAtTwo, &Loading);
+    return s_drained;
+}
+} // namespace
+
+TEST_CASE("Packets after the one that starts a map load wait for it, in order [network]")
+{
+    Drain();
+    s_loading = false;
+    PushPacket(1);
+    PushPacket(2);
+    PushPacket(3);
+    PushPacket(4);
+    CHECK(DrainHeld() == std::vector<int>{1, 2});
+
+    PushPacket(5);
+    CHECK(DrainHeld().empty());
+    CHECK(IncomingPacketQueue::Instance().GetStats().depth == 3);
+
+    s_loading = false;
+    CHECK(DrainHeld() == std::vector<int>{3, 4, 5});
+}
+
+TEST_CASE("A connection close reaches the client while a map load holds the packets [network]")
+{
+    Drain();
+    s_loading = false;
+    PushPacket(2);
+    PushPacket(3);
+    PushEvent(ConnectionEvent::Closed);
+    PushPacket(4);
+    CHECK(DrainHeld() == std::vector<int>{2, -2});
+    CHECK(IncomingPacketQueue::Instance().GetStats().depth == 2);
+
+    PushEvent(ConnectionEvent::Closed);
+    CHECK(DrainHeld() == std::vector<int>{-2});
+
+    s_loading = false;
+    CHECK(DrainHeld() == std::vector<int>{3, 4});
+}

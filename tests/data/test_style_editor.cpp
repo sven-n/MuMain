@@ -420,6 +420,109 @@ TEST_CASE("Every field of a look draws, as drag fields, part checkboxes and drop
     }
 }
 
+TEST_CASE("A layer's line names the values it sets, the item's value times a number too (design L59) "
+          "[editor][looks]")
+{
+    using namespace Data::Looks;
+    Layer layer;
+    const std::string itemOwn = MuEditor::Looks::Fields::DescribeLayer(layer);
+    CHECK(itemOwn.find(I18N::Editor::GlowStrength) == std::string::npos);
+    layer.glowStrength = FromItem{.times = 1.5f};
+    layer.opacity = FromItem{.times = 0.25f};
+    const std::string times = MuEditor::Looks::Fields::DescribeLayer(layer);
+    CHECK(times.find(I18N::Editor::GlowStrength) != std::string::npos);
+    CHECK(times.find(I18N::Editor::Opacity) != std::string::npos);
+}
+
+TEST_CASE("An entry on bones' line says where its things go, Between bones before its first pair too (design L58) "
+          "[editor][looks]")
+{
+    using namespace Data::Looks;
+    OnBones entry;
+    entry.things.push_back({.kind = BoneThingKind::Joint, .type = "jointThunder"});
+    CHECK(MuEditor::Looks::Fields::DescribeOnBones(entry).find(I18N::Editor::AtBones) != std::string::npos);
+    CHECK(MuEditor::Looks::Fields::DescribeOnBones(entry, true).find(I18N::Editor::BetweenBones) != std::string::npos);
+    entry.places.bones = {3};
+    CHECK(MuEditor::Looks::Fields::DescribeOnBones(entry, true).find(I18N::Editor::AtBones) != std::string::npos);
+}
+
+TEST_CASE("A thing on bones made another kind drops its type and what only its kind has, and keeps the rest "
+          "(design L58) [editor][looks]")
+{
+    using namespace Data::Looks;
+    BoneThing sprite{.kind = BoneThingKind::Sprite, .type = "light", .subType = 2, .scale = 0.5f, .rotation = 45.f};
+    MuEditor::Looks::Fields::ChangeKind(sprite, BoneThingKind::Particle);
+    CHECK(sprite.kind == BoneThingKind::Particle);
+    CHECK(sprite.type.empty());
+    CHECK(sprite.rotation == Number{0.f});
+    CHECK(sprite.subType == 2);
+    CHECK(sprite.scale == Number{0.5f});
+
+    BoneThing lightning{.kind = BoneThingKind::Joint, .type = "jointSpirit", .reversed = true};
+    MuEditor::Looks::Fields::ChangeKind(lightning, BoneThingKind::Effect);
+    CHECK_FALSE(lightning.reversed);
+}
+
+TEST_CASE("An entry on bones moved elsewhere starts without bones, and at the item's place without Once for all "
+          "(design L58) [editor][looks]")
+{
+    using namespace Data::Looks;
+    using MuEditor::Looks::Fields::PlaceMode;
+    OnBones entry;
+    entry.places.bones = {3, 4};
+    entry.chance = Chance{.oneIn = 2, .once = true};
+    MuEditor::Looks::Fields::ChangePlaceMode(entry, PlaceMode::Between);
+    CHECK(entry.places == BonePlaces{});
+    CHECK(entry.chance->once);
+    entry.places.between = {{1, 2}};
+    MuEditor::Looks::Fields::ChangePlaceMode(entry, PlaceMode::Origin);
+    CHECK(entry.places.origin);
+    CHECK(entry.places.between.empty());
+    CHECK_FALSE(entry.chance->once);
+    CHECK(entry.chance->oneIn == 2);
+}
+
+TEST_CASE("An entry list's buttons keep the picked line on its entry, and say when it shows another, which drops a "
+          "choice kept for it (Between bones before its first pair) [editor][looks]")
+{
+    using MuEditor::Looks::Fields::ApplyEntryButton;
+    using MuEditor::Looks::Fields::EntryButton;
+    // The lines of the list from 5 on; the second entry picked.
+    std::vector<int> list{10, 20, 30};
+    std::size_t line = 6;
+    CHECK(ApplyEntryButton(list, 5, line, EntryButton::MoveUp));
+    CHECK(line == 5);
+    CHECK(list == std::vector<int>{20, 10, 30});
+    CHECK(ApplyEntryButton(list, 5, line, EntryButton::MoveUp));
+    CHECK(line == 5);
+    CHECK(ApplyEntryButton(list, 5, line, EntryButton::MoveDown));
+    CHECK(line == 6);
+    CHECK(list == std::vector<int>{10, 20, 30});
+    CHECK_FALSE(ApplyEntryButton(list, 5, line, EntryButton::Copy));
+    CHECK(line == 7);
+    CHECK(list == std::vector<int>{10, 20, 20, 30});
+    CHECK_FALSE(ApplyEntryButton(list, 5, line, EntryButton::Remove));
+    CHECK(line == 7);
+    CHECK(list == std::vector<int>{10, 20, 30});
+    line = 7;
+    CHECK_FALSE(ApplyEntryButton(list, 5, line, EntryButton::Remove));
+    CHECK(line == 6);
+    std::vector<int> one{1};
+    line = 5;
+    CHECK_FALSE(ApplyEntryButton(one, 5, line, EntryButton::Remove));
+    CHECK(line == 4);
+}
+
+TEST_CASE("Only the list line whose fields showed last shows Between bones chosen, not one clicked in this frame "
+          "(design L58) [editor][looks]")
+{
+    using MuEditor::Looks::Fields::LineShowsBetweenChosen;
+    CHECK(LineShowsBetweenChosen(7, 7, true));
+    // Line 8 clicked in this frame: its fields haven't shown yet, the choice is line 7's.
+    CHECK_FALSE(LineShowsBetweenChosen(8, 7, true));
+    CHECK_FALSE(LineShowsBetweenChosen(7, 7, false));
+}
+
 TEST_CASE("A field of a look says what it does while the mouse rests on it (design L42) [editor][looks]")
 {
     TestImGuiContext context;

@@ -438,6 +438,10 @@
 .opt-row-tipped:hover .opt-row-tip {
 	display: block;
 }
+/* A row whose list opens down over its tip. */
+.opt-row-tipped.list-open:hover .opt-row-tip {
+	display: none;
+}
 .option-opens-up .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
@@ -518,6 +522,23 @@
    not clickable. */
 .opt-toggle-row.locked {
 	opacity: 0.45;
+	cursor: default;
+}
+/* A locked row with a tip dims its label and switch, not itself: the tip would inherit the dimming. */
+.opt-toggle-row.opt-row-tipped.locked {
+	opacity: 1;
+}
+.opt-toggle-row.opt-row-tipped.locked .opt-label,
+.opt-toggle-row.opt-row-tipped.locked .opt-control {
+	opacity: 0.45;
+}
+
+/* Borderless fullscreen runs at the desktop's resolution: the Resolution row shows it, dimmed, and
+   its list does not open. */
+.opt-row.locked .opt-control {
+	opacity: 0.45;
+}
+.opt-row.locked .option-dropdown-value {
 	cursor: default;
 }
 

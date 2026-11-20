@@ -29,6 +29,111 @@
 namespace mu::ui::window
 {
 
+namespace
+{
+// The lucky item potions, dropped like a jewel: +160 needs durability left on a lucky item, +161 no refinement.
+constexpr int LuckyItemDurabilityPotion = ITEM_POTION + 160;
+constexpr int LuckyItemRefinePotion = ITEM_POTION + 161;
+// Bless and Soul raise an item's level only below these.
+constexpr int BlessMaxTargetLevel = 6;
+constexpr int SoulMaxTargetLevel = 9;
+constexpr int FenrirFullDurability = 255;
+
+bool IsJewelType(const ITEM* pJewel)
+{
+    return pJewel->Type == ITEM_JEWEL_OF_BLESS || pJewel->Type == ITEM_JEWEL_OF_SOUL ||
+           pJewel->Type == ITEM_JEWEL_OF_LIFE || pJewel->Type == ITEM_JEWEL_OF_HARMONY ||
+           GameLogic::Items::IsRefineStone(pJewel) || pJewel->Type == LuckyItemDurabilityPotion ||
+           pJewel->Type == LuckyItemRefinePotion;
+}
+
+// A Jewel of Bless on a worn Horn of Fenrir asks to repair it.
+bool IsFenrirHornRepair(const ITEM* pJewel, const ITEM* pItem)
+{
+    return pJewel->Type == ITEM_JEWEL_OF_BLESS && pItem->Type == ITEM_HORN_OF_FENRIR &&
+           pItem->Durability != FenrirFullDurability;
+}
+
+bool HarmonyAppliesTo(const ITEM* pItem)
+{
+    if (g_SocketItemMgr.IsSocketItem(pItem) || pItem->Jewel_Of_Harmony_Option != 0)
+    {
+        return false;
+    }
+    return g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pItem->Type)) != SI_None;
+}
+
+bool RefineStoneAppliesTo(const ITEM* pItem)
+{
+    return !g_SocketItemMgr.IsSocketItem(pItem) && pItem->Jewel_Of_Harmony_Option != 0;
+}
+
+// On a lucky item only the two lucky item potions act.
+bool LuckyItemPotionAppliesTo(const ITEM* pJewel, const ITEM* pItem)
+{
+    if (pJewel->Type == LuckyItemRefinePotion)
+    {
+        return pItem->Jewel_Of_Harmony_Option == 0;
+    }
+    if (pJewel->Type == LuckyItemDurabilityPotion)
+    {
+        return pItem->Durability > 0;
+    }
+    return false;
+}
+
+bool IsJewelTarget(const ITEM* pItem)
+{
+    if (pItem->Type > ITEM_WINGS_OF_DARKNESS && !GameLogic::Items::IsWingItem(pItem))
+    {
+        return false;
+    }
+    return !GameLogic::Items::IsAmmunitionType(pItem->Type);
+}
+
+// Whether dropping pJewel on pItem uses it on the item, with the original client's checks.
+bool JewelAppliesTo(const ITEM* pJewel, const ITEM* pItem)
+{
+    if (!IsJewelType(pJewel))
+    {
+        return false;
+    }
+    if (IsFenrirHornRepair(pJewel, pItem))
+    {
+        return true;
+    }
+    if (GameLogic::Items::IsLuckyItemType(pItem->Type))
+    {
+        return LuckyItemPotionAppliesTo(pJewel, pItem);
+    }
+    if (!IsJewelTarget(pItem))
+    {
+        return false;
+    }
+    if ((pJewel->Type == ITEM_JEWEL_OF_BLESS && pItem->Level >= BlessMaxTargetLevel) ||
+        (pJewel->Type == ITEM_JEWEL_OF_SOUL && pItem->Level >= SoulMaxTargetLevel))
+    {
+        return false;
+    }
+    if (pJewel->Type == ITEM_JEWEL_OF_HARMONY)
+    {
+        return HarmonyAppliesTo(pItem);
+    }
+    if (GameLogic::Items::IsRefineStone(pJewel))
+    {
+        return RefineStoneAppliesTo(pItem);
+    }
+    return true;
+}
+
+// Jewels and stacks act only on an item the held item came from the inventory or its extensions for.
+bool IsFromInventorySystem(const CInventoryCtrl* targetControl, const CPickedItem* pPickedItem)
+{
+    return pPickedItem->GetOwnerInventory() == targetControl ||
+           (g_pMyInventoryExt != nullptr && g_pMyInventoryExt->GetOwnerOf(pPickedItem) != nullptr);
+}
+} // namespace
+
 CInventoryActionController::CInventoryActionController() : m_pContext(nullptr) {}
 
 void CInventoryActionController::SetContext(SEASON3B::IInventoryActionContext* pContext)
@@ -67,6 +172,42 @@ bool CInventoryActionController::HandleInventoryActions(CInventoryCtrl* targetCo
     return false;
 }
 
+DropOutcome CInventoryActionController::DropOutcomeOn(CInventoryCtrl* targetControl) const
+{
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
+    ITEM* pPickItem = pPickedItem != nullptr ? pPickedItem->GetItem() : nullptr;
+    if (pPickItem == nullptr || targetControl == nullptr)
+    {
+        return DropOutcome::None;
+    }
+
+    const int iTargetIndex = pPickedItem->GetTargetLinealPos(targetControl);
+    if (iTargetIndex < 0)
+    {
+        return DropOutcome::None;
+    }
+
+    if (IsFromInventorySystem(targetControl, pPickedItem))
+    {
+        ITEM* pTargetItem = targetControl->FindItem(iTargetIndex);
+        if (pTargetItem != nullptr && JewelAppliesTo(pPickItem, pTargetItem))
+        {
+            return DropOutcome::ApplyJewel;
+        }
+        if (pTargetItem != nullptr && targetControl->AreItemsStackable(pPickItem, pTargetItem))
+        {
+            return DropOutcome::Stack;
+        }
+    }
+
+    if (!targetControl->CanMove(iTargetIndex, pPickItem))
+    {
+        return DropOutcome::None;
+    }
+
+    return iTargetIndex == pPickedItem->GetSourceLinealPos() ? DropOutcome::PutBack : DropOutcome::Move;
+}
+
 bool CInventoryActionController::HandlePickedItemPlacement(CInventoryCtrl* targetControl) const
 {
     CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
@@ -84,61 +225,30 @@ bool CInventoryActionController::HandlePickedItemPlacement(CInventoryCtrl* targe
     const int iSourceIndex = pPickedItem->GetSourceLinealPos();
     const int iTargetIndex = pPickedItem->GetTargetLinealPos(targetControl);
 
-    const bool bFromInventorySystem =
-        (pPickedItem->GetOwnerInventory() == targetControl) ||
-        (g_pMyInventoryExt != nullptr && g_pMyInventoryExt->GetOwnerOf(pPickedItem) != nullptr);
-
-    if (bFromInventorySystem)
+    switch (DropOutcomeOn(targetControl))
     {
-        if (ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex))
-        {
-            return true;
-        }
-
-        if (iTargetIndex != -1 && TryStackItems(targetControl, pPickItem, iSourceIndex, iTargetIndex))
-        {
-            return true;
-        }
-    }
-
-    if (TryMoveItem(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex))
-    {
-        return true;
+    case DropOutcome::ApplyJewel:
+        return ApplyJewel(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex);
+    case DropOutcome::Stack:
+        return StackItems(pPickItem, iSourceIndex, iTargetIndex);
+    case DropOutcome::Move:
+        return MoveItem(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex);
+    case DropOutcome::PutBack:
+        CInventoryCtrl::BackupPickedItem();
+        return false;
+    case DropOutcome::None:
+        break;
     }
 
     return false;
 }
 
-bool CInventoryActionController::TryApplyJewel(CInventoryCtrl* targetControl, CPickedItem* pPickedItem,
-                                                    ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
+bool CInventoryActionController::MoveItem(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem,
+                                          int iSourceIndex, int iTargetIndex) const
 {
-    return ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex);
-}
-
-bool CInventoryActionController::TryStackItem(CInventoryCtrl* targetControl, ITEM* pPickItem,
-                                                   int iSourceIndex, int iTargetIndex) const
-{
-    return TryStackItems(targetControl, pPickItem, iSourceIndex, iTargetIndex);
-}
-
-bool CInventoryActionController::TryMoveItem(CInventoryCtrl* targetControl, CPickedItem* pPickedItem,
-                                                  ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
-{
-    if (iTargetIndex < 0 || !targetControl->CanMove(iTargetIndex, pPickItem))
-    {
-        return false;
-    }
-
     const auto sourceStorageType = pPickedItem->GetSourceStorageType();
     const auto targetStorageType = targetControl->GetStorageType();
-
-    if (iTargetIndex != iSourceIndex)
-    {
-        return SendRequestEquipmentItem(sourceStorageType, iSourceIndex, pPickItem, targetStorageType, iTargetIndex);
-    }
-
-    CInventoryCtrl::BackupPickedItem();
-    return false;
+    return SendRequestEquipmentItem(sourceStorageType, iSourceIndex, pPickItem, targetStorageType, iTargetIndex);
 }
 
 bool CInventoryActionController::HandleRepairClick(CInventoryCtrl* targetControl) const
@@ -519,57 +629,24 @@ bool CInventoryActionController::RepairItemAtMousePoint(CInventoryCtrl* targetCo
     return true;
 }
 
-bool CInventoryActionController::ApplyJewels(CInventoryCtrl* targetControl, CPickedItem* pPickedItem,
-                                                  ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
+bool CInventoryActionController::ApplyJewel(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem,
+                                            int iSourceIndex, int iTargetIndex) const
 {
-    const bool bIsJewelType = pPickItem->Type == ITEM_JEWEL_OF_BLESS || pPickItem->Type == ITEM_JEWEL_OF_SOUL ||
-                              pPickItem->Type == ITEM_JEWEL_OF_LIFE || pPickItem->Type == ITEM_JEWEL_OF_HARMONY ||
-                              GameLogic::Items::IsRefineStone(pPickItem) || pPickItem->Type == ITEM_POTION + 160 ||
-                              pPickItem->Type == ITEM_POTION + 161;
-
-    if (!bIsJewelType)
-    {
-        return false;
-    }
-
     ITEM* pItem = targetControl->FindItem(iTargetIndex);
-    if (!pItem)
+    if (pItem == nullptr)
     {
         return false;
     }
 
-    const int iType = pItem->Type;
-    const int iLevel = pItem->Level;
-    const int iDurability = pItem->Durability;
-
-    bool bSuccess = true;
-
-    if (iType > ITEM_WINGS_OF_DARKNESS && !GameLogic::Items::IsWingItem(pItem))
+    const int targetIndex = targetControl->GetIndexByItem(pItem);
+    if (IsFenrirHornRepair(pPickItem, pItem))
     {
-        bSuccess = false;
-    }
-
-    if (GameLogic::Items::IsAmmunitionType(iType))
-    {
-        bSuccess = false;
-    }
-
-    if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS && iLevel >= 6) ||
-        (pPickItem->Type == ITEM_JEWEL_OF_SOUL && iLevel >= 9))
-    {
-        bSuccess = false;
-    }
-
-    if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
-    {
-        const int iTargetIndex = targetControl->GetIndex(pItem->x, pItem->y);
-
         mu::ui::window::GenericDialogConfig cfg;
         cfg.showCancel = true;
         cfg.lines.push_back({ I18N::Game::WouldYouLikeToRepairFenrirSHorn, true });
-        cfg.onPrimary = [iSourceIndex, iTargetIndex]
+        cfg.onPrimary = [iSourceIndex, targetIndex]
         {
-            SendRequestUse(iSourceIndex, iTargetIndex);
+            SendRequestUse(iSourceIndex, targetIndex);
             CInventoryCtrl::BackupPickedItem();
         };
         cfg.onCancel = [] { CInventoryCtrl::BackupPickedItem(); };
@@ -579,80 +656,16 @@ bool CInventoryActionController::ApplyJewels(CInventoryCtrl* targetControl, CPic
         return true;
     }
 
-    if (pPickItem->Type == ITEM_JEWEL_OF_HARMONY)
-    {
-        if (g_SocketItemMgr.IsSocketItem(pItem))
-        {
-            bSuccess = false;
-        }
-        else if (pItem->Jewel_Of_Harmony_Option != 0)
-        {
-            bSuccess = false;
-        }
-        else
-        {
-            const StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pItem->Type));
-
-            if (strengthitem == SI_None)
-            {
-                bSuccess = false;
-            }
-        }
-    }
-
-    if (GameLogic::Items::IsRefineStone(pPickItem))
-    {
-        if (g_SocketItemMgr.IsSocketItem(pItem))
-        {
-            bSuccess = false;
-        }
-        else if (pItem->Jewel_Of_Harmony_Option == 0)
-        {
-            bSuccess = false;
-        }
-    }
-
-    if (GameLogic::Items::IsLuckyItemType(pItem->Type))
-    {
-        bSuccess = false;
-        if (pPickItem->Type == ITEM_POTION + 161)
-        {
-            if (pItem->Jewel_Of_Harmony_Option == 0)
-                bSuccess = true;
-        }
-        else if (pPickItem->Type == ITEM_POTION + 160)
-        {
-            if (pItem->Durability > 0)
-                bSuccess = true;
-        }
-    }
-
-    if (bSuccess)
-    {
-        const int targetIndex = targetControl->GetIndexByItem(pItem);
-        SendRequestUse(iSourceIndex, targetIndex);
-        pPickedItem->MarkUsedOnItem();
-        PlayBuffer(SOUND_GET_ITEM01);
-        return true;
-    }
-
-    return false;
+    SendRequestUse(iSourceIndex, targetIndex);
+    pPickedItem->MarkUsedOnItem();
+    PlayBuffer(SOUND_GET_ITEM01);
+    return true;
 }
 
-bool CInventoryActionController::TryStackItems(CInventoryCtrl* targetControl, ITEM* pPickItem,
-                                                    int iSourceIndex, int iTargetIndex) const
+bool CInventoryActionController::StackItems(ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
-    if (ITEM* pItem = targetControl->FindItem(iTargetIndex))
-    {
-        if (targetControl->AreItemsStackable(pPickItem, pItem))
-        {
-            SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pPickItem, STORAGE_TYPE::INVENTORY,
-                                     iTargetIndex);
-            return true;
-        }
-    }
-
-    return false;
+    SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pPickItem, STORAGE_TYPE::INVENTORY, iTargetIndex);
+    return true;
 }
 
 // Returns true for every item this function knows, also when it refuses the item or waits for a

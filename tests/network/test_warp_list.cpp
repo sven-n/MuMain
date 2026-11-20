@@ -83,7 +83,6 @@ MoveReqInfo DataFileWarp(int index, const wchar_t* mainName, const wchar_t* subN
     std::wcsncpy(info.szMainMapName, mainName, 31);
     std::wcsncpy(info.szSubMapName, subName, 31);
     info.iReqLevel = level;
-    info.m_iReqMaxLevel = 400;
     info.iReqZen = zen;
     info.iGateNum = 17;
     return info;
@@ -92,6 +91,13 @@ MoveReqInfo DataFileWarp(int index, const wchar_t* mainName, const wchar_t* subN
 ServerWarp Warp(int index, const wchar_t* name, int level, uint32_t costs)
 {
     return ServerWarp{index, 0, level, costs, name};
+}
+
+// The message of OpenMU's test WarpRequirementsAreWrittenAfterTheWarpListAsync: warp 3 needs master level 80
+// and 2 resets, warp 300 70000 resets.
+std::vector<BYTE> RequirementsPacket()
+{
+    return {0xC2, 0x00, 0x16, 0xF5, 0x0B, 0x02, 3, 0, 80, 0, 2, 0, 0, 0, 0x2C, 0x01, 0, 0, 0x70, 0x11, 0x01, 0};
 }
 } // namespace
 
@@ -133,6 +139,73 @@ TEST_CASE("server warp list: an empty list is a valid list")
 
     REQUIRE(warps.has_value());
     CHECK(warps->empty());
+}
+
+TEST_CASE("server warp requirements: the entries are read from the message")
+{
+    const auto packet = RequirementsPacket();
+
+    const auto requirements =
+        GameLogic::Warps::ReadServerWarpRequirements(packet.data(), static_cast<int32_t>(packet.size()));
+
+    REQUIRE(requirements.has_value());
+    REQUIRE(requirements->size() == 2);
+    CHECK((*requirements)[0].index == 3);
+    CHECK((*requirements)[0].minMasterLevel == 80);
+    CHECK((*requirements)[0].minResets == 2);
+    CHECK((*requirements)[1].index == 300);
+    CHECK((*requirements)[1].minMasterLevel == 0);
+    CHECK((*requirements)[1].minResets == 70000);
+}
+
+TEST_CASE("server warp requirements: resets above the client's range are capped")
+{
+    const std::vector<BYTE> packet{0xC2, 0x00, 0x0E, 0xF5, 0x0B, 0x01, 0x34, 0x12, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+    const auto requirements =
+        GameLogic::Warps::ReadServerWarpRequirements(packet.data(), static_cast<int32_t>(packet.size()));
+
+    REQUIRE(requirements.has_value());
+    REQUIRE(requirements->size() == 1);
+    CHECK((*requirements)[0].index == 0x1234);
+    CHECK((*requirements)[0].minMasterLevel == 65535);
+    CHECK((*requirements)[0].minResets == INT32_MAX);
+}
+
+TEST_CASE("server warp requirements: a message which is shorter than its count is rejected")
+{
+    auto packet = RequirementsPacket();
+    packet.pop_back();
+
+    CHECK_FALSE(
+        GameLogic::Warps::ReadServerWarpRequirements(packet.data(), static_cast<int32_t>(packet.size())).has_value());
+    CHECK_FALSE(GameLogic::Warps::ReadServerWarpRequirements(packet.data(), 5).has_value());
+    CHECK_FALSE(GameLogic::Warps::ReadServerWarpRequirements(nullptr, 0).has_value());
+}
+
+TEST_CASE("warp list merge: the master level and resets are the server's, 0 where it has none")
+{
+    auto dungeon = DataFileWarp(8, L"Dungeon", L"Dungeon", 30, 3000);
+    dungeon.iReqMasterLevel = 5;
+    dungeon.iReqResets = 2;
+    auto lorencia = DataFileWarp(2, L"Lorencia", L"Lorencia", 10, 2000);
+    lorencia.iReqMasterLevel = 5;
+    auto withRequirements = Warp(2, L"Lorencia", 10, 2000);
+    withRequirements.minMasterLevel = 40;
+    withRequirements.minResets = 1;
+    auto serverOnly = Warp(300, L"Market", 1, 0);
+    serverOnly.minResets = 70000;
+
+    const auto merged =
+        GameLogic::Warps::MergeWarpList({dungeon, lorencia}, {Warp(8, L"Dungeon", 30, 3000), withRequirements, serverOnly});
+
+    REQUIRE(merged.size() == 3);
+    CHECK(merged[0].iReqMasterLevel == 0);
+    CHECK(merged[0].iReqResets == 0);
+    CHECK(merged[1].iReqMasterLevel == 40);
+    CHECK(merged[1].iReqResets == 1);
+    CHECK(merged[2].iReqMasterLevel == 0);
+    CHECK(merged[2].iReqResets == 70000);
 }
 
 TEST_CASE("warp list merge: known warps keep their names and position, with the values of the server")

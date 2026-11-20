@@ -24,10 +24,13 @@ public:
     // Window
     int  GetWindowWidth()  const { return m_windowWidth; }
     int  GetWindowHeight() const { return m_windowHeight; }
-    bool GetWindowMode()   const { return m_windowMode; }
+    WindowMode GetWindowMode() const
+    {
+        return m_windowMode;
+    }
 
     void SetWindowSize(int width, int height);
-    void SetWindowMode(bool windowed);
+    void SetWindowMode(WindowMode mode);
 
     // Audio — volume 0 = off, >0 = on. No separate Enabled flag.
     int  GetSoundVolume()  const { return m_soundVolume; }
@@ -136,6 +139,26 @@ public:
         return m_antialiasing;
     }
     void SetAntialiasing(int samples);
+    // Edge smoothing (FXAA) of the Enhanced look.
+    bool GetEdgeSmoothing() const
+    {
+        return m_edgeSmoothing;
+    }
+    void SetEdgeSmoothing(bool enabled)
+    {
+        m_edgeSmoothing = enabled;
+    }
+    // The render scale (50 to 100 percent) and sharpness (0 to 100) of the Enhanced look.
+    int GetRenderScale() const
+    {
+        return m_renderScale;
+    }
+    void SetRenderScale(int percent);
+    int GetSharpness() const
+    {
+        return m_sharpness;
+    }
+    void SetSharpness(int percent);
     bool GetEnhancedLighting() const { return m_enhancedLighting; }
     void SetEnhancedLighting(bool enabled) { m_enhancedLighting = enabled; }
     bool GetDynamicLights() const { return m_dynamicLights; }
@@ -221,11 +244,14 @@ private:
     // defaults.
     void SeedFromExecutableFolder(const std::filesystem::path& legacyConfig) const;
 
+    void LoadRenderSettings();
+    void SaveRenderSettings();
+
     std::filesystem::path m_configPath;
 
     int  m_windowWidth;
     int  m_windowHeight;
-    bool m_windowMode;
+    WindowMode m_windowMode;
 
     int  m_soundVolume;
     int  m_musicVolume;
@@ -255,6 +281,9 @@ private:
     LookPreset m_look;
     int m_anisotropy;
     int m_antialiasing;
+    bool m_edgeSmoothing;
+    int m_renderScale;
+    int m_sharpness;
     bool m_enhancedLighting;
     bool m_dynamicLights;
     bool m_sunlight;
@@ -282,6 +311,9 @@ private:
     void WriteStringList(const wchar_t* section, const wchar_t* keyPrefix, const std::vector<std::wstring>& values);
     std::wstring ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue);
     void WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value);
+
+    // [Window] Mode, or the Windowed key of an older client's config.ini when Mode is missing.
+    WindowMode ReadWindowMode();
 
     void RemoveObsoleteKey(const wchar_t* section, const wchar_t* key);
     void RemoveObsoleteSection(const wchar_t* section);

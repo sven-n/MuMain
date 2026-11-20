@@ -3583,6 +3583,9 @@ std::unique_ptr<Connection> OpenConnectionForLater(const wchar_t* IpAddr, unsign
 // in-game logout path). Used by the auto-reconnect flow before it replays login.
 void ResetClientToLoginScene();
 
+// Removes what a buff spawned for its look (sparkles, joints, sounds) when it ends; UnRegisterBuff calls it.
+void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o);
+
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
 void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer);
 

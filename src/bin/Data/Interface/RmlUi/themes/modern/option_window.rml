@@ -38,7 +38,8 @@
 			<div class="opt-scroll scroll-pane">
 				<div class="opt-page" data-class-hidden="active_tab != 0">
 					<div class="opt-page-title">{{tab_display_label}}</div>
-					<div class="opt-row">
+					<!-- Borderless fullscreen runs at the desktop's resolution: the row shows it locked. -->
+					<div class="opt-row" data-class-locked="resolution_locked">
 						<span class="opt-label">{{resolution_row_label}}</span>
 						<div class="opt-control">
 							<div class="option-dropdown">
@@ -51,13 +52,25 @@
 							</div>
 						</div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_windowed_mode">
-						<span class="opt-label">{{windowed_mode_label}}</span>
-						<div class="opt-control"><div class="opt-toggle" data-class-checked="windowed_mode"><div class="opt-toggle-knob"></div></div></div>
+					<!-- The list opens down, where the tip shows, so the tip hides while it is open. -->
+					<div class="opt-row opt-row-tipped" data-class-list-open="open_dropdown == 11">
+						<span class="opt-label">{{window_mode_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 11" data-event-click="option_toggle_dropdown(11)">{{window_mode_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 11">
+									<div class="option-dropdown-option" data-for="label : window_mode_labels"
+									     data-class-selected="it_index == window_mode_index"
+									     data-event-click="option_dropdown_option_click(11, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{window_mode_tooltip}}</span>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_vsync">
+					<div class="opt-row opt-toggle-row opt-row-tipped" data-class-locked="vsync_locked" data-event-click="option_toggle_vsync">
 						<span class="opt-label">{{vsync_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="vsync_enabled"><div class="opt-toggle-knob"></div></div></div>
+						<span class="opt-row-tip" data-if="vsync_locked">{{vsync_locked_reason}}</span>
 					</div>
 					<div class="opt-row">
 						<span class="opt-label">{{fps_cap_row_label}}</span>
@@ -356,6 +369,39 @@
 							</div>
 						</div>
 						<span class="opt-row-tip">{{antialiasing_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-toggle-row opt-row-tipped" data-event-click="option_toggle_edge_smoothing">
+						<span class="opt-label">{{edge_smoothing_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="edge_smoothing"><div class="opt-toggle-knob"></div></div></div>
+						<span class="opt-row-tip">{{edge_smoothing_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{render_scale_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 9" data-event-click="option_toggle_dropdown(9)">{{render_scale_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 9">
+									<div class="option-dropdown-option" data-for="label : render_scale_labels"
+									     data-class-selected="it_index == render_scale_index"
+									     data-event-click="option_dropdown_option_click(9, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{render_scale_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{sharpness_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 10" data-event-click="option_toggle_dropdown(10)">{{sharpness_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 10">
+									<div class="option-dropdown-option" data-for="label : sharpness_labels"
+									     data-class-selected="it_index == sharpness_index"
+									     data-event-click="option_dropdown_option_click(10, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{sharpness_tooltip}}</span>
 					</div>
 					<div class="opt-row opt-row-tipped">
 						<span class="opt-label">{{anisotropy_row_label}}</span>

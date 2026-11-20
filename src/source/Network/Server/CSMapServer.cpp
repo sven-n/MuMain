@@ -105,7 +105,7 @@ void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
     }
 
     // SaveOptions sends through the socket, so it goes before DeleteSocket.
-    SaveOptions();
+    SaveOptionsBeforeLeaving();
     SaveMacro();
     DeleteSocket();
 

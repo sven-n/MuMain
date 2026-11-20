@@ -1092,9 +1092,15 @@ std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int te
     {
         return std::nullopt;
     }
+    return WriteOptionLines(*slotOption->option, GameLogic::Items::GetSlotOptionValue(item, *slotOption), textNum,
+                            rowLimit);
+}
+
+int WriteOptionLines(const Data::Items::ItemOption& option, int value, int textNum, int rowLimit)
+{
     Engine::Items::OptionLines::LineValues values;
-    values.value = GameLogic::Items::GetSlotOptionValue(item, *slotOption);
-    for (const Data::Items::ItemOptionTerm& term : slotOption->option->value.per)
+    values.value = value;
+    for (const Data::Items::ItemOptionTerm& term : option.value.per)
     {
         if (term.divisor > 0)
         {
@@ -1104,7 +1110,7 @@ std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int te
     }
     const int lastRow = std::min(rowLimit, MaxTextListRows);
     int row = textNum;
-    for (const std::string& name : slotOption->option->texts)
+    for (const std::string& name : option.texts)
     {
         if (row < lastRow && Engine::Items::OptionLines::Write(name, values, TextList[row], std::size(TextList[row])))
         {

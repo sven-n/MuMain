@@ -12,7 +12,7 @@ EncryptedPassword=
 [Window]
 Width=1024
 Height=768
-Windowed=1
+Mode=Windowed
 [Audio]
 SoundVolume=5
 MusicVolume=5
@@ -34,6 +34,9 @@ VSync=1
 Look=Classic
 Anisotropy=8
 Antialiasing=4
+EdgeSmoothing=0
+RenderScale=100
+Sharpness=0
 EnhancedLighting=1
 DynamicLights=1
 LightMood=1

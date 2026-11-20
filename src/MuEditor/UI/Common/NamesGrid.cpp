@@ -19,12 +19,12 @@ namespace MuEditor
 namespace
 {
 // Pixel widths before the editor UI scale.
-constexpr float IdColumnWidth = 60.0f;
 constexpr float NameColumnWidth = 190.0f;
 constexpr float SearchWidth = 220.0f;
 constexpr float MissingComboWidth = 220.0f;
 constexpr int FrozenColumns = 2;
-constexpr int IdBufferSize = 16;
+// Room for an id that is a name (the option texts), as the rows write it.
+constexpr int IdBufferSize = 64;
 // The row of the selection the tools show, as in the other tools.
 constexpr ImVec4 MarkedRowColor(0.9f, 0.7f, 0.0f, 0.25f);
 
@@ -167,7 +167,7 @@ void NamesGrid::RenderTable(NamesGridRows& rows, const char* tableId)
 
     const float uiScale = g_MuEditorCore.GetUIScale();
     ImGui::TableSetupScrollFreeze(FrozenColumns, 1);
-    ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide, IdColumnWidth * uiScale);
+    ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide, rows.GetIdColumnWidth() * uiScale);
     for (size_t column = 0; column < m_locales.size(); ++column)
     {
         const bool english = IsEnglish(m_locales[column]);

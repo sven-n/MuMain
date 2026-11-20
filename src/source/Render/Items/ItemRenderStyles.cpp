@@ -55,49 +55,6 @@ struct RenderStyle
 
 // ------------------------------------------------ the recipes
 
-bool RenderPumpkinOfLuck(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_DARK | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, -WorldTime * 0.0002f,
-                  look.blendMeshV, BITMAP_CHROME);
-    return true;
-}
-
-void SpawnPumpkinOfLuck(BMD* b, OBJECT* o, vec34_t* bones)
-{
-    vec3_t vPos, vRelativePos;
-    Vector(0.f, 0.f, 0.f, vRelativePos);
-    b->TransformPosition(bones[8], vRelativePos, vPos, true);
-    float fLumi = (sinf(WorldTime * 0.004f) + 1.0f) * 0.05f;
-    Vector(0.8f + fLumi, 0.8f + fLumi, 0.3f + fLumi, o->Light);
-    CreateSprite(BITMAP_LIGHT, vPos, 1.5f, o->Light, o, 0.5f);
-    b->TransformPosition(bones[10], vRelativePos, vPos, true);
-    CreateSprite(BITMAP_LIGHT, vPos, 0.5f, o->Light, o, 0.5f);
-    b->TransformPosition(bones[11], vRelativePos, vPos, true);
-    CreateSprite(BITMAP_LIGHT, vPos, 0.5f, o->Light, o, 0.5f);
-}
-
-bool RenderCursedCastleWater(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight * 1.5f, look.blendMeshU, look.blendMeshV);
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, Alpha, look.blendMesh, look.blendMeshLight / 4.0f, WorldTime * 0.005f,
-                  -WorldTime * 0.005f, 0);
-    return true;
-}
-
-void SpawnCursedCastleWater(BMD* b, OBJECT* o, vec34_t* bones)
-{
-    vec3_t Light;
-    vec3_t vRelativePos, vWorldPos;
-    Vector(0.f, 0.f, 0.f, vRelativePos);
-    Vector(1.f, 0.f, 0.0f, Light);
-
-    b->TransformPosition(bones[1], vRelativePos, vWorldPos, true);
-    CreateSprite(BITMAP_LIGHT, vWorldPos, 3.f, Light, o, 0.f);
-    b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, 2.f / 7.f, o->Position, o->Angle);
-}
-
 bool RenderHelperNpcPlate(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     // Only on the helper NPCs (Luke and Leo the Helper, Helper Ellen), the only
@@ -122,30 +79,8 @@ bool RenderHelperNpcPlate(BMD* b, const OBJECT* o, DrawLook& look, int Type, flo
 // ------------------------------------------------ the names
 
 const RenderStyle RenderStyles[] = {
-    {"pumpkinOfLuck", RenderPumpkinOfLuck},
-    {"cursedCastleWater", RenderCursedCastleWater},
     {"helperNpcPlate", RenderHelperNpcPlate},
 };
-
-using SpawnFunction = void (*)(BMD* b, OBJECT* o, vec34_t* bones);
-
-// The styles whose items spawn lights or animate where they are drawn.
-const struct
-{
-    const char* name;
-    SpawnFunction spawn;
-} StyleSpawns[] = {
-    {"pumpkinOfLuck", SpawnPumpkinOfLuck},
-    {"cursedCastleWater", SpawnCursedCastleWater},
-};
-
-ItemModelTable<SpawnFunction> g_itemSpawns{[](const Data::Items::ItemModelDefinition& model)
-                                           {
-                                               for (const auto& style : StyleSpawns)
-                                                   if (model.renderStyle == style.name)
-                                                       return style.spawn;
-                                               return SpawnFunction{};
-                                           }};
 
 // The render styles that are data, one entry per look of g_LookStore; built again when the looks change.
 const std::vector<RenderStyle>& DataStyles()
@@ -376,14 +311,4 @@ bool DrawsAlone(int modelType)
     return style != nullptr && style->data != nullptr && style->data->drawsAlone;
 }
 
-bool Spawns(int modelType)
-{
-    return g_itemSpawns.Find(modelType) != nullptr;
-}
-
-void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])
-{
-    if (const SpawnFunction spawn = g_itemSpawns.Find(modelType))
-        spawn(b, o, bones);
-}
 } // namespace Render::Items::Styles

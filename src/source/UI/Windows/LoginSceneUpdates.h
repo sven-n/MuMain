@@ -17,6 +17,8 @@ bool IsServerListShown();
 
 // `messageCode` is one of the scene's popup message ids (MESSAGE_* or RECEIVE_*_FAIL*).
 void ShowMessage(int messageCode);
+// From another scene whose session is torn down: shown once the login screen is set up again.
+void ShowMessageOnReturn(int messageCode);
 void CloseMessage();
 // True while the popup shows this message.
 bool IsShowingMessage(int messageCode);

@@ -12,6 +12,16 @@
 namespace mu::ui::window
 {
 
+// What releasing the held item on a grid does.
+enum class DropOutcome
+{
+    None,       // the grid refuses it
+    ApplyJewel, // a jewel (or lucky item potion) is used on the item under it
+    Stack,      // it stacks onto the item under it
+    Move,       // it moves to the free cells under it
+    PutBack,    // it lands back on its own cells
+};
+
 class CInventoryActionController
 {
 public:
@@ -20,14 +30,14 @@ public:
 
     void SetContext(SEASON3B::IInventoryActionContext* pContext);
     bool HandleInventoryActions(CInventoryCtrl* targetControl) const;
+    // What releasing the held item on targetControl would do, decided without sending anything. The drop acts on it,
+    // and the inventory routes a release over an equipment slot by it, so the two agree.
+    DropOutcome DropOutcomeOn(CInventoryCtrl* targetControl) const;
 
 private:
     bool HandlePickedItemPlacement(CInventoryCtrl* targetControl) const;
-    bool TryApplyJewel(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem,
-                       int iSourceIndex, int iTargetIndex) const;
-    bool TryStackItem(CInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
-    bool TryMoveItem(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem,
-                     int iSourceIndex, int iTargetIndex) const;
+    bool MoveItem(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex,
+                  int iTargetIndex) const;
 
     bool HandleRepairClick(CInventoryCtrl* targetControl) const;
 
@@ -42,9 +52,9 @@ private:
     int FindAlternateEquipSlot(int nOriginalSlot, ITEM* pItem) const;
     bool IsSlotOccupied(int nSlot) const;
 
-    bool ApplyJewels(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem,
-                     int iSourceIndex, int iTargetIndex) const;
-    bool TryStackItems(CInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
+    bool ApplyJewel(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex,
+                    int iTargetIndex) const;
+    bool StackItems(ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
     bool RepairItemAtMousePoint(CInventoryCtrl* targetControl) const;
     bool TryConsumeItem(CInventoryCtrl* targetControl, ITEM* pItem, int iIndex) const;
     bool TryTransferBetweenInventorySections(CInventoryCtrl* sourceControl) const;

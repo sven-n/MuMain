@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/PreviewSlots.h"
 #include "Core/Utilities/Random.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
@@ -135,6 +136,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
         if (!o->Live)
         {
             o->Live = true;
+            Render::Effects::PreviewSlots::Born(Render::Effects::PreviewSlots::List::Joint, i);
             Audio::RememberMaker(o);
             std::memset(o->Tails, 0, sizeof(o->Tails));
             o->TailFrames = 0.f;
@@ -2853,6 +2855,26 @@ void DeleteJoint(int Type, OBJECT* Target, int SubType)
     }
 }
 
+bool Render::Effects::HasDefenseAura(const OBJECT* o)
+{
+    return (g_isCharacterBuff(o, eBuff_Defense) || g_isCharacterBuff(o, eBuff_HelpNpc)) &&
+           !g_isCharacterBuff(o, eBuff_Cloaking);
+}
+
+void Render::Effects::SpawnDefenseAura(OBJECT* o, int characterIndex)
+{
+    if (SearchJoint(MODEL_SPEARSKILL, o, 4) || SearchJoint(MODEL_SPEARSKILL, o, 9))
+    {
+        return;
+    }
+
+    for (int i = 0; i < DefenseAuraJointCount; ++i)
+    {
+        CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, DefenseAuraScale, -1, 0, 0,
+                    characterIndex);
+    }
+}
+
 bool SearchJoint(int Type, OBJECT* Target, int SubType)
 {
     for (int i = 0; i < MAX_JOINTS; i++)
@@ -4475,10 +4497,7 @@ static void MoveJoint(JOINT* o, int iIndex)
 
             if (o->SubType == 4 || o->SubType == 9)
             {
-                const bool hasAttack = g_isCharacterBuff(o->Target, eBuff_Attack);
-                const bool hasDefense = g_isCharacterBuff(o->Target, eBuff_Defense);
-                const bool hasHelpNpc = g_isCharacterBuff(o->Target, eBuff_HelpNpc);
-                if (Render::Effects::ShouldKeepAuraJointAlive(hasAttack, hasDefense, hasHelpNpc))
+                if (Render::Effects::HasDefenseAura(o->Target))
                 {
                     o->LifeTime = 100;
                 }
@@ -7032,7 +7051,8 @@ static void UpdateDrawnJointEffects()
     for (int i = 0; i < MAX_JOINTS; i++)
     {
         JOINT* o = &Joints[i];
-        if (!o->Live || o->NumTails <= 0 || o->RenderFace == 0)
+        if (!o->Live || o->NumTails <= 0 || o->RenderFace == 0 ||
+            !Render::Effects::PreviewSlots::Moves(Render::Effects::PreviewSlots::List::Joint, i))
             continue;
         if (o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54 && o->Target->CurrentAction != MONSTER01_ATTACK1)
             continue;
@@ -7107,8 +7127,10 @@ void MoveJoints()
     for (int i = 0; i < MAX_JOINTS; i++)
     {
         JOINT* o = &Joints[i];
-        if (o->Live)
+        if (o->Live && Render::Effects::PreviewSlots::Moves(Render::Effects::PreviewSlots::List::Joint, i))
         {
+            const Render::Effects::PreviewSlots::MoveSoundScope previewSound(Render::Effects::PreviewSlots::List::Joint,
+                                                                             i);
             // The sounds a joint plays as it moves are marked at it, typed by
             // its maker (Charon's energy sparks reaching her hand).
             std::optional<Audio::ScopedSoundPlace> place;
@@ -7168,7 +7190,7 @@ void DescribeJoint(const JOINT& joint, Render::EffectDrawing::EffectDrawer& out)
     // Runs of segments outside the view frustum are skipped. Not for the trails that fade their
     // light per drawn segment, add sprites larger than the trail, or draw translated from it.
     const bool cullOffscreen =
-        !IsEffectCullingDisabledDebug() &&
+        !IsEffectCullingDisabledDebug() && !Render::Effects::PreviewSlots::IsCapturing() &&
         !(o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10)) &&
         !(o->Type == MODEL_SPEARSKILL && (o->SubType == 0 || o->SubType == 4 || o->SubType == 9)) &&
         !(o->Type == BITMAP_FLARE + 1 && (o->SubType == 6 || o->SubType == 8)) &&
@@ -7404,6 +7426,8 @@ void RenderJoints(BYTE bRenderOneMore)
     for (int i = 0; i < MAX_JOINTS; i++)
     {
         const JOINT* o = &Joints[i];
+        if (!Render::Effects::PreviewSlots::Draws(Render::Effects::PreviewSlots::List::Joint, i))
+            continue;
         if (o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54 && o->Target->CurrentAction != MONSTER01_ATTACK1)
             continue;
         if (o->Live && o->NumTails > 0 && o->RenderFace != 0)

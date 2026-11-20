@@ -3,7 +3,8 @@
 What a map does besides its terrain is moving into data, step by step
 ([maps design](superpowers/specs/2026-11-01-data-driven-maps-design.md)).
 The first part is the sounds of map objects; the light mood of the maps has
-its own page ([light-mood.md](light-mood.md)).
+its own page ([light-mood.md](light-mood.md)), and so has the warp list of
+the M window, `Data/Maps/Warps.json` ([warp-list.md](warp-list.md)).
 
 ## Object sounds
 

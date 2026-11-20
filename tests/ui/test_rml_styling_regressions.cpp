@@ -3,8 +3,11 @@
 
 #include "RmlLayoutFixture.h"
 #include "Data/GameData/ServerListData/LoadBar.h"
+#include "UI/HUD/MoveCommandRmlModel.h"
 #include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlRowWheel.h"
 #include "UI/Scaling/UITransform.h"
 #include "../../src/ThirdParty/RmlUi/Source/Core/DecoratorTiled.h"
 #include <RmlUi/Core/FontEngineInterface.h>
@@ -13,6 +16,7 @@
 #include <RmlUi/Core/TextShapingContext.h>
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <vector>
 
 namespace
@@ -385,6 +389,200 @@ TEST_CASE("the legacy character window shows the points to spend between the sum
         fixture.context->UnloadDocument(document);
         fixture.Refresh();
     }
+}
+
+TEST_CASE("the warp list's master level and resets stay clear of the zen in every theme [ui][styling]")
+{
+    // The cells are centred on their points, so "380 ML 100 R 2" beside the level ran into the zen. The master
+    // level and resets (GetMasterLevelAndResetsText, English) go on the row's second line, under the level.
+    constexpr const char* Level = "380";
+    constexpr const char* MasterLevelAndResets = "ML 100 R 2";
+    constexpr const char* WidestZen = "88888";
+    constexpr float Gap = 2.f;
+    constexpr float PixelTolerance = 1.f;
+    UI::Tests::RmlLayoutFixture fixture;
+    const std::pair<Rml::Vector2i, int> screens[] = {
+        {{640, 480}, 100}, {{800, 600}, 100}, {{1024, 768}, 75}, {{1024, 768}, 100}, {{1920, 1080}, 100},
+        {{1920, 1080}, 150}, {{2560, 1440}, 100}};
+    for (const std::string theme : {"classic", "legacy", "modern"})
+    {
+        for (const auto& [viewport, percent] : screens)
+        {
+            CAPTURE(theme);
+            CAPTURE(viewport.x);
+            CAPTURE(percent);
+            fixture.Configure(viewport, percent);
+            auto* document = fixture.Load(theme, "move_command");
+            REQUIRE(document);
+            UI::RmlBridge::SlotPlacement placement;
+            placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
+            placement.Apply(document, "panel");
+            const std::string fontSize = std::to_string(UI::Scaling::NativeTextPixelSize(
+                                             UI::Scaling::FontRole::Normal, viewport.x, viewport.y)) +
+                                         "px";
+            Required(*document, "#list").SetProperty("font-size", fontSize);
+            auto& row = Required(*document, ".mc-row");
+            auto& level = Required(*document, ".mc-row > .col-level");
+            auto& zen = Required(*document, ".mc-row > .col-zen");
+            auto& secondLine = Required(*document, ".mc-second-line .col-level");
+            level.SetInnerRML(Level);
+            zen.SetInnerRML(WidestZen);
+            secondLine.SetInnerRML(MasterLevelAndResets);
+            fixture.Refresh();
+
+            const DrawnRect rowBox = Drawn(row);
+            const DrawnRect levelBox = Drawn(level);
+            const DrawnRect zenBox = Drawn(zen);
+            const DrawnRect secondBox = Drawn(secondLine);
+            CHECK(levelBox.right + Gap <= zenBox.left);
+            // Under the level and the zen, centred under the level, inside the row.
+            CHECK(secondBox.top >= std::max(levelBox.bottom, zenBox.bottom) - PixelTolerance);
+            CHECK((secondBox.left + secondBox.right) / 2.f ==
+                  doctest::Approx((levelBox.left + levelBox.right) / 2.f).epsilon(0.01));
+            CHECK(secondBox.left >= rowBox.left);
+            CHECK(secondBox.right <= rowBox.right);
+            CHECK(secondBox.bottom <= rowBox.bottom + PixelTolerance);
+
+            fixture.context->UnloadDocument(document);
+            fixture.Refresh();
+        }
+    }
+}
+
+namespace
+{
+mu::ui::window::MoveCommandRowEntry WarpRow(const char* map, const char* level, const char* masterLevelAndResets)
+{
+    mu::ui::window::MoveCommandRowEntry row;
+    row.mapName = map;
+    row.reqLevel = level;
+    row.reqMasterLevelAndResets = masterLevelAndResets;
+    row.reqZen = "1000";
+    return row;
+}
+
+// The M window's document with its model bound as the window binds it (through RmlModelBinder, whose type register
+// is the model's own, so the model can be created again in one context), three rows: one-line, two-line, one-line.
+class BoundWarpList
+{
+public:
+    BoundWarpList(UI::Tests::RmlLayoutFixture& fixture, const std::string& theme, Rml::Vector2i viewport)
+        : m_fixture(fixture)
+    {
+        REQUIRE(m_binder.Create(fixture.context, "move_command",
+                                [](Rml::DataModelConstructor& constructor, mu::ui::window::MoveCommandRmlModel& model)
+                                {
+                                    mu::ui::window::BindMoveCommandFields(constructor, model);
+                                    for (const char* callback :
+                                         {"movecommand_warp", "movecommand_wheel", "movecommand_close"})
+                                    {
+                                        constructor.BindEventCallback(
+                                            callback, [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) {});
+                                    }
+                                }));
+        auto& model = m_binder.GetModel();
+        model.textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, viewport.x, viewport.y);
+        model.rows = {WarpRow("Lorencia", "10", ""), WarpRow("Icarus", "380", "ML 50 R 2"), WarpRow("Devias", "20", "")};
+        model.rows[1].masterLevelOrResetsUnmet = true;
+        document = fixture.LoadMarkup(UI::Tests::AssetMarkup(theme, "move_command", true));
+        UI::RmlBridge::SlotPlacement placement;
+        placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
+        placement.Apply(document, "panel");
+        fixture.Refresh();
+        Rml::ElementList all;
+        document->QuerySelectorAll(all, ".mc-row");
+        for (auto* row : all)
+        {
+            if (row->IsVisible())
+            {
+                rows.push_back(row);
+            }
+        }
+    }
+
+    ~BoundWarpList()
+    {
+        m_fixture.context->UnloadDocument(document);
+        m_fixture.Refresh();
+        m_binder.Destroy(m_fixture.context);
+    }
+
+    BoundWarpList(const BoundWarpList&) = delete;
+    BoundWarpList& operator=(const BoundWarpList&) = delete;
+
+    Rml::ElementDocument* document = nullptr;
+    std::vector<Rml::Element*> rows;
+
+private:
+    UI::Tests::RmlLayoutFixture& m_fixture;
+    RmlModelBinder<mu::ui::window::MoveCommandRmlModel> m_binder;
+};
+
+float Height(Rml::Element& element)
+{
+    return element.GetBox().GetSize(Rml::BoxArea::Border).y;
+}
+} // namespace
+
+TEST_CASE("the warp list's second line shows only for a warp with a master level or resets [ui][styling]")
+{
+    const Rml::Vector2i viewport{1024, 768};
+    UI::Tests::RmlLayoutFixture fixture;
+    for (const std::string theme : {"classic", "legacy", "modern"})
+    {
+        CAPTURE(theme);
+        fixture.Configure(viewport, 100);
+        const BoundWarpList list(fixture, theme, viewport);
+        REQUIRE(list.rows.size() == 3);
+        Rml::Element& oneLine = *list.rows[0];
+        Rml::Element& twoLines = *list.rows[1];
+        CHECK(Height(oneLine) > 0.f);
+        CHECK(Height(*list.rows[2]) == doctest::Approx(Height(oneLine)));
+        CHECK(Height(twoLines) > 1.5f * Height(oneLine));
+
+        Rml::Element* noSecondLine = oneLine.QuerySelector(".mc-second-line");
+        CHECK((noSecondLine == nullptr || !noSecondLine->IsVisible()));
+        Rml::Element* secondLine = twoLines.QuerySelector(".mc-second-line .col-level");
+        REQUIRE(secondLine != nullptr);
+        CHECK(secondLine->IsVisible());
+        CHECK(secondLine->GetInnerRML() == "ML 50 R 2");
+        // Only the master level is missing: the second line is unmet, the level isn't.
+        CHECK(secondLine->IsClassSet("unmet"));
+        Rml::Element* level = twoLines.QuerySelector(".mc-row > .col-level");
+        REQUIRE(level != nullptr);
+        CHECK(level->GetInnerRML() == "380");
+        CHECK_FALSE(level->IsClassSet("unmet"));
+    }
+}
+
+TEST_CASE("the warp list's wheel moves one row per notch, a two-line row too [ui][styling]")
+{
+    using UI::RmlBridge::RowWheelScrollTop;
+    const Rml::Vector2i viewport{1024, 768};
+    UI::Tests::RmlLayoutFixture fixture;
+    for (const std::string theme : {"classic", "legacy", "modern"})
+    {
+        CAPTURE(theme);
+        fixture.Configure(viewport, 100);
+        const BoundWarpList list(fixture, theme, viewport);
+        Rml::Element* pane = list.document->GetElementById("list");
+        REQUIRE(pane != nullptr);
+        const std::vector<float> tops = UI::RmlBridge::RowTops(*pane);
+        REQUIRE(tops.size() == 3);
+        CHECK(tops[0] == doctest::Approx(0.f));
+        CHECK(tops[1] == doctest::Approx(Height(*list.rows[0])));
+        CHECK(tops[2] == doctest::Approx(tops[1] + Height(*list.rows[1])));
+
+        CHECK(RowWheelScrollTop(tops, 0.f, 1.f) == tops[1]);
+        CHECK(RowWheelScrollTop(tops, tops[1], 1.f) == tops[2]);
+        CHECK(RowWheelScrollTop(tops, tops[2], -1.f) == tops[1]);
+        CHECK(RowWheelScrollTop(tops, tops[1], -1.f) == tops[0]);
+        // From between two tops the nearest counts; the rows' ends hold.
+        CHECK(RowWheelScrollTop(tops, tops[1] + 1.f, 1.f) == tops[2]);
+        CHECK(RowWheelScrollTop(tops, 0.f, -3.f) == tops[0]);
+        CHECK(RowWheelScrollTop(tops, tops[1], 5.f) == tops[2]);
+    }
+    CHECK(RowWheelScrollTop({}, 7.f, 1.f) == 7.f);
 }
 
 TEST_CASE("every legacy attribute row sits the points' room lower than the original [ui][styling]")

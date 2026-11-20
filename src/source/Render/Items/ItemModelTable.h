@@ -26,11 +26,13 @@ public:
     explicit ItemModelTable(Take take, Version version = nullptr) : m_take(take), m_version(version) {}
 
     // The value of the item a model slot is drawn like (GetItemTypeOfModel);
-    // T{} for models that are not items and for slots without a model.
-    T Find(int modelType)
+    // T{} for models that are not items and for slots without a model. It
+    // lives until the values are taken again.
+    const T& Find(int modelType)
     {
+        static const T none{};
         const int itemType = GetItemTypeOfModel(modelType);
-        return itemType >= 0 ? Values()[itemType] : T{};
+        return itemType >= 0 ? Values()[itemType] : none;
     }
 
 private:

@@ -4,6 +4,8 @@
 
 #include "ItemSyncServer.h"
 
+#include "Core/Text/AsciiText.h"
+
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
@@ -21,13 +23,6 @@ constexpr long TransferTimeoutMs = 120'000;
 
 // The hosts plain http may reach: this computer only.
 constexpr std::string_view LocalHosts[] = {"localhost", "127.0.0.1", "[::1]"};
-
-std::string ToLower(std::string_view text)
-{
-    std::string lower(text);
-    std::ranges::transform(lower, lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return lower;
-}
 
 std::string_view Trim(std::string_view text)
 {
@@ -134,7 +129,7 @@ std::optional<std::string> GetExchangeUrl(std::string_view adminPanelUrl, Server
         problem = ServerUpdateProblem::NoUrl;
         return std::nullopt;
     }
-    const std::string lower = ToLower(url);
+    const std::string lower = Core::Text::ToLowerAscii(url);
     constexpr std::string_view Https = "https://";
     constexpr std::string_view Http = "http://";
     bool allowed = lower.starts_with(Https) && lower.size() > Https.size();

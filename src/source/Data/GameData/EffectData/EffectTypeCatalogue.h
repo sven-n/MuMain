@@ -34,6 +34,8 @@ public:
     std::string_view GetName(EffectKind kind, int type) const;
 
     size_t GetTypeCount(EffectKind kind) const;
+    // The names of the types of `kind`, sorted.
+    std::vector<std::string_view> GetNames(EffectKind kind) const;
 
     // The effect types with creation values, sorted by number.
     std::span<const EffectTypeCreateParams> GetCreateParams() const;

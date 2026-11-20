@@ -16,6 +16,7 @@ extern bool SelectFlag;
 #include "UI/Inventory/UIJewelHarmony.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "Guild/GuildTypes.h"
@@ -634,7 +635,7 @@ bool CMyInventory::UpdateMouseEvent()
     if (m_pNewInventoryCtrl && !m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
 
-    if (true == EquipmentWindowProcess())
+    if (!ReleaseGoesToGrid() && EquipmentWindowProcess())
         return false;
     if (true == InventoryProcess())
         return false;
@@ -832,7 +833,14 @@ bool CMyInventory::UpdateKeyEvent()
             if (CanRegisterItemHotKey(pItem->Type) == true)
             {
                 const int iItemLevel = pItem->Level;
+                const bool changed = g_pMainFrame->GetItemHotKey(iHotKey) != pItem->Type ||
+                                     g_pMainFrame->GetItemHotKeyLevel(iHotKey) != iItemLevel;
                 g_pMainFrame->SetItemHotKey(iHotKey, pItem->Type, iItemLevel);
+                // Saved as it changes, so a crash or a disconnect doesn't lose it.
+                if (changed)
+                {
+                    SaveOptionsIfInGame();
+                }
                 return false;
             }
         }
@@ -1614,6 +1622,14 @@ bool CMyInventory::CheckTakeOff(int equipmentSlot) const
 
     g_pSystemLogBox->AddText(I18N::Game::KeepFlightEquipmentInIcarus, TYPE_ERROR_MESSAGE);
     return false;
+}
+
+bool CMyInventory::ReleaseGoesToGrid() const
+{
+    if (!IsRelease(VK_LBUTTON) || m_pNewInventoryCtrl == nullptr)
+        return false;
+
+    return m_ActionController.DropOutcomeOn(m_pNewInventoryCtrl) != DropOutcome::None;
 }
 
 bool CMyInventory::InventoryProcess() const

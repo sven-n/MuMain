@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "UI/Social/SocialWindowBase.h"
 
-BOOL g_bUseChatListBox = TRUE;
-
 DWORD g_dwActiveUIID = 0;
 DWORD g_dwMouseUseUIID = 0;
 

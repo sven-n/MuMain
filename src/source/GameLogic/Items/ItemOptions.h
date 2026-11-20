@@ -77,4 +77,20 @@ int GetCurrentSlotValue(const ITEM& item, int slot);
 
 // The same for the item's slot `slot`; a slot the code wrote gives its SpecialValue.
 int GetItemOptionValue(const ITEM& item, int slot);
+
+// An item's ancient bonus: its definition and option, the effect of its attribute (AT_SET_OPTION_IMPROVE_STRENGTH to
+// AT_SET_OPTION_IMPROVE_VITALITY, or NoItemOptionEffect for an attribute the client doesn't add) and its value at the
+// item's bonus level.
+struct AncientBonus
+{
+    const Data::Items::ItemOptionDefinition* definition = nullptr;
+    const Data::Items::ItemOption* option = nullptr;
+    WORD effect = 0;
+    int value = 0;
+};
+
+// The item's ancient bonus when its ancient byte has a bonus level (ITEM::AncientBonusOption): of the definition its
+// attackType picks until the item sets link one (Data::Items::ItemOptionDatabase::FindAncientBonus); nothing without
+// a bonus level or such a definition.
+std::optional<AncientBonus> FindAncientBonus(const ITEM& item);
 } // namespace GameLogic::Items

@@ -79,6 +79,8 @@ public:
         decltype(&SDL_WaitForGPUFences) wait = &SDL_WaitForGPUFences;
         decltype(&SDL_ReleaseGPUFence) releaseFence = &SDL_ReleaseGPUFence;
         decltype(&SDL_GetError) getError = &SDL_GetError;
+        // False where a frame must never wait (Render::TargetFramesMayWait): past the ceiling the ring keeps growing.
+        bool waitAtCeiling = true;
     };
 
     struct Result

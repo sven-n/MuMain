@@ -6,7 +6,11 @@
 #include "Data/GameData/LookData/LookEffects.h"
 #include "LookParts.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 // The fields of a look in the Style Editor (design L19), in designer terms (L8, L9, L10): a layer's kind, motion,
@@ -28,6 +32,92 @@ bool ItemValuesBeforeEntry(Data::Looks::ItemValuesBefore& entry, const std::vect
 bool ObjectLight(std::optional<std::array<Data::Looks::Number, 3>>& light);
 // One line for an entry of the item effect's list: "Only when: glow mesh, glows like level +7".
 std::string DescribeItemValuesBefore(const Data::Looks::ItemValuesBefore& entry);
+
+// Where an entry's things go, as its fields choose it.
+enum class PlaceMode
+{
+    Bones,
+    Between,
+    Origin,
+};
+// The entry's places made `mode`'s: no bones yet, or the item's place, which is one place, so Once for all goes: it is
+// hidden there, and the reader refuses it at the item's place, so the look would not load.
+void ChangePlaceMode(Data::Looks::OnBones& entry, PlaceMode mode);
+
+// A button of an item effect's entry list (the entries before the drawing, the things on bones).
+enum class EntryButton
+{
+    Copy,
+    MoveUp,
+    MoveDown,
+    Remove,
+};
+// `button` applied to `list`, whose entries are the lines from `first` on, `line` the picked one: it follows a moved
+// entry, goes to a copy, and after a removal to the next entry, else the one before, else the line before the list.
+// Whether the picked line still shows the entry it showed (a move, or a button that changed nothing): only then does a
+// choice kept for the picked entry (Between bones before its first pair) stay with it.
+template <typename T>
+bool ApplyEntryButton(std::vector<T>& list, std::size_t first, std::size_t& line, EntryButton button)
+{
+    const std::size_t index = line - first;
+    const auto at = [&](std::size_t i) { return list.begin() + static_cast<std::ptrdiff_t>(i); };
+    switch (button)
+    {
+    case EntryButton::Copy:
+        list.insert(at(index + 1), list[index]);
+        ++line;
+        return false;
+    case EntryButton::MoveUp:
+        if (index > 0)
+        {
+            std::swap(list[index], list[index - 1]);
+            --line;
+        }
+        return true;
+    case EntryButton::MoveDown:
+        if (index + 1 < list.size())
+        {
+            std::swap(list[index], list[index + 1]);
+            ++line;
+        }
+        return true;
+    case EntryButton::Remove:
+        list.erase(at(index));
+        line = list.empty() ? (first == 0 ? 0 : first - 1) : std::min(line, first + list.size() - 1);
+        return false;
+    }
+    return true;
+}
+
+// Whether the list's line `line` shows Between bones chosen before its entry's first pair: only the line whose fields
+// showed in the last frame (`fieldsLine`), not one clicked in this frame, whose fields haven't shown yet.
+inline bool LineShowsBetweenChosen(std::size_t line, std::size_t fieldsLine, bool chosen)
+{
+    return chosen && line == fieldsLine;
+}
+
+// What the fields of an entry of things on bones showed in this frame, for the preview's marks (design L58).
+struct OnBonesShown
+{
+    // Whether its places are pairs of bones (lightning).
+    bool between = false;
+    // The bone a number field points at (the mouse on it, or typed into).
+    std::optional<int> pointedBone;
+};
+// An entry of an item effect's things on bones (design L55, L56, section 7b): where (at bones, between pairs of bones,
+// at the item's place) with its bones as number fields, its chance, Together, and its things, each with its kind, its
+// type by name from the effect catalogue, SubType, scale, color, a sprite's rotation, lightning's direction and, in a
+// group, its own chance. `chosenBetween`: Between bones chosen before the entry's first pair, which the caller keeps
+// with the picked entry.
+bool OnBonesEntry(Data::Looks::OnBones& entry, OnBonesShown& shown, bool& chosenBetween);
+// A thing of things on bones made a thing of `kind`: no type yet (a name is a type of one kind), and without a
+// sprite's rotation and lightning's direction, which belong to their kinds and would be written and refused.
+void ChangeKind(Data::Looks::BoneThing& thing, Data::Looks::BoneThingKind kind);
+// The speed the update plays the item's animation at (design L29); none plays none.
+bool AnimationSpeed(std::optional<float>& speed);
+// An entry of things on bones on one line: its things, where and its chance.
+// `betweenChosen`: Between bones is chosen for the entry while it has no bones yet, as its fields show it.
+std::string DescribeOnBones(const Data::Looks::OnBones& entry, bool betweenChosen = false);
 // A layer as its effect (design L35, L40): its meshes, then only the fields of its main effect and of what else it
 // does, as `effect` describes it (a pulse's strength with its curve, a shine's motion, an overlay's texture).
 bool Effect(Data::Looks::Layer& layer, const Data::Looks::LayerEffect& effect, const std::vector<LookPart>& parts = {});

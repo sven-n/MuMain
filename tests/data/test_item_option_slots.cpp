@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "CharacterMachineScope.h"
 #include "ClientDataScope.h"
 #include "HeroScope.h"
 #include "ItemOptionsScope.h"
@@ -12,6 +13,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemOptionSlots.h"
 #include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Pets/GIPetManager.h"
@@ -934,7 +936,8 @@ TEST_CASE("The excellent options' tooltip lines come from their texts [data][ite
 }
 
 // The stat code adds an option with terms on the hero's attributes as the hero is now, not as the hero was when the
-// item was made: level / 20 grows with the hero. The other options add what the item was made with.
+// item was made: level / 20 grows with the hero and counts the master level. The other options add what the item was
+// made with.
 TEST_CASE("The stat code adds the excellent level / 20 as the hero is now [data][items]")
 {
     ClientDataScope client(ClientDirectory);
@@ -952,6 +955,12 @@ TEST_CASE("The stat code adds the excellent level / 20 as the hero is now [data]
     hero.Hero().Level = 85;
     CHECK(GameLogic::Items::GetCurrentSlotValue(kris, 0) == 4);
     CHECK(kris.SpecialValue[0] == 0);
+    // Level plus master level, rounded down: (85 + 30) / 20 for a master hero.
+    hero.Hero().Class = CLASS_GRANDMASTER;
+    const MASTER_LEVEL_VALUE savedMasterLevel = Master_Level_Data;
+    Master_Level_Data.nMLevel = 30;
+    CHECK(GameLogic::Items::GetCurrentSlotValue(kris, 0) == 5);
+    Master_Level_Data = savedMasterLevel;
     // The others: what the item was made with (2 % and attack speed 7).
     CHECK(GameLogic::Items::GetCurrentSlotValue(kris, 1) == 2);
     CHECK(GameLogic::Items::GetCurrentSlotValue(kris, 2) == 7);
@@ -1100,3 +1109,205 @@ TEST_CASE("An item is excellent when its excellent byte turns on an option it li
     CHECK(durability(ITEM_WINGS_OF_SPIRITS, 0x01) == durability(ITEM_WINGS_OF_SPIRITS, 0));
 }
 
+namespace
+{
+// An item of an ancient set with its bonus at `bonusLevel`, as the server sends it (set 1).
+ITEM MakeAncientItem(int type, BYTE bonusLevel)
+{
+    ItemCreationParams params{};
+    params.Group = type / MAX_ITEM_INDEX;
+    params.Number = type % MAX_ITEM_INDEX;
+    params.IsAncient = true;
+    params.AncientDiscriminator = 1;
+    params.AncientBonusOption = bonusLevel;
+    params.Durability = 20;
+    ITEM item;
+    FillItemFromParameters(item, params);
+    return item;
+}
+
+// The stats the stat code adds up (strength, agility, energy, vitality).
+std::array<int, 4> AddedUpStats()
+{
+    std::array<std::uint16_t, 5> stats{};
+    g_csItemOption.getAllAddStateOnlyAddValue(&stats[0], &stats[1], &stats[2], &stats[3], &stats[4]);
+    return {stats[0], stats[1], stats[2], stats[3]};
+}
+
+// What wearing `worn` adds to the stats the stat code adds up, as the difference to wearing nothing, so the set options
+// a test before left in g_csItemOption don't count.
+std::array<int, 4> AddedStats(const ITEM& worn)
+{
+    CharacterMachineScope scope;
+    const std::array<int, 4> without = AddedUpStats();
+    scope.Machine().Equipment[EQUIPMENT_RING_RIGHT] = worn;
+    const std::array<int, 4> with = AddedUpStats();
+    return {with[0] - without[0], with[1] - without[1], with[2] - without[2], with[3] - without[3]};
+}
+} // namespace
+
+// The ancient bonus of an item of a set raises the stat of its attackType (1 strength, 2 agility, 3 energy, 4
+// vitality) by 5 at bonus level 1 and 10 at level 2 and above, for every item that has one; a broken item adds
+// nothing.
+TEST_CASE("Every ancient item's bonus raises the stat of its attackType [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    std::array<int, 4> itemsPerStat{};
+    int someAncientItem = -1;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const int type = definition.group * MAX_ITEM_INDEX + definition.number;
+        const int attackType = ItemAttribute[type].AttType;
+        if (attackType < 1 || attackType > 4)
+        {
+            continue;
+        }
+        ++itemsPerStat[static_cast<size_t>(attackType - 1)];
+        someAncientItem = type;
+        for (int level = 1; level <= 3; ++level)
+        {
+            std::array<int, 4> expected{};
+            expected[static_cast<size_t>(attackType - 1)] = 5 * std::min(level, 2);
+            CAPTURE(type);
+            CAPTURE(level);
+            CHECK(AddedStats(MakeAncientItem(type, static_cast<BYTE>(level))) == expected);
+        }
+    }
+    // Each stat has items, so each case of the stat code ran.
+    CHECK(std::all_of(itemsPerStat.begin(), itemsPerStat.end(), [](int items) { return items >= 1; }));
+
+    REQUIRE(someAncientItem >= 0);
+    ITEM broken = MakeAncientItem(someAncientItem, 2);
+    broken.Durability = 0;
+    CHECK(AddedStats(broken) == std::array<int, 4>{});
+}
+
+namespace
+{
+// The first item whose attackType is `attackType`.
+int FindItemOfAttackType(int attackType)
+{
+    for (int type = 0; type < MAX_ITEM; ++type)
+    {
+        if (ItemAttribute[type].AttType == attackType && g_ItemDatabase.Find(type) != nullptr)
+        {
+            return type;
+        }
+    }
+    return -1;
+}
+} // namespace
+
+// The ancient bonus comes from the definition of Options/Ancient.json the item's attackType picks: +5 at bonus level 1,
+// +10 at level 2, the last entry above the list, nothing at level 0. Its line is the definition's text.
+TEST_CASE("The ancient bonus comes from the definition the item's attackType picks [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    const int strengthItem = FindItemOfAttackType(1);
+    const int vitalityItem = FindItemOfAttackType(4);
+    REQUIRE(strengthItem >= 0);
+    REQUIRE(vitalityItem >= 0);
+
+    CHECK_FALSE(GameLogic::Items::FindAncientBonus(MakeAncientItem(strengthItem, 0)));
+    const std::optional<GameLogic::Items::AncientBonus> level1 =
+        GameLogic::Items::FindAncientBonus(MakeAncientItem(strengthItem, 1));
+    REQUIRE(level1);
+    CHECK(level1->definition->name == "ancientBonusStrength");
+    CHECK(level1->effect == AT_SET_OPTION_IMPROVE_STRENGTH);
+    CHECK(level1->value == 5);
+    CHECK(GameLogic::Items::FindAncientBonus(MakeAncientItem(strengthItem, 2))->value == 10);
+    CHECK(GameLogic::Items::FindAncientBonus(MakeAncientItem(strengthItem, 3))->value == 10);
+    const std::optional<GameLogic::Items::AncientBonus> vitality =
+        GameLogic::Items::FindAncientBonus(MakeAncientItem(vitalityItem, 2));
+    REQUIRE(vitality);
+    CHECK(vitality->definition->name == "ancientBonusVitality");
+    CHECK(vitality->effect == AT_SET_OPTION_IMPROVE_VITALITY);
+
+    ClearTooltipRows();
+    const ITEM strength = MakeAncientItem(strengthItem, 2);
+    CHECK(g_csItemOption.RenderDefaultOptionText(&strength, 0) >= 1);
+    CHECK(std::wstring(TextList[0]) == L"Increase strength +10");
+    CHECK(TextListColor[0] == TEXT_COLOR_BLUE);
+    const ITEM stamina = MakeAncientItem(vitalityItem, 1);
+    CHECK(g_csItemOption.RenderDefaultOptionText(&stamina, 0) >= 1);
+    CHECK(std::wstring(TextList[0]) == L"Increase stamina +5");
+    ClearTooltipRows();
+    const ITEM withoutBonus = MakeAncientItem(strengthItem, 0);
+    CHECK(g_csItemOption.RenderDefaultOptionText(&withoutBonus, 0) == 0);
+}
+
+// The stat code adds the ancient bonus of the worn items with the definitions' values, to the stat the definition's
+// attribute names: an edited value list is added as written, another attribute changes the stat, and one the client
+// doesn't add adds nothing.
+TEST_CASE("The stats add the ancient bonus with its definition's value and attribute [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+    const int strengthItem = FindItemOfAttackType(1);
+    REQUIRE(strengthItem >= 0);
+
+    ItemOptionsScope restoreOptions;
+    const Data::Items::ItemOptionDatabase& shipped = restoreOptions.Saved();
+    const int found = shipped.Find("ancientBonusStrength");
+    REQUIRE(found != Data::Items::ItemOptionDatabase::NoDefinition);
+    const auto edit = [&](const char* attribute, std::vector<int> values)
+    {
+        std::vector<Data::Items::ItemOptionDefinition> definitions(shipped.GetDefinitions().begin(),
+                                                                  shipped.GetDefinitions().end());
+        Data::Items::ItemOption& option = definitions[static_cast<size_t>(found)].options.front();
+        option.attribute = attribute;
+        option.value = {std::move(values), true};
+        g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
+    };
+    edit("totalStrength", {7, 9});
+    CHECK(AddedStats(MakeAncientItem(strengthItem, 2)) == std::array<int, 4>{9, 0, 0, 0});
+    edit("totalEnergy", {7, 9});
+    CHECK(AddedStats(MakeAncientItem(strengthItem, 1)) == std::array<int, 4>{0, 0, 7, 0});
+    edit("maximumHealth", {7, 9});
+    CHECK(AddedStats(MakeAncientItem(strengthItem, 1)) == std::array<int, 4>{0, 0, 0, 0});
+}
+
+// An elemental ring's or pendant's "Increase Attribute Damage" follows its bonus line: without the line (a text the
+// option texts lack) it shows neither.
+TEST_CASE("The elemental rings' second ancient bonus line follows the bonus line [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    ClearTooltipRows();
+    const ITEM ring = MakeAncientItem(ITEM_RING_OF_ICE, 1);
+    CHECK(g_csItemOption.RenderDefaultOptionText(&ring, 0) == 2);
+    CHECK(std::wstring(TextList[0]) == L"Increase agility +5");
+    CHECK(std::wstring(TextList[1]) == L"Increase attribute damage");
+
+    ItemOptionsScope restoreOptions;
+    const Data::Items::ItemOptionDatabase& shipped = restoreOptions.Saved();
+    std::vector<Data::Items::ItemOptionDefinition> definitions(shipped.GetDefinitions().begin(),
+                                                              shipped.GetDefinitions().end());
+    const int found = shipped.Find("ancientBonusAgility");
+    REQUIRE(found != Data::Items::ItemOptionDatabase::NoDefinition);
+    definitions[static_cast<size_t>(found)].options.front().texts = {"noSuchText"};
+    g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
+    ClearTooltipRows();
+    CHECK(g_csItemOption.RenderDefaultOptionText(&ring, 0) == 0);
+}
