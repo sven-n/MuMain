@@ -28,6 +28,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Scenes/MainScene.h"
+#include "Render/Effects/PreviewSlots.h"
 
 PARTICLE  Particles[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT
@@ -394,7 +395,9 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
     {
         OBJECT* o = &Effects[icntEffect];
 
-        if (g_SkillEffects.IsSkillEffect(Type, Position, Angle, Light, SubType, Owner, PKKey, SkillIndex, Skill, SkillSerialNum, Scale, sTargetIndex))
+        const bool isSkill = g_SkillEffects.IsSkillEffect(Type, Position, Angle, Light, SubType, Owner, PKKey,
+                                                          SkillIndex, Skill, SkillSerialNum, Scale, sTargetIndex);
+        if (isSkill)
         {
             o = g_SkillEffects.CreateEffect();
         }
@@ -402,6 +405,10 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
         if (!o->Live)
         {
             o->Live = true;
+            // RenderEffects counts the skill effects after the effects.
+            Render::Effects::PreviewSlots::Born(
+                Render::Effects::PreviewSlots::List::Effect,
+                isSkill ? MAX_EFFECTS + static_cast<int>(o - g_SkillEffects.GetEffect(0)) : icntEffect);
             // Not tested yet: a reused slot must not draw in a pass that trusts last frame's visibility.
             o->Visible = false;
             Audio::RememberMaker(o);
@@ -7736,8 +7743,10 @@ void MoveEffects()
     for (int i = 0; i < MAX_EFFECTS; i++)
     {
         OBJECT* o = &Effects[i];
-        if (o->Live)
+        if (o->Live && Render::Effects::PreviewSlots::Moves(Render::Effects::PreviewSlots::List::Effect, i))
         {
+            const Render::Effects::PreviewSlots::MoveSoundScope previewSound(
+                Render::Effects::PreviewSlots::List::Effect, i);
             // The sounds an effect plays as it moves are marked at it, typed by
             // its maker.
             std::optional<Audio::ScopedSoundPlace> place;
@@ -7834,6 +7843,9 @@ void CullEffects()
         o->Visible = TestFrustrum(o->Position, 400.f);
         if (gMapManager.WorldActive == WD_39KANTURU_3RD && (o->Type == MODEL_STORM3 || o->Type == MODEL_MAYASTAR))
             o->Visible = true;
+        // A preview view's effect is seen by its view, so its children are created as in the game (design 7a).
+        if (Render::Effects::PreviewSlots::ViewOf(Render::Effects::PreviewSlots::List::Effect, i) != 0)
+            o->Visible = true;
         if (o->Visible)
             o->DrawnFrame = s_effectCullFrame;
     }
@@ -7860,6 +7872,10 @@ void RenderEffects(bool bRenderBlendMesh)
                 continue;
             }
             o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
+        }
+        if (!Render::Effects::PreviewSlots::Draws(Render::Effects::PreviewSlots::List::Effect, i))
+        {
+            continue;
         }
 
         if (o->Live)
@@ -8935,7 +8951,8 @@ void UpdateEffectModelEffects()
     for (int i = 0; i < iEffectSize; ++i)
     {
         OBJECT* o = i < MAX_EFFECTS ? &Effects[i] : g_SkillEffects.GetEffect(i - MAX_EFFECTS);
-        if (!o->Live || o->DrawnFrame != s_effectCullFrame)
+        if (!o->Live || o->DrawnFrame != s_effectCullFrame ||
+            !Render::Effects::PreviewSlots::Moves(Render::Effects::PreviewSlots::List::Effect, i))
             continue;
         if (o->Type >= MAX_MODELS)
         {
@@ -8977,7 +8994,8 @@ void RenderAfterEffects()
             o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
         }
         // CullEffects marked it.
-        if (o->Live && IsSentAfterCharacter(o))
+        if (o->Live && IsSentAfterCharacter(o) &&
+            Render::Effects::PreviewSlots::Draws(Render::Effects::PreviewSlots::List::Effect, i))
         {
             if (o->Visible)
             {
@@ -9398,7 +9416,7 @@ void RenderEffectShadows()
         {
             o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
         }
-        if (o->Live)
+        if (o->Live && Render::Effects::PreviewSlots::Draws(Render::Effects::PreviewSlots::List::Effect, i))
         {
             if (o->Visible)
             {

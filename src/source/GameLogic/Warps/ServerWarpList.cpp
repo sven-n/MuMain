@@ -3,6 +3,9 @@
 #include "Core/Platform/WinCompat.h"
 #include "Data/Translation/MultiLanguage.h"
 
+#include <algorithm>
+#include <cstdint>
+
 namespace GameLogic::Warps
 {
 namespace
@@ -19,6 +22,12 @@ constexpr int32_t LevelRequirementOffset = 4;
 constexpr int32_t CostsOffset = 8;
 constexpr int32_t NameOffset = 12;
 constexpr int32_t NameLength = 32;
+
+// Offsets within one entry of the WarpRequirementsExtended message.
+constexpr int32_t RequirementSize = 8;
+constexpr int32_t RequirementIndexOffset = 0;
+constexpr int32_t RequirementMasterLevelOffset = 2;
+constexpr int32_t RequirementResetsOffset = 4;
 
 uint16_t ReadUInt16LittleEndian(const uint8_t* data)
 {
@@ -69,5 +78,34 @@ std::optional<std::vector<ServerWarp>> ReadServerWarpList(const uint8_t* data, i
     }
 
     return warps;
+}
+
+std::optional<std::vector<ServerWarpRequirement>> ReadServerWarpRequirements(const uint8_t* data, int32_t size)
+{
+    if (data == nullptr || size < WarpsOffset)
+    {
+        return std::nullopt;
+    }
+
+    const int32_t count = data[CountOffset];
+    if (size < WarpsOffset + count * RequirementSize)
+    {
+        return std::nullopt;
+    }
+
+    std::vector<ServerWarpRequirement> requirements;
+    requirements.reserve(static_cast<size_t>(count));
+    for (int32_t i = 0; i < count; ++i)
+    {
+        const uint8_t* entry = data + WarpsOffset + i * RequirementSize;
+        ServerWarpRequirement requirement;
+        requirement.index = ReadUInt16LittleEndian(entry + RequirementIndexOffset);
+        requirement.minMasterLevel = ReadUInt16LittleEndian(entry + RequirementMasterLevelOffset);
+        requirement.minResets = static_cast<int32_t>(
+            std::min<uint32_t>(ReadUInt32LittleEndian(entry + RequirementResetsOffset), INT32_MAX));
+        requirements.push_back(requirement);
+    }
+
+    return requirements;
 }
 } // namespace GameLogic::Warps

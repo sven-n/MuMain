@@ -2,8 +2,8 @@
 #include "stdafx.h"
 #include "UI/HUD/MoveCommandWindow.h"
 #include "UI/Core/WindowSystem.h"
-#include "GameLogic/Items/ChangeRingManager.h"
-#include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/MapData/WarpDatabase.h"
+#include "GameLogic/Warps/WarpRules.h"
 #include "Core/Utilities/KeyGenerator.h"
 #include "Network/Server/ServerListManager.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -17,43 +17,21 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlRowWheel.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
-#include <cmath>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
 namespace
 {
-    constexpr int MapNameCount = 6;
-    // The fill slot's smallest panel: the header, the close bar and three rows.
-    constexpr float kFillMinimumHeight = 102.f;
-
-    const std::wstring MapName[MapNameCount] =
-    {
-        L"Lorencia",
-        L"Noria",
-        L"Elbeland",
-        L"Dungeon",
-        L"Devias",
-        L"LostTower",
-    };
-
-    bool IsLuckySeal(const std::wstring& name)
-    {
-        if (name.size() != 0) {
-            for (int i = 0; i < MapNameCount; ++i) {
-                if (name == MapName[i])
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+// The fill slot's smallest panel: the header, the close bar and three one-line rows. A warp with a master
+// level or resets takes two lines, so fewer of those fit; the list scrolls, and a minimum measured from the
+// rows would change the slot with the server's list (no warp of the data file sets them).
+constexpr float kFillMinimumHeight = 102.f;
 };
 
 CMoveCommandWindow::CMoveCommandWindow()
@@ -154,84 +132,6 @@ void mu::ui::window::CMoveCommandWindow::ApplyFillSize()
     m_RmlView.Document()->UpdateDocument();
 }
 
-bool mu::ui::window::CMoveCommandWindow::IsLuckySealBuff()
-{
-    if (g_isCharacterBuff((&Hero->Object), eBuff_Seal1)
-        || g_isCharacterBuff((&Hero->Object), eBuff_Seal2)
-        || g_isCharacterBuff((&Hero->Object), eBuff_Seal3)
-        || g_isCharacterBuff((&Hero->Object), eBuff_Seal4)
-        || g_isCharacterBuff((&Hero->Object), eBuff_Seal_HpRecovery)
-        || g_isCharacterBuff((&Hero->Object), eBuff_Seal_MpRecovery)
-        || g_isCharacterBuff((&Hero->Object), eBuff_AscensionSealMaster)
-        || g_isCharacterBuff((&Hero->Object), eBuff_WealthSealMaster)
-        || g_isCharacterBuff((&Hero->Object), eBuff_NewWealthSeal)
-        || g_isCharacterBuff((&Hero->Object), eBuff_PartyExpBonus)
-        )
-    {
-        return true;
-    }
-    return false;
-}
-
-bool mu::ui::window::CMoveCommandWindow::IsMapMove(const std::wstring& src)
-{
-    if (Hero->Object.Kind == KIND_PLAYER
-        && Hero->Object.Type == MODEL_PLAYER
-        && Hero->Object.SubType == MODEL_GM_CHARACTER)
-    {
-        return true;
-    }
-
-    if (g_isCharacterBuff((&Hero->Object), eBuff_GMEffect))
-    {
-        return true;
-    }
-
-    if (IsLuckySealBuff() == false) {
-        wchar_t lpszStr1[1024]; wchar_t* lpszStr2 = NULL;
-        if (src.find(I18N::Game::Warp) != std::wstring::npos) {
-            std::wstring temp = I18N::Game::Warp;
-            temp += ' ';
-            mu_swprintf(lpszStr1, src.c_str());
-            wchar_t* context = nullptr;
-            lpszStr2 = wcstok_s(lpszStr1, temp.c_str(), &context);
-            if (lpszStr2 == NULL) return false;
-
-            SettingCanMoveMap();
-            for (const auto* moveInfo : m_listMoveInfoData) {
-                if (!wcscmp(lpszStr2, moveInfo->_ReqInfo.szMainMapName)) {
-                    if (moveInfo->_bCanMove == true) {
-                        return IsLuckySeal(moveInfo->_ReqInfo.szSubMapName);
-                    }
-                }
-            }
-            return false;
-        }
-        else if (src.find(L"/move") != std::wstring::npos) {
-            std::wstring temp = L"/move";
-            temp += ' ';
-            mu_swprintf(lpszStr1, src.c_str());
-            wchar_t* context = nullptr;
-            lpszStr2 = wcstok_s(lpszStr1, temp.c_str(), &context);
-            if (lpszStr2 == NULL) return false;
-
-            SettingCanMoveMap();
-            for (const auto* moveInfo : m_listMoveInfoData) {
-                if (!wcsicmp(lpszStr2, moveInfo->_ReqInfo.szMainMapName)) {
-                    if (moveInfo->_bCanMove == true) {
-                        return IsLuckySeal(moveInfo->_ReqInfo.szSubMapName);
-                    }
-                }
-            }
-            return false;
-        }
-        else {
-            return IsLuckySeal(src);
-        }
-    }
-    return true;
-}
-
 void mu::ui::window::CMoveCommandWindow::SetMoveCommandKey(DWORD dwKey)
 {
     m_dwMoveCommandKey = dwKey;
@@ -246,125 +146,49 @@ DWORD mu::ui::window::CMoveCommandWindow::GetMoveCommandKey()
 
 void mu::ui::window::CMoveCommandWindow::SetStrifeMap()
 {
-    std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
-
-    if (!g_ServerListManager->IsNonPvP())
+    // The warps for Gens members only (Data/Maps/Warps.json "gensOnly"), on PvP servers.
+    const bool nonPvP = g_ServerListManager->IsNonPvP();
+    for (auto* moveInfo : m_listMoveInfoData)
     {
-        int anStrifeIndex[1] = { 42 };
-        int i;
-        for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); advance(li, 1))
-        {
-            (*li)->_bStrife = false;
-            for (i = 0; i < 1; ++i)
-            {
-                if ((*li)->_ReqInfo.index == anStrifeIndex[i])
-                {
-                    (*li)->_bStrife = true;
-                    break;
-                }
-            }
-        }
-    }
-    else
-    {
-        for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); advance(li, 1))
-            (*li)->_bStrife = false;
+        moveInfo->_bStrife = GameLogic::Warps::IsGensWarp(
+            GameLogic::Warps::FindWarpRules(g_WarpDatabase.GetList(), moveInfo->_ReqInfo.index), nonPvP);
     }
 }
 
 void mu::ui::window::CMoveCommandWindow::SettingCanMoveMap()
 {
-    int a = gMapManager.WorldActive;
-
-    DWORD iZen;
-    int iLevel, iReqLevel, iReqZen;
-
+    // The move rules of Data/Maps/Warps.json; the level, zen, master level and resets of the list, which the server
+    // may have changed.
+    const GameLogic::Warps::WarpCharacter character = GameLogic::Warps::MakeHeroWarpCharacter();
+    const bool nonPvP = g_ServerListManager->IsNonPvP();
     for (auto* moveInfo : m_listMoveInfoData)
     {
-        moveInfo->_bCanMove = false;
         moveInfo->_bSelected = false;
-
-        iLevel = CharacterAttribute->Level;
-        iZen = CharacterMachine->Gold;
-        iReqLevel = moveInfo->_ReqInfo.iReqLevel;
-        iReqZen = moveInfo->_ReqInfo.iReqZen;
-
-        if ((gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK_LORD
-            || gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_RAGEFIGHTER)
-            && (iReqLevel != 400))
-        {
-            iReqLevel = int(float(iReqLevel) * 2.f / 3.f);
-        }
-
-        if (iLevel >= iReqLevel && (int)iZen >= iReqZen && (int)Hero->PK < PVP_MURDERER1)
-        {
-            ITEM* pEquipedRightRing = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-            ITEM* pEquipedLeftRing = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-            ITEM* pEquipedHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-            ITEM* pEquipedWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
-
-            if (wcscmp(moveInfo->_ReqInfo.szMainMapName, I18N::Game::Icarus) == 0)
-            {
-                if (
-                    GameLogic::Items::HasFlightEquipment(pEquipedHelper, pEquipedWing)
-                    && !(pEquipedHelper->Type == ITEM_HORN_OF_UNIRIA)
-                    && (g_ChangeRingMgr->CheckBanMoveIcarusMap(pEquipedRightRing->Type, pEquipedLeftRing->Type) == false)
-                    )
-                {
-                    moveInfo->_bCanMove = true;
-                }
-                else
-                {
-                    moveInfo->_bCanMove = false;
-                }
-            }
-            else if (wcsncmp(moveInfo->_ReqInfo.szMainMapName, I18N::Game::Atlans, wcslen(I18N::Game::Atlans)) == 0)
-            {
-                if (pEquipedHelper->Type == ITEM_HORN_OF_UNIRIA || pEquipedHelper->Type == ITEM_HORN_OF_DINORANT)
-                {
-                    moveInfo->_bCanMove = false;
-                }
-                else
-                {
-                    moveInfo->_bCanMove = true;
-                }
-            }
-            else if ((g_ServerListManager->IsNonPvP() == true) && (wcscmp(moveInfo->_ReqInfo.szMainMapName, I18N::Game::Vulcanus) == 0))
-            {
-                moveInfo->_bCanMove = false;
-            }
-            else
-            {
-                moveInfo->_bCanMove = true;
-            }
-        }
-
-        if (moveInfo->_bCanMove && moveInfo->_bStrife && 0 == Hero->m_byGensInfluence)
-            moveInfo->_bCanMove = false;
+        moveInfo->_bCanMove =
+            GameLogic::Warps::IsWarpAllowed(g_WarpDatabase.GetList(), moveInfo->_ReqInfo, character, nonPvP);
     }
 }
 
 void mu::ui::window::CMoveCommandWindow::RmlWheelList(Rml::Event& event)
 {
-    // One row per notch: a row's height in the list's own (text-sized) layout.
+    // One row per notch, from row top to row top: a row with a second line is taller.
     Rml::Element* list = event.GetCurrentElement();
-    Rml::Element* row = list != nullptr && list->GetNumChildren() > 0 ? list->GetChild(0) : nullptr;
-    const float rowStep = row != nullptr ? row->GetBox().GetSize(Rml::BoxArea::Border).y : 0.f;
-    if (rowStep <= 0.f)
+    if (list == nullptr)
+        return;
+    const std::vector<float> rowTops = UI::RmlBridge::RowTops(*list);
+    if (rowTops.empty())
         return;
 
     // Stopping the event keeps RmlUi from scrolling the list itself.
     event.StopPropagation();
-    const float notches = event.GetParameter("wheel_delta_y", 0.f);
-    const float rowIndex = std::round(list->GetScrollTop() / rowStep) + notches;
-    list->SetScrollTop(rowIndex * rowStep);
+    list->SetScrollTop(
+        UI::RmlBridge::RowWheelScrollTop(rowTops, list->GetScrollTop(), event.GetParameter("wheel_delta_y", 0.f)));
 }
 
 void mu::ui::window::CMoveCommandWindow::RmlClickWarp(int row)
 {
-    // The requirements are re-evaluated on the click itself, not trusted from the row model: the
-    // list is rebuilt every frame, but level/zen/equipment can still change between the frame that
-    // built the row and this one.
+    // The requirements are re-evaluated on the click itself, not trusted from the row model:
+    // level/zen/equipment can change between the frame that built the row and this one.
     SettingCanMoveMap();
 
     auto li = m_listMoveInfoData.begin();
@@ -374,10 +198,9 @@ void mu::ui::window::CMoveCommandWindow::RmlClickWarp(int row)
     if (li == m_listMoveInfoData.end() || (*li)->_bCanMove == false)
         return;
 
-    if (IsTheMapInDifferentServer(gMapManager.WorldActive, (*li)->_ReqInfo.index))
-    {
-        SaveOptions();
-    }
+    // A warp can end the session here (a map on another game server): the settings the server keeps go
+    // first, before any warp.
+    SaveOptionsIfInGame();
 
     SocketClient->ToGameServer()->SendWarpCommandRequest(GetMoveCommandKey(), (*li)->_ReqInfo.index);
 
@@ -433,27 +256,7 @@ bool mu::ui::window::CMoveCommandWindow::Render()
 
 void mu::ui::window::CMoveCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, MoveCommandRmlModel& model)
 {
-    c.Bind("text_px", &model.textPx);
-
-    auto row = c.RegisterStruct<MoveCommandRowEntry>();
-    row.RegisterMember("strife_text", &MoveCommandRowEntry::strifeText);
-    row.RegisterMember("map_name", &MoveCommandRowEntry::mapName);
-    row.RegisterMember("req_level", &MoveCommandRowEntry::reqLevel);
-    row.RegisterMember("req_zen", &MoveCommandRowEntry::reqZen);
-    row.RegisterMember("can_move", &MoveCommandRowEntry::canMove);
-    row.RegisterMember("level_unmet", &MoveCommandRowEntry::levelUnmet);
-    row.RegisterMember("zen_unmet", &MoveCommandRowEntry::zenUnmet);
-    row.RegisterMember("index", &MoveCommandRowEntry::index);
-    c.RegisterArray<std::vector<MoveCommandRowEntry>>();
-    c.Bind("rows", &model.rows);
-
-    c.Bind("title_text", &model.titleText);
-    c.Bind("head_strife", &model.headStrife);
-    c.Bind("head_map", &model.headMap);
-    c.Bind("head_level", &model.headLevel);
-    c.Bind("head_zen", &model.headZen);
-    c.Bind("close_text", &model.closeText);
-
+    BindMoveCommandFields(c, model);
     c.BindEventCallback("movecommand_warp",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
@@ -479,6 +282,8 @@ void mu::ui::window::CMoveCommandWindow::BindRmlModel(Rml::DataModelConstructor&
 void mu::ui::window::CMoveCommandWindow::OnRmlBuilt()
 {
     ApplyFillSize();
+    // A new document (a theme change) starts without rows.
+    m_rowInputs.reset();
 }
 
 void mu::ui::window::CMoveCommandWindow::BuildRmlUi()
@@ -499,8 +304,17 @@ void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    SettingCanMoveMap();
-    RebuildRowModel();
+    // The rows follow the lists (the names follow the UI language with the list
+    // version), the hero and the server; built every frame they cost a search of
+    // the rules per warp.
+    RowInputs inputs{m_listVersion, g_WarpDatabase.GetVersion(), GameLogic::Warps::MakeHeroWarpCharacter(),
+                     g_ServerListManager->IsNonPvP()};
+    if (m_rowInputs != inputs)
+    {
+        SettingCanMoveMap();
+        RebuildRowModel();
+        m_rowInputs = std::move(inputs);
+    }
 
     // With every row in view the original drew its thumb disabled.
     if (Rml::Element* list = m_RmlView.Document()->GetElementById("list"))
@@ -523,32 +337,34 @@ void mu::ui::window::CMoveCommandWindow::RebuildRowModel()
 
     const int iLevel = CharacterAttribute->Level;
     const DWORD iZen = CharacterMachine->Gold;
+    const int masterLevel = gCharacterManager.GetHeroMasterLevel();
+    const int resets = static_cast<int>(CharacterAttribute->Resets);
+    const int baseClass = gCharacterManager.GetBaseClass(CharacterAttribute->Class);
     const Rml::String strifeMark = StringUtils::WideToNarrow(I18N::Game::Battle2987);
+    const Data::Maps::WarpList& warpRules = g_WarpDatabase.GetList();
 
     wchar_t szText[24];
     int index = 0;
     for (const auto* moveInfo : m_listMoveInfoData)
     {
-        // The three-quarter requirement for the Dark classes, exactly as Render() computed it --
-        // the displayed number is the adjusted one, not _ReqInfo.iReqLevel.
-        int iReqLevel = moveInfo->_ReqInfo.iReqLevel;
-        if ((gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK
-             || gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK_LORD
-             || gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_RAGEFIGHTER)
-            && (iReqLevel != 400))
-        {
-            iReqLevel = int(float(iReqLevel) * 2.f / 3.f);
-        }
+        // The level the character needs (lower for the classes of the class level discount), with the master
+        // level and resets the warp needs.
+        const Data::Maps::Warp* rules = GameLogic::Warps::FindWarpRules(warpRules, moveInfo->_ReqInfo.index);
+        const int iReqLevel =
+            GameLogic::Warps::GetRequiredLevel(warpRules, rules, moveInfo->_ReqInfo.iReqLevel, baseClass);
 
         MoveCommandRowEntry entry;
         entry.strifeText = moveInfo->_bStrife ? strifeMark : Rml::String();
         entry.mapName = StringUtils::WideToNarrow(moveInfo->_ReqInfo.szMainMapName);
-        _itow(iReqLevel, szText, 10);
-        entry.reqLevel = StringUtils::WideToNarrow(szText);
+        entry.reqLevel = std::to_string(iReqLevel);
+        entry.reqMasterLevelAndResets =
+            StringUtils::WideToNarrow(GameLogic::Warps::GetMasterLevelAndResetsText(moveInfo->_ReqInfo).c_str());
         _itow(moveInfo->_ReqInfo.iReqZen, szText, 10);
         entry.reqZen = StringUtils::WideToNarrow(szText);
         entry.canMove = moveInfo->_bCanMove;
         entry.levelUnmet = iReqLevel > iLevel;
+        entry.masterLevelOrResetsUnmet =
+            moveInfo->_ReqInfo.iReqMasterLevel > masterLevel || moveInfo->_ReqInfo.iReqResets > resets;
         entry.zenUnmet = moveInfo->_ReqInfo.iReqZen > (int)iZen;
         entry.index = index++;
 
@@ -558,15 +374,17 @@ void mu::ui::window::CMoveCommandWindow::RebuildRowModel()
     // Only publish a genuine change. Marking the array dirty re-runs every row's text binding, and
     // this list is static for minutes at a time -- only a level-up, a zen change or an equipment
     // swap moves any of it.
-    const bool changed = rows.size() != model.rows.size()
-        || !std::equal(rows.begin(), rows.end(), model.rows.begin(),
-                       [](const MoveCommandRowEntry& a, const MoveCommandRowEntry& b)
-                       {
-                           return a.canMove == b.canMove && a.levelUnmet == b.levelUnmet
-                               && a.zenUnmet == b.zenUnmet && a.strifeText == b.strifeText
-                               && a.reqLevel == b.reqLevel && a.reqZen == b.reqZen
-                               && a.mapName == b.mapName;
-                       });
+    const bool changed = rows.size() != model.rows.size() ||
+                         !std::equal(rows.begin(), rows.end(), model.rows.begin(),
+                                     [](const MoveCommandRowEntry& a, const MoveCommandRowEntry& b)
+                                     {
+                                         return a.canMove == b.canMove && a.levelUnmet == b.levelUnmet &&
+                                                a.masterLevelOrResetsUnmet == b.masterLevelOrResetsUnmet &&
+                                                a.zenUnmet == b.zenUnmet && a.strifeText == b.strifeText &&
+                                                a.reqLevel == b.reqLevel &&
+                                                a.reqMasterLevelAndResets == b.reqMasterLevelAndResets &&
+                                                a.reqZen == b.reqZen && a.mapName == b.mapName;
+                                     });
     if (!changed)
         return;
 
@@ -593,33 +411,6 @@ void mu::ui::window::CMoveCommandWindow::ClosingProcess()
 float mu::ui::window::CMoveCommandWindow::GetLayerDepth()
 {
     return 8.3f;
-}
-
-BOOL CMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const
-{
-    BOOL bInOtherServer = FALSE;
-
-    switch (iFromMapIndex)
-    {
-    case WD_30BATTLECASTLE:
-    case WD_79UNITEDMARKETPLACE:
-        bInOtherServer = TRUE;
-        break;
-    default:
-        break;
-    }
-
-    switch (iToMapIndex)
-    {
-    case 24:
-    case 44:
-        bInOtherServer = TRUE;
-        break;
-    default:
-        break;
-    }
-
-    return bInOtherServer;
 }
 
 CMoveCommandData::MOVEINFODATA* CMoveCommandWindow::FindMoveInfo(const wchar_t* pszMapName)

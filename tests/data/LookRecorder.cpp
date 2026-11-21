@@ -16,6 +16,7 @@
 #include "Data/GameData/LookData/LookStore.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Items/LookDrawing.h"
@@ -41,6 +42,8 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
+#include <tuple>
 #include <vector>
 
 namespace LookRecorder
@@ -196,12 +199,32 @@ bool Close(const std::string& a, const std::string& b, int steps)
 // a number a float step off near 1 crosses a given grid's edge about once in a thousand.
 constexpr double GridStep = 0.0001;
 constexpr std::array<double, 5> GridOffsets{0.5, 0.7, 0.9, 0.1, 0.3};
+static_assert(GridOffsets.size() == LookRecorder::RelativeFirstEdges.size());
+
+// The size of a number's step on the relative grid `gridIndex`, in steps of GridStep: 1 up to the grid's first edge,
+// then the power of two at most twice the number over that edge, so a step is 0.7 to 1.5 ten-thousandths of the
+// number. Each grid's edges between those sizes sit at its first edge (RelativeFirstEdges) times powers of two: a fifth
+// of a power of two (a factor of 1.15) from the other grids' edges, so a number a float step from one grid's edge
+// (computed, as a bone's height above the item) changes that grid's step only. frexp is exact on every platform.
+double RelativeScale(double value, std::size_t gridIndex)
+{
+    const double size = std::fabs(value) / LookRecorder::RelativeFirstEdges[gridIndex];
+    if (!(size > 1.0) || !std::isfinite(size))
+    {
+        return 1.0;
+    }
+    int exponent = 0;
+    std::frexp(size, &exponent);
+    return std::ldexp(1.0, exponent);
+}
 
 // Every number of the text as a whole number of steps on the grid. Another platform's sine, or a multiply and add the
 // compiler fuses (ARM64), moves a number by a last float step of the sine (about 1e-7 near 1, also for a small number
-// the sine was scaled to), far below a fifth of a step: a number near one grid's edge is far from the others'.
-std::string Rounded(const std::string& text, double offset)
+// the sine was scaled to), far below a fifth of a step: a number near one grid's edge is far from the others'. On the
+// relative grid a large number (a place in the world, near 13000) has a step its own float steps stay far below too.
+std::string Rounded(const std::string& text, std::size_t gridIndex, LookRecorder::Grid grid)
 {
+    const double offset = GridOffsets[gridIndex];
     std::string result;
     size_t i = 0;
     while (i < text.size())
@@ -219,7 +242,9 @@ std::string Rounded(const std::string& text, double offset)
         const double value = std::strtod(text.c_str() + i, &end);
         // Beyond this the steps don't fit a whole number; no look's number comes near it.
         constexpr double MaxSteps = 1.0e15;
-        const double steps = std::floor(value / GridStep + offset);
+        const double step =
+            grid == LookRecorder::Grid::Relative ? GridStep * RelativeScale(value, gridIndex) : GridStep;
+        const double steps = std::floor(value / step + offset);
         result += std::isfinite(steps) && std::fabs(steps) < MaxSteps ? std::to_string(static_cast<long long>(steps))
                                                                       : Number(value, 6);
         i = static_cast<size_t>(end - text.c_str());
@@ -625,6 +650,184 @@ Record RecordItemWithCode(int itemType, const Situation& situation, std::string_
     return record;
 }
 
+namespace
+{
+std::string Numbers(const float* values, int count)
+{
+    std::string text;
+    for (int i = 0; i < count; ++i)
+    {
+        text += (i == 0 ? "" : " ") + Number(values[i]);
+    }
+    return text;
+}
+
+// Every live slot of the lists a look creates things in, one entry each, its fields in a fixed order.
+std::vector<std::vector<Field>> LiveThings(const OBJECT& object)
+{
+    std::vector<std::vector<Field>> things;
+    const auto ownedBy = [&object](const OBJECT* owner)
+    {
+        return owner == &object ? "item" : owner ? "other" : "none";
+    };
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        const OBJECT& o = Sprites[i];
+        if (o.Live)
+        {
+            things.push_back({{"kind", "sprite"},
+                              {"type", std::to_string(o.Type)},
+                              {"subType", std::to_string(o.SubType)},
+                              {"position", Numbers(o.Position, 3)},
+                              {"scale", Number(o.Scale)},
+                              {"light", Numbers(o.Light, 3)},
+                              {"angle", Numbers(o.Angle, 3)},
+                              {"owner", ownedBy(o.Owner)}});
+        }
+    }
+    for (int i = 0; i < MAX_PARTICLES; ++i)
+    {
+        const PARTICLE& o = Particles[i];
+        if (o.Live)
+        {
+            things.push_back({{"kind", "particle"},
+                              {"type", std::to_string(o.Type)},
+                              {"subType", std::to_string(o.SubType)},
+                              {"position", Numbers(o.Position, 3)},
+                              {"scale", Number(o.Scale)},
+                              {"light", Numbers(o.Light, 3)},
+                              {"angle", Numbers(o.Angle, 3)},
+                              {"lifeTime", Number(o.LifeTime)},
+                              {"velocity", Numbers(o.Velocity, 3)},
+                              {"target", ownedBy(o.Target)}});
+        }
+    }
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        const JOINT& o = Joints[i];
+        if (o.Live)
+        {
+            things.push_back({{"kind", "joint"},
+                              {"type", std::to_string(o.Type)},
+                              {"subType", std::to_string(o.SubType)},
+                              {"position", Numbers(o.Position, 3)},
+                              {"targetPosition", Numbers(o.TargetPosition, 3)},
+                              {"scale", Number(o.Scale)},
+                              {"light", Numbers(o.Light, 3)},
+                              {"angle", Numbers(o.Angle, 3)},
+                              {"lifeTime", Number(o.LifeTime)},
+                              {"target", ownedBy(o.Target)}});
+        }
+    }
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+    {
+        const OBJECT& o = Effects[i];
+        if (o.Live)
+        {
+            things.push_back({{"kind", "effect"},
+                              {"type", std::to_string(o.Type)},
+                              {"subType", std::to_string(o.SubType)},
+                              {"position", Numbers(o.Position, 3)},
+                              {"scale", Number(o.Scale)},
+                              {"light", Numbers(o.Light, 3)},
+                              {"angle", Numbers(o.Angle, 3)},
+                              {"lifeTime", Number(o.LifeTime)},
+                              {"owner", ownedBy(o.Owner)}});
+        }
+    }
+    // By kind and type, and things of one kind and type in the order they were created (their slots): the order of
+    // their numbers can swap on another platform when two of them differ by a float step (sparks on a vertical chain of
+    // bones).
+    std::ranges::stable_sort(things, {},
+                             [](const std::vector<Field>& thing)
+                             {
+                                 return std::tuple(std::string_view(thing[0].second), std::stoi(thing[1].second),
+                                                   std::stoi(thing[2].second));
+                             });
+    return things;
+}
+
+void ClearThingLists()
+{
+    // Whole objects, not only Live: a create call leaves fields it doesn't set as the slot's last thing had them, so a
+    // record would depend on what ran before it.
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        Sprites[i] = OBJECT{};
+    }
+    for (int i = 0; i < MAX_PARTICLES; ++i)
+    {
+        Particles[i] = PARTICLE{};
+    }
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        Joints[i] = JOINT{};
+    }
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+    {
+        Effects[i] = OBJECT{};
+    }
+}
+
+// A digest of the engine sequence's state: equal when both drew as many numbers. It is taken from the next numbers a
+// copy of the engine gives, which the standard fixes for std::mt19937, hashed with 64-bit FNV-1a: the same on every
+// platform, unlike the engine's written state and std::hash.
+std::string EngineState()
+{
+    std::mt19937 engine = Random::Snapshot();
+    std::string text;
+    for (int i = 0; i < 8; ++i)
+    {
+        text += std::to_string(engine()) + " ";
+    }
+    std::uint64_t hash = 14695981039346656037ull;
+    for (const char c : text)
+    {
+        hash = (hash ^ static_cast<unsigned char>(c)) * 1099511628211ull;
+    }
+    return "x" + std::to_string(hash);
+}
+} // namespace
+
+Record RecordSpawn(int itemType, double worldTime, std::uint32_t seed)
+{
+    const int slot = Data::Items::ToModelSlot(itemType);
+    BMD& model = Models[slot];
+    OBJECT& object = DrawnObject();
+    const Random::DrawnAs fixedKey(&object, FixedDrawKey());
+    const double previousWorldTime = WorldTime;
+    const float previousFactor = FPS_ANIMATION_FACTOR;
+    WorldTime = worldTime;
+    FPS_ANIMATION_FACTOR = 1.f;
+    object.Initialize();
+    object.Type = slot;
+    object.Live = true;
+    ItemObjectAttribute(&object);
+    Vector(13120.25f, 12480.5f, 140.75f, object.Position);
+    ClearThingLists();
+    Random::Seed(seed);
+    Random::SeedRand(seed);
+
+    // As SpawnGroundItemEffects poses a ground item.
+    model.CurrentAction = object.CurrentAction;
+    model.Animation(BoneTransform, object.AnimationFrame, object.PriorAnimationFrame, object.PriorAction, object.Angle,
+                    object.HeadAngle, false, false);
+    model.BodyScale = object.Scale;
+    VectorCopy(object.Position, model.BodyOrigin);
+    SpawnPartObjectEffect(&model, &object, slot, BoneTransform);
+
+    Record record;
+    record.meshDraws = LiveThings(object);
+    record.modelAfter = {{"objectLight", Numbers(object.Light, 3)},
+                         {"animationFrame", Number(object.AnimationFrame)},
+                         {"randState", "x" + std::to_string(Random::RandState())},
+                         {"engineState", EngineState()}};
+    ClearThingLists();
+    WorldTime = previousWorldTime;
+    FPS_ANIMATION_FACTOR = previousFactor;
+    return record;
+}
+
 std::string FirstDifference(const Record& code, const Record& data)
 {
     std::string gpuDifference;
@@ -678,14 +881,32 @@ std::string FirstDifference(const Record& code, const Record& data)
 
 namespace
 {
-std::string HashOf(const Record& record, double offset)
+// The fields of a mesh draw or thing, their numbers on the grid. On the relative grid a thing's type and subType stay
+// exact: a type is a number near 32000 (BITMAP_SPARK), where a relative step is about 3, and one off is another type.
+std::string RoundedFields(const std::vector<Field>& fields, std::size_t gridIndex, Grid grid)
+{
+    if (grid == Grid::Fixed)
+    {
+        return Rounded(Join(fields), gridIndex, grid);
+    }
+    std::string text;
+    for (const auto& [name, value] : fields)
+    {
+        const std::string_view key = name;
+        text += text.empty() ? "" : " ";
+        text += std::string(key) + "=" + (key == "type" || key == "subType" ? value : Rounded(value, gridIndex, grid));
+    }
+    return text;
+}
+
+std::string HashOf(const Record& record, std::size_t gridIndex, Grid grid)
 {
     std::string text;
     for (const std::vector<Field>& draw : record.meshDraws)
     {
-        text += Rounded(Join(draw), offset) + "\n";
+        text += RoundedFields(draw, gridIndex, grid) + "\n";
     }
-    text += Rounded(Join(record.modelAfter), offset);
+    text += Rounded(Join(record.modelAfter), gridIndex, grid);
     const std::uint64_t hash = Render::Drawing::Hash(text.data(), text.size());
     char digest[24];
     std::snprintf(digest, sizeof(digest), "%016llx", static_cast<unsigned long long>(hash));
@@ -705,14 +926,24 @@ std::vector<std::string> Words(const std::string& text)
 }
 } // namespace
 
-std::string Digest(const Record& record)
+std::string Digest(const Record& record, Grid grid)
 {
     std::string digest = std::to_string(record.meshDraws.size());
-    for (const double offset : GridOffsets)
+    for (std::size_t gridIndex = 0; gridIndex < GridOffsets.size(); ++gridIndex)
     {
-        digest += " " + HashOf(record, offset);
+        digest += " " + HashOf(record, gridIndex, grid);
     }
     return digest;
+}
+
+std::string Describe(const Record& record)
+{
+    std::string text;
+    for (const std::vector<Field>& draw : record.meshDraws)
+    {
+        text += Join(draw) + "\n";
+    }
+    return text + "after " + Join(record.modelAfter);
 }
 
 bool SameDigest(const std::string& digest, const std::string& baseline)

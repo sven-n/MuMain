@@ -132,12 +132,14 @@ bool CInventoryExtension::UpdateMouseEvent()
             {
                 return false;
             }
-
-            if (InventoryProcess())
-            {
-                return false;
-            }
         }
+    }
+
+    // Once per release, after every page: the release goes to the page the held item lands in, and a page after it
+    // must not pick up the item under the pointer once a held item has been placed or put back.
+    if (InventoryProcess())
+    {
+        return false;
     }
 
     if (IsPointerOverPanel())
@@ -174,15 +176,26 @@ bool CInventoryExtension::InventoryProcess()
         return false;
     }
 
-    for (auto* extension : m_extensions)
+    CInventoryCtrl* extension = TargetExtension();
+    return extension != nullptr && g_pMyInventory->HandleInventoryActions(extension);
+}
+
+CInventoryCtrl* CInventoryExtension::TargetExtension() const
+{
+    CPickedItem* pickedItem = CInventoryCtrl::GetPickedItem();
+    for (int i = 0; i < CharacterAttribute->InventoryExtensions; i++)
     {
-        if (extension->ContainsPointer())
-        {
-            return g_pMyInventory->HandleInventoryActions(extension);
-        }
+        CInventoryCtrl* extension = m_extensions[i];
+        if (extension == nullptr)
+            continue;
+
+        const bool isTarget =
+            pickedItem != nullptr ? pickedItem->GetTargetLinealPos(extension) >= 0 : extension->ContainsPointer();
+        if (isTarget)
+            return extension;
     }
 
-    return false;
+    return nullptr;
 }
 
 bool CInventoryExtension::UpdateKeyEvent()

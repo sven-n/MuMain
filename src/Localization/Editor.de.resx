@@ -673,6 +673,12 @@
   <data name="Blend glow tooltip" xml:space="preserve">
     <value>Addiert ihr Licht zu dem, was vor ihr gezeichnet wurde: Helles leuchtet, Dunkles bleibt durchsichtig.</value>
   </data>
+  <data name="Darken" xml:space="preserve">
+    <value>Abdunkeln</value>
+  </data>
+  <data name="Blend darken tooltip" xml:space="preserve">
+    <value>Dunkelt ab, was vor ihr gezeichnet wurde, nach ihrem Licht: eine dunkle Ebene wirft einen Schatten.</value>
+  </data>
   <data name="Blend as the drawing asks tooltip" xml:space="preserve">
     <value>Überblendet, wie die Zeichnung des Gegenstands es wählt, wie seine eigene Textur.</value>
   </data>
@@ -5589,5 +5595,281 @@
   </data>
   <data name="Wing option bit {0}" xml:space="preserve">
     <value>Flügeloptions-Bit {0}</value>
+  </data>
+  <data name="On bones" xml:space="preserve">
+    <value>Auf Knochen</value>
+  </data>
+  <data name="On bones note" xml:space="preserve">
+    <value>Jeder Eintrag erzeugt seine Dinge in jedem Update auf den Knochen des Items: an jedem Knochen, zwischen jedem Knochenpaar (Blitze, vom ersten zum zweiten) oder am Ort des Items selbst. Die Ansichten der Vorschau zeigen sie live, jede aus ihrem eigenen Look.</value>
+  </data>
+  <data name="Animation speed" xml:space="preserve">
+    <value>Animationsgeschwindigkeit</value>
+  </data>
+  <data name="Animation speed tooltip" xml:space="preserve">
+    <value>Wie schnell das Update die Animation des Items abspielt, wie sich das Bodenitem Cursed Castle Water bewegt; ohne spielt es keine.</value>
+  </data>
+  <data name="Bone thing sprite" xml:space="preserve">
+    <value>Sprite</value>
+  </data>
+  <data name="Bone thing particle" xml:space="preserve">
+    <value>Partikel</value>
+  </data>
+  <data name="Bone thing lightning" xml:space="preserve">
+    <value>Blitz</value>
+  </data>
+  <data name="Bone thing effect" xml:space="preserve">
+    <value>Effekt</value>
+  </data>
+  <data name="Bone thing kind tooltip" xml:space="preserve">
+    <value>Was erzeugt wird: ein Sprite (lebt ein Bild lang), ein Partikel, ein Blitz zwischen zwei Knochen oder ein Effekt.</value>
+  </data>
+  <data name="Bone thing type" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="Bone thing type tooltip" xml:space="preserve">
+    <value>Der Typ mit seinem Namen im Effektkatalog (der Effekt-Browser listet sie).</value>
+  </data>
+  <data name="Bone thing type missing" xml:space="preserve">
+    <value>Typ wählen</value>
+  </data>
+  <data name="Bone thing filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Bone thing subtype tooltip" xml:space="preserve">
+    <value>Der SubType, mit dem der Typ erzeugt wird; der Code des Typs liest ihn.</value>
+  </data>
+  <data name="Bone thing scale tooltip" xml:space="preserve">
+    <value>Die Größe des Dings, eine Zahl oder eine Form.</value>
+  </data>
+  <data name="Bone thing rotation tooltip" xml:space="preserve">
+    <value>Die Drehung des Sprites in Grad, eine Zahl oder eine Form.</value>
+  </data>
+  <data name="Reversed lightning" xml:space="preserve">
+    <value>Vom zweiten Knochen zum ersten</value>
+  </data>
+  <data name="Reversed lightning tooltip" xml:space="preserve">
+    <value>Der Blitz läuft vom zweiten Knochen jedes Paars zum ersten.</value>
+  </data>
+  <data name="At bones" xml:space="preserve">
+    <value>An Knochen</value>
+  </data>
+  <data name="Between bones" xml:space="preserve">
+    <value>Zwischen Knochen</value>
+  </data>
+  <data name="At the item's place" xml:space="preserve">
+    <value>Am Ort des Items</value>
+  </data>
+  <data name="Bone places tooltip" xml:space="preserve">
+    <value>Wo die Dinge des Eintrags erzeugt werden: an jedem seiner Knochen, zwischen jedem seiner Knochenpaare oder einmal am Ort des Item-Objekts.</value>
+  </data>
+  <data name="Bone number tooltip" xml:space="preserve">
+    <value>Ein Knochen des Item-Modells mit seiner Nummer; die Vorschau umkreist ihn, solange die Maus hier ist.</value>
+  </data>
+  <data name="Add bone" xml:space="preserve">
+    <value>+ Knochen</value>
+  </data>
+  <data name="Add bone pair" xml:space="preserve">
+    <value>+ Paar</value>
+  </data>
+  <data name="Take out" xml:space="preserve">
+    <value>x</value>
+  </data>
+  <data name="Pick in the preview" xml:space="preserve">
+    <value>In der Vorschau wählen</value>
+  </data>
+  <data name="Pick in the preview tooltip" xml:space="preserve">
+    <value>Ein Klick auf den Punkt eines Knochens in einer Ansicht fügt den Knochen hinzu oder nimmt ihn heraus; zwischen Knochen erst den Anfang des Blitzes klicken, dann sein Ende.</value>
+  </data>
+  <data name="Pick the end from 0" xml:space="preserve">
+    <value>Jetzt das Ende des Blitzes ab Knochen {0} klicken.</value>
+  </data>
+  <data name="Show bones" xml:space="preserve">
+    <value>Knochen zeigen</value>
+  </data>
+  <data name="Show bones tooltip" xml:space="preserve">
+    <value>Zeichnet jeden Knochen des gezeigten Items als Punkt, mit einer Linie zu dem Knochen, an dem er hängt; zeigt man auf einen, erscheinen seine Nummer und sein Name.</value>
+  </data>
+  <data name="No bones for this item" xml:space="preserve">
+    <value>Dieses Item wird auf dem Skelett des Charakters gezeichnet: das Spiel erzeugt keine Dinge auf Knochen dafür.</value>
+  </data>
+  <data name="Chance" xml:space="preserve">
+    <value>Chance</value>
+  </data>
+  <data name="Chance tooltip" xml:space="preserve">
+    <value>Ohne Chance kommt das Ding in jedem Update.</value>
+  </data>
+  <data name="Once in" xml:space="preserve">
+    <value>Einmal in</value>
+  </data>
+  <data name="Once in tooltip" xml:space="preserve">
+    <value>Einmal in so vielen Bildern.</value>
+  </data>
+  <data name="Chance draw" xml:space="preserve">
+    <value>Ziehung</value>
+  </data>
+  <data name="Chance at the frame rate" xml:space="preserve">
+    <value>Bei der Bildrate des Spiels</value>
+  </data>
+  <data name="Chance at the frame rate tooltip" xml:space="preserve">
+    <value>Einmal in N Bildern bei der Referenz-Bildrate des Spiels, gleich bei jeder Bildrate.</value>
+  </data>
+  <data name="Chance plain" xml:space="preserve">
+    <value>Einfach</value>
+  </data>
+  <data name="Chance plain tooltip" xml:space="preserve">
+    <value>Eine einfache Zufallsziehung in jedem Update, wie die Monstergeräusche ziehen: bei höherer Bildrate öfter.</value>
+  </data>
+  <data name="Once for all" xml:space="preserve">
+    <value>Einmal für alle</value>
+  </data>
+  <data name="Once for all tooltip" xml:space="preserve">
+    <value>Würfelt einmal für den Eintrag, nicht für jeden Knochen oder jedes Paar.</value>
+  </data>
+  <data name="Together" xml:space="preserve">
+    <value>Zusammen</value>
+  </data>
+  <data name="Together tooltip" xml:space="preserve">
+    <value>Die Dinge des Eintrags teilen seine Orte und seine Chance, sodass sie zusammen kommen (die zwei Blitze der Wings of Darkness); ein Ding darin kann danach eine eigene Chance würfeln.</value>
+  </data>
+  <data name="Add thing" xml:space="preserve">
+    <value>+ Ding</value>
+  </data>
+  <data name="Thing chance" xml:space="preserve">
+    <value>Eigene Chance</value>
+  </data>
+  <data name="Warp List" xml:space="preserve">
+    <value>Warp-Liste</value>
+  </data>
+  <data name="Warp list note" xml:space="preserve">
+    <value>Die Liste, wie das M-Fenster sie zeigt, in dieser Reihenfolge. Ein Server, der eine eigene Liste sendet (OpenMU), ersetzt Level und Zen. Das Spiel übernimmt jede Änderung sofort; Speichern schreibt {0}.</value>
+  </data>
+  <data name="Add warp" xml:space="preserve">
+    <value>Warp hinzufügen</value>
+  </data>
+  <data name="Pick a warp in the list." xml:space="preserve">
+    <value>Wählen Sie einen Warp in der Liste.</value>
+  </data>
+  <data name="Search warps" xml:space="preserve">
+    <value>Suchen</value>
+  </data>
+  <data name="Move command name" xml:space="preserve">
+    <value>/move-Name</value>
+  </data>
+  <data name="Zen" xml:space="preserve">
+    <value>Zen</value>
+  </data>
+  <data name="Gate" xml:space="preserve">
+    <value>Gate</value>
+  </data>
+  <data name="Gate note" xml:space="preserve">
+    <value>Der Landepunkt des Servers; der Client verwendet ihn nicht.</value>
+  </data>
+  <data name="No class discount" xml:space="preserve">
+    <value>Kein Klassennachlass</value>
+  </data>
+  <data name="Master level" xml:space="preserve">
+    <value>Master-Level</value>
+  </data>
+  <data name="Resets" xml:space="preserve">
+    <value>Resets</value>
+  </data>
+  <data name="Zero is none" xml:space="preserve">
+    <value>0 = keine</value>
+  </data>
+  <data name="Warp rules" xml:space="preserve">
+    <value>Regeln</value>
+  </data>
+  <data name="Needs one of" xml:space="preserve">
+    <value>Braucht eines von</value>
+  </data>
+  <data name="Needs one of note" xml:space="preserve">
+    <value>Mindestens eines davon muss angelegt und nicht kaputt sein. Leer: keine Regel.</value>
+  </data>
+  <data name="Not with" xml:space="preserve">
+    <value>Nicht mit</value>
+  </data>
+  <data name="Not with note" xml:space="preserve">
+    <value>Keines davon darf angelegt sein.</value>
+  </data>
+  <data name="Item tag" xml:space="preserve">
+    <value>Item-Tag</value>
+  </data>
+  <data name="Any wings" xml:space="preserve">
+    <value>Beliebige Flügel</value>
+  </data>
+  <data name="Except" xml:space="preserve">
+    <value>außer</value>
+  </data>
+  <data name="Unknown item" xml:space="preserve">
+    <value>Die Itemliste hat dieses Item nicht.</value>
+  </data>
+  <data name="Tag items {0}" xml:space="preserve">
+    <value>({0} Items)</value>
+  </data>
+  <data name="PvP servers only" xml:space="preserve">
+    <value>Nur PvP-Server</value>
+  </data>
+  <data name="Gens members only" xml:space="preserve">
+    <value>Nur Gens-Mitglieder</value>
+  </data>
+  <data name="Blocked message" xml:space="preserve">
+    <value>Meldung bei Sperre</value>
+  </data>
+  <data name="General warp message" xml:space="preserve">
+    <value>Allgemein</value>
+  </data>
+  <data name="Blocked message note" xml:space="preserve">
+    <value>Was der Chat zeigt, wenn die Ausrüstungsregeln /move sperren.</value>
+  </data>
+  <data name="Class level discount" xml:space="preserve">
+    <value>Klassennachlass beim Level</value>
+  </data>
+  <data name="Class level discount note" xml:space="preserve">
+    <value>Diese Klassen brauchen das Level des Warps mal Zähler / Nenner, für jeden Warp ohne Kein Klassennachlass.</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>Klasse</value>
+  </data>
+  <data name="Numerator" xml:space="preserve">
+    <value>Zähler</value>
+  </data>
+  <data name="Denominator" xml:space="preserve">
+    <value>Nenner</value>
+  </data>
+  <data name="Add class" xml:space="preserve">
+    <value>Klasse hinzufügen</value>
+  </data>
+  <data name="Another warp has the index {0}" xml:space="preserve">
+    <value>Ein anderer Warp hat den Index {0}.</value>
+  </data>
+  <data name="A warp needs an English name" xml:space="preserve">
+    <value>Ein Warp braucht einen englischen Namen.</value>
+  </data>
+  <data name="A warp needs a move name" xml:space="preserve">
+    <value>Ein Warp braucht einen /move-Namen.</value>
+  </data>
+  <data name="Has a space note" xml:space="preserve">
+    <value>Enthält ein Leerzeichen: /move nimmt ein Wort.</value>
+  </data>
+  <data name="Step copy" xml:space="preserve">
+    <value>{0} kopieren</value>
+  </data>
+  <data name="Step warp field" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Warps" xml:space="preserve">
+    <value>Warps</value>
+  </data>
+  <data name="Translations" xml:space="preserve">
+    <value>Übersetzungen</value>
+  </data>
+  <data name="All warps" xml:space="preserve">
+    <value>Alle Warps</value>
+  </data>
+  <data name="Select the warp and show it in the Warps tab" xml:space="preserve">
+    <value>Den Warp auswählen und im Tab Warps zeigen</value>
+  </data>
+  <data name="Other languages in the Translations tab" xml:space="preserve">
+    <value>Die Namen der anderen Sprachen stehen im Tab Übersetzungen.</value>
   </data>
 </root>

@@ -5,8 +5,10 @@
 #include "LookRecorder.h"
 #include "ItemModelDatabaseScope.h"
 
+#include "Data/DataHandler/EffectData/EffectTypeStorage.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/LookData/LookDataHandler.h"
+#include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
@@ -219,6 +221,128 @@ std::map<std::string, std::string> RecordLook(const ShippedLook& look)
     return lines;
 }
 
+// The baseline of the things on bones (tests/data/baseline/ItemEffectSpawns.txt, section 7b): one line per item and
+// moment of each look whose things on bones moved into data, recorded from its old code before it moved
+// (MU_SPAWN_RECORDER_WRITE=<names, comma-separated> records those looks as they create their things now), so a moved
+// look still creates what its code created. A change of the digest writes the lines again from the data, which is
+// sound only right after the data matched the old code's lines on the digest before; the header says when.
+const std::filesystem::path SpawnBaseline = MU_SPAWN_BASELINE;
+
+constexpr const char* SpawnBaselineHeader =
+    "# What the looks whose things on bones moved from code into Data/Effects/ItemEffects.json create in the update:\n"
+    "# one line per item, clock time and random seed, the look, the item and the moment, then the number of things\n"
+    "# and five digests of them and of what the look left on the object, rounded on five grids\n"
+    "# (tests/data/LookRecorder.h). First recorded from the old code before each look moved\n"
+    "# (MU_SPAWN_RECORDER_WRITE=<names>), so a moved look still creates what its code did. The Devil's Key's and\n"
+    "# Invitation's lines were written again when their sparks moved onto the scaled bones (design L57). All lines\n"
+    "# were written again from the data when the digest changed (the relative grid, exact types, the things' order),\n"
+    "# each time right after the data matched the old code's lines on the digest before, in the Windows x64 Release\n"
+    "# build, last against the old code's lines as first recorded in the pull request that moved these looks into\n"
+    "# data.\n";
+
+// The looks whose things on bones move into data in step 3 (section 7b): the item effects, and the two render styles
+// whose things became item effects of the same name (design L29).
+constexpr std::array<std::string_view, 11> SpawnLooks{
+    "devilsKey",      "devilsInvitation", "rena",       "wingsOfDarkness", "wingOfStorm",       "wingOfEternal",
+    "wingOfIllusion", "wingOfRuin",       "wingOfDimension", "pumpkinOfLuck", "cursedCastleWater",
+};
+
+// The clock times and random seeds the looks create their things at: a seed of its own for each, so the chances of
+// the looks pass at some and fail at others.
+struct SpawnMoment
+{
+    double time = 0.0;
+    std::uint32_t seed = 0;
+};
+constexpr std::array<SpawnMoment, 8> SpawnMoments{{
+    {0.0, 1},
+    {1000.25, 2},
+    {2718.5, 3},
+    {65536.75, 4},
+    {0.0, 5},
+    {1000.25, 6},
+    {2718.5, 7},
+    {65536.75, 8},
+}};
+
+std::string SpawnKey(std::string_view look, int item, double time, std::uint32_t seed)
+{
+    char moment[64];
+    std::snprintf(moment, sizeof(moment), " t=%.2f seed=%u", time, seed);
+    return "spawn " + std::string(look) + " " + LookRecorder::DescribeItem(item) + moment;
+}
+
+// The effect catalogue of the test data while it lives, which things on bones name their types in; none afterwards.
+struct ShippedEffectTypes
+{
+    ShippedEffectTypes()
+    {
+        if (!built)
+        {
+            return;
+        }
+        const Data::Effects::EffectTypesLoadResult types =
+            Data::Effects::LoadEffectTypeFiles(DataDirectory / "Effects");
+        REQUIRE_FALSE(Data::Items::HasFatal(types.issues));
+        for (const Data::Effects::EffectKind kind : Data::Effects::EffectKinds)
+        {
+            g_EffectTypeCatalogue.Build(kind, types.types[Data::Effects::ToIndex(kind)]);
+        }
+    }
+    ~ShippedEffectTypes()
+    {
+        if (!built)
+        {
+            return;
+        }
+        for (const Data::Effects::EffectKind kind : Data::Effects::EffectKinds)
+        {
+            g_EffectTypeCatalogue.Build(kind, {});
+        }
+    }
+    ShippedEffectTypes(const ShippedEffectTypes&) = delete;
+    ShippedEffectTypes& operator=(const ShippedEffectTypes&) = delete;
+
+    // Whether it loads the catalogue (none was loaded), which it then empties again.
+    bool built = g_EffectTypeCatalogue.GetTypeCount(Data::Effects::EffectKind::Sprite) == 0;
+};
+
+std::map<std::string, std::string> ReadSpawnBaseline()
+{
+    std::map<std::string, std::string> lines;
+    std::ifstream in(SpawnBaseline);
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (!line.empty() && line.back() == '\r')
+        {
+            line.pop_back();
+        }
+        const size_t tab = line.rfind('\t');
+        if (line.empty() || line[0] == '#' || tab == std::string::npos)
+        {
+            continue;
+        }
+        lines[line.substr(0, tab)] = line.substr(tab + 1);
+    }
+    return lines;
+}
+
+// The items that create the look's things: those whose item effect, or (a look moved from a render style's things)
+// whose render style, it is.
+std::vector<int> SpawningItems(std::string_view look)
+{
+    std::vector<int> items = LookRecorder::ItemsUsing(look, LookKind::ItemEffect);
+    for (const int item : LookRecorder::ItemsUsing(look, LookKind::RenderStyle))
+    {
+        if (item >= 0 && std::ranges::find(items, item) == items.end())
+        {
+            items.push_back(item);
+        }
+    }
+    return items;
+}
+
 // "effect:potion" names the item effect, any other name the render style.
 ShippedLook LookNamed(const std::string& name)
 {
@@ -341,6 +465,62 @@ TEST_CASE("Numbers a float step moves across the edges of several grids keep the
     CHECK(LookRecorder::SameDigest(LookRecorder::Digest(below), LookRecorder::Digest(above)));
 }
 
+TEST_CASE("On the relative grid a place in the world a float step away keeps one of the digests, and a place "
+          "moved by a few units keeps none [looks][recorder]")
+{
+    // Near 13120 a float step is about 0.001, ten steps of the fixed grid.
+    const float place = 13120.25f;
+    const float next = std::nextafter(place, 20000.0f);
+    char text[32];
+    Record here;
+    Record there;
+    std::snprintf(text, sizeof(text), "%.9g", static_cast<double>(place));
+    here.modelAfter = {{"position", text}};
+    std::snprintf(text, sizeof(text), "%.9g", static_cast<double>(next));
+    there.modelAfter = {{"position", text}};
+    CHECK_FALSE(LookRecorder::SameDigest(LookRecorder::Digest(here), LookRecorder::Digest(there)));
+    CHECK(LookRecorder::SameDigest(LookRecorder::Digest(here, LookRecorder::Grid::Relative),
+                                   LookRecorder::Digest(there, LookRecorder::Grid::Relative)));
+    Record moved;
+    moved.modelAfter = {{"position", "13125.25"}};
+    CHECK_FALSE(LookRecorder::SameDigest(LookRecorder::Digest(here, LookRecorder::Grid::Relative),
+                                         LookRecorder::Digest(moved, LookRecorder::Grid::Relative)));
+    // A number a float step from the edge between two step sizes of one grid keeps the others' hashes; at 1.37 times a
+    // power of two, where all five grids once changed size together, it keeps one too.
+    std::vector<double> firstEdges(LookRecorder::RelativeFirstEdges.begin(), LookRecorder::RelativeFirstEdges.end());
+    firstEdges.push_back(1.37);
+    for (const double firstEdge : firstEdges)
+    {
+        const float edge = static_cast<float>(firstEdge * 128.0);
+        Record below;
+        Record above;
+        std::snprintf(text, sizeof(text), "%.9g", static_cast<double>(std::nextafter(edge, 0.0f)));
+        below.modelAfter = {{"z", text}};
+        std::snprintf(text, sizeof(text), "%.9g", static_cast<double>(std::nextafter(edge, 1000.0f)));
+        above.modelAfter = {{"z", text}};
+        CHECK(LookRecorder::SameDigest(LookRecorder::Digest(below, LookRecorder::Grid::Relative),
+                                       LookRecorder::Digest(above, LookRecorder::Grid::Relative)));
+    }
+    // A thing's type is exact: one off is another sprite.
+    Record spark;
+    Record nextSpark;
+    spark.meshDraws = {{{"kind", "sprite"}, {"type", "32004"}, {"subType", "0"}}};
+    nextSpark.meshDraws = {{{"kind", "sprite"}, {"type", "32005"}, {"subType", "0"}}};
+    CHECK_FALSE(LookRecorder::SameDigest(LookRecorder::Digest(spark, LookRecorder::Grid::Relative),
+                                         LookRecorder::Digest(nextSpark, LookRecorder::Grid::Relative)));
+    nextSpark.meshDraws = {{{"kind", "sprite"}, {"type", "32004"}, {"subType", "1"}}};
+    CHECK_FALSE(LookRecorder::SameDigest(LookRecorder::Digest(spark, LookRecorder::Grid::Relative),
+                                         LookRecorder::Digest(nextSpark, LookRecorder::Grid::Relative)));
+    // Numbers near 1 keep the fixed grid's steps.
+    Record small;
+    Record smallNext;
+    small.modelAfter = {{"x", "0.12344999999"}};
+    smallNext.modelAfter = {{"x", "0.12345000001"}};
+    CHECK(LookRecorder::Digest(small, LookRecorder::Grid::Relative) == LookRecorder::Digest(small));
+    CHECK(LookRecorder::SameDigest(LookRecorder::Digest(small, LookRecorder::Grid::Relative),
+                                   LookRecorder::Digest(smallNext, LookRecorder::Grid::Relative)));
+}
+
 TEST_CASE("The draw recorder names the first difference between two drawings [looks][recorder]")
 {
     const std::vector<int> items = LookRecorder::ItemsUsing("chromeMesh0");
@@ -448,9 +628,7 @@ TEST_CASE("Each render style in the data draws as its code while the code still 
     const ShippedLooksScope looks;
     for (const ShippedLook& look : looks.looks)
     {
-        const bool inCode = look.kind == LookKind::ItemEffect ? Render::Items::ItemEffects::ExistsInCode(look.name)
-                                                              : Render::Items::Styles::ExistsInCode(look.name);
-        if (!inCode)
+        if (look.kind != LookKind::RenderStyle || !Render::Items::Styles::ExistsInCode(look.name))
         {
             continue;
         }
@@ -470,20 +648,14 @@ TEST_CASE("Each render style in the data draws as its code while the code still 
     }
 }
 
-TEST_CASE("No render style or item effect is both in the data and in the code (design L14) [looks]")
+TEST_CASE("No render style is both in the data and in the code (design L14) [looks]")
 {
+    // Every item effect is data.
     const RenderStylesLoadResult styles = LoadRenderStyleFile(DataDirectory / "Effects");
     for (const LookDefinition& look : styles.looks)
     {
         CAPTURE(look.name);
         CHECK_FALSE(Render::Items::Styles::ExistsInCode(look.name));
-    }
-    const RenderStylesLoadResult effects = LoadLookFile(DataDirectory / "Effects", LookKind::ItemEffect);
-    REQUIRE_FALSE(Data::Items::HasFatal(effects.issues));
-    for (const LookDefinition& look : effects.looks)
-    {
-        CAPTURE(look.name);
-        CHECK_FALSE(Render::Items::ItemEffects::ExistsInCode(look.name));
     }
 }
 
@@ -519,4 +691,64 @@ TEST_CASE("The Devil's Eye puts the pulse of its code on its object in the updat
         }
     }
     WorldTime = previousWorldTime;
+}
+
+TEST_CASE("Item effects whose things on bones moved into data create what their old code created (the baseline) "
+          "[looks][recorder]")
+{
+    std::map<std::string, std::string> baseline = ReadSpawnBaseline();
+    const ShippedLooksScope looks;
+    const ShippedEffectTypes types;
+    if (const char* write = std::getenv("MU_SPAWN_RECORDER_WRITE"))
+    {
+        for (const std::string& name : SplitNames(write))
+        {
+            std::erase_if(baseline, [&](const auto& line) { return line.first.rfind("spawn " + name + " (", 0) == 0; });
+            const std::vector<int> items = SpawningItems(name);
+            LookRecorder::ShippedItems shipped;
+            shipped.Open(items);
+            for (const int item : items)
+            {
+                for (const auto& [time, seed] : SpawnMoments)
+                {
+                    baseline[SpawnKey(name, item, time, seed)] =
+                        LookRecorder::Digest(LookRecorder::RecordSpawn(item, time, seed), LookRecorder::Grid::Relative);
+                }
+            }
+        }
+        std::filesystem::create_directories(SpawnBaseline.parent_path());
+        std::ofstream out(SpawnBaseline, std::ios::binary | std::ios::trunc);
+        out << SpawnBaselineHeader;
+        for (const auto& [key, digest] : baseline)
+        {
+            out << key << '\t' << digest << '\n';
+        }
+        MESSAGE("Wrote " << SpawnBaseline.string());
+        return;
+    }
+
+    REQUIRE_FALSE(baseline.empty());
+    for (const std::string_view name : SpawnLooks)
+    {
+        const std::vector<int> items = SpawningItems(name);
+        REQUIRE_FALSE(items.empty());
+        LookRecorder::ShippedItems shipped;
+        shipped.Open(items);
+        for (const int item : items)
+        {
+            for (const auto& [time, seed] : SpawnMoments)
+            {
+                const std::string key = SpawnKey(name, item, time, seed);
+                CAPTURE(key);
+                const auto line = baseline.find(key);
+                REQUIRE(line != baseline.end());
+                const Record record = LookRecorder::RecordSpawn(item, time, seed);
+                const std::string digest = LookRecorder::Digest(record, LookRecorder::Grid::Relative);
+                // On another platform the record shows which number moved.
+                CHECK_MESSAGE(LookRecorder::SameDigest(digest, line->second),
+                              "digest " << digest << "\nbaseline " << line->second << "\n"
+                                        << LookRecorder::Describe(record));
+            }
+        }
+    }
 }

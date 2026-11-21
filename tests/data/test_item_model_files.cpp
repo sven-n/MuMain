@@ -1829,7 +1829,9 @@ TEST_CASE("Shipped item models keep the item effects of the old drawing code [da
     CHECK(effectOf(13, 43).empty());
     CHECK(effectOf(13, 17).empty());
     CHECK(effectOf(13, 18).empty());
-    CHECK(effectOf(14, 64).empty());
+    // The things on the bones of two render styles became item effects of their names (design L29).
+    CHECK(effectOf(14, 64) == "cursedCastleWater");
+    CHECK(effectOf(14, 45) == "pumpkinOfLuck");
 
     // The socket seeds and spheres and zen glow like level 0, whatever their
     // level (the old code set their level to 0, or drew zen plainly).
