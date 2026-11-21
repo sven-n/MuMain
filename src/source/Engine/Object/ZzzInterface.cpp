@@ -2029,6 +2029,21 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         return true;
     }
 
+    if (wcsicmp(Text, L"/dance") == 0)
+    {
+        if (Hero != nullptr)
+        {
+            const bool riding =
+                GameLogic::Items::IsRideableMountModel(Hero->Helper.Type) &&
+                Hero->Helper.Type != MODEL_HORN_OF_FENRIR;
+            if (Hero->SafeZone || !riding)
+            {
+                SetActionClass(Hero, &Hero->Object, PLAYER_POINT_DANCE, AT_POINT_DANCE);
+            }
+        }
+        return true;
+    }
+
     if (bMacroText == false && LogOut == false)
     {
         wchar_t Name[256];

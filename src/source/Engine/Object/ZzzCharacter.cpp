@@ -14009,7 +14009,8 @@ bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o)
     {
         bBindBack = true;
     }
-    if (o->CurrentAction >= PLAYER_GREETING1 && o->CurrentAction <= PLAYER_SALUTE1)
+    if ((o->CurrentAction >= PLAYER_GREETING1 && o->CurrentAction <= PLAYER_SALUTE1) ||
+        o->CurrentAction == PLAYER_POINT_DANCE)
     {
         bBindBack = true;
     }
