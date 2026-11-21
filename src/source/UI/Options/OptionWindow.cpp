@@ -15,6 +15,7 @@
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/EnhancedLightingSetting.h"
 #include "Engine/Object/EnhancedMovement.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Render/Lighting/LightMoodScales.h"
 #include "Render/PostProcessing/PostProcessingSetting.h"
 #include "UI/Options/TuningRows.h"
@@ -981,16 +982,25 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
 void mu::ui::window::COptionWindow::RmlToggleAutoAttack()
 {
     m_bAutoAttack = !m_bAutoAttack;
+    // The server keeps it with the key configuration: saved as it changes, so a crash or a disconnect
+    // doesn't lose it.
+    SaveOptionsIfInGame();
 }
 
 void mu::ui::window::COptionWindow::RmlToggleWhisperSound()
 {
     m_bWhisperSound = !m_bWhisperSound;
+    // The server keeps it with the key configuration: saved as it changes, so a crash or a disconnect
+    // doesn't lose it.
+    SaveOptionsIfInGame();
 }
 
 void mu::ui::window::COptionWindow::RmlToggleSlideHelp()
 {
     m_bSlideHelp = !m_bSlideHelp;
+    // The server keeps it with the key configuration: saved as it changes, so a crash or a disconnect
+    // doesn't lose it.
+    SaveOptionsIfInGame();
 }
 
 void mu::ui::window::COptionWindow::RmlToggleRenderAllEffects()

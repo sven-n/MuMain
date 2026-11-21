@@ -38,11 +38,14 @@
 
 #include "GameLogic/Events/MatchEvent.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
+#include "Data/GameData/MapData/WarpDatabase.h"
+#include "Data/GameData/MapData/WarpMessages.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSetup.h"
 #include "GameLogic/Monsters/MonsterSetupApply.h"
 #include "World/GameMaps/MonsterSpawnWorld.h"
 #include "GameLogic/NPCs/NpcTalk.h"
+#include "GameLogic/Warps/WarpRules.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/NPCs/npcBreeder.h"
@@ -64,7 +67,6 @@
 #include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
-#include "GameLogic/Items/ChangeRingManager.h"
 #include "UI/HUD/GensRanking.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Social/MonkSystem.h"
@@ -86,7 +88,6 @@
 #include <iterator>
 
 extern int g_iChatInputType;
-extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;
 extern CUIMapName* g_pUIMapName;	// rozy
 extern std::vector<int> g_noQuestTitleClasses;
@@ -2839,7 +2840,7 @@ void CheckGate()
 
                                 if (gt->Map == WD_30BATTLECASTLE || gt->Map == WD_31HUNTING_GROUND)
                                 {
-                                    SaveOptions();
+                                    SaveOptionsBeforeLeaving();
                                     SaveMacro();
                                 }
 
@@ -4180,81 +4181,17 @@ bool IsNonAttackGM()
 
 bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
 {
-    bool bCantFly = false;
-    bool bCantSwim = false;
-    bool bEquipChangeRing = false;
-
-    bool bMoveAtlans = false;
-    bool bMoveIcarus = false;
-
-    wchar_t szChatTextUpperChars[256];
-    wcscpy(szChatTextUpperChars, szChatText);
-    _wcsupr(szChatTextUpperChars);
-
-    short pEquipedRightRingType = (&CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT])->Type;
-    short pEquipedLeftRingType = (&CharacterMachine->Equipment[EQUIPMENT_RING_LEFT])->Type;
-    short pEquipedHelperType = (&CharacterMachine->Equipment[EQUIPMENT_HELPER])->Type;
-
-    if (!GameLogic::Items::HasFlightEquipment(&CharacterMachine->Equipment[EQUIPMENT_HELPER],
-                                              &CharacterMachine->Equipment[EQUIPMENT_WING]) ||
-        pEquipedHelperType == ITEM_HORN_OF_UNIRIA)
+    // /move and the warp word: the equipment rules of the warp the text names (Data/Maps/Warps.json), with the
+    // warp's message. Level, zen and the other rules are the server's to check.
+    const GameLogic::Warps::Equipment equipment =
+        GameLogic::Warps::MakeEquipment(CharacterMachine->Equipment, MAX_EQUIPMENT);
+    const std::optional<std::string> blocked =
+        GameLogic::Warps::CheckChatWarp(szChatText, SEASON3B::CMoveCommandData::GetInstance()->GetMoveCommandDatalist(),
+                                        I18N::Game::Warp, g_WarpDatabase.GetList(), equipment);
+    if (!blocked)
     {
-        bCantFly = true;
+        return false;
     }
-    if (pEquipedHelperType == ITEM_HORN_OF_UNIRIA || pEquipedHelperType == ITEM_HORN_OF_DINORANT)
-    {
-        bCantSwim = true;
-    }
-    if (g_ChangeRingMgr->CheckMoveMap(pEquipedLeftRingType, pEquipedRightRingType))
-    {
-        bEquipChangeRing = true;
-    }
-
-    if ((wcsstr(szChatTextUpperChars, L"/MOVE") != NULL) ||
-        (wcslen(I18N::Game::Warp) > 0 && wcsstr(szChatTextUpperChars, I18N::Game::Warp) != NULL))
-    {
-        std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*> m_listMoveInfoData;
-        m_listMoveInfoData = SEASON3B::CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
-
-        auto li = m_listMoveInfoData.begin();
-
-        while (li != m_listMoveInfoData.end())
-        {
-            wchar_t cMapNameUpperChars[256];
-            wcscpy(cMapNameUpperChars, (*li)->_ReqInfo.szSubMapName);
-            _wcsupr(cMapNameUpperChars);
-
-            if (wcsstr(szChatText, ((*li)->_ReqInfo.szMainMapName)) != NULL ||
-                wcsstr(szChatTextUpperChars, cMapNameUpperChars) != NULL)
-                break;
-
-            li++;
-        }
-
-        if (li != m_listMoveInfoData.end())
-        {
-            if (wcsicmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Atlans) == 0)
-            {
-                bMoveAtlans = true;
-            }
-            else if (wcsicmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Icarus) == 0)
-            {
-                bMoveIcarus = true;
-            }
-        }
-    }
-
-    if (bCantSwim && bMoveAtlans)
-    {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-        return true;
-    }
-
-    if ((bCantFly || bEquipChangeRing) && bMoveIcarus)
-    {
-        g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-        return true;
-    }
-
-    return false;
+    g_pSystemLogBox->AddText(Data::Maps::GetWarpMessageText(*blocked), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    return true;
 }

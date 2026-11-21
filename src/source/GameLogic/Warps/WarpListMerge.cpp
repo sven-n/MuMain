@@ -11,22 +11,17 @@ namespace
 {
 using MoveReqInfo = SEASON3B::CMoveCommandData::MOVEREQINFO;
 
-template <size_t N> void CopyName(wchar_t (&target)[N], const std::wstring& name)
-{
-    const size_t length = std::min(name.size(), N - 1);
-    std::wmemcpy(target, name.c_str(), length);
-    target[length] = L'\0';
-}
-
 MoveReqInfo FromServer(const ServerWarp& warp)
 {
     MoveReqInfo info{};
     info.index = warp.index;
     // The sub map name is the one which the warp chat command also accepts; the server has only one.
-    CopyName(info.szMainMapName, warp.name);
-    CopyName(info.szSubMapName, warp.name);
+    SEASON3B::CMoveCommandData::CopyName(info.szMainMapName, warp.name);
+    SEASON3B::CMoveCommandData::CopyName(info.szSubMapName, warp.name);
     info.iReqLevel = warp.levelRequirement;
     info.iReqZen = static_cast<int>(std::min<uint32_t>(warp.costs, INT32_MAX));
+    info.iReqMasterLevel = warp.minMasterLevel;
+    info.iReqResets = warp.minResets;
     return info;
 }
 } // namespace
@@ -51,6 +46,8 @@ std::vector<MoveReqInfo> MergeWarpList(const std::vector<MoveReqInfo>& dataFileW
         auto info = dataFileWarp;
         info.iReqLevel = serverWarp->levelRequirement;
         info.iReqZen = static_cast<int>(std::min<uint32_t>(serverWarp->costs, INT32_MAX));
+        info.iReqMasterLevel = serverWarp->minMasterLevel;
+        info.iReqResets = serverWarp->minResets;
         result.push_back(info);
     }
 

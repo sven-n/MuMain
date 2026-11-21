@@ -30,7 +30,6 @@
 #include "Core/Input/ImeInput.h"
 
 extern int g_iChatInputType;
-extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwKeyFocusUIID;

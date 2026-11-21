@@ -35,4 +35,11 @@ bool EqualsIgnoringAsciiCase(std::string_view left, std::string_view right)
     return left.size() == right.size() && std::equal(left.begin(), left.end(), right.begin(),
                                                      [](char a, char b) { return AsciiLower(a) == AsciiLower(b); });
 }
+
+std::string ToLowerAscii(std::string_view text)
+{
+    std::string lower(text);
+    std::transform(lower.begin(), lower.end(), lower.begin(), AsciiLower);
+    return lower;
+}
 } // namespace Core::Text

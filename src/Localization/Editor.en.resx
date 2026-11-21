@@ -6040,4 +6040,139 @@
   <data name="Thing chance" xml:space="preserve">
     <value>Its own chance</value>
   </data>
+  <data name="Warp List" xml:space="preserve">
+    <value>Warp List</value>
+  </data>
+  <data name="Warp list note" xml:space="preserve">
+    <value>The list as the M window shows it, in this order. A server that sends its own list (OpenMU) overrides level and zen. The game takes each change at once; Save writes {0}.</value>
+  </data>
+  <data name="Add warp" xml:space="preserve">
+    <value>Add warp</value>
+  </data>
+  <data name="Pick a warp in the list." xml:space="preserve">
+    <value>Pick a warp in the list.</value>
+  </data>
+  <data name="Search warps" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Move command name" xml:space="preserve">
+    <value>/move name</value>
+  </data>
+  <data name="Zen" xml:space="preserve">
+    <value>Zen</value>
+  </data>
+  <data name="Gate" xml:space="preserve">
+    <value>Gate</value>
+  </data>
+  <data name="Gate note" xml:space="preserve">
+    <value>The server's landing spot; the client doesn't use it.</value>
+  </data>
+  <data name="No class discount" xml:space="preserve">
+    <value>No class discount</value>
+  </data>
+  <data name="Master level" xml:space="preserve">
+    <value>Master level</value>
+  </data>
+  <data name="Resets" xml:space="preserve">
+    <value>Resets</value>
+  </data>
+  <data name="Zero is none" xml:space="preserve">
+    <value>0 = none</value>
+  </data>
+  <data name="Warp rules" xml:space="preserve">
+    <value>Rules</value>
+  </data>
+  <data name="Needs one of" xml:space="preserve">
+    <value>Needs one of</value>
+  </data>
+  <data name="Needs one of note" xml:space="preserve">
+    <value>At least one of these has to be equipped, not broken. Empty: no rule.</value>
+  </data>
+  <data name="Not with" xml:space="preserve">
+    <value>Not with</value>
+  </data>
+  <data name="Not with note" xml:space="preserve">
+    <value>None of these may be equipped.</value>
+  </data>
+  <data name="Item tag" xml:space="preserve">
+    <value>Item tag</value>
+  </data>
+  <data name="Any wings" xml:space="preserve">
+    <value>Any wings</value>
+  </data>
+  <data name="Except" xml:space="preserve">
+    <value>except</value>
+  </data>
+  <data name="Unknown item" xml:space="preserve">
+    <value>The item list has no such item.</value>
+  </data>
+  <data name="Tag items {0}" xml:space="preserve">
+    <value>({0} items)</value>
+  </data>
+  <data name="PvP servers only" xml:space="preserve">
+    <value>PvP servers only</value>
+  </data>
+  <data name="Gens members only" xml:space="preserve">
+    <value>Gens members only</value>
+  </data>
+  <data name="Blocked message" xml:space="preserve">
+    <value>Blocked message</value>
+  </data>
+  <data name="General warp message" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Blocked message note" xml:space="preserve">
+    <value>What the chat shows when the equipment rules block /move.</value>
+  </data>
+  <data name="Class level discount" xml:space="preserve">
+    <value>Class level discount</value>
+  </data>
+  <data name="Class level discount note" xml:space="preserve">
+    <value>These classes need the warp's level times numerator / denominator, for every warp without No class discount.</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>Class</value>
+  </data>
+  <data name="Numerator" xml:space="preserve">
+    <value>Numerator</value>
+  </data>
+  <data name="Denominator" xml:space="preserve">
+    <value>Denominator</value>
+  </data>
+  <data name="Add class" xml:space="preserve">
+    <value>Add class</value>
+  </data>
+  <data name="Another warp has the index {0}" xml:space="preserve">
+    <value>Another warp has the index {0}.</value>
+  </data>
+  <data name="A warp needs an English name" xml:space="preserve">
+    <value>A warp needs an English name.</value>
+  </data>
+  <data name="A warp needs a move name" xml:space="preserve">
+    <value>A warp needs a /move name.</value>
+  </data>
+  <data name="Has a space note" xml:space="preserve">
+    <value>Has a space: /move takes one word.</value>
+  </data>
+  <data name="Step copy" xml:space="preserve">
+    <value>Copy {0}</value>
+  </data>
+  <data name="Step warp field" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Warps" xml:space="preserve">
+    <value>Warps</value>
+  </data>
+  <data name="Translations" xml:space="preserve">
+    <value>Translations</value>
+  </data>
+  <data name="All warps" xml:space="preserve">
+    <value>All warps</value>
+  </data>
+  <data name="Select the warp and show it in the Warps tab" xml:space="preserve">
+    <value>Select the warp and show it in the Warps tab</value>
+  </data>
+  <data name="Other languages in the Translations tab" xml:space="preserve">
+    <value>The names of the other languages are in the Translations tab.</value>
+  </data>
 </root>

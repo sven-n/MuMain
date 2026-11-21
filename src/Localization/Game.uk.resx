@@ -9135,4 +9135,13 @@
   <data name="Guild members as guild master: +%d" xml:space="preserve">
     <value>Членів гільдії у глави гільдії: +%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>З цим спорядженням туди не можна переміститися.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>МР %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>Р %d</value>
+  </data>
 </root>

@@ -9138,4 +9138,13 @@ Pantalla completa cambia el monitor a la resolución elegida.</value>
   <data name="Guild members as guild master: +%d" xml:space="preserve">
     <value>Miembros del gremio como maestro: +%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>No puedes teletransportarte allí con tu equipo.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>NM %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
+  </data>
 </root>

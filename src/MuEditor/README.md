@@ -106,6 +106,10 @@ Parts the item tools and the monster tools both use:
 - **ServerListOfflinePreviewUI.h/cpp** - The preview of the servers the connect server didn't send: the toolbar's switch and Their load, and each offline channel's Show box and own load in the channel list
 - **ServerListStepLabel.h/cpp** - What each undo step did ("Remove Helheim", "Valhalla: channel 3"), for the tooltips of the editor bar's Undo and Redo
 
+### Warp List (UI/WarpList)
+- **MuWarpListUI.h/cpp** - The warps of the M window (Data/Maps/Warps.json) in its order: names per language, /move name, level, zen, gate, master level, resets and the move rules, and the class level discount of all warps; the game takes each change at once (Windows > Warp List, docs/warp-list.md)
+- **WarpListEdits.h/cpp** - The warps being changed, what the file has, their undo history and what each step did ("Remove Icarus", "Icarus: Level")
+
 ### Graphics Look (UI/GraphicsLook)
 - **MuGraphicsLookUI.h/cpp** - The look profile (Data/Render/Look.json) on every scope: the default, its environments and its map entries; a map entry's environment; a warning before a change many maps share; sliders shown live while dragged; the Player or Authoring preview; Save and Revert (Windows > Graphics look)
 - **LookEditHistory.h/cpp** - Its undo history: the whole profile before and after each change (the editor bar's Undo and Redo while the window was used last)

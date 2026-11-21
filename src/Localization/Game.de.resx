@@ -9248,4 +9248,13 @@ Vollbild stellt den Monitor auf die gewählte Auflösung um.</value>
   <data name="Guild members as guild master: +%d" xml:space="preserve">
     <value>Gildenmitglieder als Gildenmeister: +%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>Mit Ihrer Ausrüstung können Sie sich nicht dorthin teleportieren.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>ML %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
+  </data>
 </root>

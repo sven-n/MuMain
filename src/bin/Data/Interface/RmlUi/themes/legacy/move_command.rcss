@@ -94,6 +94,8 @@
 }
 /* A row is its text's line height plus 2 reference px, as native's rows were. */
 .mc-strut { display: inline; }
+/* A row's second line (the master level and resets under the level); its cells stand on it as on the row. */
+.mc-second-line { display: block; position: relative; }
 .mc-row.can-move { color: rgb(255, 255, 255); }
 
 /* Each cell reproduces RT3_WRITE_CENTER exactly: native passed no box width, so the text renderer

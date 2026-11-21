@@ -9675,4 +9675,13 @@ Fullscreen changes the monitor to the chosen resolution.</value>
   <data name="The files of this map could not be downloaded." xml:space="preserve">
     <value>The files of this map could not be downloaded.</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>You can't warp there with your equipment.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>ML %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
+  </data>
 </root>

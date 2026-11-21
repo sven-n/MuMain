@@ -1275,4 +1275,13 @@
   <data name="Guild members as guild master: +%d" xml:space="preserve">
     <value>作为战盟盟主的成员上限：+%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>你无法携带当前装备传送到那里。</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>大师 %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>转生 %d</value>
+  </data>
 </root>

@@ -861,7 +861,9 @@ server with original clients (after phases 6 and B).
      tooltip's stat requirements, the mix sources and two jewel checks)
      and the lucky item window's refinery; the transformation ring checks
      (`CheckChangeRing`, `CheckMoveMap`, `CheckBanMoveIcarusMap`, where a
-     ring that is not the panda or skeleton ring bans Icarus); the mana and
+     ring that is not the panda or skeleton ring bans Icarus; that rule is
+     now the Icarus warp's `notWith` in Warps.json, see docs/warp-list.md);
+     the mana and
      healing potion searches; and the items the hotkeys take
      (`GetHotKeyItemTypes`, which replaces `GetHotKeyCommonItem` and the
      ranges per key). `Check_LuckyItem`, the unused `IsLuckySetItem` and

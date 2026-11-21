@@ -548,13 +548,9 @@ public:
         if (!m_sent)
         {
             m_teleportsBefore = App::Control::Events::TeleportCount();
-            // The click path saves the options when the destination lives on
-            // another server (NewUIMoveCommandWindow.cpp:414): the session
-            // ends there, and what is not saved now is lost.
-            if (g_pMoveCommandWindow->IsTheMapInDifferentServer(gMapManager.WorldActive, m_mapIndex))
-            {
-                SaveOptions();
-            }
+            // As the click path: the settings the server keeps go first, before
+            // any warp, since a warp can end the session on this server.
+            SaveOptionsIfInGame();
             SocketClient->ToGameServer()->SendWarpCommandRequest(g_pMoveCommandWindow->GetMoveCommandKey(),
                                                                  static_cast<uint16_t>(m_mapIndex));
             m_sent = true;
@@ -738,8 +734,8 @@ std::string Warp(const Request& request, std::unique_ptr<Act>& act)
     // The click path refuses an entry the character does not qualify for
     // without sending anything. Sending it anyway costs the caller the whole
     // warp deadline for a request the server silently declines, so the same
-    // requirements are tested here: level, zen, wings for Icarus, the Uniria
-    // rule for Atlans, the ring ban.
+    // requirements are tested here: the move rules of the warp list
+    // (Data/Maps/Warps.json), as the M window evaluates them.
     if (!g_pMoveCommandWindow->CanMoveToMap(wide.c_str()))
     {
         return EncodeError(request.EncodedId(), ErrorCode::WarpRefused,

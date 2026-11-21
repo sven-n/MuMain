@@ -9118,4 +9118,13 @@
   <data name="Guild members as guild master: +%d" xml:space="preserve">
     <value>Anggota guild sebagai master guild: +%d</value>
   </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>Anda tidak dapat berpindah ke sana dengan perlengkapan Anda.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>ML %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
+  </data>
 </root>

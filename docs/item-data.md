@@ -422,7 +422,8 @@ a translation in a language the game has no texts in (as for item names).
 
 Wings (capes included) and mounts with the `flying` tag let a character fly.
 An item at 0 durability does not count. Icarus requires flight equipment:
-without it the character cannot warp or move there, and in Icarus the last
+without it the character cannot warp or move there (a rule of the warp list,
+[warp-list.md](warp-list.md#equipment-rules)), and in Icarus the last
 flight equipment cannot be taken off, neither by dragging it nor by
 right-clicking it.
 

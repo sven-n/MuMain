@@ -13,7 +13,8 @@
 	<div id="panel" data-class-framed="show_frame" data-style-height="panel_height + 'dp'">
 		<div id="chat_backdrop" data-style-opacity="back_alpha"></div>
 		<div id="resize_handle" data-class-hidden="!show_frame"
-		     data-event-drag="chat_resize_drag"></div>
+		     data-event-dragstart="chat_resize_start" data-event-drag="chat_resize_drag"
+		     data-event-dragend="chat_resize_end"></div>
 
 		<div id="lines" class="scroll-pane" data-style-height="client_height + 'dp'"
 		     data-style---line-px="line_px + 'px'" data-style---row-px="row_px + 'px'">
