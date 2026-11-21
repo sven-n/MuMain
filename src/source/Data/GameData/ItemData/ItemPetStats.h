@@ -55,6 +55,7 @@ struct PetStatValues
     int minimumDamage = 0;
     int maximumDamage = 0;
     int attackSpeed = 0;
+    int attackSuccess = 0;
 
     bool operator==(const PetStatValues& other) const = default;
 };

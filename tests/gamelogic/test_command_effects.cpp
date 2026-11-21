@@ -107,5 +107,5 @@ TEST_CASE("Pet stats use wide arithmetic before limiting the result to the pet w
     stats.attackSpeed.add = -1;
 
     CHECK(Data::Items::EvaluatePetStats(stats, {50, 0, 0}) ==
-          PetStatValues{50, std::numeric_limits<std::uint16_t>::max(), 0});
+          PetStatValues{50, (std::numeric_limits<std::uint16_t>::max)(), 0});
 }

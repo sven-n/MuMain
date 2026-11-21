@@ -167,8 +167,10 @@ TEST_CASE("The command row's hint leaves out what the command does not add [data
     GameLogic::Character::CommandEffects minimumOnly;
     minimumOnly.raven.minimumDamage = 37;
     minimumOnly.horse.minimumDamage = 30;
+    minimumOnly.raven.attackSuccess = 30;
     CHECK(Texts(UI::Character::BuildCommandHint(minimumOnly)) ==
-          std::vector<std::string>{"Command", "Dark Raven damage: +37~+0", "Dark Horse damage: +30~+0"});
+          std::vector<std::string>{"Command", "Dark Raven damage: +37~+0", "Dark Raven attack success rate: +30",
+                                   "Dark Horse damage: +30~+0"});
 }
 
 // The hint is formatted again only when the command's effects change, or when the window invalidates it after its
@@ -238,11 +240,12 @@ TEST_CASE("The shipped pets' stats give what the pet window's code gave [data][i
             for (int command = 0; command <= MaxStat; command += StatStep)
             {
                 const Data::Items::PetStatInputs inputs{level, strength, command};
-                const Data::Items::PetStatValues oldRaven{
-                    180 + level * 15 + command / 8, 200 + level * 15 + command / 4, 20 + level * 4 / 5 + command / 50};
+                const Data::Items::PetStatValues oldRaven{180 + level * 15 + command / 8,
+                                                          200 + level * 15 + command / 4,
+                                                          20 + level * 4 / 5 + command / 50, oldAttackSuccess};
                 const int horseMinimum = strength / 10 + command / 10 + level * 5;
                 const Data::Items::PetStatValues oldHorse{horseMinimum, horseMinimum + horseMinimum / 2,
-                                                          20 + level * 4 / 5 + command / 50};
+                                                          20 + level * 4 / 5 + command / 50, oldAttackSuccess};
                 mismatches += Data::Items::EvaluatePetStats(raven, inputs) != oldRaven;
                 mismatches += Data::Items::EvaluatePetStats(horse, inputs) != oldHorse;
             }

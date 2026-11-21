@@ -1241,8 +1241,9 @@ command / 8 to 200 + 15 per level + command / 4, attack speed 20 + level × 4
 / 5 + command / 50); the shipped Dark Horse has the original client's (strength
 / 10 + command / 10 + 5 per level, its maximum 150 % of that, and the raven's
 attack speed). The shipped attack success rate is 1,000 plus 16 per pet
-level for both pets. Older item files without that formula use the same
-calculation. OpenMU defines the raven formulas on the character class, so
+level for both pets. A missing attack success formula evaluates to zero.
+Command contributions to custom attack success formulas appear in the hint.
+OpenMU defines the raven formulas on the character class, so
 the item exchange omits `petStats`.
 
 Loading and the item checks report a value that is not a whole number, an

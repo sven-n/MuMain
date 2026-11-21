@@ -38,9 +38,13 @@ std::vector<Line> BuildCommandHint(const GameLogic::Character::CommandEffects& e
     AddPartLine(lines, std::max(effects.raven.minimumDamage, effects.raven.maximumDamage),
                 I18N::Game::DarkRavenDamageDD, effects.raven.minimumDamage, effects.raven.maximumDamage);
     AddPartLine(lines, effects.raven.attackSpeed, I18N::Game::DarkRavenAttackSpeedD, effects.raven.attackSpeed);
+    AddPartLine(lines, effects.raven.attackSuccess, I18N::Game::DarkRavenAttackSuccessRateD,
+                effects.raven.attackSuccess);
     AddPartLine(lines, std::max(effects.horse.minimumDamage, effects.horse.maximumDamage),
                 I18N::Game::DarkHorseDamageDD, effects.horse.minimumDamage, effects.horse.maximumDamage);
     AddPartLine(lines, effects.horse.attackSpeed, I18N::Game::DarkHorseAttackSpeedD, effects.horse.attackSpeed);
+    AddPartLine(lines, effects.horse.attackSuccess, I18N::Game::DarkHorseAttackSuccessRateD,
+                effects.horse.attackSuccess);
     AddPartLine(lines, effects.guildMembers, I18N::Game::GuildMembersAsGuildMasterD, effects.guildMembers);
     // Only the title: the command adds nothing yet.
     if (lines.size() == 1)

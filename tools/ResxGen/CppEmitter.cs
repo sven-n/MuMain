@@ -672,7 +672,7 @@ internal static class CppEmitter
 
     private static bool HasPrintfConversion(string value) =>
         Regex.IsMatch(value.Replace("%%", ""),
-            @"%(?:[0-9]+\$)?[-+ #0']*(?:\d+|\*(?:[0-9]+\$)?)?(?:\.(?:\d*|\*(?:[0-9]+\$)?))?(?:hh|ll|I32|I64|[hlLjztI])?[cCdiouxXeEfgGaAnpsS]");
+            @"%(?:[0-9]+\$)?[-+#0']*(?:\d+|\*(?:[0-9]+\$)?)?(?:\.(?:\d*|\*(?:[0-9]+\$)?))?(?:hh|ll|I32|I64|[hlLjztI])?[cCdiouxXeEfgGaAnpsS]");
 
     /// "Game" -> "game", for local variable names in the emitted code.
     private static string CamelCase(string name) => char.ToLowerInvariant(name[0]) + name[1..];

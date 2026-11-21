@@ -130,6 +130,6 @@ TEST_CASE("A pet stat adds its terms, each division rounded down, and a share of
 {
     const ItemDefinition horse = MakeHorse();
     // Minimum: 100 / 10 + 310 / 10 + 1 * 5 = 46; maximum 150 % of it, 69; attack speed 20 + 4 / 5 + 310 / 50 = 26.
-    CHECK(EvaluatePetStats(horse.petStats, {1, 100, 310}) == PetStatValues{46, 69, 26});
+    CHECK(EvaluatePetStats(horse.petStats, {1, 100, 310}) == PetStatValues{46, 69, 26, 1016});
     CHECK(EvaluatePetStats(ItemPetStats{}, {10, 100, 310}) == PetStatValues{});
 }

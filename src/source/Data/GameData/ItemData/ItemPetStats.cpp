@@ -33,6 +33,7 @@ PetStatValues EvaluatePetStats(const ItemPetStats& stats, const PetStatInputs& i
     values.minimumDamage = EvaluatePetStat(stats.minimumDamage, inputs, 0);
     values.maximumDamage = EvaluatePetStat(stats.maximumDamage, inputs, values.minimumDamage);
     values.attackSpeed = EvaluatePetStat(stats.attackSpeed, inputs, values.minimumDamage);
+    values.attackSuccess = EvaluatePetStat(stats.attackSuccess, inputs, values.minimumDamage);
     return values;
 }
 } // namespace Data::Items

@@ -558,11 +558,7 @@ static std::uint8_t g_tabBar = 0;
         const Data::Items::PetStatInputs inputs{pPetInfo->m_wLevel, strength, command};
         const auto& stats = GameLogic::Pets::GetItemPetStats(itemType);
         const auto values = Data::Items::EvaluatePetStats(stats, inputs);
-        // An older item file has no attack-success formula, so keep its previous calculation.
-        constexpr Data::Items::PetStatFormula LegacyAttackSuccess{1000, 16};
-        const auto& attackSuccess = stats.attackSuccess.IsEmpty() ? LegacyAttackSuccess : stats.attackSuccess;
-        pPetInfo->m_wAttackSuccess =
-            static_cast<WORD>(Data::Items::EvaluatePetStat(attackSuccess, inputs, values.minimumDamage));
+        pPetInfo->m_wAttackSuccess = static_cast<WORD>(values.attackSuccess);
         pPetInfo->m_wDamageMin = static_cast<WORD>(values.minimumDamage);
         pPetInfo->m_wDamageMax = static_cast<WORD>(values.maximumDamage);
         pPetInfo->m_wAttackSpeed = static_cast<WORD>(values.attackSpeed);

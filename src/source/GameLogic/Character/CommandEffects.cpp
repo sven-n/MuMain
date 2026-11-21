@@ -16,7 +16,7 @@ Data::Items::PetStatValues GetCommandPetStats(const DarkLordPet& pet, int comman
     const Data::Items::PetStatValues with = Data::Items::EvaluatePetStats(pet.stats, withCommand);
     const Data::Items::PetStatValues without = Data::Items::EvaluatePetStats(pet.stats, withoutCommand);
     return {with.minimumDamage - without.minimumDamage, with.maximumDamage - without.maximumDamage,
-            with.attackSpeed - without.attackSpeed};
+            with.attackSpeed - without.attackSpeed, with.attackSuccess - without.attackSuccess};
 }
 
 int GetCommandGuildMembers(int level, int command)
