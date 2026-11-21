@@ -1725,6 +1725,8 @@ bool IterateClient()
     {
         ReconnectManager::Instance().OnMapFilesFailed();
     }
+    // What the last frame wrote into the user folder (settings, macros, screenshots), stored once.
+    Core::Platform::CommitUserFiles();
 
     // Run a pending reconnect teardown between frames (self-guards on its
     // pending flag). Replaces the old WM_START_RECONNECT round-trip.
@@ -2133,6 +2135,8 @@ bool StartClient(char* szCmdLine)
 {
     const std::string contentRoot = InitializeWorkingDirectoryAndLog();
     g_teardown.Push([] { mu::log::Shutdown(); });
+    // Runs late in the quit: after the last settings are written.
+    g_teardown.Push([] { Core::Platform::CommitUserFiles(); });
     g_teardown.Push([] { Content::Close(); });
     // Installed before SDL starts so init failures are captured; SDL_Quit may still log, so it outlives SDL.
     static std::optional<Core::Log::Sdl::ScopedLogOutput> sdlLogOutput;

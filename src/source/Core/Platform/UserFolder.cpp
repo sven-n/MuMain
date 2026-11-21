@@ -8,6 +8,7 @@
 #include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_stdinc.h>
 
+#include <atomic>
 #include <cctype>
 #include <cstdint>
 #include <cstdio>
@@ -97,6 +98,26 @@ const std::filesystem::path& UserFolder()
 {
     static const std::filesystem::path folder = ResolveOnce();
     return folder;
+}
+
+namespace
+{
+std::atomic<bool> g_userFilesChanged{false};
+} // namespace
+
+void UserFilesChanged()
+{
+    g_userFilesChanged.store(true, std::memory_order_release);
+}
+
+bool CommitUserFiles()
+{
+    if (!g_userFilesChanged.exchange(false, std::memory_order_acq_rel))
+    {
+        return false;
+    }
+    TargetCommitUserFiles(UserFolder());
+    return true;
 }
 
 std::optional<std::string> ClientNameFromDefaults(std::string_view defaultsIni)
@@ -217,6 +238,7 @@ Seeded SeedUserFile(const std::filesystem::path& file, const std::filesystem::pa
     {
         if (std::filesystem::copy_file(legacy, file, error))
         {
+            UserFilesChanged();
             return Seeded::FromLegacy;
         }
         // Another client starting at the same moment made it first: theirs stays.
@@ -229,6 +251,11 @@ Seeded SeedUserFile(const std::filesystem::path& file, const std::filesystem::pa
     std::ofstream stream(file, std::ios::binary | std::ios::trunc);
     stream << *defaults;
     stream.close();
-    return stream.fail() ? failed() : Seeded::FromDefaults;
+    if (stream.fail())
+    {
+        return failed();
+    }
+    UserFilesChanged();
+    return Seeded::FromDefaults;
 }
 } // namespace Core::Platform

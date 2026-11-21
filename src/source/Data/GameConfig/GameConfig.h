@@ -301,6 +301,9 @@ private:
     std::wstring m_texturePack;
     bool m_useS6PlayerModels;
 
+    // Every write to config.ini: one entry (a null value removes the key, a null key the section).
+    void WriteEntry(const wchar_t* section, const wchar_t* key, const wchar_t* value);
+
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);
 

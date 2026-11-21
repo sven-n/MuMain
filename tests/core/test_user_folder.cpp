@@ -6,6 +6,19 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <vector>
+
+namespace
+{
+// Every folder the target was asked to store.
+std::vector<std::filesystem::path> g_storedFolders;
+} // namespace
+
+// Replaces the target's adapter: this binary links MuClient on demand, so the adapter's object is never pulled in.
+void Core::Platform::TargetCommitUserFiles(const std::filesystem::path& folder)
+{
+    g_storedFolders.push_back(folder);
+}
 
 namespace
 {
@@ -127,4 +140,30 @@ TEST_CASE("Without an old file the user file comes from the shipped defaults [co
     const fs::path macros = scratch.path / "user" / "Macro.txt";
     CHECK(Core::Platform::SeedUserFile(macros, {}, std::nullopt) == Seeded::Nothing);
     CHECK_FALSE(fs::exists(macros));
+}
+
+TEST_CASE("Writes into the user folder are stored once, at the next commit [core][user_folder]")
+{
+    // A burst of writes (every entry of a config.ini save) is stored once; a frame without writes stores nothing.
+    (void)Core::Platform::CommitUserFiles();
+    g_storedFolders.clear();
+    CHECK_FALSE(Core::Platform::CommitUserFiles());
+    CHECK(g_storedFolders.empty());
+
+    Core::Platform::UserFilesChanged();
+    Core::Platform::UserFilesChanged();
+    CHECK(Core::Platform::CommitUserFiles());
+    CHECK_FALSE(Core::Platform::CommitUserFiles());
+    REQUIRE(g_storedFolders.size() == 1);
+    CHECK(g_storedFolders.front() == Core::Platform::UserFolder());
+
+    // Seeding a file is a write; finding the player's own file is not.
+    const ScratchFolder scratch;
+    const fs::path user = scratch.path / "user" / "config.ini";
+    CHECK(Core::Platform::SeedUserFile(user, {}, std::string("[Audio]\nSoundVolume=5\n")) == Seeded::FromDefaults);
+    CHECK(Core::Platform::CommitUserFiles());
+    CHECK(g_storedFolders.size() == 2);
+    CHECK(Core::Platform::SeedUserFile(user, {}, std::string("[Audio]\nSoundVolume=9\n")) == Seeded::Existing);
+    CHECK_FALSE(Core::Platform::CommitUserFiles());
+    CHECK(g_storedFolders.size() == 2);
 }

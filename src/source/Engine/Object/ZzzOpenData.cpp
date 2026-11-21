@@ -1496,6 +1496,7 @@ void SaveMacro()
         fwprintf(fp, L"%ls\n", MacroText[i]);
     }
     fclose(fp);
+    Core::Platform::UserFilesChanged();
 }
 
 void OpenMacro()
