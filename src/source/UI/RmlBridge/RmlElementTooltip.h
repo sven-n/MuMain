@@ -4,7 +4,7 @@
 
 #include <RmlUi/Core/Element.h>
 
-#include <vector>
+#include <span>
 
 namespace Rml
 {
@@ -42,8 +42,11 @@ public:
 
     // Centred under (or over) the hovered element; hides when nothing is hovered or `lines` is
     // empty.
-    void Show(std::vector<Tooltip::Line> lines, const Placement& placement);
-    void Show(std::vector<Tooltip::Line> lines) { Show(std::move(lines), Placement{}); }
+    void Show(std::span<const Tooltip::Line> lines, const Placement& placement);
+    void Show(std::span<const Tooltip::Line> lines)
+    {
+        Show(lines, Placement{});
+    }
     void Hide();
 
 private:

@@ -35,9 +35,6 @@ enum class ItemReferenceProblem : unsigned char
     // The reference asks for a case, but the level's name line has placeholders without {name}: no form can show,
     // the line's text stands in.
     UndeclinedLine,
-    // A UI text's name has a '%', which the text, a printf format, would read as a conversion (ResolveUiTextName): the
-    // text keeps the reference as written.
-    UnshowableName,
 };
 
 // Whether the problem leaves the reference without a name, so the text keeps it as written.
@@ -57,9 +54,4 @@ struct ReferencedName
 // the item's level values and other items' names ({item:14,13}, in the language the line is written in).
 ReferencedName ResolveReferencedName(const ItemDatabase& database, const Translation::ItemReference& reference,
                                      std::string_view locale);
-
-// The same for a UI text (the Game and Dialog texts), which is a printf format: a name with a '%' gives none
-// (UnshowableName).
-ReferencedName ResolveUiTextName(const ItemDatabase& database, const Translation::ItemReference& reference,
-                                 std::string_view locale);
 } // namespace Data::Items

@@ -198,7 +198,7 @@ TEST_CASE("Changing the name cases is a change of the item data and of its names
     CHECK(database.GetNameVersion() != nameVersion);
 }
 
-TEST_CASE("A name with a '%' is kept out of a UI text, a printf format, and not out of other texts [data][items][texts]")
+TEST_CASE("A name with a percent sign can be referenced by a UI text [data][items][texts]")
 {
     std::vector<ItemDefinition> items = NamedItems();
     ItemDefinition elixir;
@@ -209,25 +209,14 @@ TEST_CASE("A name with a '%' is kept out of a UI text, a printf format, and not 
     ItemDatabase database;
     database.Build(items);
 
-    const ReferencedName percent = Data::Items::ResolveUiTextName(database, Reference(14, 40), "en");
-    CHECK(percent.text.empty());
-    CHECK(percent.problem == ItemReferenceProblem::UnshowableName);
-    // Braces are no printf conversion; the item data's texts (the tooltip) take the '%' too.
-    CHECK(Data::Items::ResolveUiTextName(database, Reference(14, 40), "pl").text == "Eliksir {x}");
     CHECK(ResolveReferencedName(database, Reference(14, 40), "en").text == "Elixir 10%");
+    CHECK(ResolveReferencedName(database, Reference(14, 40), "pl").text == "Eliksir {x}");
 
-    const auto check = [&](bool uiText)
-    {
-        std::vector<ItemDataIssue> issues;
-        Data::Translation::CheckedText text{"Drink {item:14,40}", "en", "x", ItemDataIssue::NoItem,
-                                            ItemDataIssue::NoItem, "Drink", uiText};
-        Data::Translation::CheckItemReferences(database, text, {}, issues);
-        return issues;
-    };
-    const std::vector<ItemDataIssue> uiIssues = check(true);
-    REQUIRE(uiIssues.size() == 1);
-    CHECK(uiIssues[0].severity == ItemDataIssueSeverity::Error);
-    CHECK(check(false).empty());
+    std::vector<ItemDataIssue> issues;
+    const Data::Translation::CheckedText text{"Drink {item:14,40}",  "en",   "Game.en.resx", ItemDataIssue::NoItem,
+                                              ItemDataIssue::NoItem, "Drink"};
+    Data::Translation::CheckItemReferences(database, text, {}, issues);
+    CHECK(issues.empty());
 }
 
 TEST_CASE("A UI translation that spells names English writes by number is a warning where items have names "

@@ -9100,6 +9100,30 @@
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Total: +%d</value>
   </data>
+  <data name="Attack rate (PvM): +%d" xml:space="preserve">
+    <value>Tingkat serangan (PvM): +%d</value>
+  </data>
+  <data name="DarkRavenDamageDD" xml:space="preserve">
+    <value>Kerusakan {item:13,5}: +%d~%+d</value>
+  </data>
+  <data name="Dark Raven attack speed: +%d" xml:space="preserve">
+    <value>Kecepatan serangan {item:13,5}: +%d</value>
+  </data>
+  <data name="Dark Raven attack success rate: +%d" xml:space="preserve">
+    <value>Tingkat keberhasilan serangan {item:13,5}: +%d</value>
+  </data>
+  <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
+    <value>Kerusakan {item:13,4}: +%d~%+d</value>
+  </data>
+  <data name="Dark Horse attack speed: +%d" xml:space="preserve">
+    <value>Kecepatan serangan {item:13,4}: +%d</value>
+  </data>
+  <data name="Dark Horse attack success rate: +%d" xml:space="preserve">
+    <value>Tingkat keberhasilan serangan {item:13,4}: +%d</value>
+  </data>
+  <data name="Guild members as guild master: +%d" xml:space="preserve">
+    <value>Anggota guild sebagai master guild: +%d</value>
+  </data>
   <data name="WarpBlockedByEquipment" xml:space="preserve">
     <value>Anda tidak dapat berpindah ke sana dengan perlengkapan Anda.</value>
   </data>

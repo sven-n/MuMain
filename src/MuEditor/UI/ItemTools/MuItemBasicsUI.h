@@ -30,6 +30,9 @@ private:
     // The item's option links (RenderOptionLinks).
     void RenderOptions(Data::Items::ItemDefinition& item);
     void RenderResistances(Data::Items::ItemDefinition& item);
+    // The Dark Lord's pets' stat formulas ("petStats"): for items with the darkLordPet tag or with pet stats.
+    void RenderPetStats(Data::Items::ItemDefinition& item);
+    void RenderPetStatFormula(const char* label, Data::Items::PetStatFormula& formula, bool shareOfMinimum);
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemDefinition> m_draft;
     MuEditor::Items::ItemStatProfileUseCounts m_profileCounts;

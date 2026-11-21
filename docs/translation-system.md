@@ -470,9 +470,9 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
   language stayed. Before the item data is loaded a text shows `{item:...}`
   as written (no such text is shown that early). A number no item has, or a
   level above +15, stays as written, and the rest of the text is still filled
-  in; so does a name with `%` in a Game or Dialog text, a printf format that
-  would read it as a conversion.
-- **Grammar:** languages that decline names (German, Polish) can ask for a form
+  in. When the English or displayed resource value contains a printf conversion,
+  item-name percent signs are escaped so the formatted text shows them literally.
+- **Grammar:** languages that decline names, such as German and Polish can ask for a form
   with `:gen`, `:dat`, `:acc`, `:ins` or `:loc`. The forms are part of the item
   data (`nameForms`, [item-data.md](item-data.md#name-forms)) and edited in Item
   Translations; `Tooltips/NameCases.json` gives each language its cases. A
@@ -480,7 +480,7 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
 - **Translations** of an item's own text must name the same items as the English
   text; the case may differ (`{item:14,25}` in English, `{item:14,25:acc}` in
   Polish). The UI texts may spell a name in a language that has no item names
-  yet (Russian, Japanese, ...): a reference there would show the English name.
+  yet: a reference there would show the English name.
 
 A malformed reference in a `.resx` file (`{item:14;13}`, an unknown case) stops
 the build with the file, key and text, and so does a reference in the texts of

@@ -4,6 +4,7 @@
 #include "Core/Globals/_define.h"
 #include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemNameForms.h"
+#include "Data/GameData/ItemData/ItemPetStats.h"
 #include "Data/GameData/ItemData/ItemTagSet.h"
 #include "Data/GameData/ItemData/ItemTooltipConditions.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -396,6 +397,9 @@ struct ItemDefinition
     RequirementsByLevel requirementsByLevel;
     std::array<BYTE, MAX_CLASS> classRequirements{};
     std::array<BYTE, MAX_RESISTANCE + 1> resistances{};
+
+    // A Dark Lord's pet's combat stats as formulas (ItemPetStats.h); none for other items. A client-only field.
+    ItemPetStats petStats;
 
     BYTE sellValue = 0;
     int buyPrice = 0;

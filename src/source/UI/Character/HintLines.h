@@ -4,20 +4,34 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 
+#include <cwchar>
+#include <limits>
 #include <string>
 #include <utility>
 
 // Lines of the character window's hints.
 namespace UI::Character
 {
-// Room for a formatted hint line in any language.
-constexpr size_t MaxHintLineLength = 128;
+constexpr size_t HintArgumentLength(int)
+{
+    return std::numeric_limits<int>::digits10 + 2;
+}
+
+inline size_t HintArgumentLength(const wchar_t* text)
+{
+    return std::wcslen(text);
+}
 
 template <typename... Args> std::string FormatHintText(const wchar_t* format, Args... args)
 {
-    wchar_t text[MaxHintLineLength] = {};
-    mu_swprintf_s(text, format, args...);
-    return StringUtils::WideToNarrow(text);
+    // The hint formats use decimal integers and wide strings. The format itself can include expanded item names.
+    std::wstring text(std::wcslen(format) + (size_t{0} + ... + HintArgumentLength(args)) + 1, L'\0');
+    const int length = std::swprintf(text.data(), text.size(), format, args...);
+    if (length < 0 || static_cast<size_t>(length) >= text.size())
+    {
+        return {};
+    }
+    return StringUtils::WideToNarrow(text.c_str());
 }
 
 // The skill table's name of the skill, empty when there is none; no copy.
