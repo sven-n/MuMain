@@ -64,16 +64,9 @@ namespace
 // the old buff info (by number) had it, whatever the file's order.
 const Data::Buffs::BuffDefinition* FindItemBuff(int iItemCode)
 {
-    const Data::Buffs::BuffDefinition* found = nullptr;
-    for (const Data::Buffs::BuffDefinition& buff : g_BuffDatabase.GetAll())
-    {
-        if (buff.number < eBuff_Count && buff.item && ITEMINDEX(buff.item->group, buff.item->number) == iItemCode &&
-            (found == nullptr || buff.number < found->number))
-        {
-            found = &buff;
-        }
-    }
-    return found;
+    const Data::Buffs::BuffDefinition* buff =
+        g_BuffDatabase.FindByItem(iItemCode / MAX_ITEM_INDEX, iItemCode % MAX_ITEM_INDEX);
+    return buff != nullptr && buff->number < eBuff_Count ? buff : nullptr;
 }
 } // namespace
 

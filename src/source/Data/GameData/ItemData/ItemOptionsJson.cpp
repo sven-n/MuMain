@@ -3,6 +3,7 @@
 #include "ItemOptionsJson.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
+#include "ItemOptionValueJson.h"
 
 #include <algorithm>
 #include <array>
@@ -33,14 +34,8 @@ constexpr const char* Options = "options";
 constexpr const char* Number = "number";
 constexpr const char* Attribute = "attribute";
 constexpr const char* Text = "text";
-constexpr const char* Values = "values";
-constexpr const char* PerLevel = "perLevel";
-constexpr const char* Per = "per";
-constexpr const char* Times = "times";
-constexpr const char* Divisor = "divisor";
 } // namespace Keys
 
-constexpr int MaxValue = 65535;
 constexpr int MaxNumber = 255;
 // The additional option's number is the option type the server sends, the option byte's high four bits.
 constexpr int MaxOptionTypeNumber = 15;
@@ -54,9 +49,6 @@ const KeySet OpenMuKeys = {Keys::Id, Keys::Name};
 const KeySet ServerKeys = {Keys::AddsRandomly, Keys::AddChance, Keys::MaximumOptionsPerItem};
 const KeySet OptionKeys = {Keys::Number,         Keys::Attribute,      ItemOptionAddKeys[0],
                            ItemOptionAddKeys[1], ItemOptionAddKeys[2], Keys::Text};
-// perLevel has an error of its own, so it is no unknown field.
-const KeySet ValueKeys = {Keys::Values, Keys::PerLevel, Keys::Per};
-const KeySet TermKeys = {Keys::Attribute, Keys::Times, Keys::Divisor};
 
 // Whether the options of a type have a number (OpenMU's ItemOption.Number), and whether a definition of it has one
 // option only.
@@ -133,8 +125,6 @@ private:
     void ReadOption(const OrderedJson& json, const std::string& field, ItemOptionType type, ItemOption& option);
     void ReadNumber(const OrderedJson& json, const std::string& field, ItemOptionType type, ItemOption& option);
     void ReadAdd(const OrderedJson& json, const std::string& field, ItemOption& option);
-    void ReadValue(const OrderedJson& json, const std::string& field, ItemOptionValue& value);
-    void ReadTerms(const OrderedJson& json, const std::string& field, std::vector<ItemOptionTerm>& terms);
     bool ReadWholeNumber(const OrderedJson& json, const std::string& field, int minimum, int maximum, int& value);
     void ReadTexts(const OrderedJson& json, const std::string& field, std::vector<std::string>& texts);
 
@@ -285,88 +275,6 @@ bool ItemOptionsReader::ReadWholeNumber(const OrderedJson& json, const std::stri
                                         { AddFatal(errorField, message); });
 }
 
-void ItemOptionsReader::ReadValue(const OrderedJson& json, const std::string& field, ItemOptionValue& value)
-{
-    if (!json.is_object())
-    {
-        AddFatal(field, R"(must be an object: {"values": 5}, or {"values": [4, 8, 12, 16]} for one value per level)");
-        return;
-    }
-    if (json.contains(Keys::PerLevel))
-    {
-        AddFatal(field + "." + Keys::PerLevel,
-                 R"(is not a value; write one value per level as a list: {"values": [4, 8, 12, 16]})");
-    }
-    const auto values = json.find(Keys::Values);
-    if (values == json.end() || (!values->is_number() && (!values->is_array() || values->empty())))
-    {
-        AddFatal(field + "." + Keys::Values, "missing, or neither a number nor a list of one value per level");
-        return;
-    }
-    value.isList = values->is_array();
-    if (!value.isList)
-    {
-        int constant = 0;
-        ReadWholeNumber(*values, field + "." + Keys::Values, 0, MaxValue, constant);
-        value.values = {constant};
-    }
-    else
-    {
-        for (size_t index = 0; index < values->size(); ++index)
-        {
-            int entry = 0;
-            ReadWholeNumber((*values)[index], field + "." + Keys::Values + "[" + std::to_string(index) + "]", 0,
-                            MaxValue, entry);
-            value.values.push_back(entry);
-        }
-    }
-    if (const auto per = json.find(Keys::Per); per != json.end())
-    {
-        ReadTerms(*per, field + "." + Keys::Per, value.per);
-    }
-    WarnAboutUnknownKeys(json, ValueKeys, field);
-}
-
-void ItemOptionsReader::ReadTerms(const OrderedJson& json, const std::string& field, std::vector<ItemOptionTerm>& terms)
-{
-    if (!json.is_array() || json.empty())
-    {
-        AddFatal(field, R"(must be a list of terms: [{"attribute": "level", "divisor": 20}])");
-        return;
-    }
-    for (size_t index = 0; index < json.size(); ++index)
-    {
-        const std::string termField = field + "[" + std::to_string(index) + "]";
-        const OrderedJson& entry = json[index];
-        if (!entry.is_object())
-        {
-            AddFatal(termField, R"(must be an object: {"attribute": "level", "divisor": 20})");
-            continue;
-        }
-        ItemOptionTerm term;
-        if (!ReadName(entry, Keys::Attribute, termField, term.attribute))
-        {
-            continue;
-        }
-        const auto times = entry.find(Keys::Times);
-        const auto divisor = entry.find(Keys::Divisor);
-        if ((times == entry.end()) == (divisor == entry.end()))
-        {
-            AddFatal(termField, "needs exactly one of times and divisor");
-        }
-        else if (times != entry.end())
-        {
-            ReadWholeNumber(*times, termField + "." + Keys::Times, 1, MaxValue, term.times);
-        }
-        else
-        {
-            ReadWholeNumber(*divisor, termField + "." + Keys::Divisor, 1, MaxValue, term.divisor);
-        }
-        WarnAboutUnknownKeys(entry, TermKeys, termField);
-        terms.push_back(std::move(term));
-    }
-}
-
 void ItemOptionsReader::ReadTexts(const OrderedJson& json, const std::string& field, std::vector<std::string>& texts)
 {
     constexpr const char* Message = "must be the name of a text of OptionTexts.json, or a list of them";
@@ -440,7 +348,11 @@ void ItemOptionsReader::ReadAdd(const OrderedJson& json, const std::string& fiel
         AddFatal(field, R"(needs its value as "add", "addFinal" or "percent")");
         return;
     }
-    ReadValue(*value, field + "." + ItemOptionAddKeys[static_cast<size_t>(option.add)], option.value);
+    Json::ReadOptionValue(
+        *value, field + "." + ItemOptionAddKeys[static_cast<size_t>(option.add)], option.value,
+        [this](const std::string& errorField, const std::string& message) { AddFatal(errorField, message); },
+        [this](const std::string& unknown, const std::string& message)
+        { AddIssue(ItemDataIssueSeverity::Warning, unknown, message); });
 }
 
 void ItemOptionsReader::ReadOption(const OrderedJson& json, const std::string& field, ItemOptionType type,
@@ -515,39 +427,6 @@ bool ItemOptionsReader::ReadDefinition(const OrderedJson& json, const std::strin
 
 // ---------------------------------------------------------------- writing
 
-OrderedJson WriteValue(const ItemOptionValue& value)
-{
-    OrderedJson json;
-    if (value.isList)
-    {
-        json[Keys::Values] = value.values;
-    }
-    else
-    {
-        json[Keys::Values] = value.values.empty() ? 0 : value.values.front();
-    }
-    if (!value.per.empty())
-    {
-        OrderedJson terms = OrderedJson::array();
-        for (const ItemOptionTerm& term : value.per)
-        {
-            OrderedJson entry;
-            entry[Keys::Attribute] = term.attribute;
-            if (term.divisor > 0)
-            {
-                entry[Keys::Divisor] = term.divisor;
-            }
-            else
-            {
-                entry[Keys::Times] = term.times;
-            }
-            terms.push_back(std::move(entry));
-        }
-        json[Keys::Per] = std::move(terms);
-    }
-    return json;
-}
-
 OrderedJson WriteOption(const ItemOption& option, ItemOptionType type)
 {
     OrderedJson json;
@@ -556,7 +435,7 @@ OrderedJson WriteOption(const ItemOption& option, ItemOptionType type)
         json[Keys::Number] = option.number;
     }
     json[Keys::Attribute] = option.attribute;
-    json[ItemOptionAddKeys[static_cast<size_t>(option.add)]] = WriteValue(option.value);
+    json[ItemOptionAddKeys[static_cast<size_t>(option.add)]] = Json::WriteOptionValue(option.value);
     json[Keys::Text] = option.texts.size() == 1 ? OrderedJson(option.texts.front()) : OrderedJson(option.texts);
     return json;
 }

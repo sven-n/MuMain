@@ -639,9 +639,10 @@ placeholder is one of:
   `Level`, `Strength`, `Dexterity`, `Vitality`, `Energy` and `Leadership`
   `required…` (what the item asks, after the Jewel of Harmony's and the sockets'
   strength and agility reductions) and `missing…` (what the hero lacks of it, 0
-  when nothing), and the item's add option (the potions', scrolls', seals' and
-  charms' effect in the game's ItemAddOption data): `addOptionValue1`,
-  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
+  when nothing), and the buff the item gives (the potions', scrolls', seals'
+  and charms' effect, [its values and duration](buff-data.md#values)):
+  `addOptionValue1`, `addOptionValue2` and `addOptionDuration`, a text such as
+  "1 Hour"; the
   hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
   (its `name` in the item names' language), `levelPlusOne` (its level + 1),
   `bundleCount` (how many jewels or stones a bundle holds, as the game counts
