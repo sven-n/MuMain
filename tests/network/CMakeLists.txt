@@ -56,6 +56,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_pickup_reply
+    SOURCES
+        test_pickup_reply.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_transform_viewport_entry
     SOURCES
         test_transform_viewport_entry.cpp
