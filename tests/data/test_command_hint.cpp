@@ -11,12 +11,27 @@
 #include "GameLogic/Pets/PetStats.h"
 #include "I18N/All.h"
 #include "UI/Character/CommandHint.h"
-#include "UI/Character/CommandHintTexts.h"
-#include "UI/Character/TextsChangedWatch.h"
+#include "UI/Character/CharacterInfoWindow.h"
 
 #include <filesystem>
 #include <string>
 #include <vector>
+
+namespace mu::ui::window
+{
+struct CharacterInfoTextTestAccess
+{
+    static void Sync(CCharacterInfoWindow& window)
+    {
+        window.SyncChangedTexts();
+    }
+
+    static UI::Character::CommandHintTexts& CommandTexts(CCharacterInfoWindow& window)
+    {
+        return window.m_CommandHintTexts;
+    }
+};
+} // namespace mu::ui::window
 
 namespace
 {
@@ -180,16 +195,10 @@ TEST_CASE("The command hint is built again only when what it shows changes [data
 {
     CommandHintScope scope;
     REQUIRE(scope.Loaded());
-    UI::Character::CommandHintTexts texts;
-    UI::Character::TextsChangedWatch watch;
-    // What the window's sync does before it builds the hint.
-    const auto sync = [&texts, &watch]
-    {
-        if (watch.TakeChanged())
-        {
-            texts.Invalidate();
-        }
-    };
+    mu::ui::window::CCharacterInfoWindow window;
+    using Access = mu::ui::window::CharacterInfoTextTestAccess;
+    auto& texts = Access::CommandTexts(window);
+    const auto sync = [&window] { Access::Sync(window); };
 
     sync();
     CHECK(texts.Update(Effects(250, 300)));

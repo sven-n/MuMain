@@ -191,6 +191,8 @@ namespace mu::ui::window
             {{"Data/Interface/RmlUi/character_info.rml"}}};
 
     private:
+        friend struct CharacterInfoTextTestAccess;
+
         CManager* m_pNewUIMng;
         // The hint of the line the pointer is over (StatLine::hint), in the shared tooltip.
         UI::RmlBridge::ElementTooltip m_LineHint;
