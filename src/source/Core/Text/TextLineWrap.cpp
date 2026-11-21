@@ -219,3 +219,23 @@ void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t maxLeng
         Text2[0] = L'\0';  // Empty Text2
     }
 }
+
+void KeepFirstLinesWithEllipsis(std::vector<std::wstring>& lines, size_t maxLines, int maxWidth,
+                                const MeasureTextWidth& measureWidth, const std::wstring& ellipsis)
+{
+    if (maxLines == 0 || lines.size() <= maxLines)
+        return;
+
+    lines.resize(maxLines);
+    std::wstring& last = lines.back();
+    auto fitsWithEllipsis = [&](const std::wstring& line)
+    {
+        const std::wstring shown = line + ellipsis;
+        return measureWidth(shown.c_str(), shown.size()) <= maxWidth;
+    };
+    while (!last.empty() && !fitsWithEllipsis(last))
+        last.pop_back();
+    while (!last.empty() && last.back() == L' ')
+        last.pop_back();
+    last += ellipsis;
+}

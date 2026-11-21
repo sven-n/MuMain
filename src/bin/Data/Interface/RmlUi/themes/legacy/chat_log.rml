@@ -16,6 +16,10 @@
 		     data-event-dragstart="chat_resize_start" data-event-drag="chat_resize_drag"
 		     data-event-dragend="chat_resize_end"></div>
 
+		<!-- Hidden probes with a chat line's class and font; CChatLogWindow::GetRmlLineMeasure() wraps
+		     messages with them so lines break where RmlUi really runs out of room. -->
+		<div id="measure" class="chat-line chat-line--chat" data-style-font-size="text_px + 'px'" style="position: absolute; visibility: hidden; left: 0; top: 0;">.</div>
+		<div id="measure_gm" class="chat-line chat-line--gm" data-style-font-size="text_px + 'px'" style="position: absolute; visibility: hidden; left: 0; top: 0;">.</div>
 		<div id="lines" class="scroll-pane" data-style-height="client_height + 'dp'"
 		     data-style---line-px="line_px + 'px'" data-style---row-px="row_px + 'px'">
 			<div data-for="line : lines"
