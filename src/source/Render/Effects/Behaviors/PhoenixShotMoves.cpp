@@ -238,8 +238,13 @@ bool BoneOf(const OBJECT* target, vec3_t out)
     return true;
 }
 
+// One blow a reference tick: the frame is gated before anything is picked.
 void LandBlow(const OBJECT* blade)
 {
+    if (!rand_fps_check(1))
+    {
+        return;
+    }
     OBJECT* target = &CharactersClient[blade->m_sTargetIndex].Object;
     vec3_t at, light, angle;
     if (!BoneOf(target, at))
@@ -252,7 +257,7 @@ void LandBlow(const OBJECT* blade)
     Vector(1.f, 1.f, 1.f, light);
     Vector(0.f, 0.f, 0.f, angle);
     const float scale = BlowScale + static_cast<float>(Random::Rand() % BlowScaleSpread) * 0.02f;
-    CreateParticleFpsChecked(BITMAP_SBUMB, at, angle, light, BlowSubType, scale, target);
+    CreateParticle(BITMAP_SBUMB, at, angle, light, BlowSubType, scale, target);
 }
 
 void SwellAndFade(OBJECT* blade)

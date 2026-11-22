@@ -318,3 +318,35 @@ TEST_CASE("Phoenix Shot's blades are where they were at each reference tick and 
         CHECK(same->second == doctest::Approx(along));
     }
 }
+
+TEST_CASE("Phoenix Shot's lead blade lands a blow a tick on its target's bones for 14 ticks after the strike "
+          "[effects]")
+{
+    PhoenixScope scope(600.f, 1.f);
+    scope.Cast();
+    float elapsed = 0.f;
+    REQUIRE(MoveUntilStruck(60.f, &elapsed) > 0.f);
+    REQUIRE(LiveParticles(BITMAP_SBUMB, 1).empty());
+
+    // The blows live 4 ticks, but particles move apart from the effects, so every one stays to count.
+    for (int move = 0; move < 20; ++move)
+        MoveEffects();
+    const std::vector<const PARTICLE*> blows = LiveParticles(BITMAP_SBUMB, 1);
+    CHECK(blows.size() == 14);
+
+    const OBJECT& target = scope.Target();
+    for (const PARTICLE* blow : blows)
+    {
+        // On one of the bones, up to 20 off it along the ground.
+        bool onABone = false;
+        for (int bone = 0; bone < TargetBones; ++bone)
+        {
+            const float x = target.Position[0] + scope.targetPose[bone][0][3];
+            const float y = target.Position[1] + scope.targetPose[bone][1][3];
+            const float z = target.Position[2] + scope.targetPose[bone][2][3];
+            onABone = onABone || (std::fabs(blow->Position[0] - x) <= 20.f &&
+                                  std::fabs(blow->Position[1] - y) <= 20.f && blow->Position[2] == doctest::Approx(z));
+        }
+        CHECK(onABone);
+    }
+}

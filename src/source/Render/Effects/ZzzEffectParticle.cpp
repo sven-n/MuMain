@@ -9316,16 +9316,14 @@ void DescribeParticle(const PARTICLE& particle, int i, float Width, float Height
     case BITMAP_SBUMB:
     {
         // Subtype 1 (Phoenix Shot's blows) is drawn nearer the eye, so the body it lands on
-        // doesn't hide it.
+        // doesn't hide it: along the view axis of the pass drawing it (g_Camera.Matrix, which
+        // RenderSprite faces the quad with; its third row points back at the eye).
         constexpr float BlowNearer = 70.f;
         vec3_t at;
         VectorCopy(o->Position, at);
         if (o->SubType == 1)
         {
-            vec3_t toEye;
-            VectorSubtract(g_Camera.Position, at, toEye);
-            VectorNormalize(toEye);
-            VectorMA(at, BlowNearer, toEye, at);
+            VectorMA(at, BlowNearer, g_Camera.Matrix[2], at);
         }
         out.DrawSprite(Sprite(o->TexType, at, Width * 0.25f, Height, o->Light, 0.0f, o->Frame % 4 * 0.25f + 0.005f,
                               0.0f, 0.25f - 0.01f, 1.0f));
