@@ -4,6 +4,7 @@
 set(MU_PLATFORM_SOURCES "win32")
 set(MU_TARGET_ADAPTERS
   "Core/Platform/Adapters/UserFolderSdl.cpp"
+  "Core/Platform/Adapters/UserFilesOnDisk.cpp"
   "Core/Platform/Adapters/OpenSslCredentials.cpp"
   "Core/Platform/Adapters/CredentialHostWin32.cpp"
   "GameShop/FileDownloader/Adapters/CurlShopDownload.cpp"
