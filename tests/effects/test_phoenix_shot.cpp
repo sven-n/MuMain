@@ -205,6 +205,9 @@ TEST_CASE("Phoenix Shot's rig lets go its three blades on its eighth tick, 100 o
             subTypes |= 1 << blade->SubType;
         }
         CHECK(subTypes == 0b111);
+        // They're first moved in the pass that lets them go.
+        REQUIRE(LeadBlade() != nullptr);
+        CHECK(LeadBlade()->Distance == doctest::Approx(25.f * frameFactor + frameFactor * (frameFactor - 1.f)));
     }
 }
 
@@ -252,12 +255,12 @@ TEST_CASE("Phoenix Shot's lead blade strikes its target once: sparks over it, sp
 
 TEST_CASE("A Phoenix Shot blade still short of its target when its flight runs out strikes it then [effects]")
 {
-    // 20 ticks of flight take a blade 880 along.
+    // A blade flies 21 ticks (LifeTime 50 down to 30), 945 along.
     PhoenixScope scope(5000.f, 1.f);
     scope.Cast();
     float elapsed = 0.f;
     const float struck = MoveUntilStruck(60.f, &elapsed);
-    // Let go on the eighth tick, first moved on the ninth, 20 ticks of flight.
+    // Let go on the eighth tick and first moved in that pass: 7 + 21 ticks.
     CHECK(struck == doctest::Approx(28.f));
     const std::vector<const OBJECT*> spirals = LiveEffects(BITMAP_TWLIGHT, 4);
     CHECK(spirals.size() == 8);
