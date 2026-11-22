@@ -65,8 +65,8 @@ std::string DescribeProblem(const ItemModelProblem& problem)
                std::to_string(problem.meshCount) + " meshes";
     case ItemModelProblemType::RenderStyleUnknown:
         return "render style " + problem.name + " does not exist; " + problem.modelFile + " is drawn plainly";
-    case ItemModelProblemType::ItemEffectUnknown:
-        return "item effect " + problem.name + " does not exist; " + problem.modelFile + " is drawn without it";
+    case ItemModelProblemType::EffectUnknown:
+        return "effect " + problem.name + " does not exist; " + problem.modelFile + " is drawn without it";
     }
     return {};
 }
@@ -85,7 +85,7 @@ bool IsModelFileProblem(ItemModelProblemType type)
         return true;
     case ItemModelProblemType::GlowMeshMissing:
     case ItemModelProblemType::RenderStyleUnknown:
-    case ItemModelProblemType::ItemEffectUnknown:
+    case ItemModelProblemType::EffectUnknown:
         return false;
     }
     return false;

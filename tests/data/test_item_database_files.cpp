@@ -2128,14 +2128,14 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 }
 
 // Save Items writes the look files the Style Editor changed, each only when it changed (design L39).
-TEST_CASE("Saving writes ItemEffects.json when the item effects changed, and RenderStyles.json only when its looks did "
+TEST_CASE("Saving writes Effects.json when the effects changed, and RenderStyles.json only when its looks did "
           "[data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
     folder.CopyShippedGlowLists();
     const std::filesystem::path effects = folder.Directory() / "Data" / "Effects";
-    for (const char* file : {"RenderStyles.json", "ItemEffects.json"})
+    for (const char* file : {"RenderStyles.json", "Effects.json"})
     {
         std::filesystem::copy_file(ShippedClientDirectory / "Data" / "Effects" / file, effects / file);
     }
@@ -2151,17 +2151,17 @@ TEST_CASE("Saving writes ItemEffects.json when the item effects changed, and Ren
     REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
     g_ItemDataHandler.ForgetRenderStylesForTest();
 
-    Data::Looks::LookFile file = g_ItemDataHandler.GetLookFile(Data::Looks::LookKind::ItemEffect);
+    Data::Looks::LookFile file = g_ItemDataHandler.GetLookFile(Data::Looks::LookKind::Effect);
     REQUIRE_FALSE(file.looks.empty());
     file.looks[0].objectLight = std::array<Data::Looks::Number, 3>{0.25f, 0.5f, 0.75f};
-    g_ItemDataHandler.SetLookFile(Data::Looks::LookKind::ItemEffect, file);
+    g_ItemDataHandler.SetLookFile(Data::Looks::LookKind::Effect, file);
 
     std::vector<ItemDataIssue> issues;
     CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
     Data::Looks::LookFile saved;
     std::vector<ItemDataIssue> readIssues;
-    Data::Looks::ReadLookFile(TestFiles::ReadWholeFile(effects / "ItemEffects.json"), "ItemEffects.json",
-                              Data::Looks::LookKind::ItemEffect, saved, readIssues);
+    Data::Looks::ReadLookFile(TestFiles::ReadWholeFile(effects / "Effects.json"), "Effects.json",
+                              Data::Looks::LookKind::Effect, saved, readIssues);
     CHECK_FALSE(HasFatal(readIssues));
     CHECK(saved.looks == file.looks);
     CHECK(TestFiles::ReadWholeFile(effects / "RenderStyles.json") == renderStylesText);
@@ -4387,11 +4387,11 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
     SUBCASE("a look that does not exist")
     {
         kris.renderStyle = "noSuchStyle";
-        kris.itemEffect = "noSuchEffect";
+        kris.effect = "noSuchEffect";
         g_ItemModelDatabase.Set(kris, g_GlowColors);
         g_ItemDataHandler.Validate(issues);
         CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "renderStyle"));
-        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "itemEffect"));
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "effect"));
         CHECK_FALSE(HasFatal(issues));
     }
     SUBCASE("a value the model file reader refuses")

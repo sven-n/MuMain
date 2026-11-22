@@ -269,6 +269,8 @@ private:
     void RegisterLocaleObserver();
 #ifdef _EDITOR
     void NotifyNamesChanged(int number) const;
+    // The living monsters take the looks their models name again.
+    void NotifyModelLooksChanged() const;
     // The tables become what the files read: the monsters with their names
     // in the language shown, the models with the changed slots to reopen.
     void UseMonsters(std::span<const MonsterGroup> monsters);

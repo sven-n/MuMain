@@ -853,12 +853,7 @@ bool RenderMount(const OBJECT* o, bool bForceRender)
     if (!o->Live || (!bForceRender && !o->Visible) || !IsMountDrawn(o))
         return TRUE;
 
-    int State = 0;
-    if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
-    {
-        State = 10;
-    }
-    RenderObject(o, false, 0, State);
+    RenderObject(o, false, 0, g_isCharacterBuff(o->Owner, eBuff_Cloaking));
     return TRUE;
 }
 
@@ -905,7 +900,7 @@ void UpdateDrawnMountEffects(OBJECT* o)
         Vector(Luminosity * 0.5f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
         CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
     }
-    // A cloaked rider's mount draws only as a faint outline (Draw_RenderObject's ExtraMon 10), with no effects.
+    // A cloaked rider's mount draws only as a faint outline (Draw_RenderObject's cloaked outline), with no effects.
     if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
         return;
     PlaceObjectModel(o, &Models[o->Type]);

@@ -447,7 +447,7 @@ static void OpenPartModel(int modelType)
 // Models that are drawn for items, but are no item models themselves:
 // event models, the level 14/15 armor decorations and the parts of the
 // Rage Fighter weapons.
-static void OpenItemEffectModels()
+static void OpenEffectModels()
 {
     gLoadData.AccessModel(MODEL_EVENT + 18, L"Data\\Item\\", L"LifeStoneItem");
 
@@ -514,7 +514,7 @@ void PrepareGrandSoulPantsClothMesh()
                   BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
 }
 
-// Loads the looks that are data (Data/Effects/RenderStyles.json and ItemEffects.json), before the item models are
+// Loads the looks that are data (Data/Effects/RenderStyles.json and Effects.json), before the item models are
 // opened, which check the names of their looks.
 static void OpenRenderStyleData()
 {
@@ -523,9 +523,9 @@ static void OpenRenderStyleData()
     {
         StopOnDataError("Render style data error", errorMessage);
     }
-    if (!Data::Looks::LoadItemEffects(errorMessage))
+    if (!Data::Looks::LoadEffects(errorMessage))
     {
-        StopOnDataError("Item effect data error", errorMessage);
+        StopOnDataError("Effect data error", errorMessage);
     }
 }
 
@@ -538,14 +538,14 @@ void OpenItems()
         Data::Items::ModelLoader::OpenModels({Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
         PrepareGrandSoulPantsClothMesh();
     }
-    OpenItemEffectModels();
+    OpenEffectModels();
 
     LoadBitmap(L"Item\\NCcape.tga", BITMAP_NCCAPE, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\monk_manto01.TGA", BITMAP_MANTO01, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\monke_manto.TGA", BITMAP_MANTOE, GL_LINEAR, GL_REPEAT);
 }
 
-static void OpenItemEffectModelTextures()
+static void OpenEffectModelTextures()
 {
     gLoadData.OpenTexture(MODEL_EVENT + 11, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 12, L"Item\\");
@@ -574,7 +574,7 @@ static void OpenItemEffectModelTextures()
 }
 
 // Textures that the effect code of items draws with.
-void OpenItemEffectTextures()
+void OpenEffectTextures()
 {
     LoadBitmap(L"Item\\msword01_r.jpg", BITMAP_3RDWING_LAYER, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\rollofpaper_R.jpg", BITMAP_ROOLOFPAPER_EFFECT_R, GL_LINEAR);
@@ -604,9 +604,9 @@ void OpenItemTextures()
     // Before the effect textures, like the old code: a model texture that is
     // also an effect bitmap below stays a texture of its own, with its filter.
     Data::Items::ModelLoader::OpenTextures();
-    OpenItemEffectModelTextures();
+    OpenEffectModelTextures();
     gLoadData.OpenTexture(MODEL_ARROW, L"Item\\Bow\\");
-    OpenItemEffectTextures();
+    OpenEffectTextures();
 }
 
 void DeleteNpcs()

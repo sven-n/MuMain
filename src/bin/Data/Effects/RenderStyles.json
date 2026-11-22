@@ -27,6 +27,12 @@
       "itemValuesAfter": {"hiddenMesh": 1}
     },
     {
+      "name": "alphaCrust",
+      "layers": [
+        {"kind": "texture", "light": [0.1, 1, 0.8]}
+      ]
+    },
+    {
       "name": "ammunition",
       "layers": [
         {"kind": "texture", "blend": "asDrawing", "meshes": "allEvenHidden", "onlyWhen": {"buff": "infinityArrow"}, "opacity": "drawing", "light": [1, 0.8, 0.2]},
@@ -52,12 +58,65 @@
       ]
     },
     {
+      "name": "ashSlaughterer",
+      "layers": [
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "texture": "Effect/Bugbear_R.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 2.0943951023931953}}
+      ]
+    },
+    {
+      "name": "axeHero",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [0.5, 0.6, 0.8]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [1], "light": [0.5, 0.8, 0.6]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg"}
+      ]
+    },
+    {
+      "name": "axeWarrior",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": {"tint": [0.5, 0.6, 0.8]}},
+        {"kind": "texture", "meshes": [1], "light": [0.5, 0.8, 0.6]}
+      ]
+    },
+    {
+      "name": "balgass",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [1, 1, 1]},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome03.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome03.jpg"},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [2], "texture": "Effect/Chrome03.jpg"},
+        {"kind": "texture", "meshes": [3]},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [3], "texture": "Effect/Chrome03.jpg"}
+      ]
+    },
+    {
+      "name": "balrogChrome",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.2, 0]}}
+      ]
+    },
+    {
       "name": "battleScepter",
       "layers": [
         {"kind": "texture", "opacity": "drawing", "glowStrength": {"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}},
         {"kind": "texture", "meshes": [0], "opacity": "drawing", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}}
       ],
       "itemValuesAfter": {"glowStrength": {"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}}
+    },
+    {
+      "name": "berserk",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/buserbody_r.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/busersword_r.jpg", "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}}
+      ]
     },
     {
       "name": "billOfBalrog",
@@ -67,12 +126,41 @@
       ]
     },
     {
+      "name": "bladeHunter",
+      "layers": [
+        {"kind": "texture", "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/bladeeff2_r.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "onlyWhen": {"animation": "die", "opacityAbove": 0.8}},
+        {"kind": "texture", "blend": "glow", "onlyWhen": {"animation": "die", "opacityAtMost": 0.8}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "onlyWhen": {"animation": "die"}, "texture": "Effect/Chrome01.jpg"}
+      ]
+    },
+    {
+      "name": "bloodAssassin",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [1], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [1], "onlyWhen": {"notAnimation": "die"}, "texture": "Effect/pk_mon03_red.jpg", "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0.3, "to": 0.9, "seconds": 1.2566370614359172}},
+        {"kind": "texture", "meshes": [3], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [3], "onlyWhen": {"notAnimation": "die"}, "texture": "Effect/pk_mon02_fire.jpg", "glowMesh": 3, "glowStrength": {"shape": "wave", "from": 0.3, "to": 0.9, "seconds": 1.2566370614359172}},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "onlyWhen": {"notAnimation": "die"}, "light": {"fromRed": [0.65, 0.4225, 0.4225]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "onlyWhen": {"notAnimation": "die"}, "light": {"fromRed": [1.3, 1.3, 0.52]}}
+      ]
+    },
+    {
       "name": "bloodBone",
       "layers": [
         {"kind": "texture", "scrollU": 0, "scrollV": {"shape": "scroll", "perSecond": -0.5}, "light": {"tint": [0.9, 0.9, 0.9]}},
         {"kind": "texture", "blend": "glow", "texture": "Effect/Chrome01.jpg", "scrollU": 0, "scrollV": {"shape": "scroll", "perSecond": -0.5}, "light": [0.9, 0.1, 0.1], "scrollingMesh": 0}
       ],
       "itemValuesAfter": {"scrollU": 0, "scrollV": {"shape": "scroll", "perSecond": -0.5}, "light": {"tint": [1, 1, 1]}}
+    },
+    {
+      "name": "boneScorpion",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/BoneSE.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": -0.5, "to": 1.5, "seconds": 3.141592653589793}}
+      ]
     },
     {
       "name": "boostAura",
@@ -87,6 +175,17 @@
         {"kind": "texture", "meshes": [2, 3, 4, 5]},
         {"kind": "texture", "blend": "glow", "meshes": [0], "glowMesh": 0, "glowStrength": 0.4},
         {"kind": "texture", "blend": "glow", "meshes": [1], "glowMesh": 1, "glowStrength": 0.8}
+      ]
+    },
+    {
+      "name": "burningLavaGiant",
+      "layers": [
+        {"kind": "texture", "meshes": [1, 2]},
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [0], "onlyWhen": {"cycleHalf": {"seconds": 6.283185307179586, "half": "second"}}, "texture": "Effect/lavagiantAa_e.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "bounce", "from": 0, "to": 1, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"cycleHalf": {"seconds": 6.283185307179586, "half": "first"}}, "texture": "Effect/lavagiantAa_e.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "bounce", "from": 0, "to": 1, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"cycleHalf": {"seconds": 6.283185307179586, "half": "first"}}, "texture": "Effect/lavagiantAa_e.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "bounce", "from": 0, "to": 1, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"cycleHalf": {"seconds": 6.283185307179586, "half": "first"}}, "texture": "Effect/lavagiantAa_e.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "bounce", "from": 0, "to": 1, "seconds": 3.141592653589793}}
       ]
     },
     {
@@ -138,6 +237,14 @@
       ]
     },
     {
+      "name": "cherryBlossomSpirit",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "glowStrength": 2},
+        {"kind": "reflection", "motion": "verySlowDrift", "meshes": [0], "opacity": 0.25, "glowStrength": 1},
+        {"kind": "texture", "meshes": {"allBut": [0]}, "opacity": 0.8, "glowStrength": 2}
+      ]
+    },
+    {
       "name": "chromeMesh0",
       "layers": [
         {"kind": "texture"},
@@ -165,6 +272,17 @@
       ]
     },
     {
+      "name": "condra",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [1], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/bora_golem_effect.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/bora_golem2_effect.jpg", "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [3], "onlyWhen": {"notAnimation": "die"}, "glowMesh": 3, "glowStrength": 0.9, "scrollU": {"shape": "scroll", "perSecond": 1}},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "onlyWhen": {"notAnimation": "die"}, "glowMesh": 2, "glowStrength": 0.3, "scrollU": {"shape": "scroll", "perSecond": 1.5}, "light": [0.4, 0.95, 1]}
+      ]
+    },
+    {
       "name": "contractSummon",
       "layers": [
         {"kind": "texture", "meshes": [0], "onlyWhen": {"hiddenMesh": 1}, "opacity": 1, "light": [1, 1, 1]},
@@ -189,10 +307,67 @@
       "itemValuesAfter": {"scrollingMesh": 1}
     },
     {
+      "name": "cruelBloodAssassin",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [1], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [1], "onlyWhen": {"notAnimation": "die"}, "texture": "Effect/pk_mon03_green.jpg", "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0.3, "to": 0.9, "seconds": 1.2566370614359172}},
+        {"kind": "texture", "meshes": [3], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [3], "onlyWhen": {"notAnimation": "die"}, "texture": "Effect/pk_mon02_green.jpg", "glowMesh": 3, "glowStrength": {"shape": "wave", "from": 0.3, "to": 0.9, "seconds": 1.2566370614359172}},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "onlyWhen": {"notAnimation": "die"}, "light": {"fromRed": [0.65, 0.4225, 0.4225]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "onlyWhen": {"notAnimation": "die"}, "light": {"fromRed": [1.3, 1.3, 0.52]}}
+      ]
+    },
+    {
+      "name": "crust",
+      "layers": [
+        {"kind": "texture", "texture": "Monster/iui03.jpg", "light": [0.4, 0.3, 0.5], "scrollingMesh": 0},
+        {"kind": "texture", "light": [0.5, 0.5, 0.5]}
+      ]
+    },
+    {
+      "name": "crypos",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "blend": "glow", "meshes": [3], "glowMesh": 0, "glowStrength": 1, "light": [1, 1, 1]}
+      ]
+    },
+    {
+      "name": "crypta",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/KryptaBall2.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}}
+      ]
+    },
+    {
+      "name": "crywolfGreenChrome",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [0.6, 0.8, 0.6]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "texture": "Effect/Chrome01.jpg"}
+      ]
+    },
+    {
       "name": "cursedCastleWater",
       "layers": [
         {"kind": "texture", "blend": "asDrawing", "meshes": "allEvenHidden", "opacity": "drawing", "glowStrength": {"itemTimes": 1.5}},
         {"kind": "texture", "blend": "glow", "meshes": {"allBut": [0]}, "opacity": "drawing", "glowStrength": {"itemTimes": 0.25}, "scrollU": {"shape": "scroll", "perSecond": 5}, "scrollV": {"shape": "scroll", "perSecond": -5}}
+      ]
+    },
+    {
+      "name": "darkElfTrainee",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0]},
+        {"kind": "reflection", "motion": "stripes", "blend": "glow", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1]},
+        {"kind": "reflection", "motion": "stripes", "blend": "glow", "meshes": [1]}
       ]
     },
     {
@@ -256,10 +431,35 @@
       ]
     },
     {
+      "name": "deathRider",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [0.9, 0.9, 0.9]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "meshes": [3], "scrollU": {"shape": "ramp", "from": 0, "to": -6, "seconds": 10}, "scrollV": {"shape": "ramp", "from": 0, "to": -6, "seconds": 10}, "scrollingMesh": 0},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [3], "scrollingMesh": 0}
+      ]
+    },
+    {
+      "name": "deathSpirit",
+      "layers": [
+        {"kind": "texture", "meshes": [0, 1], "glowMesh": "none", "scrollU": {"shape": "ramp", "from": 0, "to": 5, "seconds": 10}},
+        {"kind": "texture", "meshes": [2], "onlyWhen": {"opacityAbove": 0.3}, "opacity": 0.3, "glowMesh": "all", "scrollU": {"shape": "ramp", "from": 0, "to": 5, "seconds": 10}, "scrollingMesh": 2},
+        {"kind": "texture", "meshes": [2], "onlyWhen": {"opacityAtMost": 0.3}, "glowMesh": "all", "scrollU": {"shape": "ramp", "from": 0, "to": 5, "seconds": 10}, "scrollingMesh": 2}
+      ]
+    },
+    {
       "name": "demonicStick",
       "layers": [
         {"kind": "texture", "blend": "asDrawing", "meshes": "allEvenHidden", "opacity": "drawing"},
         {"kind": "texture", "blend": "glow", "meshes": [1], "opacity": "drawing", "glowMesh": 1, "glowStrength": 1}
+      ]
+    },
+    {
+      "name": "devil",
+      "layers": [
+        {"kind": "texture", "light": [1, 1, 1]},
+        {"kind": "texture", "blend": "glow", "texture": "Effect/Chrome01.jpg", "light": [0.4, 0.6, 1], "scrollingMesh": 0}
       ]
     },
     {
@@ -286,10 +486,48 @@
       ]
     },
     {
+      "name": "doppelganger",
+      "layers": [
+        {"kind": "texture", "blend": "glow", "meshes": [0]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "opacity": 0.3}
+      ]
+    },
+    {
+      "name": "doppelgangerIceWalker",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "texture": "Monster/DGicewalker_body.jpg"},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "texture": "Monster/DGicewalker_R.jpg"}
+      ]
+    },
+    {
+      "name": "doppelgangerLarva",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "texture": "Monster/Snake1.jpg"},
+        {"kind": "texture", "meshes": [1]}
+      ]
+    },
+    {
+      "name": "doppelgangerSlaughterer",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "texture": "Effect/Bugbear_R.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0, "to": 0.8, "seconds": 2.0943951023931953}}
+      ]
+    },
+    {
       "name": "dragonSpear",
       "layers": [
         {"kind": "texture", "blend": "asDrawing", "opacity": "drawing"},
         {"kind": "texture", "meshes": [1], "opacity": 1, "glowMesh": 1, "scrollU": {"shape": "scroll", "perSecond": 0.1}, "scrollV": {"shape": "scroll", "perSecond": 0.5}}
+      ]
+    },
+    {
+      "name": "drakan",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": [0.2, 0.2, 0.8]},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": "allEvenHidden", "light": [1, 1, 1], "lightMap": true}
       ]
     },
     {
@@ -317,6 +555,30 @@
       ]
     },
     {
+      "name": "erkanne",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "meshes": [3]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [3]},
+        {"kind": "texture", "meshes": [4]}
+      ]
+    },
+    {
+      "name": "erohim",
+      "layers": [
+        {"kind": "texture", "meshes": {"allBut": [5]}},
+        {"kind": "texture", "meshes": [5], "texture": "Monster/bosswing.tga", "opacity": 1, "glowMesh": "none"},
+        {"kind": "texture", "meshes": [5], "opacity": 1, "glowMesh": "none"},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [4], "opacity": 1, "light": [1, 0.5, 0]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "opacity": 1, "light": [0.75, 0.65, 0.5]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "opacity": 1},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [3], "opacity": 1},
+        {"kind": "texture", "meshes": [0], "texture": "Monster/bossmap1_R.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0.3, "to": 0.9, "seconds": 5.235987755982989}}
+      ]
+    },
+    {
       "name": "eventTicket",
       "layers": [
         {"kind": "texture"},
@@ -330,6 +592,14 @@
         {"kind": "texture", "meshes": [0], "glowMesh": 0},
         {"kind": "texture", "meshes": [2], "glowMesh": "all", "light": [{"shape": "wave", "from": 0.27, "to": 0.33, "seconds": 4.1887902}, {"shape": "wave", "from": 0.27, "to": 0.33, "seconds": 4.1887902}, {"shape": "wave", "from": 0.37, "to": 0.43, "seconds": 4.1887902}]},
         {"kind": "texture", "meshes": [1], "opacity": 0.5, "glowMesh": "all", "light": [0.4, 0.4, 0.8]}
+      ]
+    },
+    {
+      "name": "fireGolem",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "scrollU": {"shape": "ramp", "from": 0, "to": 2, "seconds": 10}, "scrollV": {"shape": "ramp", "from": 0, "to": 2, "seconds": 10}, "light": {"tint": [{"shape": "wave", "from": 0.5, "to": 2.1, "seconds": 5.235987755982989, "atMost": 1.3}, {"shape": "wave", "from": 0.5, "to": 2.1, "seconds": 5.235987755982989, "atMost": 1.3}, {"shape": "wave", "from": 0.5, "to": 2.1, "seconds": 5.235987755982989, "atMost": 1.3}]}, "scrollingMesh": 0},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "scrollingMesh": 0},
+        {"kind": "texture", "meshes": [1], "light": {"tint": [1, 1, 1]}}
       ]
     },
     {
@@ -382,11 +652,40 @@
       ]
     },
     {
+      "name": "galia",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [3]},
+        {"kind": "texture", "blend": "glow", "meshes": [2]},
+        {"kind": "reflection", "motion": "swirl", "meshes": [2]}
+      ]
+    },
+    {
       "name": "gambleItem",
       "layers": [
         {"kind": "texture", "blend": "glow", "meshes": [0], "glowMesh": 0, "glowStrength": 0.35},
         {"kind": "texture", "blend": "glow", "meshes": [1], "glowMesh": 1, "glowStrength": {"shape": "turn", "from": 0.2, "to": 0}},
         {"kind": "texture", "meshes": [2], "glowMesh": 2, "glowStrength": {"shape": "turn", "from": 0.2, "to": 0}}
+      ]
+    },
+    {
+      "name": "gigantis",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [2]}
+      ]
+    },
+    {
+      "name": "gigasGolem",
+      "layers": [
+        {"kind": "texture", "meshes": [1], "scrollU": {"shape": "ramp", "from": 0, "to": 2, "seconds": 10}, "scrollV": {"shape": "ramp", "from": 0, "to": 2, "seconds": 10}, "light": [{"shape": "wave", "from": 0.05, "to": 0.21, "seconds": 5.235987755982989, "atMost": 0.13}, {"shape": "wave", "from": 0.5, "to": 2.1, "seconds": 5.235987755982989, "atMost": 1.3}, {"shape": "wave", "from": 0.05, "to": 0.21, "seconds": 5.235987755982989, "atMost": 0.13}], "scrollingMesh": 1},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg", "scrollingMesh": 1},
+        {"kind": "texture", "meshes": [0], "opacity": {"shape": "wave", "from": 0.6, "to": 1, "seconds": 5.235987755982989}, "light": [1, 1, 1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [2], "glowMesh": 2, "glowStrength": 0.5, "scrollingMesh": 2},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "texture": "Effect/Chrome01.jpg", "scrollingMesh": 2}
       ]
     },
     {
@@ -398,11 +697,82 @@
       ]
     },
     {
+      "name": "goldenChrome",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "reflection", "motion": "stillShine", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}}
+      ]
+    },
+    {
+      "name": "goldenCrust",
+      "layers": [
+        {"kind": "texture", "texture": "Monster/iui03.jpg", "light": [0.4, 0.3, 0.5], "scrollingMesh": 0},
+        {"kind": "texture", "light": [0.5, 0.5, 0.5]},
+        {"kind": "reflection", "motion": "stillShine", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}}
+      ]
+    },
+    {
+      "name": "goldenDevil",
+      "layers": [
+        {"kind": "texture", "light": [1, 1, 1]},
+        {"kind": "texture", "blend": "glow", "texture": "Effect/Chrome01.jpg", "light": [0.4, 0.6, 1], "scrollingMesh": 0},
+        {"kind": "reflection", "motion": "stillShine", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}}
+      ]
+    },
+    {
       "name": "goldenOrSilverBox",
       "layers": [
         {"kind": "texture", "meshes": [1]},
         {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "glowMesh": 1},
         {"kind": "texture", "meshes": [2]}
+      ]
+    },
+    {
+      "name": "goldenSatyros",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "opacity": 1, "glowMesh": 0, "scrollV": {"shape": "scroll", "perSecond": 0.5}, "scrollingMesh": 1},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [3], "texture": "Effect/Chrome01.jpg", "opacity": 1, "glowMesh": 0, "scrollV": {"shape": "scroll", "perSecond": 1}},
+        {"kind": "texture", "blend": "glow", "meshes": [4], "opacity": 1, "glowMesh": 2, "scrollU": {"shape": "scroll", "perSecond": 0.1}, "scrollV": {"shape": "scroll", "perSecond": -0.5}, "light": {"fromRed": [{"shape": "wave", "from": 0, "to": 1, "seconds": 6.283185}, {"shape": "wave", "from": 0, "to": 1, "seconds": 6.283185}, {"shape": "wave", "from": 0, "to": 1, "seconds": 6.283185}]}},
+        {"kind": "reflection", "motion": "stillShine", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}}
+      ]
+    },
+    {
+      "name": "goldenShine",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "reflection", "motion": "stillShine", "blend": "glow", "meshes": "allEvenHidden", "texture": "Effect/Shiny02.jpg", "light": {"timesOpacity": [1, 0.5, 0]}}
+      ]
+    },
+    {
+      "name": "goldenStoneGolem",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "scrollU": {"shape": "ramp", "from": 0, "to": -3, "seconds": 10}, "scrollV": {"shape": "ramp", "from": 0, "to": -3, "seconds": 10}, "light": [0.9, 0.9, 0.9], "scrollingMesh": 0},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "scrollingMesh": 0},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "stillShine", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}}
+      ]
+    },
+    {
+      "name": "goldenTwinTail",
+      "layers": [
+        {"kind": "texture", "onlyWhen": {"notAnimation": "die"}, "light": [0.9, 0.9, 1]},
+        {"kind": "texture", "onlyWhen": {"animation": "die"}, "light": [0.3, 1, 0.2]},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "texture": "Monster/illumi_R.jpg", "glowMesh": 2, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [3], "glowMesh": 3, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 3.141592653589793}, "scrollU": 0, "scrollV": 0},
+        {"kind": "reflection", "motion": "stillShine", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}}
+      ]
+    },
+    {
+      "name": "goneWhenDying",
+      "layers": [
+        {"kind": "texture", "onlyWhen": {"notAnimation": "die"}}
       ]
     },
     {
@@ -422,6 +792,24 @@
         {"kind": "texture", "meshes": [0], "opacity": 1, "glowMesh": "none"},
         {"kind": "texture", "meshes": [1], "opacity": 1, "glowMesh": 1, "scrollU": {"shape": "random", "from": 0, "to": 0.9, "step": 0.1}, "scrollV": {"shape": "random", "from": 0, "to": 0.9, "step": 0.1}},
         {"kind": "texture", "blend": "glow", "meshes": [2], "opacity": 1, "glowMesh": 2, "scrollU": {"shape": "scroll", "perSecond": 0.1}, "scrollV": {"shape": "scroll", "perSecond": 0.5}, "light": {"tint": [{"shape": "wave", "from": 0.2, "to": 1, "seconds": 6.283185}, {"shape": "wave", "from": 0.2, "to": 1, "seconds": 6.283185}, {"shape": "wave", "from": 0.2, "to": 1, "seconds": 6.283185}]}}
+      ]
+    },
+    {
+      "name": "grandWizard",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "onlyWhen": {"animation": "die"}, "light": [0.3, 1, 0.2]},
+        {"kind": "texture", "meshes": [0], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "blend": "glow", "meshes": [3], "glowMesh": 3, "glowStrength": 0.5}
+      ]
+    },
+    {
+      "name": "greatDrakan",
+      "layers": [
+        {"kind": "texture", "meshes": {"allBut": [1]}, "light": [0.1, 0.1, 0.1]},
+        {"kind": "texture", "meshes": [1], "light": [1, 0.1, 0.1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": [1, 0.1, 0.1]}
       ]
     },
     {
@@ -454,6 +842,16 @@
       "layers": [
         {"kind": "texture", "meshes": "allEvenHidden", "opacity": "drawing"},
         {"kind": "texture", "blend": "glow", "meshes": [1]}
+      ]
+    },
+    {
+      "name": "hellMaine",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [1, 1, 1], "scrollingMesh": 0},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "light": [1, 0, 0], "scrollingMesh": 0},
+        {"kind": "texture", "meshes": [1], "light": [1, 1, 1]},
+        {"kind": "texture", "meshes": [2], "scrollingMesh": 1},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "light": [0.5, 0, 0], "scrollingMesh": 1}
       ]
     },
     {
@@ -509,11 +907,55 @@
       ]
     },
     {
+      "name": "jerint",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "meshes": [3]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [3], "light": [0.3, 0.3, 0.3]}
+      ],
+      "itemValuesAfter": {"light": {"tint": [1, 1, 1]}}
+    },
+    {
       "name": "jewelryCase",
       "layers": [
         {"kind": "texture", "meshes": [0]},
         {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "glowMesh": 0},
         {"kind": "texture", "meshes": [1]}
+      ]
+    },
+    {
+      "name": "kalimaShop",
+      "layers": [
+        {"kind": "texture", "meshes": [4], "light": [1, 1, 1]},
+        {"kind": "texture", "meshes": [3]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [0]}
+      ]
+    },
+    {
+      "name": "kanturuGate",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "reflection", "motion": "slowDrift", "meshes": [1], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "texture": "Npc/khs_kan2gate004.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "meshes": [2], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "texture": "Npc/khs_kan2gate003.jpg"},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "meshes": [3], "texture": "Effect/Chrome01.jpg", "glowMesh": 3, "scrollV": {"shape": "scroll", "perSecond": -0.3}},
+        {"kind": "texture", "blend": "glow", "meshes": [3], "texture": "Npc/khs_kan2gate001.jpg"},
+        {"kind": "texture", "meshes": [3]}
+      ]
+    },
+    {
+      "name": "kentauros",
+      "layers": [
+        {"kind": "texture", "light": [1, 1, 1]},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 3.141592653589793}, "scrollU": 0, "scrollV": 0},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [1]}
       ]
     },
     {
@@ -526,10 +968,37 @@
       ]
     },
     {
+      "name": "knightCommander",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2]}
+      ]
+    },
+    {
+      "name": "lavaGiant",
+      "layers": [
+        {"kind": "texture", "meshes": [1, 2]},
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [0], "onlyWhen": {"cycleHalf": {"seconds": 6.283185307179586, "half": "second"}}, "texture": "Effect/lavagiantBa_e.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "bounce", "from": 0, "to": 1, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"cycleHalf": {"seconds": 6.283185307179586, "half": "first"}}, "texture": "Effect/lavagiantBa_e.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "bounce", "from": 0, "to": 1, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"cycleHalf": {"seconds": 6.283185307179586, "half": "first"}}, "texture": "Effect/lavagiantBa_e.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "bounce", "from": 0, "to": 1, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"cycleHalf": {"seconds": 6.283185307179586, "half": "first"}}, "texture": "Effect/lavagiantBa_e.jpg", "opacity": 1, "glowMesh": 0, "glowStrength": {"shape": "bounce", "from": 0, "to": 1, "seconds": 3.141592653589793}}
+      ]
+    },
+    {
       "name": "lifeStone",
       "layers": [
         {"kind": "texture", "meshes": [0], "opacity": 1, "light": [1, 1, 1]},
         {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "opacity": 1, "light": [0, 0.5, 1]}
+      ]
+    },
+    {
+      "name": "lizardWarrior",
+      "layers": [
+        {"kind": "texture", "meshes": {"allBut": [1]}},
+        {"kind": "texture", "meshes": [1], "light": [0.6, 0.4, 0.4]}
       ]
     },
     {
@@ -571,6 +1040,24 @@
       "itemValuesAfter": {"glowMesh": 1, "glowStrength": 1}
     },
     {
+      "name": "mayaHandLeft",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "texture": "Effect/Chrome01.jpg"}
+      ]
+    },
+    {
+      "name": "mayaHandRight",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1]}
+      ]
+    },
+    {
       "name": "meshesPerLevel",
       "drawsAlone": true,
       "layers": [
@@ -583,6 +1070,14 @@
       "itemValuesAfter": {"scrollingMesh": "none"}
     },
     {
+      "name": "metalBalrog",
+      "layers": [
+        {"kind": "texture", "onlyWhen": {"withoutBuff": "tintingDebuff"}, "light": [0, 0, 1]},
+        {"kind": "texture", "onlyWhen": {"buff": "tintingDebuff"}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [0.8, 0.8, 1]}}
+      ]
+    },
+    {
       "name": "monsterBattleBow",
       "notFor": ["outsideMonsterHands"],
       "layers": [
@@ -590,10 +1085,59 @@
       ]
     },
     {
+      "name": "mutantHero",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [1, 1, 1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "texture": "Effect/Chrome01.jpg"}
+      ]
+    },
+    {
+      "name": "narcondra",
+      "layers": [
+        {"kind": "texture", "meshes": [1], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [2], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "meshes": [3], "onlyWhen": {"notAnimation": "die"}},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/king_golem01_effect.jpg", "glowMesh": 2, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [3], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/king_golem02_effect.jpg", "glowMesh": 3, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "onlyWhen": {"notAnimation": "die"}, "texture": "Monster/king_golem03_effect.jpg", "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"notAnimation": "die"}, "glowMesh": 0, "glowStrength": 1, "light": [1, 1, 1]},
+        {"kind": "texture", "blend": "glow", "meshes": [4], "onlyWhen": {"notAnimation": "die"}, "glowMesh": 4, "glowStrength": 0.9, "scrollU": {"shape": "scroll", "perSecond": 1}, "light": [1, 0.1, 1]},
+        {"kind": "texture", "blend": "glow", "meshes": [5], "onlyWhen": {"notAnimation": "die"}, "glowMesh": 5, "glowStrength": 0.7, "scrollU": {"shape": "scroll", "perSecond": 1.5}, "light": [0.7, 0.4, 1]}
+      ]
+    },
+    {
+      "name": "nightmareSoldier",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [1, 1, 1]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "meshes": [3]},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "texture": "Monster/nightmaresward_R.jpg", "light": [{"shape": "wave", "from": 0, "to": 0.7, "seconds": 2.0943951023931953}, {"shape": "wave", "from": 0, "to": 0.7, "seconds": 2.0943951023931953}, {"shape": "wave", "from": 0, "to": 0.7, "seconds": 2.0943951023931953}]},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "texture": "Monster/nightmare_R.jpg"},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [2], "onlyWhen": {"animation": "attack1"}, "light": [0.7, 0.7, 1]},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [3], "onlyWhen": {"animation": "attack1"}},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [2], "onlyWhen": {"animation": "attack2"}, "light": [0.7, 0.7, 1]},
+        {"kind": "reflection", "motion": "fastSweep", "blend": "glow", "meshes": [3], "onlyWhen": {"animation": "attack2"}}
+      ]
+    },
+    {
       "name": "oldScroll",
       "layers": [
         {"kind": "texture", "blend": "asDrawing", "meshes": {"allBut": [1]}, "opacity": 0.7},
         {"kind": "texture", "blend": "glow", "meshes": {"allBut": [0]}, "opacity": 1, "glowMesh": 4, "glowStrength": {"shape": "wave", "from": 0.4, "to": 1, "seconds": 3.1415925}}
+      ]
+    },
+    {
+      "name": "omegaWing",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [1, 1, 1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg"}
       ]
     },
     {
@@ -639,6 +1183,20 @@
       ]
     },
     {
+      "name": "orcArcherOfDoom",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "texture": "Monster/Kni000.jpg", "light": [1, 1, 1]},
+        {"kind": "texture", "meshes": [2], "texture": "Monster/Kni022.jpg"}
+      ]
+    },
+    {
+      "name": "orcSoldierOfDoom",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "texture": "Monster/Kni011.jpg", "light": [1, 1, 1]},
+        {"kind": "texture", "meshes": [1], "texture": "Monster/Kni000.jpg"}
+      ]
+    },
+    {
       "name": "packageBoxA",
       "layers": [
         {"kind": "texture", "meshes": [0], "texture": "Item/InGameShop/membership_item_red.jpg", "glowMesh": "none"}
@@ -672,6 +1230,21 @@
       "name": "packageBoxF",
       "layers": [
         {"kind": "texture", "meshes": [0], "texture": "Item/InGameShop/membership_item_sky.jpg", "glowMesh": "none"}
+      ]
+    },
+    {
+      "name": "persona",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "texture": "Monster/prsona_R.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "texture": "Monster/prsonass_R.jpg", "glowMesh": 2, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 3.141592653589793}}
+      ]
+    },
+    {
+      "name": "phantomKnight",
+      "layers": [
+        {"kind": "texture", "light": [1, 1, 1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "texture": "Effect/bab2.jpg", "light": [0.9, 0.8, 1]}
       ]
     },
     {
@@ -728,10 +1301,45 @@
       "itemValuesAfter": {"hiddenMesh": 1}
     },
     {
+      "name": "poisonGolem",
+      "layers": [
+        {"kind": "texture", "meshes": [1], "scrollU": {"shape": "ramp", "from": 0, "to": 2, "seconds": 10}, "scrollV": {"shape": "ramp", "from": 0, "to": 2, "seconds": 10}, "light": {"tint": [{"shape": "wave", "from": 0.05, "to": 0.21, "seconds": 5.235987755982989, "atMost": 0.13}, {"shape": "wave", "from": 0.5, "to": 2.1, "seconds": 5.235987755982989, "atMost": 1.3}, {"shape": "wave", "from": 0.05, "to": 0.21, "seconds": 5.235987755982989, "atMost": 0.13}]}, "scrollingMesh": 1},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "scrollingMesh": 1},
+        {"kind": "texture", "meshes": [0], "opacity": {"shape": "wave", "from": 0.6, "to": 1, "seconds": 5.235987755982989}, "light": {"tint": [1, 1, 1]}},
+        {"kind": "texture", "meshes": [2], "glowMesh": 2, "glowStrength": 0.5, "scrollingMesh": 2}
+      ]
+    },
+    {
       "name": "pumpkinOfLuck",
       "layers": [
         {"kind": "texture"},
         {"kind": "reflection", "motion": "slowDrift", "blend": "darken", "meshes": [1], "texture": "Effect/Chrome01.jpg", "scrollU": {"shape": "scroll", "perSecond": -0.2}}
+      ]
+    },
+    {
+      "name": "quarrel",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [0.5, 0.5, 0.8]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg"}
+      ]
+    },
+    {
+      "name": "quartermaster",
+      "layers": [
+        {"kind": "texture", "meshes": [0]},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "opacity": 0.3, "glowMesh": 2, "glowStrength": 0.3}
+      ]
+    },
+    {
+      "name": "queenBee",
+      "layers": [
+        {"kind": "texture", "meshes": {"allBut": [0]}},
+        {"kind": "texture", "meshes": [0], "glowMesh": "none", "glowStrength": 1, "light": [1, 1, 1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "glowMesh": "none", "glowStrength": 1, "light": [0.8, 0.6, 1]}
       ]
     },
     {
@@ -815,6 +1423,14 @@
       ]
     },
     {
+      "name": "raymond",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "texture": "Effect/raymond_sword_R.jpg", "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 2.0943951023931953}, "light": {"fromRed": [3, 9, 9]}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [3], "light": {"tint": [1, 1, 1]}}
+      ]
+    },
+    {
       "name": "runeBastardSword",
       "layers": [
         {"kind": "texture", "blend": "asDrawing", "meshes": "allEvenHidden", "opacity": "drawing"},
@@ -839,6 +1455,28 @@
       "layers": [
         {"kind": "texture", "meshes": {"allBut": [1]}, "opacity": "drawing"},
         {"kind": "texture", "blend": "glow", "meshes": [1]}
+      ]
+    },
+    {
+      "name": "satyros",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "opacity": 1, "glowMesh": 0, "scrollV": {"shape": "scroll", "perSecond": 0.5}, "scrollingMesh": 1},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [3], "texture": "Effect/Chrome01.jpg", "opacity": 1, "glowMesh": 0, "scrollV": {"shape": "scroll", "perSecond": 1}},
+        {"kind": "texture", "blend": "glow", "meshes": [4], "opacity": 1, "glowMesh": 2, "scrollU": {"shape": "scroll", "perSecond": 0.1}, "scrollV": {"shape": "scroll", "perSecond": -0.5}, "light": {"fromRed": [{"shape": "wave", "from": 0, "to": 1, "seconds": 6.283185}, {"shape": "wave", "from": 0, "to": 1, "seconds": 6.283185}, {"shape": "wave", "from": 0, "to": 1, "seconds": 6.283185}]}}
+      ]
+    },
+    {
+      "name": "scoutHero",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [0.5, 0.5, 0.6]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [3]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [3], "texture": "Effect/Chrome01.jpg"}
       ]
     },
     {
@@ -880,6 +1518,13 @@
       ]
     },
     {
+      "name": "seedMaster",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "opacity": {"shape": "wave", "from": 0, "to": 0.4, "seconds": 6.283185307179586}, "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0, "to": 0.4, "seconds": 6.283185307179586}}
+      ]
+    },
+    {
       "name": "siegePotion",
       "layers": [
         {"kind": "texture", "meshes": [0], "onlyWhen": {"hiddenMesh": 1}, "opacity": 1, "light": [1, 1, 1]},
@@ -888,6 +1533,13 @@
         {"kind": "texture", "meshes": [1], "onlyWhen": {"hiddenMesh": 0}, "opacity": 1, "light": [1, 1, 1]},
         {"kind": "reflection", "motion": "stillShine", "blend": "glow", "meshes": [1], "onlyWhen": {"hiddenMesh": 0}, "opacity": 1, "light": [0.1, 0.5, 1]},
         {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "onlyWhen": {"hiddenMesh": 0}, "opacity": 1}
+      ]
+    },
+    {
+      "name": "silverValkyrieChrome",
+      "layers": [
+        {"kind": "texture"},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 1, 1]}}
       ]
     },
     {
@@ -926,12 +1578,28 @@
       ]
     },
     {
+      "name": "soram",
+      "layers": [
+        {"kind": "texture", "light": [1, 1, 1]}
+      ]
+    },
+    {
       "name": "spirit",
       "drawsAlone": true,
       "layers": [
         {"kind": "texture", "opacity": "drawing"},
         {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"level": [0, 0]}, "opacity": "drawing", "glowMesh": 0},
         {"kind": "texture", "blend": "glow", "meshes": [0], "onlyWhen": {"level": [1, 1]}, "opacity": "drawing", "glowMesh": 0, "light": [0.3, 0.8, 1]}
+      ]
+    },
+    {
+      "name": "splinterWolf",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "opacity": 1, "glowMesh": "none", "glowStrength": 1, "scrollU": 0, "scrollV": 0, "light": [1, 1, 1]},
+        {"kind": "texture", "meshes": [1], "opacity": 1, "glowMesh": "none", "glowStrength": 1, "scrollU": 0, "scrollV": 0},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "glowMesh": 2, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 3.141592653589793}, "scrollU": 0, "scrollV": 0},
+        {"kind": "texture", "blend": "glow", "meshes": [3], "glowMesh": 3, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 3.141592653589793}, "scrollU": 0, "scrollV": 0},
+        {"kind": "texture", "meshes": [4], "opacity": 1, "glowMesh": "none", "glowStrength": 1, "scrollU": 0, "scrollV": 0}
       ]
     },
     {
@@ -949,6 +1617,14 @@
         {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "opacity": "drawing", "glowMesh": 1, "glowStrength": 0.2},
         {"kind": "texture", "blend": "glow", "meshes": [0], "opacity": "drawing", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": -1, "to": 1, "seconds": 1.2566371}},
         {"kind": "reflection", "motion": "swirl", "blend": "glow", "meshes": [0], "opacity": "drawing", "glowMesh": 0}
+      ]
+    },
+    {
+      "name": "stoneGolem",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "scrollU": {"shape": "ramp", "from": 0, "to": -3, "seconds": 10}, "scrollV": {"shape": "ramp", "from": 0, "to": -3, "seconds": 10}, "light": [0.9, 0.9, 0.9], "scrollingMesh": 0},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "scrollingMesh": 0},
+        {"kind": "texture", "meshes": [1]}
       ]
     },
     {
@@ -1079,6 +1755,15 @@
       ]
     },
     {
+      "name": "twinTail",
+      "layers": [
+        {"kind": "texture", "onlyWhen": {"notAnimation": "die"}, "light": [0.9, 0.9, 1]},
+        {"kind": "texture", "onlyWhen": {"animation": "die"}, "light": [0.3, 1, 0.2]},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "texture": "Monster/illumi_R.jpg", "glowMesh": 2, "glowStrength": {"shape": "wave", "from": 0, "to": 2, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [3], "glowMesh": 3, "glowStrength": {"shape": "wave", "from": 0, "to": 1, "seconds": 3.141592653589793}, "scrollU": 0, "scrollV": 0}
+      ]
+    },
+    {
       "name": "violentWindToEternalWingArmor",
       "notFor": ["doppelganger"],
       "layers": [
@@ -1102,6 +1787,22 @@
         {"kind": "texture", "meshes": [0], "onlyWhen": {"place": "inventoryAndGround"}, "texture": {"eachItem": "inventoryTexture", "default": "Player/InvenPantsMale40.tga"}},
         {"kind": "texture", "meshes": {"allBut": [0]}, "onlyWhen": {"place": "inventoryAndGround"}},
         {"kind": "texture", "onlyWhen": {"place": "worn"}}
+      ]
+    },
+    {
+      "name": "werewolfHero",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [0.5, 0.5, 0.8]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg"}
+      ]
+    },
+    {
+      "name": "whiteWizard",
+      "layers": [
+        {"kind": "texture", "meshes": {"allBut": [1]}, "texture": "Monster/King11.jpg", "light": [1, 1, 1]},
+        {"kind": "glowOnly", "meshes": "allEvenHidden", "light": {"timesOpacity": [1, 0.5, 0]}}
       ]
     },
     {
@@ -1140,6 +1841,36 @@
       "layers": [
         {"kind": "texture", "light": [1, 1, 1]},
         {"kind": "reflection", "motion": "stripes", "blend": "glow", "meshes": [1]}
+      ]
+    },
+    {
+      "name": "zaikan",
+      "layers": [
+        {"kind": "texture", "blend": "glow", "meshes": [0], "texture": "Monster/bv02_2.jpg", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0.99, "to": 1.01, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [1], "texture": "Monster/bv01_2.jpg", "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0.99, "to": 1.01, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0.99, "to": 1.01, "seconds": 3.141592653589793}},
+        {"kind": "texture", "blend": "glow", "meshes": [2], "glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0.99, "to": 1.01, "seconds": 3.141592653589793}},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [0.5, 0.25, 0]}}
+      ]
+    },
+    {
+      "name": "zaikanCrywolfGreen",
+      "layers": [
+        {"kind": "texture", "meshes": [0], "light": [0.6, 0.8, 0.6]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [0], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [1], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": [2], "texture": "Effect/Chrome01.jpg"},
+        {"kind": "reflection", "motion": "slowDrift", "blend": "glow", "meshes": "allEvenHidden", "light": {"timesOpacity": [0.5, 0.25, 0]}}
+      ]
+    },
+    {
+      "name": "zombieFighter",
+      "layers": [
+        {"kind": "texture", "meshes": [1]},
+        {"kind": "texture", "meshes": [2]},
+        {"kind": "texture", "blend": "glow", "meshes": [0], "glowMesh": 0, "glowStrength": {"shape": "wave", "from": 0.2, "to": 1, "seconds": 1.5707963267948966}, "onTop": true}
       ]
     }
   ]

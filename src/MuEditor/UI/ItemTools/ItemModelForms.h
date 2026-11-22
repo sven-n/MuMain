@@ -11,7 +11,7 @@
 // The parts of the model tool that edit the item's own model values: the
 // file's texture folders and none-blend meshes (for a file of its own), the
 // inventory and ground display, the cloth flag, the material, the glow, and
-// the render style and item effect picked from their lists with the items
+// the render style and effect picked from their lists with the items
 // that use them.
 namespace MuEditor::Items::ModelForms
 {

@@ -92,7 +92,7 @@ void CGMSantaTown::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     // 	}
 }
 
-bool CGMSantaTown::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool CGMSantaTown::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (IsSantaTown() == false)
         return false;
@@ -168,7 +168,7 @@ bool CGMSantaTown::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD*
     return true;
 }
 
-void CGMSantaTown::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon) {}
+void CGMSantaTown::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b) {}
 
 bool CGMSantaTown::CreateSnow(PARTICLE* o)
 {

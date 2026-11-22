@@ -461,22 +461,22 @@ void RenderLooks(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCount
                    model.renderStyleValues);
     }
     LookCombo(
-        draft, I18N::Editor::ItemEffect, model.itemEffect, Render::Items::ItemEffects::GetNames(),
-        [&](std::string_view name) { return counts.ItemEffect(name); }, [](std::string_view) { return false; });
+        draft, I18N::Editor::Effect, model.effect, Render::Items::ItemEffects::GetNames(),
+        [&](std::string_view name) { return counts.Effect(name); }, [](std::string_view) { return false; });
     ImGui::SameLine();
     ImGui::PushID("ItemEffect");
-    ImGui::BeginDisabled(model.itemEffect.empty() || !Render::Items::ItemEffects::Exists(model.itemEffect));
+    ImGui::BeginDisabled(model.effect.empty() || !Render::Items::ItemEffects::Exists(model.effect));
     if (ImGui::SmallButton(I18N::Editor::OpenInStyleEditor))
     {
-        g_MuStyleEditorUI.ShowItemEffect(model.itemEffect);
+        g_MuStyleEditorUI.ShowEffect(model.effect);
     }
     ImGui::EndDisabled();
     ImGui::PopID();
-    if (!model.itemEffect.empty())
+    if (!model.effect.empty())
     {
-        RenderUsers("##EffectUsers", counts.ItemEffect(model.itemEffect), &FindItemEffectUsers, model.itemEffect);
-        LookValues(draft, "EffectValues", Data::Looks::g_LookStore.FindItemEffect(model.itemEffect),
-                   model.itemEffectValues);
+        RenderUsers("##EffectUsers", counts.Effect(model.effect), &FindEffectUsers, model.effect);
+        LookValues(draft, "EffectValues", Data::Looks::g_LookStore.FindEffect(model.effect),
+                   model.effectValues);
     }
     ImGui::PushTextWrapPos(0.0f);
     ImGui::TextDisabled("%s", I18N::Editor::ItemLooksNote);

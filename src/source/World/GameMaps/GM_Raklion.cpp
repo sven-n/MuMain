@@ -897,7 +897,7 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-bool CGM_Raklion::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool CGM_Raklion::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (IsIceCity() == false)
         return false;
@@ -1054,7 +1054,7 @@ bool CGM_Raklion::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool
     else if ((o->Type >= MODEL_ICE_WALKER && o->Type <= MODEL_SPIDER_EGGS_3) || o->Type == MODEL_DARK_MAMMOTH ||
              o->Type == MODEL_DARK_GIANT || o->Type == MODEL_DARK_IRON_KNIGHT || o->Type == MODEL_DARK_COOLUTIN)
     {
-        RenderMonster(o, look, b, ExtraMon);
+        RenderMonster(o, look, b);
 
         return true;
     }
@@ -1062,7 +1062,7 @@ bool CGM_Raklion::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool
     return false;
 }
 
-bool CGM_Raklion::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool CGM_Raklion::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b)
 {
     switch (o->Type)
     {
@@ -1219,7 +1219,7 @@ bool CGM_Raklion::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool Ex
 
             for (int i = 0; i < 3; ++i)
             {
-                Calc_RenderObject(o, true, false, 0, eggs[i]);
+                Calc_RenderObject(o, true, false, eggs[i]);
                 b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV, look.hiddenMesh);
                 b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
@@ -1238,7 +1238,7 @@ bool CGM_Raklion::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool Ex
 
             for (int i = 0; i < 3; ++i)
             {
-                Calc_RenderObject(o, true, false, 0, eggs[i]);
+                Calc_RenderObject(o, true, false, eggs[i]);
                 b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV, look.hiddenMesh);
             }
@@ -2110,7 +2110,7 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGM_Raklion::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+void CGM_Raklion::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (o->Type == 46 || o->Type == 53)
     {

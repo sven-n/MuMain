@@ -166,6 +166,10 @@ public:
     int           HiddenMesh;
     float           LifeTime;
     int           BlendMesh;
+    // The looks a monster's setup or model names (MN8, ML1): numbers of
+    // Render::Monsters::Looks, 0 for none.
+    unsigned short RenderStyleLook;
+    unsigned short EffectLook;
     int           AttackPoint[2];
     int           RenderType;
     int			  InitialSceneTime;
@@ -214,7 +218,7 @@ public:
     vec3_t		  EyeRight2;
     vec3_t		  EyeLeft3;
     vec3_t		  EyeRight3;
-    // Where a +15 set's trails (joints 55 and 56) end; item effects keep the Eye* slots.
+    // Where a +15 set's trails (joints 55 and 56) end; effects keep the Eye* slots.
     vec3_t SetTrailLeft;
     vec3_t SetTrailRight;
 

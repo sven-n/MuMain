@@ -151,14 +151,14 @@ std::vector<NamedMesh> NamedMeshes(const LookDefinition& look, std::size_t index
         }
     };
     addValues(LookField(index) + ".itemValuesAfter", look.itemValuesAfter);
-    // An item effect's entries.
-    for (std::size_t i = 0; i < look.itemValuesBefore.size(); ++i)
+    // An effect's entries.
+    for (std::size_t i = 0; i < look.valuesBefore.size(); ++i)
     {
-        const std::string field = LookField(index) + ".itemValuesBefore[" + std::to_string(i) + "]";
-        addValues(field, look.itemValuesBefore[i].values);
-        if (look.itemValuesBefore[i].onlyWhen.hiddenMesh)
+        const std::string field = LookField(index) + ".valuesBefore[" + std::to_string(i) + "]";
+        addValues(field, look.valuesBefore[i].values);
+        if (look.valuesBefore[i].onlyWhen.hiddenMesh)
         {
-            add(field + ".onlyWhen.hiddenMesh", *look.itemValuesBefore[i].onlyWhen.hiddenMesh);
+            add(field + ".onlyWhen.hiddenMesh", *look.valuesBefore[i].onlyWhen.hiddenMesh);
         }
     }
     return named;
@@ -210,9 +210,9 @@ LookDefinition CheckItemValues(const LookDefinition& look, std::size_t index, co
                                const RenderStyleCheckInput& input, const Items::ItemModelDefinition& model,
                                LookKind kind, std::vector<ItemDataIssue>& issues)
 {
-    const bool effect = kind == LookKind::ItemEffect;
-    const std::map<std::string, std::string>& values = effect ? model.itemEffectValues : model.renderStyleValues;
-    const std::string valuesField = effect ? "itemEffectValues." : "renderStyleValues.";
+    const bool effect = kind == LookKind::Effect;
+    const std::map<std::string, std::string>& values = effect ? model.effectValues : model.renderStyleValues;
+    const std::string valuesField = effect ? "effectValues." : "renderStyleValues.";
     const std::set<std::string> names = EachItemNames(look);
     for (const auto& [name, value] : values)
     {
@@ -251,20 +251,20 @@ LookDefinition CheckItemValues(const LookDefinition& look, std::size_t index, co
 void CheckUsers(const LookDefinition& look, std::size_t index, const std::string& source,
                 const RenderStyleCheckInput& input, LookKind kind, std::vector<ItemDataIssue>& issues)
 {
-    const bool effect = kind == LookKind::ItemEffect;
+    const bool effect = kind == LookKind::Effect;
     const std::vector<NamedMesh> named = NamedMeshes(look, index);
     const std::vector<NamedBone> bones = NamedBones(look, index);
     bool used = false;
     for (const Items::ItemModelDefinition& model : input.models)
     {
-        if (!model.Exists() || (effect ? model.itemEffect : model.renderStyle) != look.name)
+        if (!model.Exists() || (effect ? model.effect : model.renderStyle) != look.name)
         {
             continue;
         }
         used = true;
         // The meshes of the look as this item draws it: its values can name others.
         std::optional<std::vector<NamedMesh>> itemNamed;
-        if (!(effect ? model.itemEffectValues : model.renderStyleValues).empty())
+        if (!(effect ? model.effectValues : model.renderStyleValues).empty())
         {
             itemNamed = NamedMeshes(CheckItemValues(look, index, source, input, model, kind, issues), index);
         }
@@ -302,10 +302,12 @@ void CheckUsers(const LookDefinition& look, std::size_t index, const std::string
     }
     used = used || (!effect && std::ranges::any_of(input.partModels, [&](const Items::PartModel& part)
                                                    { return part.renderStyle == look.name; }));
+    used =
+        used || (input.monsterUses && input.monsterUses(look.name, effect ? LookKind::Effect : LookKind::RenderStyle));
     if (!used)
     {
         issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
-                          LookField(index) + ".name", "no item uses \"" + look.name + "\""});
+                          LookField(index) + ".name", "no item or monster uses \"" + look.name + "\""});
     }
 }
 } // namespace
@@ -337,14 +339,14 @@ void CheckItemEffects(std::span<const LookDefinition> looks, const std::string& 
     for (std::size_t i = 0; i < looks.size(); ++i)
     {
         CheckBoneThingTypes(looks[i], i, source, input, issues);
-        CheckUsers(looks[i], i, source, input, LookKind::ItemEffect, issues);
+        CheckUsers(looks[i], i, source, input, LookKind::Effect, issues);
     }
 }
 
 void CheckLooks(LookKind kind, std::span<const LookDefinition> looks, const std::string& source,
                 const RenderStyleCheckInput& input, std::vector<ItemDataIssue>& issues)
 {
-    if (kind == LookKind::ItemEffect)
+    if (kind == LookKind::Effect)
     {
         CheckItemEffects(looks, source, input, issues);
     }

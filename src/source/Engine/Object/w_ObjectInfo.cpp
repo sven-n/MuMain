@@ -128,6 +128,8 @@ void OBJECT::Initialize()
     HiddenMesh = 0;
     LifeTime = 0;
     BlendMesh = 0;
+    RenderStyleLook = 0;
+    EffectLook = 0;
     AttackPoint[0] = 0;
     AttackPoint[1] = 0;
     RenderType = 0;

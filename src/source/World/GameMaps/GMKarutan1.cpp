@@ -165,7 +165,7 @@ bool CGMKarutan1::UpdateObjectEffects(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMKarutan1::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool CGMKarutan1::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (!IsKarutanMap())
         return false;
@@ -187,99 +187,12 @@ bool CGMKarutan1::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool
     case 66:
         SendAfterCharacter(o);
         return true;
-
-#ifdef ASG_ADD_KARUTAN_MONSTERS
-    case MODEL_BONE_SCORPION:
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-
-        if (o->CurrentAction != MONSTER01_DIE)
-        {
-            float fLumi = sinf(WorldTime * 0.002f) + 0.5f;
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
-                          BITMAP_BONE_SCORPION_SKIN_EFFECT);
-        }
-        return true;
-    case MODEL_CRYPTA:
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-
-        if (o->CurrentAction != MONSTER01_DIE)
-        {
-            float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
-                          BITMAP_KRYPTA_BALL_EFFECT);
-        }
-        return true;
-    case MODEL_CRYPOS:
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        return true;
-    case MODEL_CONDRA:
-        if (o->CurrentAction != MONSTER01_DIE)
-        {
-            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-
-            float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
-                          BITMAP_CONDRA_SKIN_EFFECT);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV,
-                          BITMAP_CONDRA_SKIN_EFFECT2);
-
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, look.blendMeshLight * 0.9f,
-                          WorldTime * 0.0010f, look.blendMeshV);
-            Vector(0.4f, 0.95f, 1.0f, b->BodyLight);
-            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, look.blendMeshLight * 0.3f,
-                          WorldTime * 0.0015f, look.blendMeshV);
-        }
-        return true;
-    case MODEL_NACONDRA:
-        if (o->CurrentAction != MONSTER01_DIE)
-        {
-            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-            b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-            b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-
-            float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi, look.blendMeshU, look.blendMeshV,
-                          BITMAP_NARCONDRA_SKIN_EFFECT);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi, look.blendMeshU, look.blendMeshV,
-                          BITMAP_NARCONDRA_SKIN_EFFECT2);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV,
-                          BITMAP_NARCONDRA_SKIN_EFFECT3);
-
-            Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-
-            Vector(1.0f, 0.1f, 1.0f, b->BodyLight);
-            b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, look.blendMeshLight * 0.9f,
-                          WorldTime * 0.0010f, look.blendMeshV);
-            Vector(0.7f, 0.4f, 1.0f, b->BodyLight);
-            b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 5, look.blendMeshLight * 0.7f,
-                          WorldTime * 0.0015f, look.blendMeshV);
-        }
-        return true;
-#endif // ASG_ADD_KARUTAN_MONSTERS
     }
 
     return false;
 }
 
-void CGMKarutan1::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+void CGMKarutan1::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (!IsKarutanMap())
         return;

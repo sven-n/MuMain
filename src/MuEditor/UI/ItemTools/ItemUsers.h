@@ -17,7 +17,7 @@ namespace MuEditor::Items
 {
 std::vector<int> FindSharedModelUsers(std::string_view name);
 std::vector<int> FindRenderStyleUsers(std::string_view name);
-std::vector<int> FindItemEffectUsers(std::string_view name);
+std::vector<int> FindEffectUsers(std::string_view name);
 // The items with the color in any of their glow colors (glow, shine,
 // ancient), also as the default they leave out.
 std::vector<int> FindGlowColorUsers(std::string_view name);

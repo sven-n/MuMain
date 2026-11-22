@@ -69,13 +69,13 @@ const ItemModelDefinition* FindModel(const std::vector<ItemModelDefinition>& mod
     return found != models.end() ? &*found : nullptr;
 }
 
-// The render styles and item effects of Data/Effects in g_LookStore while it lives, as the game loads them before
+// The render styles and effects of Data/Effects in g_LookStore while it lives, as the game loads them before
 // the item models; the moved looks are no longer in code.
 struct ShippedRenderStylesScope
 {
     ShippedRenderStylesScope()
     {
-        for (const Data::Looks::LookKind kind : {Data::Looks::LookKind::RenderStyle, Data::Looks::LookKind::ItemEffect})
+        for (const Data::Looks::LookKind kind : {Data::Looks::LookKind::RenderStyle, Data::Looks::LookKind::Effect})
         {
             Data::Looks::RenderStylesLoadResult result = Data::Looks::LoadLookFile(DataDirectory / "Effects", kind);
             REQUIRE_FALSE(HasFatal(result.issues));
@@ -85,7 +85,7 @@ struct ShippedRenderStylesScope
     ~ShippedRenderStylesScope()
     {
         Data::Looks::g_LookStore.SetRenderStyles({});
-        Data::Looks::g_LookStore.SetItemEffects({});
+        Data::Looks::g_LookStore.SetEffects({});
     }
     ShippedRenderStylesScope(const ShippedRenderStylesScope&) = delete;
     ShippedRenderStylesScope& operator=(const ShippedRenderStylesScope&) = delete;
@@ -1522,7 +1522,7 @@ TEST_CASE("The glow of shipped item models is on meshes the models have [data][i
 
 // The item editor offers these lists; every name in them must be one the
 // model loader accepts.
-TEST_CASE("The render style and item effect lists name every look once, sorted [data][items]")
+TEST_CASE("The render style and effect lists name every look once, sorted [data][items]")
 {
     const ShippedRenderStylesScope renderStyles;
     for (const std::span<const std::string_view> names :
@@ -1547,9 +1547,9 @@ TEST_CASE("The render style and item effect lists name every look once, sorted [
         {
             CHECK(std::ranges::binary_search(Render::Items::Styles::GetNames(), model.renderStyle));
         }
-        if (!model.itemEffect.empty())
+        if (!model.effect.empty())
         {
-            CHECK(std::ranges::binary_search(Render::Items::ItemEffects::GetNames(), model.itemEffect));
+            CHECK(std::ranges::binary_search(Render::Items::ItemEffects::GetNames(), model.effect));
         }
     }
 }
@@ -1788,15 +1788,15 @@ TEST_CASE("Render styles follow the item model database when it is built again [
     CHECK_FALSE(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE));
 }
 
-TEST_CASE("The item effects of shipped item models exist [data][items]")
+TEST_CASE("The effects of shipped item models exist [data][items]")
 {
     const ShippedRenderStylesScope looks;
     for (const ItemModelDefinition& model : ShippedModels().models)
     {
-        if (!model.itemEffect.empty())
+        if (!model.effect.empty())
         {
-            INFO("(" << model.group << "," << model.number << ") " << model.itemEffect);
-            CHECK(Render::Items::ItemEffects::Exists(model.itemEffect));
+            INFO("(" << model.group << "," << model.number << ") " << model.effect);
+            CHECK(Render::Items::ItemEffects::Exists(model.effect));
         }
     }
     CHECK_FALSE(Render::Items::ItemEffects::Exists("wingOfEternl"));
@@ -1804,14 +1804,14 @@ TEST_CASE("The item effects of shipped item models exist [data][items]")
 
 // The effects of the old drawing code (RenderPartObjectEffect), recorded per
 // item: spot checks.
-TEST_CASE("Shipped item models keep the item effects of the old drawing code [data][items]")
+TEST_CASE("Shipped item models keep the effects of the old drawing code [data][items]")
 {
     const std::vector<ItemModelDefinition>& models = ShippedModels().models;
     const auto effectOf = [&](int group, int number)
     {
         const ItemModelDefinition* model = FindModel(models, group, number);
         REQUIRE(model != nullptr);
-        return model->itemEffect;
+        return model->effect;
     };
 
     CHECK(effectOf(0, 0).empty());
@@ -1829,7 +1829,7 @@ TEST_CASE("Shipped item models keep the item effects of the old drawing code [da
     CHECK(effectOf(13, 43).empty());
     CHECK(effectOf(13, 17).empty());
     CHECK(effectOf(13, 18).empty());
-    // The things on the bones of two render styles became item effects of their names (design L29).
+    // The things on the bones of two render styles became effects of their names (design L29).
     CHECK(effectOf(14, 64) == "cursedCastleWater");
     CHECK(effectOf(14, 45) == "pumpkinOfLuck");
 
@@ -1845,7 +1845,7 @@ TEST_CASE("Shipped item models keep the item effects of the old drawing code [da
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
-TEST_CASE("Item effects run before the model is drawn [data][items]")
+TEST_CASE("Effects run before the model is drawn [data][items]")
 {
     using namespace Render::Items;
     using ItemEffects::Result;
@@ -1960,7 +1960,7 @@ TEST_CASE("The shipped items shine below +3 as the old drawing code did [data][i
     g_Shines.Build({});
 }
 
-TEST_CASE("The item effect of a model is the one of its item, or of its event model [data][items]")
+TEST_CASE("The effect of a model is the one of its item, or of its event model [data][items]")
 {
     using Render::Items::ItemEffects::Result;
     const ShippedRenderStylesScope looks;

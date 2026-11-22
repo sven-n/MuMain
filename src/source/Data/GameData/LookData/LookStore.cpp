@@ -22,15 +22,15 @@ void LookStore::SetRenderStyles(std::vector<LookDefinition> looks)
     SetLooks(LookKind::RenderStyle, std::move(looks));
 }
 
-void LookStore::SetItemEffects(std::vector<LookDefinition> looks)
+void LookStore::SetEffects(std::vector<LookDefinition> looks)
 {
-    SetLooks(LookKind::ItemEffect, std::move(looks));
+    SetLooks(LookKind::Effect, std::move(looks));
 }
 
 void LookStore::SetLooks(LookKind kind, std::vector<LookDefinition> looks)
 {
     std::ranges::sort(looks, {}, &LookDefinition::name);
-    (kind == LookKind::ItemEffect ? m_itemEffects : m_renderStyles) = std::move(looks);
+    (kind == LookKind::Effect ? m_effects : m_renderStyles) = std::move(looks);
     ++m_version;
 }
 
@@ -39,8 +39,14 @@ const LookDefinition* LookStore::FindRenderStyle(std::string_view name) const
     return FindIn(m_renderStyles, name);
 }
 
-const LookDefinition* LookStore::FindItemEffect(std::string_view name) const
+const LookDefinition* LookStore::FindEffect(std::string_view name) const
 {
-    return FindIn(m_itemEffects, name);
+    return FindIn(m_effects, name);
+}
+
+bool EffectRunsInUpdate(std::string_view name)
+{
+    const LookDefinition* effect = g_LookStore.FindEffect(name);
+    return effect != nullptr && RunsInUpdate(*effect);
 }
 } // namespace Data::Looks
