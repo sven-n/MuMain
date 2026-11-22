@@ -1500,7 +1500,6 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
             // quarter away from the target.
             constexpr float RigTurn = 90.f;
             vec3_t Position, vAngle, Light;
-            _pObj->Owner = &CharactersClient[_pObj->m_sTargetIndex].Object;
             VectorCopy(_pObj->Position, Position);
             VectorCopy(_pObj->Angle, vAngle);
             vAngle[2] =

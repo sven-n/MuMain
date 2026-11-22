@@ -44,8 +44,10 @@ constexpr float BladeHeight = 100.f;
 // The first blade let go lays the flashes (and lands the blows).
 constexpr int LeadBlade = 0;
 
-// A blade is created with lifeTime 50: it flies until it's past its target, then swells and
-// fades for StrikeLife ticks.
+// A blade is created with lifeTime 50: it flies until it's past its target, or until its flight
+// runs out, then swells and fades for StrikeLife ticks. Its speed grows by BladeAcceleration a
+// tick, so after `flown` ticks it is BladeSpeed * flown + BladeAcceleration * flown * (flown - 1) / 2
+// along (the Season 6 client's sum at 25 FPS, the same at any frame rate).
 constexpr float BladeFlight = 50.f;
 constexpr float StrikeLife = 30.f;
 constexpr float BladeSpeed = 25.f;
@@ -64,7 +66,10 @@ constexpr float FlashTurns[] = {40.f, 20.f};
 constexpr float FlashTurnOffset = 90.f;
 
 // At the strike: sparks (BITMAP_SPARK subtype 14) at one spot over the target, all flying one
-// way, and spirals (BITMAP_TWLIGHT subtype 4) on the ground under it.
+// way, and spirals (BITMAP_TWLIGHT subtype 4) on the ground under it. The three blades fly
+// together and get past the target on the same tick; the Season 6 client strikes with each, so
+// three sets of spirals lie on each other. Here the lead blade strikes once, its spirals
+// StrikeLayers times as bright (they're added), and the cast takes a third of the effects.
 constexpr int SparkCount = 7;
 constexpr int SparkSubType = 14;
 constexpr int SparkSpread = 150;
@@ -73,6 +78,7 @@ constexpr float SparkHeight = 230.f;
 constexpr int SpiralCount = 8;
 constexpr int SpiralSubType = 4;
 constexpr float SpiralTurn = 30.f;
+constexpr float StrikeLayers = 3.f;
 // Each spiral swells and turns, brightening until its last SpiralFadeLife ticks, then dimming.
 constexpr float SpiralGrowth = 0.12f;
 constexpr float SpiralSpin = -60.f;
@@ -125,8 +131,8 @@ void LayArmTrails(OBJECT* rig)
     for (int sample = 1; sample <= TrailSamples; ++sample)
     {
         const float frame = rig->AnimationFrame - TrailSpan + TrailSpan * sample / TrailSamples;
-        model->Animation(pose, frame, frame, rig->PriorAction, rig->Angle, rig->HeadAngle, false, false, nullptr, -1,
-                         bones);
+        model->Animation(pose, frame, frame, rig->PriorAction, rig->Angle, rig->HeadAngle, false, false, nullptr,
+                         static_cast<short>(rig->CurrentAction), bones);
         for (int arm = 0; arm < ArmCount; ++arm)
         {
             vec3_t inner, outer;
@@ -179,16 +185,19 @@ void Strike(OBJECT* blade, const vec3_t target)
 
     vec3_t ground;
     VectorCopy(target, ground);
-    Vector(0.2f, 0.12f, 0.04f, light);
+    Vector(0.2f * StrikeLayers, 0.12f * StrikeLayers, 0.04f * StrikeLayers, light);
     for (int spiral = 1; spiral <= SpiralCount; ++spiral)
     {
         Vector(0.f, 0.f, SpiralTurn * spiral, angle);
         CreateEffect(BITMAP_TWLIGHT, ground, angle, light, SpiralSubType, blade);
     }
 
-    StopBuffer(SOUND_RAGESKILL_PHOENIXSHOT_ATTACK, true);
     PlayBuffer(SOUND_RAGESKILL_PHOENIXSHOT_ATTACK);
+}
 
+// Every blade ends its flight at the target, and swells and fades there.
+void Land(OBJECT* blade, const vec3_t target)
+{
     blade->Position[0] = target[0];
     blade->Position[1] = target[1];
     blade->Scale += StrikeGrowth;
@@ -200,8 +209,9 @@ void Strike(OBJECT* blade, const vec3_t target)
 // it's farther from there than the target is.
 bool FlyPast(OBJECT* blade, vec3_t target)
 {
-    const float speed = BladeSpeed + BladeAcceleration * (BladeFlight - blade->LifeTime);
-    blade->Distance += speed * FPS_ANIMATION_FACTOR;
+    // The ticks flown by the end of this one (LifeTime is taken off after the move).
+    const float flown = BladeFlight - blade->LifeTime + FPS_ANIMATION_FACTOR;
+    blade->Distance = BladeSpeed * flown + BladeAcceleration * flown * (flown - 1.f) / 2.f;
 
     const float wayX = target[0] - blade->StartPosition[0];
     const float wayY = target[1] - blade->StartPosition[1];
@@ -296,12 +306,18 @@ bool Move_MODEL_WINDSPIN03(OBJECT* o, int index, float Luminosity)
     {
         LayFlashes(o);
     }
-    if (FlyPast(o, target))
+    const bool flightEnds = o->LifeTime - FPS_ANIMATION_FACTOR < StrikeLife;
+    if (FlyPast(o, target) || flightEnds)
     {
-        Strike(o, target);
+        if (o->SubType == LeadBlade)
+        {
+            Strike(o, target);
+        }
+        Land(o, target);
     }
     return true;
 }
+
 void MoveStrikeSpiral(OBJECT* o)
 {
     o->Scale += SpiralGrowth * FPS_ANIMATION_FACTOR;
