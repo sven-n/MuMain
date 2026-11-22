@@ -379,8 +379,9 @@ bool IsJewelryWithOption(int type)
     return std::find(numbers.begin(), numbers.end(), type % MAX_ITEM_INDEX) != numbers.end();
 }
 
-// The additional option the code before the definitions gave an item at `level` (SetItemAttributes up to 9a2), without
-// the Horn of Dinorant and the wings, whose code stays. Its levels end at Season 6's: 4, the jewelry's 3.
+// The additional option the code before the definitions gave an item at `level` and option type 0 (SetItemAttributes up
+// to 9a2, the wings' up to 9b1), without the Horn of Dinorant, whose code stays. Its levels end at Season 6's: 4, the
+// jewelry's 3.
 std::optional<OptionSlot> OldAdditionalOption(int type, int optionLevel)
 {
     if (optionLevel == 0)
@@ -421,6 +422,35 @@ std::optional<OptionSlot> OldAdditionalOption(int type, int optionLevel)
             return OptionSlot{AT_IMPROVE_MAX_AG, static_cast<WORD>(jewelryLevel)};
         }
         return OptionSlot{AT_LIFE_REGENERATION, static_cast<WORD>(jewelryLevel)};
+    }
+    // The wings' chain in SetItemAttributes at option type 0 (the type the server sends most): recovery by the level,
+    // the others 4 per level.
+    switch (type)
+    {
+    case ITEM_WING:
+    case ITEM_WINGS_OF_SOUL:
+    case ITEM_WINGS_OF_DRAGON:
+    case ITEM_CAPE_OF_FIGHTER:
+    case ITEM_WING_OF_STORM:
+    case ITEM_WING_OF_ETERNAL:
+    case ITEM_WING_OF_ILLUSION:
+    case ITEM_WING_OF_RUIN:
+    case ITEM_CAPE_OF_EMPEROR:
+    case ITEM_WING_OF_DIMENSION:
+    case ITEM_CAPE_OF_OVERRULE:
+        return OptionSlot{AT_LIFE_REGENERATION, static_cast<WORD>(level)};
+    case ITEM_WINGS_OF_HEAVEN:
+    case ITEM_WING_OF_CURSE:
+    case ITEM_WINGS_OF_DARKNESS:
+        return OptionSlot{AT_IMPROVE_MAGIC, static_cast<WORD>(level * 4)};
+    case ITEM_WINGS_OF_SATAN:
+    case ITEM_WINGS_OF_SPIRITS:
+    case ITEM_CAPE_OF_LORD:
+        return OptionSlot{AT_IMPROVE_DAMAGE, static_cast<WORD>(level * 4)};
+    case ITEM_WINGS_OF_DESPAIR:
+        return OptionSlot{AT_IMPROVE_CURSE, static_cast<WORD>(level * 4)};
+    default:
+        break;
     }
     return std::nullopt;
 }
@@ -466,7 +496,7 @@ ITEM MakeItemWithOption(int type, int level, int optionType = 0)
 
 // The additional option comes from the definition the item links (Data/Items/Options/Option.json) with the slot and
 // value the code before the definitions gave it, at every level the server can send up to 7: the item's whole slot
-// list is the one without an option level and the old code's option after it. The wings keep their option code.
+// list is the one without an option level and the old code's option after it. The wings' options are in Wings.json.
 TEST_CASE("Every item's additional option comes from its option links as the code before the definitions gave it "
           "[data][items]")
 {
@@ -484,7 +514,6 @@ TEST_CASE("Every item's additional option comes from its option links as the cod
             continue;
         }
         CAPTURE(type);
-        const bool optionInCode = g_ItemDatabase.GetSlot(type) == Data::Items::ItemSlot::Wings;
         const std::vector<OptionSlot> withoutOption = AllSlots(MakeItemWithOption(type, 0));
         for (int level = 1; level <= 7; ++level)
         {
@@ -492,15 +521,12 @@ TEST_CASE("Every item's additional option comes from its option links as the cod
             const ITEM item = MakeItemWithOption(type, level);
             const std::optional<OptionSlot> expected = OldAdditionalOption(type, level);
             REQUIRE(DefinitionSlots(item).size() == (expected ? 1u : 0u));
-            if (!optionInCode)
+            std::vector<OptionSlot> expectedSlots = withoutOption;
+            if (expected)
             {
-                std::vector<OptionSlot> expectedSlots = withoutOption;
-                if (expected)
-                {
-                    expectedSlots.push_back(*expected);
-                }
-                CHECK(AllSlots(item) == expectedSlots);
+                expectedSlots.push_back(*expected);
             }
+            CHECK(AllSlots(item) == expectedSlots);
             itemsWithOption += expected && level == 1 ? 1 : 0;
         }
         // Without a level, no option.
@@ -580,9 +606,9 @@ TEST_CASE("An additional option turns on only for its number [data][items]")
     }
 }
 
-// The wings' and the Horn of Dinorant's additional options are still code, which leaves out an item that links an
-// option definition, so one option level never gives two options.
-TEST_CASE("The code gives an additional option only to an item without one in data [data][items]")
+// The second and third tier wings' and the capes' options are bits of the excellent byte (their wing definitions), the
+// HP, mana and command by the item's + level, before the other slots as CalcWingOptions wrote them.
+TEST_CASE("A wing's options in the excellent byte come from its wing definition [data][items]")
 {
     ClientDataScope client(ClientDirectory);
     I18N::SetLocale("en");
@@ -590,11 +616,176 @@ TEST_CASE("The code gives an additional option only to an item without one in da
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     HeroScope hero;
 
-    CHECK(GameLogic::Items::LinksOptionType(ITEM_KRIS, Data::Items::ItemOptionType::Option));
-    CHECK(GameLogic::Items::LinksOptionType(ITEM_KRIS, Data::Items::ItemOptionType::Luck));
-    CHECK_FALSE(GameLogic::Items::LinksOptionType(ITEM_WINGS_OF_SATAN, Data::Items::ItemOptionType::Option));
-    CHECK(MakeItemWithOption(ITEM_KRIS, 2).SpecialNum == 1);
-    CHECK(MakeItemWithOption(ITEM_WINGS_OF_SATAN, 2).SpecialNum == 1);
+    const auto wing = [](int type, int level, BYTE excellentFlags)
+    {
+        ItemCreationParams params{};
+        params.Group = type / MAX_ITEM_INDEX;
+        params.Number = type % MAX_ITEM_INDEX;
+        params.Level = static_cast<BYTE>(level);
+        params.WithLuck = true;
+        params.HasExcellentOption = true;
+        params.ExcellentFlags = excellentFlags;
+        ITEM item;
+        FillItemFromParameters(item, params);
+        return item;
+    };
+
+    const ITEM spirits = wing(ITEM_WINGS_OF_SPIRITS, 7, 0x1F);
+    CHECK(DefinitionSlots(spirits) == std::vector<OptionSlot>{{AT_IMPROVE_HP_MAX, 85},
+                                                              {AT_IMPROVE_MP_MAX, 85},
+                                                              {AT_ONE_PERCENT_DAMAGE, 3},
+                                                              {AT_IMPROVE_AG_MAX, 50},
+                                                              {AT_IMPROVE_ATTACK_SPEED, 5},
+                                                              {AT_LUCK, 5}});
+    // The Cape of Fighter has the first three only; the Cape of Lord's fourth is its command.
+    CHECK(DefinitionSlots(wing(ITEM_CAPE_OF_FIGHTER, 0, 0x18)).size() == 1);
+    const std::vector<OptionSlot> capeOfLord = DefinitionSlots(wing(ITEM_CAPE_OF_LORD, 15, 0x08));
+    REQUIRE_FALSE(capeOfLord.empty());
+    CHECK(capeOfLord.front() == OptionSlot{AT_SET_OPTION_IMPROVE_CHARISMA, 85});
+    CHECK(DefinitionSlots(wing(ITEM_WING_OF_STORM, 0, 0x0F)) == std::vector<OptionSlot>{{AT_ONE_PERCENT_DAMAGE, 5},
+                                                                                        {AT_DAMAGE_REFLECTION, 5},
+                                                                                        {AT_RECOVER_FULL_LIFE, 5},
+                                                                                        {AT_RECOVER_FULL_MANA, 5},
+                                                                                        {AT_LUCK, 5}});
+    // The first tier wings read nothing from the byte.
+    CHECK(DefinitionSlots(wing(ITEM_WINGS_OF_SATAN, 0, 0x01)) == std::vector<OptionSlot>{{AT_LUCK, 5}});
+}
+
+// The wing chain of SetItemAttributes before 9b1: each wing's additional option by the option type the server sends
+// (`type`), 4 per option level (recovery 1 % per level). The first tier wings and the Cape of Lord gave theirs for any
+// type.
+std::optional<OptionSlot> OldWingOption(int wing, int type, int level)
+{
+    const auto add = [level](int effect, bool recovery = false)
+    { return OptionSlot{static_cast<WORD>(effect), static_cast<WORD>(recovery ? level : level * 4)}; };
+    struct Kinds
+    {
+        int item;
+        int type0;
+        int type2;
+        int type3;
+    };
+    // The effect at types 0, 2 and 3 (0: none).
+    constexpr int R = AT_LIFE_REGENERATION;
+    constexpr int D = AT_IMPROVE_DAMAGE;
+    constexpr int W = AT_IMPROVE_MAGIC;
+    constexpr int C = AT_IMPROVE_CURSE;
+    constexpr int F = AT_IMPROVE_DEFENSE;
+    const Kinds kinds[] = {
+        {ITEM_WINGS_OF_SPIRITS, D, R, 0},  {ITEM_WINGS_OF_SOUL, R, W, 0},   {ITEM_WINGS_OF_DRAGON, R, D, 0},
+        {ITEM_WINGS_OF_DARKNESS, W, D, 0}, {ITEM_CAPE_OF_FIGHTER, R, D, 0}, {ITEM_WINGS_OF_DESPAIR, C, W, 0},
+        {ITEM_WING_OF_STORM, R, F, D},     {ITEM_WING_OF_ETERNAL, R, F, W}, {ITEM_WING_OF_ILLUSION, R, F, D},
+        {ITEM_WING_OF_RUIN, R, W, D},      {ITEM_CAPE_OF_EMPEROR, R, F, D}, {ITEM_CAPE_OF_OVERRULE, R, F, D},
+        {ITEM_WING_OF_DIMENSION, R, C, W},
+    };
+    for (const Kinds& entry : kinds)
+    {
+        if (entry.item != wing)
+        {
+            continue;
+        }
+        const int effect = type == 0 ? entry.type0 : type == 2 ? entry.type2 : type == 3 ? entry.type3 : 0;
+        if (effect == 0)
+        {
+            return std::nullopt;
+        }
+        return add(effect, effect == R);
+    }
+    switch (wing)
+    {
+    case ITEM_WING:
+        return add(R, true);
+    case ITEM_WINGS_OF_HEAVEN:
+    case ITEM_WING_OF_CURSE:
+        return add(W);
+    case ITEM_WINGS_OF_SATAN:
+    case ITEM_CAPE_OF_LORD:
+        return add(D);
+    default:
+        return std::nullopt;
+    }
+}
+
+// Every wing's additional option at the option types 0, 2 and 3 and the levels Season 6 sends is the old chain's; the
+// one change of 9b1 is that the first tier wings and the Cape of Lord have theirs under type 0 only, as OpenMU numbers
+// them.
+TEST_CASE("Every wing's additional option at the option types 0, 2 and 3 is the old code's [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    const int wings[] = {ITEM_WING,
+                         ITEM_WINGS_OF_HEAVEN,
+                         ITEM_WINGS_OF_SATAN,
+                         ITEM_WING_OF_CURSE,
+                         ITEM_WINGS_OF_SPIRITS,
+                         ITEM_WINGS_OF_SOUL,
+                         ITEM_WINGS_OF_DRAGON,
+                         ITEM_WINGS_OF_DARKNESS,
+                         ITEM_WINGS_OF_DESPAIR,
+                         ITEM_CAPE_OF_FIGHTER,
+                         ITEM_CAPE_OF_LORD,
+                         ITEM_WING_OF_STORM,
+                         ITEM_WING_OF_ETERNAL,
+                         ITEM_WING_OF_ILLUSION,
+                         ITEM_WING_OF_RUIN,
+                         ITEM_CAPE_OF_EMPEROR,
+                         ITEM_WING_OF_DIMENSION,
+                         ITEM_CAPE_OF_OVERRULE};
+    const auto oneKind = [](int wing)
+    {
+        return wing == ITEM_WING || wing == ITEM_WINGS_OF_HEAVEN || wing == ITEM_WINGS_OF_SATAN ||
+               wing == ITEM_WING_OF_CURSE || wing == ITEM_CAPE_OF_LORD;
+    };
+    for (const int wing : wings)
+    {
+        CAPTURE(wing);
+        for (const int type : {0, 2, 3})
+        {
+            CAPTURE(type);
+            for (int level = 1; level <= 4; ++level)
+            {
+                CAPTURE(level);
+                std::optional<OptionSlot> expected = OldWingOption(wing, type, level);
+                if (oneKind(wing) && type != 0)
+                {
+                    expected.reset();
+                }
+                const std::vector<OptionSlot> slots = DefinitionSlots(MakeItemWithOption(wing, level, type));
+                CHECK(slots == (expected ? std::vector<OptionSlot>{*expected} : std::vector<OptionSlot>{}));
+            }
+        }
+    }
+}
+
+// A wing's additional option is the one of its definition with the option type the server sends as its number, as
+// OpenMU numbers them (Wings.cs): a type the wing has no option for gives none.
+TEST_CASE("A wing's additional option follows the option type the server sends [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    CHECK(GameLogic::Items::LinksOptionType(ITEM_WINGS_OF_SATAN, Data::Items::ItemOptionType::Option));
+    CHECK(DefinitionSlots(MakeItemWithOption(ITEM_WINGS_OF_SATAN, 2, 0)) ==
+          std::vector<OptionSlot>{{AT_IMPROVE_DAMAGE, 8}});
+    CHECK(DefinitionSlots(MakeItemWithOption(ITEM_WINGS_OF_SATAN, 2, 2)).empty());
+    CHECK(DefinitionSlots(MakeItemWithOption(ITEM_WINGS_OF_SPIRITS, 3, 2)) ==
+          std::vector<OptionSlot>{{AT_LIFE_REGENERATION, 3}});
+    CHECK(DefinitionSlots(MakeItemWithOption(ITEM_WING_OF_STORM, 4, 2)) ==
+          std::vector<OptionSlot>{{AT_IMPROVE_DEFENSE, 16}});
+    CHECK(DefinitionSlots(MakeItemWithOption(ITEM_WING_OF_STORM, 4, 3)) ==
+          std::vector<OptionSlot>{{AT_IMPROVE_DAMAGE, 16}});
+    CHECK(DefinitionSlots(MakeItemWithOption(ITEM_WING_OF_DIMENSION, 1, 2)) ==
+          std::vector<OptionSlot>{{AT_IMPROVE_CURSE, 4}});
+    // The Horn of Dinorant's option level is three flags, still code (9b5).
+    CHECK_FALSE(GameLogic::Items::LinksOptionType(ITEM_HORN_OF_DINORANT, Data::Items::ItemOptionType::Option));
+    CHECK(MakeItemWithOption(ITEM_HORN_OF_DINORANT, 1).SpecialNum == 1);
 }
 
 // "+Option" in the name and the ground label, and the tooltip state skillLuckOrOption, follow whether the item has an
@@ -1248,6 +1439,21 @@ TEST_CASE("The ancient bonus comes from the definition the item's attackType pic
     ClearTooltipRows();
     const ITEM withoutBonus = MakeAncientItem(strengthItem, 0);
     CHECK(g_csItemOption.RenderDefaultOptionText(&withoutBonus, 0) == 0);
+
+    // A list by the item's level takes the item's + level, as the other options do.
+    ItemOptionsScope restoreOptions;
+    const Data::Items::ItemOptionDatabase& shipped = restoreOptions.Saved();
+    std::vector<Data::Items::ItemOptionDefinition> definitions(shipped.GetDefinitions().begin(),
+                                                               shipped.GetDefinitions().end());
+    const int strengthBonus = shipped.Find("ancientBonusStrength");
+    REQUIRE(strengthBonus != Data::Items::ItemOptionDatabase::NoDefinition);
+    Data::Items::ItemOptionValue& value = definitions[static_cast<size_t>(strengthBonus)].options.front().value;
+    value = {.values = {1, 2, 3, 4}, .isList = true, .levelType = Data::Items::ItemOptionLevelType::ItemLevel};
+    g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
+    ITEM leveled = MakeAncientItem(strengthItem, 1);
+    leveled.Level = 2;
+    REQUIRE(GameLogic::Items::FindAncientBonus(leveled));
+    CHECK(GameLogic::Items::FindAncientBonus(leveled)->value == 3);
 }
 
 // The stat code adds the ancient bonus of the worn items with the definitions' values, to the stat the definition's

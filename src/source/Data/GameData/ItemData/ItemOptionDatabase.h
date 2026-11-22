@@ -77,7 +77,7 @@ public:
 
     // The order an item takes the definition's options in, as indexes of its options: as the code before the
     // definitions tested their bits, the excellent options from the highest number down (the tooltip shows them so),
-    // the others as written. Worked out when the options load.
+    // the wing options from the lowest up, the others as written. Worked out when the options load.
     const std::vector<size_t>& GetOptionOrder(ItemOptionIndex definition) const
     {
         return m_optionOrders[definition];
@@ -106,8 +106,13 @@ public:
 
     // The definitions an item's names link, in the order they are written in and taken in (by type, then by name); a
     // name of no definition is left out (the loader reports it), and so is a second definition of a type whose byte a
-    // definition before it reads.
-    std::vector<ItemOptionIndex> ResolveLinks(std::span<const std::string> names) const;
+    // definition before it reads. Of excellent and wing options (both read the excellent byte) a link of
+    // `excellentByte`'s type counts first, whatever the take order.
+    std::vector<ItemOptionIndex> ResolveLinks(std::span<const std::string> names, ItemOptionType excellentByte) const;
+
+    // The item's links: its excellent byte holds wing options on wings (ExcellentByteMeansOther), excellent options
+    // on every other item.
+    std::vector<ItemOptionIndex> ResolveLinks(const ItemDefinition& item) const;
 
     // The names in the order ResolveLinks takes them, so a saved list is the same however it was made; names of no
     // definition go last, in the order they had.
@@ -135,4 +140,8 @@ private:
 // Whether the item's excellent byte means something else than excellent options: the wings' options, the Horn of
 // Fenrir's kind (no horn is excellent).
 bool ExcellentByteMeansOther(const ItemDefinition& item);
+
+// Whether definitions of the two types read the same part of the server's item data: one type, or excellent and wing
+// options (both read the excellent byte). An item's links take one definition of each part.
+bool ReadsSameItemData(ItemOptionType left, ItemOptionType right);
 } // namespace Data::Items

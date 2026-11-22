@@ -1,0 +1,373 @@
+{
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "wingsOfElf",
+      "type": "option",
+      "displayName": {
+        "en": "Wings of Elf",
+        "de": "Elfenflügel",
+        "es": "Alas de Elfa",
+        "pl": "Skrzydła Elfa",
+        "pt": "Asas do elfo"
+      },
+      "openMu": {"id": "00000083-c000-0000-0000-000000000000", "name": "Wings of Elf Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"}
+      ]
+    },
+    {
+      "name": "wingsOfHeaven",
+      "type": "option",
+      "displayName": {
+        "en": "Wings of Heaven",
+        "de": "Himmelsflügel",
+        "es": "Alas de Cielo",
+        "pl": "Skrzydła Niebios",
+        "pt": "Asas do paraíso"
+      },
+      "openMu": {"id": "00000083-c001-0000-0000-000000000000", "name": "Wings of Heaven Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"}
+      ]
+    },
+    {
+      "name": "wingsOfSatan",
+      "type": "option",
+      "displayName": {
+        "en": "Wings of Satan",
+        "de": "Satansflügel",
+        "es": "Alas de Satán",
+        "pl": "Skrzydła Szatana",
+        "pt": "Asas de Satã"
+      },
+      "openMu": {"id": "00000083-c002-0000-0000-000000000000", "name": "Wings of Satan Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    },
+    {
+      "name": "wingsOfCurse",
+      "type": "option",
+      "displayName": {
+        "en": "Wing of Curse",
+        "de": "Fluchflügel",
+        "es": "Ala de Maldición",
+        "pl": "Skrzydło Klątwy",
+        "pt": "Asa da maldição"
+      },
+      "openMu": {"id": "00000083-c029-0000-0000-000000000000", "name": "Wings of Curse Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"}
+      ]
+    },
+    {
+      "name": "wingsOfSpirits",
+      "type": "option",
+      "displayName": {
+        "en": "Wings of Spirits",
+        "de": "Geisterflügel",
+        "es": "Alas de Espíritus",
+        "pl": "Skrzydła Duchów",
+        "pt": "Asas dos espíritos"
+      },
+      "openMu": {"id": "00000083-c003-0000-0000-000000000000", "name": "Wings of Spirits Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 2, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 0, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    },
+    {
+      "name": "wingsOfSoul",
+      "type": "option",
+      "displayName": {
+        "en": "Wings of Soul",
+        "de": "Seelenflügel",
+        "es": "Alas de Alma",
+        "pl": "Skrzydła Duszy",
+        "pt": "Asas da alma"
+      },
+      "openMu": {"id": "00000083-c004-0000-0000-000000000000", "name": "Wings of Soul Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 2, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"}
+      ]
+    },
+    {
+      "name": "wingsOfDragon",
+      "type": "option",
+      "displayName": {
+        "en": "Wings of Dragon",
+        "de": "Drachenflügel",
+        "es": "Alas de Dragón",
+        "pl": "Skrzydła Smoka",
+        "pt": "Asas do dragão"
+      },
+      "openMu": {"id": "00000083-c005-0000-0000-000000000000", "name": "Wings of Dragon Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 2, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    },
+    {
+      "name": "wingsOfDarkness",
+      "type": "option",
+      "displayName": {
+        "en": "Wings of Darkness",
+        "de": "Flügel der Dunkelheit",
+        "es": "Alas de Oscuridad",
+        "pl": "Skrzydła Ciemności",
+        "pt": "Asas da escuridão"
+      },
+      "openMu": {"id": "00000083-c006-0000-0000-000000000000", "name": "Wings of Darkness Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"},
+        {"number": 2, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    },
+    {
+      "name": "wingsOfDespair",
+      "type": "option",
+      "displayName": {
+        "en": "Wind of Despair",
+        "de": "Flügel der Verzweiflung",
+        "es": "Viento de Desesperación",
+        "pl": "Skrzydło Rozpaczy",
+        "pt": "Asa do desespero"
+      },
+      "openMu": {"id": "00000083-c02a-0000-0000-000000000000", "name": "Wings of Despair Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "curseBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalCurseDamage"},
+        {"number": 2, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"}
+      ]
+    },
+    {
+      "name": "capeOfFighter",
+      "type": "option",
+      "displayName": {
+        "en": "Cape of Fighter",
+        "de": "Kämpferumhang",
+        "es": "Capa del Guerrero",
+        "pl": "Peleryna Wojownika",
+        "pt": "Manto do Guerreiro"
+      },
+      "openMu": {"id": "00000083-c031-0000-0000-000000000000", "name": "Cape of Fighter Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 2, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    },
+    {
+      "name": "capeOfLordOption",
+      "type": "option",
+      "displayName": {
+        "en": "Cape of Lord",
+        "de": "Umhang des Lords",
+        "es": "Capa de Señor",
+        "pl": "Peleryna Lorda",
+        "pt": "Capa do Lorde"
+      },
+      "openMu": {"id": "00000083-d01e-0000-0000-000000000000", "name": "Cape of Lord Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    },
+    {
+      "name": "wingOfStorm",
+      "type": "option",
+      "displayName": {
+        "en": "Wing of Storm",
+        "de": "Sturmflügel",
+        "es": "Ala de Tormenta",
+        "pl": "Skrzydło Burzy",
+        "pt": "Asa da Tempestade"
+      },
+      "openMu": {"id": "00000083-c024-0000-0000-000000000000", "name": "Wing of Storm Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 3, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"},
+        {"number": 2, "attribute": "defenseBase", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDefense"}
+      ]
+    },
+    {
+      "name": "wingOfEternal",
+      "type": "option",
+      "displayName": {
+        "en": "Wing of Eternal",
+        "de": "Ewigkeitsflügel",
+        "es": "Ala de Eternidad",
+        "pl": "Skrzydło Wieczności",
+        "pt": "Asa da eternidade"
+      },
+      "openMu": {"id": "00000083-c025-0000-0000-000000000000", "name": "Wing of Eternal Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 3, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"},
+        {"number": 2, "attribute": "defenseBase", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDefense"}
+      ]
+    },
+    {
+      "name": "wingOfIllusion",
+      "type": "option",
+      "displayName": {
+        "en": "Wing of Illusion",
+        "de": "Illusionsflügel",
+        "es": "Ala de Ilusión",
+        "pl": "Skrzydło Iluzji",
+        "pt": "Asa da ilusão"
+      },
+      "openMu": {"id": "00000083-c026-0000-0000-000000000000", "name": "Wing of Illusion Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 3, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"},
+        {"number": 2, "attribute": "defenseBase", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDefense"}
+      ]
+    },
+    {
+      "name": "wingOfRuin",
+      "type": "option",
+      "displayName": {
+        "en": "Wing of Ruin",
+        "de": "Flügel des Verderbens",
+        "es": "Ala de Ruina",
+        "pl": "Skrzydło Zagłady",
+        "pt": "Asa da ruína"
+      },
+      "openMu": {"id": "00000083-c027-0000-0000-000000000000", "name": "Wing of Ruin Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 3, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"},
+        {"number": 2, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"}
+      ]
+    },
+    {
+      "name": "capeOfEmperor",
+      "type": "option",
+      "displayName": {
+        "en": "Cape of Emperor",
+        "de": "Umhang des Imperators",
+        "es": "Capa de Emperador",
+        "pl": "Peleryna Cesarza",
+        "pt": "Capa do Imperador"
+      },
+      "openMu": {"id": "00000083-c028-0000-0000-000000000000", "name": "Cape of Emperor Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 3, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"},
+        {"number": 2, "attribute": "defenseBase", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDefense"}
+      ]
+    },
+    {
+      "name": "wingOfDimension",
+      "type": "option",
+      "displayName": {
+        "en": "Wing of Dimension",
+        "de": "Dimensionsflügel",
+        "es": "Ala de Dimensión",
+        "pl": "Skrzydło Wymiarów",
+        "pt": "Asa da dimensão"
+      },
+      "openMu": {"id": "00000083-c02b-0000-0000-000000000000", "name": "Wing of Dimension Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 3, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"},
+        {"number": 2, "attribute": "curseBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalCurseDamage"}
+      ]
+    },
+    {
+      "name": "capeOfOverrule",
+      "type": "option",
+      "displayName": {
+        "en": "Cape of Overrule",
+        "de": "Umhang der Herrschaft",
+        "es": "Capa Reinante",
+        "pl": "Peleryna Władzy",
+        "pt": "Manto Reinante"
+      },
+      "openMu": {"id": "00000083-c032-0000-0000-000000000000", "name": "Cape of Overrule Options"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 3, "attribute": "physicalBaseDmg", "addFinal": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"},
+        {"number": 2, "attribute": "defenseBase", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDefense"}
+      ]
+    },
+    {
+      "name": "secondTierWing",
+      "type": "wing",
+      "displayName": {
+        "en": "Second tier wing options"
+      },
+      "openMu": {"id": "00000083-0065-0000-0000-000000000000", "name": "2nd Wing Options"},
+      "server": {"addsRandomly": true, "addChance": 0.1, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 1, "attribute": "maximumHealth", "add": {"levelType": "itemLevel", "values": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125]}, "text": "wingMaxHp"},
+        {"number": 2, "attribute": "maximumMana", "add": {"levelType": "itemLevel", "values": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125]}, "text": "wingMaxMana"},
+        {"number": 3, "attribute": "defenseIgnoreChance", "percent": {"values": 3}, "text": "ignoreDefense"},
+        {"number": 4, "attribute": "maximumAbility", "add": {"values": 50}, "text": "wingMaxAg"},
+        {"number": 5, "attribute": "attackSpeedAny", "add": {"values": 5}, "text": "increaseAttackSpeed"}
+      ]
+    },
+    {
+      "name": "capeOfFighterWing",
+      "type": "wing",
+      "displayName": {
+        "en": "Cape of Fighter wing options"
+      },
+      "openMu": {"id": "00000083-0065-0000-0000-000000000000", "name": "2nd Wing Options"},
+      "server": {"addsRandomly": true, "addChance": 0.1, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 1, "attribute": "maximumHealth", "add": {"levelType": "itemLevel", "values": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125]}, "text": "wingMaxHp"},
+        {"number": 2, "attribute": "maximumMana", "add": {"levelType": "itemLevel", "values": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125]}, "text": "wingMaxMana"},
+        {"number": 3, "attribute": "defenseIgnoreChance", "percent": {"values": 3}, "text": "ignoreDefense"}
+      ]
+    },
+    {
+      "name": "capeOfLord",
+      "type": "wing",
+      "displayName": {
+        "en": "Cape of Lord wing options"
+      },
+      "openMu": {"id": "00000083-0066-0000-0000-000000000000", "name": "Cape of Lord Options"},
+      "server": {"addsRandomly": true, "addChance": 0.1, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 1, "attribute": "maximumHealth", "add": {"levelType": "itemLevel", "values": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125]}, "text": "wingMaxHp"},
+        {"number": 2, "attribute": "maximumMana", "add": {"levelType": "itemLevel", "values": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125]}, "text": "wingMaxMana"},
+        {"number": 3, "attribute": "defenseIgnoreChance", "percent": {"values": 3}, "text": "ignoreDefense"},
+        {"number": 4, "attribute": "totalLeadership", "add": {"levelType": "itemLevel", "values": [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85]}, "text": "increaseCommand"}
+      ]
+    },
+    {
+      "name": "thirdTierWing",
+      "type": "wing",
+      "displayName": {
+        "en": "Third tier wing options"
+      },
+      "openMu": {"id": "00000083-0067-0000-0000-000000000000", "name": "3rd Wing Options"},
+      "server": {"addsRandomly": true, "addChance": 0.1, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 1, "attribute": "defenseIgnoreChance", "percent": {"values": 5}, "text": "ignoreDefense"},
+        {"number": 2, "attribute": "fullyReflectDamageAfterHitChance", "percent": {"values": 5}, "text": "returnAttackPower"},
+        {"number": 3, "attribute": "fullyRecoverHealthAfterHitChance", "percent": {"values": 5}, "text": "fullLifeRecovery"},
+        {"number": 4, "attribute": "fullyRecoverManaAfterHitChance", "percent": {"values": 5}, "text": "fullManaRecovery"}
+      ]
+    }
+  ]
+}

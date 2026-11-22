@@ -64,15 +64,19 @@ std::string FindFileOfType(const ItemOptionFiles& files, Data::Items::ItemOption
             ++counts[definition.file];
         }
     }
-    const auto most = std::ranges::max_element(counts, {}, [](const auto& entry) { return entry.second; });
-    if (most != counts.end())
+    // The shipped files' names: the ancient types share Ancient.json, the wing options are in Wings.json.
+    const char* name = isAncient(type)                             ? "ancient"
+                       : type == Data::Items::ItemOptionType::Wing ? "wings"
+                                                                   : Data::Items::FindEnumName(type);
+    std::string typeFile = name != nullptr ? name : "options";
+    typeFile.front() = static_cast<char>(std::toupper(static_cast<unsigned char>(typeFile.front())));
+    typeFile += ".json";
+    if (counts.contains(typeFile))
     {
-        return most->first;
+        return typeFile;
     }
-    const char* name = isAncient(type) ? "ancient" : Data::Items::FindEnumName(type);
-    std::string file = name != nullptr ? name : "options";
-    file.front() = static_cast<char>(std::toupper(static_cast<unsigned char>(file.front())));
-    return file + ".json";
+    const auto most = std::ranges::max_element(counts, {}, [](const auto& entry) { return entry.second; });
+    return most != counts.end() ? most->first : typeFile;
 }
 
 const ItemOptionDefinition* FindDefinitionNamed(const ItemOptionFiles& files, std::string_view name)
@@ -185,10 +189,18 @@ bool IsUsefulOptionLink(const ItemDefinition& item, const ItemOptionDefinition& 
     {
         return false;
     }
+    // The excellent byte holds wing options on wings, excellent options on every other item but a horn (its kind, or
+    // nothing): the other type would not count (ItemOptionDatabase::ResolveLinks), or the loader reports it.
     if (definition.type == ItemOptionType::Excellent && Data::Items::ExcellentByteMeansOther(item))
     {
         return false;
     }
+    if (definition.type == ItemOptionType::Wing &&
+        (item.slot != Data::Items::ItemSlot::Wings || item.tags.Has(Data::Items::ItemTag::HornMount)))
+    {
+        return false;
+    }
+    // A second definition of a type the item links: the first counts.
     return std::ranges::none_of(item.options,
                                 [&](const std::string& name)
                                 {
@@ -348,7 +360,8 @@ int HighestOptionLevel(const ItemOptionDefinition& definition)
     int highest = 0;
     for (const Data::Items::ItemOption& option : definition.options)
     {
-        if (option.value.isList)
+        // A list by the item's level follows the item, not the option level.
+        if (option.value.isList && option.value.levelType == Data::Items::ItemOptionLevelType::OptionLevel)
         {
             highest = std::max(highest, static_cast<int>(option.value.values.size()));
         }
@@ -363,7 +376,8 @@ bool FillOptionLevels(ItemOptionDefinition& definition, int level)
     for (Data::Items::ItemOption& option : definition.options)
     {
         std::vector<int>& values = option.value.values;
-        if (!option.value.isList || values.empty() || values.size() == size)
+        if (!option.value.isList || option.value.levelType != Data::Items::ItemOptionLevelType::OptionLevel ||
+            values.empty() || values.size() == size)
         {
             continue;
         }
@@ -386,11 +400,12 @@ bool FillOptionLevels(ItemOptionDefinition& definition, int level)
 
 void FillOptionValue(ItemOptionValue& value, int fromLevel, int fromValue, int step, int toLevel)
 {
+    const int firstLevel = value.FirstLevel();
     std::vector<int> values = value.isList ? value.values : std::vector<int>();
-    values.resize(static_cast<size_t>(toLevel), 0);
-    for (int level = fromLevel; level <= toLevel; ++level)
+    values.resize(static_cast<size_t>(toLevel - firstLevel + 1), 0);
+    for (int level = std::max(fromLevel, firstLevel); level <= toLevel; ++level)
     {
-        values[static_cast<size_t>(level - 1)] = fromValue + step * (level - fromLevel);
+        values[static_cast<size_t>(level - firstLevel)] = fromValue + step * (level - fromLevel);
     }
     value.values = std::move(values);
     value.isList = true;

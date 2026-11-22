@@ -361,6 +361,13 @@ TEST_CASE("Buffs: an unknown field is a warning, and the entry is kept [data][bu
                                         R"( "item": {"group": 13, "number": 43, "level": 1} })"));
     CHECK(inItem.buffs.size() == 1);
     CHECK(HasIssueAbout(inItem.issues, ItemDataIssueSeverity::Warning, "buffs[0].item.level", "unknown field"));
+
+    // A buff's value is one number, so a level type does nothing (the item options' value format has it for lists).
+    const ReadResult byItemLevel =
+        Read(File(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1, "displayName": "A",)"
+                  R"( "duration": {"levelType": "itemLevel", "values": 60} })"));
+    CHECK(HasIssueAbout(byItemLevel.issues, ItemDataIssueSeverity::Warning, "buffs[0].duration.levelType",
+                        "does nothing"));
 }
 
 TEST_CASE("Buffs: the shipped file loads without problems and is written as the writer writes it [data][buffs]")

@@ -5953,4 +5953,10 @@
   <data name="Other languages in the Translations tab" xml:space="preserve">
     <value>Die Namen der anderen Sprachen stehen im Tab Übersetzungen.</value>
   </data>
+  <data name="By the item's level" xml:space="preserve">
+    <value>Nach der Gegenstandsstufe</value>
+  </data>
+  <data name="The list goes by the item's level 0 to 15, not the option level" xml:space="preserve">
+    <value>Die Liste geht nach der Stufe des Gegenstands 0 bis 15, nicht nach der Optionsstufe</value>
+  </data>
 </root>
