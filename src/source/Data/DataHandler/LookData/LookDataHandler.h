@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-// Loads the looks of items as data (Data/Effects/RenderStyles.json and ItemEffects.json, see LookJson.h) into
+// Loads the looks of items as data (Data/Effects/RenderStyles.json and Effects.json, see LookJson.h) into
 // g_LookStore.
 namespace Data::Looks
 {
@@ -25,6 +25,6 @@ RenderStylesLoadResult LoadLookFile(const std::filesystem::path& directory, Look
 // Loads the render style file into g_LookStore and logs its problems; false, with the message for the player, when
 // one is fatal.
 bool LoadRenderStyles(std::string& errorMessage);
-// The same for the item effect file.
-bool LoadItemEffects(std::string& errorMessage);
+// The same for the effect file.
+bool LoadEffects(std::string& errorMessage);
 } // namespace Data::Looks

@@ -60,9 +60,9 @@ std::vector<int> FindRenderStyleUsers(std::string_view name)
     return FindModelUsers([name](const ItemModelDefinition& model) { return model.renderStyle == name; });
 }
 
-std::vector<int> FindItemEffectUsers(std::string_view name)
+std::vector<int> FindEffectUsers(std::string_view name)
 {
-    return FindModelUsers([name](const ItemModelDefinition& model) { return model.itemEffect == name; });
+    return FindModelUsers([name](const ItemModelDefinition& model) { return model.effect == name; });
 }
 
 std::vector<int> FindGlowColorUsers(std::string_view name)

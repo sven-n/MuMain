@@ -5,6 +5,7 @@
 #include "RenderStyleCheckArea.h"
 
 #include "LookEdits.h"
+#include "MonsterLookUses.h"
 #include "MuStyleEditorUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -16,6 +17,7 @@
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/LookData/BoneThingTypes.h"
 #include "Data/GameData/LookData/LookJson.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
@@ -52,6 +54,16 @@ int MeshCount(int itemType)
     return Models[Data::Items::ToModelSlot(itemType)].NumMeshs;
 }
 
+int BoneCount(int itemType)
+{
+    return Models[Data::Items::ToModelSlot(itemType)].NumBones;
+}
+
+bool EffectTypeExists(Data::Looks::BoneThingKind kind, const std::string& type)
+{
+    return Data::Looks::FindBoneThingType(kind, type).has_value();
+}
+
 bool IsAboutAnItem(const ItemDataIssue& issue)
 {
     return Data::Items::IsValidItemId(issue.group, issue.number);
@@ -64,7 +76,7 @@ public:
 
     const char* GetName() const override
     {
-        return m_kind == Data::Looks::LookKind::ItemEffect ? I18N::Editor::ItemEffects : I18N::Editor::RenderStyles;
+        return m_kind == Data::Looks::LookKind::Effect ? I18N::Editor::Effects : I18N::Editor::RenderStyles;
     }
 
     void Check(std::vector<ItemDataIssue>& issues) override
@@ -128,9 +140,9 @@ public:
         }
         if (const std::string look = LookOf(issue); !look.empty())
         {
-            if (m_kind == Data::Looks::LookKind::ItemEffect)
+            if (m_kind == Data::Looks::LookKind::Effect)
             {
-                g_MuStyleEditorUI.ShowItemEffect(look);
+                g_MuStyleEditorUI.ShowEffect(look);
             }
             else
             {
@@ -167,6 +179,13 @@ private:
     // The names of the checked looks in their order, at the last check.
     std::vector<std::string> m_lookNames;
 };
+// Whether a monster or monster model names the look (MN8), as the monster tools have them; counted once for all the
+// looks of a check.
+bool MonsterUses(const std::string& name, Data::Looks::LookKind kind)
+{
+    static MonsterLookUses uses;
+    return uses.Count(name, kind) > 0;
+}
 } // namespace
 
 Data::Looks::RenderStyleCheckInput MakeEditorCheckInput()
@@ -174,7 +193,10 @@ Data::Looks::RenderStyleCheckInput MakeEditorCheckInput()
     return {.models = g_ItemModelDatabase.GetAllSlots(),
             .partModels = g_ItemModelDatabase.GetPartModels(),
             .textureExists = TextureFileExists,
-            .meshCount = MeshCount};
+            .meshCount = MeshCount,
+            .monsterUses = MonsterUses,
+            .typeExists = EffectTypeExists,
+            .boneCount = BoneCount};
 }
 
 std::unique_ptr<DataChecks::DataCheckArea> CreateRenderStyleCheckArea()
@@ -182,9 +204,9 @@ std::unique_ptr<DataChecks::DataCheckArea> CreateRenderStyleCheckArea()
     return std::make_unique<LookCheckArea>(Data::Looks::LookKind::RenderStyle);
 }
 
-std::unique_ptr<DataChecks::DataCheckArea> CreateItemEffectCheckArea()
+std::unique_ptr<DataChecks::DataCheckArea> CreateLookEffectCheckArea()
 {
-    return std::make_unique<LookCheckArea>(Data::Looks::LookKind::ItemEffect);
+    return std::make_unique<LookCheckArea>(Data::Looks::LookKind::Effect);
 }
 } // namespace MuEditor::Looks
 

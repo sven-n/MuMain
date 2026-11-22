@@ -24,10 +24,13 @@ public:
     // Window
     int  GetWindowWidth()  const { return m_windowWidth; }
     int  GetWindowHeight() const { return m_windowHeight; }
-    bool GetWindowMode()   const { return m_windowMode; }
+    WindowMode GetWindowMode() const
+    {
+        return m_windowMode;
+    }
 
     void SetWindowSize(int width, int height);
-    void SetWindowMode(bool windowed);
+    void SetWindowMode(WindowMode mode);
 
     // Audio — volume 0 = off, >0 = on. No separate Enabled flag.
     int  GetSoundVolume()  const { return m_soundVolume; }
@@ -62,6 +65,11 @@ public:
     // Connection
     std::wstring GetServerIP() const { return m_serverIP; }
     int GetServerPort() const { return m_serverPort; }
+    // The WebSocket relay every connection goes through, or empty for plain TCP.
+    std::wstring GetRelay() const
+    {
+        return m_relay;
+    }
 
     void SetServerIP(const std::wstring& ip);
     void SetServerPort(int port);
@@ -248,7 +256,7 @@ private:
 
     int  m_windowWidth;
     int  m_windowHeight;
-    bool m_windowMode;
+    WindowMode m_windowMode;
 
     int  m_soundVolume;
     int  m_musicVolume;
@@ -264,6 +272,7 @@ private:
 
     std::wstring m_serverIP;
     int m_serverPort;
+    std::wstring m_relay;
 
     std::wstring m_uiLocale;
     bool m_translateItemNames;
@@ -298,6 +307,9 @@ private:
     std::wstring m_texturePack;
     bool m_useS6PlayerModels;
 
+    // Every write to config.ini: one entry (a null value removes the key, a null key the section).
+    void WriteEntry(const wchar_t* section, const wchar_t* key, const wchar_t* value);
+
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);
 
@@ -308,6 +320,9 @@ private:
     void WriteStringList(const wchar_t* section, const wchar_t* keyPrefix, const std::vector<std::wstring>& values);
     std::wstring ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue);
     void WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value);
+
+    // [Window] Mode, or the Windowed key of an older client's config.ini when Mode is missing.
+    WindowMode ReadWindowMode();
 
     void RemoveObsoleteKey(const wchar_t* section, const wchar_t* key);
     void RemoveObsoleteSection(const wchar_t* section);

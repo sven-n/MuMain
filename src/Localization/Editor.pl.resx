@@ -553,8 +553,8 @@
   <data name="Render style" xml:space="preserve">
     <value>Styl renderowania</value>
   </data>
-  <data name="Item effect" xml:space="preserve">
-    <value>Efekt przedmiotu</value>
+  <data name="Effect" xml:space="preserve">
+    <value>Efekt</value>
   </data>
   <data name="Used by" xml:space="preserve">
     <value>używany przez</value>
@@ -4164,5 +4164,140 @@
   </data>
   <data name="Buffs" xml:space="preserve">
     <value>Buffy</value>
+  </data>
+  <data name="Warp List" xml:space="preserve">
+    <value>Lista teleportów</value>
+  </data>
+  <data name="Warp list note" xml:space="preserve">
+    <value>Lista tak, jak pokazuje ją okno M, w tej kolejności. Serwer, który wysyła własną listę (OpenMU), zastępuje poziom i zen. Gra przejmuje każdą zmianę od razu; Zapisz zapisuje {0}.</value>
+  </data>
+  <data name="Add warp" xml:space="preserve">
+    <value>Dodaj teleport</value>
+  </data>
+  <data name="Pick a warp in the list." xml:space="preserve">
+    <value>Wybierz teleport z listy.</value>
+  </data>
+  <data name="Search warps" xml:space="preserve">
+    <value>Szukaj</value>
+  </data>
+  <data name="Move command name" xml:space="preserve">
+    <value>Nazwa dla /move</value>
+  </data>
+  <data name="Zen" xml:space="preserve">
+    <value>Zen</value>
+  </data>
+  <data name="Gate" xml:space="preserve">
+    <value>Brama</value>
+  </data>
+  <data name="Gate note" xml:space="preserve">
+    <value>Miejsce lądowania na serwerze; klient go nie używa.</value>
+  </data>
+  <data name="No class discount" xml:space="preserve">
+    <value>Bez zniżki klasy</value>
+  </data>
+  <data name="Master level" xml:space="preserve">
+    <value>Poziom mistrza</value>
+  </data>
+  <data name="Resets" xml:space="preserve">
+    <value>Resety</value>
+  </data>
+  <data name="Zero is none" xml:space="preserve">
+    <value>0 = brak</value>
+  </data>
+  <data name="Warp rules" xml:space="preserve">
+    <value>Zasady</value>
+  </data>
+  <data name="Needs one of" xml:space="preserve">
+    <value>Wymaga jednego z</value>
+  </data>
+  <data name="Needs one of note" xml:space="preserve">
+    <value>Co najmniej jeden z nich musi być założony i nie zepsuty. Pusto: brak zasady.</value>
+  </data>
+  <data name="Not with" xml:space="preserve">
+    <value>Nie z</value>
+  </data>
+  <data name="Not with note" xml:space="preserve">
+    <value>Żaden z nich nie może być założony.</value>
+  </data>
+  <data name="Item tag" xml:space="preserve">
+    <value>Tag przedmiotu</value>
+  </data>
+  <data name="Any wings" xml:space="preserve">
+    <value>Dowolne skrzydła</value>
+  </data>
+  <data name="Except" xml:space="preserve">
+    <value>oprócz</value>
+  </data>
+  <data name="Unknown item" xml:space="preserve">
+    <value>Lista przedmiotów nie ma takiego przedmiotu.</value>
+  </data>
+  <data name="Tag items {0}" xml:space="preserve">
+    <value>({0} przedm.)</value>
+  </data>
+  <data name="PvP servers only" xml:space="preserve">
+    <value>Tylko serwery PvP</value>
+  </data>
+  <data name="Gens members only" xml:space="preserve">
+    <value>Tylko członkowie Gens</value>
+  </data>
+  <data name="Blocked message" xml:space="preserve">
+    <value>Komunikat blokady</value>
+  </data>
+  <data name="General warp message" xml:space="preserve">
+    <value>Ogólny</value>
+  </data>
+  <data name="Blocked message note" xml:space="preserve">
+    <value>Co pokazuje czat, gdy zasady wyposażenia blokują /move.</value>
+  </data>
+  <data name="Class level discount" xml:space="preserve">
+    <value>Zniżka poziomu klasy</value>
+  </data>
+  <data name="Class level discount note" xml:space="preserve">
+    <value>Te klasy potrzebują poziomu teleportu razy licznik / mianownik, dla każdego teleportu bez Bez zniżki klasy.</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>Klasa</value>
+  </data>
+  <data name="Numerator" xml:space="preserve">
+    <value>Licznik</value>
+  </data>
+  <data name="Denominator" xml:space="preserve">
+    <value>Mianownik</value>
+  </data>
+  <data name="Add class" xml:space="preserve">
+    <value>Dodaj klasę</value>
+  </data>
+  <data name="Another warp has the index {0}" xml:space="preserve">
+    <value>Inny teleport ma indeks {0}.</value>
+  </data>
+  <data name="A warp needs an English name" xml:space="preserve">
+    <value>Teleport potrzebuje angielskiej nazwy.</value>
+  </data>
+  <data name="A warp needs a move name" xml:space="preserve">
+    <value>Teleport potrzebuje nazwy dla /move.</value>
+  </data>
+  <data name="Has a space note" xml:space="preserve">
+    <value>Zawiera spację: /move przyjmuje jedno słowo.</value>
+  </data>
+  <data name="Step copy" xml:space="preserve">
+    <value>Kopiuj {0}</value>
+  </data>
+  <data name="Step warp field" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Warps" xml:space="preserve">
+    <value>Teleporty</value>
+  </data>
+  <data name="Translations" xml:space="preserve">
+    <value>Tłumaczenia</value>
+  </data>
+  <data name="All warps" xml:space="preserve">
+    <value>Wszystkie teleporty</value>
+  </data>
+  <data name="Select the warp and show it in the Warps tab" xml:space="preserve">
+    <value>Wybierz teleport i pokaż go w karcie Teleporty</value>
+  </data>
+  <data name="Other languages in the Translations tab" xml:space="preserve">
+    <value>Nazwy w pozostałych językach są w karcie Tłumaczenia.</value>
   </data>
 </root>

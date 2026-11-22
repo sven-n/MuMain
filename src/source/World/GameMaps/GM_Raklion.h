@@ -56,8 +56,8 @@ namespace SEASON4A
         virtual bool CreateObject(OBJECT* o);
         virtual bool MoveObject(OBJECT* o);
         virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
-        virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
-        virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+        virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
+        virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
 
     public: // Character
         virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
@@ -78,7 +78,7 @@ namespace SEASON4A
 
     private:
         CGM_Raklion();
-        bool RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+        bool RenderMonster(const OBJECT* o, DrawLook& look, BMD* b);
         bool SetBossMonsterAction(CHARACTER* c, OBJECT* o);
 
     public:

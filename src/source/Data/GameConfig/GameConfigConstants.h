@@ -17,6 +17,9 @@ namespace CfgKeys
     // Window
     inline constexpr wchar_t CfgKeyWidth[]      = L"Width";
     inline constexpr wchar_t CfgKeyHeight[]     = L"Height";
+    // Windowed, Borderless or Fullscreen (WindowMode).
+    inline constexpr wchar_t CfgKeyWindowMode[] = L"Mode";
+    // The window mode of older clients, 1 a window and 0 fullscreen: read when Mode is missing, removed on save.
     inline constexpr wchar_t CfgKeyWindowed[]   = L"Windowed";
 
     // Audio — volume 0 = off, >0 = on (no separate Enabled flag).
@@ -33,6 +36,7 @@ namespace CfgKeys
     // Connection
     inline constexpr wchar_t CfgKeyServerIP[]   = L"ServerIP";
     inline constexpr wchar_t CfgKeyServerPort[] = L"ServerPort";
+    inline constexpr wchar_t CfgKeyRelay[] = L"Relay";
 
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
@@ -107,7 +111,7 @@ namespace CfgDefaults
 {
     inline constexpr int  CfgDefaultWindowWidth  = 1024;
     inline constexpr int  CfgDefaultWindowHeight = 768;
-    inline constexpr bool CfgDefaultWindowed     = true;
+    inline constexpr wchar_t CfgDefaultWindowMode[] = L"Windowed";
 
     inline constexpr int  CfgDefaultSoundVolume = 5;
     inline constexpr int  CfgDefaultMusicVolume = 5;
@@ -120,6 +124,7 @@ namespace CfgDefaults
 
     inline constexpr wchar_t CfgDefaultServerIP[] = L"localhost";
     inline constexpr int CfgDefaultServerPort = 44406;
+    inline constexpr wchar_t CfgDefaultRelay[] = L"";
 
     inline constexpr int CfgDefaultZoom = 1735;  // OrbitalCamera DEFAULT_RADIUS — matches Default-cam camera-to-Hero distance
 

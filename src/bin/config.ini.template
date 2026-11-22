@@ -12,13 +12,17 @@ EncryptedPassword=
 [Window]
 Width=1024
 Height=768
-Windowed=1
+Mode=Windowed
 [Audio]
 SoundVolume=5
 MusicVolume=5
 [CONNECTION SETTINGS]
 ServerIP=localhost
 ServerPort=44406
+; A WebSocket relay every connection goes through instead of TCP, e.g. wss://relay.example.com/{host}/{port}:
+; {host} and {port} become the server being dialled. Empty: connect over TCP.
+; Use wss:// for a relay on the internet; ws:// is for a relay on your own machine or network.
+Relay=
 [UI]
 Locale=en
 TranslateItemNames=1

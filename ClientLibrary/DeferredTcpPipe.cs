@@ -6,17 +6,20 @@ namespace MUnique.Client.Library;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// A TCP connection that can be written to before it is open: the pipes exist at once, the socket connects in the
-/// background, and what was written meanwhile goes out once it opens. A connect that fails completes
-/// <see cref="Input"/> with the error, as a connection the server closes would.
+/// A TCP connection, or one through a WebSocket relay, that can be written to before it is open: the pipes exist at
+/// once, the connection opens in the background, and what was written meanwhile goes out once it opens. A connect
+/// that fails completes <see cref="Input"/> with the error, as a connection the server closes would.
 /// </summary>
 internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
 {
@@ -68,7 +71,20 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
     /// <param name="onFailed">Called when it could not connect; <see cref="Input"/> then ends with the error.</param>
     public void Start(string host, int port, TimeSpan timeout, Action onOpened, Action<Exception> onFailed)
     {
-        _ = Task.Run(() => this.RunAsync(host, port, timeout, onOpened, onFailed));
+        _ = Task.Run(() => this.RunAsync(token => ConnectTcpAsync(host, port, token), timeout, onOpened, onFailed));
+    }
+
+    /// <summary>
+    /// Starts connecting through a WebSocket relay in the background and returns at once; the relay carries the byte
+    /// stream in binary messages to the server its address names.
+    /// </summary>
+    /// <param name="relay">The relay's address for the server, from <see cref="RelayAddress"/>.</param>
+    /// <param name="timeout">How long the whole connect may take.</param>
+    /// <param name="onOpened">Called once the WebSocket is open.</param>
+    /// <param name="onFailed">Called when it could not connect; <see cref="Input"/> then ends with the error.</param>
+    public void Start(Uri relay, TimeSpan timeout, Action onOpened, Action<Exception> onFailed)
+    {
+        _ = Task.Run(() => this.RunAsync(token => ConnectRelayAsync(relay, token), timeout, onOpened, onFailed));
     }
 
     /// <summary>
@@ -85,6 +101,20 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
 
         this._connectCancel.Cancel();
         this._closeDeadline.CancelAfter(CloseTime);
+    }
+
+    /// <summary>
+    /// The relay's address for one server: <c>{host}</c> and <c>{port}</c> in the template replaced by that server's.
+    /// </summary>
+    /// <param name="relay">The template, e.g. <c>wss://relay.example.com/{host}/{port}</c>.</param>
+    /// <param name="host">The host name or address of the server.</param>
+    /// <param name="port">The port of the server.</param>
+    /// <returns>The address to open.</returns>
+    internal static Uri RelayAddress(string relay, string host, int port)
+    {
+        return new Uri(relay
+            .Replace("{host}", Uri.EscapeDataString(host), StringComparison.Ordinal)
+            .Replace("{port}", port.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -268,15 +298,56 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
         }
     }
 
-    private async Task RunAsync(string host, int port, TimeSpan timeout, Action onOpened, Action<Exception> onFailed)
+    private static async Task<Transport> ConnectTcpAsync(string host, int port, CancellationToken cancellationToken)
     {
-        Socket socket;
+        var socket = await ConnectAsync(host, port, cancellationToken).ConfigureAwait(false);
+        ConfigureSocket(socket);
+        return new Transport(
+            new NetworkStream(socket, ownsSocket: true),
+            () =>
+            {
+                socket.Shutdown(SocketShutdown.Send);
+                return Task.CompletedTask;
+            },
+            socket.Dispose);
+    }
+
+    private static async Task<Transport> ConnectRelayAsync(Uri relay, CancellationToken cancellationToken)
+    {
+        var socket = new ClientWebSocket();
+
+        // Pings notice a relay that vanished about as soon as TCP keep-alive would.
+        socket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KeepAliveIdleSeconds);
+        socket.Options.KeepAliveTimeout = TimeSpan.FromSeconds(KeepAliveIntervalSeconds * KeepAliveRetryCount);
+        try
+        {
+            await socket.ConnectAsync(relay, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            socket.Dispose();
+            throw;
+        }
+
+        return new Transport(
+            WebSocketStream.Create(socket, WebSocketMessageType.Binary, ownsWebSocket: true),
+            () => socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None),
+            () =>
+            {
+                socket.Abort();
+                socket.Dispose();
+            });
+    }
+
+    private async Task RunAsync(Func<CancellationToken, Task<Transport>> connect, TimeSpan timeout, Action onOpened, Action<Exception> onFailed)
+    {
+        Transport transport;
         using (var attempt = CancellationTokenSource.CreateLinkedTokenSource(this._connectCancel.Token))
         {
             try
             {
                 attempt.CancelAfter(timeout);
-                socket = await ConnectAsync(host, port, attempt.Token).ConfigureAwait(false);
+                transport = await connect(attempt.Token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -290,23 +361,22 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
 
         if (this._connectCancel.IsCancellationRequested)
         {
-            socket.Dispose();
+            transport.Abort();
             await this.FailAsync(new OperationCanceledException(), onFailed).ConfigureAwait(false);
             return;
         }
 
-        ConfigureSocket(socket);
         onOpened();
-        using var stream = new NetworkStream(socket, ownsSocket: true);
+        using var stream = transport.Stream;
 
-        // Closing the socket ends a send or receive still pending past the deadline.
-        using var deadline = this._closeDeadline.Token.Register(socket.Dispose);
+        // Dropping the connection ends a send or receive still pending past the deadline.
+        using var deadline = this._closeDeadline.Token.Register(transport.Abort);
         var receiving = this.ReceiveAsync(stream);
-        await this.SendAsync(stream, socket).ConfigureAwait(false);
+        await this.SendAsync(transport).ConfigureAwait(false);
 
-        // Our side is closed (or broken): give the server its chance to close too, then let go of the socket.
+        // Our side is closed (or broken): give the server its chance to close too, then let go of the connection.
         await Task.WhenAny(receiving, Task.Delay(LingerTime)).ConfigureAwait(false);
-        socket.Dispose();
+        transport.Abort();
         await receiving.ConfigureAwait(false);
     }
 
@@ -334,13 +404,13 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
     }
 
     // Sends until the output is completed (our close), then shuts the sending side so the server sees the end.
-    private async Task SendAsync(NetworkStream stream, Socket socket)
+    private async Task SendAsync(Transport transport)
     {
         Exception? error = null;
         try
         {
-            await this._output.Reader.CopyToAsync(stream).ConfigureAwait(false);
-            socket.Shutdown(SocketShutdown.Send);
+            await this._output.Reader.CopyToAsync(transport.Stream).ConfigureAwait(false);
+            await transport.CloseSendingAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -352,7 +422,7 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
 
     // Receives until the server closes or the socket fails. Once the reader is gone (our close), it keeps reading and
     // drops the bytes, so unread data doesn't turn the close into a reset.
-    private async Task ReceiveAsync(NetworkStream stream)
+    private async Task ReceiveAsync(Stream stream)
     {
         Exception? error = null;
         var readerGone = false;
@@ -390,4 +460,9 @@ internal sealed class DeferredTcpPipe : IDuplexPipe, IDisposable
 
         await this._input.Writer.CompleteAsync(error).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// An open connection: its byte stream, how to end our sending side, and how to drop it at once.
+    /// </summary>
+    private sealed record Transport(Stream Stream, Func<Task> CloseSendingAsync, Action Abort);
 }

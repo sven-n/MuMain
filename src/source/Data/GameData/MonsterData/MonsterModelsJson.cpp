@@ -44,6 +44,7 @@ constexpr const char* HoldLastFrame = "holdLastFrame";
 constexpr const char* HeadBone = "headBone";
 constexpr const char* StreamMesh = "streamMesh";
 constexpr const char* NoneBlendMeshes = "noneBlendMeshes";
+constexpr const char* RenderStyle = "renderStyle";
 constexpr const char* Cues = "cues";
 constexpr const char* Name = "name";
 constexpr const char* Animation = "animation";
@@ -89,6 +90,8 @@ const KeySet ModelKeys{Keys::Slot,
                        Keys::HeadBone,
                        Keys::StreamMesh,
                        Keys::NoneBlendMeshes,
+                       Keys::RenderStyle,
+                       Keys::Effect,
                        Keys::Cues,
                        Keys::Timers,
                        Keys::NamedBones,
@@ -640,6 +643,16 @@ void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, Mod
     {
         ReadWholeList(*meshes, Keys::NoneBlendMeshes, 0, MaxMeshIndex, model.noneBlendMeshes, issues);
     }
+    // The looks of its monsters (MN8, ML1); a monster can name others.
+    for (const auto& [key, name] :
+         {std::pair{Keys::RenderStyle, &model.renderStyle}, std::pair{Keys::Effect, &model.effect}})
+    {
+        if (const auto look = json.find(key);
+            look != json.end() && ReadText(*look, key, *name, issues) && name->empty())
+        {
+            issues.Fatal(key, "must be the name of a look");
+        }
+    }
     RefuseSoundFields(json, issues);
     if (const auto cues = json.find(Keys::Cues); cues != json.end())
     {
@@ -859,6 +872,14 @@ OrderedJson WriteModel(const MonsterModelDefinition& model)
     if (!model.noneBlendMeshes.empty())
     {
         json[Keys::NoneBlendMeshes] = model.noneBlendMeshes;
+    }
+    if (!model.renderStyle.empty())
+    {
+        json[Keys::RenderStyle] = model.renderStyle;
+    }
+    if (!model.effect.empty())
+    {
+        json[Keys::Effect] = model.effect;
     }
     if (!model.cues.empty())
     {

@@ -2,6 +2,7 @@
 
 #include "Render/Look/TuningSetting.h"
 
+#include "Core/Platform/UserFolder.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Render/Look/LookPresetSetting.h"
@@ -21,6 +22,10 @@ Data::Config::PersonalTuningSaveResult Persist(const Data::Config::PersonalTunin
     if (!result.saved)
     {
         mu::log::Get("render")->error("Enhanced tuning not saved: {}", result.error);
+    }
+    else
+    {
+        Core::Platform::UserFilesChanged();
     }
     return result;
 }

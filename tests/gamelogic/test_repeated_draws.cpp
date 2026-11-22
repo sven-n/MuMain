@@ -646,3 +646,26 @@ TEST_CASE("A frame with no update since the last draws the sprites again, a pass
     CHECK(nextFrame - samePass == oneFrame);
     ClearSprites();
 }
+
+TEST_CASE("Drawing Phoenix Shot's blows again and again changes nothing the next update reads [effects]")
+{
+    ViewScope view;
+    const auto clearParticles = []
+    {
+        for (int i = 0; i < MAX_PARTICLES; ++i)
+            Particles[i].Live = false;
+    };
+    clearParticles();
+    vec3_t ahead;
+    view.Ahead(1000.f, ahead);
+    vec3_t angle{0.f, 0.f, 0.f};
+    vec3_t light{1.f, 1.f, 1.f};
+    REQUIRE(CreateParticle(BITMAP_SBUMB, ahead, angle, light, 1, 2.7f) >= 0);
+
+    Render::Drawing::DrawCallLog log;
+    mu::SetRendererOverride(&log);
+    RepeatedDraws::CheckChangesNothing([] { RenderParticles(); }, 3);
+    mu::SetRendererOverride(nullptr);
+    CHECK_FALSE(log.calls.empty());
+    clearParticles();
+}

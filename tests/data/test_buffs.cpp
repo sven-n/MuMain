@@ -6,7 +6,6 @@
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/BuffData/BuffDatabase.h"
 #include "Data/GameData/BuffData/BuffsJson.h"
-#include "GameLogic/Buffs/w_Buff.h"
 #include "GameLogic/Buffs/w_BuffScriptLoader.h"
 #include "BuffTableScope.h"
 #include "TestFiles.h"
@@ -89,6 +88,25 @@ BuffDefinition SealOfAscension()
     buff.group = 24;
     buff.displayName.Set("en", "Seal of Ascension");
     buff.item = Data::Buffs::BuffItemLink{13, 43};
+    buff.duration = Data::Items::ItemOptionValue{{1800}};
+    buff.powerUps.push_back({"experienceRate", Data::Items::ItemOptionAdd::Add, Data::Items::ItemOptionValue{{150}}});
+    return buff;
+}
+
+// The Max AG Boost Aura: its value per level of the hero.
+BuffDefinition MaxAgBoostAura()
+{
+    BuffDefinition buff;
+    buff.number = 113;
+    buff.name = "maxAgBoostAura";
+    buff.group = 58;
+    buff.displayName.Set("en", "Max AG Boost Aura");
+    buff.item = Data::Buffs::BuffItemLink{13, 104};
+    // Longer than an option slot holds: the vitality items last 30 days.
+    buff.duration = Data::Items::ItemOptionValue{{2592000}};
+    Data::Items::ItemOptionValue perLevel{{0}};
+    perLevel.per.push_back({"level", 1, 0});
+    buff.powerUps.push_back({"maximumAbility", Data::Items::ItemOptionAdd::Add, perLevel});
     return buff;
 }
 
@@ -115,10 +133,7 @@ std::vector<bool> ShownOnStrip(const std::vector<int>& active)
 
 TEST_CASE("Buffs: entries read back as written (buffs design B1, B10, B12) [data][buffs]")
 {
-    auto arrow = InfinityArrow();
-    arrow.attackDamageBonus = Data::Buffs::BuffLevelBonus{2, 3};
-    arrow.defenseBonus = Data::Buffs::BuffLevelBonus{4, 5};
-    const std::vector<BuffDefinition> buffs = {arrow, SealOfAscension(), Poison()};
+    const std::vector<BuffDefinition> buffs = {InfinityArrow(), SealOfAscension(), MaxAgBoostAura(), Poison()};
     const std::string text = Data::Buffs::WriteBuffsJson(buffs);
     const ReadResult read = Read(text);
 
@@ -139,11 +154,6 @@ TEST_CASE("Buffs: wrong values are fatal and name the entry and field [data][buf
         CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Fatal, field, message));
     };
     const std::string tail = R"(, "displayName": {"en": "A"})";
-    const std::string bonusEntry = R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail;
-    fatalAbout(bonusEntry + R"(, "attackDamageBonus": {"base": 45, "levelDivisor": 0} })",
-               "buffs[0].attackDamageBonus.levelDivisor", "from 1 to 65535");
-    fatalAbout(bonusEntry + R"(, "defenseBonus": {"base": -1, "levelDivisor": 5} })", "buffs[0].defenseBonus.base",
-               "from 0 to 65535");
     fatalAbout(R"({ "number": 0, "name": "a", "kind": "buff", "group": 1)" + tail + " }", "buffs[0].number",
                "from 1 to 255");
     fatalAbout(R"({ "number": 1, "name": "a b", "kind": "buff", "group": 1)" + tail + " }", "buffs[0].name",
@@ -169,6 +179,86 @@ TEST_CASE("Buffs: wrong values are fatal and name the entry and field [data][buf
                "buffs[0].item", "an object with group and number");
     fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail + R"(, "description": {"de": "B"} })",
                "buffs[0].description", "English");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail + R"(, "duration": 1800 })",
+               "buffs[0].duration", "must be an object");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail +
+                   R"(, "duration": {"values": 31536001} })",
+               "buffs[0].duration.values", "from 0 to 31536000");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail + R"(, "powerUps": [] })",
+               "buffs[0].powerUps", "must be a list");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail +
+                   R"(, "powerUps": [{"attribute": "defenseBase"}] })",
+               "buffs[0].powerUps[0]", "exactly one of add, addFinal and percent");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail +
+                   R"(, "powerUps": [{"attribute": "defenseBase", "add": {"values": 1}, "percent": {"values": 1}}] })",
+               "buffs[0].powerUps[0]", "exactly one of add, addFinal and percent");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail +
+                   R"(, "powerUps": [{"attribute": "defenseBase", "add": {"values": 65536}}] })",
+               "buffs[0].powerUps[0].add.values", "from 0 to 65535");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail +
+                   R"(, "powerUps": [{"add": {"values": 1}}] })",
+               "buffs[0].powerUps[0].attribute", "letters and digits");
+    // A list is one value per item level, and a buff has none.
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail +
+                   R"(, "duration": {"values": [1800]} })",
+               "buffs[0].duration", "one number, not a list");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail +
+                   R"(, "duration": {"values": 1800, "per": [{"attribute": "level", "times": 60}]} })",
+               "buffs[0].duration", "without per terms");
+    fatalAbout(R"({ "number": 1, "name": "a", "kind": "buff", "group": 1)" + tail +
+                   R"(, "powerUps": [{"attribute": "defenseBase", "add": {"values": [60, 70]}}] })",
+               "buffs[0].powerUps[0].add", "one number, not a list");
+}
+
+TEST_CASE("Buffs: a power-up of an attribute no buff can raise is an error [data][buffs]")
+{
+    BuffDefinition buff = SealOfAscension();
+    buff.powerUps.push_back({"luck", Data::Items::ItemOptionAdd::Add, Data::Items::ItemOptionValue{{1}}});
+    std::vector<ItemDataIssue> issues;
+    Data::Buffs::ValidateBuffs(std::vector<BuffDefinition>{buff}, {}, "Buffs.json", issues);
+
+    INFO(Messages(issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(
+        HasIssueAbout(issues, ItemDataIssueSeverity::Error, "buffs[0].powerUps[1].attribute", "luck is no attribute"));
+}
+
+TEST_CASE("Buffs: a power-up's term on a hero attribute the client doesn't read is a warning [data][buffs]")
+{
+    BuffDefinition buff = MaxAgBoostAura();
+    buff.powerUps[0].value.per[0].attribute = "lvl";
+    std::vector<ItemDataIssue> issues;
+    Data::Buffs::ValidateBuffs(std::vector<BuffDefinition>{buff}, {}, "Buffs.json", issues);
+
+    INFO(Messages(issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "buffs[0].powerUps[0].add.per[0].attribute",
+                        "no hero attribute lvl"));
+}
+
+TEST_CASE("Buffs: a power-up added another way than add is a warning [data][buffs]")
+{
+    BuffDefinition buff = SealOfAscension();
+    buff.powerUps[0].add = Data::Items::ItemOptionAdd::Percent;
+    std::vector<ItemDataIssue> issues;
+    Data::Buffs::ValidateBuffs(std::vector<BuffDefinition>{buff}, {}, "Buffs.json", issues);
+
+    INFO(Messages(issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "buffs[0].powerUps[0]", "percent is read but"));
+}
+
+TEST_CASE("Buffs: a debuff's power-up is a warning [data][buffs]")
+{
+    BuffDefinition buff = SealOfAscension();
+    buff.kind = Data::Buffs::BuffKind::Debuff;
+    std::vector<ItemDataIssue> issues;
+    Data::Buffs::ValidateBuffs(std::vector<BuffDefinition>{buff}, {}, "Buffs.json", issues);
+
+    INFO(Messages(issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "buffs[0].powerUps",
+                        "stats don't count a debuff's power-ups"));
 }
 
 TEST_CASE("Buffs: a file without a list of buffs or of a newer format is fatal [data][buffs]")
@@ -286,31 +376,6 @@ TEST_CASE("Buffs: the shipped file loads without problems and is written as the 
     CHECK(text == Data::Buffs::WriteBuffsJson(loaded.buffs));
 }
 
-TEST_CASE("Buffs: the shipped Elf Soldier bonus grows past level 180 [data][buffs]")
-{
-    const auto data = std::filesystem::path(MU_TEST_DATA_DIR);
-    const auto loaded = Data::Buffs::LoadBuffsFile(data / "Buffs" / "Buffs.json");
-    REQUIRE(loaded.issues.empty());
-    const BuffTableScope table(loaded.buffs, "en");
-
-    Buff active;
-    CHECK(active.GetLevelScaledStatBonuses(220).attackDamage == 0);
-    CHECK(active.GetLevelScaledStatBonuses(220).defense == 0);
-    active.RegisterBuff(eBuff_HelpNpc);
-
-    for (std::uint16_t level = 1; level <= 180; ++level)
-    {
-        const auto bonuses = active.GetLevelScaledStatBonuses(level);
-        CHECK(bonuses.attackDamage == 45 + level / 3);
-        CHECK(bonuses.defense == 50 + level / 5);
-    }
-
-    CHECK(active.GetLevelScaledStatBonuses(200).attackDamage == 111);
-    CHECK(active.GetLevelScaledStatBonuses(200).defense == 90);
-    CHECK(active.GetLevelScaledStatBonuses(220).attackDamage == 118);
-    CHECK(active.GetLevelScaledStatBonuses(220).defense == 94);
-}
-
 TEST_CASE("Buffs: every item the shipped buffs name is in the shipped item data [data][buffs][items]")
 {
     const std::filesystem::path data = std::filesystem::path(MU_TEST_DATA_DIR);
@@ -383,6 +448,18 @@ TEST_CASE("Buffs: an item that gives two buffs finds the lower number, whatever 
     CHECK(loader->GetBuffIndex(ITEMINDEX(13, 43)) == 29);
     CHECK(loader->GetBuffType(ITEMINDEX(13, 43)) == 29);
     CHECK(loader->GetBuffIndex(ITEMINDEX(13, 44)) == -1);
+    REQUIRE(g_BuffDatabase.FindByItem(13, 43) != nullptr);
+    CHECK(g_BuffDatabase.FindByItem(13, 43)->number == 29);
+    CHECK(g_BuffDatabase.FindByItem(13, 44) == nullptr);
+}
+
+TEST_CASE("Buffs: a new table forgets the items of the old one [data][buffs]")
+{
+    {
+        const BuffTableScope table({SealOfAscension()}, "en");
+        CHECK(g_BuffDatabase.FindByItem(13, 43) != nullptr);
+    }
+    CHECK(g_BuffDatabase.FindByItem(13, 43) == nullptr);
 }
 
 TEST_CASE("Buffs: the shipped file keeps the strip rules of the old client's code [data][buffs]")

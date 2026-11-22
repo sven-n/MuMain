@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include <optional>
 
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
@@ -97,7 +98,7 @@ void GameConfig::Load()
 
     m_windowWidth  = ReadInt(CfgSectionWindow, CfgKeyWidth, CfgDefaultWindowWidth);
     m_windowHeight = ReadInt(CfgSectionWindow, CfgKeyHeight, CfgDefaultWindowHeight);
-    m_windowMode   = ReadBool(CfgSectionWindow, CfgKeyWindowed, CfgDefaultWindowed);
+    m_windowMode = ReadWindowMode();
 
     m_soundVolume  = ReadInt(CfgSectionAudio, CfgKeySoundVolume, CfgDefaultSoundVolume);
     m_musicVolume  = ReadInt(CfgSectionAudio, CfgKeyMusicVolume, CfgDefaultMusicVolume);
@@ -112,6 +113,13 @@ void GameConfig::Load()
         ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP), CfgDefaultServerIP);
     m_serverPort = GameConfigValidation::ValidateServerPort(
         ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort), CfgDefaultServerPort);
+    const std::wstring relay = ReadString(CfgSectionConnectionSettings, CfgKeyRelay, CfgDefaultRelay);
+    m_relay = GameConfigValidation::ValidateRelay(relay);
+    if (m_relay.empty() && !GameConfigValidation::ValidateServerIP(relay, L"").empty())
+    {
+        mu::log::Get("core")->error(
+            "config.ini: Relay is not a ws:// or wss:// address with a host; connecting over TCP");
+    }
 
     m_chatCommandFavourites = ReadStringList(L"ChatCommands", L"Favourite");
     m_chatCommandTemplates = ReadStringList(L"ChatCommands", L"Template");
@@ -150,7 +158,9 @@ void GameConfig::Save()
 
     WriteInt(CfgSectionWindow, CfgKeyWidth, m_windowWidth);
     WriteInt(CfgSectionWindow, CfgKeyHeight, m_windowHeight);
-    WriteBool(CfgSectionWindow, CfgKeyWindowed, m_windowMode);
+    WriteString(CfgSectionWindow, CfgKeyWindowMode, GameConfigValidation::FormatWindowMode(m_windowMode));
+    // Mode replaces it; removed only now that Mode is written, so an older config.ini keeps its choice.
+    RemoveObsoleteKey(CfgSectionWindow, CfgKeyWindowed);
 
     WriteInt(CfgSectionAudio, CfgKeySoundVolume, m_soundVolume);
     WriteInt(CfgSectionAudio, CfgKeyMusicVolume, m_musicVolume);
@@ -163,6 +173,7 @@ void GameConfig::Save()
 
     WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
     WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
+    WriteString(CfgSectionConnectionSettings, CfgKeyRelay, m_relay);
 
     WriteStringList(L"ChatCommands", L"Favourite", m_chatCommandFavourites);
     WriteStringList(L"ChatCommands", L"Template", m_chatCommandTemplates);
@@ -297,9 +308,22 @@ void GameConfig::SetWindowSize(int width, int height)
     m_windowHeight = height;
 }
 
-void GameConfig::SetWindowMode(bool windowed)
+void GameConfig::SetWindowMode(WindowMode mode)
 {
-    m_windowMode = windowed;
+    m_windowMode = mode;
+}
+
+WindowMode GameConfig::ReadWindowMode()
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+
+    std::optional<bool> legacyWindowed;
+    if (!ReadString(CfgSectionWindow, CfgKeyWindowed, L"").empty())
+    {
+        legacyWindowed = ReadBool(CfgSectionWindow, CfgKeyWindowed, true);
+    }
+    return GameConfigValidation::ResolveWindowMode(ReadString(CfgSectionWindow, CfgKeyWindowMode, L""), legacyWindowed);
 }
 
 void GameConfig::SetSoundVolume(int level)
@@ -530,6 +554,12 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
 }
 
 // Helper functions using Windows INI API
+void GameConfig::WriteEntry(const wchar_t* section, const wchar_t* key, const wchar_t* value)
+{
+    WritePrivateProfileStringW(section, key, value, m_configPath.wstring().c_str());
+    Core::Platform::UserFilesChanged();
+}
+
 int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const
 {
     return GetPrivateProfileIntW(section, key, defaultValue, m_configPath.wstring().c_str());
@@ -540,7 +570,7 @@ void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
     wchar_t buffer[32];
     swprintf_s(buffer, L"%d", value);
 
-    WritePrivateProfileStringW(section, key, buffer, m_configPath.wstring().c_str());
+    WriteEntry(section, key, buffer);
 }
 
 bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue) const
@@ -550,7 +580,7 @@ bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defau
 
 void GameConfig::WriteBool(const wchar_t* section, const wchar_t* key, bool value)
 {
-    WritePrivateProfileStringW(section, key, value ? L"1" : L"0", m_configPath.wstring().c_str());
+    WriteEntry(section, key, value ? L"1" : L"0");
 }
 
 std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue)
@@ -569,19 +599,19 @@ std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, 
 
 void GameConfig::WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value)
 {
-    WritePrivateProfileStringW(section, key, value.c_str(), m_configPath.wstring().c_str());
+    WriteEntry(section, key, value.c_str());
 }
 
 void GameConfig::RemoveObsoleteKey(const wchar_t* section, const wchar_t* key)
 {
     // Passing nullptr as the value deletes the key (Windows INI API).
-    WritePrivateProfileStringW(section, key, nullptr, m_configPath.wstring().c_str());
+    WriteEntry(section, key, nullptr);
 }
 
 void GameConfig::RemoveObsoleteSection(const wchar_t* section)
 {
     // Passing nullptr as the key deletes the entire section.
-    WritePrivateProfileStringW(section, nullptr, nullptr, m_configPath.wstring().c_str());
+    WriteEntry(section, nullptr, nullptr);
 }
 
 std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)

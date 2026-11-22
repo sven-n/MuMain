@@ -127,7 +127,7 @@ void DrawCellsAndItem(const GridItem& item, float cellPixels, float left, float 
 void DrawGrid(const GridItem& item)
 {
     const MuEditor::Effects::SavedGameRenderState savedState;
-    const MuEditor::Effects::EffectPoolGuard removeItemEffects;
+    const MuEditor::Effects::EffectPoolGuard removeEffects;
     // The cell the item camera was made for: the inventory's 20 units at the
     // window's height.
     const float cellPixels = CellUnits * static_cast<float>(WindowHeight) / REFERENCE_HEIGHT;

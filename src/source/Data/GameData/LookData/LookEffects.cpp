@@ -54,7 +54,7 @@ GlowMesh GlowOn(const MeshSet& meshes)
 // mesh glowing would move none).
 GlowMesh MovedMesh(const MeshSet& meshes)
 {
-    return meshes.meshes.empty() ? GlowMesh(FromItem{}) : GlowMesh(meshes.meshes.front());
+    return meshes.meshes.empty() ? GlowMesh(ItemGlowMesh{}) : GlowMesh(meshes.meshes.front());
 }
 } // namespace
 

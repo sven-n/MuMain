@@ -142,7 +142,6 @@ using namespace mu::ui::window;
 
 extern BYTE m_AltarState[];
 extern int g_iChatInputType;
-extern BOOL g_bUseChatListBox;
 
 extern BOOL g_bUseWindowMode;
 
@@ -1008,7 +1007,6 @@ void InitGame()
     SelectedItem = -1;
 
     Attacking = -1;
-    UI::Options::ResetForNewGame();
 
     CheckInventory = nullptr;
 
@@ -1147,6 +1145,8 @@ void ResetClientToLoginScene()
     App::Control::Events::RecordDisconnected("the game session was torn down");
     // Before ReleaseMainData: a map load's steps hold world state that it releases.
     World::MapLoad::Cancel();
+    // A long load showed the loading screen, which only an entered world closes.
+    HideLoadingSceneOverlay();
 
     // Mirror of the in-game logout path (see ReceiveLogOut, case 2): release the
     // active game session and return to a clean login scene. The auto-reconnect
@@ -1260,7 +1260,8 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     // Before LoadWorld, which loads the stage's map parts.
     gMapManager.SetServerStage(GetJoinMapServerStage(ReceiveBuffer));
     gMapManager.WorldActive = Data->Map;
-    World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+    World::MapLoad::Begin(World::MapLoad::PackOf(gMapManager.WorldActive),
+                          gMapManager.LoadWorldSteps(gMapManager.WorldActive),
                           [c, data = *Data] { FinishJoinMapServer(c, &data); });
     return TRUE;
 }
@@ -1391,6 +1392,12 @@ static void FinishJoinMapServer(CHARACTER* c, const PRECEIVE_JOIN_MAP_SERVER_EXT
     GameLogic::Commands::Catalog().Reset();
     GameLogic::Commands::Catalog().RequestOnce();
 
+    // A character without a stored key configuration gets none from the server
+    // (OpenMU sends it right after the join packet, or not at all; it waited in
+    // the queue while the map loaded), so its settings are saved a moment after
+    // this, too.
+    SetJoinedMapServer();
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
 }
 
@@ -1518,7 +1525,8 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
         const int OldWorld = gMapManager.WorldActive;
 
         gMapManager.WorldActive = Data->Map;
-        World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+        World::MapLoad::Begin(World::MapLoad::PackOf(gMapManager.WorldActive),
+                              gMapManager.LoadWorldSteps(gMapManager.WorldActive),
                               [c, OldWorld]
                               {
                                   RevivalAfterMapLoad(c, OldWorld);
@@ -2361,7 +2369,8 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             const BYTE flag = Data->Flag;
 
             gMapManager.WorldActive = Data->Map;
-            World::MapLoad::Begin(gMapManager.LoadWorldSteps(gMapManager.WorldActive),
+            World::MapLoad::Begin(World::MapLoad::PackOf(gMapManager.WorldActive),
+                                  gMapManager.LoadWorldSteps(gMapManager.WorldActive),
                                   [o, OldWorld, flag, iEtcPart]
                                   {
                                       TeleportAfterMapLoad(o, OldWorld);
@@ -6192,6 +6201,10 @@ void RequestInventorySync()
 extern int ItemKey;
 void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 {
+    // Any reply answers the pending pick up, also one which can't be read:
+    // otherwise no further pick up is sent until the next login.
+    SendGetItem = -1;
+
     auto Data = safe_cast<PHEADER_DEFAULT>(ReceiveBuffer);
     if (Data == nullptr)
     {
@@ -6204,7 +6217,12 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        if (Data->Value == GET_ITEM_ZEN)
+        if (Data->Value == GET_ITEM_ZEN && ReceiveBuffer.size() < sizeof(PRECEIVE_INVENTORY_MONEY))
+        {
+            // Without the amount it is a refusal: OpenMU sends it when the
+            // pile doesn't fit into the inventory money.
+        }
+        else if (Data->Value == GET_ITEM_ZEN)
         {
             auto Data2 = safe_cast<PRECEIVE_INVENTORY_MONEY>(ReceiveBuffer);
             if (Data2 == nullptr)
@@ -6284,7 +6302,6 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                 PlayBuffer(SOUND_GET_ITEM01, &Hero->Object);
         }
     }
-    SendGetItem = -1;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x22 [ReceiveGetItem(%d)]", Data->Value);
 }
@@ -10102,12 +10119,11 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
     UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::W, Data->KeyQWE[1] + ITEM_POTION, byWLevel);
     UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::E, Data->KeyQWE[2] + ITEM_POTION, byELevel);
 
-    BYTE wChatListBoxSize = (Data->ChatLogBox >> 4) * 3;
-    BYTE wChatListBoxBackAlpha = Data->ChatLogBox & 0x0F;
+    const bool chatBoxRestored = UI::Options::ApplySavedChatBox(Data->ChatLogBox);
 
     UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::R, Data->KeyR + ITEM_POTION, byRLevel);
 
-    SetKeyConfigurationReceived(true);
+    SetKeyConfigurationReceived(true, chatBoxRestored);
 }
 
 void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer)
@@ -14013,6 +14029,18 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             else
             {
                 g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x09] (too short: %d bytes)", Size);
+            }
+        }
+        else if (subcode == 0x0B)
+        {
+            // The minimum master level and resets of the warps of the server's list, right after it.
+            if (const auto requirements = GameLogic::Warps::ReadServerWarpRequirements(ReceiveBuffer, Size))
+            {
+                SEASON3B::CMoveCommandData::GetInstance()->ApplyServerWarpRequirements(*requirements);
+            }
+            else
+            {
+                g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x0B] (too short: %d bytes)", Size);
             }
         }
         else

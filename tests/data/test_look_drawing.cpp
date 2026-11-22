@@ -7,12 +7,15 @@
 
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/Random.h"
+#include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/LookData/LookEffects.h"
 #include "Data/GameData/LookData/LookStore.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Items/LookDrawing.h"
@@ -508,11 +511,11 @@ TEST_CASE("A layer's scrolling mesh is the model's while it draws, and the item 
     }
 }
 
-TEST_CASE("An item effect that is data sets the item values of its entries whose Only when holds, in their order, "
+TEST_CASE("An effect that is data sets the item values of its entries whose Only when holds, in their order, "
           "and the object's light in the update (design L13, L45) [looks]")
 {
     LookDefinition effect{"byLevel", {}, {}};
-    effect.itemValuesBefore = {
+    effect.valuesBefore = {
         {.onlyWhen = {.level = std::pair<int, int>{1, 15}}, .glowsLikeLevel = 7},
         // Reads the level the entry before set.
         {.onlyWhen = {.level = std::pair<int, int>{7, 7}}, .values = {.glowMesh = 1, .glowStrength = 0.5f}},
@@ -541,41 +544,180 @@ TEST_CASE("An item effect that is data sets the item values of its entries whose
         CHECK(look.hiddenMesh == 1);
         CHECK(alpha == 2.f);
     }
-    Render::Items::Looks::SpawnItemEffect(effect, &object);
+    Render::Items::Looks::SpawnItemEffect(effect, {}, &model, &object, nullptr);
     CHECK(object.Light[0] == 0.5f);
     CHECK(object.Light[1] == 0.25f);
     CHECK(object.Light[2] == 1.f);
 }
 
-TEST_CASE("An item names an item effect that is data before one still in code (design L14) [looks]")
+TEST_CASE("An effect creates its things on bones at the item's posed bones, between pairs and at the origin, "
+          "and nothing of a type the catalogue doesn't have or at a bone the model doesn't have (section 7b) [looks]")
 {
-    // wingsOfDarkness stays code until its things on bones move (step 3): it spawns and sets no value.
-    LookDefinition effect{"wingsOfDarkness", {}, {}};
-    effect.itemValuesBefore = {{.values = {.glowStrength = 0.25f}}};
-    g_LookStore.SetItemEffects({effect});
-    REQUIRE(Render::Items::ItemEffects::ExistsInCode("wingsOfDarkness"));
-    ItemModelDatabaseScope database;
-    Data::Items::ItemModelDefinition entry;
-    entry.group = 0;
-    entry.number = 0;
-    entry.file = "Data/Item/Sword01.bmd";
-    entry.itemEffect = "wingsOfDarkness";
-    g_ItemModelDatabase.Build(std::span(&entry, 1), Data::Effects::GlowColorList{});
+    const auto clear = []
+    {
+        for (int i = 0; i < MAX_SPRITES; ++i)
+        {
+            Sprites[i].Live = false;
+        }
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            Joints[i].Live = false;
+        }
+    };
+    clear();
+    LookDefinition effect{"wings", {}, {}};
+    OnBones lights;
+    lights.places.bones = {1, 0};
+    lights.things.push_back({.kind = BoneThingKind::Sprite,
+                             .type = "light",
+                             .scale = 0.5f,
+                             .color = {0.25f, 0.5f, 0.75f},
+                             .rotation = 0.5f});
+    OnBones spark;
+    spark.places.origin = true;
+    spark.things.push_back({.kind = BoneThingKind::Sprite, .type = "spark3", .scale = 2.5f});
+    spark.things.push_back({.kind = BoneThingKind::Sprite, .type = "noSuchSprite"});
+    OnBones lightning;
+    lightning.together = true;
+    lightning.places.between = {{1, 0}};
+    lightning.chance = Chance{.oneIn = 1, .draw = ChanceDraw::Plain};
+    lightning.things.push_back({.kind = BoneThingKind::Joint, .type = "jointThunder", .subType = 14});
+    lightning.things.push_back({.kind = BoneThingKind::Joint, .type = "jointSpirit", .subType = 4, .reversed = true});
+    effect.onBones = {lights, spark, lightning};
+    // No catalogue is built here; the numbers are the game's.
+    CHECK(Render::Items::Looks::ResolveBoneThingTypes(effect)[1][1] == -1);
+    const Render::Items::Looks::BoneThingTypes types{
+        {BITMAP_LIGHT}, {BITMAP_SPARK + 1, -1}, {BITMAP_JOINT_THUNDER, BITMAP_JOINT_SPIRIT}};
+
     BMD model;
+    model.NumBones = 2;
+    model.BodyScale = 2.f;
+    Vector(100.f, 0.f, 0.f, model.BodyOrigin);
+    float bones[2][3][4] = {};
+    for (int bone = 0; bone < 2; ++bone)
+    {
+        for (int axis = 0; axis < 3; ++axis)
+        {
+            bones[bone][axis][axis] = 1.f;
+        }
+        bones[bone][2][3] = 10.f * static_cast<float>(bone + 1);
+    }
     OBJECT object;
-    DrawLook look;
-    float alpha = 1.f;
-    int level = 0;
-    CHECK(Render::Items::ItemEffects::Apply(&model, &object, look, MODEL_SWORD, alpha, level) ==
-          Render::Items::ItemEffects::Result::Applied);
-    CHECK(look.blendMeshLight == 0.25f);
-    CHECK_FALSE(Render::Items::ItemEffects::Spawns(MODEL_SWORD));
-    g_LookStore.SetItemEffects({});
-    look = {};
-    look.blendMeshLight = 0.5f;
-    Render::Items::ItemEffects::Apply(&model, &object, look, MODEL_SWORD, alpha, level);
-    CHECK(look.blendMeshLight == 0.5f);
-    CHECK(Render::Items::ItemEffects::Spawns(MODEL_SWORD));
+    Vector(7.f, 8.f, 9.f, object.Position);
+    Render::Items::Looks::SpawnItemEffect(effect, types, &model, &object, bones);
+
+    // Bone 1 is at height 20, bone 0 at 10, scaled by 2 and moved by the model's origin.
+    std::vector<const OBJECT*> lightSprites;
+    const OBJECT* sparkSprite = nullptr;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live)
+        {
+            continue;
+        }
+        CHECK(Sprites[i].Owner == &object);
+        if (Sprites[i].Type == BITMAP_LIGHT)
+        {
+            lightSprites.push_back(&Sprites[i]);
+        }
+        else
+        {
+            CHECK(Sprites[i].Type == BITMAP_SPARK + 1);
+            sparkSprite = &Sprites[i];
+        }
+    }
+    REQUIRE(lightSprites.size() == 2);
+    CHECK(lightSprites[0]->Position[0] == doctest::Approx(100.f));
+    CHECK(lightSprites[0]->Position[2] == doctest::Approx(40.f));
+    CHECK(lightSprites[1]->Position[2] == doctest::Approx(20.f));
+    CHECK(lightSprites[0]->Scale == doctest::Approx(0.5f));
+    CHECK(lightSprites[0]->Light[2] == doctest::Approx(0.75f));
+    CHECK(lightSprites[0]->Angle[2] == doctest::Approx(0.5f));
+    REQUIRE(sparkSprite != nullptr);
+    CHECK(sparkSprite->Position[1] == doctest::Approx(8.f));
+
+    // Thunder from bone 1 to bone 0, the spirit the other way.
+    std::vector<const JOINT*> joints;
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        if (Joints[i].Live)
+        {
+            joints.push_back(&Joints[i]);
+        }
+    }
+    REQUIRE(joints.size() == 2);
+    const auto byType = [&joints](int type)
+    { return *std::ranges::find(joints, type, [](const JOINT* joint) { return joint->Type; }); };
+    CHECK(byType(BITMAP_JOINT_THUNDER)->SubType == 14);
+    CHECK(byType(BITMAP_JOINT_THUNDER)->Target == &object);
+    // As the game's own calls with those places create them.
+    const JOINT thunder = *byType(BITMAP_JOINT_THUNDER);
+    const JOINT spirit = *byType(BITMAP_JOINT_SPIRIT);
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        Joints[i].Live = false;
+    }
+    vec3_t from{100.f, 0.f, 40.f};
+    vec3_t to{100.f, 0.f, 20.f};
+    CreateJoint(BITMAP_JOINT_THUNDER, from, to, object.Angle, 14, &object, 1.f);
+    CreateJoint(BITMAP_JOINT_SPIRIT, to, from, object.Angle, 4, &object, 1.f);
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        CHECK(thunder.Position[axis] == doctest::Approx(Joints[0].Position[axis]));
+        CHECK(thunder.TargetPosition[axis] == doctest::Approx(Joints[0].TargetPosition[axis]));
+        CHECK(spirit.Position[axis] == doctest::Approx(Joints[1].Position[axis]));
+        CHECK(spirit.TargetPosition[axis] == doctest::Approx(Joints[1].TargetPosition[axis]));
+    }
+
+    const auto liveThings = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+        {
+            live += Sprites[i].Live ? 1 : 0;
+        }
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            live += Joints[i].Live ? 1 : 0;
+        }
+        return live;
+    };
+    // Without bones only the things at the origin.
+    clear();
+    Render::Items::Looks::SpawnItemEffect(effect, types, &model, &object, nullptr);
+    CHECK(liveThings() == 1);
+
+    // A bone the model doesn't have, or a pair with one, creates nothing: the pose holds nothing there.
+    clear();
+    model.NumBones = 1;
+    Render::Items::Looks::SpawnItemEffect(effect, types, &model, &object, bones);
+    CHECK(liveThings() == 2);
+    clear();
+}
+
+TEST_CASE("A thing on bones whose type the effect catalogue doesn't have is logged when the looks load, the others "
+          "not (section 7b) [looks]")
+{
+    const std::vector<Data::Effects::EffectTypeEntry> sprites{{"light", "BITMAP_LIGHT"}};
+    g_EffectTypeCatalogue.Build(Data::Effects::EffectKind::Sprite, sprites);
+    LookDefinition effect{"wings", {}, {}};
+    OnBones lights;
+    lights.places.bones = {1};
+    lights.together = true;
+    lights.things.push_back({.kind = BoneThingKind::Sprite, .type = "light"});
+    lights.things.push_back({.kind = BoneThingKind::Sprite, .type = "noSuchSprite"});
+    effect.onBones = {lights};
+    g_LookStore.SetEffects({effect});
+    {
+        const LogCapture log("data");
+        Render::Items::Looks::LogUnknownBoneThingTypes();
+        const std::string line = log.LineWith("noSuchSprite");
+        // Named as Data Checks names it.
+        CHECK(line.find("wings: onBones[0].things[1].sprite") != std::string::npos);
+        CHECK(log.LineWith("\"light\"").empty());
+    }
+    g_LookStore.SetEffects({});
+    g_EffectTypeCatalogue.Build(Data::Effects::EffectKind::Sprite, {});
 }
 
 TEST_CASE("An item says whether its render style draws alone (design L47) [looks]")
@@ -663,6 +805,20 @@ TEST_CASE("A layer can be only for a character without a buff (design L11) [look
     sword.object.m_BuffMap.RegisterBuff(eBuff_InfinityArrow);
     CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0});
     sword.object.m_BuffMap.UnRegisterBuff(eBuff_InfinityArrow);
+}
+
+TEST_CASE("A layer's opacity conditions read the drawing's opacity, as its light times the opacity does [looks]")
+{
+    const LookStoreScope looks({{"fading",
+                                 {Layer{.meshes = {{0}}, .onlyWhen = {.opacityAbove = 0.8}},
+                                  Layer{.meshes = {{1}}, .onlyWhen = {.opacityAtMost = 0.8}}},
+                                 {}}});
+    TestSword sword("fading");
+    DrawLook look;
+    look.alpha = 1.f;
+    CHECK(Meshes(sword.Draw(look, 0.5f)) == std::vector<int>{1});
+    look.alpha = 0.5f;
+    CHECK(Meshes(sword.Draw(look, 1.f)) == std::vector<int>{0});
 }
 
 TEST_CASE("A look can leave a light on the model, a color or a tint of the light it was handed (design L46) "
@@ -762,6 +918,34 @@ TEST_CASE("A texture missing when its look was prepared is found when the look i
         CHECK(draws[0].texture == static_cast<int>(texture));
     }
     Bitmaps.UnloadImage(texture, true);
+    Render::Sprites::SetGpuUploadsSkipped(false);
+}
+
+// A map loads its own textures and drops the last map's (CMapManager::LoadWorld): the looks find theirs again then,
+// so a texture the map has is drawn from where the map loaded it (MN8).
+TEST_CASE("A texture loaded again elsewhere, as a map loads its textures, is drawn from there after the looks find "
+          "theirs again [looks]")
+{
+    Render::Sprites::SetGpuUploadsSkipped(true);
+    const LookDefinition style{"testLook", {Layer{.meshes = {{0}}, .texture = "Item/test_look_map.jpg"}}, {}};
+    const LookStoreScope looks({style});
+    TestSword sword("testLook");
+    std::vector<std::uint8_t> rgba(static_cast<std::size_t>(ImageSize) * ImageSize * 4, 255);
+    const GLuint first = Bitmaps.LoadImagePixels(L"Data\\Item\\test_look_map.jpg", rgba, ImageSize, ImageSize, true);
+    Render::Items::Looks::PrepareTextures(style);
+    DrawLook look;
+    REQUIRE(sword.Draw(look).size() == 1);
+    CHECK(sword.Draw(look)[0].texture == static_cast<int>(first));
+
+    // The texture goes and comes back under another index, as a map drops and loads its own.
+    Bitmaps.UnloadImage(first, true);
+    const GLuint again = Bitmaps.LoadImagePixels(L"Data\\Item\\test_look_map.jpg", rgba, ImageSize, ImageSize, true);
+    REQUIRE(again != first);
+    Render::Items::Looks::RefindTextures();
+    const std::vector<MeshDraw> draws = sword.Draw(look);
+    REQUIRE(draws.size() == 1);
+    CHECK(draws[0].texture == static_cast<int>(again));
+    Bitmaps.UnloadImage(again, true);
     Render::Sprites::SetGpuUploadsSkipped(false);
 }
 

@@ -2,11 +2,13 @@
 
 #include "World/MapInfra/MapLoad.h"
 
+#include "Core/Content/ContentStore.h"
 #include "Core/Utilities/StagedLoad.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include <chrono>
 #include <optional>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -22,11 +24,13 @@ constexpr std::chrono::milliseconds LoadingScreenAfter{150};
 
 struct Load
 {
-    Load(std::vector<Core::StagedLoad::Step> steps, std::function<void()> afterLoad)
-        : steps(std::move(steps)), afterLoad(std::move(afterLoad))
+    Load(std::string pack, std::vector<Core::StagedLoad::Step> steps, std::function<void()> afterLoad)
+        : pack(std::move(pack)), steps(std::move(steps)), afterLoad(std::move(afterLoad))
     {
     }
 
+    // Emptied once the pack is ready.
+    std::string pack;
     Core::StagedLoad steps;
     std::function<void()> afterLoad;
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
@@ -34,6 +38,7 @@ struct Load
 };
 
 std::optional<Load> s_load;
+std::optional<std::string> s_failure;
 
 void Finish()
 {
@@ -50,7 +55,12 @@ void Finish()
 }
 } // namespace
 
-void Begin(std::vector<Core::StagedLoad::Step> steps, std::function<void()> afterLoad)
+std::string PackOf(int map)
+{
+    return "map" + std::to_string(map);
+}
+
+void Begin(std::string pack, std::vector<Core::StagedLoad::Step> steps, std::function<void()> afterLoad)
 {
     if (s_load)
     {
@@ -59,7 +69,9 @@ void Begin(std::vector<Core::StagedLoad::Step> steps, std::function<void()> afte
         }
         Finish();
     }
-    s_load.emplace(std::move(steps), std::move(afterLoad));
+    s_load.emplace(std::move(pack), std::move(steps), std::move(afterLoad));
+    // Asked now, so a download starts with the packet that changes the map.
+    Content::RequestPack(s_load->pack);
 }
 
 bool Active()
@@ -74,6 +86,22 @@ void Pump(const std::function<bool()>& holdBack)
         return;
     }
     ++s_load->frames;
+    if (!s_load->pack.empty())
+    {
+        const Content::PackStatus status = Content::RequestPack(s_load->pack);
+        if (status.state == Content::PackStatus::State::Pending)
+        {
+            return;
+        }
+        if (status.state == Content::PackStatus::State::Failed)
+        {
+            mu::log::Get("render")->error("Map change dropped: content pack {} failed: {}", s_load->pack, status.error);
+            s_failure = s_load->pack + ": " + status.error;
+            s_load.reset();
+            return;
+        }
+        s_load->pack.clear();
+    }
     if (s_load->steps.Pump(StepBudget, holdBack))
     {
         Finish();
@@ -83,6 +111,11 @@ void Pump(const std::function<bool()>& holdBack)
 bool LoadingScreenDue()
 {
     return s_load && std::chrono::steady_clock::now() - s_load->start >= LoadingScreenAfter;
+}
+
+std::optional<std::string> TakeFailure()
+{
+    return std::exchange(s_failure, std::nullopt);
 }
 
 void Cancel()

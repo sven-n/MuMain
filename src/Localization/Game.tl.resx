@@ -1024,9 +1024,6 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>Isalin ang mga pangalan ng item</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>Windowed mode</value>
-  </data>
   <data name="Close388" xml:space="preserve">
     <value>Isara</value>
   </data>
@@ -9102,5 +9099,14 @@
   </data>
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Kabuuan: +%d</value>
+  </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>Hindi ka makakapag-warp doon gamit ang iyong kagamitan.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>ML %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>R %d</value>
   </data>
 </root>

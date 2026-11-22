@@ -11,7 +11,7 @@ namespace Data::Monsters
 {
 namespace
 {
-constexpr std::array<std::string_view, 12> AnimationNames = {
+constexpr std::array<std::string_view, MonsterNamedAnimationCount> AnimationNames = {
     "stop1", "stop2", "walk", "attack1", "attack2", "shock", "die", "appear", "attack3", "attack4", "run", "attack5",
 };
 static_assert(MONSTER01_STOP1 == 0 && MONSTER01_STOP2 == 1 && MONSTER01_WALK == 2 && MONSTER01_ATTACK1 == 3 &&

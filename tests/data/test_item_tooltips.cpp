@@ -12,6 +12,7 @@
 #include "I18N/All.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
+#include "Data/GameData/BuffData/BuffDatabase.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -22,6 +23,8 @@
 #include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Buffs/BuffValues.h"
+#include "GameLogic/Buffs/w_Buff.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Skills/SkillManager.h"
@@ -41,11 +44,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <functional>
 #include <fstream>
 #include <map>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
@@ -460,7 +466,7 @@ TEST_CASE("A requirement reduced to 0 still shows [data][items][tooltip]")
     SetItemTooltipTextMeasure(nullptr);
 }
 
-TEST_CASE("An item's add option values come from its add option [data][items][tooltip]")
+TEST_CASE("An item's tooltip shows the values and duration of its buff [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
     std::string errorMessage;
@@ -469,7 +475,8 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     HeroScope hero;
     MakeNewDarkWizard(hero.Hero());
 
-    // The Seal of Healing (13/62): its experience rate and life recovery, and how long it lasts.
+    // The Seal of Healing (13/62): its experience rate and life recovery, and how long it lasts, as its add option row
+    // has them.
     ITEM seal;
     FillItemFromParameters(seal, Engine::Items::TooltipSnapshot::FullItemParameters(13, 62));
     const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(seal.Type);
@@ -484,6 +491,342 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
         Engine::Items::TooltipValues::GetItemTooltipText(values, "addOptionDuration");
     REQUIRE(duration.has_value());
     CHECK_FALSE(duration->empty());
+}
+
+// The values and durations of the buffs that items give moved from the item add option table (ItemAddOption.bmd) to
+// Data/Buffs/Buffs.json (buffs design B13). They are Webzen's Season 6 numbers, so every item buff keeps its item's
+// row: its options in their order, under the names of Webzen's add option codes (zTeam's S6 ItemAddOption.h, IGCN's for
+// 60 to 68), and its time.
+TEST_CASE("Every item buff keeps the values and duration of its item's add option row [data][items][buffs]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    HeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+
+    const std::map<int, std::string> names = {
+        {1, "attackSpeedAny"},
+        {2, "baseDamageBonus"},
+        {3, "defenseBase"},
+        {4, "maximumHealth"},
+        {5, "maximumMana"},
+        {6, "experienceRate"},
+        {7, "bonusItemDropRate"},
+        {8, "disableExperience"},
+        {9, "totalStrength"},
+        {10, "totalAgility"},
+        {11, "totalVitality"},
+        {12, "totalEnergy"},
+        {13, "totalLeadership"},
+        {14, "physicalBaseDmg"},
+        {15, "wizardryBaseDmg"},
+        {16, "mobility"},
+        {53, "healthRecoveryMultiplier"},
+        {54, "manaRecoveryMultiplier"},
+        {55, "criticalDamageChance"},
+        {56, "excellentDamageChance"},
+        {60, "vulcanusExperienceRate"},
+        {61, "vulcanusItemDropRate"},
+        {62, "deathPenaltyProtection"},
+        {63, "itemDurabilityProtection"},
+        {65, "vitalityBonus"},
+        {66, "maximumAbility"},
+        {67, "maximumShield"},
+        {68, "partyExperienceBonus"},
+    };
+    // Webzen's level options: the auras add their value per level of the hero.
+    const std::set<int> perLevel = {66, 67};
+    int itemBuffs = 0;
+    for (const Data::Buffs::BuffDefinition& buff : g_BuffDatabase.GetAll())
+    {
+        if (!buff.item)
+        {
+            continue;
+        }
+        CAPTURE(buff.number);
+        const ITEM_ADD_OPTION& row =
+            g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEMINDEX(buff.item->group, buff.item->number));
+        const std::array<std::pair<int, int>, 2> options = {
+            {{row.m_byOption1, row.m_byValue1}, {row.m_byOption2, row.m_byValue2}}};
+        size_t powerUp = 0;
+        for (const auto& [option, value] : options)
+        {
+            // A row's value without an option (the Jack O'Lantern items' second) adds nothing.
+            if (option == 0)
+            {
+                continue;
+            }
+            REQUIRE(powerUp < buff.powerUps.size());
+            const Data::Buffs::BuffPowerUp& entry = buff.powerUps[powerUp];
+            CHECK(entry.attribute == names.at(option));
+            if (perLevel.contains(option))
+            {
+                REQUIRE(entry.value.per.size() == 1);
+                CHECK(entry.value.per.front().attribute == "level");
+                CHECK(entry.value.per.front().times == value);
+            }
+            else
+            {
+                CHECK(entry.value == Data::Items::ItemOptionValue{{value}});
+            }
+            ++powerUp;
+        }
+        CHECK(powerUp == buff.powerUps.size());
+        CHECK(GameLogic::Buffs::GetDuration(buff) == static_cast<int>(row.m_Time));
+        ++itemBuffs;
+    }
+    CHECK(itemBuffs == 45);
+}
+
+// The auras (13/104 and 13/105) add their row's value per level of the hero; the value is computed from the hero's
+// level as the table holds it, so a term's attribute name has to be resolved when the table is built.
+TEST_CASE("An aura's value is its row's value times the hero's level [data][items][buffs]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    HeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+    hero.Hero().Level = 150;
+
+    for (const int itemType : {ITEMINDEX(13, 104), ITEMINDEX(13, 105)})
+    {
+        CAPTURE(itemType);
+        const Data::Buffs::BuffDefinition* buff =
+            g_BuffDatabase.FindByItem(itemType / MAX_ITEM_INDEX, itemType % MAX_ITEM_INDEX);
+        REQUIRE(buff != nullptr);
+        REQUIRE(buff->powerUps.size() == 1);
+        const Data::Items::ItemOptionValue& value = buff->powerUps.front().value;
+        CHECK(value.At(0) == 0);
+        REQUIRE(value.per.size() == 1);
+        CHECK(value.per.front().heroAttribute == Data::Items::ItemOptionTermAttribute::Level);
+        const int rowValue = g_pItemAddOptioninfo->GetItemAddOtioninfo(itemType).m_byValue1;
+        REQUIRE(rowValue != 0);
+        CHECK(GameLogic::Buffs::GetPowerUpValue(*buff, 0) == rowValue * 150);
+    }
+}
+
+// The character stats add up the hero's buffs by attribute name. Each buff the stats checked one by one before gives
+// its item's row value under the attribute of the stat it raised, so every stat keeps its number.
+TEST_CASE("The stats read each item buff's value by the attribute of its stat [data][items][buffs]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+
+    struct Reader
+    {
+        eBuffState buff;
+        int itemType;
+        Data::Buffs::BuffAttributeName attribute;
+    };
+    constexpr std::array<Reader, 12> readers = {{
+        {eBuff_EliteScroll2, ITEM_SCROLL_OF_DEFENSE, "defenseBase"},
+        {eBuff_EliteScroll3, ITEM_SCROLL_OF_WRATH, "physicalBaseDmg"},
+        {eBuff_EliteScroll4, ITEM_SCROLL_OF_WIZARDRY, "wizardryBaseDmg"},
+        {eBuff_Hellowin2, ITEM_JACK_OLANTERN_WRATH, "baseDamageBonus"},
+        {eBuff_Hellowin3, ITEM_JACK_OLANTERN_CRY, "defenseBase"},
+        {eBuff_CherryBlossom_Petal, ITEM_CHERRY_BLOSSOM_FLOWER_PETAL, "baseDamageBonus"},
+        {eBuff_SecretPotion1, ITEM_ELIXIR_OF_STRENGTH, "totalStrength"},
+        {eBuff_SecretPotion2, ITEM_ELIXIR_OF_AGILITY, "totalAgility"},
+        {eBuff_SecretPotion3, ITEM_ELIXIR_OF_HEALTH, "totalVitality"},
+        {eBuff_SecretPotion4, ITEM_ELIXIR_OF_ENERGY, "totalEnergy"},
+        {eBuff_SecretPotion5, ITEM_ELIXIR_OF_CONTROL, "totalLeadership"},
+        {eBuff_Scroll_Battle, ITEM_SCROLL_OF_BATTLE, "criticalDamageChance"},
+    }};
+    for (const Reader& reader : readers)
+    {
+        CAPTURE(static_cast<int>(reader.buff));
+        const Data::Buffs::BuffDefinition* buff = g_BuffDatabase.Find(reader.buff);
+        REQUIRE(buff != nullptr);
+        REQUIRE(buff->item.has_value());
+        CHECK(ITEMINDEX(buff->item->group, buff->item->number) == reader.itemType);
+        Buff active;
+        active.RegisterBuff(reader.buff);
+        CHECK(GameLogic::Buffs::SumPowerUps(active, reader.attribute) ==
+              static_cast<int>(g_pItemAddOptioninfo->GetItemAddOtioninfo(reader.itemType).m_byValue1));
+    }
+}
+
+// Two buffs of one attribute add up; the Seal of Strength (13/96) counts, which the stats had no check for.
+TEST_CASE("The stats add up the values of every buff the hero has by attribute [data][items][buffs]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+
+    // Its buff (104) has no name in eBuffState.
+    const Data::Buffs::BuffDefinition* sealOfStrength = g_BuffDatabase.FindByItem(13, 96);
+    REQUIRE(sealOfStrength != nullptr);
+    Buff active;
+    active.RegisterBuff(eBuff_EliteScroll2);
+    active.RegisterBuff(static_cast<eBuffState>(sealOfStrength->number));
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "defenseBase") == 60 + 60);
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "baseDamageBonus") == 50);
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "physicalBaseDmg") == 0);
+    active.UnRegisterBuff(eBuff_EliteScroll2);
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "defenseBase") == 60);
+}
+
+// The Elf Soldier's buff (3) grows with the hero's level as OpenMU's does, also above level 180, where the old check in
+// the character window stopped; she gives it up to level 220.
+TEST_CASE("The Elf Soldier's buff adds 45 + level / 3 damage and 50 + level / 5 defense [data][buffs]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    HeroScope hero;
+
+    Buff active;
+    active.RegisterBuff(eBuff_HelpNpc);
+    struct Expected
+    {
+        WORD level;
+        int damage;
+        int defense;
+    };
+    for (const Expected& expected :
+         {Expected{1, 45, 50}, Expected{180, 105, 86}, Expected{200, 111, 90}, Expected{220, 118, 94}})
+    {
+        CAPTURE(expected.level);
+        hero.Hero().Level = expected.level;
+        CHECK(GameLogic::Buffs::SumPowerUps(active, "greaterDamageBonus") == expected.damage);
+        CHECK(GameLogic::Buffs::SumPowerUps(active, "defenseFinal") == expected.defense);
+    }
+    // Neither is a stat the character stats add on their own, so nothing counts twice.
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "baseDamageBonus") == 0);
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "defenseBase") == 0);
+}
+
+// A value only raises its attribute, so a debuff's power-up would raise what the debuff lowers: it adds nothing (and
+// Buffs.json warns about it).
+TEST_CASE("A debuff's power-ups add nothing to the stats [data][items][buffs]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+
+    const std::vector<Data::Buffs::BuffDefinition> shipped = g_BuffDatabase.GetAll();
+    std::vector<Data::Buffs::BuffDefinition> changed = shipped;
+    const auto debuff = std::find_if(changed.begin(), changed.end(), [](const Data::Buffs::BuffDefinition& buff)
+                                     { return buff.kind == Data::Buffs::BuffKind::Debuff; });
+    REQUIRE(debuff != changed.end());
+    Data::Buffs::BuffPowerUp lower;
+    lower.attribute = "defenseBase";
+    lower.value.values = {20};
+    debuff->powerUps = {lower};
+    const int number = debuff->number;
+    const std::string locale = g_BuffDatabase.GetDisplayLocale();
+    g_BuffDatabase.Build(changed, locale);
+
+    Buff active;
+    active.RegisterBuff(static_cast<eBuffState>(number));
+    active.RegisterBuff(eBuff_EliteScroll2);
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "defenseBase") == 60);
+    g_BuffDatabase.Build(shipped, locale);
+}
+
+// The stat functions add each buff to the stat its attribute names: a buff on the hero raises the stat by its item's
+// row value, from a character machine that is otherwise the same.
+TEST_CASE("The character stats raise the stat of each buff's attribute [data][items][buffs]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    HeroScope hero;
+    hero.HeroCharacter().Class = CLASS_KNIGHT;
+    hero.Hero().Class = CLASS_KNIGHT;
+
+    struct Stat
+    {
+        eBuffState buff;
+        int itemType;
+        std::function<int(CHARACTER_MACHINE&)> read;
+    };
+    const auto defense = [](CHARACTER_MACHINE& machine)
+    {
+        machine.CalculateDefense();
+        return static_cast<int>(machine.Character.Defense);
+    };
+    const auto damage = [](CHARACTER_MACHINE& machine)
+    {
+        machine.CalculateDamage();
+        return static_cast<int>(machine.Character.AttackDamageMinRight);
+    };
+    const auto wizardry = [](CHARACTER_MACHINE& machine)
+    {
+        machine.CalculateMagicDamage();
+        return static_cast<int>(machine.Character.MagicDamageMin);
+    };
+    // A stat of CalculateBasicState, which adds to the machine's Add* fields.
+    const auto basic = [](WORD CHARACTER_ATTRIBUTE::* added)
+    {
+        return [added](CHARACTER_MACHINE& machine)
+        {
+            machine.CalculateBasicState();
+            return static_cast<int>(machine.Character.*added);
+        };
+    };
+    // The same stat of getAllAddStateOnlyExValues, by its place among the five.
+    const auto exValue = [](size_t stat)
+    {
+        return [stat](CHARACTER_MACHINE& machine)
+        {
+            std::array<int, 5> values{};
+            machine.getAllAddStateOnlyExValues(values[0], values[1], values[2], values[3], values[4]);
+            return values[stat];
+        };
+    };
+    const std::vector<Stat> stats = {
+        {eBuff_EliteScroll2, ITEM_SCROLL_OF_DEFENSE, defense},
+        {eBuff_EliteScroll3, ITEM_SCROLL_OF_WRATH, damage},
+        {eBuff_EliteScroll4, ITEM_SCROLL_OF_WIZARDRY, wizardry},
+        // baseDamageBonus raises the physical damage and the wizardry.
+        {eBuff_Hellowin2, ITEM_JACK_OLANTERN_WRATH, damage},
+        {eBuff_Hellowin2, ITEM_JACK_OLANTERN_WRATH, wizardry},
+        {eBuff_SecretPotion1, ITEM_ELIXIR_OF_STRENGTH, basic(&CHARACTER_ATTRIBUTE::AddStrength)},
+        {eBuff_SecretPotion2, ITEM_ELIXIR_OF_AGILITY, basic(&CHARACTER_ATTRIBUTE::AddDexterity)},
+        {eBuff_SecretPotion3, ITEM_ELIXIR_OF_HEALTH, basic(&CHARACTER_ATTRIBUTE::AddVitality)},
+        {eBuff_SecretPotion4, ITEM_ELIXIR_OF_ENERGY, basic(&CHARACTER_ATTRIBUTE::AddEnergy)},
+        {eBuff_SecretPotion5, ITEM_ELIXIR_OF_CONTROL, basic(&CHARACTER_ATTRIBUTE::AddCharisma)},
+        {eBuff_SecretPotion1, ITEM_ELIXIR_OF_STRENGTH, exValue(0)},
+        {eBuff_SecretPotion2, ITEM_ELIXIR_OF_AGILITY, exValue(1)},
+        {eBuff_SecretPotion3, ITEM_ELIXIR_OF_HEALTH, exValue(2)},
+        {eBuff_SecretPotion4, ITEM_ELIXIR_OF_ENERGY, exValue(3)},
+        {eBuff_SecretPotion5, ITEM_ELIXIR_OF_CONTROL, exValue(4)},
+    };
+    const auto statOf = [](const Stat& stat)
+    {
+        auto machine = std::make_unique<CHARACTER_MACHINE>();
+        for (ITEM& equipped : machine->Equipment)
+        {
+            equipped = ITEM{};
+            equipped.Type = -1;
+        }
+        machine->Character.Class = CLASS_KNIGHT;
+        machine->Character.Strength = machine->Character.Dexterity = machine->Character.Energy = 900;
+        return stat.read(*machine);
+    };
+    for (size_t row = 0; row < stats.size(); ++row)
+    {
+        const Stat& stat = stats[row];
+        CAPTURE(row);
+        const int plain = statOf(stat);
+        hero.HeroCharacter().Object.m_BuffMap.RegisterBuff(stat.buff);
+        const int buffed = statOf(stat);
+        hero.HeroCharacter().Object.m_BuffMap.UnRegisterBuff(stat.buff);
+        const int value = static_cast<int>(g_pItemAddOptioninfo->GetItemAddOtioninfo(stat.itemType).m_byValue1);
+        REQUIRE(value > 0);
+        CHECK(buffed - plain == value);
+    }
 }
 
 // The server marks an item's guardian (380) option with one bit of its option flags and no byte of its own; such an

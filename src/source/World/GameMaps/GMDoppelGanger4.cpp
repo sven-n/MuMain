@@ -271,12 +271,10 @@ void CGMDoppelGanger4::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
     }
 }
 
-bool CGMDoppelGanger4::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool CGMDoppelGanger4::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (IsDoppelGanger4() == false)
         return false;
-
-    float fBlendMeshLight = 0;
 
     switch (o->Type)
     {
@@ -308,42 +306,6 @@ bool CGMDoppelGanger4::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b,
                       look.blendMeshV, look.hiddenMesh);
         b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
                       look.blendMeshU, look.blendMeshV, look.hiddenMesh);
-        return true;
-    case MODEL_ICE_WALKER:
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV, BITMAP_DOPPELGANGER_ICEWALKER0);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV, BITMAP_DOPPELGANGER_ICEWALKER1);
-        return true;
-    case MODEL_LARVA:
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV, BITMAP_DOPPELGANGER_SNAKE01);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        return true;
-    case MODEL_MAD_BUTCHER:
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fBlendMeshLight, look.blendMeshU,
-                      look.blendMeshV, BITMAP_BUGBEAR_R);
-        return true;
-    case MODEL_TERRIBLE_BUTCHER:
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fBlendMeshLight, look.blendMeshU,
-                      look.blendMeshV, BITMAP_BUGBEAR_R);
-        return true;
-    case MODEL_DOPPELGANGER:
         return true;
     }
 
@@ -637,21 +599,7 @@ bool CGMDoppelGanger4::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-bool CGMDoppelGanger4::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
-{
-    switch (o->Type)
-    {
-    case MODEL_DOPPELGANGER:
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.3f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        return true;
-        break;
-    }
-
-    return true;
-}
-
-void CGMDoppelGanger4::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+void CGMDoppelGanger4::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (!IsDoppelGanger4())
         return;

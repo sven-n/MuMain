@@ -17,27 +17,26 @@ namespace
 {
 constexpr std::string_view RenderStyleDataLabel = "Render style data";
 constexpr std::string_view RenderStyleDataName = "render style data";
-constexpr std::string_view ItemEffectDataLabel = "Item effect data";
-constexpr std::string_view ItemEffectDataName = "item effect data";
+constexpr std::string_view EffectDataLabel = "Effect data";
+constexpr std::string_view EffectDataName = "effect data";
 
 bool LoadLooks(LookKind kind, std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     const std::filesystem::path directory = Effects::GetEffectDataDirectory();
     RenderStylesLoadResult result = LoadLookFile(directory, kind);
-    const bool effects = kind == LookKind::ItemEffect;
-    LogDataIssues(effects ? ItemEffectDataLabel : RenderStyleDataLabel, result.issues);
+    const bool effects = kind == LookKind::Effect;
+    LogDataIssues(effects ? EffectDataLabel : RenderStyleDataLabel, result.issues);
     if (Items::HasFatal(result.issues))
     {
-        errorMessage =
-            DescribeFatalIssues(effects ? ItemEffectDataName : RenderStyleDataName, directory, result.issues);
+        errorMessage = DescribeFatalIssues(effects ? EffectDataName : RenderStyleDataName, directory, result.issues);
         return false;
     }
     const size_t count = result.looks.size();
     g_LookStore.SetLooks(kind, std::move(result.looks));
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
-    MU_LOG_INFO(mu::log::Get("data"), "Loaded {} {} from {} in {:.1f} ms", count,
-                effects ? "item effects" : "render styles", directory.string(), elapsed.count());
+    MU_LOG_INFO(mu::log::Get("data"), "Loaded {} {} from {} in {:.1f} ms", count, effects ? "effects" : "render styles",
+                directory.string(), elapsed.count());
     return true;
 }
 } // namespace
@@ -70,8 +69,8 @@ bool LoadRenderStyles(std::string& errorMessage)
     return LoadLooks(LookKind::RenderStyle, errorMessage);
 }
 
-bool LoadItemEffects(std::string& errorMessage)
+bool LoadEffects(std::string& errorMessage)
 {
-    return LoadLooks(LookKind::ItemEffect, errorMessage);
+    return LoadLooks(LookKind::Effect, errorMessage);
 }
 } // namespace Data::Looks

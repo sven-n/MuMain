@@ -438,6 +438,10 @@
 .opt-row-tipped:hover .opt-row-tip {
 	display: block;
 }
+/* A row whose list opens down over its tip. */
+.opt-row-tipped.list-open:hover .opt-row-tip {
+	display: none;
+}
 .option-opens-up .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
@@ -527,6 +531,15 @@
 .opt-toggle-row.opt-row-tipped.locked .opt-label,
 .opt-toggle-row.opt-row-tipped.locked .opt-control {
 	opacity: 0.45;
+}
+
+/* Borderless fullscreen runs at the desktop's resolution: the Resolution row shows it, dimmed, and
+   its list does not open. */
+.opt-row.locked .opt-control {
+	opacity: 0.45;
+}
+.opt-row.locked .option-dropdown-value {
+	cursor: default;
 }
 
 /* The player's tuning of each Enhanced feature (OptionWindow.h's tuning rows), under the feature's

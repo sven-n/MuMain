@@ -1891,7 +1891,11 @@
     },
     {
       "name": "phoenixShot",
-      "code": "MODEL_PHOENIX_SHOT"
+      "code": "MODEL_PHOENIX_SHOT",
+      "create": {
+        "lifeTime": 70,
+        "velocity": 1.5
+      }
     },
     {
       "name": "pierPart",
@@ -2843,6 +2847,16 @@
             "copy": {
               "eyeRight": "light"
             }
+          },
+          {
+            "subType": 4,
+            "lifeTime": 30,
+            "scale": 2.5
+          },
+          {
+            "subType": 5,
+            "lifeTime": 2,
+            "scale": 3.5
           }
         ]
       }
@@ -2971,6 +2985,20 @@
         "lifeTime": 50,
         "copy": {
           "scale": "callScale"
+        }
+      }
+    },
+    {
+      "name": "windSpin03",
+      "code": "MODEL_WINDSPIN03",
+      "create": {
+        "lifeTime": 50,
+        "velocity": 0,
+        "blendMesh": -2,
+        "lightEnable": false,
+        "distance": 0,
+        "copy": {
+          "startPosition": "position"
         }
       }
     },

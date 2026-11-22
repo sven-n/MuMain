@@ -254,7 +254,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
     return true;
 }
 
-bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (IsBalgasBarrackMap() || IsBalgasRefugeMap())
     {
@@ -288,7 +288,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(const OBJECT* o, DrawLook& look,
             return true;
         }
     }
-    return RenderMonsterObjectMesh(o, look, b, ExtraMon);
+    return false;
 }
 
 void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
@@ -635,76 +635,6 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
     }
     break;
     }
-}
-
-bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
-{
-    switch (o->Type)
-    {
-    case MODEL_BALRAM:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      5);
-        return true;
-    }
-    break;
-    case MODEL_DEATH_SPIRIT:
-    {
-        b->BeginRender(look.alpha);
-        static float aaa = 0.f;
-        aaa += 0.1f;
-        if (aaa > 1.0f)
-            aaa = 0.f;
-        for (int i = 0; i < Models[o->Type].NumMeshs; i++)
-        {
-            if (i == 2)
-            {
-                if (look.alpha > 0.3f)
-                    look.alpha = 0.3f;
-
-                look.blendMesh = -2;
-                b->EndRender();
-                b->BeginRender(look.alpha);
-                Models[o->Type].StreamMesh = i;
-            }
-            else
-                look.blendMesh = -1;
-
-            look.blendMeshU = (int)WorldTime % 10000 * 0.0005f;
-            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-        }
-        b->EndRender();
-        look.alpha = 1.0f;
-        return true;
-    }
-    break;
-    case MODEL_SORAM:
-    {
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(look.alpha);
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      5);
-        b->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_DARK_ELF:
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME6, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME6, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-        return true;
-    }
-    return false;
 }
 
 bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)

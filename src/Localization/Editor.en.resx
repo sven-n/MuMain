@@ -433,6 +433,9 @@
   <data name="Fullscreen" xml:space="preserve">
     <value>Fullscreen</value>
   </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Borderless fullscreen</value>
+  </data>
   <data name="Actual Window Client" xml:space="preserve">
     <value>Actual Window Client</value>
   </data>
@@ -614,7 +617,7 @@
     <value>Never drawn, so the preview can't show it alone.</value>
   </data>
   <data name="Mesh code looks note" xml:space="preserve">
-    <value>The Style Editor shows which parts the render style draws and with which effects; the item effect is drawing code.</value>
+    <value>The Style Editor shows which parts the render style draws and with which effects; the effect is drawing code.</value>
   </data>
   <data name="Preview pick note" xml:space="preserve">
     <value>Click a part to find its mesh in the mesh list.</value>
@@ -631,14 +634,11 @@
   <data name="Render style" xml:space="preserve">
     <value>Render style</value>
   </data>
-  <data name="Item effect" xml:space="preserve">
-    <value>Item effect</value>
+  <data name="Effect" xml:space="preserve">
+    <value>Effect</value>
   </data>
   <data name="Render styles" xml:space="preserve">
     <value>Render styles</value>
-  </data>
-  <data name="Item effects" xml:space="preserve">
-    <value>Item effects</value>
   </data>
   <data name="Style Editor" xml:space="preserve">
     <value>Style Editor</value>
@@ -653,7 +653,7 @@
     <value>Render styles are in Data/Effects/RenderStyles.json or still drawing code, marked (code); Open in Style Editor shows the look. This picks which one the item uses.</value>
   </data>
   <data name="Style Editor tree note" xml:space="preserve">
-    <value>Render styles draw an item in layers; item effects act before it is drawn. Folders only sort the looks: drag a look or a folder onto a folder or onto its root. A look marked (code) is still drawing code: you see it and its items, but can't change it.</value>
+    <value>Render styles draw an item in layers; effects act before it is drawn. Folders only sort the looks: drag a look or a folder onto a folder or onto its root. A look marked (code) is still drawing code: you see it and its items, but can't change it.</value>
   </data>
   <data name="New look" xml:space="preserve">
     <value>New look</value>
@@ -694,8 +694,8 @@
   <data name="A look name of letters and digits that no other render style has" xml:space="preserve">
     <value>A name of letters and digits that no other render style has, in the file or in code.</value>
   </data>
-  <data name="A look name of letters and digits that no other item effect has" xml:space="preserve">
-    <value>A name of letters and digits that no other item effect has</value>
+  <data name="A look name of letters and digits that no other effect has" xml:space="preserve">
+    <value>A name of letters and digits that no other effect has</value>
   </data>
   <data name="Only a look no item uses can be renamed or removed." xml:space="preserve">
     <value>Only a look no item uses can be renamed or removed.</value>
@@ -703,8 +703,8 @@
   <data name="Code look note" xml:space="preserve">
     <value>Still drawing code (Render/Items/ItemRenderStyles.cpp): you see the look and its items here, but can't change it. It moves into the look file in a later step.</value>
   </data>
-  <data name="Item effects root note" xml:space="preserve">
-    <value>The item effects of {0}, and those still drawing code, marked (code). An item effect sets item values before the item is drawn and can put a light on the item's object.</value>
+  <data name="Effects root note" xml:space="preserve">
+    <value>The effects of {0}, and those still drawing code, marked (code). An effect sets item values before the item is drawn and can put a light on the item's object.</value>
   </data>
   <data name="Render styles root note" xml:space="preserve">
     <value>The render styles of {0}, and those still drawing code, marked (code).</value>
@@ -759,6 +759,12 @@
   </data>
   <data name="Blend glow tooltip" xml:space="preserve">
     <value>Adds its light to what is drawn before it: bright places glow, dark ones stay see-through.</value>
+  </data>
+  <data name="Darken" xml:space="preserve">
+    <value>Darken</value>
+  </data>
+  <data name="Blend darken tooltip" xml:space="preserve">
+    <value>Darkens what is drawn before it by its light: a dark layer makes a shadow.</value>
   </data>
   <data name="Blend as the drawing asks tooltip" xml:space="preserve">
     <value>Blends as the item's drawing chooses, as the item's own texture does.</value>
@@ -968,7 +974,7 @@
     <value>Only at these levels: the level the item glows like, from and to, both included.</value>
   </data>
   <data name="Only when hidden mesh tooltip" xml:space="preserve">
-    <value>Only when the item hides this mesh in this drawing (its hidden mesh, which item effects can set), or when it hides none.</value>
+    <value>Only when the item hides this mesh in this drawing (its hidden mesh, which effects can set), or when it hides none.</value>
   </data>
   <data name="No hidden mesh" xml:space="preserve">
     <value>No hidden mesh</value>
@@ -1010,7 +1016,7 @@
     <value>Draws alone</value>
   </data>
   <data name="Draws alone tooltip" xml:space="preserve">
-    <value>Drawn right after the item's item effect, in the object's own light, with nothing of the drawing code after it: no level light from +3, no level glow from +7, no excellent glow, no buff tint.</value>
+    <value>Drawn right after the item's effect, in the object's own light, with nothing of the drawing code after it: no level light from +3, no level glow from +7, no excellent glow, no buff tint.</value>
   </data>
   <data name="Before drawing" xml:space="preserve">
     <value>Before drawing</value>
@@ -1116,6 +1122,81 @@
   </data>
   <data name="Effect Browser" xml:space="preserve">
     <value>Effect Browser</value>
+  </data>
+  <data name="Model look {0}" xml:space="preserve">
+    <value>(model: {0})</value>
+  </data>
+  <data name="Glow only" xml:space="preserve">
+    <value>Glow only</value>
+  </data>
+  <data name="At most" xml:space="preserve">
+    <value>At most</value>
+  </data>
+  <data name="At most tooltip" xml:space="preserve">
+    <value>The value never goes above this: the top of a wave cut off.</value>
+  </data>
+  <data name="A color times the opacity" xml:space="preserve">
+    <value>A color times the opacity</value>
+  </data>
+  <data name="A color times the red of the light" xml:space="preserve">
+    <value>A color times the red of the light</value>
+  </data>
+  <data name="Tinting debuff" xml:space="preserve">
+    <value>Tinting debuff (poison, freeze, Blow of Destruction)</value>
+  </data>
+  <data name="On top" xml:space="preserve">
+    <value>On top</value>
+  </data>
+  <data name="On top tooltip" xml:space="preserve">
+    <value>Drawn without the depth test: over the model's other meshes and over walls, as the PK Field's Zombie Fighter glows.</value>
+  </data>
+  <data name="Light map" xml:space="preserve">
+    <value>Light map</value>
+  </data>
+  <data name="Light map tooltip" xml:space="preserve">
+    <value>The reflection lights the mesh as a light map, as the Drakan's second chrome.</value>
+  </data>
+  <data name="Not in animation" xml:space="preserve">
+    <value>Not in animation</value>
+  </data>
+  <data name="Animation tooltip" xml:space="preserve">
+    <value>Only while the monster plays this animation.</value>
+  </data>
+  <data name="Not in animation tooltip" xml:space="preserve">
+    <value>Not while the monster plays this animation: a glow left out while it dies.</value>
+  </data>
+  <data name="Opacity above" xml:space="preserve">
+    <value>Opacity above</value>
+  </data>
+  <data name="Opacity above tooltip" xml:space="preserve">
+    <value>Only while the drawing is more opaque than this, from 0 to 1.</value>
+  </data>
+  <data name="Opacity at most" xml:space="preserve">
+    <value>Opacity at most</value>
+  </data>
+  <data name="Opacity at most tooltip" xml:space="preserve">
+    <value>Only once the drawing has faded to this opacity or less, from 0 to 1: a dying monster drawn glowing as it fades.</value>
+  </data>
+  <data name="Cycle half" xml:space="preserve">
+    <value>Cycle half (seconds)</value>
+  </data>
+  <data name="Cycle half tooltip" xml:space="preserve">
+    <value>Only in one half of a cycle of the clock this many seconds long: the first half while the cycle's sine is at or above zero, the second while it is below. The Lava Giants glow brighter in the first half of their pulse.</value>
+  </data>
+  <data name="First half" xml:space="preserve">
+    <value>First half</value>
+  </data>
+  <data name="First half tooltip" xml:space="preserve">
+    <value>While the cycle's sine is at or above zero.</value>
+  </data>
+  <data name="Second half" xml:space="preserve">
+    <value>Second half</value>
+  </data>
+  <data name="Second half tooltip" xml:space="preserve">
+    <value>While the cycle's sine is below zero.</value>
+  </data>
+  <data name="Effect types" xml:space="preserve">
+    <value>Effect types</value>
   </data>
   <data name="Effect types not loaded" xml:space="preserve">
     <value>The effect types are not loaded yet; the loading screen loads them.</value>
@@ -3644,7 +3725,7 @@
     <value>Part models</value>
   </data>
   <data name="Part model note" xml:space="preserve">
-    <value>A part model: drawn with items, where the game code puts it (the +15 armor decorations, the Phoenix Soul Star's wing, the Phoenix Soul Armor in the inventory). Its entry in Data/Items/Models/PartModels.json holds its file, texture folders and render style; it has no inventory, ground, glow or item effect. Pick an item to see items again.</value>
+    <value>A part model: drawn with items, where the game code puts it (the +15 armor decorations, the Phoenix Soul Star's wing, the Phoenix Soul Armor in the inventory). Its entry in Data/Items/Models/PartModels.json holds its file, texture folders and render style; it has no inventory, ground, glow or effect. Pick an item to see items again.</value>
   </data>
   <data name="The part model {0} has no entry" xml:space="preserve">
     <value>The part model {0} has no entry in PartModels.json.</value>
@@ -3708,6 +3789,15 @@
   </data>
   <data name="Step model" xml:space="preserve">
     <value>{0}: {1}</value>
+  </data>
+  <data name="Step what looks" xml:space="preserve">
+    <value>looks</value>
+  </data>
+  <data name="Monster looks" xml:space="preserve">
+    <value>Looks</value>
+  </data>
+  <data name="Model looks note" xml:space="preserve">
+    <value>The render style and effect every monster of the model is drawn with; a monster can name others in Monster Setup.</value>
   </data>
   <data name="Step what file" xml:space="preserve">
     <value>file</value>
@@ -5871,5 +5961,281 @@
   </data>
   <data name="Wing option bit {0}" xml:space="preserve">
     <value>Wing option bit {0}</value>
+  </data>
+  <data name="On bones" xml:space="preserve">
+    <value>On bones</value>
+  </data>
+  <data name="On bones note" xml:space="preserve">
+    <value>Each entry creates its things on the item's bones in every update: at each bone, between each pair of bones (lightning, from the first to the second) or at the item's own place. The preview's views show them live, each from its own look.</value>
+  </data>
+  <data name="Animation speed" xml:space="preserve">
+    <value>Animation speed</value>
+  </data>
+  <data name="Animation speed tooltip" xml:space="preserve">
+    <value>How fast the update plays the item's animation, as the Cursed Castle Water's ground item moves; without one it plays none.</value>
+  </data>
+  <data name="Bone thing sprite" xml:space="preserve">
+    <value>Sprite</value>
+  </data>
+  <data name="Bone thing particle" xml:space="preserve">
+    <value>Particle</value>
+  </data>
+  <data name="Bone thing lightning" xml:space="preserve">
+    <value>Lightning</value>
+  </data>
+  <data name="Bone thing effect" xml:space="preserve">
+    <value>Effect</value>
+  </data>
+  <data name="Bone thing kind tooltip" xml:space="preserve">
+    <value>What is created: a sprite (it lives one frame), a particle, lightning between two bones, or an effect.</value>
+  </data>
+  <data name="Bone thing type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Bone thing type tooltip" xml:space="preserve">
+    <value>The type by its name in the effect catalogue (the Effect Browser lists them).</value>
+  </data>
+  <data name="Bone thing type missing" xml:space="preserve">
+    <value>Pick a type</value>
+  </data>
+  <data name="Bone thing filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Bone thing subtype tooltip" xml:space="preserve">
+    <value>The SubType the type is created with; the type's code reads it.</value>
+  </data>
+  <data name="Bone thing scale tooltip" xml:space="preserve">
+    <value>The thing's scale, a number or a shape.</value>
+  </data>
+  <data name="Bone thing rotation tooltip" xml:space="preserve">
+    <value>The sprite's rotation in degrees, a number or a shape.</value>
+  </data>
+  <data name="Reversed lightning" xml:space="preserve">
+    <value>From the second bone to the first</value>
+  </data>
+  <data name="Reversed lightning tooltip" xml:space="preserve">
+    <value>The lightning runs from the second bone of each pair to the first.</value>
+  </data>
+  <data name="At bones" xml:space="preserve">
+    <value>At bones</value>
+  </data>
+  <data name="Between bones" xml:space="preserve">
+    <value>Between bones</value>
+  </data>
+  <data name="At the item's place" xml:space="preserve">
+    <value>At the item's place</value>
+  </data>
+  <data name="Bone places tooltip" xml:space="preserve">
+    <value>Where the entry's things are created: at each of its bones, between each of its pairs of bones, or once at the item object's own place.</value>
+  </data>
+  <data name="Bone number tooltip" xml:space="preserve">
+    <value>A bone of the item's model by its number; the preview rings it while the mouse is here.</value>
+  </data>
+  <data name="Add bone" xml:space="preserve">
+    <value>+ Bone</value>
+  </data>
+  <data name="Add bone pair" xml:space="preserve">
+    <value>+ Pair</value>
+  </data>
+  <data name="Take out" xml:space="preserve">
+    <value>x</value>
+  </data>
+  <data name="Pick in the preview" xml:space="preserve">
+    <value>Pick in the preview</value>
+  </data>
+  <data name="Pick in the preview tooltip" xml:space="preserve">
+    <value>A click on a bone's dot in a view adds the bone or takes it out; between bones, click the start of the lightning, then its end.</value>
+  </data>
+  <data name="Pick the end from 0" xml:space="preserve">
+    <value>Now click the end of the lightning from bone {0}.</value>
+  </data>
+  <data name="Show bones" xml:space="preserve">
+    <value>Show bones</value>
+  </data>
+  <data name="Show bones tooltip" xml:space="preserve">
+    <value>Draws every bone of the previewed item as a dot, joined by a line to the bone it hangs on; pointing at one shows its number and name.</value>
+  </data>
+  <data name="No bones for this item" xml:space="preserve">
+    <value>This item is drawn on the character's skeleton: the game creates no things on bones for it.</value>
+  </data>
+  <data name="Chance" xml:space="preserve">
+    <value>Chance</value>
+  </data>
+  <data name="Chance tooltip" xml:space="preserve">
+    <value>Without a chance the thing comes in every update.</value>
+  </data>
+  <data name="Once in" xml:space="preserve">
+    <value>Once in</value>
+  </data>
+  <data name="Once in tooltip" xml:space="preserve">
+    <value>Once in this many frames.</value>
+  </data>
+  <data name="Chance draw" xml:space="preserve">
+    <value>Draw</value>
+  </data>
+  <data name="Chance at the frame rate" xml:space="preserve">
+    <value>At the game's frame rate</value>
+  </data>
+  <data name="Chance at the frame rate tooltip" xml:space="preserve">
+    <value>Once in N frames at the game's reference frame rate, the same at any frame rate.</value>
+  </data>
+  <data name="Chance plain" xml:space="preserve">
+    <value>Plain</value>
+  </data>
+  <data name="Chance plain tooltip" xml:space="preserve">
+    <value>A plain random draw in each update, as the monster sounds draw theirs: more often at a higher frame rate.</value>
+  </data>
+  <data name="Once for all" xml:space="preserve">
+    <value>Once for all</value>
+  </data>
+  <data name="Once for all tooltip" xml:space="preserve">
+    <value>Rolls once for the entry, not for each bone or pair.</value>
+  </data>
+  <data name="Together" xml:space="preserve">
+    <value>Together</value>
+  </data>
+  <data name="Together tooltip" xml:space="preserve">
+    <value>The entry's things share its places and its chance, so they come together (the Wings of Darkness' two lightnings); a thing inside can roll a chance of its own after it.</value>
+  </data>
+  <data name="Add thing" xml:space="preserve">
+    <value>+ Thing</value>
+  </data>
+  <data name="Thing chance" xml:space="preserve">
+    <value>Its own chance</value>
+  </data>
+  <data name="Warp List" xml:space="preserve">
+    <value>Warp List</value>
+  </data>
+  <data name="Warp list note" xml:space="preserve">
+    <value>The list as the M window shows it, in this order. A server that sends its own list (OpenMU) overrides level and zen. The game takes each change at once; Save writes {0}.</value>
+  </data>
+  <data name="Add warp" xml:space="preserve">
+    <value>Add warp</value>
+  </data>
+  <data name="Pick a warp in the list." xml:space="preserve">
+    <value>Pick a warp in the list.</value>
+  </data>
+  <data name="Search warps" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Move command name" xml:space="preserve">
+    <value>/move name</value>
+  </data>
+  <data name="Zen" xml:space="preserve">
+    <value>Zen</value>
+  </data>
+  <data name="Gate" xml:space="preserve">
+    <value>Gate</value>
+  </data>
+  <data name="Gate note" xml:space="preserve">
+    <value>The server's landing spot; the client doesn't use it.</value>
+  </data>
+  <data name="No class discount" xml:space="preserve">
+    <value>No class discount</value>
+  </data>
+  <data name="Master level" xml:space="preserve">
+    <value>Master level</value>
+  </data>
+  <data name="Resets" xml:space="preserve">
+    <value>Resets</value>
+  </data>
+  <data name="Zero is none" xml:space="preserve">
+    <value>0 = none</value>
+  </data>
+  <data name="Warp rules" xml:space="preserve">
+    <value>Rules</value>
+  </data>
+  <data name="Needs one of" xml:space="preserve">
+    <value>Needs one of</value>
+  </data>
+  <data name="Needs one of note" xml:space="preserve">
+    <value>At least one of these has to be equipped, not broken. Empty: no rule.</value>
+  </data>
+  <data name="Not with" xml:space="preserve">
+    <value>Not with</value>
+  </data>
+  <data name="Not with note" xml:space="preserve">
+    <value>None of these may be equipped.</value>
+  </data>
+  <data name="Item tag" xml:space="preserve">
+    <value>Item tag</value>
+  </data>
+  <data name="Any wings" xml:space="preserve">
+    <value>Any wings</value>
+  </data>
+  <data name="Except" xml:space="preserve">
+    <value>except</value>
+  </data>
+  <data name="Unknown item" xml:space="preserve">
+    <value>The item list has no such item.</value>
+  </data>
+  <data name="Tag items {0}" xml:space="preserve">
+    <value>({0} items)</value>
+  </data>
+  <data name="PvP servers only" xml:space="preserve">
+    <value>PvP servers only</value>
+  </data>
+  <data name="Gens members only" xml:space="preserve">
+    <value>Gens members only</value>
+  </data>
+  <data name="Blocked message" xml:space="preserve">
+    <value>Blocked message</value>
+  </data>
+  <data name="General warp message" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Blocked message note" xml:space="preserve">
+    <value>What the chat shows when the equipment rules block /move.</value>
+  </data>
+  <data name="Class level discount" xml:space="preserve">
+    <value>Class level discount</value>
+  </data>
+  <data name="Class level discount note" xml:space="preserve">
+    <value>These classes need the warp's level times numerator / denominator, for every warp without No class discount.</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>Class</value>
+  </data>
+  <data name="Numerator" xml:space="preserve">
+    <value>Numerator</value>
+  </data>
+  <data name="Denominator" xml:space="preserve">
+    <value>Denominator</value>
+  </data>
+  <data name="Add class" xml:space="preserve">
+    <value>Add class</value>
+  </data>
+  <data name="Another warp has the index {0}" xml:space="preserve">
+    <value>Another warp has the index {0}.</value>
+  </data>
+  <data name="A warp needs an English name" xml:space="preserve">
+    <value>A warp needs an English name.</value>
+  </data>
+  <data name="A warp needs a move name" xml:space="preserve">
+    <value>A warp needs a /move name.</value>
+  </data>
+  <data name="Has a space note" xml:space="preserve">
+    <value>Has a space: /move takes one word.</value>
+  </data>
+  <data name="Step copy" xml:space="preserve">
+    <value>Copy {0}</value>
+  </data>
+  <data name="Step warp field" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Warps" xml:space="preserve">
+    <value>Warps</value>
+  </data>
+  <data name="Translations" xml:space="preserve">
+    <value>Translations</value>
+  </data>
+  <data name="All warps" xml:space="preserve">
+    <value>All warps</value>
+  </data>
+  <data name="Select the warp and show it in the Warps tab" xml:space="preserve">
+    <value>Select the warp and show it in the Warps tab</value>
+  </data>
+  <data name="Other languages in the Translations tab" xml:space="preserve">
+    <value>The names of the other languages are in the Translations tab.</value>
   </data>
 </root>

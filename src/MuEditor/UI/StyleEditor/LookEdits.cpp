@@ -29,7 +29,7 @@ void SortByName(std::vector<LookDefinition>& looks)
 // The model entry's field that names a look of the kind.
 std::string& LookFieldOf(Data::Items::ItemModelDefinition& model, Data::Looks::LookKind kind)
 {
-    return kind == Data::Looks::LookKind::ItemEffect ? model.itemEffect : model.renderStyle;
+    return kind == Data::Looks::LookKind::Effect ? model.effect : model.renderStyle;
 }
 } // namespace
 
@@ -41,8 +41,8 @@ LookEdits& LookEdits::GetInstance()
 LookEdits& LookEdits::Of(Data::Looks::LookKind kind)
 {
     static LookEdits renderStyles(Data::Looks::LookKind::RenderStyle);
-    static LookEdits itemEffects(Data::Looks::LookKind::ItemEffect);
-    return kind == Data::Looks::LookKind::ItemEffect ? itemEffects : renderStyles;
+    static LookEdits effects(Data::Looks::LookKind::Effect);
+    return kind == Data::Looks::LookKind::Effect ? effects : renderStyles;
 }
 
 const LookEdits::State& LookEdits::GetState() const

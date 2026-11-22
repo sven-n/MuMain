@@ -11365,166 +11365,166 @@ ourInfluenceGround subType 99 owner none position 12345.5/13579.25/260.5 angle -
 ourInfluenceGround subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	7580481319064006259
 ourInfluenceGround subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	2107096610318879939
 ourInfluenceGround subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	7580481319064006259
-phoenixShot subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	929275916813975996
-phoenixShot subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8096658810857680110
-phoenixShot subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	929275916813975996
-phoenixShot subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8096658810857680110
-phoenixShot subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	6131763760217426607
-phoenixShot subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	12616882300867612693
-phoenixShot subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	6131763760217426607
-phoenixShot subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	12616882300867612693
-phoenixShot subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	4216270130830944216
-phoenixShot subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	16611681297931629431
-phoenixShot subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	4216270130830944216
-phoenixShot subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	16611681297931629431
-phoenixShot subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	11857573151140800255
-phoenixShot subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	9166759629971708572
-phoenixShot subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	11857573151140800255
-phoenixShot subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	9166759629971708572
-phoenixShot subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	6382456823165382532
-phoenixShot subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	12165570540688348961
-phoenixShot subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	6382456823165382532
-phoenixShot subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	12165570540688348961
-phoenixShot subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	18047476847887243497
-phoenixShot subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	11627317721963746404
-phoenixShot subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	18047476847887243497
-phoenixShot subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	11627317721963746404
-phoenixShot subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	2273550380733660791
-phoenixShot subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	14575736839483567257
-phoenixShot subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	2273550380733660791
-phoenixShot subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	14575736839483567257
-phoenixShot subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	18362254021288783234
-phoenixShot subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	3235251478153080588
-phoenixShot subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	18362254021288783234
-phoenixShot subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	3235251478153080588
-phoenixShot subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3439464222979537235
-phoenixShot subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	2347259684217571612
-phoenixShot subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3439464222979537235
-phoenixShot subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	2347259684217571612
-phoenixShot subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	8771251859590289998
-phoenixShot subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	3477590433061711661
-phoenixShot subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	8771251859590289998
-phoenixShot subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	3477590433061711661
-phoenixShot subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	16512926893108087965
-phoenixShot subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	15412955726905901592
-phoenixShot subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	16512926893108087965
-phoenixShot subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	15412955726905901592
-phoenixShot subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	1646338726025245978
-phoenixShot subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	14690657351607345803
-phoenixShot subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	1646338726025245978
-phoenixShot subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	14690657351607345803
-phoenixShot subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	16290335539544009446
-phoenixShot subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	12680020142230147288
-phoenixShot subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	16290335539544009446
-phoenixShot subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	12680020142230147288
-phoenixShot subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	4586367293947125225
-phoenixShot subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	16095436432537720059
-phoenixShot subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	4586367293947125225
-phoenixShot subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	16095436432537720059
-phoenixShot subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	12568680482563046182
-phoenixShot subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	13615150239585213677
-phoenixShot subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	12568680482563046182
-phoenixShot subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	13615150239585213677
-phoenixShot subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	14823394409189959765
-phoenixShot subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	1147825186477639878
-phoenixShot subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	14823394409189959765
-phoenixShot subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	1147825186477639878
-phoenixShot subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	10239914857032867294
-phoenixShot subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	3425552168480877179
-phoenixShot subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	10239914857032867294
-phoenixShot subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	3425552168480877179
-phoenixShot subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	15770993531753635091
-phoenixShot subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	3162839326271406418
-phoenixShot subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	15770993531753635091
-phoenixShot subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	3162839326271406418
-phoenixShot subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3993815126048831849
-phoenixShot subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	15627009062236149291
-phoenixShot subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3993815126048831849
-phoenixShot subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	15627009062236149291
-phoenixShot subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	406926878779302020
-phoenixShot subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	3392533628330678090
-phoenixShot subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	406926878779302020
-phoenixShot subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	3392533628330678090
-phoenixShot subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	495047100418159769
-phoenixShot subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	10318226472589934490
-phoenixShot subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	495047100418159769
-phoenixShot subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	10318226472589934490
-phoenixShot subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	9513348448931226372
-phoenixShot subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	63816051279740471
-phoenixShot subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	9513348448931226372
-phoenixShot subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	63816051279740471
-phoenixShot subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	18288780220531059319
-phoenixShot subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	15095821577756385522
-phoenixShot subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	18288780220531059319
-phoenixShot subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	15095821577756385522
-phoenixShot subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	1402542727903113164
-phoenixShot subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	7240041673853611873
-phoenixShot subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	1402542727903113164
-phoenixShot subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	7240041673853611873
-phoenixShot subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	18075138325048960766
-phoenixShot subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8594929251008542954
-phoenixShot subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	18075138325048960766
-phoenixShot subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8594929251008542954
-phoenixShot subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	4526306684876490103
-phoenixShot subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	7815831429633140971
-phoenixShot subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	4526306684876490103
-phoenixShot subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	7815831429633140971
-phoenixShot subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	15982619509359829198
-phoenixShot subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	9619942045440488611
-phoenixShot subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	15982619509359829198
-phoenixShot subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	9619942045440488611
-phoenixShot subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	17317582189684177911
-phoenixShot subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	9407748866815653174
-phoenixShot subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	17317582189684177911
-phoenixShot subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	9407748866815653174
-phoenixShot subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	4537726976923726214
-phoenixShot subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	4188236488525203981
-phoenixShot subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	4537726976923726214
-phoenixShot subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	4188236488525203981
-phoenixShot subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	17009611879487743521
-phoenixShot subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	15027318704654529314
-phoenixShot subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	17009611879487743521
-phoenixShot subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	15027318704654529314
-phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	16431601498448394309
-phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	10265009803819868979
-phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	16431601498448394309
-phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	10265009803819868979
-phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	10994559304595300510
-phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	16114711536558634064
-phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	10994559304595300510
-phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	16114711536558634064
-phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	10610519807437805742
-phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8342501104438944452
-phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	10610519807437805742
-phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8342501104438944452
-phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	10267180555869958035
-phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	12924294873267107961
-phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	10267180555869958035
-phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	12924294873267107961
-phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	16807134239148605191
-phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	14866180255375015853
-phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	16807134239148605191
-phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	14866180255375015853
-phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	10261007659153895992
-phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	6497535682014999054
-phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	10261007659153895992
-phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	6497535682014999054
-phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	10663729881496884992
-phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	12889036883688074990
-phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	10663729881496884992
-phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	12889036883688074990
-phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	11674038263966941197
-phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	5759875277636120823
-phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	11674038263966941197
-phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	5759875277636120823
-phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	17712925321398458143
-phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	11017852418317393631
-phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	17712925321398458143
-phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	11017852418317393631
-phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	8423097016218493606
-phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	1432699120965295134
-phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	8423097016218493606
-phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	1432699120965295134
+phoenixShot subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	13650886799951102519
+phoenixShot subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	281943865411233531
+phoenixShot subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	13650886799951102519
+phoenixShot subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	281943865411233531
+phoenixShot subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	1176563439356373264
+phoenixShot subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	16554309924683723668
+phoenixShot subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	1176563439356373264
+phoenixShot subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	16554309924683723668
+phoenixShot subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	5030405236644184851
+phoenixShot subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	548198305724226602
+phoenixShot subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	5030405236644184851
+phoenixShot subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	548198305724226602
+phoenixShot subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	10021299139831062624
+phoenixShot subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	14209012177637953061
+phoenixShot subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	10021299139831062624
+phoenixShot subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	14209012177637953061
+phoenixShot subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	14321881740447899997
+phoenixShot subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8978310040244672290
+phoenixShot subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	14321881740447899997
+phoenixShot subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8978310040244672290
+phoenixShot subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	623980126003595656
+phoenixShot subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	7952507608411506115
+phoenixShot subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	623980126003595656
+phoenixShot subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	7952507608411506115
+phoenixShot subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3464870933962406126
+phoenixShot subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	11768585329161315206
+phoenixShot subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3464870933962406126
+phoenixShot subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	11768585329161315206
+phoenixShot subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	5317805807246978295
+phoenixShot subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	15837545627477587075
+phoenixShot subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	5317805807246978295
+phoenixShot subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	15837545627477587075
+phoenixShot subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	17804806198440537694
+phoenixShot subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8304789927894798399
+phoenixShot subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	17804806198440537694
+phoenixShot subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8304789927894798399
+phoenixShot subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	823726263770854263
+phoenixShot subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	15703472693306500574
+phoenixShot subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	823726263770854263
+phoenixShot subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	15703472693306500574
+phoenixShot subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	14523153210875359222
+phoenixShot subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8774150001434815849
+phoenixShot subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	14523153210875359222
+phoenixShot subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8774150001434815849
+phoenixShot subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	4235571815418296481
+phoenixShot subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	14494329937177671626
+phoenixShot subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	4235571815418296481
+phoenixShot subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	14494329937177671626
+phoenixShot subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	6403838825198841073
+phoenixShot subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	11400728374348091605
+phoenixShot subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	6403838825198841073
+phoenixShot subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	11400728374348091605
+phoenixShot subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	11247290803727466730
+phoenixShot subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	2489196238034537618
+phoenixShot subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	11247290803727466730
+phoenixShot subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	2489196238034537618
+phoenixShot subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	16314029169074634833
+phoenixShot subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	16530051516829416056
+phoenixShot subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	16314029169074634833
+phoenixShot subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	16530051516829416056
+phoenixShot subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	17164461166295220806
+phoenixShot subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	4517712590104558831
+phoenixShot subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	17164461166295220806
+phoenixShot subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	4517712590104558831
+phoenixShot subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	8215077497532046287
+phoenixShot subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	1076815665634210468
+phoenixShot subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	8215077497532046287
+phoenixShot subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	1076815665634210468
+phoenixShot subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	3848602708683218
+phoenixShot subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	4670693572792538873
+phoenixShot subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	3848602708683218
+phoenixShot subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	4670693572792538873
+phoenixShot subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	11515603770678327680
+phoenixShot subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	7008841711910581256
+phoenixShot subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	11515603770678327680
+phoenixShot subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	7008841711910581256
+phoenixShot subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	13752151085735754257
+phoenixShot subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	7256177708657026737
+phoenixShot subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	13752151085735754257
+phoenixShot subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	7256177708657026737
+phoenixShot subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	9703671444211061420
+phoenixShot subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	9877073220790976477
+phoenixShot subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	9703671444211061420
+phoenixShot subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	9877073220790976477
+phoenixShot subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	5990177246973473613
+phoenixShot subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	13305966443310792312
+phoenixShot subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	5990177246973473613
+phoenixShot subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	13305966443310792312
+phoenixShot subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3402107989725879304
+phoenixShot subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	4063449137567966155
+phoenixShot subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3402107989725879304
+phoenixShot subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	4063449137567966155
+phoenixShot subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	9895323257834345643
+phoenixShot subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	9112754395875921984
+phoenixShot subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	9895323257834345643
+phoenixShot subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	9112754395875921984
+phoenixShot subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	11883710237282592361
+phoenixShot subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	12142360842756431167
+phoenixShot subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	11883710237282592361
+phoenixShot subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	12142360842756431167
+phoenixShot subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	2354064211836323032
+phoenixShot subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	15772754973851963074
+phoenixShot subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	2354064211836323032
+phoenixShot subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	15772754973851963074
+phoenixShot subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	10069920123479376281
+phoenixShot subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	10280029722038448174
+phoenixShot subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	10069920123479376281
+phoenixShot subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	10280029722038448174
+phoenixShot subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	12548151521206061112
+phoenixShot subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	3787496196289545183
+phoenixShot subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	12548151521206061112
+phoenixShot subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	3787496196289545183
+phoenixShot subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3701808079130106231
+phoenixShot subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	5830922613478796646
+phoenixShot subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3701808079130106231
+phoenixShot subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	5830922613478796646
+phoenixShot subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	16115949815021089792
+phoenixShot subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	8754706063265881929
+phoenixShot subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	16115949815021089792
+phoenixShot subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	8754706063265881929
+phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	7896076338274152302
+phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	535175922913364958
+phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	7896076338274152302
+phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	535175922913364958
+phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	6641294745127172281
+phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	6387952127769840577
+phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	6641294745127172281
+phoenixShot subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	6387952127769840577
+phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	4167541574367407471
+phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	3585553804315380011
+phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	4167541574367407471
+phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	3585553804315380011
+phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	9881871969121269286
+phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	16185670314429429814
+phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	9881871969121269286
+phoenixShot subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	16185670314429429814
+phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	12439135319912857608
+phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	7502630732619358800
+phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	12439135319912857608
+phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	7502630732619358800
+phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	9541537267706116795
+phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	4543036091850756607
+phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	9541537267706116795
+phoenixShot subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	4543036091850756607
+phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	15412850521276334217
+phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	4384706371434096573
+phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	15412850521276334217
+phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	4384706371434096573
+phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	4408047897335782624
+phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	2013429794720120380
+phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	4408047897335782624
+phoenixShot subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	2013429794720120380
+phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	8681348015138081792
+phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	2397349089785865026
+phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	8681348015138081792
+phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	2397349089785865026
+phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	13478952075388253313
+phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	10707837154334139215
+phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	13478952075388253313
+phoenixShot subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	10707837154334139215
 piercing2 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	4105782124410878987
 piercing2 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	923807366522287523
 piercing2 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	4105782124410878987
@@ -18749,6 +18749,54 @@ twlight subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 fr
 twlight subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	8785037032643518269
 twlight subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	1435887072122279770
 twlight subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	8785037032643518269
+twlight subType 4 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	18406144121424810968
+twlight subType 4 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8267628953752547128
+twlight subType 4 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	18406144121424810968
+twlight subType 4 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8267628953752547128
+twlight subType 4 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	5842012434373113685
+twlight subType 4 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	3175136560572281643
+twlight subType 4 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	5842012434373113685
+twlight subType 4 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	3175136560572281643
+twlight subType 4 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	190300482668940308
+twlight subType 4 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	11903086081694501069
+twlight subType 4 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	190300482668940308
+twlight subType 4 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	11903086081694501069
+twlight subType 4 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	2932374079706619537
+twlight subType 4 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	10880480506760756086
+twlight subType 4 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	2932374079706619537
+twlight subType 4 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	10880480506760756086
+twlight subType 4 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	17640595828629923216
+twlight subType 4 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	12097397543247151579
+twlight subType 4 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	17640595828629923216
+twlight subType 4 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	12097397543247151579
+twlight subType 4 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	5174216051755724015
+twlight subType 4 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	10079202844246519906
+twlight subType 4 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	5174216051755724015
+twlight subType 4 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	10079202844246519906
+twlight subType 5 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	13820058286806723841
+twlight subType 5 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	2712781932936955119
+twlight subType 5 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	13820058286806723841
+twlight subType 5 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	2712781932936955119
+twlight subType 5 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	8500050868440218330
+twlight subType 5 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	12364153862894470962
+twlight subType 5 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	8500050868440218330
+twlight subType 5 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	12364153862894470962
+twlight subType 5 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	8926020289678274113
+twlight subType 5 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	3781876464414979038
+twlight subType 5 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	8926020289678274113
+twlight subType 5 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	3781876464414979038
+twlight subType 5 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	1788176344487949654
+twlight subType 5 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	7445348334806072079
+twlight subType 5 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	1788176344487949654
+twlight subType 5 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	7445348334806072079
+twlight subType 5 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3529158331081818527
+twlight subType 5 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8841129448562596982
+twlight subType 5 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3529158331081818527
+twlight subType 5 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8841129448562596982
+twlight subType 5 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	4865687427248128194
+twlight subType 5 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	9420882924649282329
+twlight subType 5 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	4865687427248128194
+twlight subType 5 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	9420882924649282329
 twlight subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3521674037270230807
 twlight subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	15150703598239150419
 twlight subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3521674037270230807
@@ -18789,6 +18837,22 @@ twlight subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 
 twlight subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	18133734983011287379
 twlight subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	2610746937816913875
 twlight subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	18133734983011287379
+twlight subType 4 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	13865881578604448737
+twlight subType 4 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	7659042660779693965
+twlight subType 4 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	13865881578604448737
+twlight subType 4 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	7659042660779693965
+twlight subType 4 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	16087017301347744628
+twlight subType 4 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	13264403022235792478
+twlight subType 4 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	16087017301347744628
+twlight subType 4 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	13264403022235792478
+twlight subType 5 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	14599322495242284024
+twlight subType 5 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	17377872833597095442
+twlight subType 5 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	14599322495242284024
+twlight subType 5 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	17377872833597095442
+twlight subType 5 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	6510133752170442699
+twlight subType 5 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	17977243369742128287
+twlight subType 5 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	6510133752170442699
+twlight subType 5 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	17977243369742128287
 warp3 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	4598751451867240325
 warp3 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	4395292456433381021
 warp3 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	4598751451867240325
@@ -19813,3 +19877,163 @@ windForceMirror subType 99 owner none position 12345.5/13579.25/260.5 angle -17/
 windForceMirror subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	4553359377083922090
 windForceMirror subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	12590383625545144944
 windForceMirror subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	4553359377083922090
+windSpin03 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	4985363723374744604
+windSpin03 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	13892326987738566751
+windSpin03 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	4985363723374744604
+windSpin03 subType 0 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	13892326987738566751
+windSpin03 subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	15542125357015948101
+windSpin03 subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	14397425321513935146
+windSpin03 subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	15542125357015948101
+windSpin03 subType 0 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	14397425321513935146
+windSpin03 subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	18286782171223368440
+windSpin03 subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	5047757454956998222
+windSpin03 subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	18286782171223368440
+windSpin03 subType 0 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	5047757454956998222
+windSpin03 subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	13326599065938135265
+windSpin03 subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	231904500609819671
+windSpin03 subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	13326599065938135265
+windSpin03 subType 0 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	231904500609819671
+windSpin03 subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	15084082579748306980
+windSpin03 subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	13694397210494907910
+windSpin03 subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	15084082579748306980
+windSpin03 subType 0 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	13694397210494907910
+windSpin03 subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	10144558399159113951
+windSpin03 subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	17177158286681523521
+windSpin03 subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	10144558399159113951
+windSpin03 subType 0 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	17177158286681523521
+windSpin03 subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	9486355267846798713
+windSpin03 subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	13543716623914565230
+windSpin03 subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	9486355267846798713
+windSpin03 subType 1 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	13543716623914565230
+windSpin03 subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	4078448044628708586
+windSpin03 subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	11570007417159799229
+windSpin03 subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	4078448044628708586
+windSpin03 subType 1 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	11570007417159799229
+windSpin03 subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	10808579504327836425
+windSpin03 subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	3611995037278962935
+windSpin03 subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	10808579504327836425
+windSpin03 subType 1 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	3611995037278962935
+windSpin03 subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	16979567736685956678
+windSpin03 subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	15838476844105661684
+windSpin03 subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	16979567736685956678
+windSpin03 subType 1 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	15838476844105661684
+windSpin03 subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	5428792231175018503
+windSpin03 subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	8635957765518706593
+windSpin03 subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	5428792231175018503
+windSpin03 subType 1 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	8635957765518706593
+windSpin03 subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	3166888396190068178
+windSpin03 subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	5875342601518949340
+windSpin03 subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	3166888396190068178
+windSpin03 subType 1 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	5875342601518949340
+windSpin03 subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	9618134830807496586
+windSpin03 subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	10059998020747417817
+windSpin03 subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	9618134830807496586
+windSpin03 subType 2 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	10059998020747417817
+windSpin03 subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	6225873072404529251
+windSpin03 subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	1351537291891278484
+windSpin03 subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	6225873072404529251
+windSpin03 subType 2 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	1351537291891278484
+windSpin03 subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3076254199371144906
+windSpin03 subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	13219523891366929244
+windSpin03 subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3076254199371144906
+windSpin03 subType 2 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	13219523891366929244
+windSpin03 subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	5132829482259923283
+windSpin03 subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	17452983618555059493
+windSpin03 subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	5132829482259923283
+windSpin03 subType 2 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	17452983618555059493
+windSpin03 subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	168102632447186242
+windSpin03 subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	11961791323058128472
+windSpin03 subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	168102632447186242
+windSpin03 subType 2 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	11961791323058128472
+windSpin03 subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	16370757061075262413
+windSpin03 subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	8113059046286445251
+windSpin03 subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	16370757061075262413
+windSpin03 subType 2 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	8113059046286445251
+windSpin03 subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	574821499968704215
+windSpin03 subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	2800278303097618904
+windSpin03 subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	574821499968704215
+windSpin03 subType 3 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	2800278303097618904
+windSpin03 subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	4694727552861624320
+windSpin03 subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	17489297372842366335
+windSpin03 subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	4694727552861624320
+windSpin03 subType 3 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	17489297372842366335
+windSpin03 subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	12510383824607566579
+windSpin03 subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	3735408400452685293
+windSpin03 subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	12510383824607566579
+windSpin03 subType 3 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	3735408400452685293
+windSpin03 subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	3402941478241684592
+windSpin03 subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	11229769934035431226
+windSpin03 subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	3402941478241684592
+windSpin03 subType 3 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	11229769934035431226
+windSpin03 subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	6728654470638381885
+windSpin03 subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	15663378876295161211
+windSpin03 subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	6728654470638381885
+windSpin03 subType 3 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	15663378876295161211
+windSpin03 subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	2651465658797294840
+windSpin03 subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	13675809200573124422
+windSpin03 subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	2651465658797294840
+windSpin03 subType 3 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	13675809200573124422
+windSpin03 subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	3979421321142956730
+windSpin03 subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	16168422379249798921
+windSpin03 subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	3979421321142956730
+windSpin03 subType 99 owner none scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	16168422379249798921
+windSpin03 subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	9694993083486629129
+windSpin03 subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	12219742607084835490
+windSpin03 subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	9694993083486629129
+windSpin03 subType 99 owner none scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	12219742607084835490
+windSpin03 subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	15062924391740917338
+windSpin03 subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	17353016101842921868
+windSpin03 subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	15062924391740917338
+windSpin03 subType 99 owner hero scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	17353016101842921868
+windSpin03 subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	11716179705721148981
+windSpin03 subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	8961015954929656383
+windSpin03 subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	11716179705721148981
+windSpin03 subType 99 owner hero scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	8961015954929656383
+windSpin03 subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	9542509743153724594
+windSpin03 subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	10336760095459901928
+windSpin03 subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	9542509743153724594
+windSpin03 subType 99 owner monster scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	10336760095459901928
+windSpin03 subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	3188770192834591219
+windSpin03 subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	11337601688477079081
+windSpin03 subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	3188770192834591219
+windSpin03 subType 99 owner monster scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	11337601688477079081
+windSpin03 subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	11682630370060591251
+windSpin03 subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	17119287872307281948
+windSpin03 subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	11682630370060591251
+windSpin03 subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	17119287872307281948
+windSpin03 subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	12265661241114095444
+windSpin03 subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	9507154706463523187
+windSpin03 subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	12265661241114095444
+windSpin03 subType 0 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	9507154706463523187
+windSpin03 subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	12621394868385573812
+windSpin03 subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	5553824416066967963
+windSpin03 subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	12621394868385573812
+windSpin03 subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	5553824416066967963
+windSpin03 subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	9785835979260669901
+windSpin03 subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	14375847092933362198
+windSpin03 subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	9785835979260669901
+windSpin03 subType 1 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	14375847092933362198
+windSpin03 subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	4183392381198841477
+windSpin03 subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	439209483058280274
+windSpin03 subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	4183392381198841477
+windSpin03 subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	439209483058280274
+windSpin03 subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	9158374482625007494
+windSpin03 subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	689159151055646889
+windSpin03 subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	9158374482625007494
+windSpin03 subType 2 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	689159151055646889
+windSpin03 subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	10055130628108698062
+windSpin03 subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	16499528759837985481
+windSpin03 subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	10055130628108698062
+windSpin03 subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	16499528759837985481
+windSpin03 subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	7519163910581767463
+windSpin03 subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	3504690701948570932
+windSpin03 subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	7519163910581767463
+windSpin03 subType 3 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	3504690701948570932
+windSpin03 subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern A	6286920835963279253
+windSpin03 subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 1 pattern B	4390466299973653922
+windSpin03 subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern A	6286920835963279253
+windSpin03 subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 0 pkKey -1 skill 0/0/0 target -1 frameFactor 0.5 pattern B	4390466299973653922
+windSpin03 subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern A	17661882638168055200
+windSpin03 subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 1 pattern B	15523071929522217243
+windSpin03 subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern A	17661882638168055200
+windSpin03 subType 99 owner none position 12345.5/13579.25/260.5 angle -17/101/271 light 0.349999994/0.550000012/0.649999976 scale 1.75 pkKey 37 skill 41/43/47 target 53 frameFactor 0.5 pattern B	15523071929522217243

@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/PreviewSlots.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -88,6 +89,7 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
         if (!o->Live)
         {
             o->Live = true;
+            Render::Effects::PreviewSlots::Born(Render::Effects::PreviewSlots::List::Sprite, i);
             o->Type = Type;
             o->SubType = SubType;
             o->Owner = Owner;
@@ -215,6 +217,11 @@ void RenderSprites(BYTE byRenderOneMore)
     for (int i = 0; i < MAX_SPRITES; i++)
     {
         const OBJECT* o = &Sprites[i];
+        // A preview view's sprites are drawn by its view only (design L51).
+        if (!Render::Effects::PreviewSlots::Draws(Render::Effects::PreviewSlots::List::Sprite, i))
+        {
+            continue;
+        }
         if (byRenderOneMore == 1)
         {
             if (o->Position[2] > 350.f)

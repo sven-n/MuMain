@@ -131,7 +131,7 @@ bool CSystem::Create()
     m_pNewUIMng = new CManager;
 
     m_pNewChatLogWindow = new CChatLogWindow;
-    if (false == m_pNewChatLogWindow->Create(m_pNewUIMng, 6))
+    if (false == m_pNewChatLogWindow->Create(m_pNewUIMng))
         return false;
 
     m_pNewSystemLogWindow = new CSystemLogWindow;

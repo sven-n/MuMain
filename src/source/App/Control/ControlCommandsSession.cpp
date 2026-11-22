@@ -510,7 +510,7 @@ public:
                 return Status::Finished;
             }
 
-            SaveOptions();
+            SaveOptionsBeforeLeaving();
             SaveMacro();
             MUHelper::g_MuHelper.TriggerStop();
             g_pNewUIMng->ResetActiveUIObj();
@@ -655,7 +655,7 @@ std::string Quit(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "close the chaos machine window first");
     }
 
-    SaveOptionsIfInGame();
+    SaveOptionsBeforeLeaving();
 
     // `quit` is answered on every scene, including those where there is no
     // connection at all, so the goodbye needs the connection.

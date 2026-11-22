@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "GameLogic/KeyConfiguration/ChatBoxConfiguration.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Chat/MessageType.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -99,6 +100,10 @@ namespace mu::ui::window
     class CChatLogWindow : public CObject
     {
     public:
+        // The box a character starts with, until its stored key configuration says otherwise.
+        static constexpr int DefaultShowingLines = GameLogic::KeyConfiguration::ChatBox::DefaultLines;
+        static constexpr float DefaultBackAlpha = GameLogic::KeyConfiguration::ChatBox::DefaultAlpha;
+
         enum IMAGE_LIST
         {
             IMAGE_SCROLL_TOP = BITMAP_INTERFACE_NEW_CHATLOGWND_BEGIN,	//. newui_scrollbar_up.tga
@@ -188,6 +193,8 @@ namespace mu::ui::window
         // measure from them.
         float m_PanelBottomPx = 0.f;
         float m_PanelScale = 0.f;
+        // The shown lines when the resize drag started: its end saves the key configuration once if they changed.
+        size_t m_LinesAtResizeStart = 0;
         bool m_bLinesDirty = true;
         bool m_bFollowTail = true;
         // One-shot, set when the line list changes and consumed after RmlUi has
@@ -205,7 +212,7 @@ namespace mu::ui::window
         CChatLogWindow();
         ~CChatLogWindow() override;
 
-        bool Create(CManager* pNewUIMng, int nShowingLines = 6);
+        bool Create(CManager* pNewUIMng, int nShowingLines = DefaultShowingLines);
         void Release();
 
         void AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType = TYPE_ALL_MESSAGE);

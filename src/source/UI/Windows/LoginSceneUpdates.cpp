@@ -70,6 +70,11 @@ void ShowMessage(int messageCode)
     CSceneUICoordinator::Instance().PopUpMsgWin(messageCode);
 }
 
+void ShowMessageOnReturn(int messageCode)
+{
+    CSceneUICoordinator::Instance().PopUpMsgWinOnLoginScene(messageCode);
+}
+
 void CloseMessage()
 {
     CSceneUICoordinator::Instance().CloseMsgWin();

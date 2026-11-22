@@ -2,6 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/PreviewSlots.h"
+#include "Camera/CameraState.h"
 #include "Core/Utilities/Random.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
@@ -73,6 +75,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
         if (!o->Live)
         {
             o->Live = true;
+            Render::Effects::PreviewSlots::Born(Render::Effects::PreviewSlots::List::Particle, i);
             o->Type = Type;
             o->TexType = Type;
             o->SubType = SubType;
@@ -2023,11 +2026,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 break;
             case BITMAP_SPARK:
                 o->Scale = (float)(Random::Rand() % 4 + 4) * 0.1f;
-                if (o->SubType == 0 || o->SubType == 2 || o->SubType == 3 || o->SubType == 4 || o->SubType == 6 || o->SubType == 11
-                    || o->SubType == 13)
+                if (o->SubType == 0 || o->SubType == 2 || o->SubType == 3 || o->SubType == 4 || o->SubType == 6 ||
+                    o->SubType == 11 || o->SubType == 13 || o->SubType == 14)
                 {
                     o->LifeTime = Random::Rand() % 16 + 24;
-                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    const float turn = (float)(Random::Rand() % 360);
+                    // Phoenix Shot's sparks (subtype 14) all fly the way the caller turned them.
+                    o->Angle[2] = o->SubType == 14 ? Angle[2] : turn;
                     AngleMatrix(o->Angle, Matrix);
                     o->Gravity = (float)(Random::Rand() % 16 + 6);
                     Vector(0.f, (float)(Random::Rand() % 20 + 20) * 0.1f, 0.f, p);
@@ -2059,6 +2064,12 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Scale *= 1.6f;
                         VectorScale(p, 1.5f, p);
                         o->TexType = BITMAP_SPARK + 1;
+                    }
+                    else if (o->SubType == 14)
+                    {
+                        // Phoenix Shot's strike: bigger.
+                        constexpr float PhoenixSparkScale = 2.6f;
+                        o->Scale *= PhoenixSparkScale;
                     }
 
                     VectorRotate(p, Matrix, o->Velocity);
@@ -3880,8 +3891,10 @@ void MoveParticles()
     {
         PARTICLE* o = &Particles[i];
 
-        if (o->Live)
+        if (o->Live && Render::Effects::PreviewSlots::Moves(Render::Effects::PreviewSlots::List::Particle, i))
         {
+            const Render::Effects::PreviewSlots::MoveSoundScope previewSound(
+                Render::Effects::PreviewSlots::List::Particle, i);
             count++;
             o->LifeTime -= FPS_ANIMATION_FACTOR;
             if (o->LifeTime <= 0)
@@ -9302,8 +9315,18 @@ void DescribeParticle(const PARTICLE& particle, int i, float Width, float Height
     break;
     case BITMAP_SBUMB:
     {
-        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, 0.0f,
-                              o->Frame % 4 * 0.25f + 0.005f, 0.0f, 0.25f - 0.01f, 1.0f));
+        // Subtype 1 (Phoenix Shot's blows) is drawn nearer the eye, so the body it lands on
+        // doesn't hide it: along the view axis of the pass drawing it (g_Camera.Matrix, which
+        // RenderSprite faces the quad with; its third row points back at the eye).
+        constexpr float BlowNearer = 70.f;
+        vec3_t at;
+        VectorCopy(o->Position, at);
+        if (o->SubType == 1)
+        {
+            VectorMA(at, BlowNearer, g_Camera.Matrix[2], at);
+        }
+        out.DrawSprite(Sprite(o->TexType, at, Width * 0.25f, Height, o->Light, 0.0f, o->Frame % 4 * 0.25f + 0.005f,
+                              0.0f, 0.25f - 0.01f, 1.0f));
     }
     break;
     case BITMAP_DAMAGE1:
@@ -9334,7 +9357,8 @@ void DescribeParticle(const PARTICLE& particle, int i, float Width, float Height
 
 void RenderParticles(BYTE byRenderOneMore)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    // As RenderSprites: without the option window (a test, the editor's preview before the UI) every effect draws.
+    if (g_pOption && !g_pOption->GetRenderAllEffects())
     {
         return;
     }
@@ -9347,7 +9371,8 @@ void RenderParticles(BYTE byRenderOneMore)
     static Entry drawOrder[MAX_PARTICLES];
     static Entry drawOrderScratch[MAX_PARTICLES];
 
-    const bool cullOffscreen = !IsEffectCullingDisabledDebug();
+    // A preview view's capture draws its particles whatever the world's camera sees (design 7a).
+    const bool cullOffscreen = !IsEffectCullingDisabledDebug() && !Render::Effects::PreviewSlots::IsCapturing();
     const bool sortDraws = GameConfig::GetInstance().GetSortParticleDraws();
     std::size_t drawCount = MAX_PARTICLES;
     if (sortDraws)
@@ -9361,7 +9386,7 @@ void RenderParticles(BYTE byRenderOneMore)
     {
         const int i = sortDraws ? drawOrder[drawIndex].particleIndex : static_cast<int>(drawIndex);
         const PARTICLE* o = &Particles[i];
-        if (o->Live)
+        if (o->Live && Render::Effects::PreviewSlots::Draws(Render::Effects::PreviewSlots::List::Particle, i))
         {
             if (byRenderOneMore == 1)
             {

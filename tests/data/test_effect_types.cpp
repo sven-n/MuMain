@@ -785,8 +785,8 @@ TEST_CASE("The effect type catalogue keeps the creation values of effects, sorte
         effects.begin(), effects.end(), [](const EffectTypeEntry& entry) { return entry.create.has_value(); }));
     // The 32 types of the 22 rows that EffectRegistry.cpp held as C++ until
     // FX1.2, the 8 types whose creation cases FX1.3 moved, the 28 of FX1.4, the
-    // 41 of FX1.5 and the 12 of FX1.5b.
-    CHECK(withCreateParams == 121);
+    // 41 of FX1.5 and the 12 of FX1.5b; Phoenix Shot's rig and blades.
+    CHECK(withCreateParams == 123);
 
     EffectTypeCatalogue catalogue;
     catalogue.Build(EffectKind::Effect, effects);

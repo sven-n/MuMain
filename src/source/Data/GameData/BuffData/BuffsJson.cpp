@@ -2,8 +2,13 @@
 
 #include "BuffsJson.h"
 
+#include "BuffAttributes.h"
+
 #include "Core/Globals/_define.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
+#include "Data/GameData/ItemData/ItemOptionEffects.h"
+#include "Data/GameData/ItemData/ItemOptionValueJson.h"
+#include "Data/GameData/ItemData/ItemOptionsJson.h"
 
 #include <map>
 #include <optional>
@@ -28,26 +33,28 @@ constexpr const char* Group = "group";
 constexpr const char* DisplayName = "displayName";
 constexpr const char* Description = "description";
 constexpr const char* Item = "item";
+constexpr const char* Duration = "duration";
+constexpr const char* PowerUps = "powerUps";
+constexpr const char* Attribute = "attribute";
 constexpr const char* Family = "family";
 constexpr const char* Tier = "tier";
 constexpr const char* Hidden = "hidden";
 constexpr const char* CancelSkill = "cancelSkill";
-constexpr const char* AttackDamageBonus = "attackDamageBonus";
-constexpr const char* DefenseBonus = "defenseBonus";
-constexpr const char* Base = "base";
-constexpr const char* LevelDivisor = "levelDivisor";
 } // namespace Keys
 
 constexpr const char* BuffKindName = "buff";
 constexpr const char* DebuffKindName = "debuff";
+// The longest duration a buff can have, a year: the vitality items last 30 days.
+constexpr int MaxDurationSeconds = 365 * 24 * 60 * 60;
 // A buff's group is a byte, as in the old BuffEffect files.
 constexpr int MaxBuffGroup = 255;
 
 const Items::Json::KeySet EntryKeys{
-    Keys::Number, Keys::Name, Keys::Kind,   Keys::Group,       Keys::DisplayName,       Keys::Description, Keys::Item,
-    Keys::Family, Keys::Tier, Keys::Hidden, Keys::CancelSkill, Keys::AttackDamageBonus, Keys::DefenseBonus};
+    Keys::Number,   Keys::Name,     Keys::Kind,   Keys::Group, Keys::DisplayName, Keys::Description, Keys::Item,
+    Keys::Duration, Keys::PowerUps, Keys::Family, Keys::Tier,  Keys::Hidden,      Keys::CancelSkill};
 const Items::Json::KeySet ItemKeys{Keys::Group, Keys::Number};
-const Items::Json::KeySet LevelBonusKeys{Keys::Base, Keys::LevelDivisor};
+const Items::Json::KeySet PowerUpKeys{Keys::Attribute, Items::ItemOptionAddKeys[0], Items::ItemOptionAddKeys[1],
+                                      Items::ItemOptionAddKeys[2]};
 
 void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const std::string& source,
               const std::string& field, const std::string& message)
@@ -74,9 +81,9 @@ public:
                ReadKind(json, buff.kind) && ReadWhole(json, Keys::Group, 0, MaxBuffGroup, buff.group) &&
                ReadText(json, Keys::DisplayName, true, buff.displayName) &&
                ReadText(json, Keys::Description, false, buff.description) && ReadItem(json, buff.item) &&
-               ReadFamily(json, buff) && ReadHidden(json, buff.hidden) && ReadCancelSkill(json, buff.cancelSkill) &&
-               ReadLevelBonus(json, Keys::AttackDamageBonus, buff.attackDamageBonus) &&
-               ReadLevelBonus(json, Keys::DefenseBonus, buff.defenseBonus) && WarnUnknown(json, EntryKeys, "");
+               ReadDuration(json, buff.duration) && ReadPowerUps(json, buff.powerUps) && ReadFamily(json, buff) &&
+               ReadHidden(json, buff.hidden) && ReadCancelSkill(json, buff.cancelSkill) &&
+               WarnUnknown(json, EntryKeys, "");
     }
 
 private:
@@ -170,25 +177,104 @@ private:
         return WarnUnknown(*field, ItemKeys, Keys::Item);
     }
 
-    bool ReadLevelBonus(const OrderedJson& json, const char* key, std::optional<BuffLevelBonus>& bonus)
+    // A value of the item options' format at `field`, its numbers up to `maximum`; false when it has a fatal problem.
+    bool ReadValue(const OrderedJson& json, const std::string& field, Items::ItemOptionValue& value,
+                   int maximum = Items::Json::MaxOptionValue)
     {
-        const auto field = json.find(key);
+        bool valid = true;
+        Items::Json::ReadOptionValue(
+            json, field, value,
+            [&](const std::string& errorField, const std::string& message)
+            {
+                AddFatal(errorField, message);
+                valid = false;
+            },
+            [&](const std::string& unknown, const std::string& message)
+            { AddIssue(m_issues, ItemDataIssueSeverity::Warning, m_source, unknown, message); }, maximum);
+        if (valid && value.isList)
+        {
+            // A list holds one value per item level from level 1, and a buff has no item level.
+            AddFatal(field, "its values must be one number, not a list: a buff has no item level");
+            return false;
+        }
+        return valid;
+    }
+
+    bool ReadDuration(const OrderedJson& json, std::optional<Items::ItemOptionValue>& duration)
+    {
+        const auto field = json.find(Keys::Duration);
         if (field == json.end())
         {
             return true;
         }
-        if (!field->is_object())
-        {
-            return Fail(key, "must be an object with base and levelDivisor");
-        }
-        BuffLevelBonus value;
-        if (!ReadWhole(*field, key, Keys::Base, 0, BuffLevelBonus::MaxParameter, value.base) ||
-            !ReadWhole(*field, key, Keys::LevelDivisor, 1, BuffLevelBonus::MaxParameter, value.levelDivisor))
+        Items::ItemOptionValue value;
+        if (!ReadValue(*field, BuffField(m_index, Keys::Duration), value, MaxDurationSeconds))
         {
             return false;
         }
-        bonus = value;
-        return WarnUnknown(*field, LevelBonusKeys, key);
+        if (!value.per.empty())
+        {
+            // A computed value stops at what an option slot holds (65535 s, about 18 hours), below the longest
+            // duration, and a countdown can't follow the hero's attributes anyway.
+            return Fail(Keys::Duration, "must be a number of seconds without per terms");
+        }
+        duration = std::move(value);
+        return true;
+    }
+
+    bool ReadPowerUps(const OrderedJson& json, std::vector<BuffPowerUp>& powerUps)
+    {
+        const auto field = json.find(Keys::PowerUps);
+        if (field == json.end())
+        {
+            return true;
+        }
+        if (!field->is_array() || field->empty())
+        {
+            return Fail(Keys::PowerUps, R"(must be a list: [{"attribute": "defenseBase", "add": {"values": 60}}])");
+        }
+        for (size_t index = 0; index < field->size(); ++index)
+        {
+            const std::string key = std::string(Keys::PowerUps) + "[" + std::to_string(index) + "]";
+            const OrderedJson& entry = (*field)[index];
+            if (!entry.is_object())
+            {
+                return Fail(key, R"(must be an object: {"attribute": "defenseBase", "add": {"values": 60}})");
+            }
+            BuffPowerUp powerUp;
+            if (!Items::Json::ReadNameField(entry, Keys::Attribute, BuffField(m_index, key), powerUp.attribute,
+                                            [this](const std::string& errorField, const std::string& message)
+                                            { AddFatal(errorField, message); }))
+            {
+                return false;
+            }
+            const OrderedJson* value = nullptr;
+            for (size_t way = 0; way < Items::ItemOptionAddKeys.size(); ++way)
+            {
+                if (const auto found = entry.find(Items::ItemOptionAddKeys[way]); found != entry.end())
+                {
+                    if (value != nullptr)
+                    {
+                        return Fail(key, "needs exactly one of add, addFinal and percent");
+                    }
+                    value = &*found;
+                    powerUp.add = static_cast<Items::ItemOptionAdd>(way);
+                }
+            }
+            if (value == nullptr)
+            {
+                return Fail(key, "needs exactly one of add, addFinal and percent");
+            }
+            if (!ReadValue(*value,
+                           BuffField(m_index, key) + "." + Items::ItemOptionAddKeys[static_cast<size_t>(powerUp.add)],
+                           powerUp.value))
+            {
+                return false;
+            }
+            WarnUnknown(entry, PowerUpKeys, key);
+            powerUps.push_back(std::move(powerUp));
+        }
+        return true;
     }
 
     bool ReadFamily(const OrderedJson& json, BuffDefinition& buff)
@@ -240,14 +326,6 @@ private:
     std::vector<ItemDataIssue>& m_issues;
 };
 
-void WriteLevelBonus(OrderedJson& json, const char* key, const std::optional<BuffLevelBonus>& bonus)
-{
-    if (bonus)
-    {
-        json[key] = {{Keys::Base, bonus->base}, {Keys::LevelDivisor, bonus->levelDivisor}};
-    }
-}
-
 OrderedJson WriteEntry(const BuffDefinition& buff)
 {
     OrderedJson json = OrderedJson::object();
@@ -267,6 +345,23 @@ OrderedJson WriteEntry(const BuffDefinition& buff)
         item[Keys::Number] = buff.item->number;
         json[Keys::Item] = std::move(item);
     }
+    if (buff.duration)
+    {
+        json[Keys::Duration] = Items::Json::WriteOptionValue(*buff.duration);
+    }
+    if (!buff.powerUps.empty())
+    {
+        OrderedJson powerUps = OrderedJson::array();
+        for (const BuffPowerUp& powerUp : buff.powerUps)
+        {
+            OrderedJson entry = OrderedJson::object();
+            entry[Keys::Attribute] = powerUp.attribute;
+            entry[Items::ItemOptionAddKeys[static_cast<size_t>(powerUp.add)]] =
+                Items::Json::WriteOptionValue(powerUp.value);
+            powerUps.push_back(std::move(entry));
+        }
+        json[Keys::PowerUps] = std::move(powerUps);
+    }
     if (!buff.family.empty())
     {
         json[Keys::Family] = buff.family;
@@ -283,8 +378,6 @@ OrderedJson WriteEntry(const BuffDefinition& buff)
     {
         json[Keys::CancelSkill] = buff.cancelSkill;
     }
-    WriteLevelBonus(json, Keys::AttackDamageBonus, buff.attackDamageBonus);
-    WriteLevelBonus(json, Keys::DefenseBonus, buff.defenseBonus);
     return json;
 }
 } // namespace
@@ -370,6 +463,42 @@ void ValidateBuffs(std::span<const BuffDefinition> buffs, std::span<const size_t
         {
             AddIssue(issues, ItemDataIssueSeverity::Fatal, source, BuffField(entry, Keys::Kind),
                      "family " + buff.family + " has buffs and debuffs: its tiers are one buff");
+        }
+        if (buff.kind == BuffKind::Debuff && !buff.powerUps.empty())
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, source, BuffField(entry, Keys::PowerUps),
+                     "the character stats don't count a debuff's power-ups: a value raises its attribute, and the "
+                     "format has no decrease yet");
+        }
+        for (size_t index = 0; index < buff.powerUps.size(); ++index)
+        {
+            if (!IsBuffAttribute(buff.powerUps[index].attribute))
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Error, source,
+                         BuffField(entry,
+                                   std::string(Keys::PowerUps) + "[" + std::to_string(index) + "]." + Keys::Attribute),
+                         buff.powerUps[index].attribute + " is no attribute a buff can raise (BuffAttributes.h)");
+            }
+            if (buff.powerUps[index].add != Items::ItemOptionAdd::Add)
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Warning, source,
+                         BuffField(entry, std::string(Keys::PowerUps) + "[" + std::to_string(index) + "]"),
+                         std::string(Items::ItemOptionAddKeys[static_cast<size_t>(buff.powerUps[index].add)]) +
+                             " is read but the client adds every buff value as add: the value counts as a flat bonus");
+            }
+            const std::vector<Items::ItemOptionTerm>& terms = buff.powerUps[index].value.per;
+            for (size_t term = 0; term < terms.size(); ++term)
+            {
+                if (Items::FindItemOptionTermAttribute(terms[term].attribute) == Items::ItemOptionTermAttribute::Unread)
+                {
+                    AddIssue(
+                        issues, ItemDataIssueSeverity::Warning, source,
+                        BuffField(entry, std::string(Keys::PowerUps) + "[" + std::to_string(index) + "]." +
+                                             Items::ItemOptionAddKeys[static_cast<size_t>(buff.powerUps[index].add)] +
+                                             ".per[" + std::to_string(term) + "].attribute"),
+                        "the client reads no hero attribute " + terms[term].attribute + ": the term adds nothing");
+                }
+            }
         }
     }
 }

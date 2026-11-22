@@ -12,6 +12,8 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "GameLogic/KeyConfiguration/ChatBoxConfiguration.h"
+#include "GameLogic/KeyConfiguration/KeyConfigurationGate.h"
 #include "GameLogic/Skills/SkillHotkeyConfiguration.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/PlayerBodyModels.h"
@@ -31,6 +33,8 @@
 #include "GameLogic/Events/Event.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/HUD/HudUpdates.h"
+#include "UI/Options/OptionUpdates.h"
 #include "UI/Dialogs/HelpWindow.h"
 #include "Camera/CameraMove.h"
 #include "GameLogic/Quests/QuestMng.h"
@@ -47,6 +51,9 @@
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/DataHandler/BuffData/BuffStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
+#include "Data/DataHandler/MapData/WarpStorage.h"
+#include "I18N/All.h"
+#include "Data/GameData/MapData/WarpDatabase.h"
 #include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
@@ -60,8 +67,9 @@
 #include "Network/Server/SocketSystem.h"
 #include "Render/Text/CUIRenderText.h"
 
+#include <chrono>
+
 ///////////////////////////////////////////
-extern BOOL g_bUseChatListBox;
 ///////////////////////////////////////////
 
 void OpenPlayers()
@@ -366,6 +374,19 @@ static void OpenMapData()
     }
 }
 
+// Loads the warp list of the M window (Data/Maps/Warps.json), named in the UI
+// language, which they follow, as the monster names do; errors stop the game.
+static void OpenWarpData()
+{
+    std::string errorMessage;
+    if (!Data::Maps::LoadWarps(errorMessage))
+    {
+        StopOnDataError("Warp list error", errorMessage);
+    }
+    SEASON3B::CMoveCommandData::GetInstance()->SetDataFileWarps(g_WarpDatabase.GetList(), I18N::GetCurrentLocale());
+    SEASON3B::CMoveCommandData::GetInstance()->FollowUiLanguage();
+}
+
 // Loads the buffs (Data/Buffs/Buffs.json): their names, texts and the buff
 // strip's rules; errors stop the game.
 static void OpenBuffData()
@@ -426,7 +447,7 @@ static void OpenPartModel(int modelType)
 // Models that are drawn for items, but are no item models themselves:
 // event models, the level 14/15 armor decorations and the parts of the
 // Rage Fighter weapons.
-static void OpenItemEffectModels()
+static void OpenEffectModels()
 {
     gLoadData.AccessModel(MODEL_EVENT + 18, L"Data\\Item\\", L"LifeStoneItem");
 
@@ -493,7 +514,7 @@ void PrepareGrandSoulPantsClothMesh()
                   BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
 }
 
-// Loads the looks that are data (Data/Effects/RenderStyles.json and ItemEffects.json), before the item models are
+// Loads the looks that are data (Data/Effects/RenderStyles.json and Effects.json), before the item models are
 // opened, which check the names of their looks.
 static void OpenRenderStyleData()
 {
@@ -502,9 +523,9 @@ static void OpenRenderStyleData()
     {
         StopOnDataError("Render style data error", errorMessage);
     }
-    if (!Data::Looks::LoadItemEffects(errorMessage))
+    if (!Data::Looks::LoadEffects(errorMessage))
     {
-        StopOnDataError("Item effect data error", errorMessage);
+        StopOnDataError("Effect data error", errorMessage);
     }
 }
 
@@ -517,14 +538,14 @@ void OpenItems()
         Data::Items::ModelLoader::OpenModels({Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
         PrepareGrandSoulPantsClothMesh();
     }
-    OpenItemEffectModels();
+    OpenEffectModels();
 
     LoadBitmap(L"Item\\NCcape.tga", BITMAP_NCCAPE, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\monk_manto01.TGA", BITMAP_MANTO01, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\monke_manto.TGA", BITMAP_MANTOE, GL_LINEAR, GL_REPEAT);
 }
 
-static void OpenItemEffectModelTextures()
+static void OpenEffectModelTextures()
 {
     gLoadData.OpenTexture(MODEL_EVENT + 11, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 12, L"Item\\");
@@ -553,7 +574,7 @@ static void OpenItemEffectModelTextures()
 }
 
 // Textures that the effect code of items draws with.
-void OpenItemEffectTextures()
+void OpenEffectTextures()
 {
     LoadBitmap(L"Item\\msword01_r.jpg", BITMAP_3RDWING_LAYER, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\rollofpaper_R.jpg", BITMAP_ROOLOFPAPER_EFFECT_R, GL_LINEAR);
@@ -583,9 +604,9 @@ void OpenItemTextures()
     // Before the effect textures, like the old code: a model texture that is
     // also an effect bitmap below stays a texture of its own, with its filter.
     Data::Items::ModelLoader::OpenTextures();
-    OpenItemEffectModelTextures();
+    OpenEffectModelTextures();
     gLoadData.OpenTexture(MODEL_ARROW, L"Item\\Bow\\");
-    OpenItemEffectTextures();
+    OpenEffectTextures();
 }
 
 void DeleteNpcs()
@@ -1434,6 +1455,8 @@ void OpenSounds()
     LoadGameSound(SOUND_RAGESKILL_DRAGONKICK_ATTACK);
     LoadGameSound(SOUND_RAGESKILL_BUFF_1);
     LoadGameSound(SOUND_RAGESKILL_BUFF_2);
+    LoadGameSound(SOUND_RAGESKILL_PHOENIXSHOT);
+    LoadGameSound(SOUND_RAGESKILL_PHOENIXSHOT_ATTACK);
 }
 
 bool OpenFont()
@@ -1475,6 +1498,7 @@ void SaveMacro()
         fwprintf(fp, L"%ls\n", MacroText[i]);
     }
     fclose(fp);
+    Core::Platform::UserFilesChanged();
 }
 
 void OpenMacro()
@@ -1532,11 +1556,9 @@ void SaveOptions()
     options[22] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_W) - ITEM_POTION) & 0xFF);
     options[23] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_E) - ITEM_POTION) & 0xFF);
 
-    BYTE wChatListBoxSize = g_pChatListBox->GetNumberOfLines(g_pChatListBox->GetCurrentMsgType()) / 3;
-    if (g_bUseChatListBox == FALSE)
-        wChatListBoxSize = 0;
-    BYTE wChatListBoxBackAlpha = g_pChatListBox->GetBackAlpha() * 10;
-    options[24] = (((wChatListBoxSize << 4) & 0xF0) | (wChatListBoxBackAlpha & 0x0F)) & 0xFF;
+    // The box's shown lines, not the number of messages in the log.
+    options[24] = GameLogic::KeyConfiguration::ChatBox::Encode(
+        static_cast<int>(g_pChatListBox->GetNumberOfShowingLines()), g_pChatListBox->GetBackAlpha());
     options[25] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_R) - ITEM_POTION) & 0xFF);
 
     options[26] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_Q);
@@ -1549,17 +1571,58 @@ void SaveOptions()
 
 namespace
 {
-bool s_keyConfigurationReceived = false;
+GameLogic::KeyConfiguration::KeyConfigurationGate s_keyConfigurationGate;
+
+bool IsInGame()
+{
+    return SocketClient != nullptr && g_bGameServerConnected && SceneFlag == MAIN_SCENE;
+}
+} // namespace
+
+void SetKeyConfigurationReceived(bool received, bool everythingRestored)
+{
+    if (received)
+    {
+        s_keyConfigurationGate.Received(everythingRestored);
+    }
+    else
+    {
+        s_keyConfigurationGate.Reset();
+    }
 }
 
-void SetKeyConfigurationReceived(bool received)
+void ResetKeyConfiguration()
 {
-    s_keyConfigurationReceived = received;
+    UI::Hud::ClearSkillHotkeys();
+    UI::Hud::ClearItemHotkeys();
+    UI::Options::ResetForNewCharacter();
+    SetKeyConfigurationReceived(false);
+}
+
+void SetJoinedMapServer()
+{
+    s_keyConfigurationGate.Joined(std::chrono::steady_clock::now());
 }
 
 void SaveOptionsIfInGame()
 {
-    if (SocketClient != nullptr && g_bGameServerConnected && SceneFlag == MAIN_SCENE && s_keyConfigurationReceived)
+    if (IsInGame() && s_keyConfigurationGate.RequestSave(std::chrono::steady_clock::now()))
+    {
+        SaveOptions();
+    }
+}
+
+void SaveOptionsBeforeLeaving()
+{
+    if (IsInGame() && s_keyConfigurationGate.MaySaveNow(std::chrono::steady_clock::now()))
+    {
+        SaveOptions();
+    }
+}
+
+void SaveOptionsIfDue()
+{
+    if (IsInGame() && s_keyConfigurationGate.TakeDueSave(std::chrono::steady_clock::now()))
     {
         SaveOptions();
     }
@@ -1828,6 +1891,7 @@ static void OpenBasicDataStep1()
     LoadBitmap(L"Effect\\joint_sword_red.jpg", BITMAP_BLUR + 11, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\motion_blur_r2.jpg", BITMAP_BLUR + 12, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\motion_blur_r3.jpg", BITMAP_BLUR + 13, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Effect\\SwordEffor2_blur.jpg", BITMAP_BLUR + 14, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\blur02.jpg", BITMAP_BLUR2, GL_NEAREST, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\lightning2.jpg", BITMAP_LIGHTNING + 1, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\Thunder01.jpg", BITMAP_ENERGY, GL_LINEAR, GL_REPEAT);
@@ -2131,6 +2195,7 @@ static void OpenBasicDataStep5()
 {
     OpenItemTextures();
     Render::Items::Looks::PrepareTextures();
+    Render::Items::Looks::LogUnknownBoneThingTypes();
 }
 
 static void OpenBasicDataStep6()
@@ -2163,8 +2228,7 @@ static void OpenBasicDataStep9()
 
     OpenItemDataAndShowModelProblems();
 
-    mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-    SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
+    OpenWarpData();
 
     OpenMonsterData();
     OpenMapData();

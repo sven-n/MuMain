@@ -98,6 +98,15 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L48 | The glow values on the ground (Q-L36, 2026-11-08) | **They pulse everywhere.** `ItemObjectAttribute` sets the glow values of L27 on every drawing of a held, worn or inventory item, but once at the drop for a ground item, so a pulsing or random glow freezes on the ground at the value of the drop. As item values before the drawing (item effects, L27) they apply on every drawing, so ground items pulse like held ones: a quirk fix in its own commit, with the recorder's expected differences and an in-game before/after (L16). Rejected: a condition that keeps the drop's value on the ground, and leaving the 39 item types in code for a later step. |
 | L49 | Item values before the shadow (Q-L37, 2026-11-08) | **The shadow pass applies the item effect's values first.** A held item's shadow (`RenderPartObjectEffect`, `RenderBodyShadow`) reads the hidden mesh before the item effect runs; with the hidden meshes of L27 in an item effect (the Rune Blade, Elemental Mace and Elemental Shield hide mesh 2, the Dragon Spear mesh 1), the shadow pass applies the item values first, so their shadows stay as today. Items whose item effect hides a mesh by level (the siege potion, the contract, the life stone) then hide it in a shadow too; they cast none in play. Rejected: keeping the four hidden meshes in `ItemObjectAttribute`. |
 | L50 | Where part models are edited (Q-L38, 2026-11-10) | **In the Item Model window's list.** A group "Part models" after the item groups lists the 11 entries of `PartModels.json` (L28); picking one shows a note on where the game draws it, its Model file (file and texture folders), the mesh list and its render style with "Open in Style Editor", edited like a shared model, with the preview. It has no inventory, ground, glow or item effect. Rejected: listing part models with a look's users in the Style Editor only (file and folders hand-edited), and no editor in pull request 3. |
+| L51 | How the preview shows things on bones (Q-L39, 2026-11-11; FX1.7c) | **The game's own effect lists, marked for a preview.** The things a previewed item effect creates (sprites, particles, lightning, effects) are made by the game's own create calls into its effect lists and moved by its own update, so they behave as in the game. In editor builds each of them carries a mark of the view it belongs to: the world's draw loops (`RenderEffects`, `RenderParticles`, `RenderJoints`, `RenderSprites`, `RenderAfterEffects`) skip marked ones, `CullEffects` counts them as seen, and the view's capture draws only its own, with the view's camera. Not chosen: a copy of the lists per view swapped in each frame (costly, random sequences to save), sprites only (lightning, particles and the Storm's thunder missing), and showing the item on the character in the world (no side-by-side preview). |
+| L52 | Which preview views show things on bones (Q-L40, 2026-11-11) | **Each view its own.** Every view of the Style Editor's preview (as applied, as edited) keeps its own copy of the item object with its own bones, creates its own things from its own look and draws only those, so an edited look is seen next to the one applied. Two views use about twice the slots of the game's effect lists. Not chosen: only the edited view (no comparison), and a checkbox per view to turn them off. |
+| L53 | Where the preview's item stands (Q-L41, 2026-11-11) | **At the player's character.** The hidden preview item of each view is placed at the character's position, as the effect browser's world preview places its owner, so what its things read from the world (ground height, light) is real, as for the item in the game; the world does not draw them (L51). Not chosen: the map's origin corner (odd ground reads), and high above the character (falling particles fall far). |
+| L54 | Things on bones while the preview's time stops (Q-L42, 2026-11-11) | **They stop too.** While a view's time is stopped, the game's update skips that view's things and the view creates none; sprites and lights, made from the clock each frame, follow the slider; moving the slider does not wind lightning or particles back. Not chosen: running on with the game's time, and hiding them while time is stopped. |
+| L55 | How things on bones name their bones (Q-L43, 2026-11-11) | **One entry, a list of bones.** An entry of an item effect's things on bones (`"onBones"`) names its bones as a list (`"bones": [22, 23, 25]`), and lightning as a list of pairs, from and to (`"between": [[30, 22], [29, 21]]`); the entry's values hold for each of them. The 11 looks take about 25 entries. Not chosen: one entry per bone (about 200 entries), and named bone groups in the look (no two entries share a list today). |
+| L56 | Chances of things on bones (Q-L44, 2026-11-11) | **A chance per entry, and groups that share one.** A chance is `{"oneIn": N}`, once in N frames at the game's reference frame rate (`rand_fps_check`), or with `"draw": "plain"` the other draw (`Random::Rand() % N == 0`), as the monster sounds write it; `"per"` says whether it rolls for each bone or pair, or once for the entry. A `"together"` group holds bones (or pairs) and a chance that its things share, so the Wings of Darkness' two lightnings strike together; a thing inside can roll again, as the Storm's thunder does. All 11 looks are copied exactly. Not chosen: a chance per bone only (two looks change), and named chances in the look. |
+| L57 | The Devil's Key's and Invitation's sparks (Q-L45, 2026-11-11) | **On the bones, fixed.** The two items placed their sparks at bones without the model's scale (`SpawnDevilsKey`, `SpawnDevilsInvitation`), about a quarter farther from the item's center than the bones on the ground (scale 0.8). Their entries place them on the scaled bones like every other thing on bones; the old position is an expected difference with an in-game before and after, as the quirks of L16. Not chosen: an entry flag `"unscaledBones"` only these two would use. |
+| L58 | Picking bones in the Style Editor (Q-L46, 2026-11-11) | **Click them in the preview.** An entry's bones are number fields; the bone under the mouse in the list is ringed in the preview with its number, and "Show bones" draws every bone of the previewed model as a dot with its number on hover. A pick mode adds or removes a bone by clicking its dot; lightning pairs are picked by clicking two bones, from and to. Not chosen: the marks without picking, and numbers only. |
+| L59 | The item's value times a number (Q-L47, 2026-11-11) | **`{"itemTimes": 1.5}`.** A layer's opacity, glow strength or scroll can be the item's value times a fixed number, as the Cursed Castle Water glows at 1.5 and 0.25 of the item's; the Style Editor's "the item's" gets a factor field. Not chosen: a wave from 1.5 to 1.5 times the item's (a wave that doesn't wave), and keeping its drawing in code. |
 
 ## Current state
 
@@ -549,6 +558,80 @@ unknown glow color (L30).
 - **Data Checks** (L23, L24): the new areas Render styles and Item effects;
   the graphics area renamed Graphics look.
 
+### 7a. The live preview of things on bones (FX1.7c, step 2)
+
+From the survey of 2026-11-11 (main `9b50e946a`) and L51 to L54. In editor
+builds only; the game's own code paths stay as they are.
+
+- **Where it runs in the frame.** Sprites live one update: `UpdateActiveScene`
+  clears them first (`SceneManager.cpp:487`), and the editor's previews are
+  recorded after the world's draw (`SceneManager.cpp:1241`). So each view's
+  item creates its things in a new editor hook inside the game's update,
+  after `ClearSprites` and the world's moves, from the view's own copy of the
+  item object and its own bones (L52), at the character's position (L53),
+  through the item effect's own `Render::Items::Looks::SpawnItemEffect`, not
+  the game's `SpawnPartObjectEffect`: a view shows the look's things only, not
+  the sparks the game adds to sparking event models. The editor's own
+  `Update` runs before `ClearSprites` and is too early.
+- **The mark.** Each slot of the effect, particle, joint and sprite lists
+  carries the view it belongs to (none for the game). The world's draw loops
+  skip marked slots; `CullEffects` counts a marked effect as seen, so its
+  children are created as in the game (`UpdateEffectModelEffects` creates them
+  only for effects the last cull saw). Particles carry no owner, so what a
+  spawn creates is found by comparing the lists before and after it. A slot keeps
+  its mark while its view keeps the thing in it; each create call takes the
+  mark off the slot it fills, so a thing the game creates in a slot a view's
+  thing just left (the game's own lightning of the same type) stays the
+  game's.
+- **The capture.** A view draws only its own slots, after its item, with the
+  view's camera put into `g_Camera` around it. The world's camera is kept in
+  a local copy, not with `SaveCameraPerspective`, whose one slot the game's
+  item windows (`ItemCamera`, `PhotoViewer`) use. The view draws with the
+  draw-time frustum tests of particles and lightning off, and with its own
+  sprite marks (the world's per-frame marks would hide sprites the world
+  drew).
+- **Time.** While a view's time is stopped, the game's moves skip its slots
+  from the view's draw on (so lightning that lives a frame stops as it is),
+  and it creates only its sprites; a view that has made nothing yet makes
+  its whole effect once, to stop on (L54).
+- **The Item Model window.** Its preview is a view of its own too, beside
+  the Style Editor's three (asked for on 2026-11-13), with the item effect
+  its item runs; it has no stopped time.
+- **When they go.** A view's things are removed when its look, item, level or
+  pose changes, when the view closes, when the map changes
+  (`OnWorldClearing`) and when the editor closes; as the world preview
+  does it (`EffectPreviewTracker`), with the things that follow them.
+- **Room in the lists.** The game comes first: a view creates nothing while
+  a list has fewer than a quarter of its slots free, and the views together
+  use at most a quarter of each list.
+- **Sounds and random numbers.** Things a view creates play no sound (as the
+  world preview mutes them). They draw from the game's random sequences as
+  in the game; the preview is an editor tool, and the recorder's tests pin
+  the sequences anyway.
+- **cppcheck.** `ZzzEffectJoint.cpp` and `zzzeffectsprite.cpp` are checked
+  as whole files once they change, so they are checked first.
+
+### 7b. Things on bones in the item effect file (step 3)
+
+From the survey of 2026-11-11 (main `9b50e946a`) and L55 to L57. The 9
+item effects and the bone parts of `pumpkinOfLuck` and `cursedCastleWater`
+(L29) move; `helperNpcPlate` lights the helper NPC, not an item, and moves
+with the monsters' looks (MN8).
+
+- **Kinds.** `"sprite"`, `"particle"`, `"joint"` (lightning) and
+  `"effect"` (the Storm's `fenrirThunder`), each by its FX1 name with a
+  `"subType"` number (D30); all names the 11 looks use are in the catalogue.
+- **Values.** Scale, color (`"light"` for effects), sprite rotation; each a
+  number or a shape of section 2 (wave, bounce, scroll are used). Offsets
+  from the bone are allowed (none of the 11 uses one).
+- **Places.** `"bones"` or `"between"` (L55), or `"at": "origin"` for the
+  item object's own place (`rena`).
+- **Copied as they are, no special fields:** the Wing of Illusion's last light
+  sits at bone 33 (the old code reused the last loop's bone); the Pumpkin of
+  Luck's sprites repeat the wave of the object light the look sets (both come
+  from the same clock); the Cursed Castle Water's animation speed is a field
+  of the item effect (L29).
+
 ### 8. The move and its proof
 
 Looks move by building block (L17), in the pull requests of section 9. Each
@@ -611,7 +694,7 @@ Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
 Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), Q-L3 (L12),
-Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), Q-L8 (L23), Q-L12 (L24), Q-L9 (L25), Q-L10 (L26), Q-L11 (L27), Q-L13 (L28), all on 2026-11-01; Q-L14 (L29), Q-L15 (L30) and Q-L16 (L31) on 2026-11-03; Q-L17 (L32) on 2026-11-04; Q-L18 (L33) and Q-L19 (L34) on 2026-11-05; Q-L20 (L35), Q-L21 (L36), Q-L25 (L37), Q-L22 (L38), Q-L23 (L39) and Q-L24 (L40) on 2026-11-06; Q-L26 and Q-L27 (L41), Q-L28 to Q-L30 (L42) and Q-L31 (L43) on 2026-11-07; Q-L32 (L44), Q-L33 (L45), Q-L34 (L46), Q-L35 (L47), Q-L36 (L48) and Q-L37 (L49) on 2026-11-08; Q-L38 (L50) on 2026-11-10. All questions are answered.
+Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), Q-L8 (L23), Q-L12 (L24), Q-L9 (L25), Q-L10 (L26), Q-L11 (L27), Q-L13 (L28), all on 2026-11-01; Q-L14 (L29), Q-L15 (L30) and Q-L16 (L31) on 2026-11-03; Q-L17 (L32) on 2026-11-04; Q-L18 (L33) and Q-L19 (L34) on 2026-11-05; Q-L20 (L35), Q-L21 (L36), Q-L25 (L37), Q-L22 (L38), Q-L23 (L39) and Q-L24 (L40) on 2026-11-06; Q-L26 and Q-L27 (L41), Q-L28 to Q-L30 (L42) and Q-L31 (L43) on 2026-11-07; Q-L32 (L44), Q-L33 (L45), Q-L34 (L46), Q-L35 (L47), Q-L36 (L48) and Q-L37 (L49) on 2026-11-08; Q-L38 (L50) on 2026-11-10; Q-L39 (L51), Q-L40 (L52), Q-L41 (L53) Q-L42 (L54), Q-L43 (L55), Q-L44 (L56), Q-L45 (L57), Q-L46 (L58) and Q-L47 (L59) on 2026-11-11.
 
 ## Tasks
 
@@ -622,9 +705,9 @@ The design, then the pull requests of L26 and L27:
    2026-11-03.
 2. [x] Pull request 0, the design: this document, for review (#954).
 3. [x] Pull request 1, the mesh list (L21, L22) and the names of L24 (#970).
-4. [ ] Pull request 2, step 1 part 1: the machinery, the Style Editor, L17's
+4. [x] Pull request 2, step 1 part 1: the machinery, the Style Editor, L17's
    groups 1 and 2 without the six render styles of L33.
-5. [ ] Pull request 3, step 1 part 2: L17's groups 3 to 5 (#915 is
+5. [x] Pull request 3, step 1 part 2: L17's groups 3 to 5 (#915 is
    merged), with `ItemObjectAttribute`'s glow values (L27), and the part
    models with the 3 looks of `RenderModelWithoutStyle` (L28), and the
    shines below +3 and the Deadly Staff's glow pass as glow data (L30),

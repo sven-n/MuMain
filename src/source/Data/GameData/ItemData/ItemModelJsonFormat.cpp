@@ -33,9 +33,9 @@ constexpr const char* TextureFolders = "textureFolders";
 constexpr const char* NoneBlendMeshes = "noneBlendMeshes";
 constexpr const char* MeshNames = "meshNames";
 constexpr const char* RenderStyle = "renderStyle";
-constexpr const char* ItemEffect = "itemEffect";
+constexpr const char* Effect = "effect";
 constexpr const char* RenderStyleValues = "renderStyleValues";
-constexpr const char* ItemEffectValues = "itemEffectValues";
+constexpr const char* EffectValues = "effectValues";
 } // namespace Keys
 
 // The fields of a model entry and of a shared model; others are warned about.
@@ -52,8 +52,8 @@ const std::set<std::string, std::less<>> ItemModelKeys{Keys::Number,
                                                        MaterialJson::MaterialKey,
                                                        Keys::RenderStyle,
                                                        Keys::RenderStyleValues,
-                                                       Keys::ItemEffect,
-                                                       Keys::ItemEffectValues};
+                                                       Keys::Effect,
+                                                       Keys::EffectValues};
 const std::set<std::string, std::less<>> SharedModelKeys{Keys::Name, Keys::File, Keys::TextureFolders,
                                                          Keys::NoneBlendMeshes, Keys::MeshNames};
 const std::set<std::string, std::less<>> PartModelKeys{
@@ -123,11 +123,11 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
         json[key] = std::move(written);
     };
     putValues(Keys::RenderStyleValues, model.renderStyleValues);
-    if (!model.itemEffect.empty())
+    if (!model.effect.empty())
     {
-        json[Keys::ItemEffect] = model.itemEffect;
+        json[Keys::Effect] = model.effect;
     }
-    putValues(Keys::ItemEffectValues, model.itemEffectValues);
+    putValues(Keys::EffectValues, model.effectValues);
     return json;
 }
 
@@ -143,7 +143,7 @@ std::string DumpModelFile(const OrderedJson& root)
     }
     text = Json::PutObjectsOnOneLine(text, Keys::MeshNames);
     text = Json::PutObjectsOnOneLine(text, Keys::RenderStyleValues);
-    text = Json::PutObjectsOnOneLine(text, Keys::ItemEffectValues);
+    text = Json::PutObjectsOnOneLine(text, Keys::EffectValues);
     return text + "\n";
 }
 
@@ -319,7 +319,7 @@ void ItemModelReader::ReadMeshNames(const OrderedJson& json, std::map<int, std::
     }
 }
 
-// A shared model, a render style or an item effect; whether it exists is
+// A shared model, a render style or an effect; whether it exists is
 // checked when the models are loaded (the shared models) or opened.
 void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std::string& name)
 {
@@ -413,8 +413,8 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     MaterialJson::Read(json, model, report);
     ReadLookName(json, Keys::RenderStyle, model.renderStyle);
     ReadLookValues(json, Keys::RenderStyleValues, model.renderStyleValues);
-    ReadLookName(json, Keys::ItemEffect, model.itemEffect);
-    ReadLookValues(json, Keys::ItemEffectValues, model.itemEffectValues);
+    ReadLookName(json, Keys::Effect, model.effect);
+    ReadLookValues(json, Keys::EffectValues, model.effectValues);
     WarnAboutUnknownKeys(json, ItemModelKeys);
     return !m_hasFatal;
 }

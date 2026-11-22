@@ -4,10 +4,13 @@
 
 #include "MuStyleEditorUI.h"
 
+#include "BoneMarks.h"
+#include "BoneThingsPreview.h"
 #include "LookEdits.h"
 #include "LookFields.h"
 #include "LookParts.h"
 #include "RenderStyleCheckArea.h"
+#include "WorldTimeScope.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorToolWindows.h"
@@ -66,7 +69,7 @@ constexpr char AddEffectPopupId[] = "###AddEffect";
 constexpr char DragPayloadType[] = "MU_LOOKS_TREE";
 // The roots in the order the tree shows them.
 constexpr std::size_t RenderStylesRootIndex = 0;
-constexpr std::size_t ItemEffectsRootIndex = 1;
+constexpr std::size_t EffectsRootIndex = 1;
 // Pixel widths before the editor UI scale.
 constexpr float TreeWidth = 260.0f;
 constexpr float NameWidth = 260.0f;
@@ -77,15 +80,15 @@ constexpr float PartWidth = 200.0f;
 constexpr float EffectNoteColumn = 170.0f;
 constexpr ImVec4 NotFreeColor{1.0f, 0.4f, 0.4f, 1.0f};
 constexpr float MaxPreviewSeconds = 60.0f;
-// A kept draft's key: an item effect and a render style can have the same name.
+// A kept draft's key: an effect and a render style can have the same name.
 std::string DraftKey(Data::Looks::LookKind kind, const std::string& name)
 {
-    return kind == Data::Looks::LookKind::ItemEffect ? "effect " + name : name;
+    return kind == Data::Looks::LookKind::Effect ? "effect " + name : name;
 }
 
 std::size_t RootIndexOf(Data::Looks::LookKind kind)
 {
-    return kind == Data::Looks::LookKind::ItemEffect ? ItemEffectsRootIndex : RenderStylesRootIndex;
+    return kind == Data::Looks::LookKind::Effect ? EffectsRootIndex : RenderStylesRootIndex;
 }
 
 // The problems of a look are about "looks[0]", the only one checked.
@@ -175,31 +178,6 @@ std::vector<std::size_t> RowLayers(const LookDefinition& look, int part)
     return layers;
 }
 
-// The clock of the game for one drawing: the preview's stopped time.
-class WorldTimeScope
-{
-public:
-    explicit WorldTimeScope(std::optional<double> milliseconds) : m_previous(WorldTime), m_set(milliseconds.has_value())
-    {
-        if (m_set)
-        {
-            WorldTime = *milliseconds;
-        }
-    }
-    ~WorldTimeScope()
-    {
-        if (m_set)
-        {
-            WorldTime = m_previous;
-        }
-    }
-    WorldTimeScope(const WorldTimeScope&) = delete;
-    WorldTimeScope& operator=(const WorldTimeScope&) = delete;
-
-private:
-    double m_previous;
-    bool m_set;
-};
 } // namespace
 
 namespace MuEditor::Looks
@@ -211,9 +189,9 @@ std::optional<LookDefinition> ForItem(const LookDefinition& look, Data::Looks::L
     {
         return std::nullopt;
     }
-    const bool effect = kind == Data::Looks::LookKind::ItemEffect;
-    const std::string& named = effect ? model->itemEffect : model->renderStyle;
-    const std::map<std::string, std::string>& values = effect ? model->itemEffectValues : model->renderStyleValues;
+    const bool effect = kind == Data::Looks::LookKind::Effect;
+    const std::string& named = effect ? model->effect : model->renderStyle;
+    const std::map<std::string, std::string>& values = effect ? model->effectValues : model->renderStyleValues;
     if (named != look.name || values.empty() || !Data::Looks::SetsEachItem(look))
     {
         return std::nullopt;
@@ -265,11 +243,11 @@ CMuStyleEditorUI& CMuStyleEditorUI::GetInstance()
     return instance;
 }
 
-CMuStyleEditorUI::CMuStyleEditorUI() : m_tree({&m_renderStyles, &m_itemEffects}, DragPayloadType, FolderPopupId)
+CMuStyleEditorUI::CMuStyleEditorUI() : m_tree({&m_renderStyles, &m_effects}, DragPayloadType, FolderPopupId)
 {
     m_renderStyles.SetUnappliedCheck([this](const std::string& name) { return HasUnappliedChanges(name); });
-    m_itemEffects.SetUnappliedCheck([this](const std::string& name)
-                                    { return HasUnappliedChanges(name, Data::Looks::LookKind::ItemEffect); });
+    m_effects.SetUnappliedCheck([this](const std::string& name)
+                                    { return HasUnappliedChanges(name, Data::Looks::LookKind::Effect); });
 }
 
 void CMuStyleEditorUI::Render(bool* open)
@@ -324,18 +302,18 @@ void CMuStyleEditorUI::ShowRenderStyle(const std::string& name)
     ImGui::SetWindowFocus(MuEditor::WindowIds::StyleEditor);
 }
 
-void CMuStyleEditorUI::ShowItemEffect(const std::string& name)
+void CMuStyleEditorUI::ShowEffect(const std::string& name)
 {
     g_MuEditorCore.GetToolWindows().styleEditor = true;
-    if (m_itemEffects.Has(name))
+    if (m_effects.Has(name))
     {
-        m_tree.PickEntry(ItemEffectsRootIndex, name);
+        m_tree.PickEntry(EffectsRootIndex, name);
     }
     else
     {
-        m_tree.SetPick(ItemEffectsRootIndex, {});
+        m_tree.SetPick(EffectsRootIndex, {});
     }
-    m_tree.OpenRoot(ItemEffectsRootIndex);
+    m_tree.OpenRoot(EffectsRootIndex);
     ImGui::SetWindowFocus(MuEditor::WindowIds::StyleEditor);
 }
 
@@ -346,18 +324,18 @@ bool CMuStyleEditorUI::IsRenderStylesPicked() const
 
 Data::Looks::LookKind CMuStyleEditorUI::PickedKind() const
 {
-    return m_tree.GetPick().root == ItemEffectsRootIndex ? Data::Looks::LookKind::ItemEffect
+    return m_tree.GetPick().root == EffectsRootIndex ? Data::Looks::LookKind::Effect
                                                          : Data::Looks::LookKind::RenderStyle;
 }
 
 MuEditor::Looks::LooksRoot& CMuStyleEditorUI::RootOf(Data::Looks::LookKind kind)
 {
-    return kind == Data::Looks::LookKind::ItemEffect ? m_itemEffects : m_renderStyles;
+    return kind == Data::Looks::LookKind::Effect ? m_effects : m_renderStyles;
 }
 
 const MuEditor::Looks::LooksRoot& CMuStyleEditorUI::RootOf(Data::Looks::LookKind kind) const
 {
-    return kind == Data::Looks::LookKind::ItemEffect ? m_itemEffects : m_renderStyles;
+    return kind == Data::Looks::LookKind::Effect ? m_effects : m_renderStyles;
 }
 
 MuEditor::Looks::LookEdits& CMuStyleEditorUI::EditsOf(Data::Looks::LookKind kind)
@@ -380,7 +358,7 @@ void CMuStyleEditorUI::RenderFileBar()
         ImGui::SameLine();
         ImGui::TextUnformatted(I18N::Editor::UnsavedChanges);
     }
-    if (!g_LookEdits.IsComplete() || !g_ItemEffectEdits.IsComplete())
+    if (!g_LookEdits.IsComplete() || !g_EffectEdits.IsComplete())
     {
         RenderNote(I18N::Editor::TheLookFileHasAFatalProblem);
     }
@@ -486,8 +464,8 @@ void CMuStyleEditorUI::RenderNameDialog()
     // The names of the root's kind: a look of the file or one in code may not have it.
     const Data::Looks::LookKind kind = PickedKind();
     const bool usable = Data::Items::Json::IsName(name) && !RootOf(kind).Has(name);
-    RenderNote(kind == Data::Looks::LookKind::ItemEffect
-                   ? I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherItemEffectHas
+    RenderNote(kind == Data::Looks::LookKind::Effect
+                   ? I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherEffectHas
                    : I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherRenderStyleHas);
     ImGui::BeginDisabled(!usable);
     if (ImGui::Button(I18N::Editor::OK))
@@ -502,7 +480,7 @@ void CMuStyleEditorUI::RenderNameDialog()
                 const LookDefinition* source = edits.Find(from);
                 if (dialog == NameDialog::New)
                 {
-                    // A new render style draws the item plainly, as one texture layer; a new item effect does nothing.
+                    // A new render style draws the item plainly, as one texture layer; a new effect does nothing.
                     LookDefinition fresh{name};
                     if (kind == Data::Looks::LookKind::RenderStyle)
                     {
@@ -550,7 +528,7 @@ void CMuStyleEditorUI::RenderPicked()
             RenderLook(*look);
             return;
         }
-        RenderCodeLook(pick.entry, pick.root == ItemEffectsRootIndex);
+        RenderCodeLook(pick.entry, pick.root == EffectsRootIndex);
         return;
     }
     if (!pick.folder.empty())
@@ -564,12 +542,12 @@ void CMuStyleEditorUI::RenderPicked()
 void CMuStyleEditorUI::RenderRoot()
 {
     const Data::Looks::LookKind kind = PickedKind();
-    const bool effects = kind == Data::Looks::LookKind::ItemEffect;
+    const bool effects = kind == Data::Looks::LookKind::Effect;
     const std::string file =
         (Data::Effects::GetEffectDataDirectory() / Data::Looks::GetLookFileName(kind)).generic_string();
-    ImGui::TextUnformatted(effects ? I18N::Editor::ItemEffects : I18N::Editor::RenderStyles);
+    ImGui::TextUnformatted(effects ? I18N::Editor::Effects : I18N::Editor::RenderStyles);
     RenderNote(
-        I18N::Format(effects ? I18N::Editor::ItemEffectsRootNote : I18N::Editor::RenderStylesRootNote, {file}).c_str());
+        I18N::Format(effects ? I18N::Editor::EffectsRootNote : I18N::Editor::RenderStylesRootNote, {file}).c_str());
     const std::vector<ItemDataIssue>& issues = EditsOf(kind).GetIssues();
     if (!issues.empty())
     {
@@ -581,7 +559,7 @@ void CMuStyleEditorUI::RenderRoot()
     }
 }
 
-void CMuStyleEditorUI::RenderCodeLook(const std::string& name, bool itemEffect)
+void CMuStyleEditorUI::RenderCodeLook(const std::string& name, bool effect)
 {
     ImGui::TextUnformatted((name + " " + I18N::Editor::CodeMark).c_str());
     RenderPreview(nullptr);
@@ -589,7 +567,7 @@ void CMuStyleEditorUI::RenderCodeLook(const std::string& name, bool itemEffect)
     if (ImGui::BeginChild("##Look"))
     {
         RenderNote(I18N::Editor::CodeLookNote);
-        RenderUsers(UsersOf(name, itemEffect));
+        RenderUsers(UsersOf(name, effect));
     }
     ImGui::EndChild();
 }
@@ -608,10 +586,10 @@ void CMuStyleEditorUI::RenderLook(const LookDefinition& look)
     if (ImGui::BeginChild("##Look"))
     {
         RenderChecks();
-        const bool effect = m_draftKind == Data::Looks::LookKind::ItemEffect;
+        const bool effect = m_draftKind == Data::Looks::LookKind::Effect;
         if (effect)
         {
-            RenderItemEffect();
+            RenderEffect();
         }
         else
         {
@@ -661,7 +639,7 @@ void CMuStyleEditorUI::RenderApply(const LookDefinition& look)
 void CMuStyleEditorUI::OpenApply(const LookDefinition& look)
 {
     // D26: a change to a look reaches all its items; they are listed before it is applied.
-    m_confirmUsers = UsersOf(look.name, m_draftKind == Data::Looks::LookKind::ItemEffect);
+    m_confirmUsers = UsersOf(look.name, m_draftKind == Data::Looks::LookKind::Effect);
     const int itemType = g_ItemSelection.GetItemType();
     m_applyItem =
         g_ItemDatabase.Find(itemType) != nullptr && g_ItemModelDatabase.Find(itemType) != nullptr ? itemType : -1;
@@ -782,8 +760,8 @@ bool CMuStyleEditorUI::RenderApplyCopy()
     bool usable = Data::Items::Json::IsName(copy) && !RootOf(m_draftKind).Has(copy);
     if (!usable)
     {
-        RenderNote(m_draftKind == Data::Looks::LookKind::ItemEffect
-                       ? I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherItemEffectHas
+        RenderNote(m_draftKind == Data::Looks::LookKind::Effect
+                       ? I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherEffectHas
                        : I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherRenderStyleHas);
     }
     if (m_applyTo == ApplyTo::NewItem)
@@ -911,38 +889,117 @@ void CMuStyleEditorUI::RenderLayers()
     ImGui::PopID();
 }
 
-void CMuStyleEditorUI::RenderItemEffect()
+namespace
 {
-    std::vector<Data::Looks::ItemValuesBefore>& entries = m_draft.itemValuesBefore;
+// Copy, Move up, Move down and Remove for the picked line `line`, the entry `line - first` of `list`; disabled
+// without a list (another line is picked). Whether the picked line still shows the entry it showed (ApplyEntryButton).
+template <typename T> bool EntryButtons(std::vector<T>* list, std::size_t first, std::size_t& line)
+{
+    ImGui::BeginDisabled(list == nullptr);
+    const bool copy = ImGui::SmallButton(I18N::Editor::Copy);
+    ImGui::SameLine();
+    const bool up = ImGui::SmallButton(I18N::Editor::MoveUp);
+    ImGui::SameLine();
+    const bool down = ImGui::SmallButton(I18N::Editor::MoveDown);
+    ImGui::SameLine();
+    const bool remove = ImGui::SmallButton(I18N::Editor::Remove);
+    ImGui::EndDisabled();
+    using MuEditor::Looks::Fields::EntryButton;
+    if (list == nullptr || !(copy || up || down || remove))
+    {
+        return true;
+    }
+    const EntryButton button = copy   ? EntryButton::Copy
+                               : up   ? EntryButton::MoveUp
+                               : down ? EntryButton::MoveDown
+                                      : EntryButton::Remove;
+    return MuEditor::Looks::Fields::ApplyEntryButton(*list, first, line, button);
+}
+} // namespace
+
+Data::Looks::OnBones* CMuStyleEditorUI::PickedOnBones()
+{
+    if (m_draftKind != Data::Looks::LookKind::Effect)
+    {
+        return nullptr;
+    }
+    // After the entries before the drawing come the object's light and the animation speed.
+    const std::size_t first = m_draft.valuesBefore.size() + 2;
+    if (m_line < first || m_line - first >= m_draft.onBones.size())
+    {
+        return nullptr;
+    }
+    return &m_draft.onBones[m_line - first];
+}
+
+void CMuStyleEditorUI::RenderEffectToolbar()
+{
+    std::vector<Data::Looks::ValuesBefore>& before = m_draft.valuesBefore;
+    std::vector<Data::Looks::OnBones>& onBones = m_draft.onBones;
+    const std::size_t firstBones = before.size() + 2;
+    const bool beforePicked = m_line < before.size();
+    const bool bonesPicked = PickedOnBones() != nullptr;
+
     ImGui::TextUnformatted(I18N::Editor::BeforeDrawing);
     ImGui::SameLine();
+    ImGui::PushID("Before");
     if (ImGui::SmallButton(I18N::Editor::Add))
     {
-        const std::size_t at = std::min(m_line + 1, entries.size());
-        entries.insert(entries.begin() + static_cast<std::ptrdiff_t>(at), Data::Looks::ItemValuesBefore{});
+        const std::size_t at = beforePicked ? m_line + 1 : before.size();
+        before.insert(before.begin() + static_cast<std::ptrdiff_t>(at), Data::Looks::ValuesBefore{});
         m_line = at;
+        ForgetEntryChoice();
     }
-    const bool entry = m_line < entries.size();
-    ImGui::BeginDisabled(!entry);
+    ImGui::PopID();
     ImGui::SameLine();
-    if (ImGui::SmallButton(I18N::Editor::Remove) && entry)
-    {
-        entries.erase(entries.begin() + static_cast<std::ptrdiff_t>(m_line));
-    }
+    ImGui::TextUnformatted(I18N::Editor::OnBones);
     ImGui::SameLine();
-    if (ImGui::SmallButton(I18N::Editor::MoveUp) && entry && m_line > 0)
+    ImGui::PushID("OnBones");
+    if (ImGui::SmallButton(I18N::Editor::Add))
     {
-        std::swap(entries[m_line], entries[m_line - 1]);
-        --m_line;
+        const std::size_t at = bonesPicked ? m_line - firstBones + 1 : onBones.size();
+        Data::Looks::OnBones entry;
+        entry.things.emplace_back();
+        onBones.insert(onBones.begin() + static_cast<std::ptrdiff_t>(at), std::move(entry));
+        m_line = before.size() + 2 + at;
+        ForgetEntryChoice();
     }
+    ImGui::PopID();
     ImGui::SameLine();
-    if (ImGui::SmallButton(I18N::Editor::MoveDown) && entry && m_line + 1 < entries.size())
+    ImGui::TextDisabled("|");
+    ImGui::SameLine();
+    // Another entry under the picked line (a copy, a removal; the lines of the things on bones move with the entries
+    // before the drawing) takes no choice of the one before.
+    if (m_line < before.size())
     {
-        std::swap(entries[m_line], entries[m_line + 1]);
-        ++m_line;
+        if (!EntryButtons(&before, 0, m_line))
+        {
+            ForgetEntryChoice();
+        }
     }
-    ImGui::EndDisabled();
+    else if (PickedOnBones() != nullptr)
+    {
+        if (!EntryButtons(&onBones, before.size() + 2, m_line))
+        {
+            ForgetEntryChoice();
+        }
+    }
+    else
+    {
+        EntryButtons<Data::Looks::OnBones>(nullptr, 0, m_line);
+    }
+}
+
+void CMuStyleEditorUI::RenderEffect()
+{
+    RenderEffectToolbar();
     RenderNote(I18N::Editor::BeforeDrawingNote);
+    RenderNote(I18N::Editor::OnBonesNote);
+    std::vector<Data::Looks::ValuesBefore>& entries = m_draft.valuesBefore;
+    const std::size_t lightLine = entries.size();
+    const std::size_t speedLine = entries.size() + 1;
+    const std::size_t firstBones = entries.size() + 2;
+    const std::size_t pickedBefore = m_line;
 
     const float height = LayerListLines * ImGui::GetFrameHeightWithSpacing();
     if (ImGui::BeginChild("##Entries", ImVec2(0.0f, height), ImGuiChildFlags_Borders))
@@ -951,7 +1008,7 @@ void CMuStyleEditorUI::RenderItemEffect()
         {
             ImGui::PushID(static_cast<int>(index));
             const std::string line =
-                std::to_string(index + 1) + ". " + MuEditor::Looks::Fields::DescribeItemValuesBefore(entries[index]);
+                std::to_string(index + 1) + ". " + MuEditor::Looks::Fields::DescribeValuesBefore(entries[index]);
             if (ImGui::Selectable(line.c_str(), m_line == index))
             {
                 m_line = index;
@@ -960,28 +1017,132 @@ void CMuStyleEditorUI::RenderItemEffect()
         }
         const std::string light =
             std::string(I18N::Editor::ObjectLight) + ": " + (m_draft.objectLight ? "" : I18N::Editor::None);
-        if (ImGui::Selectable(light.c_str(), m_line >= entries.size()))
+        if (ImGui::Selectable(light.c_str(), m_line == lightLine))
         {
-            m_line = entries.size();
+            m_line = lightLine;
         }
+        char speed[32] = {};
+        if (m_draft.animationSpeed)
+        {
+            std::snprintf(speed, sizeof(speed), "%.3g", *m_draft.animationSpeed);
+        }
+        const std::string speedText =
+            std::string(I18N::Editor::AnimationSpeed) + ": " + (m_draft.animationSpeed ? speed : I18N::Editor::None);
+        if (ImGui::Selectable(speedText.c_str(), m_line == speedLine))
+        {
+            m_line = speedLine;
+        }
+        ImGui::PushID("OnBones");
+        for (std::size_t index = 0; index < m_draft.onBones.size(); ++index)
+        {
+            ImGui::PushID(static_cast<int>(index));
+            const bool betweenChosen =
+                MuEditor::Looks::Fields::LineShowsBetweenChosen(firstBones + index, pickedBefore, m_betweenChosen);
+            const std::string line = std::string(I18N::Editor::OnBones) + " " + std::to_string(index + 1) + ": " +
+                                     MuEditor::Looks::Fields::DescribeOnBones(m_draft.onBones[index], betweenChosen);
+            if (ImGui::Selectable(line.c_str(), m_line == firstBones + index))
+            {
+                m_line = firstBones + index;
+            }
+            ImGui::PopID();
+        }
+        ImGui::PopID();
     }
     ImGui::EndChild();
+    // Past the last line (an entry removed elsewhere, an undo): the last one.
+    m_line = std::min(m_line, firstBones + m_draft.onBones.size() - 1);
+    if (m_line != pickedBefore)
+    {
+        ForgetEntryChoice();
+    }
 
     ImGui::PushID("Entry");
     ImGui::PushID(m_draftOf.c_str());
     ImGui::PushID(static_cast<int>(m_line));
     const std::vector<LookPart> parts = MuEditor::Looks::PartsOf(g_ItemSelection.GetItemType());
+    m_pointedBone.reset();
     if (m_line < entries.size())
     {
-        MuEditor::Looks::Fields::ItemValuesBeforeEntry(entries[m_line], parts);
+        MuEditor::Looks::Fields::ValuesBeforeEntry(entries[m_line], parts);
     }
-    else
+    else if (m_line == lightLine)
     {
         MuEditor::Looks::Fields::ObjectLight(m_draft.objectLight);
     }
+    else if (m_line == speedLine)
+    {
+        MuEditor::Looks::Fields::AnimationSpeed(m_draft.animationSpeed);
+    }
+    else if (Data::Looks::OnBones* entry = PickedOnBones())
+    {
+        ImGui::BeginDisabled(entry->places.origin);
+        ImGui::Checkbox(I18N::Editor::PickInThePreview, &m_pickBones);
+        ImGui::EndDisabled();
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip | ImGuiHoveredFlags_AllowWhenDisabled))
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::PickInThePreviewTooltip);
+        }
+        if (m_pickBones && m_pairFrom)
+        {
+            ImGui::SameLine();
+            ImGui::TextDisabled("%s",
+                                I18N::Format(I18N::Editor::PickTheEndFrom0, {std::to_string(*m_pairFrom)}).c_str());
+        }
+        if ((m_pickBones || m_showBones) && m_noBones)
+        {
+            RenderNote(I18N::Editor::NoBonesForThisItem);
+        }
+        MuEditor::Looks::Fields::OnBonesShown shown;
+        MuEditor::Looks::Fields::OnBonesEntry(*entry, shown, m_betweenChosen);
+        if (shown.between != m_entryBetween || !m_pickBones)
+        {
+            m_pairFrom.reset();
+        }
+        m_entryBetween = shown.between;
+        m_pointedBone = shown.pointedBone;
+    }
     ImGui::PopID();
     ImGui::PopID();
     ImGui::PopID();
+}
+
+void CMuStyleEditorUI::RenderBoneMarks(const MuEditor::Effects::EffectPreviewRequest& request, float turnDegrees,
+                                       const MuEditor::Effects::EffectPreviewCamera& camera,
+                                       const MuEditor::Items::CItemModelPreview::ViewOnScreen& screen)
+{
+    namespace BoneMarks = MuEditor::Looks::BoneMarks;
+    Data::Looks::OnBones* entry = PickedOnBones();
+    const bool picking = m_pickBones && entry != nullptr && !entry->places.origin;
+    if (!m_showBones && entry == nullptr)
+    {
+        return;
+    }
+    std::vector<BoneMarks::ShownBone>& bones = m_shownBones;
+    BoneMarks::BonesOf(request, turnDegrees, bones);
+    m_noBones = bones.empty();
+    if (bones.empty())
+    {
+        return;
+    }
+    BoneMarks::Marks marks;
+    marks.dots = m_showBones || picking;
+    if (entry != nullptr)
+    {
+        marks.bones = entry->places.bones;
+        marks.pairs = entry->places.between;
+        marks.ringed = m_pointedBone;
+        marks.from = m_pairFrom;
+    }
+    const std::optional<int> hit = BoneMarks::Draw(bones, marks, camera, screen.min, screen.max,
+                                                   picking ? screen.click : std::nullopt, screen.hovered);
+    if (picking && screen.hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+    {
+        m_pickTakeBack.TakeBack(entry->places, m_pairFrom, ImGui::GetTime(), ImGui::GetIO().MouseDoubleClickTime);
+    }
+    if (hit && picking)
+    {
+        m_pickTakeBack.Pick(entry->places, m_entryBetween, m_pairFrom, *hit, ImGui::GetTime());
+    }
 }
 
 void CMuStyleEditorUI::RenderLayerToolbar()
@@ -1277,13 +1438,13 @@ void CMuStyleEditorUI::RenderChecks()
     }
 }
 
-const std::vector<int>& CMuStyleEditorUI::UsersOf(const std::string& name, bool itemEffect)
+const std::vector<int>& CMuStyleEditorUI::UsersOf(const std::string& name, bool effect)
 {
     const int modelsVersion = g_ItemModelDatabase.GetVersion();
-    if (m_users.name != name || m_users.itemEffect != itemEffect || m_users.modelsVersion != modelsVersion)
+    if (m_users.name != name || m_users.effect != effect || m_users.modelsVersion != modelsVersion)
     {
-        m_users = {name, itemEffect, modelsVersion,
-                   itemEffect ? MuEditor::Items::FindItemEffectUsers(name)
+        m_users = {name, effect, modelsVersion,
+                   effect ? MuEditor::Items::FindEffectUsers(name)
                               : MuEditor::Items::FindRenderStyleUsers(name)};
     }
     return m_users.items;
@@ -1331,6 +1492,12 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
     ImGui::EndDisabled();
     ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::DrawAsADoppelganger, &m_asDoppelganger);
+    ImGui::SameLine();
+    ImGui::Checkbox(I18N::Editor::ShowBones, &m_showBones);
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip))
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::ShowBonesTooltip);
+    }
     const int itemType = g_ItemSelection.GetItemType();
     if (g_ItemDatabase.Find(itemType) == nullptr || g_ItemModelDatabase.Find(itemType) == nullptr)
     {
@@ -1343,7 +1510,11 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
     const LookDefinition shown =
         look != nullptr ? MuEditor::Looks::WithoutHiddenLayers(*look, m_hiddenLayers) : LookDefinition{};
     // All views at the same moment.
-    const WorldTimeScope time(m_stopTime ? std::optional<double>(m_seconds * 1000.0) : std::nullopt);
+    const std::optional<double> stoppedAt = m_stopTime ? std::optional<double>(m_seconds * 1000.0) : std::nullopt;
+    const MuEditor::Looks::WorldTimeScope time(stoppedAt);
+    // While bones are picked a click in a view picks a bone, not a mesh.
+    const Data::Looks::OnBones* pickedEntry = look != nullptr ? PickedOnBones() : nullptr;
+    m_preview.SetMeshPicking(!(m_pickBones && pickedEntry != nullptr && !pickedEntry->places.origin));
     if (look == nullptr)
     {
         // A look in code: the item as the game draws it.
@@ -1352,7 +1523,7 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
     }
     // The item as it is (with its own look or none), then the look as applied and as the fields have it on the picked
     // item, whatever look it names (design L41).
-    const bool effect = m_draftKind == Data::Looks::LookKind::ItemEffect;
+    const bool effect = m_draftKind == Data::Looks::LookKind::Effect;
     const LookDefinition* applied = EditsOf(m_draftKind).Find(look->name);
     // An item that names this look and sets values of it draws the look with them, as the game does (design L12).
     if (applied != nullptr)
@@ -1398,7 +1569,20 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
             }
             const Render::Items::Styles::PreviewLook preview(slot, *drawn);
             draw();
-        });
+        },
+        // Each view's things on bones, from the effect its item runs while it is drawn (design L51, L52).
+        [stoppedAt](int view, const MuEditor::Effects::EffectPreviewRequest& request, float turnDegrees,
+                    const MuEditor::Effects::EffectPreviewCamera& camera)
+        {
+            const int model = MuEditor::Effects::PreviewItemModelsOf(request).model;
+            MuEditor::Looks::g_BoneThingsPreview.Draw(
+                view, {request, Render::Items::ItemEffects::EffectOf(model), turnDegrees, stoppedAt}, camera);
+        },
+        // The item's bones over each view (design L58).
+        [this](int, const MuEditor::Effects::EffectPreviewRequest& request, float turnDegrees,
+               const MuEditor::Effects::EffectPreviewCamera& camera,
+               const MuEditor::Items::CItemModelPreview::ViewOnScreen& screen)
+        { RenderBoneMarks(request, turnDegrees, camera, screen); });
 }
 
 void CMuStyleEditorUI::RenderViewHeader(int view, float width)
@@ -1454,6 +1638,14 @@ void CMuStyleEditorUI::ForgetDraftsForTest()
     m_keptDrafts.clear();
     m_hiddenLayers.clear();
     m_line = 0;
+    ForgetEntryChoice();
+}
+
+void CMuStyleEditorUI::ForgetEntryChoice()
+{
+    m_betweenChosen = false;
+    m_entryBetween = false;
+    m_pairFrom.reset();
 }
 
 void CMuStyleEditorUI::KeepDraft()
@@ -1478,6 +1670,7 @@ bool CMuStyleEditorUI::TakeKeptDraft(const std::string& name)
     m_line = kept->second.line;
     m_draftOf = name;
     m_keptDrafts.erase(kept);
+    ForgetEntryChoice();
     return true;
 }
 
@@ -1507,6 +1700,7 @@ void CMuStyleEditorUI::LoadDraft(const LookDefinition& look)
     m_draftKind = PickedKind();
     m_hiddenLayers.assign(m_draft.layers.size(), 0);
     m_line = std::min(m_line, m_draft.layers.size());
+    ForgetEntryChoice();
 }
 
 void CMuStyleEditorUI::InsertLayer(std::size_t at, Layer layer)

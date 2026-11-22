@@ -2,6 +2,13 @@
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/MonsterModelDefinition.h"
+
+#include <functional>
+#include <map>
+#include <set>
+#include <string>
+#include <string_view>
 
 #include <span>
 #include <vector>
@@ -40,4 +47,29 @@ void ValidateMonsterTalkSteps(std::span<const MonsterDefinition* const> monsters
 void ValidateMonsterTalkTexts(std::span<const MonsterDefinition* const> monsters, const MonsterTalkTexts& talkTexts,
                               std::span<const char* const> uiLocales, const std::string& source,
                               std::vector<Items::ItemDataIssue>& issues);
+// Whether a look file has a look of that name (a render style, or an effect).
+using LookExists = std::function<bool(std::string_view name)>;
+
+// The looks the monsters name (MN8, ML1): a render style or an effect no look
+// file has is an error, the monster is drawn without it; "none" names none.
+// An effect that `runsInUpdate` (an object light, things on bones, an
+// animation speed) is a warning: only items run that part, the monster gets
+// only the effect's values before the drawing. On the entry, its map variants
+// and the state variants of both.
+void ValidateMonsterLooks(std::span<const MonsterDefinition* const> monsters, const LookExists& renderStyleExists,
+                          const LookExists& effectExists, const std::string& source,
+                          std::vector<Items::ItemDataIssue>& issues, const LookExists& runsInUpdate = {});
+// How many monster entries and models name each render style (or with
+// `effects`, each effect): on the entry, its map and state variants, or the
+// model; an entry naming a look in several places counts once. "none" names
+// none. Data Checks and the Style Editor count them as users of the looks.
+std::map<std::string, int, std::less<>> CountMonsterLookUses(std::span<const MonsterDefinition* const> monsters,
+                                                             std::span<const MonsterModelDefinition* const> models,
+                                                             bool effects);
+
+// The same for the looks the models name for their monsters.
+void ValidateMonsterModelLooks(std::span<const MonsterModelDefinition* const> models,
+                               const LookExists& renderStyleExists, const LookExists& effectExists,
+                               const std::string& source, std::vector<Items::ItemDataIssue>& issues,
+                               const LookExists& runsInUpdate = {});
 } // namespace Data::Monsters

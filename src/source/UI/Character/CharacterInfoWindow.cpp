@@ -28,6 +28,7 @@
 #include "UI/Character/CriticalDamageRateLine.h"
 #include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
+#include "GameLogic/Buffs/BuffValues.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -672,9 +673,10 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             iAttackRatingPK = iPlusRating;
         }
     }
-    const auto buffBonuses = Hero->Object.m_BuffMap.GetLevelScaledStatBonuses(CharacterAttribute->Level);
-    iAttackDamageMin += buffBonuses.attackDamage;
-    iAttackDamageMax += buffBonuses.attackDamage;
+    // The Elf Soldier's buff raises it this way (Data/Buffs/Buffs.json, docs/buff-data.md).
+    const int greaterDamageBonus = GameLogic::Buffs::GetHeroPowerUpTotal("greaterDamageBonus");
+    iAttackDamageMin += greaterDamageBonus;
+    iAttackDamageMax += greaterDamageBonus;
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
     {
@@ -1017,7 +1019,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     int t_adjdef = CharacterAttribute->Defense + add_defense;
 
-    t_adjdef += buffBonuses.defense;
+    t_adjdef += GameLogic::Buffs::GetHeroPowerUpTotal("defenseFinal");
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
     {

@@ -6,6 +6,7 @@
 #include "LogCapture.h"
 #include "TemporaryMonsterFolder.h"
 
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
@@ -170,6 +171,22 @@ TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][
         CHECK_FALSE(g_MonsterDataHandler.Load(error));
         CHECK(error.find("could not be read") != std::string::npos);
     }
+}
+
+TEST_CASE("Item data loaded in a ClientDataScope fills no item table once the scope ends [data][items]")
+{
+    {
+        ClientDataScope scope(ClientData.parent_path());
+        std::string errorMessage;
+        REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    }
+    REQUIRE(ItemAttribute == nullptr);
+    // Each would write the item names through the null ItemAttribute if the item data still counted as loaded.
+    I18N::SetLocale("pt");
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    g_ItemDataHandler.SetTranslateItemNames(true);
+    I18N::SetLocale("en");
+    CHECK(ItemAttribute == nullptr);
 }
 
 TEST_CASE("Monster data: the game's load names the file in the problems it logs [data][monsters]")

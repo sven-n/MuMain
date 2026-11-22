@@ -890,7 +890,7 @@ bool CursedTemple::IsGaugebarEnabled()
     return m_bGaugebarEnabled;
 }
 
-bool CursedTemple::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool CursedTemple::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (!gMapManager.IsCursedTemple()) return false;
 

@@ -10,7 +10,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "itemEffect": "potion"
+      "effect": "potion"
     },
     {
       "number": 1,
@@ -20,7 +20,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "itemEffect": "potion"
+      "effect": "potion"
     },
     {
       "number": 2,
@@ -30,7 +30,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "itemEffect": "potion"
+      "effect": "potion"
     },
     {
       "number": 3,
@@ -40,7 +40,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "itemEffect": "potion"
+      "effect": "potion"
     },
     {
       "number": 4,
@@ -50,7 +50,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "itemEffect": "potion"
+      "effect": "potion"
     },
     {
       "number": 5,
@@ -60,7 +60,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "itemEffect": "potion"
+      "effect": "potion"
     },
     {
       "number": 6,
@@ -70,7 +70,7 @@
         "anchor": [0.5, 0.95],
         "scale": 0.0035
       },
-      "itemEffect": "potion"
+      "effect": "potion"
     },
     {
       "number": 7,
@@ -80,7 +80,7 @@
         "anchor": [0.5, 0.5]
       },
       "renderStyle": "siegePotion",
-      "itemEffect": "hiddenMeshByLevel"
+      "effect": "hiddenMeshByLevel"
     },
     {
       "number": 8,
@@ -195,7 +195,7 @@
       "glow": {
         "level": [0, 1, 2, 3, 4, 5, 6, 13, 13, 13, 13, 13, 13, 13, 13, 13]
       },
-      "itemEffect": "devilsEye"
+      "effect": "devilsEye"
     },
     {
       "number": 18,
@@ -211,7 +211,7 @@
       "glow": {
         "level": [0, 1, 2, 3, 4, 5, 6, 13, 13, 13, 13, 13, 13, 13, 13, 13]
       },
-      "itemEffect": "devilsKey"
+      "effect": "devilsKey"
     },
     {
       "number": 19,
@@ -227,7 +227,7 @@
       "glow": {
         "level": [0, 1, 2, 3, 4, 5, 6, 13, 13, 13, 13, 13, 13, 13, 13, 13]
       },
-      "itemEffect": "devilsInvitation"
+      "effect": "devilsInvitation"
     },
     {
       "number": 20,
@@ -257,7 +257,7 @@
       "ground": {
         "rotation": [270, 0, 90]
       },
-      "itemEffect": "rena"
+      "effect": "rena"
     },
     {
       "number": 22,
@@ -544,7 +544,8 @@
         "rotation": [0, 0, 90],
         "scale": 0.9
       },
-      "renderStyle": "pumpkinOfLuck"
+      "renderStyle": "pumpkinOfLuck",
+      "effect": "pumpkinOfLuck"
     },
     {
       "number": 46,
@@ -777,7 +778,8 @@
         "shineHiddenMesh": 0,
         "shineBelowPlus3": "cursedCastleWater"
       },
-      "renderStyle": "cursedCastleWater"
+      "renderStyle": "cursedCastleWater",
+      "effect": "cursedCastleWater"
     },
     {
       "number": 65,

@@ -16,6 +16,7 @@ extern bool SelectFlag;
 #include "UI/Inventory/UIJewelHarmony.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "Guild/GuildTypes.h"
@@ -824,7 +825,14 @@ bool CMyInventory::UpdateKeyEvent()
             if (CanRegisterItemHotKey(pItem->Type) == true)
             {
                 const int iItemLevel = pItem->Level;
+                const bool changed = g_pMainFrame->GetItemHotKey(iHotKey) != pItem->Type ||
+                                     g_pMainFrame->GetItemHotKeyLevel(iHotKey) != iItemLevel;
                 g_pMainFrame->SetItemHotKey(iHotKey, pItem->Type, iItemLevel);
+                // Saved as it changes, so a crash or a disconnect doesn't lose it.
+                if (changed)
+                {
+                    SaveOptionsIfInGame();
+                }
                 return false;
             }
         }

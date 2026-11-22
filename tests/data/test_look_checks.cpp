@@ -7,6 +7,9 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/LookData/LookChecks.h"
 #include "Data/GameData/LookData/LookJson.h"
+#include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/GameData/MonsterData/MonsterDataValidation.h"
+#include "Data/GameData/MonsterData/MonsterModelsJson.h"
 
 #ifndef _WIN32
 #include "Core/Platform/PathResolve.h"
@@ -14,6 +17,8 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <set>
 #include <string>
 #include <vector>
@@ -195,7 +200,8 @@ TEST_CASE("The names of a file's looks in file order name what a problem is abou
     CHECK(ReadLookNames(R"({"looks": {}})").empty());
 }
 
-TEST_CASE("The shipped render styles name textures that exist, and items use each of them [looks][checks]")
+TEST_CASE("The shipped render styles name textures that exist, and items or monsters use each of them "
+          "[looks][checks]")
 {
     // The textures as the game finds them in the client folder and the shipped item models; the meshes are checked
     // in the editor, which has the models loaded.
@@ -205,6 +211,22 @@ TEST_CASE("The shipped render styles name textures that exist, and items use eac
     const Data::Items::ItemModelDataLoadResult models =
         Data::Items::LoadItemModelDataDirectory(data / "Items" / "Models");
     REQUIRE_FALSE(Data::Items::HasFatal(models.issues));
+    // The looks the shipped monsters and monster models name (MN8).
+    const Data::Monsters::MonsterDataLoadResult monsters =
+        Data::Monsters::LoadMonstersFile(data / "Monsters" / "Monsters.json");
+    REQUIRE_FALSE(Data::Items::HasFatal(monsters.issues));
+    std::vector<Data::Monsters::MonsterModelDefinition> monsterModels;
+    std::vector<ItemDataIssue> modelIssues;
+    std::ifstream modelsFile(data / "Monsters" / "Models.json", std::ios::binary);
+    const std::string modelsText((std::istreambuf_iterator<char>(modelsFile)), std::istreambuf_iterator<char>());
+    Data::Monsters::ReadMonsterModelsJson(modelsText, "Models.json", monsterModels, modelIssues);
+    REQUIRE_FALSE(Data::Items::HasFatal(modelIssues));
+    std::vector<const Data::Monsters::MonsterDefinition*> monsterEntries;
+    for (const Data::Monsters::MonsterDefinition& monster : monsters.monsters)
+        monsterEntries.push_back(&monster);
+    std::vector<const Data::Monsters::MonsterModelDefinition*> modelEntries;
+    for (const Data::Monsters::MonsterModelDefinition& model : monsterModels)
+        modelEntries.push_back(&model);
     std::vector<ItemDataIssue> issues;
     const RenderStyleCheckInput input{.models = models.models,
                                       .partModels = models.partModels,
@@ -218,42 +240,94 @@ TEST_CASE("The shipped render styles name textures that exist, and items use eac
 #endif
                                           return std::filesystem::exists(file);
                                       },
-                                      .meshCount = [](int) { return 0; }};
+                                      .meshCount = [](int) { return 0; },
+                                      .monsterUses =
+                                          [&](const std::string& name, LookKind kind)
+                                      {
+                                          return Data::Monsters::CountMonsterLookUses(monsterEntries, modelEntries,
+                                                                                         kind == LookKind::Effect)
+                                              .contains(name);
+                                      }};
     CheckRenderStyles(shipped.looks, Source, input, issues);
     INFO(Describe(issues));
     CHECK(issues.empty());
 }
 
-TEST_CASE("Item effects are checked against the items that name them: meshes, values, users (design L23) "
+TEST_CASE("Effects are checked against the items that name them: meshes, values, users (design L23) "
           "[looks][checks]")
 {
     LookDefinition effect{"pulse"};
-    effect.itemValuesBefore.push_back(
+    effect.valuesBefore.push_back(
         {.onlyWhen = {.hiddenMesh = 4}, .values = {.glowMesh = 3, .hiddenMesh = 1}, .glowsLikeLevel = 7});
     const LookDefinition unused{"quiet"};
     ItemModelDefinition model = Model(0, 5, "");
-    model.itemEffect = "pulse";
-    model.itemEffectValues = {{"color", "1"}};
+    model.effect = "pulse";
+    model.effectValues = {{"color", "1"}};
     const std::vector<ItemModelDefinition> models{model};
     std::vector<ItemDataIssue> issues;
     const RenderStyleCheckInput input{.models = models, .meshCount = [](int) { return 2; }};
     CheckItemEffects(std::vector{effect, unused}, Source, input, issues);
     INFO(Describe(issues));
     // Meshes 3 and 4 are not in the item's model of two meshes; mesh 1 is.
-    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].itemValuesBefore[0].glowMesh") == 1);
-    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].itemValuesBefore[0].onlyWhen.hiddenMesh") == 1);
-    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].itemValuesBefore[0].hiddenMesh") == 0);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].valuesBefore[0].glowMesh") == 1);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].valuesBefore[0].onlyWhen.hiddenMesh") == 1);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].valuesBefore[0].hiddenMesh") == 0);
     // A value the effect doesn't let each item set, about the item.
-    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "itemEffectValues.color") == 1);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "effectValues.color") == 1);
     // An effect no item uses; a render style of the item's doesn't count.
     CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[1].name") == 1);
     CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].name") == 0);
 }
 
-TEST_CASE("The shipped item effects are used by items [looks][checks]")
+TEST_CASE("Things on bones are checked: a type the effect catalogue doesn't have is an error, a bone an item's model "
+          "doesn't have a warning about the item (design L55) [looks][checks]")
+{
+    LookDefinition effect{"wings"};
+    OnBones flares;
+    flares.places.bones = {3, 12};
+    flares.things.push_back({.kind = BoneThingKind::Sprite, .type = "flare"});
+    OnBones lightning;
+    lightning.together = true;
+    lightning.places.between = {{2, 30}};
+    lightning.things.push_back({.kind = BoneThingKind::Joint, .type = "jointThunder"});
+    lightning.things.push_back({.kind = BoneThingKind::Joint, .type = "noSuchJoint"});
+    effect.onBones = {flares, lightning};
+    ItemModelDefinition model = Model(12, 6, "");
+    model.effect = "wings";
+    const std::vector<ItemModelDefinition> models{model};
+    std::vector<ItemDataIssue> issues;
+    const RenderStyleCheckInput input{
+        .models = models,
+        .typeExists = [](BoneThingKind kind, const std::string& type)
+        { return kind == BoneThingKind::Sprite ? type == "flare" : type == "jointThunder"; },
+        .boneCount = [](int) { return 10; }};
+    CheckItemEffects(std::vector{effect}, Source, input, issues);
+    INFO(Describe(issues));
+    REQUIRE(issues.size() == 3);
+    CHECK(Count(issues, ItemDataIssueSeverity::Error, "looks[0].onBones[1].things[1].joint") == 1);
+    // Bones 12 and 30 are not in the item's model of ten bones; 2 and 3 are.
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].onBones[0].bones") == 1);
+    CHECK(Count(issues, ItemDataIssueSeverity::Warning, "looks[0].onBones[1].together.between") == 1);
+    for (const ItemDataIssue& issue : issues)
+    {
+        if (issue.severity == ItemDataIssueSeverity::Warning)
+        {
+            CHECK(issue.group == 12);
+            CHECK(issue.number == 6);
+        }
+    }
+
+    // A model that is not loaded skips the bone checks.
+    issues.clear();
+    const RenderStyleCheckInput unloaded{.models = models, .boneCount = [](int) { return 0; }};
+    CheckItemEffects(std::vector{effect}, Source, unloaded, issues);
+    CHECK(issues.empty());
+}
+
+TEST_CASE("The shipped effects are used by items [looks][checks]")
 {
     const std::filesystem::path data = MU_TEST_DATA_DIR;
-    RenderStylesLoadResult shipped = LoadLookFile(data / "Effects", LookKind::ItemEffect);
+    RenderStylesLoadResult shipped = LoadLookFile(data / "Effects", LookKind::Effect);
     REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
     const Data::Items::ItemModelDataLoadResult models =
         Data::Items::LoadItemModelDataDirectory(data / "Items" / "Models");
@@ -263,4 +337,28 @@ TEST_CASE("The shipped item effects are used by items [looks][checks]")
     CheckItemEffects(shipped.looks, Source, input, issues);
     INFO(Describe(issues));
     CHECK(issues.empty());
+}
+
+TEST_CASE("A look a monster or monster model names is used, one nobody names is a warning (MN8) [looks][checks]")
+{
+    const LookDefinition look{"monsterGlow", {Layer{}}, {}};
+    const LookDefinition looks[] = {look};
+    for (const bool named : {true, false})
+    {
+        CAPTURE(named);
+        std::vector<ItemDataIssue> issues;
+        const RenderStyleCheckInput input{.meshCount = [](int) { return 0; },
+                                          .monsterUses = [&](const std::string& name, LookKind kind)
+                                          { return named && name == "monsterGlow" && kind == LookKind::RenderStyle; }};
+        CheckRenderStyles(looks, Source, input, issues);
+        if (named)
+        {
+            CHECK(issues.empty());
+        }
+        else
+        {
+            REQUIRE(issues.size() == 1);
+            CHECK(issues[0].message == "no item or monster uses \"monsterGlow\"");
+        }
+    }
 }

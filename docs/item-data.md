@@ -421,7 +421,8 @@ a translation in a language the game has no texts in (as for item names).
 
 Wings (capes included) and mounts with the `flying` tag let a character fly.
 An item at 0 durability does not count. Icarus requires flight equipment:
-without it the character cannot warp or move there, and in Icarus the last
+without it the character cannot warp or move there (a rule of the warp list,
+[warp-list.md](warp-list.md#equipment-rules)), and in Icarus the last
 flight equipment cannot be taken off, neither by dragging it nor by
 right-clicking it.
 
@@ -639,9 +640,10 @@ placeholder is one of:
   `Level`, `Strength`, `Dexterity`, `Vitality`, `Energy` and `Leadership`
   `required…` (what the item asks, after the Jewel of Harmony's and the sockets'
   strength and agility reductions) and `missing…` (what the hero lacks of it, 0
-  when nothing), and the item's add option (the potions', scrolls', seals' and
-  charms' effect in the game's ItemAddOption data): `addOptionValue1`,
-  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
+  when nothing), and the buff the item gives (the potions', scrolls', seals'
+  and charms' effect, [its values and duration](buff-data.md#values)):
+  `addOptionValue1`, `addOptionValue2` and `addOptionDuration`, a text such as
+  "1 Hour"; the
   hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
   (its `name` in the item names' language), `levelPlusOne` (its level + 1),
   `bundleCount` (how many jewels or stones a bundle holds, as the game counts
@@ -1374,9 +1376,9 @@ and server share.
 | `ground` | How the item lies on the ground, see below. Optional. |
 | `glow` | How the item glows, see below. Optional. |
 | `renderStyle` | The look of the model when it is more than a plain textured model, see below. Optional. |
-| `renderStyleValues` | The values the item sets for the fields of its render style that each item sets, by their names: `{"color": [0.9, 0.1, 0.2]}`; see [Render styles and item effects](#render-styles-and-item-effects). Optional. |
-| `itemEffect` | What the model does before it is drawn (sprites and particles on its bones, a pulsing glow mesh, ...), see below. Optional. |
-| `itemEffectValues` | The values the item sets for the fields of its item effect that each item sets, like `renderStyleValues`. Optional. |
+| `renderStyleValues` | The values the item sets for the fields of its render style that each item sets, by their names: `{"color": [0.9, 0.1, 0.2]}`; see [Render styles and effects](#render-styles-and-effects). Optional. |
+| `effect` | What the model does before it is drawn (sprites and particles on its bones, a pulsing glow mesh, ...), see below. Optional. |
+| `effectValues` | The values the item sets for the fields of its effect that each item sets, like `renderStyleValues`. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 | `material` | `{ "specular": 0.5 }`: the strength of the highlight under Enhanced lighting, 0 (none) to 1; see [enhanced-look.md](enhanced-look.md). Optional. |
 
@@ -1446,7 +1448,7 @@ to +2 an item whose glow names one is drawn in its light times `light` (left
 out: in the light the model has), then each pass draws glowing on the shine
 meshes, in the shine color times its `brightness` and `opacity`: `kind`
 `texture` with the meshes' own texture, `reflection` with a reflection that
-moves as its `motion` says (the [motions of a look's layer](#render-styles-and-item-effects),
+moves as its `motion` says (the [motions of a look's layer](#render-styles-and-effects),
 `slowDrift` when left out). `opacity` and `brightness` are 1 when left out.
 
 ```json
@@ -1470,7 +1472,7 @@ for the inventory, ...
 ```
 
 A render style is a named look in `Data/Effects/RenderStyles.json` (see
-[Render styles and item effects](#render-styles-and-item-effects)), or one
+[Render styles and effects](#render-styles-and-effects)), or one
 still in code, listed at the end of
 `src/source/Render/Items/ItemRenderStyles.cpp`; the looks move from the code
 into the file step by step, and the game looks a name up in the file first.
@@ -1485,7 +1487,7 @@ plainly; a new look is made in the [Style Editor](#style-editor).
 
 Most styles fit any item. A look picks a mesh, a texture or a color for
 each of its items with the values each item sets (see
-[Render styles and item effects](#render-styles-and-item-effects)):
+[Render styles and effects](#render-styles-and-effects)):
 `violentWindToEternalWingHelm`, `…Armor` and `…Pants` (items 39 to 44) the
 inventory mesh or texture of each set, `divineAndSuccubusSkin` and
 `luckyItem` theirs, `socketSeed` and `socketSeedSphere` the color of the
@@ -1504,17 +1506,15 @@ Ellen; in the code the flag of a PC room look, which no player gets).
 How an item shines below +3 is no part of its style: its glow names the
 shine (`shineBelowPlus3`, see the glow values above).
 
-`itemEffect` names what the model does before it is drawn:
+`effect` names what the model does before it is drawn:
 
 ```json
-{ "number": 37, "file": "Data/Item/wing09.bmd", "textureFolders": ["Item"], "itemEffect": "wingOfEternal" }
+{ "number": 37, "file": "Data/Item/wing09.bmd", "textureFolders": ["Item"], "effect": "wingOfEternal" }
 ```
 
-An item effect is a named look in `Data/Effects/ItemEffects.json` (see
-[Render styles and item effects](#render-styles-and-item-effects)), or one
-still in code, listed at the end of `src/source/Render/Items/ItemEffects.cpp`;
-the game looks a name up in the file first. An item effect runs every frame
-before the model is drawn and can:
+An effect is a named look in `Data/Effects/Effects.json` (see
+[Render styles and effects](#render-styles-and-effects)). An effect runs
+every frame before the model is drawn and can:
 
 - place sprites, particles and lightning on bones of the model, so they
   follow its animation (the Devil's Key and Invitation, Rena, the wings of
@@ -1525,21 +1525,21 @@ before the model is drawn and can:
   `hideMesh1`), the level potions glow like (`potion`: +7 at every level
   above 0).
 
-The glow values of 39 weapons, shields, wings and orbs are item effects as
+The glow values of 39 weapons, shields, wings and orbs are effects as
 well: `pulsingGlow` (a glow mesh, or `"all"`, whose strength waves),
 `flickeringGlow`, `glowingMesh`, `shimmeringGlow` and `shimmeringPulse`
 (a glow that jumps over the texture), `scrollingDown` (the Bill of Balrog)
 and `hideMesh2` / `hideMesh1` (the Rune Blade, the Elemental Mace and Shield,
 the Dragon Spear). They apply on every drawing, on the ground too, and a
-held item's shadow leaves out the mesh its item effect hides.
+held item's shadow leaves out the mesh its effect hides.
 
-An item effect never draws the model: the looks that draw their model
+An effect never draws the model: the looks that draw their model
 themselves are render styles that draw alone (the Dark Lord's scrolls,
 `fruits`, `spirit`, `firecracker`, `gmGift`, `meshesPerLevel`), and
 `billOfBalrog` draws an extra pass before the model.
 
-Items with the same item effect share it. The socket seeds and spheres and
-zen have no item effect; they glow like level 0 (`"glow": {"level": 0}`), whatever
+Items with the same effect share it. The socket seeds and spheres and
+zen have no effect; they glow like level 0 (`"glow": {"level": 0}`), whatever
 their level.
 
 The effects of the event models that level variants are drawn with stay in
@@ -1596,7 +1596,7 @@ The problems are:
 | `noneBlendMeshes` has a mesh number the model does not have. | warning |
 | A `glow` value names a mesh the model does not have; that glow is not drawn (a hidden mesh: the glow is on all meshes). | warning |
 | `renderStyle` names a style that does not exist; the model is drawn plainly. | warning |
-| `itemEffect` names an item effect that does not exist; the model is drawn without it. | warning |
+| `effect` names an effect that does not exist; the model is drawn without it. | warning |
 
 A model file can be in the formats of the Season 6 client (BMD versions
 10 and 12) or in the encrypted format of later seasons' models (version
@@ -1610,7 +1610,7 @@ with `hid` are not drawn, so their texture is not loaded.
 On Linux the game itself hands out the copied text, so it may only be
 pastable while the game runs. The text is in `MuError.log` as well.
 
-### Render styles and item effects
+### Render styles and effects
 
 The render styles that are data are in `Data/Effects/RenderStyles.json`: a
 format version, the kind, the folders the [Style Editor](#style-editor) sorts
@@ -1641,29 +1641,31 @@ drawing hands the look.
 
 | Field | Values |
 |---|---|
-| `kind` | `texture`: the mesh's own texture, or the layer's; `reflection`: a reflection that moves over the mesh (chrome); `flatColor`: the mesh in the light alone, without a texture |
+| `kind` | `texture`: the mesh's own texture, or the layer's; `reflection`: a reflection that moves over the mesh (chrome); `flatColor`: the mesh in the light alone, without a texture; `glowOnly`: the mesh's texture added as glow alone, as the monsters' glow passes draw (a mesh whose texture has an alpha channel, or the glow mesh, is not drawn) |
 | `motion` | How a reflection moves: `slowDrift` (left out), `fastSweep`, `followsLight`, `swirl`, `strongSwirl`, `stripes`, `verySlowDrift`, `oilSheen`, `stillShine` |
 | `where` | Where a reflection goes: `over` the texture (left out), or `underHoles`: on a mesh whose texture has holes, drawn before the texture, solid and on both faces, so it fills the holes (the Magic Gladiator sets); over a texture without holes, a glowing mesh and a see-through item it goes over with its blend. A look with such a layer draws mesh by mesh, every layer of a mesh before the next mesh, and the layer leaves the light as it found it |
-| `blend` | `normal` (left out), `glow` (added to what is below), `asDrawing` (the drawing's own: a doppelganger draws see-through) |
+| `blend` | `normal` (left out), `glow` (added to what is below), `darken` (darkens what is below, the Pumpkin of Luck's reflection), `asDrawing` (the drawing's own: a doppelganger draws see-through) |
 | `meshes` | Left out: every mesh, with the model's texture scripts, without the item's hidden mesh; `"allEvenHidden"`: every mesh, the hidden one too; `[0, 2]`: those meshes; `{"allBut": [2]}`: every mesh but those; `"none"`: no mesh, a layer that draws nothing, the default of a layer the values of some items turn on |
 | `texture` | A texture file under `Data` (`Effect/Chrome01.jpg`) instead of the mesh's own: a `.jpg` or a `.tga`, which the game reads from its `.OZJ` or `.OZT` file |
-| `light` | The light the layer is drawn in: `[red, green, blue]`, or `{"tint": [red, green, blue]}`, the item's light times those; each a number or a shape. `{"brightness": 0.8}` is the item's light scaled so its brightest channel is 0.8 (a grey for a black light). It stays for the layers after it, and `{"tint": [1, 1, 1]}` is the item's light again. Left out: the light the layer before left |
+| `light` | The light the layer is drawn in: `[red, green, blue]`, or `{"tint": [red, green, blue]}`, the item's light times those; each a number or a shape. `{"brightness": 0.8}` is the item's light scaled so its brightest channel is 0.8 (a grey for a black light). `{"timesOpacity": [red, green, blue]}` is the color times the drawing's opacity, as the monsters' glow passes dim as they fade. `{"fromRed": [red, green, blue]}` is the color times the red of the item's light, as Raymond's sword and the Blood Assassins were lit from the red channel alone. It stays for the layers after it, and `{"tint": [1, 1, 1]}` is the item's light again. Left out: the light the layer before left |
+| `lightMap` | `true`: a reflection that lights the mesh as a light map, as the Drakan's second chrome. Left out: false |
+| `onTop` | `true`: the layer is drawn without the depth test, over the model's other meshes and over walls, as the PK Field's Zombie Fighter and Gladiator glows. Left out: false |
 | `opacity` | A number, a shape, or `"drawing"`: the drawing's opacity |
 | `glowMesh` | The mesh drawn glowing: a mesh number, `"none"` or `"all"` |
 | `glowStrength`, `scrollU`, `scrollV` | A number or a shape |
 | `scrollingMesh` | The mesh whose texture scrolls while the layer draws, without the light of the scene; otherwise the model's own stays |
-| `onlyWhen` | When the layer draws; every condition it sets must hold, otherwise the layer is skipped. `"place"`: `"worn"` (worn or held, with the character's skin), `"inventoryAndGround"` (the skin hidden), `"inventory"` (the inventory's drawing, in white light) or `"ground"`; `"level": [from, to]`: the level the item glows like, both included; `"hiddenMesh"`: the item's hidden mesh in this drawing, a mesh number or `"none"`; `"buff": "infinityArrow"`: the character has the buff; `"withoutBuff": "infinityArrow"`: the character doesn't. Left out: the layer always draws |
+| `onlyWhen` | When the layer draws; every condition it sets must hold, otherwise the layer is skipped. `"place"`: `"worn"` (worn or held, with the character's skin), `"inventoryAndGround"` (the skin hidden), `"inventory"` (the inventory's drawing, in white light) or `"ground"`; `"level": [from, to]`: the level the item glows like, both included; `"hiddenMesh"`: the item's hidden mesh in this drawing, a mesh number or `"none"`; `"buff": "infinityArrow"`: the character has the buff; `"withoutBuff": "infinityArrow"`: the character doesn't; `"tintingDebuff"` is any debuff that tints a monster's body (poison, freeze, Blow of Destruction). `"animation": "die"`: the drawn monster plays that animation (stop1, stop2, walk, attack1, attack2, shock, die, appear, attack3, attack4, run, attack5); `"notAnimation": "die"`: it doesn't, as a glow left out while it dies. `"opacityAbove": 0.8`: the drawing is more opaque than that; `"opacityAtMost": 0.8`: it has faded to that or less, as the Blade Hunter, drawn glowing once it fades while it dies. `"cycleHalf": {"seconds": 6.28, "half": "first"}`: the clock is in that half of a cycle of so many seconds, the first while the cycle's sine is at or above zero and the second while it is below, as the Lava Giants' pulse. Left out: the layer always draws |
 
 `notFor` lists the drawings a look is not for, which then draw the item
 plainly, as an item without a look: `"doppelganger"`, and
 `"outsideMonsterHands"` (every drawing but in a monster's hands; the layers
 that draw as the drawing asks then draw without that mark).
 
-`"drawsAlone": true` draws the look right after the item's item effect, in
+`"drawsAlone": true` draws the look right after the item's effect, in
 the object's own light, and nothing of the drawing code after it: no level
 light from +3, no level glow from +7, no excellent glow, no buff tint. The
 Dark Lord's scrolls, `spirit`, `fruits`, `firecracker`, `gmGift` and
-`meshesPerLevel` draw alone, as their item effects in code did.
+`meshesPerLevel` draw alone, as their effects in code did.
 
 ```json
 {"name": "ammunition", "layers": [
@@ -1684,10 +1686,14 @@ color.
 
 A value that changes over time names a **shape**. A layer's value can be the
 item's value times the shape (`"timesItem": true`), as the Phoenix Soul items
-pulse their own opacity and glow strength. Its numbers give the
+pulse their own opacity and glow strength, and `"atMost": 1.3` cuts its
+value off at a top, as the code's `min(sin(...) * 0.8f + 1.3f, 1.3f)`. Its numbers give the
 code's values exactly, so a look moved from code keeps them:
 `{"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}` is the
-code's `sin(WorldTime * 0.001f) * 0.6f + 0.4f`.
+code's `sin(WorldTime * 0.001f) * 0.6f + 0.4f`. A layer's opacity, glow
+strength or scroll can also be the item's value times a fixed number,
+`{"itemTimes": 1.5}`, as the Cursed Castle Water glows at 1.5 and 0.25 of
+the item's.
 
 | Shape | Fields | Value |
 |---|---|---|
@@ -1720,7 +1726,7 @@ missing or wrong number (`seconds` 0 or less, `count` outside 1 to 1000, a
 outside 0 to 15 or one whose `from` is above its `to`, `where` on a texture
 layer, a name of a value each item sets that isn't letters and digits, an
 item's value that can't be its field's (about that item), and an item
-effect's part (`itemValuesBefore`).
+effect's part (`valuesBefore`).
 **Error**, the game skips that layer: a texture that is no `.jpg` or `.tga`,
 or whose file is missing. **Warning**: unknown fields, a look without
 layers, a look no item uses, a mesh number an item's model doesn't have
@@ -1729,20 +1735,20 @@ that its look doesn't have (about that item), `timesItem` on a number that
 can't be the item's (a light, an item value, an object light, a drawing
 opacity; left out), and a folder naming a look the file doesn't have.
 
-The item effects that are data are in `Data/Effects/ItemEffects.json`,
-built like the render style file with the kind `"itemEffect"`. An item
+The effects that are data are in `Data/Effects/Effects.json`,
+built like the render style file with the kind `"effect"`. An item
 effect has none of a render style's parts (layers, `notFor`,
 `itemValuesAfter`; they are fatal there, and its parts in a render style);
 it does what comes before the drawing:
 
 ```json
-{"name": "hiddenMeshByLevel", "itemValuesBefore": [
+{"name": "hiddenMeshByLevel", "valuesBefore": [
   {"onlyWhen": {"level": [0, 0]}, "hiddenMesh": 1},
   {"onlyWhen": {"level": [1, 1]}, "hiddenMesh": 0}]},
-{"name": "potion", "itemValuesBefore": [{"onlyWhen": {"level": [1, 15]}, "glowsLikeLevel": 7}]}
+{"name": "potion", "valuesBefore": [{"onlyWhen": {"level": [1, 15]}, "glowsLikeLevel": 7}]}
 ```
 
-`itemValuesBefore` is a list of item values the effect sets before the
+`valuesBefore` is a list of item values the effect sets before the
 drawing, each with an `onlyWhen` like a layer's (its level is the level the
 item glows like). The entries apply in their order, so one can read the
 level an entry before it set. An entry sets the item values of
@@ -1753,7 +1759,54 @@ look (a layer's `"drawing"`; the Devil's Eye draws at 2), and
 `objectLight`, `[red, green, blue]` of numbers or shapes, is the light the
 update puts on the item's object, which the ground item's next draw adds to
 its light (the Devil's Eye's pulse). A field of an entry can be one each
-item sets, which the model entry sets in `itemEffectValues`.
+item sets, which the model entry sets in `effectValues`.
+`animationSpeed` plays the item object's animation in the update at that
+speed, as the Cursed Castle Water's ground item moves; without it the update
+plays none.
+
+`onBones` lists the **things** an effect creates on the item's bones in
+every update, from the item's pose in that update: sprites, particles,
+lightning and effects of the effect catalogue, each by its name there (the
+**Effect Browser** lists them) with a `subType` number.
+
+```json
+{"name": "wingOfStorm", "onBones": [
+  {"sprite": "cloud64", "subType": 1, "bones": [9, 20, 19], "scale": 0.5, "rotation": {"shape": "scroll", "perSecond": 10}},
+  {"together": {"bones": [11, 21, 29], "chance": {"oneIn": 2, "per": "once"}},
+   "things": [{"effect": "fenrirThunder", "subType": 1, "color": [0.6, 0.6, 0.9], "chance": {"oneIn": 20, "draw": "plain"}}]}]},
+{"name": "wingsOfDarkness", "onBones": [
+  {"together": {"between": [[30, 22], [29, 21]], "chance": {"oneIn": 1}},
+   "things": [{"joint": "jointThunder", "subType": 14, "scale": 20},
+              {"joint": "jointSpirit", "subType": 4, "reversed": true, "scale": 25}]}]}
+```
+
+An entry is one thing, named by its kind (`"sprite"`, `"particle"`,
+`"joint"` for lightning, `"effect"`), with its places and values; or a group,
+`"together"` with the places and the chance its `"things"` share, so they
+come together (the Wings of Darkness' two lightnings strike at once).
+
+| Field | Values |
+|---|---|
+| `bones` | The bone numbers of the item's model the thing is created at, each once a frame; 0 to 199 |
+| `between` | Lightning only: pairs of bones, `[from, to]`, 0 to 199, the lightning goes from the first to the second |
+| `at` | `"origin"`: once at the item object's own place (Rena's spark) |
+| `subType` | The SubType the type is created with, 0 to 1000 (left out: 0) |
+| `scale` | A number or a shape (left out: 1) |
+| `color` | `[red, green, blue]`, each a number or a shape: a sprite's color, the light of a particle, lightning or effect |
+| `rotation` | A sprite's rotation in degrees, a number or a shape |
+| `reversed` | Lightning from the second bone of each pair to the first |
+| `chance` | `{"oneIn": N}`, N from 1 to 10000: once in N frames at the game's reference frame rate, the same at any frame rate; `"draw": "plain"`: a plain random draw each update, as the monster sounds draw theirs; `"per": "once"`: one roll for the entry instead of one for each bone or pair. A thing inside a group can roll its own chance after the group's (the Wing of Storm's thunder), once each time the group's holds, so it has no `"per"` |
+
+An entry names exactly one of `bones`, `between` and `at`. The checks:
+**fatal** a thing of an unknown kind, lightning at bones or a thing that
+isn't lightning between bones, places named twice or not at all, a bone,
+SubType or `oneIn` out of its range, a chance without `oneIn`, `"per"` on
+the chance of a thing inside a group or of an entry at the item's place; **error** a type the effect catalogue
+doesn't have (it is not created, and the game logs it when it loads its
+data); **warning** a bone an item's model doesn't have (about that item:
+nothing is created at it, nor lightning of a pair with it). The things are created as the game moves them, so they look as in
+the game; the Devil's Key's and Invitation's sparks sit on their bones as
+the item is scaled, as every other thing on bones.
 
 ### Shared models
 
@@ -1779,7 +1832,7 @@ A shared model has a `name` of letters and digits and the `file`,
 `textureFolders`, `noneBlendMeshes` and `meshNames` of a model entry. Its file is
 opened once, by the first of its items, and its textures are loaded once;
 the other items use that data. Everything else (`inventory`, `ground`,
-`glow`, `renderStyle`, `itemEffect`, `cloth`) stays each item's own.
+`glow`, `renderStyle`, `effect`, `cloth`) stays each item's own.
 Changing a shared model changes all its items; the model tool lists them
 first (see [Item Model](#item-model)).
 
@@ -1997,7 +2050,7 @@ How changes work:
   item stat file (a profile or a table nothing uses) opens Item Formulas at
   it. Warnings (a model file that is
   missing, a file several items name themselves instead of through a
-  shared model, a render style or item effect that does not exist, a
+  shared model, a render style or effect that does not exist, a
   [part model](#part-models) problem) do not stop it. If a file cannot be written (read-only folder, full disk), no
   file is replaced, the popup says so and the console names the file. A
   file open in another program can still fail when it is replaced, after
@@ -2067,12 +2120,12 @@ number that has a model but no item:
   those models by level (the Box of Luck, the Wizard's Ring, ...); the
   preview and the inventory grid show them at the chosen level, also for
   an item without a model entry.
-- **Style and effect**: the render style and the item effect, picked from
+- **Style and effect**: the render style and the effect, picked from
   their lists with how many models use each and "(code)" for one still in
   code, and the items that use the picked one (a click selects one). **Open
-  in Style Editor** shows the render style or the item effect in the
+  in Style Editor** shows the render style or the effect in the
   [Style Editor](#style-editor). When the look lets each item set values
-  (`renderStyleValues`, `itemEffectValues`), **Values for this item** lists
+  (`renderStyleValues`, `effectValues`), **Values for this item** lists
   them, a field each, written as the model file writes them (`[0.9, 0.1, 0.2]`,
   `2`; `null` leaves the look's field out); an empty field is the look's
   default, and **Reset** takes the item's value away. Text that is no value
@@ -2081,7 +2134,7 @@ number that has a model but no item:
   name. A picked one takes the item's place until an item is picked again:
   its preview, its model file and texture folders, its meshes, and its render
   style with **Open in Style Editor**. A part model has no inventory, ground,
-  glow or item effect. Its changes are undo steps, a changed file or folder
+  glow or effect. Its changes are undo steps, a changed file or folder
   is opened again at once, and Save Items writes `PartModels.json`.
 
 A changed file, texture folder, mesh list or material is opened again
@@ -2139,7 +2192,7 @@ The editor has no bold font, so it draws a bold label twice, a pixel apart.
 
 **Windows > Style Editor** shows the looks of items as a tree, built like the
 [Colors](#colors) window and docked with the item tools, one of them: the roots **Render
-styles** and **Item effects**, each look with how many models use it, and
+styles** and **Effects**, each look with how many models use it, and
 "(code)" for a look that is still drawing code, which you see with its items
 but can't change. Folders sort the looks of each file as in the Colors
 window (**New folder**, **Rename**, **Remove**, **Move up**, **Move down**,
@@ -2147,11 +2200,11 @@ drag and drop); the files keep them as `"lookFolders"`. A look in code stays
 under its root, and the looks there are sorted by name.
 
 **New look** adds a look to the picked folder: a render style that draws the
-item plainly (one texture layer), or an item effect that sets nothing yet.
+item plainly (one texture layer), or an effect that sets nothing yet.
 **Copy** copies the picked look under a new name, and **Rename** and
 **Remove** change a look no item uses. A name has letters and digits only,
 and no other look of its root has it, in the file or in code; a render style
-and an item effect may share one.
+and an effect may share one.
 
 The picked look shows:
 
@@ -2178,7 +2231,7 @@ The picked look shows:
   the dropdown above it); **Chosen look**, the picked look as the game draws
   it now, for reference; and **As edited**, the look as the fields have it,
   before Apply. The last two draw the picked item with the picked look,
-  whatever look the item names, and all three keep the item's item effect.
+  whatever look the item names, and all three keep the item's effect.
   They share the Item Model window's controls and one camera (a drag in any
   turns all),
   with **Stop time** and a time slider, an eye per effect or layer that
@@ -2206,7 +2259,7 @@ The picked look shows:
   shows as its main effect, with the others among its settings.
 - Above the parts, the render style's own options: **Not for doppelgangers**,
   **Only in a monster's hands** and **Draws alone** (see
-  [Render styles and item effects](#render-styles-and-item-effects)).
+  [Render styles and effects](#render-styles-and-effects)).
 - **Show the layers** shows the look as its layers instead, for what the
   effects don't cover: the layers in drawing order, one line each written
   from its fields, and **Item values after drawing** as the last line;
@@ -2235,16 +2288,52 @@ The picked look shows:
   change over time.
 - The items that use the look; a click selects one.
 
-A picked **item effect** shows, instead of parts and layers, its entries
-**Before drawing** in their order (**Add**, **Remove**, **Move up**, **Move
-down**), each with its Only when, the item values it sets (no light), the
-drawing's opacity, the level the item glows like and Each item sets, and the
-**Object light** as the last line. Its preview runs the edited effect on the
-picked item; Apply, Revert and the problems work as for a render style.
+A picked **effect** shows, instead of parts and layers, its lines: its
+entries **Before drawing** in their order, each with its Only when, the item
+values it sets (no light), the drawing's opacity, the level the item glows
+like and Each item sets; the **Object light**; the **Animation speed**; and
+its entries **On bones**. **Add** beside Before drawing and beside On bones
+adds an entry to that list, and **Copy**, **Move up**, **Move down** and
+**Remove** change the picked one. An entry on bones has:
+
+- where its things go: **At bones**, **Between bones** (lightning, from the
+  first bone of a pair to the second) or **At the item's place**, with its
+  bones as number fields (**+ Bone**, **+ Pair**, `x` takes one out);
+- its **Chance**: **Once in** so many frames, drawn **At the game's frame
+  rate** or **Plain**, and **Once for all** bones or pairs;
+- **Together**, a group whose things share the entry's places and chance,
+  each thing with **Its own chance**;
+- each thing's **Kind**, its **Type** from the effect catalogue (a list with
+  a filter), **SubType**, **Scale**, **Color**, a sprite's **Rotation** and
+  lightning's **From the second bone to the first**.
+
+The views of the preview show the things on bones **live**: each view runs
+its own effect (the item's, the chosen look, the edited one) in the game's
+own effect lists, so they move and fade as in the game, and the views can be
+compared. They are created at your character's place, which the world
+doesn't draw them at, and each view draws only its own. **Stop time** stops
+them too: lightning and particles hold still, sprites and lights follow the
+time slider. A view creates nothing while the game's effect lists are
+nearly full, so the game's own effects come first. The Item Model window's
+preview shows them too.
+
+**Show bones**, beside Stop time, draws the item's skeleton over each view:
+each bone a dot joined by a line to the bone it hangs on, with its number and
+name when the mouse points at it. The picked entry's bones are orange with
+their numbers, its pairs joined from start to end, and a bone the mouse
+points at in the entry's fields is ringed. **Pick in the preview**, above the
+entry's fields, makes a click on a bone's dot add the bone or take it out;
+between bones, click the start of the lightning, then its end, which adds the
+pair or, when the entry has it, takes it out. Armor has no bones of its own
+there: it is drawn on the character's skeleton, and the game creates nothing
+on bones for it.
+
+Its preview runs the edited effect on the picked item; Apply, Revert and the
+problems work as for a render style.
 
 Each change of the looks or their folders is a step of the item undo history
 and reaches the game at once. **Save Items** writes
-`Data/Effects/RenderStyles.json` and `ItemEffects.json` with the items, each
+`Data/Effects/RenderStyles.json` and `Effects.json` with the items, each
 when it changed. A file read with a fatal
 problem is never written; the editor then shows the looks the game has.
 

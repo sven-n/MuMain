@@ -579,17 +579,22 @@ TEST_CASE("A character's mark spawns its sprite in the update, and its draw spaw
     FenrirScope::ClearSpawns();
 }
 
-TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and its draw spawns none [effects]")
+TEST_CASE("A wing's effect spawns its lights on the bones it is given, and its draw spawns none [effects]")
 {
     FenrirScope scope;
+    // The Wing of Eternal's lights are data (section 7b).
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
     ItemModelDatabaseScope restoreModels;
     Data::Items::ItemModelDefinition eternal;
     eternal.group = 12;
     eternal.number = 37;
     eternal.file = "Data/Item/Wing37.bmd";
-    eternal.itemEffect = "wingOfEternal";
+    eternal.effect = "wingOfEternal";
     g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{eternal}, Data::Effects::GlowColorList{});
     BMD* b = &Models[MODEL_WING_OF_ETERNAL];
+    // The scope's models aren't loaded: the wing has as many bones as its pose holds.
+    b->NumBones = MAX_BONES;
     b->BodyScale = 1.f;
     Vector(0.f, 0.f, 0.f, b->BodyOrigin);
     OBJECT wing;
@@ -679,7 +684,7 @@ TEST_CASE("A dying Blood Assassin breaks apart from the update, body and head, a
     FenrirScope::ClearSpawns();
 
     DrawLook look = DrawLook::Of(o);
-    CheckDrawSpawnsNone([&] { map->RenderObjectMesh(&o, look, b, false); });
+    CheckDrawSpawnsNone([&] { map->RenderObjectMesh(&o, look, b); });
     CHECK(liveEffects() == 0);
     map->UpdateMonsterEffects(&c, &o, b);
     CHECK(liveEffects() == 2);
@@ -1042,7 +1047,7 @@ TEST_CASE("Drawing an item's effect or style again and again leaves the look on 
     eye.group = 14;
     eye.number = 17;
     eye.file = "Data/Item/EventBullCatEye.bmd";
-    eye.itemEffect = "devilsEye";
+    eye.effect = "devilsEye";
     Data::Items::ItemModelDefinition bone;
     bone.group = 13;
     bone.number = 17;
@@ -1178,9 +1183,7 @@ TEST_CASE("A Lion Gate is placed by its update, not by its draw [effects]")
     Vector(23410.f, 2860.f, 0.f, gate.Position); // tile 234, 28
     BMD* b = &Models[gate.Type];
 
-    DrawLook look = DrawLook::Of(gate);
-    CheckDrawSpawnsNone([&] { GMEmpireGuardian1::Make()->RenderMonster(&gate, look, b); });
-    CHECK(gate.Position[0] == 23410.f);
+    // Its draw is the goneWhenDying look of Data/Effects/RenderStyles.json, which moves nothing.
 
     GMEmpireGuardian1::Make()->MoveMonsterVisual(&scope.character(), &gate, b);
     CHECK(gate.Position[0] == 23450.f);
@@ -1222,8 +1225,8 @@ TEST_CASE("A dying Dreadfear fades in its update, by the reference clock, not in
         CheckDrawSpawnsNone(
             [&]
             {
-                M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(&dreadfear, look, b, 0);
-                M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(&dreadfear, look, b, false);
+                M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(&dreadfear, look, b);
+                M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(&dreadfear, look, b);
             });
         CHECK(dreadfear.Alpha == 0.5f);
 
@@ -1293,7 +1296,7 @@ TEST_CASE("Drawing an object whose pose the update has not built leaves its pose
     REQUIRE_FALSE(Engine::Object::Pose::IsCurrent(&rock, b, true));
     const float before = rock.BoneTransform[0][0][3];
 
-    CheckDrawSpawnsNone([&] { CHECK(Calc_RenderObject(&rock, false, 0, 0)); });
+    CheckDrawSpawnsNone([&] { CHECK(Calc_RenderObject(&rock, false, 0)); });
     CHECK_FALSE(Engine::Object::Pose::IsCurrent(&rock, b, true));
     CHECK(rock.BoneTransform[0][0][3] == before);
 }
@@ -1334,15 +1337,21 @@ TEST_CASE("A character drawn before the update posed it is posed into draw bones
 TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")
 {
     FenrirScope scope;
+    // Its look and its light are data (design L29, section 7b).
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
     ItemModelDatabaseScope restoreModels;
     Data::Items::ItemModelDefinition water;
     water.group = 14;
     water.number = 64;
     water.file = "Data/Item/Water.bmd";
     water.renderStyle = "cursedCastleWater";
+    water.effect = "cursedCastleWater";
     g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{water}, Data::Effects::GlowColorList{});
     const int model = Data::Items::ToModelSlot(Data::Items::MakeItemType(14, 64));
     BMD* b = &Models[model];
+    // The scope's models aren't loaded: the water has as many bones as its pose holds.
+    b->NumBones = MAX_BONES;
     b->BodyScale = 1.f;
     Vector(0.f, 0.f, 0.f, b->BodyOrigin);
     OBJECT item;
@@ -1357,8 +1366,8 @@ TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and 
     for (int i = 0; i < MAX_SPRITES; ++i)
         CHECK_FALSE(Sprites[i].Live);
 
-    REQUIRE(Render::Items::Styles::Spawns(model));
-    Render::Items::Styles::Spawn(b, &item, model, scope.bones.get());
+    REQUIRE(Render::Items::ItemEffects::Spawns(model));
+    Render::Items::ItemEffects::Spawn(b, &item, model, scope.bones.get());
     int onPose = 0;
     for (int i = 0; i < MAX_SPRITES; ++i)
     {
@@ -1392,7 +1401,7 @@ TEST_CASE("A Dragon Kick afterimage leaves the fading character's alpha, place a
     CHECK(o->AnimationFrame == 4.f);
     CHECK(o->Position[0] == 1000.f);
 
-    RepeatedDraws::CheckChangesNothing([o] { RenderObject_AfterImage(o, true, 0, 0); });
+    RepeatedDraws::CheckChangesNothing([o] { RenderObject_AfterImage(o, true, 0); });
     CHECK(o->Alpha == 0.4f);
     CHECK(o->AnimationFrame == 4.f);
 }

@@ -107,47 +107,47 @@ TEST_CASE("The Style Editor's changes of a look reach the game at once and are i
     CHECK(GameLook("brightBladeGold") == nullptr);
 }
 
-TEST_CASE("Item effects are edited like render styles: a change reaches the game and is an item edit [editor][looks]")
+TEST_CASE("Effects are edited like render styles: a change reaches the game and is an item edit [editor][looks]")
 {
     LookDefinition effect{"pulse"};
-    effect.itemValuesBefore.push_back({.values = {.glowMesh = 1}});
+    effect.valuesBefore.push_back({.values = {.glowMesh = 1}});
     // A render style of the same name stays apart.
     const LookEditsScope looks({Plain("pulse")}, {}, std::vector{effect});
     LookDefinition changed = effect;
     changed.objectLight = std::array<Data::Looks::Number, 3>{0.5f, 0.5f, 0.5f};
 
-    g_ItemEffectEdits.SetLook("Change an item effect", "pulse", changed);
-    REQUIRE(Data::Looks::g_LookStore.FindItemEffect("pulse") != nullptr);
-    CHECK(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    g_EffectEdits.SetLook("Change an effect", "pulse", changed);
+    REQUIRE(Data::Looks::g_LookStore.FindEffect("pulse") != nullptr);
+    CHECK(Data::Looks::g_LookStore.FindEffect("pulse")->objectLight.has_value());
     CHECK(GameLook("pulse")->layers.size() == 1);
-    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "Change an item effect");
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "Change an effect");
     CHECK(g_ItemEdits.Undo());
-    CHECK_FALSE(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK_FALSE(Data::Looks::g_LookStore.FindEffect("pulse")->objectLight.has_value());
 
     // A render style's change in the same group is a step of its own kind, undone with it.
     g_ItemEdits.BeginGroup("Both");
-    g_ItemEffectEdits.SetLook("Both", "pulse", changed);
+    g_EffectEdits.SetLook("Both", "pulse", changed);
     g_LookEdits.SetLook("Both", "pulse", LookDefinition{"pulse", {Layer{}, Layer{}}});
     g_ItemEdits.EndGroup();
-    CHECK(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK(Data::Looks::g_LookStore.FindEffect("pulse")->objectLight.has_value());
     CHECK(GameLook("pulse")->layers.size() == 2);
     CHECK(g_ItemEdits.Undo());
-    CHECK_FALSE(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK_FALSE(Data::Looks::g_LookStore.FindEffect("pulse")->objectLight.has_value());
     CHECK(GameLook("pulse")->layers.size() == 1);
 }
 
-TEST_CASE("The Style Editor opens on an item effect with its entries before drawing (design L13, L45) [editor][looks]")
+TEST_CASE("The Style Editor opens on an effect with its entries before drawing (design L13, L45) [editor][looks]")
 {
     TestImGuiContext context;
     ToolWindowsScope windows;
     g_ItemSelection.Select(MuEditor::Items::ItemSelection::NoItem);
     LookDefinition effect{"pulse"};
-    effect.itemValuesBefore.push_back(
+    effect.valuesBefore.push_back(
         {.onlyWhen = {.level = std::pair{1, 15}}, .values = {.glowMesh = 1}, .glowsLikeLevel = 7});
     effect.objectLight = std::array<Data::Looks::Number, 3>{0.5f, 0.5f, 0.5f};
     const LookEditsScope looks({Plain("pulse")}, {}, std::vector{effect});
 
-    g_MuStyleEditorUI.ShowItemEffect("pulse");
+    g_MuStyleEditorUI.ShowEffect("pulse");
     CHECK(g_MuEditorCore.GetToolWindows().styleEditor);
     RenderStyleEditor();
     RenderStyleEditor();
@@ -158,27 +158,27 @@ TEST_CASE("The Style Editor opens on an item effect with its entries before draw
     g_MuStyleEditorUI.ShowRenderStyle("pulse");
     RenderStyleEditor();
     CHECK(g_MuStyleEditorUI.GetDraft() == Plain("pulse"));
-    CHECK_FALSE(g_MuStyleEditorUI.HasUnappliedChanges("pulse", Data::Looks::LookKind::ItemEffect));
+    CHECK_FALSE(g_MuStyleEditorUI.HasUnappliedChanges("pulse", Data::Looks::LookKind::Effect));
 
     // An entry's line describes it.
-    CHECK(MuEditor::Looks::Fields::DescribeItemValuesBefore(effect.itemValuesBefore[0]).find(I18N::Editor::OnlyWhen) ==
+    CHECK(MuEditor::Looks::Fields::DescribeValuesBefore(effect.valuesBefore[0]).find(I18N::Editor::OnlyWhen) ==
           0);
 
     // The fields of an entry and of the object's light draw without changing them.
-    Data::Looks::ItemValuesBefore entry = effect.itemValuesBefore[0];
+    Data::Looks::ValuesBefore entry = effect.valuesBefore[0];
     std::optional<std::array<Data::Looks::Number, 3>> light = effect.objectLight;
     for (int frame = 0; frame < 3; ++frame)
     {
         ImGui::NewFrame();
         ImGui::SetNextWindowSize(ImVec2(900.0f, 900.0f));
         ImGui::Begin("Fields");
-        CHECK_FALSE(MuEditor::Looks::Fields::ItemValuesBeforeEntry(entry));
+        CHECK_FALSE(MuEditor::Looks::Fields::ValuesBeforeEntry(entry));
         CHECK_FALSE(MuEditor::Looks::Fields::ObjectLight(light));
         ImGui::End();
         ImGui::Render();
         CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
     }
-    CHECK(entry == effect.itemValuesBefore[0]);
+    CHECK(entry == effect.valuesBefore[0]);
     CHECK(light == effect.objectLight);
 }
 
@@ -420,6 +420,109 @@ TEST_CASE("Every field of a look draws, as drag fields, part checkboxes and drop
     }
 }
 
+TEST_CASE("A layer's line names the values it sets, the item's value times a number too (design L59) "
+          "[editor][looks]")
+{
+    using namespace Data::Looks;
+    Layer layer;
+    const std::string itemOwn = MuEditor::Looks::Fields::DescribeLayer(layer);
+    CHECK(itemOwn.find(I18N::Editor::GlowStrength) == std::string::npos);
+    layer.glowStrength = FromItem{.times = 1.5f};
+    layer.opacity = FromItem{.times = 0.25f};
+    const std::string times = MuEditor::Looks::Fields::DescribeLayer(layer);
+    CHECK(times.find(I18N::Editor::GlowStrength) != std::string::npos);
+    CHECK(times.find(I18N::Editor::Opacity) != std::string::npos);
+}
+
+TEST_CASE("An entry on bones' line says where its things go, Between bones before its first pair too (design L58) "
+          "[editor][looks]")
+{
+    using namespace Data::Looks;
+    OnBones entry;
+    entry.things.push_back({.kind = BoneThingKind::Joint, .type = "jointThunder"});
+    CHECK(MuEditor::Looks::Fields::DescribeOnBones(entry).find(I18N::Editor::AtBones) != std::string::npos);
+    CHECK(MuEditor::Looks::Fields::DescribeOnBones(entry, true).find(I18N::Editor::BetweenBones) != std::string::npos);
+    entry.places.bones = {3};
+    CHECK(MuEditor::Looks::Fields::DescribeOnBones(entry, true).find(I18N::Editor::AtBones) != std::string::npos);
+}
+
+TEST_CASE("A thing on bones made another kind drops its type and what only its kind has, and keeps the rest "
+          "(design L58) [editor][looks]")
+{
+    using namespace Data::Looks;
+    BoneThing sprite{.kind = BoneThingKind::Sprite, .type = "light", .subType = 2, .scale = 0.5f, .rotation = 45.f};
+    MuEditor::Looks::Fields::ChangeKind(sprite, BoneThingKind::Particle);
+    CHECK(sprite.kind == BoneThingKind::Particle);
+    CHECK(sprite.type.empty());
+    CHECK(sprite.rotation == Number{0.f});
+    CHECK(sprite.subType == 2);
+    CHECK(sprite.scale == Number{0.5f});
+
+    BoneThing lightning{.kind = BoneThingKind::Joint, .type = "jointSpirit", .reversed = true};
+    MuEditor::Looks::Fields::ChangeKind(lightning, BoneThingKind::Effect);
+    CHECK_FALSE(lightning.reversed);
+}
+
+TEST_CASE("An entry on bones moved elsewhere starts without bones, and at the item's place without Once for all "
+          "(design L58) [editor][looks]")
+{
+    using namespace Data::Looks;
+    using MuEditor::Looks::Fields::PlaceMode;
+    OnBones entry;
+    entry.places.bones = {3, 4};
+    entry.chance = Chance{.oneIn = 2, .once = true};
+    MuEditor::Looks::Fields::ChangePlaceMode(entry, PlaceMode::Between);
+    CHECK(entry.places == BonePlaces{});
+    CHECK(entry.chance->once);
+    entry.places.between = {{1, 2}};
+    MuEditor::Looks::Fields::ChangePlaceMode(entry, PlaceMode::Origin);
+    CHECK(entry.places.origin);
+    CHECK(entry.places.between.empty());
+    CHECK_FALSE(entry.chance->once);
+    CHECK(entry.chance->oneIn == 2);
+}
+
+TEST_CASE("An entry list's buttons keep the picked line on its entry, and say when it shows another, which drops a "
+          "choice kept for it (Between bones before its first pair) [editor][looks]")
+{
+    using MuEditor::Looks::Fields::ApplyEntryButton;
+    using MuEditor::Looks::Fields::EntryButton;
+    // The lines of the list from 5 on; the second entry picked.
+    std::vector<int> list{10, 20, 30};
+    std::size_t line = 6;
+    CHECK(ApplyEntryButton(list, 5, line, EntryButton::MoveUp));
+    CHECK(line == 5);
+    CHECK(list == std::vector<int>{20, 10, 30});
+    CHECK(ApplyEntryButton(list, 5, line, EntryButton::MoveUp));
+    CHECK(line == 5);
+    CHECK(ApplyEntryButton(list, 5, line, EntryButton::MoveDown));
+    CHECK(line == 6);
+    CHECK(list == std::vector<int>{10, 20, 30});
+    CHECK_FALSE(ApplyEntryButton(list, 5, line, EntryButton::Copy));
+    CHECK(line == 7);
+    CHECK(list == std::vector<int>{10, 20, 20, 30});
+    CHECK_FALSE(ApplyEntryButton(list, 5, line, EntryButton::Remove));
+    CHECK(line == 7);
+    CHECK(list == std::vector<int>{10, 20, 30});
+    line = 7;
+    CHECK_FALSE(ApplyEntryButton(list, 5, line, EntryButton::Remove));
+    CHECK(line == 6);
+    std::vector<int> one{1};
+    line = 5;
+    CHECK_FALSE(ApplyEntryButton(one, 5, line, EntryButton::Remove));
+    CHECK(line == 4);
+}
+
+TEST_CASE("Only the list line whose fields showed last shows Between bones chosen, not one clicked in this frame "
+          "(design L58) [editor][looks]")
+{
+    using MuEditor::Looks::Fields::LineShowsBetweenChosen;
+    CHECK(LineShowsBetweenChosen(7, 7, true));
+    // Line 8 clicked in this frame: its fields haven't shown yet, the choice is line 7's.
+    CHECK_FALSE(LineShowsBetweenChosen(8, 7, true));
+    CHECK_FALSE(LineShowsBetweenChosen(7, 7, false));
+}
+
 TEST_CASE("A field of a look says what it does while the mouse rests on it (design L42) [editor][looks]")
 {
     TestImGuiContext context;
@@ -477,9 +580,9 @@ TEST_CASE("The preview draws a look with the values of the picked item that name
         MuEditor::Looks::ForItem(look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 0));
     REQUIRE(forItem.has_value());
     CHECK(forItem->layers[0].meshes.meshes == std::vector<int>{1, 2});
-    // An item that names another look, or looks at the item effects, draws this look as it is.
+    // An item that names another look, or looks at the effects, draws this look as it is.
     CHECK_FALSE(MuEditor::Looks::ForItem(look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 1)).has_value());
-    CHECK_FALSE(MuEditor::Looks::ForItem(look, LookKind::ItemEffect, Data::Items::MakeItemType(0, 0)).has_value());
+    CHECK_FALSE(MuEditor::Looks::ForItem(look, LookKind::Effect, Data::Items::MakeItemType(0, 0)).has_value());
 
     // The preview keeps the look it made while nothing it was made from changes.
     MuEditor::Looks::ItemPreviewLook kept;

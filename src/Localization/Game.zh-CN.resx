@@ -184,9 +184,6 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>翻译物品名称</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>窗口模式</value>
-  </data>
   <data name="Enhanced graphics" xml:space="preserve">
     <value>增强画面</value>
   </data>
@@ -1259,5 +1256,14 @@
   </data>
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>合计：+%d</value>
+  </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>你无法携带当前装备传送到那里。</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>大师 %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>转生 %d</value>
   </data>
 </root>
