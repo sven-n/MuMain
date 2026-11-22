@@ -6,6 +6,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace Data::Buffs
@@ -29,6 +30,11 @@ public:
     void Build(std::span<const BuffDefinition> buffs, std::string_view locale);
     // Builds the texts in another language.
     void SetDisplayLocale(std::string_view locale);
+    // The language the texts are in.
+    const std::string& GetDisplayLocale() const
+    {
+        return m_locale;
+    }
 
     const std::vector<BuffDefinition>& GetAll() const
     {
@@ -36,6 +42,9 @@ public:
     }
     // The buff of that number, or nullptr.
     const BuffDefinition* Find(int number) const;
+    // The buff the item gives, or nullptr. Of several (13/43 gives 29 and 40) the lowest number, as the old buff info
+    // (by number) had it, whatever the file's order.
+    const BuffDefinition* FindByItem(int group, int number) const;
     // Its texts in the display language, or nullptr.
     const BuffDisplayTexts* FindTexts(int number) const;
 
@@ -49,12 +58,22 @@ private:
 
     BuffDatabase();
 
+    // The key of an item in m_itemBuffs.
+    static constexpr int ItemKey(int group, int number)
+    {
+        return (group << 16) | (number & 0xFFFF);
+    }
+
     std::vector<BuffDefinition> m_buffs;
     std::vector<BuffDisplayTexts> m_texts;
+    std::string m_locale;
     // The index in m_buffs by number, or NoBuff.
     std::array<int, MaxBuffNumber + 1> m_indices{};
     // Each buff's family as the lowest buff number in it, or NoBuff for none; by index in m_buffs.
     std::vector<int> m_families;
+    // The index in m_buffs of the buff each item gives (the lowest number of several), by ItemKey: the item tooltips
+    // ask every frame.
+    std::unordered_map<int, int> m_itemBuffs;
 };
 } // namespace Data::Buffs
 

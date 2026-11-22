@@ -1,10 +1,13 @@
 #pragma once
 
+#include "Data/GameData/BuffData/BuffAttributes.h"
 #include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/ItemData/ItemOptionDefinition.h"
 
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <vector>
 
 // One buff or debuff of Data/Buffs/Buffs.json (buffs design, B1, B10, B12): what the game shows for the effect number
 // the server sends. See docs/superpowers/specs/2026-11-08-buffs-design.md.
@@ -21,6 +24,26 @@ enum class BuffKind : std::uint8_t
 {
     Buff,
     Debuff,
+};
+
+// What the buff raises: an attribute, by OpenMU's Stats name in camelCase ("defenseBase"), or by a name of Webzen's
+// item add options where OpenMU has none ("mobility"), and the value it adds, in the item options' value format. The
+// value is the one of Webzen's Season 6 data: a rate in percent ("experienceRate" 150 is 150 %).
+struct BuffPowerUp
+{
+    std::string attribute;
+    Items::ItemOptionAdd add = Items::ItemOptionAdd::Add;
+    Items::ItemOptionValue value;
+    // The attribute's index in BuffAttributes, which the buff table resolves when it loads (BuffDatabase::Build), so
+    // the character stats summed every frame never compare a name; NoBuffAttribute until then.
+    int attributeIndex = NoBuffAttribute;
+
+    // The data only: attributeIndex follows from the name, so a loaded power-up equals an edited one with the same
+    // data.
+    bool operator==(const BuffPowerUp& other) const
+    {
+        return attribute == other.attribute && add == other.add && value == other.value;
+    }
 };
 
 // The item that gives the buff, by its group and number.
@@ -44,6 +67,12 @@ struct BuffDefinition
     // Its tooltip lines, separated by '\n'; empty for none.
     LocalizedString description;
     std::optional<BuffItemLink> item;
+    // How long the buff lasts, in seconds, when the server sends no time; none when only the server knows it (an item
+    // of the cash shop lasts as long as it was bought for).
+    std::optional<Items::ItemOptionValue> duration;
+    // What it raises, in their order: an item's tooltip shows the first as {addOptionValue1}, the second as
+    // {addOptionValue2}.
+    std::vector<BuffPowerUp> powerUps;
     // The buffs of one family are tiers of the same buff; the strip shows only the highest tier on. Empty for none.
     std::string family;
     int tier = 0;

@@ -5,6 +5,7 @@
 #include "Character/CharacterManager.h"
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/_GlobalFunctions.h"
+#include "Data/GameData/BuffData/BuffDatabase.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -12,7 +13,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/CSItemOption.h"
-#include "GameLogic/Items/ItemAddOptioninfo.h"
+#include "GameLogic/Buffs/BuffValues.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemOptions.h"
 #include "I18N/All.h"
@@ -209,12 +210,13 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope s
 
     // The stat lines' values (NeedsAllTooltipValues names them).
     values.bundleCount = COMGEM::CalcCompiledCount(&item);
-    if (g_pItemAddOptioninfo != nullptr)
+    // An item that gives a buff shows the buff's values and duration (Data/Buffs/Buffs.json).
+    if (const Data::Buffs::BuffDefinition* buff =
+            g_BuffDatabase.FindByItem(item.Type / MAX_ITEM_INDEX, item.Type % MAX_ITEM_INDEX))
     {
-        const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
-        values.addOptionValue1 = addOption.m_byValue1;
-        values.addOptionValue2 = addOption.m_byValue2;
-        values.addOptionTime = addOption.m_Time;
+        values.addOptionValue1 = GameLogic::Buffs::GetPowerUpValue(*buff, 0);
+        values.addOptionValue2 = GameLogic::Buffs::GetPowerUpValue(*buff, 1);
+        values.addOptionTime = GameLogic::Buffs::GetDuration(*buff);
     }
     ComputeDamage(item, values);
     const StrengthenCapability harmony = HarmonyBonus(item, 2);
