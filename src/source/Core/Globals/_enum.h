@@ -3334,7 +3334,7 @@ enum
 // animation index itself, and ReceiveAction maps it back with its own case. Pinned so
 // an action inserted above PLAYER_POINT_DANCE cannot silently change what clients play.
 inline constexpr int AT_POINT_DANCE = 227;
-static_assert(PLAYER_POINT_DANCE == AT_POINT_DANCE,
+static_assert(PLAYER_POINT_DANCE == 227 && AT_POINT_DANCE == 227,
               "AT_POINT_DANCE is the pinned point-dance request value; update both deliberately");
 // ai end
 

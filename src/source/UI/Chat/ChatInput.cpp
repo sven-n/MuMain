@@ -2,6 +2,8 @@
 #include "Core/Utilities/Random.h"
 #include "UI/Chat/ChatInput.h"
 
+#include <cwctype>
+
 // Includes mirror ZzzInterface.cpp.
 #include "Core/Platform/Imm.h"
 #include "UI/Core/UIManager.h"
@@ -48,12 +50,75 @@
 
 namespace UI::Chat
 {
+namespace
+{
+std::wstring_view TrimLeft(std::wstring_view text)
+{
+    while (!text.empty() && std::iswspace(static_cast<wint_t>(text.front())))
+    {
+        text.remove_prefix(1);
+    }
+    return text;
+}
+} // namespace
+
+bool IsDanceCommand(std::wstring_view text)
+{
+    text = TrimLeft(text);
+    if (text.size() < DanceCommand.size() ||
+        _wcsnicmp(text.data(), DanceCommand.data(), DanceCommand.size()) != 0)
+    {
+        return false;
+    }
+
+    return text.size() == DanceCommand.size() ||
+           std::iswspace(static_cast<wint_t>(text[DanceCommand.size()]));
+}
+
+bool ContainsDanceWord(std::wstring_view text)
+{
+    const std::wstring_view word = I18N::Game::Dance;
+    if (word.empty() || word.size() > text.size())
+    {
+        return false;
+    }
+
+    for (std::size_t position = 0; position + word.size() <= text.size(); ++position)
+    {
+        if (_wcsnicmp(text.data() + position, word.data(), word.size()) != 0)
+        {
+            continue;
+        }
+
+        if (position > 0)
+        {
+            const wchar_t previous = text[position - 1];
+            if (previous == L'/' || std::iswalnum(static_cast<wint_t>(previous)))
+            {
+                continue;
+            }
+        }
+
+        if (position + word.size() < text.size() &&
+            std::iswalnum(static_cast<wint_t>(text[position + word.size()])))
+        {
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 void CheckChatText(wchar_t* Text)
 {
     // Slash commands go through CheckCommand; a malformed /dance command must not
     // fall through and trigger a word emote from its arguments.
-    if (_wcsnicmp(Text, L"/dance", 6) == 0)
+    if (IsDanceCommand(Text))
+    {
         return;
+    }
 
     CHARACTER* c = Hero;
     OBJECT* o = &c->Object;
@@ -133,16 +198,9 @@ void CheckChatText(wchar_t* Text)
     {
         SetActionClass(c, o, PLAYER_HUSTLE, AT_HUSTLE);
     }
-    else if (Text[0] != L'/' && FindText(Text, I18N::Game::Dance))
+    else if (ContainsDanceWord(Text))
     {
         SetActionClass(c, o, PLAYER_POINT_DANCE, AT_POINT_DANCE);
-    }
-    else if (FindText(Text, L"/dance") || FindText(Text, L"/Dance"))
-    {
-        // PLAYER_POINT_DANCE is a real action in player.bmd (index 227). The animation
-        // request carries that index; the server relays it unchanged and ReceiveAction's
-        // default plays the number as the animation, so other clients dance too.
-        SetActionClass(c, o, PLAYER_POINT_DANCE, static_cast<BYTE>(PLAYER_POINT_DANCE));
     }
     else if (FindText(Text, I18N::Game::ComeOn))
     {
