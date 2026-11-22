@@ -137,6 +137,7 @@ using namespace mu::ui::window;
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "GameLogic/Skills/SkillHotkeyConfiguration.h"
+#include "Network/RoundTripMeter.h"
 
 #define MAX_DEBUG_MAX 10
 
@@ -14042,6 +14043,13 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             {
                 g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x0B] (too short: %d bytes)", Size);
             }
+        }
+        else if (subcode == 0x0D && bIsC1C3 && Size >= 8)
+        {
+            // The answer to a round trip request of the ping: the token the request carried.
+            const uint32_t token = ReceiveBuffer[4] | (ReceiveBuffer[5] << 8) | (ReceiveBuffer[6] << 16) |
+                                   (static_cast<uint32_t>(ReceiveBuffer[7]) << 24);
+            Network::Ping().Answered(token, Network::RoundTripMeter::Clock::now());
         }
         else
         {

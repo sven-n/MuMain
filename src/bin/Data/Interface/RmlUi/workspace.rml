@@ -103,6 +103,10 @@
 					<div class="slot" data-window="doppelganger_frame"></div>
 					<div class="slot" data-window="duel_watch_users"></div>
 				</div>
+				<!-- The ping ($ping), in the top-right corner below the header. -->
+				<div class="region ping-corner" data-scale="hud">
+					<div class="slot" data-window="ping"></div>
+				</div>
 				<!-- Where the friend list first opens: the corner above the HUD. -->
 				<div class="region free-bottom-right">
 					<div class="slot" data-window="friends"></div>

@@ -25,6 +25,8 @@ constexpr ManagedExport kManagedExports_Connection[] = {
     // Libraries from before it connect over TCP only.
     {"ConnectionManager_SetRelay", true},
     {"ConnectionManager_SendLogin"},
+    // Libraries from before it can't measure the ping.
+    {"ConnectionManager_SendRoundTripRequest", true},
     {"ConnectionManager_SendAuthenticateExt"},
     {"ConnectionManager_SendChatMessageExt"},
 };
