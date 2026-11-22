@@ -9123,7 +9123,7 @@ Pantalla completa cambia el monitor a la resolución elegida.</value>
   <data name="Attack rate (PvM): +%d" xml:space="preserve">
     <value>Tasa de ataque (PvM): +%d</value>
   </data>
-  <data name="DarkRavenDamageDD" xml:space="preserve">
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
     <value>Daño del {item:13,5}: +%d~%+d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">

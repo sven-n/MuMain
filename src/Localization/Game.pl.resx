@@ -9542,7 +9542,7 @@ Pełny ekran przełącza monitor na wybraną rozdzielczość.</value>
   <data name="Attack rate (PvM): +%d" xml:space="preserve">
     <value>Współczynnik ataku (PvM): +%d</value>
   </data>
-  <data name="DarkRavenDamageDD" xml:space="preserve">
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
     <value>Obrażenia {item:13,5:gen}: +%d~%+d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">

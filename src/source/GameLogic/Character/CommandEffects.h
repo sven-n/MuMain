@@ -3,10 +3,10 @@
 #include "Data/GameData/ItemData/ItemPetStats.h"
 
 // What the Dark Lord's command adds: the attack rate by OpenMU's ClassDarkLord formula; the Dark Raven's and Dark
-// Horse's damage and attack speed by their pet stats in the item data ("petStats": the raven's follow OpenMU's
-// ClassDarkLord, the horse's the original client, since OpenMU's command reaches the horse through Earthshake's
-// damage); and the guild size by the original client's rule (GameLogic/Social/GuildSize.h; OpenMU does not check
-// it). Each part is what the stat is with the command less what it is without it, as the client counts it.
+// Horse's damage, attack speed and attack success rate by their pet stats in the item data ("petStats": the raven's
+// follow OpenMU's ClassDarkLord, the horse's the original client, since OpenMU's command reaches the horse through
+// Earthshake's damage); and the guild size by the original client's rule (GameLogic/Social/GuildSize.h; OpenMU does
+// not check it). Each part is what the stat is with the command less what it is without it, as the client counts it.
 namespace GameLogic::Character
 {
 // Command per point of the PvM attack rate.

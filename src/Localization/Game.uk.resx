@@ -9120,7 +9120,7 @@
   <data name="Attack rate (PvM): +%d" xml:space="preserve">
     <value>Точність (PvM): +%d</value>
   </data>
-  <data name="DarkRavenDamageDD" xml:space="preserve">
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
     <value>Шкода {item:13,5:gen}: +%d~%+d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">

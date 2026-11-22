@@ -9657,7 +9657,7 @@ Fullscreen changes the monitor to the chosen resolution.</value>
   <data name="Attack rate (PvM): +%d" xml:space="preserve">
     <value>Attack rate (PvM): +%d</value>
   </data>
-  <data name="DarkRavenDamageDD" xml:space="preserve">
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
     <value>{item:13,5} damage: +%d~%+d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">

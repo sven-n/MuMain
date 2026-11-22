@@ -670,6 +670,9 @@ internal static class CppEmitter
         sb.AppendLine("}");
     }
 
+    /// A printf conversion after a '%', "%%" aside. The space flag is left out on purpose, so that prose such as
+    /// "50% damage" does not count as a format; the trade-off is that a real "% d" is not detected either, and an
+    /// item name's '%' in such a text would not be escaped. No item text uses the space flag.
     private static bool HasPrintfConversion(string value) =>
         Regex.IsMatch(value.Replace("%%", ""),
             @"%(?:[0-9]+\$)?[-+#0']*(?:\d+|\*(?:[0-9]+\$)?)?(?:\.(?:\d*|\*(?:[0-9]+\$)?))?(?:hh|ll|I32|I64|[hlLjztI])?[cCdiouxXeEfgGaAnpsS]");
