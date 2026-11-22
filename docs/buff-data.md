@@ -34,7 +34,9 @@ The design and the steps still to come are in
 | `group` | Buffs of one group are the same kind of effect. The cash shop asks before an item replaces an active buff of its group. Buffs of one group share one countdown: a second buff of the group shows no time left, and the end of either ends the countdown. |
 | `displayName` | The name in the tooltip, in every language the game has; a language without one shows the English. |
 | `description` | The tooltip lines under the name, separated by `\n`; left out for none. |
-| `item` | The item that gives the buff (`group`, `number`); left out for none. When the server sends no duration, the countdown takes the item's duration (its add option's time). Moving the item in the item tools does not move this link yet (the Buffs tool will); the buff then names a missing item, an error. |
+| `item` | The item that gives the buff (`group`, `number`); left out for none. The item's tooltip shows the buff's values and duration (see [Values](#values)). Moving the item in the item tools does not move this link yet (the Buffs tool will); the buff then names a missing item, an error. |
+| `duration` | How long the buff lasts in seconds, in the [value format of the item options](item-data.md#item-options) (`{"values": 1800}`, without `per` terms), when the server sends no time; left out when only the server knows it. Only an item buff's countdown uses it. |
+| `powerUps` | What the buff raises, in their order: each an `attribute` and its value in the item options' format under `add`. `addFinal` and `percent` are read, but the client adds every value as `add` (a warning). See [Values](#values). |
 | `family`, `tier` | Buffs of one family are tiers of the same buff: when several are on, the buff strip shows only the highest tier. `tier` is left out for 0, the lowest. |
 | `hidden` | `true`: the effect gets no icon on the buff strip. |
 | `cancelSkill` | A right-click on the icon asks to cancel the buff and sends this skill to the server. The server decides whether it may be cancelled; OpenMU allows it for Infinity Arrow and Expansion of Wizardry and their strengthened tiers (skills 77, 441, 233, 380, 383). |
@@ -46,6 +48,61 @@ know, a text in a language the game has no texts in, and a name longer than 49
 letters (it is cut) are warnings. All of them go to the log and show in the
 editor's Data Checks (area **Buffs**,
 [dev-editor.md](dev-editor.md#data-checks)).
+
+## Values
+
+The values and durations of the 45 buffs that items give (scrolls, elixirs,
+seals, the Jack O'Lantern and cherry blossom items, talismans) are Webzen's
+Season 6 numbers, as the item add option table (`ItemAddOption.bmd`) has them.
+The file is unchanged, but the client reads only its guardian (380) options
+now; a test checks that every item buff keeps its row. The character stats, the
+Scroll of Battle's critical damage rate, the countdown of an item buff without
+a time from the server and the item tooltips read them from here; an item's
+tooltip shows its buff's first value as `{addOptionValue1}`, the second as
+`{addOptionValue2}` and its duration as `{addOptionDuration}`.
+
+```json
+{"number": 45, "name": "scrollOfDefense", "kind": "buff", "group": 68,
+ "item": {"group": 14, "number": 73},
+ "powerUps": [{"attribute": "defenseBase", "add": {"values": 60}}]}
+```
+
+- **Attributes.** OpenMU's attribute names in camelCase where OpenMU has the
+  attribute (`defenseBase`, `attackSpeedAny`, `experienceRate`), else a name
+  of Webzen's add option (`disableExperience`, `mobility`,
+  `vulcanusItemDropRate`, `partyExperienceBonus`, `vitalityBonus`). The list
+  is `BuffAttributes.h`; another name is an error. A `per` term on a hero
+  attribute the client doesn't read is a warning: the term adds nothing.
+- **The character stats.** They add up the power-ups of all the hero's buffs
+  by attribute: physical damage `physicalBaseDmg` and `baseDamageBonus`,
+  wizardry `wizardryBaseDmg` and `baseDamageBonus`, defense `defenseBase`,
+  the stats `totalStrength`, `totalAgility`, `totalVitality`, `totalEnergy`
+  and `totalLeadership`. A new buff with one of them counts without code; a
+  debuff doesn't: a value only raises its attribute, and the format has no
+  decrease yet, so the stats don't count a debuff's power-ups, and they are a
+  warning (an item's tooltip still shows them). The
+  Seal of Strength (13/96) counts this way; the original client had no check
+  for it, so its +50 damage and +60 defense never showed. Elixirs of different
+  stats add up too, where the old checks counted only the first of them;
+  OpenMU lets a character have one elixir at a time, so nothing changes there.
+  The Scroll of Battle adds `criticalDamageChance` the same way.
+- **The Christmas buffs still in code.** The Santa NPC's event buffs
+  (Blessing of Xmas, Strength of Santa, Defense of Santa) are still added by
+  their own checks in `ZzzInfomation.cpp` and have no `powerUps` yet. A
+  power-up given to one of them counts twice unless the same change removes
+  those checks.
+- **Numbers.** As Webzen's data gives them: a rate in percent
+  (`experienceRate` 150 is 150 %), the auras' value per level of the hero
+  (`{"values": 0, "per": [{"attribute": "level", "times": 10}]}`). Each is one
+  number: a list (`[1800]`) is one value per item level, and a buff has none,
+  so a list stops the game.
+- **No duration.** The cash shop's scrolls and seals (Scroll of Quickness,
+  Scroll of Defense, Seal of Wealth) have none: Webzen's server takes their
+  time from the purchase, so only the time the server sends shows.
+- **OpenMU.** OpenMU stores some of these another way or with other numbers:
+  the Scroll of Defense and Jack O'Lantern Cry as final defense (+30 and +50),
+  Jack O'Lantern Blessings for 32 minutes, Gladiator's Honor for 30, the cash
+  shop's items for 30. The planned sync with the server compares them.
 
 ## Compared with the original client
 

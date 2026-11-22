@@ -17,6 +17,8 @@ it yourself").
 | Light mood | darker baked map light, so the light sources stand out | [light-mood.md](light-mood.md) |
 | Post-processing | bloom around light effects and per-map colour grading | [post-processing.md](post-processing.md) |
 | Anti-aliasing | multisampled edges (4 samples, or what `Antialiasing` asks for), alpha-to-coverage for cut-out foliage and fences | — |
+| Edge smoothing (optional) | FXAA over the processed scene, before the interface: smooths what multisampling misses (shimmer on highlights, rim light, fine texture); off unless the player ticks it | [post-processing.md](post-processing.md#edge-smoothing) |
+| Render scale and sharpening (optional) | The 3D scene drawn at 50 to 100 percent of the window's size and upscaled to it (FSR 1), and sharpened; the interface stays at the window's size. 100 percent and no sharpening unless the player chooses | [post-processing.md](post-processing.md#render-scale-and-sharpening) |
 
 ## Choosing the look
 
@@ -32,6 +34,9 @@ it yourself").
   |---|---|---|
   | `Look` | `Enhanced` or `Classic` | `Classic` |
   | `Antialiasing` | samples of the Enhanced look: `0` (off), `2`, `4` or `8` | `4` |
+  | `EdgeSmoothing` | `1` adds edge smoothing (FXAA) to the Enhanced look, with or without multisampling | `0` |
+  | `RenderScale` | the Enhanced look's 3D scene in percent of the window's size, `50` to `100`, upscaled to it | `100` |
+  | `Sharpness` | sharpening of the Enhanced look's 3D scene, `0` (none) to `100` | `0` |
   | `Anisotropy` | maximum anisotropic filtering, clamped to the GPU | `8` |
   | `EnhancedLighting`, `DynamicLights`, `Sunlight`, `LightMood`, `PostProcessing` | `0` switches that feature of Enhanced off; Classic ignores them | `1` |
 
@@ -40,8 +45,12 @@ it yourself").
   anti-aliasing whatever `Antialiasing` says; Enhanced uses its count, lowered
   to what the GPU supports. The options window's Anti-aliasing row, or
   `$msaa off|2|4|8` in the chat box, changes and saves the count (on a slow GPU,
-  Off keeps Enhanced without anti-aliasing). The Anisotropic filtering row sets
-  `Anisotropy`.
+  Off keeps Enhanced without anti-aliasing). The Edge smoothing (FXAA) row, or
+  `$fxaa on|off`, changes and saves `EdgeSmoothing`; Classic renders without it.
+  The Render scale and Sharpness rows, or `$renderscale <50-100>` and
+  `$sharpness <0-100>`, change and save `RenderScale` and `Sharpness`; Classic
+  renders at the window's size without sharpening.
+  The Anisotropic filtering row sets `Anisotropy`.
   The anisotropy level applies to every texture with mip levels: world
   textures in Enhanced, and upscaled textures (an optional asset pack) in both
   looks, because they are always drawn smaller than they are stored.

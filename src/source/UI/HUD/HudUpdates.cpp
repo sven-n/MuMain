@@ -13,6 +13,13 @@ extern CUIMapName* g_pUIMapName;
 
 namespace UI::Hud
 {
+namespace
+{
+// The main frame's slot of each ItemHotkey.
+constexpr int ItemHotkeySlots[] = {mu::ui::window::HOTKEY_Q, mu::ui::window::HOTKEY_W, mu::ui::window::HOTKEY_E,
+                                   mu::ui::window::HOTKEY_R};
+} // namespace
+
 void SetGensStanding(int contribution, int ranking, int nextContribution)
 {
     g_pNewUIGensRanking->SetContribution(contribution);
@@ -49,11 +56,17 @@ void SetSkillHotkey(int hotkey, int skillIndex)
     g_pMainFrame->SetSkillHotKey(hotkey, skillIndex);
 }
 
+void ClearItemHotkeys()
+{
+    for (const int slot : ItemHotkeySlots)
+    {
+        g_pMainFrame->SetItemHotKey(slot, -1, 0);
+    }
+}
+
 void SetItemHotkey(ItemHotkey hotkey, int itemType, int itemLevel)
 {
-    static constexpr int keys[] = { mu::ui::window::HOTKEY_Q, mu::ui::window::HOTKEY_W, mu::ui::window::HOTKEY_E,
-                                    mu::ui::window::HOTKEY_R };
-    g_pMainFrame->SetItemHotKey(keys[static_cast<int>(hotkey)], itemType, itemLevel);
+    g_pMainFrame->SetItemHotKey(ItemHotkeySlots[static_cast<int>(hotkey)], itemType, itemLevel);
 }
 
 void AddSlideNotice(int loopCount, int loopDelay, std::wstring_view text, int type, float speed,

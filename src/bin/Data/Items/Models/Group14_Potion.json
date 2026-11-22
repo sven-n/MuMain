@@ -544,7 +544,8 @@
         "rotation": [0, 0, 90],
         "scale": 0.9
       },
-      "renderStyle": "pumpkinOfLuck"
+      "renderStyle": "pumpkinOfLuck",
+      "itemEffect": "pumpkinOfLuck"
     },
     {
       "number": 46,
@@ -777,7 +778,8 @@
         "shineHiddenMesh": 0,
         "shineBelowPlus3": "cursedCastleWater"
       },
-      "renderStyle": "cursedCastleWater"
+      "renderStyle": "cursedCastleWater",
+      "itemEffect": "cursedCastleWater"
     },
     {
       "number": 65,

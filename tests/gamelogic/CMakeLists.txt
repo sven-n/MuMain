@@ -201,3 +201,16 @@ mu_add_test(
     SOURCES
         test_skill_hotkey_configuration.cpp
 )
+
+mu_add_test(
+    NAME test_chat_box_configuration
+    SOURCES
+        test_chat_box_configuration.cpp
+)
+
+mu_add_test(
+    NAME test_key_configuration_gate
+    SOURCES
+        test_key_configuration_gate.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/KeyConfiguration/KeyConfigurationGate.cpp
+)

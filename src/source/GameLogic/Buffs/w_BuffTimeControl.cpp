@@ -2,7 +2,8 @@
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "UI/Core/UIManager.h"
-#include "GameLogic/Items/ItemAddOptioninfo.h"
+#include "GameLogic/Buffs/BuffValues.h"
+#include "Data/GameData/BuffData/BuffDatabase.h"
 #include "w_BuffTimeControl.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "I18N/All.h"
@@ -54,20 +55,10 @@ DWORD BuffTimeControl::GetBuffMaxTime(eBuffState bufftype, DWORD curbufftime)
 {
     if (curbufftime == 0)
     {
-        const BuffInfo& buffinfo = g_BuffInfo(bufftype);
-
-        if (!buffinfo.HasItem())
-        {
-            return -1;
-        }
-        else
-        {
-            const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEMINDEX(buffinfo.s_ItemType, buffinfo.s_ItemIndex));
-
-            if (Item_data.m_Time == 0) return -1;
-
-            return Item_data.m_Time;
-        }
+        // Without a time from the server, an item buff lasts its duration in Buffs.json; another one has no time.
+        const Data::Buffs::BuffDefinition* buff = g_BuffDatabase.Find(bufftype);
+        const int duration = buff != nullptr && buff->item ? GameLogic::Buffs::GetDuration(*buff) : 0;
+        return duration > 0 ? static_cast<DWORD>(duration) : static_cast<DWORD>(-1);
     }
 
     return curbufftime;

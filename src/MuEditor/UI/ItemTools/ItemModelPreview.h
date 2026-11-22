@@ -6,6 +6,7 @@
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewScene.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewTarget.h"
 #include "ItemMeshPicking.h"
+#include "imgui.h"
 
 #include <array>
 #include <functional>
@@ -26,7 +27,13 @@ namespace MuEditor::Items
 class CItemModelPreview
 {
 public:
-    void Render(int itemType);
+    // Runs right after view `view` drew its item, with the view's matrices: what the view drew (`request`, turned by
+    // `turnDegrees`) and its camera.
+    using AfterItem = std::function<void(int view, const MuEditor::Effects::EffectPreviewRequest& request,
+                                         float turnDegrees, const MuEditor::Effects::EffectPreviewCamera& camera)>;
+
+    // The item in one view; `afterItem` (if set) runs in it, as view 0.
+    void Render(int itemType, const AfterItem& afterItem = {});
     // The model of a slot that is no item's, a part model (design L50), with the same controls.
     void RenderModelSlot(int modelSlot);
     // The most views RenderSideBySide draws.
@@ -35,9 +42,29 @@ public:
     using Header = std::function<void(int view, float width)>;
     // Runs `draw`, the drawing of view `view`, inside what that view needs.
     using DrawIn = std::function<void(int view, const std::function<void()>& draw)>;
+    // Where a view's picture stands in the window, and the point a left click that did not turn it clicked.
+    struct ViewOnScreen
+    {
+        ImVec2 min;
+        ImVec2 max;
+        std::optional<ImVec2> click;
+        bool hovered = false;
+    };
+    // Runs right after view `view`'s picture is put into the window, to draw over it: what the view drew (`request`,
+    // turned by `turnDegrees`), its camera and where it stands.
+    using Overlay =
+        std::function<void(int view, const MuEditor::Effects::EffectPreviewRequest& request, float turnDegrees,
+                           const MuEditor::Effects::EffectPreviewCamera& camera, const ViewOnScreen& screen)>;
     // `count` views of the item side by side (at most MaxViews), each below its `header`: one set of controls and one
-    // camera, so a drag in any turns all; each is drawn inside `drawIn`.
-    void RenderSideBySide(int itemType, int count, const Header& header, const DrawIn& drawIn);
+    // camera, so a drag in any turns all; each is drawn inside `drawIn`, `afterItem` (if set) runs in each and
+    // `overlay` (if set) over each.
+    void RenderSideBySide(int itemType, int count, const Header& header, const DrawIn& drawIn,
+                          const AfterItem& afterItem = {}, const Overlay& overlay = {});
+    // Whether a click in a view keeps the mesh it hits (on at first); off while a click means something else.
+    void SetMeshPicking(bool picking)
+    {
+        m_meshPicking = picking;
+    }
 
     // The item level and looks the controls chose, for the inventory grid.
     int GetLevel() const
@@ -82,9 +109,11 @@ private:
     // The view's height for a width the window gives it.
     [[nodiscard]] float ViewHeight(float widthInWindow) const;
     void RenderView(const MuEditor::Effects::EffectPreviewRequest& request, View& view, const char* id, float width,
-                    float height, const std::function<void(const std::function<void()>&)>& drawIn);
+                    float height, const std::function<void(const std::function<void()>&)>& drawIn,
+                    const std::function<void()>& afterItem = {},
+                    const std::function<void(const ViewOnScreen&)>& overlay = {});
     void DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, View& view, float aspect,
-                   const std::optional<MeshPicking::Ray>& pickRay);
+                   const std::optional<MeshPicking::Ray>& pickRay, const std::function<void()>& afterItem);
     void TakeBackPickOnDoubleClick() const;
 
     MuEditor::Effects::EffectPreviewCamera m_camera;
@@ -95,6 +124,7 @@ private:
     bool m_ancient = false;
     bool m_turn = false;
     bool m_asDoppelganger = false;
+    bool m_meshPicking = true;
     MuEditor::Effects::PreviewItemPose m_pose = MuEditor::Effects::PreviewItemPose::Inventory;
     // ImGui::GetTime() of the last click that picked a mesh; long ago before the first one.
     double m_pickTime = std::numeric_limits<double>::lowest();

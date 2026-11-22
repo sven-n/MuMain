@@ -72,10 +72,13 @@ void Update(Rml::Context& context)
     const float unit = UnitAt(*element, context, size.x);
     const auto anchor = TooltipPlacement::ForButton(offset.x, offset.y, size.x, size.y, unit);
 
-    Tooltip::Line line;
-    line.text = HintOf(*element);
     Tooltip::Config config;
-    config.lines.push_back(std::move(line));
+    for (Rml::String& text : HintLines(HintOf(*element)))
+    {
+        Tooltip::Line line;
+        line.text = std::move(text);
+        config.lines.push_back(std::move(line));
+    }
     config.box = Tooltip::Config::Box::ButtonHint;
     config.textAlign = Tooltip::Config::TextAlign::Center;
     config.centerHorizontally = true;
@@ -91,5 +94,19 @@ void Update(Rml::Context& context)
     config.flipAnchorY = std::max(anchor.belowY, cursorBottom);
     config.transform = UI::Scaling::Transform{unit, unit, 0.f, 0.f, unit};
     Tooltip::Show(config, &s_Owner);
+}
+
+std::vector<Rml::String> HintLines(const Rml::String& hint)
+{
+    std::vector<Rml::String> lines;
+    Rml::String::size_type start = 0;
+    while (true)
+    {
+        const Rml::String::size_type end = hint.find('\n', start);
+        lines.push_back(hint.substr(start, end == Rml::String::npos ? Rml::String::npos : end - start));
+        if (end == Rml::String::npos)
+            return lines;
+        start = end + 1;
+    }
 }
 } // namespace UI::RmlBridge::DocumentHints

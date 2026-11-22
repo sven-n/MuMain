@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "BoneMarks.h"
 #include "LookEdits.h"
 #include "LookParts.h"
 #include "LooksRoot.h"
@@ -136,9 +137,16 @@ private:
     [[nodiscard]] std::string UnusedLookName(const std::string& base) const;
     void RenderLayers();
     void RenderLayerToolbar();
-    // An item effect: its entries before the drawing in their order, then the object's light, and the picked line's
-    // fields.
+    // An item effect: its entries before the drawing in their order, the object's light, the animation speed and its
+    // things on bones (design section 7b), and the picked line's fields.
     void RenderItemEffect();
+    void RenderItemEffectToolbar();
+    // The picked entry of the draft's things on bones, or nullptr.
+    [[nodiscard]] Data::Looks::OnBones* PickedOnBones();
+    // The marks of the item's bones over a view of the preview, and a click on one in pick mode (design L58).
+    void RenderBoneMarks(const MuEditor::Effects::EffectPreviewRequest& request, float turnDegrees,
+                         const MuEditor::Effects::EffectPreviewCamera& camera,
+                         const MuEditor::Items::CItemModelPreview::ViewOnScreen& screen);
     void RenderParts();
     void RenderPartRow(const char* label, int part, const std::vector<std::size_t>& layers);
     void RenderEffectChip(std::size_t layer, int part);
@@ -157,6 +165,8 @@ private:
     void UpdateDraft(const Data::Looks::LookDefinition& look);
     // The draft is the look again, every layer shown.
     void LoadDraft(const Data::Looks::LookDefinition& look);
+    // The picked entry's choice of Between bones, what its fields showed and a pair's start, for another entry.
+    void ForgetEntryChoice();
     // The draft of the look picked before, when it has changes not applied; its draft again when it had them.
     void KeepDraft();
     [[nodiscard]] bool TakeKeptDraft(const std::string& name);
@@ -219,6 +229,23 @@ private:
     Data::Looks::LookKind m_checkedKind = Data::Looks::LookKind::RenderStyle;
     int m_checkedModels = -1;
     bool m_checked = false;
+
+    // The bones of the previewed item (design L58): "Show bones", the pick mode, the start of a pair being picked,
+    // and what the fields of the picked entry of things on bones showed in the last frame.
+    bool m_showBones = false;
+    bool m_pickBones = false;
+    std::optional<int> m_pairFrom;
+    bool m_entryBetween = false;
+    // Between bones chosen for the picked entry before its first pair; another entry picked, added, copied or removed,
+    // or another draft, forgets it (ForgetEntryChoice), a move keeps it.
+    bool m_betweenChosen = false;
+    std::optional<int> m_pointedBone;
+    // The last pick, taken back when its click was the first of a double click (which puts the view back).
+    MuEditor::Looks::BoneMarks::PickTakeBack m_pickTakeBack;
+    // The bones a view shows, reused by each view and frame.
+    std::vector<MuEditor::Looks::BoneMarks::ShownBone> m_shownBones;
+    // The last view's item had no bones of its own (armor) while marks were asked for.
+    bool m_noBones = false;
 
     bool m_stopTime = false;
     float m_seconds = 0.0f;

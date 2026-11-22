@@ -1,9 +1,8 @@
 #include "stdafx.h"
 
 #include "doctest.h"
+#include "ShippedItemsScope.h"
 
-#include "Core/Utilities/Log/MuLogger.h"
-#include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -14,7 +13,6 @@
 #include "GameLogic/Items/TradeRestrictions.h"
 #include "World/MapInfra/MapManager.h"
 
-#include <filesystem>
 #include <vector>
 
 extern CHARACTER* Hero;
@@ -55,21 +53,16 @@ ITEM Broken(ITEM item)
     return item;
 }
 
-// Loads the shipped items and gives the rules a Hero (for the GM Gift).
-class ShippedItemsScope
+// The shipped items (see ShippedItemsScope) and a Hero for the rules (for the GM Gift).
+class ShippedItemsWithHero
 {
 public:
-    ShippedItemsScope() : m_previousHero(Hero)
+    ShippedItemsWithHero() : m_previousHero(Hero)
     {
-        mu::log::Init();
-        const ItemDataLoadResult result =
-            LoadItemDataDirectory(std::filesystem::path(MU_TEST_DATA_DIR) / "Items");
-        REQUIRE_FALSE(HasFatal(result.issues));
-        g_ItemDatabase.Build(result.items);
         Hero = &m_character;
     }
 
-    ~ShippedItemsScope()
+    ~ShippedItemsWithHero()
     {
         Hero = m_previousHero;
     }
@@ -80,6 +73,7 @@ public:
     }
 
 private:
+    ShippedItemsScope m_items;
     CHARACTER m_character{};
     CHARACTER* m_previousHero;
 };
@@ -129,7 +123,7 @@ bool Valuable(int itemType, const ItemState& state = {})
 
 TEST_CASE("A normal weapon allows every action [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
 
     CHECK_FALSE(TradeBan(KrisType));
     CHECK_FALSE(DropBan(KrisType));
@@ -141,7 +135,7 @@ TEST_CASE("A normal weapon allows every action [data][items][rules]")
 
 TEST_CASE("Items the client does not know allow no action [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
     const int emptyType = MakeItemType(0, 500);
     REQUIRE(g_ItemDatabase.Find(emptyType) == nullptr);
 
@@ -155,7 +149,7 @@ TEST_CASE("Items the client does not know allow no action [data][items][rules]")
 
 TEST_CASE("Item level variants have their own rules [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
 
     // Rena +3 is the Sign of Lord; Rena +1 (Stone) cannot be sold.
     CHECK(TradeBan(ITEM_RENA));
@@ -190,7 +184,7 @@ TEST_CASE("Item level variants have their own rules [data][items][rules]")
 
 TEST_CASE("Rented items have their own rules [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
 
     CHECK(StoreBan(KrisType, {0, true}));
 
@@ -209,7 +203,7 @@ TEST_CASE("Rented items have their own rules [data][items][rules]")
 
 TEST_CASE("Durability and the player change some rules [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
 
     CHECK(StoreBan(ITEM_TALISMAN_OF_MOBILITY, {0, false, false, 1}));
     CHECK_FALSE(StoreBan(ITEM_TALISMAN_OF_MOBILITY, {0, false, false, 2}));
@@ -222,7 +216,7 @@ TEST_CASE("Durability and the player change some rules [data][items][rules]")
 
 TEST_CASE("Potions cannot be repaired [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
 
     CHECK(RepairBan(ITEM_APPLE));
     CHECK(RepairBan(ITEM_JEWEL_OF_BLESS));
@@ -230,7 +224,7 @@ TEST_CASE("Potions cannot be repaired [data][items][rules]")
 
 TEST_CASE("Valuable items ask for confirmation [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
 
     CHECK(Valuable(ITEM_JEWEL_OF_BLESS));
     CHECK(Valuable(ITEM_WING));
@@ -248,7 +242,7 @@ TEST_CASE("Valuable items ask for confirmation [data][items][rules]")
 
 TEST_CASE("Item categories come from the item data [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
     const ITEM wingsOfElf = MakeItem(ITEM_WING);
     const ITEM wingsOfSpirits = MakeItem(ITEM_WINGS_OF_SPIRITS);
     const ITEM capeOfLord = MakeItem(ITEM_CAPE_OF_LORD);
@@ -302,7 +296,7 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
 
 TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
     // Numbers without item data in the bow and shield groups.
     const int noBow = ITEM_BOW + 27;
     const int noShield = ITEM_SHIELD + 27;
@@ -348,7 +342,7 @@ TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
 
 TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from the item data [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
     // Numbers without item data in the sword, staff and mace groups.
     const int noGlove = MakeItemType(0, 40);
     const int noBook = MakeItemType(5, 40);
@@ -392,7 +386,7 @@ TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from th
 
 TEST_CASE("Lucky items, shield potions and transformation rings come from the item data [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
     const int scaleHelmLucky = MakeItemType(7, 62);
     const int stormJahadBootsLucky = MakeItemType(11, 72);
     const int phoenixSoulHelm = MakeItemType(7, 73);
@@ -417,7 +411,7 @@ TEST_CASE("Lucky items, shield potions and transformation rings come from the it
 
 TEST_CASE("The shipped potions are taken largest first [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
     const auto inUseOrder = [](ItemTag tag)
     {
         const auto itemTypes = g_ItemDatabase.GetItemTypesWithTagInUseOrder(tag);
@@ -436,7 +430,7 @@ TEST_CASE("The shipped potions are taken largest first [data][items][rules]")
 
 TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
 
     const auto manaPotions = g_ItemDatabase.GetItemTypesWithTag(ItemTag::ManaPotion);
     CHECK(std::vector<int>(manaPotions.begin(), manaPotions.end()) ==
@@ -446,7 +440,7 @@ TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
 
 TEST_CASE("Wings, the Dinorant, the Dark Horse and the Fenrir are flight equipment [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
     const ItemState durable{0, false, false, 255};
     const ITEM none = MakeItem(-1);
     const ITEM wings = MakeItem(ITEM_WING, durable);
@@ -471,7 +465,7 @@ TEST_CASE("Wings, the Dinorant, the Dark Horse and the Fenrir are flight equipme
 
 TEST_CASE("In Icarus the last flight equipment cannot be taken off [data][items][rules]")
 {
-    ShippedItemsScope items;
+    ShippedItemsWithHero items;
     const ItemState durable{0, false, false, 255};
     const ITEM none = MakeItem(-1);
     const ITEM wings = MakeItem(ITEM_WING, durable);

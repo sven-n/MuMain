@@ -357,7 +357,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.Write(L"> Menu - Exit game. ");
         g_ErrorReport.WriteCurrentTime();
 
-        SaveOptions();
+        SaveOptionsBeforeLeaving();
         SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
@@ -388,7 +388,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.Write(L"> Menu - Join another server. ");
         g_ErrorReport.WriteCurrentTime();
 
-        SaveOptions();
+        SaveOptionsBeforeLeaving();
         SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
@@ -419,7 +419,7 @@ void mu::ui::window::ShowSystemMenuDialog()
         g_ErrorReport.Write(L"> Menu - Join with another character. ");
         g_ErrorReport.WriteCurrentTime();
 
-        SaveOptions();
+        SaveOptionsBeforeLeaving();
         SaveMacro();
 
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))

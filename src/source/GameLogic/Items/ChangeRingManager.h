@@ -14,7 +14,6 @@ public:
     bool CheckDarkCloak(CLASS_TYPE iClass, int iType);
     bool CheckChangeRing(short RingType);
     bool CheckMoveMap(short sLeftRingType, short sRightRingType);
-    bool CheckBanMoveIcarusMap(short sLeftRingType, short sRightRingType);
 };
 
 #define g_ChangeRingMgr CChangeRingManager::GetInstance()

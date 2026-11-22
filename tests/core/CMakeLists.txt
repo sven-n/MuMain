@@ -130,6 +130,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_map_load
+    SOURCES
+        test_map_load.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_mu_logger
     SOURCES
         test_mu_logger_static_init.cpp

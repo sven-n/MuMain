@@ -30,6 +30,8 @@ enum class ItemHotkey : std::uint8_t
     R,
 };
 void SetItemHotkey(ItemHotkey hotkey, int itemType, int itemLevel);
+// Empties Q, W, E and R.
+void ClearItemHotkeys();
 
 // A scrolling notice across the top of the screen.
 void AddSlideNotice(int loopCount, int loopDelay, std::wstring_view text, int type, float speed,

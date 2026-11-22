@@ -15,6 +15,7 @@
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/EnhancedLightingSetting.h"
 #include "Engine/Object/EnhancedMovement.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Render/Lighting/LightMoodScales.h"
 #include "Render/PostProcessing/PostProcessingSetting.h"
 #include "UI/Options/TuningRows.h"
@@ -50,10 +51,9 @@
 extern int m_MusicOnOff;
 extern int m_SoundOnOff;
 extern unsigned int WindowWidth, WindowHeight;
-extern BOOL g_bUseWindowMode;
 void ReinitializeFonts();
 std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions();
-void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
+void MuApplyWindowResolution(unsigned int width, unsigned int height, WindowMode mode);
 float ConvertX(float x);
 float ConvertY(float y);
 
@@ -126,6 +126,25 @@ const std::vector<int>& UI::Options::UIScalePercentChoices()
     return choices;
 }
 
+const std::vector<WindowMode>& UI::Options::WindowModeChoices()
+{
+    static const std::vector<WindowMode> choices = {WindowMode::Windowed, WindowMode::Borderless,
+                                                    WindowMode::Fullscreen};
+    return choices;
+}
+
+int UI::Options::FindWindowModeIndex(WindowMode mode)
+{
+    const auto& choices = WindowModeChoices();
+    const auto match = std::find(choices.begin(), choices.end(), mode);
+    return match == choices.end() ? 0 : static_cast<int>(std::distance(choices.begin(), match));
+}
+
+bool UI::Options::ResolutionChoosable(WindowMode mode)
+{
+    return mode != WindowMode::Borderless;
+}
+
 int UI::Options::FindClosestUIScaleIndex(int percent)
 {
     const auto& choices = UIScalePercentChoices();
@@ -195,6 +214,10 @@ static const int s_NumFpsCapValues = sizeof(s_FpsCapValues) / sizeof(s_FpsCapVal
 // ([Render] Antialiasing, Anisotropy); the first entry of each is "Off".
 static constexpr int s_AntialiasingValues[] = {0, 2, 4, 8};
 static constexpr int s_AnisotropyValues[] = {1, 2, 4, 8, 16};
+// The Render scale and Sharpness rows, in percent ([Render] RenderScale, Sharpness); a config value
+// between two shows the lower. The last render scale and the first sharpness change nothing.
+static constexpr int s_RenderScaleValues[] = {50, 59, 67, 77, 85, 100};
+static constexpr int s_SharpnessValues[] = {0, 25, 50, 75, 100};
 
 namespace
 {
@@ -208,6 +231,19 @@ template <std::size_t N> int FindValueIndex(const int (&values)[N], int value)
             index = i;
     }
     return index;
+}
+
+// "N%" for each value; the first is "Off" when `firstIsOff`.
+template <std::size_t N> std::vector<Rml::String> PercentLabels(const int (&values)[N], bool firstIsOff)
+{
+    std::vector<Rml::String> labels;
+    labels.reserve(N);
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        labels.push_back(i == 0 && firstIsOff ? StringUtils::WideToNarrow(I18N::Game::Off)
+                                              : std::to_string(values[i]) + "%");
+    }
+    return labels;
 }
 
 template <std::size_t N> std::vector<Rml::String> MultiplierLabels(const int (&values)[N])
@@ -316,7 +352,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
     m_iResolutionIndex = 0;
-    m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_windowMode = GameConfig::GetInstance().GetWindowMode();
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
@@ -361,6 +397,32 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng)
     return true;
 }
 
+void mu::ui::window::COptionWindow::BindRenderOptionModel(Rml::DataModelConstructor& c, OptionRmlModel& model)
+{
+    c.Bind("antialiasing_labels", &model.antialiasingLabels);
+    c.Bind("antialiasing_index", &model.antialiasingIndex);
+    c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
+    c.Bind("antialiasing_value_label", &model.antialiasingValueLabel);
+    c.Bind("antialiasing_tooltip", &model.antialiasingTooltip);
+    c.Bind("anisotropy_labels", &model.anisotropyLabels);
+    c.Bind("anisotropy_index", &model.anisotropyIndex);
+    c.Bind("anisotropy_row_label", &model.anisotropyRowLabel);
+    c.Bind("anisotropy_value_label", &model.anisotropyValueLabel);
+    c.Bind("anisotropy_tooltip", &model.anisotropyTooltip);
+    c.Bind("render_scale_labels", &model.renderScaleLabels);
+    c.Bind("render_scale_index", &model.renderScaleIndex);
+    c.Bind("render_scale_row_label", &model.renderScaleRowLabel);
+    c.Bind("render_scale_value_label", &model.renderScaleValueLabel);
+    c.Bind("render_scale_tooltip", &model.renderScaleTooltip);
+    c.Bind("sharpness_labels", &model.sharpnessLabels);
+    c.Bind("sharpness_index", &model.sharpnessIndex);
+    c.Bind("sharpness_row_label", &model.sharpnessRowLabel);
+    c.Bind("sharpness_value_label", &model.sharpnessValueLabel);
+    c.Bind("sharpness_tooltip", &model.sharpnessTooltip);
+    c.BindEventCallback("option_toggle_edge_smoothing", [this](Rml::DataModelHandle, Rml::Event&,
+                                                               const Rml::VariantList&) { RmlToggleEdgeSmoothing(); });
+}
+
 void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model)
 {
     c.Bind("positioned", &model.positioned);
@@ -391,8 +453,6 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("slide_help_label", &model.slideHelpLabel);
     c.Bind("render_all_effects", &model.renderAllEffects);
     c.Bind("render_all_effects_label", &model.renderAllEffectsLabel);
-    c.Bind("windowed_mode", &model.windowedMode);
-    c.Bind("windowed_mode_label", &model.windowedModeLabel);
 
     c.Bind("sound_volume", &model.soundVolume);
     c.Bind("sound_volume_label", &model.soundVolumeLabel);
@@ -406,6 +466,12 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("resolution_index", &model.resolutionIndex);
     c.Bind("resolution_row_label", &model.resolutionRowLabel);
     c.Bind("resolution_value_label", &model.resolutionValueLabel);
+    c.Bind("resolution_locked", &model.resolutionLocked);
+    c.Bind("window_mode_labels", &model.windowModeLabels);
+    c.Bind("window_mode_index", &model.windowModeIndex);
+    c.Bind("window_mode_row_label", &model.windowModeRowLabel);
+    c.Bind("window_mode_value_label", &model.windowModeValueLabel);
+    c.Bind("window_mode_tooltip", &model.windowModeTooltip);
     c.Bind("language_labels", &model.languageLabels);
     c.Bind("language_index", &model.languageIndex);
     c.Bind("language_row_label", &model.languageRowLabel);
@@ -461,6 +527,9 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
     c.Bind("enhanced_movement", &model.enhancedMovement);
     c.Bind("enhanced_movement_label", &model.enhancedMovementLabel);
+    c.Bind("edge_smoothing", &model.edgeSmoothing);
+    c.Bind("edge_smoothing_label", &model.edgeSmoothingLabel);
+    c.Bind("edge_smoothing_tooltip", &model.edgeSmoothingTooltip);
     auto tuningRow = c.RegisterStruct<TuningRowModel>();
     tuningRow.RegisterMember("control", &TuningRowModel::control);
     tuningRow.RegisterMember("label", &TuningRowModel::label);
@@ -488,16 +557,7 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("tuning_reset_all_label", &model.tuningResetAllLabel);
     c.Bind("tuning_save_message", &model.tuningSaveMessage);
     c.Bind("tuning_preview_note", &model.tuningPreviewNote);
-    c.Bind("antialiasing_labels", &model.antialiasingLabels);
-    c.Bind("antialiasing_index", &model.antialiasingIndex);
-    c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
-    c.Bind("antialiasing_value_label", &model.antialiasingValueLabel);
-    c.Bind("antialiasing_tooltip", &model.antialiasingTooltip);
-    c.Bind("anisotropy_labels", &model.anisotropyLabels);
-    c.Bind("anisotropy_index", &model.anisotropyIndex);
-    c.Bind("anisotropy_row_label", &model.anisotropyRowLabel);
-    c.Bind("anisotropy_value_label", &model.anisotropyValueLabel);
-    c.Bind("anisotropy_tooltip", &model.anisotropyTooltip);
+    BindRenderOptionModel(c, model);
 
     // Interface/UI tab.
     c.Bind("show_fps_counter", &model.showFpsCounter);
@@ -542,9 +602,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.BindEventCallback("option_toggle_slide_help",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSlideHelp(); });
     c.BindEventCallback("option_toggle_render_all_effects",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRenderAllEffects(); });
-    c.BindEventCallback("option_toggle_windowed_mode",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleRenderAllEffects(); });
     c.BindEventCallback("option_toggle_translate_item_names",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleTranslateItemNames(); });
@@ -594,11 +653,11 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleEnhancedMovement(); });
     c.BindEventCallback("option_toggle_enhanced_feature",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-        {
-            if (arguments.size() == 1)
-                RmlToggleEnhancedFeature(arguments[0].Get<int>(-1));
-        });
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                RmlToggleEnhancedFeature(arguments[0].Get<int>(-1));
+                        });
 
     const auto intArgument = [](const Rml::VariantList& arguments)
     { return arguments.size() == 1 ? arguments[0].Get<int>(-1) : -1; };
@@ -807,7 +866,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
-    m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_windowMode = GameConfig::GetInstance().GetWindowMode();
 
     m_bVsyncEnabled = GameConfig::GetInstance().GetVSyncEnabled();
     m_iFpsCapIndex = FindCurrentFpsCapIndex();
@@ -863,6 +922,8 @@ void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
     if (dropdownId < 0 || dropdownId >= DropdownCount)
         return;
+    if (dropdownId == DropdownResolution && !UI::Options::ResolutionChoosable(m_windowMode))
+        return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
     // was open as a side effect -- see model.openDropdown's own comment for why a single field
@@ -903,6 +964,15 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
     case DropdownTexturePack:
         RmlTexturePackChanged(optionIndex);
         break;
+    case DropdownRenderScale:
+        RmlRenderScaleChanged(optionIndex);
+        break;
+    case DropdownSharpness:
+        RmlSharpnessChanged(optionIndex);
+        break;
+    case DropdownWindowMode:
+        RmlWindowModeChanged(optionIndex);
+        break;
     default:
         break;
     }
@@ -912,27 +982,30 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
 void mu::ui::window::COptionWindow::RmlToggleAutoAttack()
 {
     m_bAutoAttack = !m_bAutoAttack;
+    // The server keeps it with the key configuration: saved as it changes, so a crash or a disconnect
+    // doesn't lose it.
+    SaveOptionsIfInGame();
 }
 
 void mu::ui::window::COptionWindow::RmlToggleWhisperSound()
 {
     m_bWhisperSound = !m_bWhisperSound;
+    // The server keeps it with the key configuration: saved as it changes, so a crash or a disconnect
+    // doesn't lose it.
+    SaveOptionsIfInGame();
 }
 
 void mu::ui::window::COptionWindow::RmlToggleSlideHelp()
 {
     m_bSlideHelp = !m_bSlideHelp;
+    // The server keeps it with the key configuration: saved as it changes, so a crash or a disconnect
+    // doesn't lose it.
+    SaveOptionsIfInGame();
 }
 
 void mu::ui::window::COptionWindow::RmlToggleRenderAllEffects()
 {
     m_bRenderAllEffects = !m_bRenderAllEffects;
-}
-
-void mu::ui::window::COptionWindow::RmlToggleWindowedMode()
-{
-    m_bWindowedMode = !m_bWindowedMode;
-    ApplyWindowModeToggle();
 }
 
 void mu::ui::window::COptionWindow::RmlSoundVolumeChanged(int value)
@@ -996,6 +1069,20 @@ void mu::ui::window::COptionWindow::RmlResolutionChanged(int index)
         return;
     m_iResolutionIndex = index;
     ApplyResolution();
+}
+
+void mu::ui::window::COptionWindow::RmlWindowModeChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    const auto& choices = UI::Options::WindowModeChoices();
+    if (index < 0 || index >= static_cast<int>(choices.size()))
+        return;
+    if (choices[index] == m_windowMode)
+        return;
+    m_windowMode = choices[index];
+    ApplyWindowMode();
 }
 
 void mu::ui::window::COptionWindow::RmlLanguageChanged(int index)
@@ -1156,6 +1243,11 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedMovement()
     config.SetEnhancedMovement(!config.GetEnhancedMovement());
     config.Save();
     Engine::Characters::SetEnhancedMovementEnabled(config.GetEnhancedMovement());
+}
+
+void mu::ui::window::COptionWindow::RmlToggleEdgeSmoothing()
+{
+    MuSetEdgeSmoothingPreference(!GameConfig::GetInstance().GetEdgeSmoothing());
 }
 
 void mu::ui::window::COptionWindow::RmlToggleTuningGroup(int group)
@@ -1347,6 +1439,28 @@ void mu::ui::window::COptionWindow::RmlAnisotropyChanged(int index)
     MuSetAnisotropyPreference(s_AnisotropyValues[index]);
 }
 
+// MuSetRenderScalePreference and MuSetSharpnessPreference save the value and apply it while the
+// Enhanced look is active.
+void mu::ui::window::COptionWindow::RmlRenderScaleChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(std::size(s_RenderScaleValues)))
+        return;
+    MuSetRenderScalePreference(s_RenderScaleValues[index]);
+}
+
+void mu::ui::window::COptionWindow::RmlSharpnessChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(std::size(s_SharpnessValues)))
+        return;
+    MuSetSharpnessPreference(s_SharpnessValues[index]);
+}
+
 void mu::ui::window::COptionWindow::RmlToggleS6PlayerModels()
 {
     auto& config = GameConfig::GetInstance();
@@ -1445,7 +1559,7 @@ void mu::ui::window::COptionWindow::ApplyPendingUIScale()
     // GameConfig::SetWindowSize()/Save() the way ApplyResolution() is: the window size does not
     // change here, and persisting it from this path would write back whatever size the resize
     // settled on instead of the user's own [Window] setting.
-    MuApplyWindowResolution(WindowWidth, WindowHeight, g_bUseWindowMode != FALSE);
+    MuApplyWindowResolution(WindowWidth, WindowHeight, m_windowMode);
 
     // The clamp may have coerced the request (a choice outside GameConfig's bounds can't happen
     // today, but the ladder and the clamp are independent constants), so re-seed from what was
@@ -1675,13 +1789,16 @@ void mu::ui::window::COptionWindow::ApplyResolution()
     {
         return;
     }
+    if (!UI::Options::ResolutionChoosable(m_windowMode))
+    {
+        return;
+    }
 
     const auto [newWidth, newHeight] = m_resolutions[m_iResolutionIndex];
 
     // Resize through SDL (MuApplyWindowResolution), not raw Win32 SetWindowPos -- SDL clamps a
     // non-resizable window straight back to its current size otherwise.
-    MuApplyWindowResolution(static_cast<unsigned int>(newWidth), static_cast<unsigned int>(newHeight),
-                            g_bUseWindowMode != FALSE);
+    MuApplyWindowResolution(static_cast<unsigned int>(newWidth), static_cast<unsigned int>(newHeight), m_windowMode);
 
     // SDL may have coerced the request; WindowWidth/Height now hold the actual result, so
     // persist that and snap the selection to it.
@@ -1701,19 +1818,58 @@ void mu::ui::window::COptionWindow::SyncResolutionComboToWindow()
     m_iResolutionIndex = listed;
 }
 
-// Switches windowed/fullscreen through SDL (MuApplyWindowResolution), not raw Win32 calls --
+// Switches the window mode through SDL (MuApplyWindowResolution), not raw Win32 calls --
 // driving the OS directly left SDL's state inconsistent with later resolution changes.
-void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
+void mu::ui::window::COptionWindow::ApplyWindowMode()
 {
-    g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
-    GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetWindowMode(m_windowMode);
 
-    MuApplyWindowResolution(WindowWidth, WindowHeight, m_bWindowedMode);
+    // The saved resolution, not the current size: coming back from borderless, the window has the
+    // desktop's size, and the player's own resolution is the one to return to.
+    MuApplyWindowResolution(static_cast<unsigned int>(config.GetWindowWidth()),
+                            static_cast<unsigned int>(config.GetWindowHeight()), m_windowMode);
 
-    // The mode switch may have coerced the size, so save after applying it.
+    // The mode switch may have coerced the size, so save after applying it. Borderless keeps the
+    // saved resolution for the other modes: its desktop size is not the player's choice.
     SyncResolutionComboToWindow();
-    GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
-    GameConfig::GetInstance().Save();
+    if (UI::Options::ResolutionChoosable(m_windowMode))
+        config.SetWindowSize(WindowWidth, WindowHeight);
+    config.Save();
+}
+
+// Rebuilt every sync for the localized mode names, as the FPS Limit row's "Uncapped".
+void mu::ui::window::COptionWindow::SyncWindowModeRow(OptionRmlModel& model)
+{
+    // In UI::Options::WindowModeChoices() order.
+    static const wchar_t* const* const modeNames[] = {&I18N::Game::Windowed, &I18N::Game::BorderlessFullscreen,
+                                                      &I18N::Game::Fullscreen};
+    std::vector<Rml::String> labels;
+    for (const wchar_t* const* name : modeNames)
+        labels.push_back(StringUtils::WideToNarrow(*name));
+    const int index = UI::Options::FindWindowModeIndex(m_windowMode);
+    if (model.windowModeLabels != labels)
+    {
+        model.windowModeLabels = std::move(labels);
+        m_RmlView.MarkDirty("window_mode_labels");
+    }
+    if (model.windowModeIndex != index)
+    {
+        model.windowModeIndex = index;
+        m_RmlView.MarkDirty("window_mode_index");
+    }
+    const Rml::String& value = model.windowModeLabels[static_cast<size_t>(index)];
+    if (model.windowModeValueLabel != value)
+    {
+        model.windowModeValueLabel = value;
+        m_RmlView.MarkDirty("window_mode_value_label");
+    }
+    const bool resolutionLocked = !UI::Options::ResolutionChoosable(m_windowMode);
+    if (model.resolutionLocked != resolutionLocked)
+    {
+        model.resolutionLocked = resolutionLocked;
+        m_RmlView.MarkDirty("resolution_locked");
+    }
 }
 
 void mu::ui::window::COptionWindow::SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text)
@@ -1724,6 +1880,60 @@ void mu::ui::window::COptionWindow::SyncLabel(Rml::String& field, const char* fi
         field = narrow;
         m_RmlView.MarkDirty(fieldName);
     }
+}
+
+void mu::ui::window::COptionWindow::SyncRenderOptionLabels(OptionRmlModel& model)
+{
+    if (model.renderScaleLabels.empty())
+    {
+        model.renderScaleLabels = PercentLabels(s_RenderScaleValues, false);
+        m_RmlView.MarkDirty("render_scale_labels");
+    }
+    // Compare the wide text before converting or formatting any labels. Keep this cache in the
+    // model so rebuilding the view also initializes its arrays and dirty bindings.
+    const wchar_t* const off = I18N::Game::Off;
+    if (!model.sharpnessLabels.empty() && model.renderOptionsOffText == off)
+    {
+        return;
+    }
+    model.renderOptionsOffText = off;
+    model.antialiasingLabels = MultiplierLabels(s_AntialiasingValues);
+    model.anisotropyLabels = MultiplierLabels(s_AnisotropyValues);
+    model.sharpnessLabels = PercentLabels(s_SharpnessValues, true);
+    m_RmlView.MarkDirty("antialiasing_labels");
+    m_RmlView.MarkDirty("anisotropy_labels");
+    m_RmlView.MarkDirty("sharpness_labels");
+}
+
+void mu::ui::window::COptionWindow::SyncRenderOptionModel(OptionRmlModel& model)
+{
+    SyncRenderOptionLabels(model);
+    const auto syncMultiplierRow = [&](const std::vector<Rml::String>& labels, int& index, const char* indexName,
+                                       Rml::String& valueLabel, const char* valueName, int newIndex)
+    {
+        if (index != newIndex)
+        {
+            index = newIndex;
+            m_RmlView.MarkDirty(indexName);
+        }
+        if (valueLabel != labels[index])
+        {
+            valueLabel = labels[index];
+            m_RmlView.MarkDirty(valueName);
+        }
+    };
+    syncMultiplierRow(model.antialiasingLabels, model.antialiasingIndex, "antialiasing_index",
+                      model.antialiasingValueLabel, "antialiasing_value_label",
+                      FindValueIndex(s_AntialiasingValues, GameConfig::GetInstance().GetAntialiasing()));
+    syncMultiplierRow(model.anisotropyLabels, model.anisotropyIndex, "anisotropy_index", model.anisotropyValueLabel,
+                      "anisotropy_value_label",
+                      FindValueIndex(s_AnisotropyValues, GameConfig::GetInstance().GetAnisotropy()));
+    syncMultiplierRow(model.renderScaleLabels, model.renderScaleIndex, "render_scale_index",
+                      model.renderScaleValueLabel, "render_scale_value_label",
+                      FindValueIndex(s_RenderScaleValues, GameConfig::GetInstance().GetRenderScale()));
+    syncMultiplierRow(model.sharpnessLabels, model.sharpnessIndex, "sharpness_index", model.sharpnessValueLabel,
+                      "sharpness_value_label",
+                      FindValueIndex(s_SharpnessValues, GameConfig::GetInstance().GetSharpness()));
 }
 
 void mu::ui::window::COptionWindow::SyncRmlModel()
@@ -1773,7 +1983,8 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
     SyncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);
     SyncLabel(model.renderAllEffectsLabel, "render_all_effects_label", I18N::Game::RenderFullEffects);
-    SyncLabel(model.windowedModeLabel, "windowed_mode_label", I18N::Game::WindowedMode);
+    SyncLabel(model.windowModeRowLabel, "window_mode_row_label", I18N::Game::DisplayMode);
+    SyncLabel(model.windowModeTooltip, "window_mode_tooltip", I18N::Game::DisplayModeTooltip);
     SyncLabel(model.soundVolumeLabel, "sound_volume_label", I18N::Game::SoundVolume);
     SyncLabel(model.musicVolumeLabel, "music_volume_label", I18N::Game::MusicVolume);
     SyncLabel(model.renderLevelLabel, "render_level_label", I18N::Game::EffectLimitation);
@@ -1798,10 +2009,16 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
     SyncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
     SyncLabel(model.enhancedMovementLabel, "enhanced_movement_label", I18N::Game::EnhancedMovement);
+    SyncLabel(model.edgeSmoothingLabel, "edge_smoothing_label", I18N::Game::EdgeSmoothing);
+    SyncLabel(model.edgeSmoothingTooltip, "edge_smoothing_tooltip", I18N::Game::EdgeSmoothingTooltip);
     SyncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
     SyncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
     SyncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
     SyncLabel(model.anisotropyTooltip, "anisotropy_tooltip", I18N::Game::AnisotropicFilteringTooltip);
+    SyncLabel(model.renderScaleRowLabel, "render_scale_row_label", I18N::Game::RenderScale);
+    SyncLabel(model.renderScaleTooltip, "render_scale_tooltip", I18N::Game::RenderScaleTooltip);
+    SyncLabel(model.sharpnessRowLabel, "sharpness_row_label", I18N::Game::Sharpness);
+    SyncLabel(model.sharpnessTooltip, "sharpness_tooltip", I18N::Game::SharpnessTooltip);
     SyncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
     SyncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
     SyncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
@@ -1814,8 +2031,11 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (model.autoAttack != m_bAutoAttack) { model.autoAttack = m_bAutoAttack; m_RmlView.MarkDirty("auto_attack"); }
     if (model.whisperSound != m_bWhisperSound) { model.whisperSound = m_bWhisperSound; m_RmlView.MarkDirty("whisper_sound"); }
     if (model.slideHelp != m_bSlideHelp) { model.slideHelp = m_bSlideHelp; m_RmlView.MarkDirty("slide_help"); }
-    if (model.renderAllEffects != m_bRenderAllEffects) { model.renderAllEffects = m_bRenderAllEffects; m_RmlView.MarkDirty("render_all_effects"); }
-    if (model.windowedMode != m_bWindowedMode) { model.windowedMode = m_bWindowedMode; m_RmlView.MarkDirty("windowed_mode"); }
+    if (model.renderAllEffects != m_bRenderAllEffects)
+    {
+        model.renderAllEffects = m_bRenderAllEffects;
+        m_RmlView.MarkDirty("render_all_effects");
+    }
 
     if (model.soundVolume != m_iVolumeLevel) { model.soundVolume = m_iVolumeLevel; m_RmlView.MarkDirty("sound_volume"); }
     if (model.musicVolume != m_iMusicLevel) { model.musicVolume = m_iMusicLevel; m_RmlView.MarkDirty("music_volume"); }
@@ -1832,6 +2052,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     if (model.resolutionIndex != m_iResolutionIndex) { model.resolutionIndex = m_iResolutionIndex; m_RmlView.MarkDirty("resolution_index"); }
     syncDropdownValue(model.resolutionValueLabel, "resolution_value_label", model.resolutionLabels, model.resolutionIndex);
+    SyncWindowModeRow(model);
 
     if (model.languageLabels.empty())
     {
@@ -1928,33 +2149,12 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
         syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
         syncFlag(model.enhancedMovement, "enhanced_movement", Engine::Characters::EnhancedMovementEnabled());
+        syncFlag(model.edgeSmoothing, "edge_smoothing", GameConfig::GetInstance().GetEdgeSmoothing());
         syncFlag(model.lookSunlightLocked, "look_sunlight_locked", !enhancedGraphics || !dynamicLights);
     }
     SyncTuningModel(model);
 
-    // Rebuilt every sync for the localized "Off", as the FPS Limit row's "Uncapped".
-    const auto syncMultiplierRow = [&](std::vector<Rml::String>& labels, const char* labelsName, int& index,
-                                       const char* indexName, Rml::String& valueLabel, const char* valueName,
-                                       std::vector<Rml::String> newLabels, int newIndex)
-    {
-        if (labels != newLabels)
-        {
-            labels = std::move(newLabels);
-            m_RmlView.MarkDirty(labelsName);
-        }
-        if (index != newIndex)
-        {
-            index = newIndex;
-            m_RmlView.MarkDirty(indexName);
-        }
-        syncDropdownValue(valueLabel, valueName, labels, index);
-    };
-    syncMultiplierRow(model.antialiasingLabels, "antialiasing_labels", model.antialiasingIndex, "antialiasing_index",
-                      model.antialiasingValueLabel, "antialiasing_value_label", MultiplierLabels(s_AntialiasingValues),
-                      FindValueIndex(s_AntialiasingValues, GameConfig::GetInstance().GetAntialiasing()));
-    syncMultiplierRow(model.anisotropyLabels, "anisotropy_labels", model.anisotropyIndex, "anisotropy_index",
-                      model.anisotropyValueLabel, "anisotropy_value_label", MultiplierLabels(s_AnisotropyValues),
-                      FindValueIndex(s_AnisotropyValues, GameConfig::GetInstance().GetAnisotropy()));
+    SyncRenderOptionModel(model);
 
     const bool showFpsCounter = GetShowFpsCounter();
     const bool showDebugInfo = GetShowDebugInfo();

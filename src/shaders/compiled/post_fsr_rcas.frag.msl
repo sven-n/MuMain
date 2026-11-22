@@ -1,0 +1,40 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct RcasUniforms
+{
+    float sharpness;
+    float maxX;
+    float maxY;
+    float padding;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant RcasUniforms& _48 [[buffer(0)]], texture2d<float> source [[texture(0)]], sampler sourceSampler [[sampler(0)]], float4 gl_FragCoord [[position]])
+{
+    main0_out out = {};
+    int2 _284 = int2(gl_FragCoord.xy);
+    float3 _394 = source.read(uint2(int3(clamp(_284 + int2(0, -1), int2(0), int2(int(_48.maxX), int(_48.maxY))), 0).xy), 0).xyz;
+    float3 _419 = source.read(uint2(int3(clamp(_284 + int2(-1, 0), int2(0), int2(int(_48.maxX), int(_48.maxY))), 0).xy), 0).xyz;
+    float3 _297 = source.sample(sourceSampler, in.input_uv, level(0.0)).xyz;
+    float3 _444 = source.read(uint2(int3(clamp(_284 + int2(1, 0), int2(0), int2(int(_48.maxX), int(_48.maxY))), 0).xy), 0).xyz;
+    float3 _469 = source.read(uint2(int3(clamp(_284 + int2(0, 1), int2(0), int2(int(_48.maxX), int(_48.maxY))), 0).xy), 0).xyz;
+    float3 _309 = fast::min(fast::min(_394, fast::min(_419, _444)), _469);
+    float3 _315 = fast::max(fast::max(_394, fast::max(_419, _444)), _469);
+    float3 _337 = fast::max(-(fast::min(_309, _297) / fast::max(_315 * 4.0, float3(1.52587890625e-05))), (float3(1.0) - fast::max(_315, _297)) / fast::min((_309 * 4.0) - float3(4.0), float3(-1.52587890625e-05)));
+    float _349 = fast::max(-0.1875, fast::min(fast::max(_337.x, fast::max(_337.y, _337.z)), 0.0)) * _48.sharpness;
+    out._entryPointOutput = float4((((((_394 + _419) + _444) + _469) * _349) + _297) / float3((4.0 * _349) + 1.0), 1.0);
+    return out;
+}
+

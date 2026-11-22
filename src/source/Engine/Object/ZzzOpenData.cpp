@@ -12,6 +12,8 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "GameLogic/KeyConfiguration/ChatBoxConfiguration.h"
+#include "GameLogic/KeyConfiguration/KeyConfigurationGate.h"
 #include "GameLogic/Skills/SkillHotkeyConfiguration.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/PlayerBodyModels.h"
@@ -31,6 +33,8 @@
 #include "GameLogic/Events/Event.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/HUD/HudUpdates.h"
+#include "UI/Options/OptionUpdates.h"
 #include "UI/Dialogs/HelpWindow.h"
 #include "Camera/CameraMove.h"
 #include "GameLogic/Quests/QuestMng.h"
@@ -47,6 +51,9 @@
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/DataHandler/BuffData/BuffStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
+#include "Data/DataHandler/MapData/WarpStorage.h"
+#include "I18N/All.h"
+#include "Data/GameData/MapData/WarpDatabase.h"
 #include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
@@ -60,8 +67,9 @@
 #include "Network/Server/SocketSystem.h"
 #include "Render/Text/CUIRenderText.h"
 
+#include <chrono>
+
 ///////////////////////////////////////////
-extern BOOL g_bUseChatListBox;
 ///////////////////////////////////////////
 
 void OpenPlayers()
@@ -364,6 +372,19 @@ static void OpenMapData()
     {
         StopOnDataError("Map data error", errorMessage);
     }
+}
+
+// Loads the warp list of the M window (Data/Maps/Warps.json), named in the UI
+// language, which they follow, as the monster names do; errors stop the game.
+static void OpenWarpData()
+{
+    std::string errorMessage;
+    if (!Data::Maps::LoadWarps(errorMessage))
+    {
+        StopOnDataError("Warp list error", errorMessage);
+    }
+    SEASON3B::CMoveCommandData::GetInstance()->SetDataFileWarps(g_WarpDatabase.GetList(), I18N::GetCurrentLocale());
+    SEASON3B::CMoveCommandData::GetInstance()->FollowUiLanguage();
 }
 
 // Loads the buffs (Data/Buffs/Buffs.json): their names, texts and the buff
@@ -1532,11 +1553,9 @@ void SaveOptions()
     options[22] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_W) - ITEM_POTION) & 0xFF);
     options[23] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_E) - ITEM_POTION) & 0xFF);
 
-    BYTE wChatListBoxSize = g_pChatListBox->GetNumberOfLines(g_pChatListBox->GetCurrentMsgType()) / 3;
-    if (g_bUseChatListBox == FALSE)
-        wChatListBoxSize = 0;
-    BYTE wChatListBoxBackAlpha = g_pChatListBox->GetBackAlpha() * 10;
-    options[24] = (((wChatListBoxSize << 4) & 0xF0) | (wChatListBoxBackAlpha & 0x0F)) & 0xFF;
+    // The box's shown lines, not the number of messages in the log.
+    options[24] = GameLogic::KeyConfiguration::ChatBox::Encode(
+        static_cast<int>(g_pChatListBox->GetNumberOfShowingLines()), g_pChatListBox->GetBackAlpha());
     options[25] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_R) - ITEM_POTION) & 0xFF);
 
     options[26] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_Q);
@@ -1549,17 +1568,58 @@ void SaveOptions()
 
 namespace
 {
-bool s_keyConfigurationReceived = false;
+GameLogic::KeyConfiguration::KeyConfigurationGate s_keyConfigurationGate;
+
+bool IsInGame()
+{
+    return SocketClient != nullptr && g_bGameServerConnected && SceneFlag == MAIN_SCENE;
+}
+} // namespace
+
+void SetKeyConfigurationReceived(bool received, bool everythingRestored)
+{
+    if (received)
+    {
+        s_keyConfigurationGate.Received(everythingRestored);
+    }
+    else
+    {
+        s_keyConfigurationGate.Reset();
+    }
 }
 
-void SetKeyConfigurationReceived(bool received)
+void ResetKeyConfiguration()
 {
-    s_keyConfigurationReceived = received;
+    UI::Hud::ClearSkillHotkeys();
+    UI::Hud::ClearItemHotkeys();
+    UI::Options::ResetForNewCharacter();
+    SetKeyConfigurationReceived(false);
+}
+
+void SetJoinedMapServer()
+{
+    s_keyConfigurationGate.Joined(std::chrono::steady_clock::now());
 }
 
 void SaveOptionsIfInGame()
 {
-    if (SocketClient != nullptr && g_bGameServerConnected && SceneFlag == MAIN_SCENE && s_keyConfigurationReceived)
+    if (IsInGame() && s_keyConfigurationGate.RequestSave(std::chrono::steady_clock::now()))
+    {
+        SaveOptions();
+    }
+}
+
+void SaveOptionsBeforeLeaving()
+{
+    if (IsInGame() && s_keyConfigurationGate.MaySaveNow(std::chrono::steady_clock::now()))
+    {
+        SaveOptions();
+    }
+}
+
+void SaveOptionsIfDue()
+{
+    if (IsInGame() && s_keyConfigurationGate.TakeDueSave(std::chrono::steady_clock::now()))
     {
         SaveOptions();
     }
@@ -2131,6 +2191,7 @@ static void OpenBasicDataStep5()
 {
     OpenItemTextures();
     Render::Items::Looks::PrepareTextures();
+    Render::Items::Looks::LogUnknownBoneThingTypes();
 }
 
 static void OpenBasicDataStep6()
@@ -2163,8 +2224,7 @@ static void OpenBasicDataStep9()
 
     OpenItemDataAndShowModelProblems();
 
-    mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-    SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
+    OpenWarpData();
 
     OpenMonsterData();
     OpenMapData();

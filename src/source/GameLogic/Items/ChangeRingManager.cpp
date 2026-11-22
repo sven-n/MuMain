@@ -48,12 +48,6 @@ constexpr std::array<int, 6> kDarkCloakModels{
     MODEL_HALLOWEEN, MODEL_XMAS_EVENT_CHANGE_GIRL, MODEL_GM_CHARACTER, MODEL_XMAS2008_SNOWMAN,
     MODEL_PANDA,     MODEL_SKELETON_CHANGED,
 };
-
-// The panda and skeleton rings may enter Icarus.
-bool IsIcarusBanRing(short ringType)
-{
-    return GameLogic::Items::IsTransformationRingType(ringType) && !GameLogic::Items::IsPandaOrSkeletonType(ringType);
-}
 } // namespace
 
 CChangeRingManager::CChangeRingManager() {}
@@ -82,9 +76,4 @@ bool CChangeRingManager::CheckMoveMap(short sLeftRingType, short sRightRingType)
 {
     return GameLogic::Items::IsTransformationRingType(sLeftRingType) ||
            GameLogic::Items::IsTransformationRingType(sRightRingType);
-}
-
-bool CChangeRingManager::CheckBanMoveIcarusMap(short sLeftRingType, short sRightRingType)
-{
-    return IsIcarusBanRing(sLeftRingType) || IsIcarusBanRing(sRightRingType);
 }

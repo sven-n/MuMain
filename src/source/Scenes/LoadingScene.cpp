@@ -86,6 +86,17 @@ void HideLoadingSceneOverlay()
     }
 }
 
+void ShowLoadingSceneOverlay()
+{
+    // One copy only: a load can start again before the world that opened it became ready.
+    if (s_rmlLoadingDoc || !RmlUiRuntime::Instance().IsCreated())
+        return;
+    s_rmlLoadingDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/loading.rml");
+    UI::RmlBridge::ApplyStackingDepth(s_rmlLoadingDoc, "loading.rml");
+    if (s_rmlLoadingDoc)
+        s_rmlLoadingDoc->Show();
+}
+
 void LoadingScene(HDC hDC)
 {
     g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_Start");
@@ -114,19 +125,7 @@ void LoadingScene(HDC hDC)
 
         ::StopMp3(MUSIC_LOGIN_THEME);
 
-        // Guard against a leftover instance from a previous "entering the world" cycle -- should
-        // already be closed by HideLoadingSceneOverlay() once that cycle's world became ready,
-        // but re-entering loading before that happened (e.g. a fast reconnect) must not load a
-        // second copy on top of it.
-        HideLoadingSceneOverlay();
-
-        if (RmlUiRuntime::Instance().IsCreated())
-        {
-            s_rmlLoadingDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/loading.rml");
-            UI::RmlBridge::ApplyStackingDepth(s_rmlLoadingDoc, "loading.rml");
-            if (s_rmlLoadingDoc)
-                s_rmlLoadingDoc->Show();
-        }
+        ShowLoadingSceneOverlay();
     }
 
     FogEnable = false;

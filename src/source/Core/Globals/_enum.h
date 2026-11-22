@@ -208,6 +208,7 @@ enum
     MESSAGE_WHITEANGEL_EVENT,
     MESSAGE_3COLORHARVEST_EVENT,
     MESSAGE_SERVER_LOST_RECONNECT, // the login screen can't reach the server: Reconnect or Exit
+    MESSAGE_MAP_FILES_FAILED,      // a map change's content pack couldn't be delivered
 };
 
 enum ActionSkillType

@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "Data/GameConfig/GameConfigValidation.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/RmlBridge/RmlThemedView.h"
@@ -31,6 +32,13 @@ const std::vector<int>& UIScalePercentChoices();
 // GameConfig's own bounds are wider than this ladder, so a hand-edited config.ini legitimately
 // holds values in between. Ties resolve to the lower entry.
 int FindClosestUIScaleIndex(int percent);
+
+// The Display tab's Display mode row offers these, in this order.
+const std::vector<WindowMode>& WindowModeChoices();
+// Index of `mode` in WindowModeChoices().
+int FindWindowModeIndex(WindowMode mode);
+// Whether the Resolution row applies in `mode`: borderless always runs at the desktop's resolution.
+bool ResolutionChoosable(WindowMode mode);
 } // namespace UI::Options
 
 namespace mu::ui::window
@@ -90,6 +98,9 @@ namespace mu::ui::window
             DropdownAntialiasing = 6,
             DropdownAnisotropy = 7,
             DropdownTexturePack = 8,
+            DropdownRenderScale = 9,
+            DropdownSharpness = 10,
+            DropdownWindowMode = 11,
             DropdownCount
         };
 
@@ -100,7 +111,7 @@ namespace mu::ui::window
         void ApplyResolution();
         int FindCurrentResolutionIndex();
         void SyncResolutionComboToWindow();
-        void ApplyWindowModeToggle();
+        void ApplyWindowMode();
 
         void ApplyLanguage();
         int FindCurrentLanguageIndex();
@@ -156,13 +167,13 @@ namespace mu::ui::window
         void RmlToggleWhisperSound();
         void RmlToggleSlideHelp();
         void RmlToggleRenderAllEffects();
-        void RmlToggleWindowedMode();
         void RmlSoundVolumeChanged(int value);
         void RmlMusicVolumeChanged(int value);
         void RmlRenderLevelChanged(int value);
         // The volume and effect-limit gauges' pointer and wheel events (0 sound, 1 music, 2 effects).
         void RmlGaugeEvent(Rml::Event& event, int gauge);
         void RmlResolutionChanged(int index);
+        void RmlWindowModeChanged(int index);
         void RmlLanguageChanged(int index);
         // The checkbox under the language: item names in the UI language, or English.
         void RmlToggleTranslateItemNames();
@@ -184,6 +195,8 @@ namespace mu::ui::window
         void RmlToggleEnhancedFeature(int feature);
         // Enhanced Movement ([Render] EnhancedMovement), in both looks; read live like the features.
         void RmlToggleEnhancedMovement();
+        // Edge smoothing ([Render] EdgeSmoothing), applied while the Enhanced look is active.
+        void RmlToggleEdgeSmoothing();
         // The player's tuning under each feature (Render/Look/TuningControls.h): a group's label
         // or chevron expands it (never its switch), "More settings" its specialist rows. A slider
         // previews while it is pressed, dragged or stepped by a key and is saved when the pointer
@@ -205,6 +218,10 @@ namespace mu::ui::window
         // from GameConfig, since `$msaa` changes the first outside this window too.
         void RmlAntialiasingChanged(int index);
         void RmlAnisotropyChanged(int index);
+        // Render scale and Sharpness rows ([Render] RenderScale, Sharpness), read live from GameConfig
+        // as `$renderscale` and `$sharpness` change them too.
+        void RmlRenderScaleChanged(int index);
+        void RmlSharpnessChanged(int index);
         // Interface/UI tab -- Show FPS Counter/Show Debug Info stay ephemeral (SceneManager.h
         // globals, no GameConfig persistence), matching $fpscounter/$details today.
         void RmlToggleShowFpsCounter();
@@ -283,8 +300,6 @@ namespace mu::ui::window
             Rml::String slideHelpLabel;
             bool renderAllEffects = true;
             Rml::String renderAllEffectsLabel;
-            bool windowedMode = false;
-            Rml::String windowedModeLabel;
 
             int soundVolume = 0;
             Rml::String soundVolumeLabel;
@@ -300,6 +315,14 @@ namespace mu::ui::window
             // kept as its own diffed field rather than a {{}} array-index expression (this engine's
             // binding-expression grammar is otherwise untested for that, see DataExpression.cpp).
             Rml::String resolutionValueLabel;
+            // Borderless runs at the desktop's resolution: the row shows it, dimmed, and does not open.
+            bool resolutionLocked = false;
+            // Windowed, Borderless fullscreen, Fullscreen (UI::Options::WindowModeChoices()).
+            std::vector<Rml::String> windowModeLabels;
+            int windowModeIndex = 0;
+            Rml::String windowModeRowLabel;
+            Rml::String windowModeValueLabel;
+            Rml::String windowModeTooltip;
             std::vector<Rml::String> languageLabels;
             int languageIndex = 0;
             Rml::String languageRowLabel;
@@ -362,6 +385,9 @@ namespace mu::ui::window
             Rml::String lookPostProcessingLabel;
             bool enhancedMovement = false;
             Rml::String enhancedMovementLabel;
+            bool edgeSmoothing = false;
+            Rml::String edgeSmoothingLabel;
+            Rml::String edgeSmoothingTooltip;
             // The player's tuning, per group (Render::Look::TuningGroup): its common and its "More
             // settings" rows, whether it is expanded, and why its sliders do not apply (empty when
             // they do).
@@ -378,6 +404,8 @@ namespace mu::ui::window
             // Shown while the last save failed; empty otherwise.
             Rml::String tuningSaveMessage;
             Rml::String tuningPreviewNote;
+            // The localized text used by the cached render-option lists, not a bound field.
+            std::wstring renderOptionsOffText;
             // [Render] Antialiasing (the Enhanced look's samples) and Anisotropy.
             std::vector<Rml::String> antialiasingLabels;
             int antialiasingIndex = 0;
@@ -389,6 +417,17 @@ namespace mu::ui::window
             Rml::String anisotropyRowLabel;
             Rml::String anisotropyValueLabel;
             Rml::String anisotropyTooltip;
+            // [Render] RenderScale and Sharpness.
+            std::vector<Rml::String> renderScaleLabels;
+            int renderScaleIndex = 0;
+            Rml::String renderScaleRowLabel;
+            Rml::String renderScaleValueLabel;
+            Rml::String renderScaleTooltip;
+            std::vector<Rml::String> sharpnessLabels;
+            int sharpnessIndex = 0;
+            Rml::String sharpnessRowLabel;
+            Rml::String sharpnessValueLabel;
+            Rml::String sharpnessTooltip;
 
             // Interface/UI tab.
             bool showFpsCounter = false;
@@ -418,11 +457,16 @@ namespace mu::ui::window
             Rml::String s6PlayerModelsLabel;
             Rml::String s6PlayerModelsTooltip;
         };
+        void BindRenderOptionModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);
+        // The Display mode row, and whether the Resolution row is locked by it.
+        void SyncWindowModeRow(OptionRmlModel& model);
         // The model's copy of a UI text, marked dirty when the text changed.
         void SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text);
         void SyncTuningModel(OptionRmlModel& model);
+        void SyncRenderOptionLabels(OptionRmlModel& model);
+        void SyncRenderOptionModel(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
             [this](Rml::DataModelConstructor& c, OptionRmlModel& model) { BindRmlModel(c, model); },
@@ -447,7 +491,7 @@ namespace mu::ui::window
         int m_iRenderLevel;
         bool m_bRenderAllEffects;
         int m_iResolutionIndex;
-        bool m_bWindowedMode;
+        WindowMode m_windowMode;
         int m_iLanguageIndex;
         bool m_bTranslateItemNames;
         int m_iFontIndex;
@@ -466,7 +510,7 @@ namespace mu::ui::window
         bool m_bScrollDropdownPending = false;
 
         // Video tab additions -- m_bVsyncEnabled seeded from GameConfig::GetVSyncEnabled() (same
-        // place m_bWindowedMode seeds from g_bUseWindowMode); m_iFpsCapIndex indexes
+        // place m_windowMode seeds from GameConfig::GetWindowMode()); m_iFpsCapIndex indexes
         // s_FpsCapValues (kFpsCapValues in the .cpp), seeded by matching GameConfig::GetFpsCap().
         bool m_bVsyncEnabled;
         int m_iFpsCapIndex;

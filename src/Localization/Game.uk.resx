@@ -1024,8 +1024,22 @@
   <data name="Translate Item Names" xml:space="preserve">
     <value>Перекладати назви предметів</value>
   </data>
-  <data name="Windowed mode" xml:space="preserve">
-    <value>Віконний режим</value>
+  <data name="Display mode" xml:space="preserve">
+    <value>Режим відображення</value>
+  </data>
+  <data name="Windowed" xml:space="preserve">
+    <value>У вікні</value>
+  </data>
+  <data name="Borderless fullscreen" xml:space="preserve">
+    <value>Повноекранний без рамки</value>
+  </data>
+  <data name="Fullscreen" xml:space="preserve">
+    <value>Повноекранний</value>
+  </data>
+  <data name="Display mode tooltip" xml:space="preserve">
+    <value>Повноекранний без рамки займає екран у роздільній здатності робочого столу
+й миттєво перемикається на інші вікна.
+Повноекранний перемикає монітор на вибрану роздільну здатність.</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Закрити</value>
@@ -9102,5 +9116,14 @@
   </data>
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Разом: +%d</value>
+  </data>
+  <data name="WarpBlockedByEquipment" xml:space="preserve">
+    <value>З цим спорядженням туди не можна переміститися.</value>
+  </data>
+  <data name="Warp master level %d" xml:space="preserve">
+    <value>МР %d</value>
+  </data>
+  <data name="Warp resets %d" xml:space="preserve">
+    <value>Р %d</value>
   </data>
 </root>

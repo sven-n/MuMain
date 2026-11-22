@@ -70,16 +70,6 @@ namespace info
         wchar_t	szName[32];
     };
 
-    struct Script_Movereq
-    {
-        int index;
-        wchar_t szMainMapName[32];
-        wchar_t szSubMapName[32];
-        int	iReqLevel;
-        int iReqZen;
-        int iGateNum;
-    };
-
     struct Script_Quest_Class_Act
     {
         BYTE    chLive;

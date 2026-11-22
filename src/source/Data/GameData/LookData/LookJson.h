@@ -24,6 +24,10 @@ namespace Data::Looks
 {
 constexpr int LookFileFormatVersion = 1;
 
+// The highest SubType and "oneIn" of a thing on bones the files take; the Style Editor's fields keep to them.
+constexpr int MaxBoneThingSubType = 1000;
+constexpr int MaxBoneThingOneIn = 10000;
+
 // "RenderStyles.json".
 std::string_view GetRenderStylesFileName();
 

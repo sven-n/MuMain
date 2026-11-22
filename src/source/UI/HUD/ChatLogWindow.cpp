@@ -10,6 +10,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Social/SocialWindowBase.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/ZzzOpenData.h"
 
 // RmlUi migration -- see ChatLogRmlModel (ChatLogWindow.h).
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -43,10 +44,9 @@ void mu::ui::window::CChatLogWindow::Init()
 {
     m_pNewUIMng = nullptr;
     m_WndSize.cx = WND_WIDTH; m_WndSize.cy = 0;
-    m_nShowingLines = 6;
+    m_nShowingLines = DefaultShowingLines;
     m_iCurrentRenderEndLine = -1;
-    m_fBackAlpha = 0.6f;
-
+    m_fBackAlpha = DefaultBackAlpha;
 
     m_bShowFrame = false;
 
@@ -55,7 +55,7 @@ void mu::ui::window::CChatLogWindow::Init()
 
 }
 
-bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int nShowingLines /* = 6 */)
+bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int nShowingLines /* = DefaultShowingLines */)
 {
     Release();
 
@@ -625,9 +625,20 @@ void mu::ui::window::CChatLogWindow::BindRmlModel(Rml::DataModelConstructor& c, 
     c.Bind("row_px", &model.rowPx);
 
     // RmlUi drag events supply the pointer directly; legacy button flags do not see panel presses.
-    c.BindEventCallback("chat_resize_drag",
-        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
-        { ResizeToPointer(event.GetParameter<float>("mouse_y", 0.f)); });
+    c.BindEventCallback("chat_resize_start", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_LinesAtResizeStart = GetNumberOfShowingLines(); });
+    c.BindEventCallback("chat_resize_drag", [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+                        { ResizeToPointer(event.GetParameter<float>("mouse_y", 0.f)); });
+    // The server keeps the chat box size with the key configuration: saved once the drag ends at a new size, as F4
+    // and the size button save theirs.
+    c.BindEventCallback("chat_resize_end",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            if (GetNumberOfShowingLines() != m_LinesAtResizeStart)
+                            {
+                                SaveOptionsIfInGame();
+                            }
+                        });
 }
 
 void mu::ui::window::CChatLogWindow::OnRmlReloaded()

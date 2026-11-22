@@ -229,6 +229,7 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     ImGui::MenuItem(I18N::Editor::SoundMixerTitle, nullptr, &windows.soundMixer);
     ImGui::MenuItem(I18N::Editor::SoundEditorTitle, nullptr, &windows.soundEditor);
     ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);
+    ImGui::MenuItem(I18N::Editor::WarpList, nullptr, &windows.warpList);
     ImGui::MenuItem(I18N::Editor::GraphicsLook, nullptr, &windows.graphicsLook);
     ImGui::MenuItem("Skill Editor", nullptr, &windows.skillEditor);
     ImGui::MenuItem("Dev Editor", nullptr, &windows.devEditor);

@@ -3,6 +3,7 @@
 #include "Core/Content/ContentPath.h"
 
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -62,6 +63,30 @@ enum class Found
 Found Probe(const std::filesystem::path& path);
 // The folder's entries, sorted by name; empty for a missing folder.
 std::vector<Entry> ListFolder(const std::filesystem::path& folder);
+
+// A pack of content a target may deliver after start-up, like a map's files (Data/Maps/Files/Map<n>.json is pack
+// "map<n>"): a browser's download, an asset pack an app store installs later.
+struct PackStatus
+{
+    enum class State
+    {
+        Ready,
+        Pending,
+        Failed,
+    };
+    State state = State::Ready;
+    // How much of a pending pack has arrived, from 0 to 1.
+    float progress = 1.0f;
+    // Why a pack failed, for the log.
+    std::string error;
+};
+// Asks the target for a pack: the first ask starts its delivery, later asks report on it. Called once a frame while
+// it is pending; the first time a pack is ready, the folder listings are refreshed. A source that delivers a pack no
+// one asked for calls Refresh itself. Thread: the main thread.
+using PackSource = std::function<PackStatus(std::string_view pack)>;
+// Without a source, as on desktop where every file is on disk, every pack is ready.
+void SetPackSource(PackSource source);
+PackStatus RequestPack(std::string_view pack);
 
 // Forgets the folder listings it holds, after something wrote or removed content. Writes are rare (editor saves),
 // so it drops them all rather than finding the folder under every spelling.

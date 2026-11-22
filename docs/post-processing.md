@@ -48,6 +48,71 @@ effects, black elsewhere), `$post view bloom` (the blurred glow) and
 `$post view scene` (back). The views need post-processing on and a bloom
 strength above 0.
 
+## Edge smoothing
+
+Edge smoothing (FXAA) is the last pass over the processed scene, after bloom,
+grading and the HDR tone map and before the interface. It looks for edges by
+the contrast in brightness, follows each edge to where it ends and blends
+across it, and it softens single pixels that are much brighter or darker than
+their neighbours. Multisampling smooths only the edges of triangles; edge
+smoothing also catches what is drawn inside a surface: highlights on metal
+armour, rim light and fine texture that shimmer while the camera moves. The
+price is a little sharpness in fine texture.
+
+It belongs to the Enhanced look and is off unless the player ticks "Edge
+smoothing (FXAA)" under the Anti-aliasing row, or types `$fxaa on`
+(`[Render] EdgeSmoothing` in `config.ini`). It works with any multisample count,
+including none, and with bloom and colour grading switched off: the frame then
+takes the post-processed path with a composite that changes nothing, so it
+looks as without post-processing apart from the smoothed edges. The diagnostic
+views (`$post view source` and `$post view bloom`) are shown unsmoothed.
+
+The pass reads one full-size image in the frame's format, through one sampler,
+so it adds a single sampler slot to the frame whatever the scene holds. If the
+graphics device cannot build it, the log says so and frames stay unsmoothed.
+
+## Render scale and sharpening
+
+The render scale draws the 3D scene at a share of the window's size, from 50 to
+100 percent, and upscales it to the window before the interface, which stays at
+the window's size and as sharp as before. The upscale is AMD's FidelityFX Super
+Resolution 1 edge-adaptive upsampling (EASU), and the sharpening its contrast
+adaptive sharpening (RCAS); both are ported from `ffx_fsr1.h` (MIT licence) into
+`post_fsr_easu.frag` and `post_fsr_rcas.frag`. Sharpening also works at 100
+percent, on its own.
+
+After the composite, the passes run in this order, each reading the image the
+one before drew:
+
+| Pass | Runs when | Size |
+|---|---|---|
+| Edge smoothing (FXAA) | ticked | the render size |
+| Upscale (EASU) | the render scale is below 100 percent | from the render size to the window's |
+| Sharpening (RCAS) | the sharpness is above 0 | the window's size |
+
+The last of them draws inside the interface pass, the others into images of
+their own. Each is one full-screen draw with one texture and one sampler, so
+each adds one sampler slot to the frame.
+
+At a render scale below 100 percent, what the scene draws into is that size:
+the scene texture and its multisampled colour target, the scene's depth, the
+bloom source and the bloom chain, the ground shadow mask, the ambient occlusion
+and the composite. The viewports and scissors recorded for the window are
+scaled to it while the scene's passes replay. The sun shadow map keeps its own
+resolution, and the interface pass, RmlUi and the grading table stay at the
+window's size. The interface then starts from a cleared depth of its own, since
+the scene's depth is smaller: a 3D draw after the scene (an item preview, say)
+no longer hides behind the world below 100 percent.
+
+Both are player settings of the Enhanced look, like the anti-aliasing:
+`[Render] RenderScale` (50 to 100, default 100) and `Sharpness` (0 to 100,
+default 0) in `config.ini`, the Render scale and Sharpness rows under
+Anti-aliasing in the options window, and `$renderscale <50-100>` and
+`$sharpness <0-100>` in the chat box. At 100 percent and a sharpness of 0
+nothing changes. Classic renders at the window's size without sharpening
+whatever they say. If the graphics device cannot build a pass, the log says so
+and frames go without it.
+
 ## Grading tables
 
 A map's table is `Data/Grading/World<N>.png`, where `N` is the map number plus
