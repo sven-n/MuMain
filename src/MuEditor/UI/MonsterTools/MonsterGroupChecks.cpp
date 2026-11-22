@@ -46,6 +46,20 @@ std::vector<MapRef> MapsElsewhere(const MonsterMapVariant& variant, const std::v
     return elsewhere;
 }
 
+// Whether the variant names only looks (MN8, ML7): a map's own look of the monster, kept for a server that places it
+// there (Crywolf's green chrome on Tantalos), so it is no mistake on a map where the data places it nowhere.
+bool NamesOnlyLooks(const MonsterMapVariant& variant)
+{
+    if (variant.model || variant.attacks || (!variant.setup.renderStyle && !variant.setup.effect))
+    {
+        return false;
+    }
+    Data::Monsters::MonsterSetup rest = variant.setup;
+    rest.renderStyle.reset();
+    rest.effect.reset();
+    return rest == Data::Monsters::MonsterSetup{};
+}
+
 void CheckVariants(int number, const std::vector<MonsterMapVariant>& variants, const std::vector<MapRef>& maps,
                    const std::string& where, const std::string& source, std::vector<ItemDataIssue>& issues)
 {
@@ -55,6 +69,10 @@ void CheckVariants(int number, const std::vector<MonsterMapVariant>& variants, c
     }
     for (size_t index = 0; index < variants.size(); ++index)
     {
+        if (NamesOnlyLooks(variants[index]))
+        {
+            continue;
+        }
         const std::vector<MapRef> elsewhere = MapsElsewhere(variants[index], maps);
         if (elsewhere.empty())
         {

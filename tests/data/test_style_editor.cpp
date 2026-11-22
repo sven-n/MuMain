@@ -107,47 +107,47 @@ TEST_CASE("The Style Editor's changes of a look reach the game at once and are i
     CHECK(GameLook("brightBladeGold") == nullptr);
 }
 
-TEST_CASE("Item effects are edited like render styles: a change reaches the game and is an item edit [editor][looks]")
+TEST_CASE("Effects are edited like render styles: a change reaches the game and is an item edit [editor][looks]")
 {
     LookDefinition effect{"pulse"};
-    effect.itemValuesBefore.push_back({.values = {.glowMesh = 1}});
+    effect.valuesBefore.push_back({.values = {.glowMesh = 1}});
     // A render style of the same name stays apart.
     const LookEditsScope looks({Plain("pulse")}, {}, std::vector{effect});
     LookDefinition changed = effect;
     changed.objectLight = std::array<Data::Looks::Number, 3>{0.5f, 0.5f, 0.5f};
 
-    g_ItemEffectEdits.SetLook("Change an item effect", "pulse", changed);
-    REQUIRE(Data::Looks::g_LookStore.FindItemEffect("pulse") != nullptr);
-    CHECK(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    g_EffectEdits.SetLook("Change an effect", "pulse", changed);
+    REQUIRE(Data::Looks::g_LookStore.FindEffect("pulse") != nullptr);
+    CHECK(Data::Looks::g_LookStore.FindEffect("pulse")->objectLight.has_value());
     CHECK(GameLook("pulse")->layers.size() == 1);
-    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "Change an item effect");
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "Change an effect");
     CHECK(g_ItemEdits.Undo());
-    CHECK_FALSE(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK_FALSE(Data::Looks::g_LookStore.FindEffect("pulse")->objectLight.has_value());
 
     // A render style's change in the same group is a step of its own kind, undone with it.
     g_ItemEdits.BeginGroup("Both");
-    g_ItemEffectEdits.SetLook("Both", "pulse", changed);
+    g_EffectEdits.SetLook("Both", "pulse", changed);
     g_LookEdits.SetLook("Both", "pulse", LookDefinition{"pulse", {Layer{}, Layer{}}});
     g_ItemEdits.EndGroup();
-    CHECK(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK(Data::Looks::g_LookStore.FindEffect("pulse")->objectLight.has_value());
     CHECK(GameLook("pulse")->layers.size() == 2);
     CHECK(g_ItemEdits.Undo());
-    CHECK_FALSE(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK_FALSE(Data::Looks::g_LookStore.FindEffect("pulse")->objectLight.has_value());
     CHECK(GameLook("pulse")->layers.size() == 1);
 }
 
-TEST_CASE("The Style Editor opens on an item effect with its entries before drawing (design L13, L45) [editor][looks]")
+TEST_CASE("The Style Editor opens on an effect with its entries before drawing (design L13, L45) [editor][looks]")
 {
     TestImGuiContext context;
     ToolWindowsScope windows;
     g_ItemSelection.Select(MuEditor::Items::ItemSelection::NoItem);
     LookDefinition effect{"pulse"};
-    effect.itemValuesBefore.push_back(
+    effect.valuesBefore.push_back(
         {.onlyWhen = {.level = std::pair{1, 15}}, .values = {.glowMesh = 1}, .glowsLikeLevel = 7});
     effect.objectLight = std::array<Data::Looks::Number, 3>{0.5f, 0.5f, 0.5f};
     const LookEditsScope looks({Plain("pulse")}, {}, std::vector{effect});
 
-    g_MuStyleEditorUI.ShowItemEffect("pulse");
+    g_MuStyleEditorUI.ShowEffect("pulse");
     CHECK(g_MuEditorCore.GetToolWindows().styleEditor);
     RenderStyleEditor();
     RenderStyleEditor();
@@ -158,27 +158,27 @@ TEST_CASE("The Style Editor opens on an item effect with its entries before draw
     g_MuStyleEditorUI.ShowRenderStyle("pulse");
     RenderStyleEditor();
     CHECK(g_MuStyleEditorUI.GetDraft() == Plain("pulse"));
-    CHECK_FALSE(g_MuStyleEditorUI.HasUnappliedChanges("pulse", Data::Looks::LookKind::ItemEffect));
+    CHECK_FALSE(g_MuStyleEditorUI.HasUnappliedChanges("pulse", Data::Looks::LookKind::Effect));
 
     // An entry's line describes it.
-    CHECK(MuEditor::Looks::Fields::DescribeItemValuesBefore(effect.itemValuesBefore[0]).find(I18N::Editor::OnlyWhen) ==
+    CHECK(MuEditor::Looks::Fields::DescribeValuesBefore(effect.valuesBefore[0]).find(I18N::Editor::OnlyWhen) ==
           0);
 
     // The fields of an entry and of the object's light draw without changing them.
-    Data::Looks::ItemValuesBefore entry = effect.itemValuesBefore[0];
+    Data::Looks::ValuesBefore entry = effect.valuesBefore[0];
     std::optional<std::array<Data::Looks::Number, 3>> light = effect.objectLight;
     for (int frame = 0; frame < 3; ++frame)
     {
         ImGui::NewFrame();
         ImGui::SetNextWindowSize(ImVec2(900.0f, 900.0f));
         ImGui::Begin("Fields");
-        CHECK_FALSE(MuEditor::Looks::Fields::ItemValuesBeforeEntry(entry));
+        CHECK_FALSE(MuEditor::Looks::Fields::ValuesBeforeEntry(entry));
         CHECK_FALSE(MuEditor::Looks::Fields::ObjectLight(light));
         ImGui::End();
         ImGui::Render();
         CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
     }
-    CHECK(entry == effect.itemValuesBefore[0]);
+    CHECK(entry == effect.valuesBefore[0]);
     CHECK(light == effect.objectLight);
 }
 
@@ -580,9 +580,9 @@ TEST_CASE("The preview draws a look with the values of the picked item that name
         MuEditor::Looks::ForItem(look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 0));
     REQUIRE(forItem.has_value());
     CHECK(forItem->layers[0].meshes.meshes == std::vector<int>{1, 2});
-    // An item that names another look, or looks at the item effects, draws this look as it is.
+    // An item that names another look, or looks at the effects, draws this look as it is.
     CHECK_FALSE(MuEditor::Looks::ForItem(look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 1)).has_value());
-    CHECK_FALSE(MuEditor::Looks::ForItem(look, LookKind::ItemEffect, Data::Items::MakeItemType(0, 0)).has_value());
+    CHECK_FALSE(MuEditor::Looks::ForItem(look, LookKind::Effect, Data::Items::MakeItemType(0, 0)).has_value());
 
     // The preview keeps the look it made while nothing it was made from changes.
     MuEditor::Looks::ItemPreviewLook kept;

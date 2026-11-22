@@ -74,7 +74,7 @@
       "ground": {
         "rotation": [60, 0, -45]
       },
-      "itemEffect": "glowingMesh"
+      "effect": "glowingMesh"
     },
     {
       "number": 6,
@@ -136,7 +136,7 @@
       "ground": {
         "rotation": [60, 0, -45]
       },
-      "itemEffect": "pulsingGlow"
+      "effect": "pulsingGlow"
     },
     {
       "number": 11,
@@ -173,7 +173,7 @@
       "ground": {
         "rotation": [60, 0, -45]
       },
-      "itemEffect": "glowingMesh"
+      "effect": "glowingMesh"
     },
     {
       "number": 14,
@@ -190,7 +190,7 @@
         "color": "blue",
         "shineColor": "blue"
       },
-      "itemEffect": "shimmeringPulse"
+      "effect": "shimmeringPulse"
     },
     {
       "number": 15,
@@ -424,7 +424,7 @@
         "hiddenMesh": 2
       },
       "renderStyle": "runeBlade",
-      "itemEffect": "hideMesh2"
+      "effect": "hideMesh2"
     },
     {
       "number": 32,

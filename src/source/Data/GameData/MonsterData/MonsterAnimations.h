@@ -12,6 +12,8 @@ namespace Data::Monsters
 // attack3 8, attack4 9, run 10, attack5 11; a later animation goes by its
 // number ("12").
 std::string GetMonsterAnimationName(int animation);
+// How many animations have a name of their own (stop1 to attack5).
+constexpr int MonsterNamedAnimationCount = 12;
 
 // The number of a name GetMonsterAnimationName gives, or nullopt.
 std::optional<int> FindMonsterAnimation(std::string_view name);

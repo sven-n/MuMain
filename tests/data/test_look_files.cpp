@@ -40,14 +40,14 @@ std::string File(const std::string& looks)
 
 std::string EffectFile(const std::string& looks)
 {
-    return R"({ "formatVersion": 1, "kind": "itemEffect", "looks": )" + looks + " }";
+    return R"({ "formatVersion": 1, "kind": "effect", "looks": )" + looks + " }";
 }
 
 ReadResult ReadEffects(std::string_view text)
 {
     ReadResult result;
     LookFile file;
-    ReadLookFile(text, "ItemEffects.json", LookKind::ItemEffect, file, result.issues);
+    ReadLookFile(text, "Effects.json", LookKind::Effect, file, result.issues);
     result.looks = std::move(file.looks);
     return result;
 }
@@ -83,15 +83,15 @@ TEST_CASE("The shipped render style file reads without problems and is in the wr
     CHECK(WriteRenderStylesJson(result.looks) == *text);
 }
 
-TEST_CASE("The shipped item effect file reads without problems and is in the written format [looks][files]")
+TEST_CASE("The shipped effect file reads without problems and is in the written format [looks][files]")
 {
     const auto text = Data::Items::Json::ReadTextFile(std::filesystem::path(MU_TEST_DATA_DIR) / "Effects" /
-                                                      std::string(GetLookFileName(LookKind::ItemEffect)));
+                                                      std::string(GetLookFileName(LookKind::Effect)));
     REQUIRE(text);
     const ReadResult result = ReadEffects(*text);
     INFO(Describe(result.issues));
     CHECK(result.issues.empty());
-    CHECK(WriteLookFileJson(LookKind::ItemEffect, result.looks) == *text);
+    CHECK(WriteLookFileJson(LookKind::Effect, result.looks) == *text);
 }
 
 TEST_CASE("A look's layers read every field, and write back as they were read [looks][files]")
@@ -138,6 +138,19 @@ TEST_CASE("A look's layers read every field, and write back as they were read [l
     CHECK(WriteRenderStylesJson(result.looks) == text);
 }
 
+TEST_CASE("A layer's Only when writes its whole numbers without a fraction, as the file had them [looks][files]")
+{
+    const LookDefinition fading{
+        "fading",
+        {Layer{.meshes = {{0}}, .onlyWhen = {.opacityAbove = 0, .opacityAtMost = 1}},
+         Layer{.meshes = {{1}}, .onlyWhen = {.opacityAtMost = 0.5, .cycleHalf = CycleHalf{.seconds = 2, .first = true}}}},
+        {}};
+    const std::string text = WriteRenderStylesJson({fading});
+    CHECK(text.find(R"("onlyWhen": {"opacityAbove": 0, "opacityAtMost": 1})") != std::string::npos);
+    CHECK(text.find(R"("onlyWhen": {"opacityAtMost": 0.5, "cycleHalf": {"seconds": 2, "half": "first"}})") !=
+          std::string::npos);
+}
+
 TEST_CASE("A render style's Not for and a layer's Only when read every part and write back as they were read "
           "(design L11) [looks][files]")
 {
@@ -168,49 +181,49 @@ TEST_CASE("A render style's Not for and a layer's Only when read every part and 
     CHECK(plain.find("onlyWhen") == std::string::npos);
 }
 
-TEST_CASE("An item effect sets item values before the drawing, by level, and the object's light, and writes back "
+TEST_CASE("An effect sets item values before the drawing, by level, and the object's light, and writes back "
           "as it was read (design L13, L45) [looks][files]")
 {
     const ReadResult result = ReadEffects(EffectFile(R"([
-        {"name": "hiddenMeshByLevel", "itemValuesBefore": [
+        {"name": "hiddenMeshByLevel", "valuesBefore": [
             {"onlyWhen": {"level": [0, 0]}, "hiddenMesh": 1},
             {"onlyWhen": {"level": [1, 1]}, "hiddenMesh": 0}]},
-        {"name": "devilsEye", "itemValuesBefore": [
+        {"name": "devilsEye", "valuesBefore": [
             {"glowMesh": 1, "glowStrength": {"shape": "wave", "from": 5.65, "to": 25.65, "seconds": 3.1415927},
              "drawingOpacity": 2}],
          "objectLight": [1, {"shape": "wave", "from": 1.13, "to": 5.13, "seconds": 3.1415927}, 1]},
-        {"name": "potion", "itemValuesBefore": [{"onlyWhen": {"level": [1, 15]}, "glowsLikeLevel": 7}]},
-        {"name": "shining", "itemValuesBefore": [{"glowMesh": "all"}]}])"));
+        {"name": "potion", "valuesBefore": [{"onlyWhen": {"level": [1, 15]}, "glowsLikeLevel": 7}]},
+        {"name": "shining", "valuesBefore": [{"glowMesh": "all"}]}])"));
     INFO(Describe(result.issues));
     CHECK(result.issues.empty());
     REQUIRE(result.looks.size() == 4);
-    CHECK(result.looks[3].itemValuesBefore[0].values.glowMesh == -2);
+    CHECK(result.looks[3].valuesBefore[0].values.glowMesh == -2);
     const LookDefinition& byLevel = result.looks[0];
-    REQUIRE(byLevel.itemValuesBefore.size() == 2);
-    CHECK(byLevel.itemValuesBefore[1].onlyWhen.level == std::pair<int, int>{1, 1});
-    CHECK(byLevel.itemValuesBefore[1].values.hiddenMesh == 0);
+    REQUIRE(byLevel.valuesBefore.size() == 2);
+    CHECK(byLevel.valuesBefore[1].onlyWhen.level == std::pair<int, int>{1, 1});
+    CHECK(byLevel.valuesBefore[1].values.hiddenMesh == 0);
     const LookDefinition& eye = result.looks[1];
-    REQUIRE(eye.itemValuesBefore.size() == 1);
-    CHECK(eye.itemValuesBefore[0].drawingOpacity == Number{2.f});
-    CHECK(eye.itemValuesBefore[0].values.glowMesh == 1);
+    REQUIRE(eye.valuesBefore.size() == 1);
+    CHECK(eye.valuesBefore[0].drawingOpacity == Number{2.f});
+    CHECK(eye.valuesBefore[0].values.glowMesh == 1);
     REQUIRE(eye.objectLight);
     CHECK((*eye.objectLight)[0] == Number{1.f});
-    CHECK(result.looks[2].itemValuesBefore[0].glowsLikeLevel == 7);
+    CHECK(result.looks[2].valuesBefore[0].glowsLikeLevel == 7);
 
-    const std::string text = WriteLookFileJson(LookKind::ItemEffect, result.looks);
-    CHECK(text.find(R"("kind": "itemEffect")") != std::string::npos);
+    const std::string text = WriteLookFileJson(LookKind::Effect, result.looks);
+    CHECK(text.find(R"("kind": "effect")") != std::string::npos);
     CHECK(text.find(R"({"onlyWhen": {"level": [1, 15]}, "glowsLikeLevel": 7})") != std::string::npos);
     CHECK(text.find(R"("objectLight": [1, {"shape": "wave")") != std::string::npos);
     // Sorted by name, and so again.
     const ReadResult again = ReadEffects(text);
     CHECK(again.issues.empty());
-    CHECK(WriteLookFileJson(LookKind::ItemEffect, again.looks) == text);
+    CHECK(WriteLookFileJson(LookKind::Effect, again.looks) == text);
     REQUIRE(again.looks.size() == 4);
     CHECK(text.find(R"({"glowMesh": "all"})") != std::string::npos);
     CHECK(again.looks[0] == eye);
 }
 
-TEST_CASE("An item effect's things on bones are read, single and in groups, and written back as they were read "
+TEST_CASE("An effect's things on bones are read, single and in groups, and written back as they were read "
           "(design L55, L56) [looks][files]")
 {
     const ReadResult result = ReadEffects(EffectFile(R"([
@@ -267,7 +280,7 @@ TEST_CASE("An item effect's things on bones are read, single and in groups, and 
     CHECK(onBones[4].places.origin);
     CHECK(std::holds_alternative<Shape>(onBones[4].things[0].rotation));
 
-    const std::string text = WriteLookFileJson(LookKind::ItemEffect, result.looks);
+    const std::string text = WriteLookFileJson(LookKind::Effect, result.looks);
     CHECK(text.find(R"({"sprite": "flareBlue", "bones": [22, 21], "scale": 0.75, "color": [0.6, 0.3, 0.8]})") !=
           std::string::npos);
     CHECK(text.find(R"("chance": {"oneIn": 20, "draw": "plain"})") != std::string::npos);
@@ -277,10 +290,10 @@ TEST_CASE("An item effect's things on bones are read, single and in groups, and 
     CHECK(again.issues.empty());
     REQUIRE(again.looks.size() == 1);
     CHECK(again.looks[0] == result.looks[0]);
-    CHECK(WriteLookFileJson(LookKind::ItemEffect, again.looks) == text);
+    CHECK(WriteLookFileJson(LookKind::Effect, again.looks) == text);
 }
 
-TEST_CASE("A layer value can be the item's times a number, a layer can darken, and an item effect can play the "
+TEST_CASE("A layer value can be the item's times a number, a layer can darken, and an effect can play the "
           "object's animation (design L59, L29) [looks][files]")
 {
     const ReadResult styles = Read(File(R"([{"name": "water", "layers": [
@@ -305,7 +318,7 @@ TEST_CASE("A layer value can be the item's times a number, a layer can darken, a
     CHECK(effects.issues.empty());
     REQUIRE(effects.looks.size() == 1);
     CHECK(effects.looks[0].animationSpeed == 0.2857143f);
-    CHECK(WriteLookFileJson(LookKind::ItemEffect, effects.looks).find(R"("animationSpeed": 0.2857143)") !=
+    CHECK(WriteLookFileJson(LookKind::Effect, effects.looks).find(R"("animationSpeed": 0.2857143)") !=
           std::string::npos);
 
     CHECK(Find(Read(File(R"([{"name": "a", "layers": [{"kind": "texture", "opacity": {"itemTimes": "x"}}]}])"))
@@ -386,7 +399,7 @@ TEST_CASE("Things on bones that can't be created as written are fatal and name t
                "looks[0].onBones") != nullptr);
 }
 
-TEST_CASE("A look file has only its kind's parts: render style parts in an item effect and the other way round are "
+TEST_CASE("A look file has only its kind's parts: render style parts in an effect and the other way round are "
           "fatal (design L23) [looks][files]")
 {
     const struct
@@ -397,10 +410,10 @@ TEST_CASE("A look file has only its kind's parts: render style parts in an item 
         {R"([{"name": "a", "layers": []}])", "looks[0].layers"},
         {R"([{"name": "a", "notFor": ["doppelganger"]}])", "looks[0].notFor"},
         {R"([{"name": "a", "itemValuesAfter": {"glowMesh": 1}}])", "looks[0].itemValuesAfter"},
-        {R"([{"name": "a", "itemValuesBefore": [{"light": [1, 1, 1]}]}])", "looks[0].itemValuesBefore[0].light"},
-        {R"([{"name": "a", "itemValuesBefore": [{"glowsLikeLevel": 16}]}])",
-         "looks[0].itemValuesBefore[0].glowsLikeLevel"},
-        {R"([{"name": "a", "itemValuesBefore": {"glowMesh": 1}}])", "looks[0].itemValuesBefore"},
+        {R"([{"name": "a", "valuesBefore": [{"light": [1, 1, 1]}]}])", "looks[0].valuesBefore[0].light"},
+        {R"([{"name": "a", "valuesBefore": [{"glowsLikeLevel": 16}]}])",
+         "looks[0].valuesBefore[0].glowsLikeLevel"},
+        {R"([{"name": "a", "valuesBefore": {"glowMesh": 1}}])", "looks[0].valuesBefore"},
         {R"([{"name": "a", "objectLight": [1, 1]}])", "looks[0].objectLight"},
     };
     for (const auto& item : effectCases)
@@ -413,30 +426,30 @@ TEST_CASE("A look file has only its kind's parts: render style parts in an item 
     // A file of the other kind.
     CHECK(Find(ReadEffects(File("[]")).issues, ItemDataIssueSeverity::Fatal, "kind") != nullptr);
     CHECK(Find(Read(EffectFile("[]")).issues, ItemDataIssueSeverity::Fatal, "kind") != nullptr);
-    // An item effect that does nothing is a warning.
+    // An effect that does nothing is a warning.
     CHECK(Find(ReadEffects(EffectFile(R"([{"name": "a"}])")).issues, ItemDataIssueSeverity::Warning, "looks[0]") !=
           nullptr);
 }
 
-TEST_CASE("An item's values take the place of the fields of its item effect that each item sets (design L12) "
+TEST_CASE("An item's values take the place of the fields of its effect that each item sets (design L12) "
           "[looks][files]")
 {
-    const ReadResult result = ReadEffects(EffectFile(R"([{"name": "glowing", "itemValuesBefore": [
+    const ReadResult result = ReadEffects(EffectFile(R"([{"name": "glowing", "valuesBefore": [
         {"glowMesh": {"eachItem": "glowMesh", "default": 0}, "glowStrength": 1}]}])"));
     INFO(Describe(result.issues));
     REQUIRE(result.looks.size() == 1);
     CHECK(SetsEachItem(result.looks[0]));
     std::vector<ItemDataIssue> issues;
     const LookDefinition resolved =
-        ResolveForItem(result.looks[0], {{"glowMesh", "2"}}, "", issues, LookKind::ItemEffect);
+        ResolveForItem(result.looks[0], {{"glowMesh", "2"}}, "", issues, LookKind::Effect);
     CHECK(issues.empty());
-    REQUIRE(resolved.itemValuesBefore.size() == 1);
-    CHECK(resolved.itemValuesBefore[0].values.glowMesh == 2);
-    CHECK(WriteLookFileJson(LookKind::ItemEffect, result.looks)
+    REQUIRE(resolved.valuesBefore.size() == 1);
+    CHECK(resolved.valuesBefore[0].values.glowMesh == 2);
+    CHECK(WriteLookFileJson(LookKind::Effect, result.looks)
               .find(R"({"glowMesh": {"eachItem": "glowMesh", "default": 0}, "glowStrength": 1})") != std::string::npos);
 }
 
-TEST_CASE("A render style can draw alone, which writes after its Not for, and is no part of an item effect (design "
+TEST_CASE("A render style can draw alone, which writes after its Not for, and is no part of an effect (design "
           "L47) [looks][files]")
 {
     const ReadResult result =
@@ -695,7 +708,7 @@ TEST_CASE("Problems that make a render style file unusable are fatal [looks][fil
          "looks[0].layers[0].scrollingMesh"},
         {R"([{"name": "a", "layers": [], "itemValuesAfter": {"glowStrength": "drawing"}}])",
          "looks[0].itemValuesAfter.glowStrength"},
-        {R"([{"name": "a", "layers": [], "itemValuesBefore": [{"hiddenMesh": 1}]}])", "looks[0].itemValuesBefore"},
+        {R"([{"name": "a", "layers": [], "valuesBefore": [{"hiddenMesh": 1}]}])", "looks[0].valuesBefore"},
         {R"([{"name": "a", "notFor": "doppelganger", "layers": []}])", "looks[0].notFor"},
         {R"([{"name": "a", "notFor": ["doppelganger", "inventory"], "layers": []}])", "looks[0].notFor[1]"},
         {R"([{"name": "a", "layers": [{"kind": "texture", "onlyWhen": "worn"}]}])", "looks[0].layers[0].onlyWhen"},
@@ -721,7 +734,7 @@ TEST_CASE("Problems that make a render style file unusable are fatal [looks][fil
         CHECK(Data::Items::HasFatal(result.issues));
     }
 
-    CHECK(Find(Read(R"({ "formatVersion": 1, "kind": "itemEffect", "looks": [] })").issues,
+    CHECK(Find(Read(R"({ "formatVersion": 1, "kind": "effect", "looks": [] })").issues,
                ItemDataIssueSeverity::Fatal, "kind") != nullptr);
     CHECK(Find(Read(R"({ "formatVersion": 1, "kind": "renderStyle" })").issues, ItemDataIssueSeverity::Fatal,
                "looks") != nullptr);

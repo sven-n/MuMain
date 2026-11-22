@@ -202,7 +202,7 @@ bool GMSwampOfQuiet::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
     return true;
 }
 
-bool GMSwampOfQuiet::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
+bool GMSwampOfQuiet::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (pObject->Type >= MODEL_SHADOW_PAWN && pObject->Type <= MODEL_SHADOW_LOOK)
     {
@@ -277,7 +277,7 @@ bool GMSwampOfQuiet::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pM
     return true;
 }
 
-void GMSwampOfQuiet::RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon0)
+void GMSwampOfQuiet::RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (!IsCurrentMap())
         return;

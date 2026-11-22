@@ -83,8 +83,8 @@
       "ground": {
         "rotation": [0, 270, -45]
       },
-      "itemEffect": "pulsingGlow",
-      "itemEffectValues": {"glowMesh": "all"}
+      "effect": "pulsingGlow",
+      "effectValues": {"glowMesh": "all"}
     },
     {
       "number": 7,
@@ -177,8 +177,8 @@
         "color": "white",
         "shineColor": "blue"
       },
-      "itemEffect": "pulsingGlow",
-      "itemEffectValues": {"glowMesh": "all"}
+      "effect": "pulsingGlow",
+      "effectValues": {"glowMesh": "all"}
     },
     {
       "number": 14,
@@ -191,8 +191,8 @@
       "ground": {
         "rotation": [90, 0, -45]
       },
-      "itemEffect": "pulsingGlow",
-      "itemEffectValues": {"glowMesh": "all"}
+      "effect": "pulsingGlow",
+      "effectValues": {"glowMesh": "all"}
     },
     {
       "number": 15,
@@ -222,8 +222,8 @@
       "ground": {
         "rotation": [90, 0, -45]
       },
-      "itemEffect": "pulsingGlow",
-      "itemEffectValues": {"glowMesh": "all", "glowStrength": {"shape": "wave", "from": 0.7, "to": 1.1, "seconds": 1.5707963}}
+      "effect": "pulsingGlow",
+      "effectValues": {"glowMesh": "all", "glowStrength": {"shape": "wave", "from": 0.7, "to": 1.1, "seconds": 1.5707963}}
     },
     {
       "number": 17,

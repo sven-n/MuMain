@@ -8,6 +8,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace Data::Monsters
 {
@@ -64,6 +65,9 @@ public:
         }
         return &m_monsters[static_cast<std::size_t>(number)];
     }
+
+    // The entries, by number: each number has its own entry.
+    std::vector<const MonsterDefinition*> GetAll() const;
 
     // The monster's name in the display language, cut to what the game holds
     // (MAX_MONSTER_NAME); nullptr like Find.

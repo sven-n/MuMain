@@ -130,7 +130,7 @@ void CheckModel(int itemType, const ItemModelDefinition& model, const LookNames&
 {
     CheckGlowMeshes(itemType, model);
     CheckLookName(model, model.renderStyle, lookNames.renderStyle, ItemModelProblemType::RenderStyleUnknown);
-    CheckLookName(model, model.itemEffect, lookNames.itemEffect, ItemModelProblemType::ItemEffectUnknown);
+    CheckLookName(model, model.effect, lookNames.effect, ItemModelProblemType::EffectUnknown);
 }
 
 // The material values of the item's slot: every slot keeps its own, also one

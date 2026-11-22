@@ -26,11 +26,11 @@ inline bool NoLookExists(std::string_view)
 struct LookNames
 {
     LookExists renderStyle = NoLookExists;
-    LookExists itemEffect = NoLookExists;
+    LookExists effect = NoLookExists;
 };
 
 // Opens the .bmd file of every item model; `lookNames` checks the names of
-// the "renderStyle" and "itemEffect" values. The file of a shared model is
+// the "renderStyle" and "effect" values. The file of a shared model is
 // opened once, by its first item; the others use the data of that slot.
 void OpenModels(const LookNames& lookNames);
 

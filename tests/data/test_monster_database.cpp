@@ -47,6 +47,17 @@ TEST_CASE("Monster table: finds the monsters it has, nothing else [data][monster
     CHECK(g_MonsterDatabase.FindDisplayName(3) == nullptr);
 }
 
+TEST_CASE("Monster table: lists its entries by number, each once [data][monsters]")
+{
+    const std::array monsters = {Monster(251, "Hanzo", MonsterKind::Npc), BudgeDragon()};
+    g_MonsterDatabase.Build(monsters, "en");
+
+    const std::vector<const MonsterDefinition*> all = g_MonsterDatabase.GetAll();
+    REQUIRE(all.size() == 2);
+    CHECK(all[0] == g_MonsterDatabase.Find(2));
+    CHECK(all[1] == g_MonsterDatabase.Find(251));
+}
+
 TEST_CASE("Monster table: numbers without an entry get the answers of the old client [data][monsters]")
 {
     const std::array monsters = {BudgeDragon()};

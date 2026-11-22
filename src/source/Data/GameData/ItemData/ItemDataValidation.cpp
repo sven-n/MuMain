@@ -1206,7 +1206,7 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
 }
 
 void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
-                            LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues)
+                            LookNameExists effectExists, std::vector<ItemDataIssue>& issues)
 {
     const auto check =
         [&](const ItemModelDefinition& model, const char* field, const std::string& name, LookNameExists exists)
@@ -1220,7 +1220,7 @@ void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNam
     for (const ItemModelDefinition& model : models)
     {
         check(model, "renderStyle", model.renderStyle, renderStyleExists);
-        check(model, "itemEffect", model.itemEffect, itemEffectExists);
+        check(model, "effect", model.effect, effectExists);
     }
 }
 

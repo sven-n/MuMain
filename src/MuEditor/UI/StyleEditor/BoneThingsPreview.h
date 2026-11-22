@@ -20,7 +20,7 @@ namespace MuEditor::Looks
 struct BoneThingsShown
 {
     MuEditor::Effects::EffectPreviewRequest request;
-    // The item effect the view's item runs (Render::Items::ItemEffects::EffectOf while the view draws); nullptr: none.
+    // The effect the view's item runs (Render::Items::ItemEffects::EffectOf while the view draws); nullptr: none.
     const Data::Looks::LookDefinition* effect = nullptr;
     // How far the view's turn has turned the item.
     float turnDegrees = 0.0f;
@@ -31,7 +31,7 @@ struct BoneThingsShown
 // The things on bones of the items the Style Editor's preview and the Item Model window's preview show (FX1.7c, design
 // section 7a, L51 to L54). Each view
 // keeps its own copy of the item object with its own bones at the player's character (L52, L53); in the game's update
-// it creates the things its item effect creates there, with the game's own calls into the game's effect lists, which
+// it creates the things its effect creates there, with the game's own calls into the game's effect lists, which
 // move them as in the game. Their slots carry the view's mark (Render::Effects::PreviewSlots): the world doesn't draw
 // them, and the view draws only its own, right after its item, with its camera. While the preview's time stops the
 // game moves none of a view's things and the view creates only its sprites and light, made from the stopped clock

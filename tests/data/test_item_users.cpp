@@ -61,13 +61,13 @@ TEST_CASE("The item tools find the items that use a shared model, a look or a gl
     models[1].model = "parchment";
     models[0].renderStyle = "chrome";
     models[2].renderStyle = "chrome";
-    models[1].itemEffect = "sparkle";
+    models[1].effect = "sparkle";
     models[2].glow.shineColor = "red";
     g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
 
     CHECK(FindSharedModelUsers("parchment") == std::vector<int>{MakeItemType(0, 0), MakeItemType(0, 1)});
     CHECK(FindRenderStyleUsers("chrome") == std::vector<int>{MakeItemType(0, 0), MakeItemType(0, 2)});
-    CHECK(FindItemEffectUsers("sparkle") == std::vector<int>{MakeItemType(0, 1)});
+    CHECK(FindEffectUsers("sparkle") == std::vector<int>{MakeItemType(0, 1)});
     CHECK(FindGlowColorUsers("red") == std::vector<int>{MakeItemType(0, 2)});
     // The default glow color counts where an item leaves it out.
     CHECK(FindGlowColorUsers(ItemGlow::DefaultColor).size() == 3);

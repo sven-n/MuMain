@@ -9,6 +9,7 @@
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/DataHandler/MonsterData/MonsterSoundJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Data/GameData/MonsterData/MonsterDataValidation.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
@@ -23,6 +24,7 @@
 #include <bitset>
 #include <chrono>
 #include <map>
+#include <set>
 
 namespace Data::Monsters
 {
@@ -40,19 +42,40 @@ constexpr std::string_view MonsterSoundsName = "monster sound sets";
 // read in place.
 void ValidateLinks(std::span<const MonsterSoundSet> sets, std::vector<Items::ItemDataIssue>& issues)
 {
-    std::vector<const MonsterDefinition*> monsters;
-    for (int number = 0; number < MonsterNumberCount; ++number)
+    ValidateMonsterSoundLinks(g_MonsterDatabase.GetAll(), g_MonsterModelDatabase.GetAll(), sets,
+                              GetMonstersFile().generic_string(), GetMonsterSoundsFile().generic_string(), issues);
+}
+
+// The looks the monsters and their models name (MN8, ML1), once both tables are built: a name no look file has is
+// reported, and the monster is drawn without it. The look files are loaded before the monsters (OpenItems); without
+// them (tools that load only the monsters) nothing is checked.
+void ValidateLookNames(std::vector<Items::ItemDataIssue>& monsterIssues, std::vector<Items::ItemDataIssue>& modelIssues)
+{
+    if (Data::Looks::g_LookStore.GetRenderStyles().empty() && Data::Looks::g_LookStore.GetEffects().empty())
     {
-        if (const MonsterDefinition* monster = g_MonsterDatabase.Find(number))
-        {
-            monsters.push_back(monster);
-        }
+        return;
     }
-    ValidateMonsterSoundLinks(monsters, g_MonsterModelDatabase.GetAll(), sets, GetMonstersFile().generic_string(),
-                              GetMonsterSoundsFile().generic_string(), issues);
+    const auto renderStyleExists = [](std::string_view name)
+    { return Data::Looks::g_LookStore.FindRenderStyle(name) != nullptr; };
+    const auto effectExists = [](std::string_view name)
+    { return Data::Looks::g_LookStore.FindEffect(name) != nullptr; };
+    ValidateMonsterLooks(g_MonsterDatabase.GetAll(), renderStyleExists, effectExists,
+                         GetMonstersFile().generic_string(), monsterIssues, Data::Looks::EffectRunsInUpdate);
+    ValidateMonsterModelLooks(g_MonsterModelDatabase.GetAll(), renderStyleExists, effectExists,
+                              GetMonsterModelsFile().generic_string(), modelIssues, Data::Looks::EffectRunsInUpdate);
 }
 
 #ifdef _EDITOR
+// Whether two entries of a slot name the same looks (MN8); none names none. Only a look change makes the living
+// monsters take their looks again: the other fields reach them when the model is reopened.
+bool SameLooks(const MonsterModelDefinition* a, const MonsterModelDefinition* b)
+{
+    static const MonsterModelDefinition None;
+    const MonsterModelDefinition& left = a != nullptr ? *a : None;
+    const MonsterModelDefinition& right = b != nullptr ? *b : None;
+    return left.renderStyle == right.renderStyle && left.effect == right.effect;
+}
+
 // The entries of the table, sorted by number.
 std::vector<MonsterDefinition> CollectMonsters()
 {
@@ -157,6 +180,11 @@ bool MonsterDataHandler::LoadModels(std::string& errorMessage)
     }
 
     g_MonsterModelDatabase.Build(result.models);
+    std::vector<Items::ItemDataIssue> monsterLookIssues;
+    std::vector<Items::ItemDataIssue> modelLookIssues;
+    ValidateLookNames(monsterLookIssues, modelLookIssues);
+    LogDataIssues(MonsterDataLabel, monsterLookIssues);
+    LogDataIssues(MonsterModelsLabel, modelLookIssues);
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} monster models from {} in {:.1f} ms", result.models.size(),
                 GetMonsterModelsFile().generic_string(), elapsed.count());
@@ -476,6 +504,7 @@ std::optional<MonsterModelDefinition> MonsterDataHandler::ReadModel(int slot) co
 
 void MonsterDataHandler::RestoreModels(std::span<const MonsterModelSnapshot> snapshots)
 {
+    bool looksChanged = false;
     for (const MonsterModelSnapshot& snapshot : snapshots)
     {
         const std::string_view symbol = GetMonsterModelSymbol(snapshot.slot);
@@ -483,6 +512,8 @@ void MonsterDataHandler::RestoreModels(std::span<const MonsterModelSnapshot> sna
         {
             continue;
         }
+        const MonsterModelDefinition* old = g_MonsterModelDatabase.Find(snapshot.slot);
+        looksChanged = looksChanged || !SameLooks(old, snapshot.model.has_value() ? &*snapshot.model : nullptr);
         if (snapshot.model)
         {
             MonsterModelDefinition model = *snapshot.model;
@@ -494,6 +525,10 @@ void MonsterDataHandler::RestoreModels(std::span<const MonsterModelSnapshot> sna
             g_MonsterModelDatabase.Remove(snapshot.slot);
         }
         m_modelsToReopen.push_back(snapshot.slot);
+    }
+    if (looksChanged)
+    {
+        NotifyModelLooksChanged();
     }
 }
 
@@ -625,12 +660,14 @@ void MonsterDataHandler::UseModels(std::span<const MonsterModelDefinition> model
     // The slots whose entry the file changes, also those it removes.
     const std::map<int, MonsterModelDefinition> before = BySlot(CollectModels());
     const std::map<int, MonsterModelDefinition> after = BySlot(models);
+    bool looksChanged = false;
     for (const auto& [slot, model] : before)
     {
         const auto read = after.find(slot);
         if (read == after.end() || !(read->second == model))
         {
             m_modelsToReopen.push_back(slot);
+            looksChanged = looksChanged || !SameLooks(&model, read != after.end() ? &read->second : nullptr);
         }
     }
     for (const auto& [slot, model] : after)
@@ -638,9 +675,24 @@ void MonsterDataHandler::UseModels(std::span<const MonsterModelDefinition> model
         if (!before.contains(slot))
         {
             m_modelsToReopen.push_back(slot);
+            looksChanged = looksChanged || !SameLooks(nullptr, &model);
         }
     }
     g_MonsterModelDatabase.Build(models);
+    if (looksChanged)
+    {
+        NotifyModelLooksChanged();
+    }
+}
+
+void MonsterDataHandler::NotifyModelLooksChanged() const
+{
+    // The looks a model names for its monsters (MN8) are found when a monster is set up: the living ones take them
+    // again, as they take an entry's changes.
+    if (m_monstersChanged != nullptr)
+    {
+        m_monstersChanged(AllNumbers);
+    }
 }
 
 void MonsterDataHandler::ReopenChangedModels()

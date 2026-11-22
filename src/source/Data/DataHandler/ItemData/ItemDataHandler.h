@@ -48,6 +48,12 @@ public:
     // ItemAttribute[]. On fatal problems nothing is changed, false is returned and
     // errorMessage describes the fatal problems for the player.
     bool Load(std::string& errorMessage);
+    // For tests whose item table is gone (ClientDataScope): the item data counts as not loaded, so neither a UI
+    // language switch nor Translate item names refills ItemAttribute any more.
+    void ForgetLoadForTest()
+    {
+        m_loaded = false;
+    }
 
     // Loads and validates the item models (Data/Items/Models) into the item
     // model database. On fatal problems nothing is changed, false is returned and
@@ -113,7 +119,7 @@ public:
     void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors);
     // The folders MuEditor sorts the glow colors in (D69); Save writes them with the colors.
     void SetGlowColorFolders(std::vector<Data::Colors::ColorFolder> folders);
-    // A look file as the editor has it (Data/Effects/RenderStyles.json or ItemEffects.json, design L39): its looks,
+    // A look file as the editor has it (Data/Effects/RenderStyles.json or Effects.json, design L39): its looks,
     // sorted by name, which the game draws (g_LookStore), and the Style Editor's folders. Read from the file when first
     // asked for, and the game draws the file's looks from then on (the file may have changed since the game started;
     // the caller loads their textures); a read with a fatal problem keeps the game's looks and no folders, and Save
@@ -165,7 +171,7 @@ public:
     void ForgetRenderStylesForTest()
     {
         ForgetLooksForTest(Data::Looks::LookKind::RenderStyle);
-        ForgetLooksForTest(Data::Looks::LookKind::ItemEffect);
+        ForgetLooksForTest(Data::Looks::LookKind::Effect);
     }
     // Opens the models changed since the last call again (ModelLoader::ReopenModels).
     // For between frames: the editor calls it before the game draws.
@@ -247,8 +253,8 @@ public:
     // problems to `issues`.
     void Validate(std::vector<Data::Items::ItemDataIssue>& issues) const;
     // The looks the checks know; they are drawing code, so the editor gives
-    // them. Without them render style and item effect names are not checked.
-    void SetLookNames(Data::Items::LookNameExists renderStyleExists, Data::Items::LookNameExists itemEffectExists);
+    // them. Without them render style and effect names are not checked.
+    void SetLookNames(Data::Items::LookNameExists renderStyleExists, Data::Items::LookNameExists effectExists);
 
     // Validates the item database and the item models (Validate) and writes Data/Items,
     // with the model files of Data/Items/Models whose models changed (moved,
@@ -390,7 +396,7 @@ private:
     struct LookNames
     {
         Data::Items::LookNameExists renderStyle;
-        Data::Items::LookNameExists itemEffect;
+        Data::Items::LookNameExists effect;
     };
     std::optional<LookNames> m_lookNames;
 #endif

@@ -4,6 +4,7 @@
 #include "Core/Content/ContentStore.h"
 #include "Core/Globals/_define.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/Translation/ItemTextExpansion.h"
 #include "I18N/All.h"
@@ -56,6 +57,9 @@ public:
         // Resetting the locale refills ItemAttribute, so it runs while
         // ItemAttribute still points at the test's table.
         I18N::SetLocale("en");
+        // The item data loaded into the test's table is not loaded any more: a later UI language or Translate item
+        // names switch would refill ItemAttribute, which is null again below.
+        g_ItemDataHandler.ForgetLoadForTest();
         std::filesystem::current_path(m_previousDirectory);
         if (m_openedContent)
         {

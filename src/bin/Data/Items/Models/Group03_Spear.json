@@ -16,7 +16,7 @@
       "ground": {
         "rotation": [0, 270, -45]
       },
-      "itemEffect": "pulsingGlow"
+      "effect": "pulsingGlow"
     },
     {
       "number": 1,
@@ -138,7 +138,7 @@
         "color": "red"
       },
       "renderStyle": "billOfBalrog",
-      "itemEffect": "scrollingDown"
+      "effect": "scrollingDown"
     },
     {
       "number": 10,
@@ -157,7 +157,7 @@
         "hiddenMesh": 1
       },
       "renderStyle": "dragonSpear",
-      "itemEffect": "hideMesh1"
+      "effect": "hideMesh1"
     },
     {
       "number": 11,

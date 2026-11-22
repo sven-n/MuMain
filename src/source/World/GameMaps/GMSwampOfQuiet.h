@@ -24,8 +24,8 @@ namespace SEASON3C
         static void CreateObject(OBJECT* pObject);
         static bool MoveObject(OBJECT* pObject);
         static bool UpdateObjectEffects(OBJECT* pObject, BMD* pModel);
-        static bool RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
-        static void RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
+        static bool RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel);
+        static void RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel);
 
         //. 몬스터
         static bool MoveMonsterVisual(OBJECT* pObject, BMD* pModel);

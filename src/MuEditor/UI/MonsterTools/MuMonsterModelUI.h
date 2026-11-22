@@ -43,6 +43,8 @@ private:
     void RenderFile(Data::Monsters::MonsterModelDefinition& model);
     void RenderFilePicker(Data::Monsters::MonsterModelDefinition& model);
     void RenderTextureFolders(Data::Monsters::MonsterModelDefinition& model);
+    // The looks of its monsters (MN8, ML1): a render style and an effect, each with Edit.
+    void RenderLooks(Data::Monsters::MonsterModelDefinition& model);
     void RenderAnimations(Data::Monsters::MonsterModelDefinition& model, int slot);
     void RenderSounds(int slot);
     // The cues, with Remove for those no sound event plays on.

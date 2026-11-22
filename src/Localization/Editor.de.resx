@@ -527,7 +527,7 @@
     <value>Wird nie gezeichnet; die Vorschau kann es nicht allein zeigen.</value>
   </data>
   <data name="Mesh code looks note" xml:space="preserve">
-    <value>Der Stil-Editor zeigt, welche Teile der Darstellungsstil mit welchen Effekten zeichnet; der Gegenstandseffekt ist Zeichencode.</value>
+    <value>Der Stil-Editor zeigt, welche Teile der Darstellungsstil mit welchen Effekten zeichnet; der Effekt ist Zeichencode.</value>
   </data>
   <data name="Preview pick note" xml:space="preserve">
     <value>Ein Klick auf einen Teil findet sein Mesh in der Mesh-Liste.</value>
@@ -544,14 +544,11 @@
   <data name="Render style" xml:space="preserve">
     <value>Darstellungsstil</value>
   </data>
-  <data name="Item effect" xml:space="preserve">
-    <value>Gegenstandseffekt</value>
+  <data name="Effect" xml:space="preserve">
+    <value>Effekt</value>
   </data>
   <data name="Render styles" xml:space="preserve">
     <value>Darstellungsstile</value>
-  </data>
-  <data name="Item effects" xml:space="preserve">
-    <value>Gegenstandseffekte</value>
   </data>
   <data name="Style Editor" xml:space="preserve">
     <value>Stil-Editor</value>
@@ -566,7 +563,7 @@
     <value>Darstellungsstile stehen in Data/Effects/RenderStyles.json oder sind noch Zeichencode, markiert mit (Code); Im Stil-Editor öffnen zeigt den Look. Hier wird gewählt, welchen der Gegenstand nutzt.</value>
   </data>
   <data name="Style Editor tree note" xml:space="preserve">
-    <value>Darstellungsstile zeichnen einen Gegenstand in Ebenen; Gegenstandseffekte wirken, bevor er gezeichnet wird. Ordner sortieren die Looks nur: Ziehe einen Look oder einen Ordner auf einen Ordner oder auf seine Wurzel. Ein Look mit (Code) ist noch Zeichencode: Du siehst ihn und seine Gegenstände, kannst ihn aber nicht ändern.</value>
+    <value>Darstellungsstile zeichnen einen Gegenstand in Ebenen; Effekte wirken, bevor er gezeichnet wird. Ordner sortieren die Looks nur: Ziehe einen Look oder einen Ordner auf einen Ordner oder auf seine Wurzel. Ein Look mit (Code) ist noch Zeichencode: Du siehst ihn und seine Gegenstände, kannst ihn aber nicht ändern.</value>
   </data>
   <data name="New look" xml:space="preserve">
     <value>Neuer Look</value>
@@ -607,8 +604,8 @@
   <data name="A look name of letters and digits that no other render style has" xml:space="preserve">
     <value>Ein Name aus Buchstaben und Ziffern, den kein anderer Darstellungsstil hat, weder in der Datei noch im Code.</value>
   </data>
-  <data name="A look name of letters and digits that no other item effect has" xml:space="preserve">
-    <value>Ein Name aus Buchstaben und Ziffern, den kein anderer Item-Effekt hat</value>
+  <data name="A look name of letters and digits that no other effect has" xml:space="preserve">
+    <value>Ein Name aus Buchstaben und Ziffern, den kein anderer Effekt hat</value>
   </data>
   <data name="Only a look no item uses can be renamed or removed." xml:space="preserve">
     <value>Nur ein Look, den kein Gegenstand nutzt, kann umbenannt oder entfernt werden.</value>
@@ -616,8 +613,8 @@
   <data name="Code look note" xml:space="preserve">
     <value>Noch Zeichencode (Render/Items/ItemRenderStyles.cpp): Du siehst den Look und seine Gegenstände hier, kannst ihn aber nicht ändern. Er kommt in einem späteren Schritt in die Look-Datei.</value>
   </data>
-  <data name="Item effects root note" xml:space="preserve">
-    <value>Die Item-Effekte von {0} und die noch als Zeichencode vorhandenen, markiert mit (Code). Ein Item-Effekt setzt Item-Werte, bevor das Item gezeichnet wird, und kann ein Licht auf das Objekt des Items legen.</value>
+  <data name="Effects root note" xml:space="preserve">
+    <value>Die Effekte von {0} und die noch als Zeichencode vorhandenen, markiert mit (Code). Ein Effekt setzt Item-Werte, bevor das Item gezeichnet wird, und kann ein Licht auf das Objekt des Items legen.</value>
   </data>
   <data name="Render styles root note" xml:space="preserve">
     <value>Die Darstellungsstile aus {0} und die, die noch Zeichencode sind, markiert mit (Code).</value>
@@ -980,7 +977,7 @@
     <value>Nur auf diesen Stufen: die Stufe, wie die das Item leuchtet, von und bis, beide eingeschlossen.</value>
   </data>
   <data name="Only when hidden mesh tooltip" xml:space="preserve">
-    <value>Nur wenn das Item in dieser Zeichnung dieses Mesh verbirgt (sein verborgenes Mesh, das Item-Effekte setzen können) oder keines.</value>
+    <value>Nur wenn das Item in dieser Zeichnung dieses Mesh verbirgt (sein verborgenes Mesh, das Effekte setzen können) oder keines.</value>
   </data>
   <data name="No hidden mesh" xml:space="preserve">
     <value>Kein verborgenes Mesh</value>
@@ -1022,7 +1019,7 @@
     <value>Zeichnet allein</value>
   </data>
   <data name="Draws alone tooltip" xml:space="preserve">
-    <value>Direkt nach dem Item-Effekt des Items gezeichnet, im eigenen Licht des Objekts, ohne alles, was der Zeichencode danach tut: kein Stufenlicht ab +3, kein Stufenleuchten ab +7, kein Exzellent-Leuchten, keine Buff-Tönung.</value>
+    <value>Direkt nach dem Effekt des Items gezeichnet, im eigenen Licht des Objekts, ohne alles, was der Zeichencode danach tut: kein Stufenlicht ab +3, kein Stufenleuchten ab +7, kein Exzellent-Leuchten, keine Buff-Tönung.</value>
   </data>
   <data name="Before drawing" xml:space="preserve">
     <value>Vor dem Zeichnen</value>
@@ -1128,6 +1125,81 @@
   </data>
   <data name="Effect Browser" xml:space="preserve">
     <value>Effekt-Browser</value>
+  </data>
+  <data name="Model look {0}" xml:space="preserve">
+    <value>(Modell: {0})</value>
+  </data>
+  <data name="Glow only" xml:space="preserve">
+    <value>Nur Leuchten</value>
+  </data>
+  <data name="At most" xml:space="preserve">
+    <value>Höchstens</value>
+  </data>
+  <data name="At most tooltip" xml:space="preserve">
+    <value>Der Wert steigt nie über diesen: die Spitze einer Welle abgeschnitten.</value>
+  </data>
+  <data name="A color times the opacity" xml:space="preserve">
+    <value>Eine Farbe mal die Deckkraft</value>
+  </data>
+  <data name="A color times the red of the light" xml:space="preserve">
+    <value>Eine Farbe mal das Rot des Lichts</value>
+  </data>
+  <data name="Tinting debuff" xml:space="preserve">
+    <value>Färbender Debuff (Gift, Frost, Blow of Destruction)</value>
+  </data>
+  <data name="On top" xml:space="preserve">
+    <value>Obenauf</value>
+  </data>
+  <data name="On top tooltip" xml:space="preserve">
+    <value>Ohne Tiefentest gezeichnet: über den anderen Meshes des Modells und über Wänden, wie das Leuchten des Zombie-Kämpfers im PK-Feld.</value>
+  </data>
+  <data name="Light map" xml:space="preserve">
+    <value>Lichtkarte</value>
+  </data>
+  <data name="Light map tooltip" xml:space="preserve">
+    <value>Die Spiegelung beleuchtet das Mesh als Lichtkarte, wie das zweite Chrom des Drakan.</value>
+  </data>
+  <data name="Not in animation" xml:space="preserve">
+    <value>Nicht in Animation</value>
+  </data>
+  <data name="Animation tooltip" xml:space="preserve">
+    <value>Nur während das Monster diese Animation spielt.</value>
+  </data>
+  <data name="Not in animation tooltip" xml:space="preserve">
+    <value>Nicht während das Monster diese Animation spielt: ein Leuchten, das beim Sterben wegfällt.</value>
+  </data>
+  <data name="Opacity above" xml:space="preserve">
+    <value>Deckkraft über</value>
+  </data>
+  <data name="Opacity above tooltip" xml:space="preserve">
+    <value>Nur solange die Zeichnung deckender ist als dieser Wert, von 0 bis 1.</value>
+  </data>
+  <data name="Opacity at most" xml:space="preserve">
+    <value>Deckkraft höchstens</value>
+  </data>
+  <data name="Opacity at most tooltip" xml:space="preserve">
+    <value>Erst wenn die Zeichnung auf diese Deckkraft oder weniger verblasst ist, von 0 bis 1: ein sterbendes Monster, das beim Verblassen leuchtet.</value>
+  </data>
+  <data name="Cycle half" xml:space="preserve">
+    <value>Zyklushälfte (Sekunden)</value>
+  </data>
+  <data name="Cycle half tooltip" xml:space="preserve">
+    <value>Nur in einer Hälfte eines Zyklus der Uhr, der so viele Sekunden lang ist: die erste Hälfte, solange der Sinus des Zyklus null oder mehr ist, die zweite, solange er unter null ist. Die Lavariesen leuchten in der ersten Hälfte ihres Pulses heller.</value>
+  </data>
+  <data name="First half" xml:space="preserve">
+    <value>Erste Hälfte</value>
+  </data>
+  <data name="First half tooltip" xml:space="preserve">
+    <value>Solange der Sinus des Zyklus null oder mehr ist.</value>
+  </data>
+  <data name="Second half" xml:space="preserve">
+    <value>Zweite Hälfte</value>
+  </data>
+  <data name="Second half tooltip" xml:space="preserve">
+    <value>Solange der Sinus des Zyklus unter null ist.</value>
+  </data>
+  <data name="Effect types" xml:space="preserve">
+    <value>Effekttypen</value>
   </data>
   <data name="Effect types not loaded" xml:space="preserve">
     <value>Die Effekttypen sind noch nicht geladen; der Ladebildschirm lädt sie.</value>
@@ -3365,7 +3437,7 @@
     <value>Teilmodelle</value>
   </data>
   <data name="Part model note" xml:space="preserve">
-    <value>Ein Teilmodell: wird mit Items gezeichnet, dort, wo der Spielcode es hinsetzt (die Verzierungen der +15-Rüstungen, der Flügel des Phoenix Soul Star, die Phoenix-Soul-Rüstung im Inventar). Sein Eintrag in Data/Items/Models/PartModels.json enthält Datei, Texturordner und Darstellungsstil; es hat kein Inventar, keinen Boden, kein Leuchten und keinen Item-Effekt. Wähle ein Item, um wieder Items zu sehen.</value>
+    <value>Ein Teilmodell: wird mit Items gezeichnet, dort, wo der Spielcode es hinsetzt (die Verzierungen der +15-Rüstungen, der Flügel des Phoenix Soul Star, die Phoenix-Soul-Rüstung im Inventar). Sein Eintrag in Data/Items/Models/PartModels.json enthält Datei, Texturordner und Darstellungsstil; es hat kein Inventar, keinen Boden, kein Leuchten und keinen Effekt. Wähle ein Item, um wieder Items zu sehen.</value>
   </data>
   <data name="The part model {0} has no entry" xml:space="preserve">
     <value>Das Teilmodell {0} hat keinen Eintrag in PartModels.json.</value>
@@ -3429,6 +3501,15 @@
   </data>
   <data name="Step model" xml:space="preserve">
     <value>{0}: {1}</value>
+  </data>
+  <data name="Step what looks" xml:space="preserve">
+    <value>Looks</value>
+  </data>
+  <data name="Monster looks" xml:space="preserve">
+    <value>Looks</value>
+  </data>
+  <data name="Model looks note" xml:space="preserve">
+    <value>Der Darstellungsstil und der Effekt, mit denen jedes Monster des Modells gezeichnet wird; ein Monster kann in Monster Setup andere nennen.</value>
   </data>
   <data name="Step what file" xml:space="preserve">
     <value>Datei</value>
