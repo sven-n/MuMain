@@ -224,7 +224,7 @@ TEST_CASE("Sound files: the shipped file names each sound the code loads once, r
     Data::Sounds::ValidateSoundFiles(result.sounds, "SoundFiles.json", result.issues);
     CHECK_FALSE(HasFatal(result.issues));
     CHECK(result.issues.empty());
-    CHECK(result.sounds.size() == 389);
+    CHECK(result.sounds.size() == 391);
     std::set<int> numbers;
     for (const SoundFile& sound : result.sounds)
     {

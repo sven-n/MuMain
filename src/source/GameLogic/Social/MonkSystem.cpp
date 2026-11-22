@@ -493,6 +493,9 @@ bool CMonkSystem::SetRageSkillAni(int _nSkill, OBJECT* _pObj)
     case AT_SKILL_DRAGON_KICK:
         SetAction(_pObj, PLAYER_SKILL_DRAGONKICK);
         return true;
+    case AT_SKILL_PHOENIX_SHOT:
+        SetAction(_pObj, PLAYER_SKILL_PHOENIX_SHOT);
+        return true;
     case AT_SKILL_ATT_UP_OURFORCES:
     case AT_SKILL_HP_UP_OURFORCES:
     case AT_SKILL_HP_UP_OURFORCES_STR:
@@ -1492,13 +1495,21 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
         if (_pObj->m_sTargetIndex < 0)
             return true;
 
-        vec3_t Position, vAngle, Light;
-        _pObj->Owner = &CharactersClient[_pObj->m_sTargetIndex].Object;
-        VectorCopy(CharactersClient[_pObj->m_sTargetIndex].Object.Position, Position);
-        VectorCopy(_pObj->Angle, vAngle);
-        vAngle[2] = CreateAngle2D(_pObj->Position, Position);
-        Vector(1.f, 1.f, 1.f, Light);
-        CreateEffect(MODEL_PHOENIX_SHOT, Position, vAngle, Light, 0, _pObj, -1, 0, 0, 0, 1.f);
+        {
+            // The rig plays at the caster's feet; its arms meet along its x, so it's turned a
+            // quarter away from the target.
+            constexpr float RigTurn = 90.f;
+            vec3_t Position, vAngle, Light;
+            _pObj->Owner = &CharactersClient[_pObj->m_sTargetIndex].Object;
+            VectorCopy(_pObj->Position, Position);
+            VectorCopy(_pObj->Angle, vAngle);
+            vAngle[2] =
+                CreateAngle2D(_pObj->Position, CharactersClient[_pObj->m_sTargetIndex].Object.Position) - RigTurn;
+            Vector(1.f, 1.f, 1.f, Light);
+            PlayBuffer(SOUND_RAGESKILL_PHOENIXSHOT);
+            CreateEffect(MODEL_PHOENIX_SHOT, Position, vAngle, Light, 0, _pObj, -1, 0, 0, 0, 1.f,
+                         _pObj->m_sTargetIndex);
+        }
         break;
     default:
         break;
