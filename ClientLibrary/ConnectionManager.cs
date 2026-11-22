@@ -37,6 +37,11 @@ public unsafe partial class ConnectionManager
     private static int _maxHandle;
 
     /// <summary>
+    /// The WebSocket relay new connections go through, with <c>{host}</c> and <c>{port}</c> to fill in; null for TCP.
+    /// </summary>
+    private static volatile string? _relay;
+
+    /// <summary>
     /// Registers the native logger used by managed diagnostics.
     /// </summary>
     /// <param name="callback">The native logging callback.</param>
@@ -44,6 +49,18 @@ public unsafe partial class ConnectionManager
     public static void SetLogCallback(delegate* unmanaged<byte, byte*, void> callback)
     {
         ManagedLog.SetCallback(callback);
+    }
+
+    /// <summary>
+    /// Sets the WebSocket relay the connections opened from now on go through, e.g.
+    /// <c>wss://relay.example.com/{host}/{port}</c>; an empty string connects over TCP.
+    /// </summary>
+    /// <param name="relayPtr">The pointer to the relay's address template.</param>
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_SetRelay")]
+    public static void SetRelay(IntPtr relayPtr)
+    {
+        var relay = NativeInterop.PtrToWideString(relayPtr);
+        _relay = string.IsNullOrWhiteSpace(relay) ? null : relay.Trim();
     }
 
     /// <summary>
@@ -165,7 +182,7 @@ public unsafe partial class ConnectionManager
             throw new InvalidOperationException($"Connection handle {handle} already exists.");
         }
 
-        wrapper.Connect(host, port, ConnectTimeout);
+        wrapper.Connect(host, port, _relay, ConnectTimeout);
         return handle;
     }
 }

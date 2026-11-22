@@ -2117,6 +2117,10 @@ static void SelectConnectServer(wchar_t* commandLine)
     g_ErrorReport.Write(L"> Server = %hs, from %ls.\r\n",
                         Network::DescribeEndpointForLog(mu_wchar_to_utf8(szServerIpAddress), g_ServerPort).c_str(),
                         fromCommandLine ? L"the command line" : L"config.ini");
+
+    static const std::wstring relay = GameConfig::GetInstance().GetRelay();
+    SetConnectionRelay(MU_C16(relay.c_str()));
+    g_ErrorReport.Write(L"> Connections: %ls.\r\n", relay.empty() ? L"TCP" : L"through a WebSocket relay");
 }
 
 // The content opens first: the user folder's name comes from the shipped defaults, and the log goes into that folder.
