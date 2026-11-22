@@ -1,0 +1,169 @@
+{
+  "formatVersion": 1,
+  "texts": {
+    "attackDamageIncrease": {
+      "en": "Damage +{value} %",
+      "de": "Schaden +{value} %"
+    },
+    "base": {
+      "en": "base: {value}",
+      "de": "Grundwert: {value}"
+    },
+    "berserkerCurseMultiplier": {
+      "en": "Curse damage +{value} %",
+      "de": "Fluchschaden +{value} %"
+    },
+    "berserkerHealthDecrement": {
+      "en": "Maximum life {value} %",
+      "de": "Maximales Leben {value} %"
+    },
+    "berserkerManaMultiplier": {
+      "en": "Maximum mana +{value} %",
+      "de": "Maximales Mana +{value} %"
+    },
+    "berserkerMaxPhysDmgBonus": {
+      "en": "Maximum damage +{value}",
+      "de": "Maximaler Schaden +{value}"
+    },
+    "berserkerMinPhysDmgBonus": {
+      "en": "Minimum damage +{value}",
+      "de": "Minimaler Schaden +{value}"
+    },
+    "berserkerProficiencyMultiplier": {
+      "en": "Final wizardry and curse damage +{value} %",
+      "de": "Endgültiger Zauber- und Fluchschaden +{value} %"
+    },
+    "berserkerWizardryMultiplier": {
+      "en": "Wizardry damage +{value} %",
+      "de": "Zauberschaden +{value} %"
+    },
+    "criticalDamageBonus": {
+      "en": "Critical damage +{value}",
+      "de": "Kritischer Schaden +{value}"
+    },
+    "criticalDamageChance": {
+      "en": "Critical damage rate +{value} %",
+      "de": "Kritische Schadensrate +{value} %"
+    },
+    "damageReflection": {
+      "en": "Damage reflected {value} %",
+      "de": "Reflektierter Schaden {value} %"
+    },
+    "defenseFinal": {
+      "en": "Defense +{value}",
+      "de": "Verteidigung +{value}"
+    },
+    "defenseIgnoreChance": {
+      "en": "Chance to ignore defense {value} %",
+      "de": "Chance, Verteidigung zu ignorieren {value} %"
+    },
+    "defenseRatePvmIncrease": {
+      "en": "Defense rate +{value} %",
+      "de": "Verteidigungsrate +{value} %"
+    },
+    "duration": {
+      "en": "Duration: {value} seconds",
+      "de": "Dauer: {value} Sekunden"
+    },
+    "greaterDamageBonus": {
+      "en": "Damage +{value}",
+      "de": "Schaden +{value}"
+    },
+    "greaterDefenseBonus": {
+      "en": "Defense +{value}",
+      "de": "Verteidigung +{value}"
+    },
+    "increaseBlockBonus": {
+      "en": "Defense rate +{value}",
+      "de": "Verteidigungsrate +{value}"
+    },
+    "maximum": {
+      "en": "at most {value}",
+      "de": "höchstens {value}"
+    },
+    "maximumWizBaseDmgIncrease": {
+      "en": "Maximum wizardry damage +{value} %",
+      "de": "Maximaler Zauberschaden +{value} %"
+    },
+    "minimumWizBaseDmg": {
+      "en": "Minimum wizardry damage +{value}",
+      "de": "Minimaler Zauberschaden +{value}"
+    },
+    "ruleDivisor": {
+      "en": "1 per {divisor}",
+      "de": "1 je {divisor}"
+    },
+    "ruleTimes": {
+      "en": "x{value}",
+      "de": "x{value}"
+    },
+    "seconds": {
+      "en": "{value} s",
+      "de": "{value} s"
+    },
+    "soulBarrierManaTollPerHit": {
+      "en": "Mana per absorbed hit {value}",
+      "de": "Mana je absorbiertem Treffer {value}"
+    },
+    "soulBarrierReceiveDecrement": {
+      "en": "Damage absorbed {value} %",
+      "de": "Absorbierter Schaden {value} %"
+    },
+    "swellLifeHealthIncrease": {
+      "en": "Maximum life +{value} %",
+      "de": "Maximales Leben +{value} %"
+    },
+    "swellLifeManaIncrease": {
+      "en": "Maximum mana +{value} %",
+      "de": "Maximales Mana +{value} %"
+    },
+    "termLevel": {
+      "en": "level {value}",
+      "de": "Stufe {value}"
+    },
+    "termMasterLevel": {
+      "en": "master level {value}",
+      "de": "Meisterstufe {value}"
+    },
+    "termMaximumMana": {
+      "en": "maximum mana {value}",
+      "de": "maximales Mana {value}"
+    },
+    "termNearbyPartyMemberCount": {
+      "en": "party members near you {value}",
+      "de": "Gruppenmitglieder in der Nähe {value}"
+    },
+    "termTotalAgility": {
+      "en": "agility {value}",
+      "de": "Beweglichkeit {value}"
+    },
+    "termTotalEnergy": {
+      "en": "energy {value}",
+      "de": "Energie {value}"
+    },
+    "termTotalLeadership": {
+      "en": "command {value}",
+      "de": "Befehlsgewalt {value}"
+    },
+    "termTotalLevel": {
+      "en": "total level {value}",
+      "de": "Gesamtstufe {value}"
+    },
+    "termTotalStrength": {
+      "en": "strength {value}",
+      "de": "Stärke {value}"
+    },
+    "termTotalStrengthAndAgility": {
+      "en": "strength and agility {value}",
+      "de": "Stärke und Beweglichkeit {value}"
+    },
+    "termTotalVitality": {
+      "en": "vitality {value}",
+      "de": "Vitalität {value}"
+    },
+    "totalVitality": {
+      "en": "Vitality +{value}",
+      "de": "Vitalität +{value}"
+    }
+  }
+}

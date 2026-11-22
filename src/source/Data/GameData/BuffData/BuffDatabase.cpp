@@ -3,7 +3,6 @@
 #include "BuffDatabase.h"
 
 #include "Core/Utilities/StringUtils.h"
-#include "Data/GameData/ItemData/ItemOptionEffects.h"
 
 #include <algorithm>
 #include <map>
@@ -27,6 +26,23 @@ std::vector<std::wstring> SplitLines(const std::wstring& text)
     }
     return lines;
 }
+// The index of the buff's other power-up of the attribute `attribute`, or NoPowerUp (none named, or Buffs.json
+// rejected the name).
+int FindPowerUpIndex(const BuffDefinition& buff, const std::string& attribute, const BuffPowerUp& self)
+{
+    if (attribute.empty())
+    {
+        return NoPowerUp;
+    }
+    for (size_t index = 0; index < buff.powerUps.size(); ++index)
+    {
+        if (&buff.powerUps[index] != &self && buff.powerUps[index].attribute == attribute)
+        {
+            return static_cast<int>(index);
+        }
+    }
+    return NoPowerUp;
+}
 } // namespace
 
 BuffDatabase& BuffDatabase::GetInstance()
@@ -48,12 +64,21 @@ void BuffDatabase::Build(std::span<const BuffDefinition> buffs, std::string_view
         // The values computed every frame read the attributes' indices, never their names.
         if (buff.duration)
         {
-            Items::ResolveTermAttributes(*buff.duration);
+            ResolveTermAttributes(*buff.duration);
         }
         for (BuffPowerUp& powerUp : buff.powerUps)
         {
             powerUp.attributeIndex = FindBuffAttribute(powerUp.attribute);
-            Items::ResolveTermAttributes(powerUp.value);
+            ResolveTermAttributes(powerUp.value);
+        }
+        for (BuffPowerUp& powerUp : buff.powerUps)
+        {
+            powerUp.multipliedByIndex = FindPowerUpIndex(buff, powerUp.multipliedBy, powerUp);
+            powerUp.valueOfIndices.clear();
+            for (const std::string& name : powerUp.valueOf)
+            {
+                powerUp.valueOfIndices.push_back(FindPowerUpIndex(buff, name, powerUp));
+            }
         }
     }
     m_indices.fill(NoBuff);

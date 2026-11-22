@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Data/DataHandler/BuffData/BuffStorage.h"
+#include "Data/DataHandler/SkillData/MasterSkillStorage.h"
+#include "Data/GameData/BuffData/BuffLineTexts.h"
+#include "Data/GameData/SkillData/MasterSkillDatabase.h"
+#include "Data/GameData/SkillData/MasterSkillsJson.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/BuffData/BuffDatabase.h"
 #include "doctest.h"
@@ -58,6 +62,25 @@ public:
             CHECK_MESSAGE(issue.severity == Data::Items::ItemDataIssueSeverity::Warning, issue.ToString());
         }
         g_BuffDatabase.Build(buffs.buffs, "en");
+        // The master skills' buff parts and the skill tooltip's buff texts (buffs design B9, B18).
+        m_previousMasterSkills = g_MasterSkillDatabase.GetAll();
+        Data::Skills::MasterSkillsLoadResult masters =
+            Data::Skills::LoadMasterSkillsFile(Data::Skills::GetMasterSkillsFile());
+        Data::Skills::ValidateMasterSkillBuffs(
+            masters.skills, {}, buffs.buffs, [&](int skill)
+            { return Data::Skills::FindMasterSkillBuff(skill, masters.skills); }, "MasterSkills.json", masters.issues);
+        Data::Buffs::BuffTextsLoadResult texts = Data::Buffs::LoadBuffTextsFile(Data::Buffs::GetBuffTextsFile());
+        for (const auto* issues : {&masters.issues, &texts.issues})
+        {
+            for (const Data::Items::ItemDataIssue& issue : *issues)
+            {
+                CHECK_MESSAGE(issue.severity == Data::Items::ItemDataIssueSeverity::Warning, issue.ToString());
+            }
+        }
+        g_MasterSkillDatabase.Build(masters.skills);
+        m_previousBuffTexts = g_BuffLineTexts.GetTexts();
+        m_previousBuffTextLocale = g_BuffLineTexts.GetDisplayLocale();
+        g_BuffLineTexts.SetTexts(std::move(texts.texts), "en");
         // The time texts of the elixirs and seals (g_StringTime).
         if (!g_BuffSystem)
         {
@@ -77,6 +100,8 @@ public:
         g_pUIJewelHarmonyinfo = m_previousHarmony;
         g_pItemAddOptioninfo = m_previousAddOptions;
         g_BuffDatabase.Build(m_previousBuffs, m_previousBuffLocale);
+        g_MasterSkillDatabase.Build(m_previousMasterSkills);
+        g_BuffLineTexts.SetTexts(std::move(m_previousBuffTexts), m_previousBuffTextLocale);
         if (m_skills != nullptr)
         {
             SkillAttribute = nullptr;
@@ -92,5 +117,8 @@ private:
     ItemAddOptioninfo* m_previousAddOptions = nullptr;
     std::vector<Data::Buffs::BuffDefinition> m_previousBuffs;
     std::string m_previousBuffLocale;
+    std::vector<Data::Skills::MasterSkillDefinition> m_previousMasterSkills;
+    Data::Items::ItemOptionTexts m_previousBuffTexts;
+    std::string m_previousBuffTextLocale;
     bool m_madeBuffSystem = false;
 };
