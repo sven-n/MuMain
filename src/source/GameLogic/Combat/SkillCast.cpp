@@ -913,6 +913,14 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     case AT_SKILL_DRAGON_ROAR_STR:
     case AT_SKILL_PHOENIX_SHOT:
     {
+        // Phoenix Shot is cast at its target: the caster turns to it first, as for Killing Blow (Dragon Roar
+        // strikes all around and keeps the caster's facing).
+        if (iSkill == AT_SKILL_PHOENIX_SHOT && g_MovementSkill.m_iTarget >= 0 &&
+            g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+        {
+            VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
+            pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
+        }
         BYTE angle = (BYTE)((((pObj->Angle[2] + 180.f) / 360.f) * 255.f));
         WORD TKey = 0xffff;
         if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
