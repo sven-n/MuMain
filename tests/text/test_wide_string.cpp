@@ -93,3 +93,26 @@ TEST_CASE("CutWideStringToUtf8Bytes accepts a null text")
 {
     CHECK_FALSE(Core::Text::CutWideStringToUtf8Bytes(nullptr, 4));
 }
+
+TEST_CASE("CopyWideString never ends between the halves of a surrogate pair")
+{
+    // 'a', 'b', then an emoji as two UTF-16 units. Four units hold three units and the terminator, which would end
+    // on the pair's first half.
+    const wchar_t source[] = {L'a', L'b', static_cast<wchar_t>(0xD83D), static_cast<wchar_t>(0xDC09), L'\0'};
+    wchar_t destination[4] = {};
+
+    CHECK_FALSE(Core::Text::CopyWideString(destination, std::size(destination), source));
+    CHECK(std::wcscmp(destination, L"ab") == 0);
+
+    wchar_t whole[5] = {};
+    CHECK(Core::Text::CopyWideString(whole, std::size(whole), source));
+    CHECK(std::wcscmp(whole, source) == 0);
+}
+
+TEST_CASE("CopyWideString cuts plain text at the buffer size")
+{
+    wchar_t destination[4] = {};
+
+    CHECK_FALSE(Core::Text::CopyWideString(destination, std::size(destination), L"abcdef"));
+    CHECK(std::wcscmp(destination, L"abc") == 0);
+}

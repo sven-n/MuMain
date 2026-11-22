@@ -349,8 +349,7 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
             type_string strChat, strWhisper;
             GetChatText(strChat);
             GetWhsprID(strWhisper);
-            wcsncpy(szChatText, strChat.c_str(), MAX_CHAT_SIZE);
-            szChatText[MAX_CHAT_SIZE] = L'\0';
+            Core::Text::CopyWideString(szChatText, MAX_CHAT_SIZE + 1, strChat.c_str());
             Core::Text::CutWideStringToUtf8Bytes(szChatText, kChatTextMaxUtf8Bytes);
             wcsncpy(szWhisperID, strWhisper.c_str(), MAX_USERNAME_SIZE);
             szWhisperID[MAX_USERNAME_SIZE] = L'\0';

@@ -53,7 +53,10 @@ bool Core::Text::CopyWideString(wchar_t* destination, std::size_t destinationCou
     }
 
     const std::size_t sourceLength = std::wcslen(source);
-    const std::size_t copyLength = std::min(sourceLength, destinationCount - 1);
+    std::size_t copyLength = std::min(sourceLength, destinationCount - 1);
+    // A cut between the two halves of a UTF-16 surrogate pair would leave half a character.
+    if (copyLength < sourceLength && copyLength > 0 && IsSurrogatePairAt(source + copyLength - 1))
+        --copyLength;
     std::wmemcpy(destination, source, copyLength);
     destination[copyLength] = L'\0';
     return copyLength == sourceLength;

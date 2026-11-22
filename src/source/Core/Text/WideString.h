@@ -4,6 +4,8 @@
 
 namespace Core::Text
 {
+    // Copies `source` into `destination`, as much of it as fits, never ending between the halves of a UTF-16
+    // surrogate pair: the text stays terminated within `destinationCount` units. False when not all of it fit.
     bool CopyWideString(wchar_t* destination, std::size_t destinationCount, const wchar_t* source);
     // Adds `source` to the end of the text in `destination`, as much of it as fits: the text stays
     // terminated within `destinationCount` units. False when not all of `source` fit.
