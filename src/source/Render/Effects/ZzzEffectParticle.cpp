@@ -1,8 +1,9 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Render/Effects/PreviewSlots.h"
+#include "Camera/CameraState.h"
 #include "Core/Utilities/Random.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
@@ -9314,8 +9315,20 @@ void DescribeParticle(const PARTICLE& particle, int i, float Width, float Height
     break;
     case BITMAP_SBUMB:
     {
-        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, 0.0f,
-                              o->Frame % 4 * 0.25f + 0.005f, 0.0f, 0.25f - 0.01f, 1.0f));
+        // Subtype 1 (Phoenix Shot's blows) is drawn nearer the eye, so the body it lands on
+        // doesn't hide it.
+        constexpr float BlowNearer = 70.f;
+        vec3_t at;
+        VectorCopy(o->Position, at);
+        if (o->SubType == 1)
+        {
+            vec3_t toEye;
+            VectorSubtract(g_Camera.Position, at, toEye);
+            VectorNormalize(toEye);
+            VectorMA(at, BlowNearer, toEye, at);
+        }
+        out.DrawSprite(Sprite(o->TexType, at, Width * 0.25f, Height, o->Light, 0.0f, o->Frame % 4 * 0.25f + 0.005f,
+                              0.0f, 0.25f - 0.01f, 1.0f));
     }
     break;
     case BITMAP_DAMAGE1:

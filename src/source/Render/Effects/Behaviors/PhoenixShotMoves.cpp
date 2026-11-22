@@ -80,6 +80,18 @@ constexpr float SpiralFadeLife = 18.f;
 constexpr float SpiralBrighten = 1.05f;
 constexpr float SpiralDim = 0.75f;
 
+// Not the Season 6 client's: for BlowTicks ticks after the strike, a burst (Killing Blow's,
+// BITMAP_SBUMB) lands each tick on one of the target's bones, a little off it, as clips of the
+// skill being played show.
+constexpr float BlowTicks = 14.f;
+constexpr int BlowJitter = 40;
+constexpr float BlowScale = 2.7f;
+constexpr int BlowScaleSpread = 35;
+constexpr float BlowLowest = 30.f;
+// The bursts' subtype: drawn nearer the eye, so the body they land on doesn't hide them
+// (ZzzEffectParticle's BITMAP_SBUMB draw).
+constexpr int BlowSubType = 1;
+
 // A random offset in [-span / 2, span / 2).
 float Jitter(int span)
 {
@@ -204,6 +216,35 @@ bool FlyPast(OBJECT* blade, vec3_t target)
     return blade->Distance > targetDistance;
 }
 
+// One of the target's bones, from the pose the update keeps for it.
+bool BoneOf(const OBJECT* target, vec3_t out)
+{
+    const int bones = std::min<int>(Models[target->Type].NumBones, MAX_BONES);
+    if (target->BoneTransform == nullptr || bones <= 0)
+    {
+        return false;
+    }
+    BoneInWorld(target, target->BoneTransform[Random::Rand() % bones], out);
+    return true;
+}
+
+void LandBlow(const OBJECT* blade)
+{
+    OBJECT* target = &CharactersClient[blade->m_sTargetIndex].Object;
+    vec3_t at, light, angle;
+    if (!BoneOf(target, at))
+    {
+        return;
+    }
+    at[0] += Jitter(BlowJitter);
+    at[1] += Jitter(BlowJitter);
+    at[2] = std::max(at[2], target->Position[2] + BlowLowest);
+    Vector(1.f, 1.f, 1.f, light);
+    Vector(0.f, 0.f, 0.f, angle);
+    const float scale = BlowScale + static_cast<float>(Random::Rand() % BlowScaleSpread) * 0.02f;
+    CreateParticleFpsChecked(BITMAP_SBUMB, at, angle, light, BlowSubType, scale, target);
+}
+
 void SwellAndFade(OBJECT* blade)
 {
     blade->Scale += FadeGrowth * FPS_ANIMATION_FACTOR;
@@ -237,6 +278,10 @@ bool Move_MODEL_WINDSPIN03(OBJECT* o, int index, float Luminosity)
     if (o->LifeTime < StrikeLife)
     {
         SwellAndFade(o);
+        if (o->SubType == LeadBlade && o->LifeTime >= StrikeLife - BlowTicks && TargetSeen(o))
+        {
+            LandBlow(o);
+        }
         return true;
     }
     if (!TargetSeen(o))
