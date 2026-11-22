@@ -155,6 +155,11 @@ struct MonsterModelDefinition
     std::optional<int> streamMesh;
     // Meshes drawn without blending.
     std::vector<int> noneBlendMeshes;
+    // The looks every monster of the model is drawn with (MN8, ML1): a render
+    // style and an effect of Data/Effects by name; empty for none. A monster
+    // can name others (MonsterSetup::renderStyle, effect).
+    std::string renderStyle;
+    std::string effect;
     // The points of its animations that sound events play on; the names are
     // unique. The sounds are in the sound sets that its monsters name.
     std::vector<MonsterModelCue> cues;

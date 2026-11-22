@@ -184,6 +184,30 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values [netw
     }
 }
 
+TEST_CASE(
+    "a relay is a ws:// or wss:// address with a host, and anything else connects over TCP [network][server-config]")
+{
+    CHECK(GameConfigValidation::ValidateRelay(L"  wss://relay.example.com/{host}/{port} ") ==
+          L"wss://relay.example.com/{host}/{port}");
+    CHECK(GameConfigValidation::ValidateRelay(L"WS://127.0.0.1:8766/{host}/{port}") ==
+          L"WS://127.0.0.1:8766/{host}/{port}");
+    CHECK(GameConfigValidation::ValidateRelay(L"").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"   ").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"https://relay.example.com/{host}/{port}").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"relay.example.com").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://[::1]:8766/{host}/{port}") == L"wss://[::1]:8766/{host}/{port}");
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss:///{host}/{port}").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://:8766/{host}").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://relay.example.com:0/{host}").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://relay.example.com:65536/{host}").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://relay.example.com:port/{host}").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://{host}/{port}").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://relay example.com/{host}").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://relay.example.com/a b").empty());
+    CHECK(GameConfigValidation::ValidateRelay(L"wss://[::1/{host}").empty());
+}
+
 TEST_CASE("the config file is the one beside the executable unless MU_CONFIG_PATH names another [network][server-config]")
 {
     const std::filesystem::path directory = std::filesystem::path("game") / "client";

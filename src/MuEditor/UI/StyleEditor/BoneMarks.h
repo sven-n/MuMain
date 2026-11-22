@@ -13,7 +13,7 @@
 
 // The bones of the item a preview view shows, marked over the view (design L58): every bone as a dot joined to the
 // bone it hangs on by a line, with its number and name on hover ("Show bones"), the bones of the picked entry of an
-// item effect's things on bones, the bone the mouse points at in the entry's fields ringed with its number, and the
+// effect's things on bones, the bone the mouse points at in the entry's fields ringed with its number, and the
 // pick mode that adds or removes a bone by clicking its dot.
 namespace MuEditor::Looks::BoneMarks
 {

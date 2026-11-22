@@ -25,6 +25,8 @@ constexpr std::array Fields{
     Field{"outline", &I18N::Editor::Outline, Look, AtOnce},
     Field{"subType", &I18N::Editor::Skin, Look, AtOnce},
     Field{"lookLevel", &I18N::Editor::RenderTier, Look, AtOnce},
+    Field{"renderStyle", &I18N::Editor::RenderStyle, Look, AtOnce},
+    Field{"effect", &I18N::Editor::Effect, Look, AtOnce},
     Field{"glowMesh", &I18N::Editor::GlowMesh, Look, AtOnce},
     Field{"glowLight", &I18N::Editor::GlowLight, Look, AtOnce},
     Field{"hiddenMesh", &I18N::Editor::HiddenMesh, Look, AtOnce},

@@ -227,6 +227,9 @@ public:
     BITMAP_t* GetTexture(GLuint uiBitmapIndex);
     BITMAP_t* FindTexture(GLuint uiBitmapIndex);
     BITMAP_t* FindTexture(const std::wstring& filename);
+    // The textures of the files, at their places in `filenames` (nullptr: none has the file), found as FindTexture
+    // finds one, the lowest index of a file first: in one pass over the textures for all of them.
+    std::vector<BITMAP_t*> FindTextures(std::span<const std::wstring> filenames);
     BITMAP_t* FindTextureByName(const std::wstring& name);
 #ifdef _EDITOR
     // The world that was active when the texture of this number was last

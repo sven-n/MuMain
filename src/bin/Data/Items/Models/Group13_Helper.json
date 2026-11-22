@@ -9,7 +9,7 @@
       "inventory": {
         "anchor": [0.5, 0.7]
       },
-      "itemEffect": "glowingMesh"
+      "effect": "glowingMesh"
     },
     {
       "number": 1,
@@ -68,7 +68,7 @@
         "anchor": [0.5, 0.9]
       },
       "renderStyle": "contractSummon",
-      "itemEffect": "hiddenMeshByLevel"
+      "effect": "hiddenMeshByLevel"
     },
     {
       "number": 8,
@@ -103,7 +103,7 @@
         "anchor": [0.5, 0.8]
       },
       "renderStyle": "lifeStone",
-      "itemEffect": "hideMesh1"
+      "effect": "hideMesh1"
     },
     {
       "number": 12,

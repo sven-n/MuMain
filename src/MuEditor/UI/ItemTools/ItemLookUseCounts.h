@@ -8,7 +8,7 @@
 
 namespace MuEditor::Items
 {
-// How many model entries use each shared model, render style, item effect and
+// How many model entries use each shared model, render style, effect and
 // glow color, for the model tool's lists that show the count beside each
 // name. Counted in one pass over the models, again when they changed. And how
 // many items name each ground label style in their own rules, counted again
@@ -18,7 +18,7 @@ class ItemLookUseCounts
 public:
     int SharedModel(std::string_view name);
     int RenderStyle(std::string_view name);
-    int ItemEffect(std::string_view name);
+    int Effect(std::string_view name);
     int GlowColor(std::string_view name);
     int GroundLabelStyle(std::string_view name);
 
@@ -31,7 +31,7 @@ private:
 
     Counts m_sharedModels;
     Counts m_renderStyles;
-    Counts m_itemEffects;
+    Counts m_effects;
     Counts m_glowColors;
     int m_version = -1;
     Counts m_groundLabelStyles;

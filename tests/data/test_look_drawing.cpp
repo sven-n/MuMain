@@ -511,11 +511,11 @@ TEST_CASE("A layer's scrolling mesh is the model's while it draws, and the item 
     }
 }
 
-TEST_CASE("An item effect that is data sets the item values of its entries whose Only when holds, in their order, "
+TEST_CASE("An effect that is data sets the item values of its entries whose Only when holds, in their order, "
           "and the object's light in the update (design L13, L45) [looks]")
 {
     LookDefinition effect{"byLevel", {}, {}};
-    effect.itemValuesBefore = {
+    effect.valuesBefore = {
         {.onlyWhen = {.level = std::pair<int, int>{1, 15}}, .glowsLikeLevel = 7},
         // Reads the level the entry before set.
         {.onlyWhen = {.level = std::pair<int, int>{7, 7}}, .values = {.glowMesh = 1, .glowStrength = 0.5f}},
@@ -550,7 +550,7 @@ TEST_CASE("An item effect that is data sets the item values of its entries whose
     CHECK(object.Light[2] == 1.f);
 }
 
-TEST_CASE("An item effect creates its things on bones at the item's posed bones, between pairs and at the origin, "
+TEST_CASE("An effect creates its things on bones at the item's posed bones, between pairs and at the origin, "
           "and nothing of a type the catalogue doesn't have or at a bone the model doesn't have (section 7b) [looks]")
 {
     const auto clear = []
@@ -707,7 +707,7 @@ TEST_CASE("A thing on bones whose type the effect catalogue doesn't have is logg
     lights.things.push_back({.kind = BoneThingKind::Sprite, .type = "light"});
     lights.things.push_back({.kind = BoneThingKind::Sprite, .type = "noSuchSprite"});
     effect.onBones = {lights};
-    g_LookStore.SetItemEffects({effect});
+    g_LookStore.SetEffects({effect});
     {
         const LogCapture log("data");
         Render::Items::Looks::LogUnknownBoneThingTypes();
@@ -716,7 +716,7 @@ TEST_CASE("A thing on bones whose type the effect catalogue doesn't have is logg
         CHECK(line.find("wings: onBones[0].things[1].sprite") != std::string::npos);
         CHECK(log.LineWith("\"light\"").empty());
     }
-    g_LookStore.SetItemEffects({});
+    g_LookStore.SetEffects({});
     g_EffectTypeCatalogue.Build(Data::Effects::EffectKind::Sprite, {});
 }
 
@@ -805,6 +805,20 @@ TEST_CASE("A layer can be only for a character without a buff (design L11) [look
     sword.object.m_BuffMap.RegisterBuff(eBuff_InfinityArrow);
     CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0});
     sword.object.m_BuffMap.UnRegisterBuff(eBuff_InfinityArrow);
+}
+
+TEST_CASE("A layer's opacity conditions read the drawing's opacity, as its light times the opacity does [looks]")
+{
+    const LookStoreScope looks({{"fading",
+                                 {Layer{.meshes = {{0}}, .onlyWhen = {.opacityAbove = 0.8}},
+                                  Layer{.meshes = {{1}}, .onlyWhen = {.opacityAtMost = 0.8}}},
+                                 {}}});
+    TestSword sword("fading");
+    DrawLook look;
+    look.alpha = 1.f;
+    CHECK(Meshes(sword.Draw(look, 0.5f)) == std::vector<int>{1});
+    look.alpha = 0.5f;
+    CHECK(Meshes(sword.Draw(look, 1.f)) == std::vector<int>{0});
 }
 
 TEST_CASE("A look can leave a light on the model, a color or a tint of the light it was handed (design L46) "
@@ -904,6 +918,34 @@ TEST_CASE("A texture missing when its look was prepared is found when the look i
         CHECK(draws[0].texture == static_cast<int>(texture));
     }
     Bitmaps.UnloadImage(texture, true);
+    Render::Sprites::SetGpuUploadsSkipped(false);
+}
+
+// A map loads its own textures and drops the last map's (CMapManager::LoadWorld): the looks find theirs again then,
+// so a texture the map has is drawn from where the map loaded it (MN8).
+TEST_CASE("A texture loaded again elsewhere, as a map loads its textures, is drawn from there after the looks find "
+          "theirs again [looks]")
+{
+    Render::Sprites::SetGpuUploadsSkipped(true);
+    const LookDefinition style{"testLook", {Layer{.meshes = {{0}}, .texture = "Item/test_look_map.jpg"}}, {}};
+    const LookStoreScope looks({style});
+    TestSword sword("testLook");
+    std::vector<std::uint8_t> rgba(static_cast<std::size_t>(ImageSize) * ImageSize * 4, 255);
+    const GLuint first = Bitmaps.LoadImagePixels(L"Data\\Item\\test_look_map.jpg", rgba, ImageSize, ImageSize, true);
+    Render::Items::Looks::PrepareTextures(style);
+    DrawLook look;
+    REQUIRE(sword.Draw(look).size() == 1);
+    CHECK(sword.Draw(look)[0].texture == static_cast<int>(first));
+
+    // The texture goes and comes back under another index, as a map drops and loads its own.
+    Bitmaps.UnloadImage(first, true);
+    const GLuint again = Bitmaps.LoadImagePixels(L"Data\\Item\\test_look_map.jpg", rgba, ImageSize, ImageSize, true);
+    REQUIRE(again != first);
+    Render::Items::Looks::RefindTextures();
+    const std::vector<MeshDraw> draws = sword.Draw(look);
+    REQUIRE(draws.size() == 1);
+    CHECK(draws[0].texture == static_cast<int>(again));
+    Bitmaps.UnloadImage(again, true);
     Render::Sprites::SetGpuUploadsSkipped(false);
 }
 

@@ -31,9 +31,9 @@ enum class ItemModelProblemType
     // "renderStyle" names a style that does not exist; the model is drawn
     // plainly.
     RenderStyleUnknown,
-    // "itemEffect" names an item effect that does not exist; the model is
+    // "effect" names an effect that does not exist; the model is
     // drawn without it.
-    ItemEffectUnknown,
+    EffectUnknown,
 };
 
 // A problem found while opening an item model or its textures.
@@ -53,7 +53,7 @@ struct ItemModelProblem
     int meshCount = 0;
     // GlowMeshMissing: the glow value with the mesh, e.g. "glow.meshes".
     std::string field;
-    // RenderStyleUnknown, ItemEffectUnknown: the name that does not exist.
+    // RenderStyleUnknown, EffectUnknown: the name that does not exist.
     std::string name;
     // The shared model of the item, if it has one. A problem with the model
     // file, its textures or its meshes is then one of the shared model, which

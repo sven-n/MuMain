@@ -4,7 +4,7 @@ class OBJECT;
 
 namespace Render
 {
-// How one draw shows an object's model. It starts as the object's own look; the item effects and styles and the
+// How one draw shows an object's model. It starts as the object's own look; the effects and styles and the
 // map draws change it for the draw, and the object keeps its look.
 struct DrawLook
 {
@@ -15,7 +15,7 @@ struct DrawLook
     float blendMeshV = 0.f;
     int hiddenMesh = -1;
     // The level the item is drawn like, for the conditions of its look (design L11): its glow level, as the render
-    // level option caps it and its item effect leaves it. Read only.
+    // level option caps it and its effect leaves it. Read only.
     int level = 0;
 
     static DrawLook Of(const OBJECT& o);

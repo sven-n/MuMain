@@ -617,7 +617,7 @@
     <value>Never drawn, so the preview can't show it alone.</value>
   </data>
   <data name="Mesh code looks note" xml:space="preserve">
-    <value>The Style Editor shows which parts the render style draws and with which effects; the item effect is drawing code.</value>
+    <value>The Style Editor shows which parts the render style draws and with which effects; the effect is drawing code.</value>
   </data>
   <data name="Preview pick note" xml:space="preserve">
     <value>Click a part to find its mesh in the mesh list.</value>
@@ -634,14 +634,11 @@
   <data name="Render style" xml:space="preserve">
     <value>Render style</value>
   </data>
-  <data name="Item effect" xml:space="preserve">
-    <value>Item effect</value>
+  <data name="Effect" xml:space="preserve">
+    <value>Effect</value>
   </data>
   <data name="Render styles" xml:space="preserve">
     <value>Render styles</value>
-  </data>
-  <data name="Item effects" xml:space="preserve">
-    <value>Item effects</value>
   </data>
   <data name="Style Editor" xml:space="preserve">
     <value>Style Editor</value>
@@ -656,7 +653,7 @@
     <value>Render styles are in Data/Effects/RenderStyles.json or still drawing code, marked (code); Open in Style Editor shows the look. This picks which one the item uses.</value>
   </data>
   <data name="Style Editor tree note" xml:space="preserve">
-    <value>Render styles draw an item in layers; item effects act before it is drawn. Folders only sort the looks: drag a look or a folder onto a folder or onto its root. A look marked (code) is still drawing code: you see it and its items, but can't change it.</value>
+    <value>Render styles draw an item in layers; effects act before it is drawn. Folders only sort the looks: drag a look or a folder onto a folder or onto its root. A look marked (code) is still drawing code: you see it and its items, but can't change it.</value>
   </data>
   <data name="New look" xml:space="preserve">
     <value>New look</value>
@@ -697,8 +694,8 @@
   <data name="A look name of letters and digits that no other render style has" xml:space="preserve">
     <value>A name of letters and digits that no other render style has, in the file or in code.</value>
   </data>
-  <data name="A look name of letters and digits that no other item effect has" xml:space="preserve">
-    <value>A name of letters and digits that no other item effect has</value>
+  <data name="A look name of letters and digits that no other effect has" xml:space="preserve">
+    <value>A name of letters and digits that no other effect has</value>
   </data>
   <data name="Only a look no item uses can be renamed or removed." xml:space="preserve">
     <value>Only a look no item uses can be renamed or removed.</value>
@@ -706,8 +703,8 @@
   <data name="Code look note" xml:space="preserve">
     <value>Still drawing code (Render/Items/ItemRenderStyles.cpp): you see the look and its items here, but can't change it. It moves into the look file in a later step.</value>
   </data>
-  <data name="Item effects root note" xml:space="preserve">
-    <value>The item effects of {0}, and those still drawing code, marked (code). An item effect sets item values before the item is drawn and can put a light on the item's object.</value>
+  <data name="Effects root note" xml:space="preserve">
+    <value>The effects of {0}, and those still drawing code, marked (code). An effect sets item values before the item is drawn and can put a light on the item's object.</value>
   </data>
   <data name="Render styles root note" xml:space="preserve">
     <value>The render styles of {0}, and those still drawing code, marked (code).</value>
@@ -977,7 +974,7 @@
     <value>Only at these levels: the level the item glows like, from and to, both included.</value>
   </data>
   <data name="Only when hidden mesh tooltip" xml:space="preserve">
-    <value>Only when the item hides this mesh in this drawing (its hidden mesh, which item effects can set), or when it hides none.</value>
+    <value>Only when the item hides this mesh in this drawing (its hidden mesh, which effects can set), or when it hides none.</value>
   </data>
   <data name="No hidden mesh" xml:space="preserve">
     <value>No hidden mesh</value>
@@ -1019,7 +1016,7 @@
     <value>Draws alone</value>
   </data>
   <data name="Draws alone tooltip" xml:space="preserve">
-    <value>Drawn right after the item's item effect, in the object's own light, with nothing of the drawing code after it: no level light from +3, no level glow from +7, no excellent glow, no buff tint.</value>
+    <value>Drawn right after the item's effect, in the object's own light, with nothing of the drawing code after it: no level light from +3, no level glow from +7, no excellent glow, no buff tint.</value>
   </data>
   <data name="Before drawing" xml:space="preserve">
     <value>Before drawing</value>
@@ -1125,6 +1122,81 @@
   </data>
   <data name="Effect Browser" xml:space="preserve">
     <value>Effect Browser</value>
+  </data>
+  <data name="Model look {0}" xml:space="preserve">
+    <value>(model: {0})</value>
+  </data>
+  <data name="Glow only" xml:space="preserve">
+    <value>Glow only</value>
+  </data>
+  <data name="At most" xml:space="preserve">
+    <value>At most</value>
+  </data>
+  <data name="At most tooltip" xml:space="preserve">
+    <value>The value never goes above this: the top of a wave cut off.</value>
+  </data>
+  <data name="A color times the opacity" xml:space="preserve">
+    <value>A color times the opacity</value>
+  </data>
+  <data name="A color times the red of the light" xml:space="preserve">
+    <value>A color times the red of the light</value>
+  </data>
+  <data name="Tinting debuff" xml:space="preserve">
+    <value>Tinting debuff (poison, freeze, Blow of Destruction)</value>
+  </data>
+  <data name="On top" xml:space="preserve">
+    <value>On top</value>
+  </data>
+  <data name="On top tooltip" xml:space="preserve">
+    <value>Drawn without the depth test: over the model's other meshes and over walls, as the PK Field's Zombie Fighter glows.</value>
+  </data>
+  <data name="Light map" xml:space="preserve">
+    <value>Light map</value>
+  </data>
+  <data name="Light map tooltip" xml:space="preserve">
+    <value>The reflection lights the mesh as a light map, as the Drakan's second chrome.</value>
+  </data>
+  <data name="Not in animation" xml:space="preserve">
+    <value>Not in animation</value>
+  </data>
+  <data name="Animation tooltip" xml:space="preserve">
+    <value>Only while the monster plays this animation.</value>
+  </data>
+  <data name="Not in animation tooltip" xml:space="preserve">
+    <value>Not while the monster plays this animation: a glow left out while it dies.</value>
+  </data>
+  <data name="Opacity above" xml:space="preserve">
+    <value>Opacity above</value>
+  </data>
+  <data name="Opacity above tooltip" xml:space="preserve">
+    <value>Only while the drawing is more opaque than this, from 0 to 1.</value>
+  </data>
+  <data name="Opacity at most" xml:space="preserve">
+    <value>Opacity at most</value>
+  </data>
+  <data name="Opacity at most tooltip" xml:space="preserve">
+    <value>Only once the drawing has faded to this opacity or less, from 0 to 1: a dying monster drawn glowing as it fades.</value>
+  </data>
+  <data name="Cycle half" xml:space="preserve">
+    <value>Cycle half (seconds)</value>
+  </data>
+  <data name="Cycle half tooltip" xml:space="preserve">
+    <value>Only in one half of a cycle of the clock this many seconds long: the first half while the cycle's sine is at or above zero, the second while it is below. The Lava Giants glow brighter in the first half of their pulse.</value>
+  </data>
+  <data name="First half" xml:space="preserve">
+    <value>First half</value>
+  </data>
+  <data name="First half tooltip" xml:space="preserve">
+    <value>While the cycle's sine is at or above zero.</value>
+  </data>
+  <data name="Second half" xml:space="preserve">
+    <value>Second half</value>
+  </data>
+  <data name="Second half tooltip" xml:space="preserve">
+    <value>While the cycle's sine is below zero.</value>
+  </data>
+  <data name="Effect types" xml:space="preserve">
+    <value>Effect types</value>
   </data>
   <data name="Effect types not loaded" xml:space="preserve">
     <value>The effect types are not loaded yet; the loading screen loads them.</value>
@@ -3647,7 +3719,7 @@
     <value>Part models</value>
   </data>
   <data name="Part model note" xml:space="preserve">
-    <value>A part model: drawn with items, where the game code puts it (the +15 armor decorations, the Phoenix Soul Star's wing, the Phoenix Soul Armor in the inventory). Its entry in Data/Items/Models/PartModels.json holds its file, texture folders and render style; it has no inventory, ground, glow or item effect. Pick an item to see items again.</value>
+    <value>A part model: drawn with items, where the game code puts it (the +15 armor decorations, the Phoenix Soul Star's wing, the Phoenix Soul Armor in the inventory). Its entry in Data/Items/Models/PartModels.json holds its file, texture folders and render style; it has no inventory, ground, glow or effect. Pick an item to see items again.</value>
   </data>
   <data name="The part model {0} has no entry" xml:space="preserve">
     <value>The part model {0} has no entry in PartModels.json.</value>
@@ -3711,6 +3783,15 @@
   </data>
   <data name="Step model" xml:space="preserve">
     <value>{0}: {1}</value>
+  </data>
+  <data name="Step what looks" xml:space="preserve">
+    <value>looks</value>
+  </data>
+  <data name="Monster looks" xml:space="preserve">
+    <value>Looks</value>
+  </data>
+  <data name="Model looks note" xml:space="preserve">
+    <value>The render style and effect every monster of the model is drawn with; a monster can name others in Monster Setup.</value>
   </data>
   <data name="Step what file" xml:space="preserve">
     <value>file</value>

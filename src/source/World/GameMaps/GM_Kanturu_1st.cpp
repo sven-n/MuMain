@@ -314,7 +314,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(const OBJECT* pObject, DrawLook
     return true;
 }
 
-bool M37Kanturu1st::RenderKanturu1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool M37Kanturu1st::RenderKanturu1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (IsKanturu1st() || M40GMArea::IsGmArea())
     {
@@ -342,7 +342,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectMesh(const OBJECT* o, DrawLook& look, 
         }
     }
 
-    return RenderKanturu1stMonsterObjectMesh(o, look, b, ExtraMon);
+    return false;
 }
 
 void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
@@ -630,187 +630,6 @@ bool M37Kanturu1st::MoveKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     break;
     case MODEL_SOCCERBALL:
     {
-    }
-    break;
-    }
-
-    return false;
-}
-
-bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
-{
-    switch (o->Type)
-    {
-    case MODEL_BERSERK:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-
-        if (o->CurrentAction == MONSTER01_DIE)
-            return true;
-
-        float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
-                      BITMAP_BERSERK_EFFECT);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV,
-                      BITMAP_BERSERK_WP_EFFECT);
-
-        return true;
-    }
-    break;
-    case MODEL_GIGANTIS:
-    {
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        if (o->CurrentAction != MONSTER01_DIE)
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV);
-
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        return true;
-    }
-    break;
-    case MODEL_GENOCIDER:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        return true;
-    }
-    break;
-    case MODEL_SPLINTER_WOLF:
-    {
-        float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderMesh(0, RENDER_TEXTURE);
-        b->RenderMesh(1, RENDER_TEXTURE);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi);
-        b->RenderMesh(4, RENDER_TEXTURE);
-        return true;
-    }
-    break;
-
-    case MODEL_IRON_RIDER:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        return true;
-    }
-    break;
-    case MODEL_BLADE_HUNTER:
-    {
-        if (o->CurrentAction != MONSTER01_DIE)
-        {
-            float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV, look.hiddenMesh);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
-                          BITMAP_BLADEHUNTER_EFFECT);
-        }
-        else
-        {
-            if (look.alpha < 0.f)
-                look.alpha = 0.f;
-
-            if (look.alpha > 0.8f)
-            {
-                b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                              look.blendMeshV, look.hiddenMesh);
-            }
-            else
-                b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-            b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-        }
-        return true;
-    }
-    break;
-    case MODEL_SATYROS:
-    {
-        vec3_t Light;
-        VectorCopy(b->BodyLight, Light);
-        b->BeginRender(1.f);
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        b->StreamMesh = 1;
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, 1.f, 0, look.blendMeshLight, look.blendMeshU,
-                      WorldTime * 0.0005f);
-        b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, 1.f, 0, look.blendMeshLight, look.blendMeshU,
-                      WorldTime * 0.001f, BITMAP_CHROME);
-
-        float Luminosity = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
-        Vector(Light[0] * Luminosity, Light[0] * Luminosity, Light[0] * Luminosity, b->BodyLight);
-        b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, 1.f, 2, look.blendMeshLight, WorldTime * 0.0001f,
-                      -WorldTime * 0.0005f);
-        b->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_KENTAUROS:
-    {
-        float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi);
-        b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-        return true;
-    }
-    break;
-    case MODEL_BERSERKER_WARRIOR:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-
-        if (o->CurrentAction == MONSTER01_DIE)
-            return true;
-
-        float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
-                      BITMAP_BERSERK_EFFECT);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV,
-                      BITMAP_BERSERK_WP_EFFECT);
-
-        return true;
-    }
-    break;
-    case MODEL_KENTAUROS_WARRIOR:
-    {
-        float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi);
-        b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-        return true;
-    }
-    break;
-    case MODEL_GIGANTIS_WARRIOR:
-    {
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        if (o->CurrentAction != MONSTER01_DIE)
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV);
-
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        return true;
-    }
-    break;
-    case MODEL_SOCCERBALL:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        return true;
     }
     break;
     }

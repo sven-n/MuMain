@@ -27,6 +27,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/BoneManager.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Monsters/MonsterLooks.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -474,6 +475,7 @@ void ApplyAtOnce(CHARACTER& character, const LiveStart& start, const MonsterSetu
     character.m_bIsSelected = setup.selectable.value_or(start.selected);
     character.MoveSpeed = setup.moveSpeed ? static_cast<WORD>(*setup.moveSpeed) : start.moveSpeed;
     character.Blood = setup.noBloodPool.value_or(start.blood);
+    Render::Monsters::Looks::Resolve(character, setup);
     // A fixed facing turns it now; without one it keeps the server's turn.
     if (setup.facing)
         object.Angle[2] = *setup.facing;
@@ -515,6 +517,7 @@ void DressCharacter(CHARACTER& character, const MonsterSetup& setup)
         character.PK = static_cast<BYTE>(*setup.pkColor);
     if (setup.helperPlate)
         object.m_bpcroom = *setup.helperPlate;
+    Render::Monsters::Looks::Resolve(character, setup);
 }
 
 void ApplySetup(CHARACTER& character, const MonsterSetup& setup)

@@ -65,6 +65,20 @@ void MonsterDatabase::Build(std::span<const MonsterDefinition> monsters, std::st
     ++m_builds;
 }
 
+std::vector<const MonsterDefinition*> MonsterDatabase::GetAll() const
+{
+    std::vector<const MonsterDefinition*> monsters;
+    monsters.reserve(m_exists.count());
+    for (std::size_t number = 0; number < m_monsters.size(); ++number)
+    {
+        if (m_exists[number])
+        {
+            monsters.push_back(&m_monsters[number]);
+        }
+    }
+    return monsters;
+}
+
 void MonsterDatabase::SetDisplayLocale(std::string_view locale)
 {
     // Not a change of the data: the version stays (GetVersion).

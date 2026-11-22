@@ -6,6 +6,7 @@
 
 #include "MonsterAnimationFacts.h"
 #include "MonsterEdits.h"
+#include "MonsterLookPicker.h"
 #include "MonsterModelValues.h"
 #include "MonsterSelection.h"
 #include "MonsterShownModel.h"
@@ -18,6 +19,7 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemModelFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
@@ -155,6 +157,10 @@ void MuMonsterModelUI::RenderModel(MonsterModelDefinition& model, int slot)
     if (ImGui::CollapsingHeader(I18N::Editor::TextureFolders, ImGuiTreeNodeFlags_DefaultOpen))
     {
         RenderTextureFolders(model);
+    }
+    if (ImGui::CollapsingHeader(I18N::Editor::MonsterLooks, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        RenderLooks(model);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::Animations, ImGuiTreeNodeFlags_DefaultOpen))
     {
@@ -322,6 +328,25 @@ void MuMonsterModelUI::RenderTextureFolders(MonsterModelDefinition& model)
         m_draft.AfterChange(true, StepLabelOf(model, I18N::Editor::StepWhatTextureFolders));
     }
     ImGui::EndDisabled();
+}
+
+void MuMonsterModelUI::RenderLooks(MonsterModelDefinition& model)
+{
+    ImGui::TextDisabled("%s", I18N::Editor::ModelLooksNote);
+    const auto look = [&](const char* label, std::string& name, Data::Looks::LookKind kind)
+    {
+        ImGui::PushID(label);
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted(label);
+        ImGui::SameLine();
+        const bool changed =
+            LookPicker::Render(name, kind, "", I18N::Editor::None, SearchWidth * g_MuEditorCore.GetUIScale());
+        if (changed)
+            m_draft.AfterChange(true, StepLabelOf(model, I18N::Editor::StepWhatLooks));
+        ImGui::PopID();
+    };
+    look(I18N::Editor::RenderStyle, model.renderStyle, Data::Looks::LookKind::RenderStyle);
+    look(I18N::Editor::Effect, model.effect, Data::Looks::LookKind::Effect);
 }
 
 void MuMonsterModelUI::RenderAnimations(MonsterModelDefinition& model, int slot)

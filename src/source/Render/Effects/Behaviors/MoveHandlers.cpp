@@ -19,7 +19,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "MoveHandlers.h"
-
+#include "PhoenixShotMoves.h"
 
 namespace Render::Effects::Behaviors
 {
@@ -5797,6 +5797,10 @@ namespace Render::Effects::Behaviors
                         o->Light[2] = o->EyeRight[2] * (o->PKKey * 0.1f);
                     }
                 }
+                else if (o->SubType == 4)
+                {
+                    MoveStrikeSpiral(o);
+                }
     }
         return true;
     }
@@ -10617,6 +10621,8 @@ namespace Render::Effects::Behaviors
             { MODEL_TARGETMON_EFFECT, &Move_MODEL_TARGETMON_EFFECT },
             { MODEL_VOLCANO_OF_MONK, &Move_MODEL_VOLCANO_OF_MONK },
             { MODEL_VOLCANO_STONE, &Move_MODEL_VOLCANO_STONE },
+            { MODEL_PHOENIX_SHOT, &Move_MODEL_PHOENIX_SHOT },
+            { MODEL_WINDSPIN03, &Move_MODEL_WINDSPIN03 },
         };
         // clang-format on
         return handlers;

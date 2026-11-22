@@ -664,7 +664,7 @@ void CSPetDarkSpirit::CullPet()
         o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
 }
 
-void CSPetDarkSpirit::RenderPet(int PetState) const
+void CSPetDarkSpirit::RenderPet(bool cloaked) const
 {
     const CHARACTER* c = &m_PetCharacter;
     const OBJECT* o = &c->Object;
@@ -681,7 +681,7 @@ void CSPetDarkSpirit::RenderPet(int PetState) const
             if (m_PetOwner->Object.Type != MODEL_PLAYER && o->Type != MODEL_DARK_SPIRIT)
                 return;
 
-            RenderObject(o, false, 0, PetState);
+            RenderObject(o, false, 0, cloaked);
         }
     }
 }

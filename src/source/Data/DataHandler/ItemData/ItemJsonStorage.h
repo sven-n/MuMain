@@ -240,7 +240,7 @@ struct ItemModelSave
     std::filesystem::path groundLabelsFile;
     const GroundLabelFile* groundLabels = nullptr;
     bool groundLabelsChanged = false;
-    // The look files the Style Editor changed (Data/Effects/RenderStyles.json, ItemEffects.json), with their text.
+    // The look files the Style Editor changed (Data/Effects/RenderStyles.json, Effects.json), with their text.
     std::vector<LookFileToSave> lookFiles;
     // Other files written with them, all or none: the monster list with the
     // item references a move changed (D60). Written when their text differs.

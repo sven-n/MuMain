@@ -18,10 +18,9 @@ public:
     virtual bool CreateObject(OBJECT* o);
     virtual bool MoveObject(OBJECT* o);
     virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
-    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
-    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
     virtual void RenderFrontSideVisual();
-    bool RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
 public:
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);

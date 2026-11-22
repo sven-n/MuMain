@@ -14,7 +14,7 @@
 namespace MuEditor::Looks
 {
 // The looks of one kind the Style Editor changes (design L18, L31, L39): the looks and folders of
-// Data/Effects/RenderStyles.json or ItemEffects.json as the editor has them (CItemDataHandler::GetLookFile). Each
+// Data/Effects/RenderStyles.json or Effects.json as the editor has them (CItemDataHandler::GetLookFile). Each
 // change is an item edit (one undo step with the item tools, ItemEdits::SetLookFile) and reaches the game at once, so
 // it draws what the editor shows; Save Items writes the file.
 class LookEdits final
@@ -50,7 +50,7 @@ public:
     void SetFolders(const char* step, std::vector<Data::Colors::ColorFolder> folders);
 
     // Apply for one item (design L36): `copy`, the edited look under a name no look has, goes into the folder of
-    // `original`, and only the item at `itemType` names it (as its render style or item effect, by the kind); or a new
+    // `original`, and only the item at `itemType` names it (as its render style or effect, by the kind); or a new
     // item at the free item type `newItemType` with the English name `itemName`, duplicated from `itemType` with its
     // model (Duplicate item), names it. The look and the item are one undo step `step`. Nothing happens for an item
     // without a model.
@@ -75,6 +75,6 @@ private:
 } // namespace MuEditor::Looks
 
 #define g_LookEdits MuEditor::Looks::LookEdits::GetInstance()
-#define g_ItemEffectEdits MuEditor::Looks::LookEdits::Of(Data::Looks::LookKind::ItemEffect)
+#define g_EffectEdits MuEditor::Looks::LookEdits::Of(Data::Looks::LookKind::Effect)
 
 #endif // _EDITOR

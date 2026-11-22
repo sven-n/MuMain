@@ -410,6 +410,10 @@ static void ConsumeScreenshot()
     const int height = static_cast<int>(pixels.height);
     std::wstring writtenName = fileName;
     const bool saved = WriteJpeg(writtenName.data(), width, height, pixels.rgb.data(), g_screenshotQuality);
+    if (saved)
+    {
+        Core::Platform::UserFilesChanged();
+    }
 
     // A scripted capture has no message: the system log belongs to the player's
     // own Print Screen, and so does the rolling screenshot counter.

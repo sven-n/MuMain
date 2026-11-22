@@ -24,8 +24,8 @@ public:
     bool MoveObject(OBJECT* o);
     bool UpdateObjectEffects(OBJECT* o, BMD* b);
     bool RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b);
-    bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
-    void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+    bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
+    void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
     void RenderFrontSideVisual();
 
 public:

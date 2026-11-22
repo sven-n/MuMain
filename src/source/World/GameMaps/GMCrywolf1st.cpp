@@ -588,7 +588,7 @@ bool M34CryWolf1st::UpdateCryWolf1stObjectEffects(OBJECT* o, BMD* b)
 
     return true;
 }
-bool M34CryWolf1st::RenderCryWolf1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
+bool M34CryWolf1st::RenderCryWolf1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (!IsCyrWolf1st())
     {
@@ -668,7 +668,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(const OBJECT* o, DrawLook& look, 
     return true;
     }
 
-    return RenderCryWolf1stMonsterObjectMesh(o, look, b, ExtraMon);
+    return RenderCryWolf1stMonsterObjectMesh(o, look, b);
 }
 
 bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
@@ -1359,161 +1359,13 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
+bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_SORAM:
-    {
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(look.alpha);
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      5);
-        b->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_BALGASS:
-    {
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(look.alpha);
-        for (int i = 0; i < Models[o->Type].NumMeshs; i++)
-        {
-            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-            b->RenderMesh(i, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME3);
-        }
-        b->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_BALRAM:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      5);
-        return true;
-    }
-    break;
-    case MODEL_DEATH_SPIRIT:
-    {
-        b->BeginRender(look.alpha);
-        static float aaa = 0.f;
-        aaa += 0.1f;
-        if (aaa > 1.0f)
-            aaa = 0.f;
-        for (int i = 0; i < Models[o->Type].NumMeshs; i++)
-        {
-            if (i == 2)
-            {
-                if (look.alpha > 0.3f)
-                    look.alpha = 0.3f;
-
-                look.blendMesh = -2;
-                b->EndRender();
-                b->BeginRender(look.alpha);
-                Models[o->Type].StreamMesh = i;
-            }
-            else
-                look.blendMesh = -1;
-
-            look.blendMeshU = (int)WorldTime % 10000 * 0.0005f;
-            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-        }
-        b->EndRender();
-        look.alpha = 1.0f;
-        return true;
-    }
-    break;
-    case MODEL_SCOUT:
-    {
-        if (ExtraMon)
-        {
-            Vector(0.5f, 0.5f, 0.6f, b->BodyLight);
-            b->BeginRender(look.alpha);
-            for (int i = 0; i < Models[o->Type].NumMeshs; i++)
-            {
-                b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                              look.blendMeshV);
-                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-            }
-            b->EndRender();
-        }
-        else
-            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV, 5);
-        return true;
-    }
-    break;
-    case MODEL_WEREWOLF_HERO:
-    {
-        if (ExtraMon)
-        {
-            Vector(0.5f, 0.5f, 0.8f, b->BodyLight);
-            b->BeginRender(look.alpha);
-            for (int i = 0; i < Models[o->Type].NumMeshs; i++)
-            {
-                b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                              look.blendMeshV);
-                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-            }
-            b->EndRender();
-        }
-        else
-            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV, 5);
-        return true;
-    }
-    break;
-    case MODEL_TANTALLOS:
-    {
-        Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(look.alpha);
-        for (int i = 0; i < Models[o->Type].NumMeshs; i++)
-        {
-            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-        }
-        b->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_BLOODY_WOLF:
-    {
-        Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(look.alpha);
-        for (int i = 0; i < Models[o->Type].NumMeshs; i++)
-        {
-            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-        }
-        b->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_BEAM_KNIGHT:	//318
-    {
-        Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(look.alpha);
-        for (int i = 0; i < Models[o->Type].NumMeshs; i++)
-        {
-            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-        }
-        b->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_DRAGON_:	//319
+    // The Red Dragon event's dragons flying over this map (GOBoid.cpp, EnableEvent): boids, which have no monster
+    // look. The Red Dragon and Dragon monsters name crywolfGreenChrome here.
+    case MODEL_DRAGON_:
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
         b->BeginRender(look.alpha);

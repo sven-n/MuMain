@@ -16,8 +16,8 @@
         "level": 0,
         "excellent": false
       },
-      "itemEffect": "glowingMesh",
-      "itemEffectValues": {"glowMesh": 0}
+      "effect": "glowingMesh",
+      "effectValues": {"glowMesh": 0}
     },
     {
       "number": 1,
@@ -64,8 +64,8 @@
         "level": 0,
         "excellent": false
       },
-      "itemEffect": "glowingMesh",
-      "itemEffectValues": {"glowMesh": 0}
+      "effect": "glowingMesh",
+      "effectValues": {"glowMesh": 0}
     },
     {
       "number": 4,
@@ -82,7 +82,7 @@
         "level": 0,
         "excellent": false
       },
-      "itemEffect": "wingsOfSoul"
+      "effect": "wingsOfSoul"
     },
     {
       "number": 5,
@@ -99,7 +99,7 @@
         "level": 0,
         "excellent": false
       },
-      "itemEffect": "wingsOfDragon"
+      "effect": "wingsOfDragon"
     },
     {
       "number": 6,
@@ -117,7 +117,7 @@
         "excellent": false
       },
       "renderStyle": "wingsOfDarkness",
-      "itemEffect": "wingsOfDarkness"
+      "effect": "wingsOfDarkness"
     },
     {
       "number": 7,
@@ -146,8 +146,8 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "glowingMesh",
-      "itemEffectValues": {"glowMesh": 0}
+      "effect": "glowingMesh",
+      "effectValues": {"glowMesh": 0}
     },
     {
       "number": 9,
@@ -160,8 +160,8 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "glowingMesh",
-      "itemEffectValues": {"glowMesh": 0}
+      "effect": "glowingMesh",
+      "effectValues": {"glowMesh": 0}
     },
     {
       "number": 10,
@@ -174,8 +174,8 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "glowingMesh",
-      "itemEffectValues": {"glowMesh": 0}
+      "effect": "glowingMesh",
+      "effectValues": {"glowMesh": 0}
     },
     {
       "number": 11,
@@ -191,8 +191,8 @@
       "glow": {
         "level": 0
       },
-      "itemEffect": "glowingMesh",
-      "itemEffectValues": {"glowMesh": 0}
+      "effect": "glowingMesh",
+      "effectValues": {"glowMesh": 0}
     },
     {
       "number": 12,
@@ -322,8 +322,8 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "glowingMesh",
-      "itemEffectValues": {"glowMesh": 0}
+      "effect": "glowingMesh",
+      "effectValues": {"glowMesh": 0}
     },
     {
       "number": 21,
@@ -462,7 +462,7 @@
         "excellent": false
       },
       "renderStyle": "wingOfStorm",
-      "itemEffect": "wingOfStorm"
+      "effect": "wingOfStorm"
     },
     {
       "number": 37,
@@ -479,7 +479,7 @@
         "level": 0,
         "excellent": false
       },
-      "itemEffect": "wingOfEternal"
+      "effect": "wingOfEternal"
     },
     {
       "number": 38,
@@ -496,7 +496,7 @@
         "level": 0,
         "excellent": false
       },
-      "itemEffect": "wingOfIllusion"
+      "effect": "wingOfIllusion"
     },
     {
       "number": 39,
@@ -515,7 +515,7 @@
         "excellent": false
       },
       "renderStyle": "wingOfRuin",
-      "itemEffect": "wingOfRuin"
+      "effect": "wingOfRuin"
     },
     {
       "number": 40,
@@ -583,7 +583,7 @@
         "excellent": false
       },
       "renderStyle": "wingOfDimension",
-      "itemEffect": "wingOfDimension"
+      "effect": "wingOfDimension"
     },
     {
       "number": 44,
@@ -1378,8 +1378,8 @@
       "glow": {
         "excellent": false
       },
-      "itemEffect": "glowingMesh",
-      "itemEffectValues": {"glowMesh": 0}
+      "effect": "glowingMesh",
+      "effectValues": {"glowMesh": 0}
     },
     {
       "number": 133,

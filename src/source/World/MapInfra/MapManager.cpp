@@ -7,6 +7,7 @@
 #include "Camera/CameraMove.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
+#include "Render/Items/LookDrawing.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Data/DataHandler/LoadData.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
@@ -972,6 +973,8 @@ std::vector<Core::StagedLoad::Step> CMapManager::LoadWorldSteps(int Map)
     }
     steps.insert(steps.end(),
                  {
+                     // The looks draw a texture the map loads from the map's slot, as their code did.
+                     [] { Render::Items::Looks::RefindTextures(); },
                      [this] { World::MapObjectSounds::LoadForMap(GetServerMap(), GetServerStage()); },
                      [this, load] { LoadWorldTerrainFiles(*load); },
                      [this, load] { LoadWorldTerrain(*load); },

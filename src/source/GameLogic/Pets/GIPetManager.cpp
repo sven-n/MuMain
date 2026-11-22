@@ -238,7 +238,7 @@ static std::uint8_t g_tabBar = 0;
         const OBJECT* o = &c->Object;
         if (auto* petSystem = ResolvePetSystem(c))
         {
-            petSystem->RenderPet(g_isCharacterBuff(o, eBuff_Cloaking) ? 10 : 0);
+            petSystem->RenderPet(g_isCharacterBuff(o, eBuff_Cloaking));
         }
     }
 

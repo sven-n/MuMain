@@ -4,6 +4,7 @@
 set(MU_PLATFORM_SOURCES "posix")
 set(MU_TARGET_ADAPTERS
   "Core/Platform/Adapters/UserFolderSdl.cpp"
+  "Core/Platform/Adapters/UserFilesOnDisk.cpp"
   "Core/Platform/Adapters/OpenSslCredentials.cpp"
   "Core/Platform/Adapters/CredentialHostPosix.cpp"
   "GameShop/FileDownloader/Adapters/CurlShopDownload.cpp"

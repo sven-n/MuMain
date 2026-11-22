@@ -166,8 +166,7 @@ void PetObject::Render(bool bForceRender) const
     // A forced pet draws wherever it stands.
     if (!m_obj->Live || (!bForceRender && !m_obj->Visible))
         return;
-    const int State = g_isCharacterBuff(m_obj->Owner, eBuff_Cloaking) ? 10 : 0;
-    RenderObject(m_obj, FALSE, 0, State);
+    RenderObject(m_obj, FALSE, 0, g_isCharacterBuff(m_obj->Owner, eBuff_Cloaking));
 }
 
 bool PetObject::IsSameOwner(OBJECT* Owner)

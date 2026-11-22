@@ -782,7 +782,18 @@
       "item": {
         "group": 13,
         "number": 43
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "experienceRate",
+          "add": {
+            "values": 150
+          }
+        }
+      ]
     },
     {
       "number": 30,
@@ -819,7 +830,21 @@
       "item": {
         "group": 13,
         "number": 44
-      }
+      },
+      "powerUps": [
+        {
+          "attribute": "experienceRate",
+          "add": {
+            "values": 200
+          }
+        },
+        {
+          "attribute": "bonusItemDropRate",
+          "add": {
+            "values": 150
+          }
+        }
+      ]
     },
     {
       "number": 31,
@@ -856,7 +881,18 @@
       "item": {
         "group": 13,
         "number": 45
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "disableExperience",
+          "add": {
+            "values": 0
+          }
+        }
+      ]
     },
     {
       "number": 32,
@@ -964,7 +1000,18 @@
       "item": {
         "group": 14,
         "number": 46
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "attackSpeedAny",
+          "add": {
+            "values": 10
+          }
+        }
+      ]
     },
     {
       "number": 36,
@@ -1001,7 +1048,18 @@
       "item": {
         "group": 14,
         "number": 47
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "baseDamageBonus",
+          "add": {
+            "values": 25
+          }
+        }
+      ]
     },
     {
       "number": 37,
@@ -1038,7 +1096,18 @@
       "item": {
         "group": 14,
         "number": 48
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "defenseBase",
+          "add": {
+            "values": 100
+          }
+        }
+      ]
     },
     {
       "number": 38,
@@ -1075,7 +1144,18 @@
       "item": {
         "group": 14,
         "number": 49
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "maximumHealth",
+          "add": {
+            "values": 500
+          }
+        }
+      ]
     },
     {
       "number": 39,
@@ -1112,7 +1192,18 @@
       "item": {
         "group": 14,
         "number": 50
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "maximumMana",
+          "add": {
+            "values": 500
+          }
+        }
+      ]
     },
     {
       "number": 40,
@@ -1149,7 +1240,18 @@
       "item": {
         "group": 13,
         "number": 43
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "experienceRate",
+          "add": {
+            "values": 150
+          }
+        }
+      ]
     },
     {
       "number": 41,
@@ -1186,7 +1288,21 @@
       "item": {
         "group": 13,
         "number": 44
-      }
+      },
+      "powerUps": [
+        {
+          "attribute": "experienceRate",
+          "add": {
+            "values": 200
+          }
+        },
+        {
+          "attribute": "bonusItemDropRate",
+          "add": {
+            "values": 150
+          }
+        }
+      ]
     },
     {
       "number": 42,
@@ -1223,7 +1339,18 @@
       "item": {
         "group": 13,
         "number": 45
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "disableExperience",
+          "add": {
+            "values": 0
+          }
+        }
+      ]
     },
     {
       "number": 43,
@@ -1260,7 +1387,18 @@
       "item": {
         "group": 13,
         "number": 59
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "mobility",
+          "add": {
+            "values": 0
+          }
+        }
+      ]
     },
     {
       "number": 44,
@@ -1297,7 +1435,15 @@
       "item": {
         "group": 14,
         "number": 72
-      }
+      },
+      "powerUps": [
+        {
+          "attribute": "attackSpeedAny",
+          "add": {
+            "values": 15
+          }
+        }
+      ]
     },
     {
       "number": 45,
@@ -1334,7 +1480,15 @@
       "item": {
         "group": 14,
         "number": 73
-      }
+      },
+      "powerUps": [
+        {
+          "attribute": "defenseBase",
+          "add": {
+            "values": 60
+          }
+        }
+      ]
     },
     {
       "number": 46,
@@ -1371,7 +1525,18 @@
       "item": {
         "group": 14,
         "number": 74
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "physicalBaseDmg",
+          "add": {
+            "values": 30
+          }
+        }
+      ]
     },
     {
       "number": 47,
@@ -1407,7 +1572,18 @@
       "item": {
         "group": 14,
         "number": 75
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "wizardryBaseDmg",
+          "add": {
+            "values": 30
+          }
+        }
+      ]
     },
     {
       "number": 48,
@@ -1438,7 +1614,18 @@
       "item": {
         "group": 14,
         "number": 76
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "maximumHealth",
+          "add": {
+            "values": 200
+          }
+        }
+      ]
     },
     {
       "number": 49,
@@ -1471,7 +1658,18 @@
       "item": {
         "group": 14,
         "number": 77
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "maximumMana",
+          "add": {
+            "values": 300
+          }
+        }
+      ]
     },
     {
       "number": 50,
@@ -1508,7 +1706,18 @@
       "item": {
         "group": 14,
         "number": 78
-      }
+      },
+      "duration": {
+        "values": 864000
+      },
+      "powerUps": [
+        {
+          "attribute": "totalStrength",
+          "add": {
+            "values": 50
+          }
+        }
+      ]
     },
     {
       "number": 51,
@@ -1544,7 +1753,18 @@
       "item": {
         "group": 14,
         "number": 79
-      }
+      },
+      "duration": {
+        "values": 864000
+      },
+      "powerUps": [
+        {
+          "attribute": "totalAgility",
+          "add": {
+            "values": 50
+          }
+        }
+      ]
     },
     {
       "number": 52,
@@ -1581,7 +1801,18 @@
       "item": {
         "group": 14,
         "number": 80
-      }
+      },
+      "duration": {
+        "values": 864000
+      },
+      "powerUps": [
+        {
+          "attribute": "totalVitality",
+          "add": {
+            "values": 50
+          }
+        }
+      ]
     },
     {
       "number": 53,
@@ -1618,7 +1849,18 @@
       "item": {
         "group": 14,
         "number": 81
-      }
+      },
+      "duration": {
+        "values": 864000
+      },
+      "powerUps": [
+        {
+          "attribute": "totalEnergy",
+          "add": {
+            "values": 50
+          }
+        }
+      ]
     },
     {
       "number": 54,
@@ -1655,7 +1897,18 @@
       "item": {
         "group": 14,
         "number": 82
-      }
+      },
+      "duration": {
+        "values": 864000
+      },
+      "powerUps": [
+        {
+          "attribute": "totalLeadership",
+          "add": {
+            "values": 50
+          }
+        }
+      ]
     },
     {
       "number": 55,
@@ -2307,7 +2560,18 @@
       "item": {
         "group": 14,
         "number": 85
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "maximumMana",
+          "add": {
+            "values": 700
+          }
+        }
+      ]
     },
     {
       "number": 79,
@@ -2344,7 +2608,18 @@
       "item": {
         "group": 14,
         "number": 86
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "maximumHealth",
+          "add": {
+            "values": 700
+          }
+        }
+      ]
     },
     {
       "number": 80,
@@ -2381,7 +2656,18 @@
       "item": {
         "group": 14,
         "number": 87
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "baseDamageBonus",
+          "add": {
+            "values": 40
+          }
+        }
+      ]
     },
     {
       "number": 81,
@@ -2568,7 +2854,24 @@
       "item": {
         "group": 13,
         "number": 62
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "experienceRate",
+          "add": {
+            "values": 150
+          }
+        },
+        {
+          "attribute": "healthRecoveryMultiplier",
+          "add": {
+            "values": 5
+          }
+        }
+      ]
     },
     {
       "number": 88,
@@ -2605,7 +2908,24 @@
       "item": {
         "group": 13,
         "number": 63
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "bonusItemDropRate",
+          "add": {
+            "values": 150
+          }
+        },
+        {
+          "attribute": "manaRecoveryMultiplier",
+          "add": {
+            "values": 5
+          }
+        }
+      ]
     },
     {
       "number": 89,
@@ -2641,7 +2961,18 @@
       "item": {
         "group": 14,
         "number": 97
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "criticalDamageChance",
+          "add": {
+            "values": 20
+          }
+        }
+      ]
     },
     {
       "number": 90,
@@ -2677,7 +3008,18 @@
       "item": {
         "group": 14,
         "number": 98
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "excellentDamageChance",
+          "add": {
+            "values": 20
+          }
+        }
+      ]
     },
     {
       "number": 91,
@@ -2986,7 +3328,24 @@
       "item": {
         "group": 13,
         "number": 81
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "disableExperience",
+          "add": {
+            "values": 0
+          }
+        },
+        {
+          "attribute": "deathPenaltyProtection",
+          "add": {
+            "values": 0
+          }
+        }
+      ]
     },
     {
       "number": 100,
@@ -3023,7 +3382,18 @@
       "item": {
         "group": 13,
         "number": 82
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "itemDurabilityProtection",
+          "add": {
+            "values": 0
+          }
+        }
+      ]
     },
     {
       "number": 101,
@@ -3060,7 +3430,18 @@
       "item": {
         "group": 13,
         "number": 93
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "experienceRate",
+          "add": {
+            "values": 150
+          }
+        }
+      ]
     },
     {
       "number": 102,
@@ -3097,7 +3478,24 @@
       "item": {
         "group": 13,
         "number": 94
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "experienceRate",
+          "add": {
+            "values": 200
+          }
+        },
+        {
+          "attribute": "bonusItemDropRate",
+          "add": {
+            "values": 150
+          }
+        }
+      ]
     },
     {
       "number": 103,
@@ -3134,7 +3532,24 @@
       "item": {
         "group": 13,
         "number": 95
-      }
+      },
+      "duration": {
+        "values": 3600
+      },
+      "powerUps": [
+        {
+          "attribute": "vulcanusExperienceRate",
+          "add": {
+            "values": 20
+          }
+        },
+        {
+          "attribute": "vulcanusItemDropRate",
+          "add": {
+            "values": 1
+          }
+        }
+      ]
     },
     {
       "number": 104,
@@ -3171,7 +3586,24 @@
       "item": {
         "group": 13,
         "number": 96
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "baseDamageBonus",
+          "add": {
+            "values": 50
+          }
+        },
+        {
+          "attribute": "defenseBase",
+          "add": {
+            "values": 60
+          }
+        }
+      ]
     },
     {
       "number": 105,
@@ -3329,7 +3761,18 @@
       "item": {
         "group": 13,
         "number": 103
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "partyExperienceBonus",
+          "add": {
+            "values": 10
+          }
+        }
+      ]
     },
     {
       "number": 113,
@@ -3366,7 +3809,24 @@
       "item": {
         "group": 13,
         "number": 104
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "maximumAbility",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "level",
+                "times": 1
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "number": 114,
@@ -3403,7 +3863,24 @@
       "item": {
         "group": 13,
         "number": 105
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "maximumShield",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "level",
+                "times": 10
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "number": 115,
@@ -3440,7 +3917,18 @@
       "item": {
         "group": 13,
         "number": 117
-      }
+      },
+      "duration": {
+        "values": 21600
+      },
+      "powerUps": [
+        {
+          "attribute": "vitalityBonus",
+          "add": {
+            "values": 100
+          }
+        }
+      ]
     },
     {
       "number": 116,
@@ -3477,7 +3965,18 @@
       "item": {
         "group": 13,
         "number": 118
-      }
+      },
+      "duration": {
+        "values": 86400
+      },
+      "powerUps": [
+        {
+          "attribute": "vitalityBonus",
+          "add": {
+            "values": 100
+          }
+        }
+      ]
     },
     {
       "number": 117,
@@ -3514,7 +4013,18 @@
       "item": {
         "group": 13,
         "number": 119
-      }
+      },
+      "duration": {
+        "values": 604800
+      },
+      "powerUps": [
+        {
+          "attribute": "vitalityBonus",
+          "add": {
+            "values": 100
+          }
+        }
+      ]
     },
     {
       "number": 118,
@@ -3551,7 +4061,18 @@
       "item": {
         "group": 13,
         "number": 120
-      }
+      },
+      "duration": {
+        "values": 2592000
+      },
+      "powerUps": [
+        {
+          "attribute": "vitalityBonus",
+          "add": {
+            "values": 100
+          }
+        }
+      ]
     },
     {
       "number": 119,
@@ -3588,7 +4109,18 @@
       "item": {
         "group": 13,
         "number": 116
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "bonusItemDropRate",
+          "add": {
+            "values": 150
+          }
+        }
+      ]
     },
     {
       "number": 120,
@@ -3660,7 +4192,24 @@
       "item": {
         "group": 14,
         "number": 140
-      }
+      },
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "healthRecoveryMultiplier",
+          "add": {
+            "values": 3
+          }
+        },
+        {
+          "attribute": "maximumHealth",
+          "add": {
+            "values": 100
+          }
+        }
+      ]
     },
     {
       "number": 129,

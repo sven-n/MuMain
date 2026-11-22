@@ -455,7 +455,7 @@
       "glow": {
         "color": "copper"
       },
-      "itemEffect": "redSpirit"
+      "effect": "redSpirit"
     },
     {
       "number": 25,

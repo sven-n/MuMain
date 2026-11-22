@@ -319,7 +319,7 @@ bool MapProcess::RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b)
     return false;
 }
 
-bool MapProcess::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool MapProcess::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -331,7 +331,7 @@ bool MapProcess::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool 
         {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
-                bool result = basemap.lock()->RenderObjectMesh(o, look, b, ExtraMon);
+                bool result = basemap.lock()->RenderObjectMesh(o, look, b);
                 if (result)
                 {
                     return true;
@@ -346,7 +346,7 @@ bool MapProcess::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool 
     return false;
 }
 
-void MapProcess::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+void MapProcess::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -358,7 +358,7 @@ void MapProcess::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, 
         {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
-                basemap.lock()->RenderAfterObjectMesh(o, look, b, ExtraMon);
+                basemap.lock()->RenderAfterObjectMesh(o, look, b);
             }
         }
         else
