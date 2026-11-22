@@ -109,6 +109,12 @@ void TrimTrailingSpaces(std::wstring& line)
 
 std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth, const MeasureTextWidth& measureWidth)
 {
+    return WrapTextToWidth(text, maxWidth, maxWidth, measureWidth);
+}
+
+std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int firstLineMaxWidth, int maxWidth,
+                                          const MeasureTextWidth& measureWidth)
+{
     std::vector<std::wstring> lines;
     if (text.empty() || maxWidth <= 0 || !measureWidth)
     {
@@ -125,7 +131,11 @@ std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth
     // has seen. npos while it has none.
     size_t breakAt = std::wstring::npos;
 
-    const auto fits = [&](size_t length) { return measureWidth(line.c_str(), length) <= maxWidth; };
+    const auto fits = [&](size_t length)
+    {
+        const int lineMaxWidth = lines.empty() ? firstLineMaxWidth : maxWidth;
+        return measureWidth(line.c_str(), length) <= lineMaxWidth;
+    };
     // Called when a word ends: the line is measured once per word, not after
     // every letter (a tooltip is built every frame, and each measured piece
     // is a new text for the renderer's text cache).
@@ -150,6 +160,12 @@ std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth
             }
             line = std::move(word);
             breakAt = std::wstring::npos;
+        }
+        // The first word alone on a first line that is narrower than the others: it goes to the
+        // second line when it fits there, and the first line stays empty.
+        if (lines.empty() && firstLineMaxWidth < maxWidth && !fits(line.size()))
+        {
+            lines.emplace_back();
         }
         // A single word which is wider than a whole line. It has to be broken
         // somewhere, otherwise it would never fit: where it stops fitting.

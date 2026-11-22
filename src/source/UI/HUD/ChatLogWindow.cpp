@@ -33,6 +33,8 @@ namespace
 {
 // The widest scrollbar a theme gives the shown frame (chat_log.rcss; legacy and classic).
 constexpr float kScrollbarWidthDp = 15.0f;
+// The class chat_log.rml binds to show_frame on #panel.
+const Rml::String kFramedClass = "framed";
 // GetStringWidth() is a font-metrics estimate; one pixel of slack keeps a line from touching the edge.
 constexpr int kMeasureSlackPx = 1;
 const std::wstring kSenderSeparator = L" : ";
@@ -861,18 +863,42 @@ mu::ui::window::CChatLogWindow::WrapText(const type_string& strID, const type_st
     if (!GetRmlLineMeasure(MsgType, measure, maxWidth))
         GetNativeLineMeasure(MsgType, measure, maxWidth);
 
-    // The sender is drawn in front of the first line, so it is wrapped with the text and taken off
-    // the first line again.
-    const type_string prefix = strID.empty() ? type_string() : strID + kSenderSeparator;
-    std::vector<type_string> lines = WrapTextToWidth(prefix + strText, maxWidth, measure);
+    // The sender is drawn in front of the first line only, so that line has less room than the
+    // others. A first word that does not fit behind the sender leaves the sender alone on it.
+    int firstLineMaxWidth = maxWidth;
+    if (!strID.empty())
+    {
+        const type_string prefix = strID + kSenderSeparator;
+        firstLineMaxWidth -= measure(prefix.c_str(), prefix.size());
+    }
+    std::vector<type_string> lines = WrapTextToWidth(strText, firstLineMaxWidth, maxWidth, measure);
     KeepFirstLinesWithEllipsis(lines, MAX_WRAPPED_LINES, maxWidth, measure, kEllipsis);
     if (lines.empty())
         return {strText};
-
-    lines.front().erase(0, std::min(prefix.size(), lines.front().size()));
-    if (lines.front().empty() && lines.size() > 1)
-        lines.erase(lines.begin());  // the first word did not fit behind the sender
     return lines;
+}
+
+float mu::ui::window::CChatLogWindow::GetFramedWellWidth(Rml::ElementDocument& document, Rml::Element& panel,
+                                                         Rml::Element& well)
+{
+    const float dpRatio = RmlUiRuntime::Instance().GetContext()->GetDensityIndependentPixelRatio();
+    if (panel.IsClassSet(kFramedClass))
+    {
+        m_FramedWellWidth = well.GetOffsetWidth();
+    }
+    else if (m_FramedWellDocument != &document || m_FramedWellDpRatio != dpRatio)
+    {
+        // Lay the document out once as F5 shows it and back: a theme may make the framed well
+        // narrower than the hidden-frame one (classic's window is 268dp against 281dp).
+        panel.SetClass(kFramedClass, true);
+        document.UpdateDocument();
+        m_FramedWellWidth = well.GetOffsetWidth();
+        panel.SetClass(kFramedClass, false);
+        document.UpdateDocument();
+    }
+    m_FramedWellDocument = &document;
+    m_FramedWellDpRatio = dpRatio;
+    return m_FramedWellWidth;
 }
 
 bool mu::ui::window::CChatLogWindow::GetRmlLineMeasure(MESSAGE_TYPE MsgType, MeasureTextWidth& measure, int& maxWidth)
@@ -883,17 +909,19 @@ bool mu::ui::window::CChatLogWindow::GetRmlLineMeasure(MESSAGE_TYPE MsgType, Mea
 
     Rml::Element* probe = document->GetElementById(MsgType == TYPE_GM_MESSAGE ? "measure_gm" : "measure");
     Rml::Element* well = document->GetElementById("lines");
-    if (probe == nullptr || well == nullptr || probe->GetFontFaceHandle() == 0)
+    Rml::Element* panel = document->GetElementById("panel");
+    if (probe == nullptr || well == nullptr || panel == nullptr || probe->GetFontFaceHandle() == 0)
         return false;
 
-    // Room for the scrollbar is always kept: a line wrapped while the frame is hidden must still
-    // fit once F5 shows the frame and its scrollbar. The probe holds one character, so its box
-    // minus that character is what a line adds around its text (padding, border).
+    // A line wrapped while the frame is hidden must still fit once F5 shows the frame: the
+    // narrower of the two wells counts, less room for the scrollbar. The probe holds one
+    // character, so its box minus that character is what a line adds around its text (padding,
+    // border).
     const float dpRatio = RmlUiRuntime::Instance().GetContext()->GetDensityIndependentPixelRatio();
+    const float wellWidth = std::min(well->GetOffsetWidth(), GetFramedWellWidth(*document, *panel, *well));
     const float lineDecoration =
         probe->GetOffsetWidth() - static_cast<float>(Rml::ElementUtilities::GetStringWidth(probe, kProbeText));
-    maxWidth =
-        static_cast<int>(well->GetOffsetWidth() - kScrollbarWidthDp * dpRatio - lineDecoration) - kMeasureSlackPx;
+    maxWidth = static_cast<int>(wellWidth - kScrollbarWidthDp * dpRatio - lineDecoration) - kMeasureSlackPx;
     if (maxWidth <= 0)
         return false;
 

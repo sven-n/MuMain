@@ -368,3 +368,34 @@ TEST_CASE("KeepFirstLinesWithEllipsis does not leave a space before the ellipsis
 
     CHECK(lines == std::vector<std::wstring>{L"abcde..."});
 }
+
+TEST_CASE("WrapTextToWidth gives the first line its own width")
+{
+    // A sender of four units in front of the first line leaves it six of ten.
+    const auto lines = WrapTextToWidth(L"aaa bbbb cc", 6, 10, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 2);
+    CHECK(lines[0] == L"aaa");
+    CHECK(lines[1] == L"bbbb cc");
+}
+
+TEST_CASE("WrapTextToWidth leaves the first line empty when the first word only fits a whole line")
+{
+    const auto lines = WrapTextToWidth(L"abcdefgh ij", 4, 10, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 3);
+    CHECK(lines[0].empty());
+    CHECK(lines[1] == L"abcdefgh");
+    CHECK(lines[2] == L"ij");
+}
+
+TEST_CASE("WrapTextToWidth with no room on the first line still breaks a word wider than a line")
+{
+    const auto lines = WrapTextToWidth(L"abcdefghijkl", 0, 5, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 4);
+    CHECK(lines[0].empty());
+    CHECK(lines[1] == L"abcde");
+    CHECK(lines[2] == L"fghij");
+    CHECK(lines[3] == L"kl");
+}

@@ -39,6 +39,16 @@ using MeasureTextWidth = std::function<int(const wchar_t* text, size_t length)>;
 std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth, const MeasureTextWidth& measureWidth);
 
 /**
+ * @brief WrapTextToWidth, with a first line of its own width: something drawn in front of it (a
+ *        chat message's sender) leaves it only firstLineMaxWidth.
+ *
+ * When the first word does not fit there but fits a whole line, the first line stays empty and the
+ * word starts the second; a word wider than a whole line is broken as WrapTextToWidth breaks it.
+ */
+std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int firstLineMaxWidth, int maxWidth,
+                                          const MeasureTextWidth& measureWidth);
+
+/**
  * @brief Keeps at most maxLines of wrapped lines; when lines are dropped, the last kept one ends in
  *        the ellipsis, shortened (and trailing spaces removed) until it fits maxWidth with it.
  */
