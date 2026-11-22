@@ -1455,6 +1455,8 @@ void OpenSounds()
     LoadGameSound(SOUND_RAGESKILL_DRAGONKICK_ATTACK);
     LoadGameSound(SOUND_RAGESKILL_BUFF_1);
     LoadGameSound(SOUND_RAGESKILL_BUFF_2);
+    LoadGameSound(SOUND_RAGESKILL_PHOENIXSHOT);
+    LoadGameSound(SOUND_RAGESKILL_PHOENIXSHOT_ATTACK);
 }
 
 bool OpenFont()
@@ -1889,6 +1891,7 @@ static void OpenBasicDataStep1()
     LoadBitmap(L"Effect\\joint_sword_red.jpg", BITMAP_BLUR + 11, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\motion_blur_r2.jpg", BITMAP_BLUR + 12, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\motion_blur_r3.jpg", BITMAP_BLUR + 13, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Effect\\SwordEffor2_blur.jpg", BITMAP_BLUR + 14, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\blur02.jpg", BITMAP_BLUR2, GL_NEAREST, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\lightning2.jpg", BITMAP_LIGHTNING + 1, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\Thunder01.jpg", BITMAP_ENERGY, GL_LINEAR, GL_REPEAT);

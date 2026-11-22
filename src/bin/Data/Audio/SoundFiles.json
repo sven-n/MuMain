@@ -387,6 +387,8 @@
     {"id": "SOUND_RAGESKILL_DRAGONKICK_ATTACK", "file": "Data/Sound/Ragefighter/Rage_Dragonkick_Att.wav", "channels": 4},
     {"id": "SOUND_RAGESKILL_BUFF_1", "file": "Data/Sound/Ragefighter/Rage_Buff_1.wav", "channels": 4},
     {"id": "SOUND_RAGESKILL_BUFF_2", "file": "Data/Sound/Ragefighter/Rage_Buff_2.wav", "channels": 4},
+    {"id": "SOUND_RAGESKILL_PHOENIXSHOT", "file": "Data/Sound/w69w70w71w72/CombatMaster_attack2.wav", "channels": 4},
+    {"id": "SOUND_RAGESKILL_PHOENIXSHOT_ATTACK", "file": "Data/Sound/w69w70w71w72/CombatMaster_attack3.wav", "channels": 4},
     {"id": "SOUND_KARUTAN_DESERT_ENV", "file": "Data/Sound/Karutan/Karutan_desert_env.wav", "channels": 1},
     {"id": "SOUND_KARUTAN_INSECT_ENV", "file": "Data/Sound/Karutan/Karutan_insect_env.wav", "channels": 1},
     {"id": "SOUND_KARUTAN_KARDAMAHAL_ENV", "file": "Data/Sound/Karutan/Kardamahal_entrance_env.wav", "channels": 1}

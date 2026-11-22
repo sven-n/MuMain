@@ -26,3 +26,15 @@ mu_add_test(
 target_compile_definitions(test_effect_creation PRIVATE
     MU_EFFECT_CREATION_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/EffectCreation.txt"
 )
+
+# Phoenix Shot's move handlers (Render/Effects/Behaviors/PhoenixShotMoves.cpp) played over a cast: the blades let
+# go, their flight at either frame rate, the strike.
+mu_add_test(
+    NAME test_phoenix_shot
+    SOURCES
+        test_phoenix_shot.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+        mu_test_effect_data
+)
