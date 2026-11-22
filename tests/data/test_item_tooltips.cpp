@@ -175,9 +175,9 @@ public:
 };
 } // namespace
 
-// Every item's tooltip at every level 0 to 15, in the 28 variants of WriteItemTooltipSnapshot (plain, full, ancient,
-// the ancient bonus at levels 1 to 3, harmony, each option alone, the additional option at levels 2 to 7 and option
-// types 1 to 3, each excellent option alone, worn, broken and expired),
+// Every item's tooltip at every level 0 to 15, in the 30 variants of WriteItemTooltipSnapshot (plain, full, ancient,
+// the ancient bonus at levels 1 to 3, harmony, each option alone, the additional option at levels 2 to 7, option
+// types 1 to 3 and types 2 and 3 at level 4, each excellent option alone, worn, broken and expired),
 // for the two heroes, against the hashes recorded in item_tooltip_snapshot.txt: a tooltip that changes shows here.
 // After a change that is meant, run the test with MU_TOOLTIP_SNAPSHOT_UPDATE=1 to record the new hashes; the control
 // socket's `tooltip-snapshot` writes the full lines in the game to compare with.
@@ -231,7 +231,7 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
                     changedTooltips.emplace_back(key, text);
                 }
             });
-        CHECK(tooltips == 911 * 28 * 16);
+        CHECK(tooltips == 911 * 30 * 16);
     }
     SetItemTooltipTextMeasure(nullptr);
 

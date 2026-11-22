@@ -75,12 +75,20 @@ TEST_CASE("Item Options puts a new definition in the file of its type's definiti
     ItemOptionFiles files = MakeFiles();
     CHECK(FindFileOfType(files, ItemOptionType::Option) == "Option.json");
     CHECK(FindFileOfType(files, ItemOptionType::Luck) == "Luck.json");
-    files.definitions.push_back(MakeDefinition("customDamage", ItemOptionType::Option, {1}));
-    files.definitions.back().file = "Custom.json";
-    // The file most of them are in.
+    // The file named after the type, also where another file holds more of them (Wings.json the wings' options).
+    for (int wing = 0; wing < 3; ++wing)
+    {
+        files.definitions.push_back(MakeDefinition("wing" + std::to_string(wing), ItemOptionType::Option, {1}));
+        files.definitions.back().file = "Wings.json";
+    }
     CHECK(FindFileOfType(files, ItemOptionType::Option) == "Option.json");
-    // No definition of the type: the type's name.
+    // Else the file most of them are in.
+    files.definitions.push_back(MakeDefinition("secondTierWing", ItemOptionType::Wing, {1}));
+    files.definitions.back().file = "Wings.json";
+    CHECK(FindFileOfType(files, ItemOptionType::Wing) == "Wings.json");
+    // No definition of the type: the type's name, or the shipped file's (Wings.json).
     CHECK(FindFileOfType(files, ItemOptionType::Excellent) == "Excellent.json");
+    CHECK(FindFileOfType(MakeFiles(), ItemOptionType::Wing) == "Wings.json");
     CHECK(FindFileOfType(files, ItemOptionType::AncientOption) == "Ancient.json");
     // The two ancient types share a file: set options go where the bonuses are.
     files.definitions.push_back(MakeDefinition("ancientBonusStrength", ItemOptionType::AncientBonus, {5}));
@@ -93,6 +101,7 @@ TEST_CASE("Item Basics offers only the option links that do something [data][ite
     ItemOptionFiles files = MakeFiles();
     files.definitions.push_back(MakeDefinition("excellentWeapon", ItemOptionType::Excellent, {1}));
     files.definitions.push_back(MakeDefinition("ancientBonusStrength", ItemOptionType::AncientBonus, {5}));
+    files.definitions.push_back(MakeDefinition("secondTierWing", ItemOptionType::Wing, {1}));
     const ItemOptionDatabase options(files);
     const auto definition = [&files](std::string_view name) -> const ItemOptionDefinition&
     { return *std::ranges::find(files.definitions, name, &ItemOptionDefinition::name); };
@@ -109,6 +118,18 @@ TEST_CASE("Item Basics offers only the option links that do something [data][ite
     wings.slot = ItemSlot::Wings;
     CHECK_FALSE(IsUsefulOptionLink(wings, definition("excellentWeapon"), options));
     CHECK(IsUsefulOptionLink(wings, definition("luck"), options));
+    CHECK(IsUsefulOptionLink(wings, definition("secondTierWing"), options));
+    // The excellent byte holds excellent options on every other item: no wing options there, and an excellent link
+    // counts even where a wing link is written already. A horn's byte holds its kind.
+    CHECK_FALSE(IsUsefulOptionLink(kris, definition("secondTierWing"), options));
+    const ItemDefinition wingedRing = MakeItem(13, 8, {"secondTierWing"});
+    CHECK(IsUsefulOptionLink(wingedRing, definition("excellentWeapon"), options));
+    ItemDefinition excellentWings = MakeItem(12, 4, {"excellentWeapon"});
+    excellentWings.slot = ItemSlot::Wings;
+    CHECK(IsUsefulOptionLink(excellentWings, definition("secondTierWing"), options));
+    ItemDefinition horn = MakeItem(13, 37, {});
+    horn.tags.Set(ItemTag::HornMount);
+    CHECK_FALSE(IsUsefulOptionLink(horn, definition("secondTierWing"), options));
 }
 
 TEST_CASE("Item Options counts the items whose attackType picks an ancient bonus definition by its name "
@@ -401,6 +422,18 @@ TEST_CASE("Fill levels makes a definition's value lists end at a level by their 
         ItemOptionValue constant{.values = {7}, .isList = false};
         FillOptionValue(constant, 2, 10, 10, 3);
         CHECK(constant.values == std::vector<int>{0, 10, 20});
+    }
+
+    SUBCASE("a list by the item's level is written from level 0 up to 15")
+    {
+        ItemOptionValue health{
+            .values = {50, 55}, .isList = true, .levelType = Data::Items::ItemOptionLevelType::ItemLevel};
+        FillOptionValue(health, 0, 50, 5, 15);
+        REQUIRE(health.values.size() == 16);
+        CHECK(health.values.front() == 50);
+        CHECK(health.values.back() == 125);
+        FillOptionValue(health, 2, 100, 0, 3);
+        CHECK(health.values == std::vector<int>{50, 55, 100, 100});
     }
 }
 

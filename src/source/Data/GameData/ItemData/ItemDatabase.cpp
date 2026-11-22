@@ -155,9 +155,8 @@ void ItemDatabase::SetOptions(ItemOptionDatabase options)
     m_options = std::move(options);
     for (size_t itemType = 0; itemType < m_definitions.size(); ++itemType)
     {
-        m_optionLinks[itemType] = m_definitions[itemType].Exists()
-                                      ? m_options.ResolveLinks(m_definitions[itemType].options)
-                                      : std::vector<ItemOptionIndex>();
+        m_optionLinks[itemType] = m_definitions[itemType].Exists() ? m_options.ResolveLinks(m_definitions[itemType])
+                                                                   : std::vector<ItemOptionIndex>();
     }
 }
 
@@ -233,8 +232,7 @@ void ItemDatabase::Store(int itemType, ItemDefinition definition)
         }
     }
 
-    m_optionLinks[itemType] =
-        definition.Exists() ? m_options.ResolveLinks(definition.options) : std::vector<ItemOptionIndex>();
+    m_optionLinks[itemType] = definition.Exists() ? m_options.ResolveLinks(definition) : std::vector<ItemOptionIndex>();
     m_definitions[itemType] = std::move(definition);
     m_ruleData[itemType] = ruleData;
 }

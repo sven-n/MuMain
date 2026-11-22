@@ -374,6 +374,16 @@ TEST_CASE("Every shipped item's option list is the one the option rules give [da
         withOptions += item.options.empty() ? 0 : 1;
     }
     CHECK(withOptions > 400);
+
+    // A second or third tier wing no rule names by number gets its tier's wing options and luck.
+    ItemDefinition newWing;
+    newWing.group = 12;
+    newWing.number = 44;
+    newWing.slot = Data::Items::ItemSlot::Wings;
+    newWing.wingTier = Data::Items::WingTier::Third;
+    CHECK(DeriveItemOptions(rules.rules, newWing) == std::vector<std::string>{"thirdTierWing", "luck"});
+    newWing.wingTier = Data::Items::WingTier::Second;
+    CHECK(DeriveItemOptions(rules.rules, newWing) == std::vector<std::string>{"secondTierWing", "luck"});
 }
 
 // The shipped tooltip file, read once.
@@ -1938,10 +1948,11 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 
     SUBCASE("a moved item's option list follows its new number")
     {
-        // The rules give luck to the Wings of Elf (12/0), not to a number of group 12 no rule names.
+        // The rules give the Wings of Elf (12/0) luck and its additional option, not a number of group 12 no rule
+        // names.
         const int emptyWingType = MakeItemType(12, 300);
         REQUIRE(g_ItemDatabase.Find(emptyWingType) == nullptr);
-        REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->options == std::vector<std::string>{"luck"});
+        REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->options == std::vector<std::string>{"luck", "wingsOfElf"});
         std::swap(ItemAttribute[ITEM_WINGS_OF_ELF], ItemAttribute[emptyWingType]);
         g_ItemDataHandler.OnItemsSwapped(ITEM_WINGS_OF_ELF, emptyWingType);
         CHECK(g_ItemDatabase.Find(emptyWingType)->options.empty());
