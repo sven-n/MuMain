@@ -113,6 +113,13 @@ void GameConfig::Load()
         ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP), CfgDefaultServerIP);
     m_serverPort = GameConfigValidation::ValidateServerPort(
         ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort), CfgDefaultServerPort);
+    const std::wstring relay = ReadString(CfgSectionConnectionSettings, CfgKeyRelay, CfgDefaultRelay);
+    m_relay = GameConfigValidation::ValidateRelay(relay);
+    if (m_relay.empty() && !GameConfigValidation::ValidateServerIP(relay, L"").empty())
+    {
+        mu::log::Get("core")->error(
+            "config.ini: Relay is not a ws:// or wss:// address with a host; connecting over TCP");
+    }
 
     m_chatCommandFavourites = ReadStringList(L"ChatCommands", L"Favourite");
     m_chatCommandTemplates = ReadStringList(L"ChatCommands", L"Template");
@@ -166,6 +173,7 @@ void GameConfig::Save()
 
     WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
     WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
+    WriteString(CfgSectionConnectionSettings, CfgKeyRelay, m_relay);
 
     WriteStringList(L"ChatCommands", L"Favourite", m_chatCommandFavourites);
     WriteStringList(L"ChatCommands", L"Template", m_chatCommandTemplates);

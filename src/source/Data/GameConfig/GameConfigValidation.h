@@ -28,6 +28,9 @@ namespace GameConfigValidation
 {
 int ValidateServerPort(int value, int defaultPort);
 std::wstring ValidateServerIP(const std::wstring& value, const std::wstring& defaultIP);
+// A ws:// or wss:// address with a host (and a 1-65535 port if it names one), trimmed;
+// anything else is empty (no relay: connect over TCP).
+std::wstring ValidateRelay(const std::wstring& value);
 // At least 1 (no anisotropy). The upper bound is what the GPU supports and is
 // applied by the renderer, which logs when it clamps.
 int ValidateAnisotropy(int value);

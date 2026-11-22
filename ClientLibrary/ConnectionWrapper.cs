@@ -83,10 +83,18 @@ public sealed class ConnectionWrapper : IDisposable
     /// </summary>
     /// <param name="host">The host name or address.</param>
     /// <param name="port">The port.</param>
+    /// <param name="relay">The WebSocket relay to go through (see <see cref="DeferredTcpPipe.RelayAddress"/>), or null.</param>
     /// <param name="timeout">How long the whole connect may take.</param>
-    public void Connect(string host, int port, TimeSpan timeout)
+    public void Connect(string host, int port, string? relay, TimeSpan timeout)
     {
-        this._pipe.Start(host, port, timeout, this.NotifyOpened, this.OnConnectFailed);
+        if (relay is null)
+        {
+            this._pipe.Start(host, port, timeout, this.NotifyOpened, this.OnConnectFailed);
+        }
+        else
+        {
+            this._pipe.Start(DeferredTcpPipe.RelayAddress(relay, host, port), timeout, this.NotifyOpened, this.OnConnectFailed);
+        }
     }
 
     /// <summary>
