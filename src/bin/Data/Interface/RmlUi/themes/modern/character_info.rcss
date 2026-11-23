@@ -155,3 +155,5 @@
 .attr-lines span.buffed { color: token(accent-gold); }
 /* A line with a hint (the damage, the critical damage rate) shows it while the pointer is over it. */
 .attr-lines span.hinted { pointer-events: auto; }
+/* The command row's box shows what the command adds (#1017). */
+.attr-textbox.hinted { pointer-events: auto; }

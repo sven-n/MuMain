@@ -387,9 +387,7 @@ void mu::ui::window::CMyShopInventory::BindRmlModel(Rml::DataModelConstructor& c
                         });
 
     // Former RenderTextInfo()'s static instructional lines -- set once here, not
-    // re-synced every frame, since none of this text ever changes at runtime (same
-    // convention CCharacterInfoWindow's own static labels use). Only show_still_opening
-    // (SyncRmlModel()) reflects live state.
+    // re-synced every frame. Only show_still_opening (SyncRmlModel()) reflects live state.
     model.warningText = StringUtils::WideToNarrow(I18N::Game::Warning);
     model.sellingPriceText = StringUtils::WideToNarrow(I18N::Game::SellingPriceWhenOpeningTheStore);
     model.pleaseVerifyText = StringUtils::WideToNarrow(I18N::Game::PleaseVerify);

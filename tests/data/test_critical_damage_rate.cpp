@@ -527,7 +527,6 @@ TEST_CASE("The critical hit texts are built again only when what they show chang
     UI::Character::CriticalHitTexts texts;
     UI::Character::CriticalHitTexts::Parts parts;
     parts.damageRange = {1909, 2575};
-    parts.locale = "en";
 
     CHECK(texts.Update(parts));
     CHECK(texts.RateLine().text == "Critical damage rate: 0%");
@@ -549,12 +548,13 @@ TEST_CASE("The critical hit texts are built again only when what they show chang
     CHECK(texts.Update(parts));
     CHECK(Texts(texts.DamageHintLines())[1] == "Normal hit: 1909~2600");
 
+    // A language switch reaches the texts through Invalidate (the window's TextsChangedWatch).
     I18N::SetLocale("de");
-    parts.locale = "de";
+    texts.Invalidate();
     CHECK(texts.Update(parts));
     CHECK(texts.RateLine().text == "Kritische Schadensrate: 5%");
     I18N::SetLocale("en");
-    parts.locale = "en";
+    texts.Invalidate();
     CHECK(texts.Update(parts));
 
     // A buff's skill renamed (the skill editor) and the Scroll of Battle renamed ("Translate item names", the item
