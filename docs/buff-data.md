@@ -46,7 +46,8 @@ buffs and debuffs stops the game. An item the item list does not have is an
 error: the buff gets no duration or values from it. A field the game doesn't
 know, a text in a language the game has no texts in, and a name longer than 49
 letters (it is cut) are warnings. All of them go to the log and show in the
-editor's Data Checks (area **Buffs**,
+editor's Data Checks (area **Buffs**, which checks `Data/Skills/MasterSkills.json`
+and `Data/Buffs/BuffTexts.json` too,
 [dev-editor.md](dev-editor.md#data-checks)).
 
 ## Values
@@ -103,6 +104,103 @@ tooltip shows its buff's first value as `{addOptionValue1}`, the second as
   the Scroll of Defense and Jack O'Lantern Cry as final defense (+30 and +50),
   Jack O'Lantern Blessings for 32 minutes, Gladiator's Honor for 30, the cash
   shop's items for 30. The planned sync with the server compares them.
+
+## Skill buffs
+
+The 19 buffs a skill casts that OpenMU defines (Greater Damage and Defense,
+Soul Barrier, Critical Damage Increase, Infinity Arrow, Swell Life, Damage
+Reflection, Berserker, Expansion of Wizardry, the Rage Fighter's Ignore
+Defense, Increase Health and Increase Block, and their master skill versions)
+have `"valuesFrom": "caster"` and OpenMU's numbers (its effect initializers,
+`VersionSeasonSix/SkillsInitializer.cs`). The skill tooltip shows them with the
+hero as the caster; nothing else reads them yet.
+
+```json
+{"number": 5, "name": "criticalDamageIncrease", "valuesFrom": "caster",
+ "duration": {"values": 60, "per": [{"attribute": "totalEnergy", "divisor": 10}], "maximum": 180},
+ "powerUps": [{"attribute": "criticalDamageBonus", "add": {"values": 0, "per": [
+   {"attribute": "totalEnergy", "divisor": 30}, {"attribute": "totalLeadership", "divisor": 25}]}}]}
+```
+
+- **Numbers.** As OpenMU writes them: decimals and negatives (`0.10`, `16.8`,
+  `-0.4`), `times` and `divisor` too, summed as decimals and cut to a whole
+  number only where one shows, so the tooltip equals the server. The tooltip
+  cuts each gray part of a flat value on its own too, so the parts can add up
+  to a little less than the white total, which is cut once (Critical Damage
+  Increase at 2000 energy and 1510 command: +66 and +60 under +127, of
+  66.7 and 60.4). An owner's
+  buff (an item) keeps whole numbers. `maximum` stops a value or a duration;
+  the master skills' parts come after it. A caster's duration may have `per`
+  terms; an owner's may not.
+- **Units.** Each attribute in `BuffAttributes.h` is flat (`criticalDamageBonus`
+  126) or a fraction OpenMU keeps as one (`soulBarrierReceiveDecrement` 0.30),
+  which the tooltip shows in percent. `criticalDamageChance` stays in percent,
+  as the Scroll of Battle has it. `maximumWizBaseDmgIncrease` and
+  `defenseRatePvmIncrease` stand for OpenMU's x1.0 placeholders that a master
+  skill raises; they are no OpenMU names.
+- **Terms.** A term reads the caster's `level`, `totalLevel`, `masterLevel`,
+  `totalStrength`, `totalAgility`, `totalVitality`, `totalEnergy`,
+  `totalLeadership`, `totalStrengthAndAgility`, `maximumMana` or
+  `nearbyPartyMemberCount`: the party members the client sees, the hero not
+  counted, like OpenMU's count of the members in the caster's view.
+- **Chains.** Berserker's class rules multiply one power-up by another:
+  `"multipliedBy": "berserkerManaMultiplier"` multiplies a power-up by that one
+  (the physical damage bonus), `"valueOf"` adds that one's value to its own
+  (the curse multiplier), or the values of a list of them (the wizardry
+  multiplier adds the mana and the proficiency multipliers). Both name other
+  power-ups of the same buff; one that leads back to where it starts stops the
+  game. The proficiency multiplier, which Berserker Proficiency (470) raises,
+  also multiplies the final wizardry and curse damage, so it has a line of its
+  own. Berserker's
+  defense rule (`ClassSummoner.cs`) is left out until it is checked in game.
+- **The character stats** don't count a caster's buff: only the server knows
+  the caster's attributes, and the server's values come with buffs PR 5. Until
+  then the code for Critical Damage Increase, Expansion of Wizardry, Increase
+  Health, Increase Block and Berserker stays, so the character window may show
+  another number than the tooltip (Increase Block is a percent there, flat in
+  OpenMU).
+- **No values.** Buffs OpenMU doesn't define have none: 9 Swell Mana and the
+  next-season skills' 136, 140, 142 and 149. 143, 150 and 151, which the skill
+  data names for skills 441, 469 and 470, are strip entries; OpenMU casts 6 and
+  81 for those skills (`castsBuff` below).
+- **Texts.** The tooltip lines come from `Data/Buffs/BuffTexts.json`, in the
+  format of the item option texts: a value line per attribute
+  (`"criticalDamageBonus": "Critical damage +{value}"`), a label per term
+  attribute (`"termTotalEnergy": "energy {value}"`), and `duration`, `base`,
+  `seconds`, `maximum`, `ruleDivisor` and `ruleTimes`. An attribute without a
+  text shows no lines (Infinity Arrow's arrow use, which the tooltip's banner
+  already says).
+
+## Master skills
+
+`Data/Skills/MasterSkills.json` says, per master skill, what it adds to the
+buff its skill casts, in OpenMU's shape (`AddMasterSkillDefinition`). Skills as
+data (SK1) takes it over later.
+
+```json
+{"formatVersion": 1, "masterSkills": [
+  {"skill": 422, "raises": "greaterDamageBonus", "how": "multiply", "extendsDuration": true},
+  {"skill": 441, "raises": "attackDamageIncrease", "how": "add", "castsBuff": 6}]}
+```
+
+- **The value** is the one the server sends for the hero's skill level
+  (`CSkillTreeInfo::GetSkillValue`): a percent where OpenMU divides by 100.
+- **`how`**: `add` adds it (a fraction's attribute takes it as a percent, so 10
+  adds 0.10); `multiply` multiplies the value by 1 + value / 100, several of
+  them adding up to one factor as OpenMU sums them (Greater Damage's 420 and
+  422). `extendsDuration` adds the value in seconds to the duration.
+- **Which count.** The tooltip of a skill counts the learned master skills from
+  that skill down to its base skills (422, 420, 28), as OpenMU counts the cast
+  skill and its base skills, after the value's maximum.
+- **`castsBuff`** names the buff a skill casts where the skill data's `Effect`
+  names another (441 casts 6, 469 and 470 cast 81).
+- **Checks.** A skill twice stops the game; an attribute that is no buff
+  attribute, a `castsBuff` that is no buff and an attribute that is no
+  power-up of the skill's buff are errors; an entry that adds nothing is a
+  warning.
+- **Not yet.** Soul Barrier's extra mana toll per level of its strengthener is
+  OpenMU code (`SoulBarrierStrengSkillAction.cs`), not data, and the tooltip
+  leaves it out.
 
 ## Compared with the original client
 

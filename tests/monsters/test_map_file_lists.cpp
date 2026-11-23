@@ -11,7 +11,6 @@
 #include "Core/Content/ContentStore.h"
 #include "Core/Platform/Quit.h"
 #include "Core/Utilities/Random.h"
-#include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/LoadData.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -512,10 +511,7 @@ std::string MonsterLists(const std::map<int, Files>& monsters)
 std::map<std::string, std::string> ListFiles(const Lists& lists)
 {
     std::map<std::string, std::string> files;
-    Files shared = lists.shared;
-    // The shared pack serves both client builds. Only the editor loads the option rules at startup.
-    shared.insert(Data::Items::GetOptionRulesFile().generic_string());
-    files["Shared.json"] = FileList(shared);
+    files["Shared.json"] = FileList(lists.shared);
     files["Monsters.json"] = MonsterLists(lists.monsters);
     for (const auto& [map, mapFiles] : lists.maps)
         files["Map" + std::to_string(map) + ".json"] = FileList(mapFiles);

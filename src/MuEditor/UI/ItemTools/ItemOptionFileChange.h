@@ -19,9 +19,10 @@
 // change), a rename with the links and rules that name the definition, and the levels of a value list.
 namespace MuEditor::Items
 {
-// The file a new definition of the type goes in: the one most definitions of the type are in (the two ancient types
-// count as one, they share a file), else the type's name with a capital letter ("Excellent.json", "Ancient.json" for
-// the ancient types), as the files are named by convention.
+// The file a new definition of the type goes in: the file named after the type ("Option.json", "Excellent.json",
+// "Ancient.json" for the two ancient types, which share a file) when definitions of the type are in it, as the files
+// are named by convention; else the one most of them are in (the wings' additional options are in Wings.json, but a
+// new one belongs in Option.json); else the shipped file's name, the type's ("Wings.json" for wing options).
 std::string FindFileOfType(const Data::Items::ItemOptionFiles& files, Data::Items::ItemOptionType type);
 
 // The definition of `files` with the name, or nullptr.
@@ -65,8 +66,9 @@ void DropMissingMarks(std::set<std::string, std::less<>>& marked, const Data::It
 bool IsPickedByName(const Data::Items::ItemOptionDefinition& definition);
 
 // Whether linking the definition to the item does something: not when the item links a definition of its type already
-// (the first counts), for the ancient types (the item sets give them) and for excellent options on wings and horns (the
-// excellent byte means something else there). The link picker of Item Basics offers only these.
+// (the first counts), for the ancient types (the item sets give them), and not for the type its excellent byte does not
+// hold: wings take wing options there, no excellent ones, every other item excellent options, no wing ones, a horn
+// neither (its kind). The link picker of Item Basics offers only these.
 bool IsUsefulOptionLink(const Data::Items::ItemDefinition& item, const Data::Items::ItemOptionDefinition& definition,
                         const Data::Items::ItemOptionDatabase& options);
 
@@ -133,8 +135,8 @@ int HighestOptionLevel(const Data::Items::ItemOptionDefinition& definition);
 bool FillOptionLevels(Data::Items::ItemOptionDefinition& definition, int level);
 
 // Writes the value as a list from `fromLevel` to `toLevel`: `fromValue` at `fromLevel`, `step` more at each level
-// after it; the levels below `fromLevel` keep their values (0 where the list had none). `fromLevel` is 1 or more and
-// `toLevel` at least `fromLevel`.
+// after it; the levels below `fromLevel` keep their values (0 where the list had none). `fromLevel` is at least the
+// value's first level (1, or the item's level 0 for a list by it) and `toLevel` at least `fromLevel`.
 void FillOptionValue(Data::Items::ItemOptionValue& value, int fromLevel, int fromValue, int step, int toLevel);
 } // namespace MuEditor::Items
 

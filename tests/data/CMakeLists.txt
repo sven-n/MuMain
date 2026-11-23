@@ -248,6 +248,7 @@ mu_add_test(
         test_item_tooltip_text.cpp
         test_item_texts.cpp
         test_item_tooltips.cpp
+        test_skill_buff_values.cpp
         test_item_value_formulas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS

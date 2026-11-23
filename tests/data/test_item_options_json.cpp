@@ -122,6 +122,109 @@ TEST_CASE("An option's value is a constant, or one value per level whose last on
     CHECK(perLevel.At(7) == 16);
 }
 
+TEST_CASE("Wing options read the excellent byte's bits and can take their value by the item's level [data][items]")
+{
+    constexpr const char* WingFile = R"({
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "secondTierWing",
+      "type": "wing",
+      "displayName": {
+        "en": "Second tier wing options"
+      },
+      "options": [
+        {"number": 1, "attribute": "maximumHealth", "add": {"levelType": "itemLevel", "values": [50, 55, 60]}, "text": "wingMaxHp"},
+        {"number": 5, "attribute": "attackSpeedAny", "add": {"values": 5}, "text": "increaseAttackSpeed"}
+      ]
+    }
+  ]
+}
+)";
+    std::vector<ItemOptionDefinition> definitions;
+    std::vector<ItemDataIssue> issues;
+    ReadItemOptionsJson(WingFile, "Options/Wings.json", "Wings.json", definitions, issues);
+    CHECK(issues.empty());
+    REQUIRE(definitions.size() == 1);
+    const ItemOptionDefinition& wing = definitions[0];
+    CHECK(wing.type == ItemOptionType::Wing);
+    REQUIRE(wing.options.size() == 2);
+    const ItemOptionValue& health = wing.options[0].value;
+    CHECK(health.levelType == ItemOptionLevelType::ItemLevel);
+    // From the item's level 0; above the list its last entry.
+    CHECK(health.At(0) == 50);
+    CHECK(health.At(2) == 60);
+    CHECK(health.At(15) == 60);
+    CHECK(wing.options[1].value.levelType == ItemOptionLevelType::OptionLevel);
+    CHECK(WriteItemOptionsJson(definitions) == WingFile);
+
+    // A wing option is a bit of the excellent byte: 1 to 6.
+    CHECK(HasIssue(ReadDefinition(R"({"name": "wing", "type": "wing", "displayName": {"en": "Wing"}, "options": [)"
+                                  R"({"number": 7, "attribute": "maximumHealth", "add": {"values": 5}}]})"),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    CHECK(HasIssue(ReadDefinition(R"({"name": "wing", "type": "wing", "displayName": {"en": "Wing"}, "options": [)"
+                                  R"({"number": 1, "attribute": "maximumHealth", )"
+                                  R"("add": {"levelType": "heroLevel", "values": 5}}]})"),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].add.levelType"));
+    // One value has no levels: the level type does nothing, so it warns and is left out.
+    const std::string constantByItemLevel =
+        R"({"name": "wing", "type": "wing", "displayName": {"en": "Wing"}, "options": [)"
+        R"({"number": 1, "attribute": "maximumHealth", "add": {"levelType": "itemLevel", "values": 5}}]})";
+    CHECK(HasIssue(ReadDefinition(constantByItemLevel), ItemDataIssueSeverity::Warning,
+                   "definitions[0].options[0].add.levelType"));
+}
+
+// A list longer than its levels loads as written, with a warning on the values no level reaches.
+TEST_CASE("A value list with more values than levels warns and is kept [data][items]")
+{
+    const auto read = [](const std::string& levelType, int count)
+    {
+        std::string list;
+        for (int index = 0; index < count; ++index)
+        {
+            list += (index == 0 ? "" : ", ") + std::to_string(index);
+        }
+        const std::string file = R"({"formatVersion": 1, "definitions": [{"name": "secondTierWing", "type": "wing", )"
+                                 R"("displayName": {"en": "Wing"}, "options": [{"number": 1, )"
+                                 R"("attribute": "maximumHealth", "add": {)" +
+                                 levelType + R"("values": [)" + list + R"(]}, "text": "wingMaxHp"}]}]})";
+        std::vector<ItemOptionDefinition> definitions;
+        std::vector<ItemDataIssue> issues;
+        ReadItemOptionsJson(file, "Options/Wings.json", "Wings.json", definitions, issues);
+        REQUIRE(definitions.size() == 1);
+        REQUIRE(definitions[0].options.size() == 1);
+        CHECK(definitions[0].options[0].value.values.size() == static_cast<size_t>(count));
+        return issues;
+    };
+    const auto warnsOnValues = [](const std::vector<ItemDataIssue>& issues)
+    {
+        return issues.size() == 1 && issues[0].severity == ItemDataIssueSeverity::Warning &&
+               issues[0].field == "definitions[0].options[0].add.values";
+    };
+
+    // Option levels 1 to 15.
+    CHECK(read("", 15).empty());
+    CHECK(warnsOnValues(read("", 16)));
+    // Item levels 0 to 15.
+    const std::string byItemLevel = R"("levelType": "itemLevel", )";
+    CHECK(read(byItemLevel, 16).empty());
+    CHECK(warnsOnValues(read(byItemLevel, 17)));
+}
+
+// The loader and Item Options' Number field and Add an option share these ranges.
+TEST_CASE("Each option type's numbers are the ones its byte can turn on [data][items]")
+{
+    CHECK(GetOptionNumberRange(ItemOptionType::Option).minimum == 0);
+    CHECK(GetOptionNumberRange(ItemOptionType::Option).maximum == 15);
+    CHECK(GetOptionNumberRange(ItemOptionType::Excellent).minimum == 1);
+    CHECK(GetOptionNumberRange(ItemOptionType::Excellent).maximum == MaxExcellentOptionNumber);
+    CHECK(GetOptionNumberRange(ItemOptionType::Wing).maximum == MaxExcellentOptionNumber);
+    CHECK(GetOptionNumberRange(ItemOptionType::AncientOption).minimum == 1);
+    CHECK_FALSE(HasOptionNumbers(ItemOptionType::Luck));
+    CHECK_FALSE(HasOptionNumbers(ItemOptionType::AncientBonus));
+    CHECK(HasOptionNumbers(ItemOptionType::Wing));
+}
+
 TEST_CASE("Option definition file errors stop the start [data][items]")
 {
     using Severity = ItemDataIssueSeverity;
@@ -132,7 +235,7 @@ TEST_CASE("Option definition file errors stop the start [data][items]")
     };
 
     fatal(R"({"type": "luck", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}", "definitions[0].name");
-    fatal(R"({"name": "luck", "type": "wing", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}",
+    fatal(R"({"name": "luck", "type": "harmony", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}",
           "definitions[0].type");
     fatal(R"({"name": "luck", "type": "luck", )" + std::string(LuckOption) + "}", "definitions[0].displayName");
     fatal(R"({"name": "luck", "type": "luck", "displayName": {"de": "Glück"}, )" + std::string(LuckOption) + "}",

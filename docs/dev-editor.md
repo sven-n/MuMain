@@ -118,7 +118,8 @@ and the glTF model file table, the server list, the effect
 catalogue (area **Effect types**), the graphics look (`Data/Render/Look.json`,
 area **Graphics look**), the item options
 (`Data/Items/Options` and the option texts, area **Item options**,
-[item-data.md](item-data.md#item-options)) and the buffs (area **Buffs**,
+[item-data.md](item-data.md#item-options)) and the buffs with the master
+skills' buff parts and the skill tooltip's buff texts (area **Buffs**,
 [buff-data.md](buff-data.md)) as the game reads their files at
 start, and the map object sounds as the Map Editor's Sounds tab has them
 ([map-data.md](map-data.md)) and the warps as the Warp List window has them

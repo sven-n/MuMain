@@ -2100,7 +2100,7 @@
         "pt": "Capa do Lorde"
       },
       "tags": ["cape", "valuable"],
-      "options": ["luck"],
+      "options": ["capeOfLord", "luck", "capeOfLordOption"],
       "description": [
         {
           "text": "@damageIncrease",

@@ -280,77 +280,6 @@ ActionSkillType GetSkillByBook(int Type)
     }
 }
 
-void CalcWingOptions(ITEM* ip)
-{
-    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
-    {
-        if (ip->ExcellentFlags & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_HP_MAX, 50 + ip->Level * 5);
-        }
-        if ((ip->ExcellentFlags >> 1) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MP_MAX, 50 + ip->Level * 5);
-        }
-        if ((ip->ExcellentFlags >> 2) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_ONE_PERCENT_DAMAGE, 3);
-        }
-        if ((ip->ExcellentFlags >> 3) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_AG_MAX, 50);
-        }
-        if ((ip->ExcellentFlags >> 4) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_ATTACK_SPEED, 5);
-        }
-    }
-    else if (ip->Type == ITEM_CAPE_OF_LORD
-        || ip->Type == ITEM_CAPE_OF_FIGHTER)
-    {
-        if (ip->ExcellentFlags & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_HP_MAX, 50 + ip->Level * 5);
-        }
-
-        if ((ip->ExcellentFlags >> 1) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MP_MAX, 50 + ip->Level * 5);
-        }
-
-        if ((ip->ExcellentFlags >> 2) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_ONE_PERCENT_DAMAGE, 3);
-        }
-
-        if ((ip->ExcellentFlags >> 3) & 0x01
-            && (ip->Type != ITEM_CAPE_OF_FIGHTER)
-        )
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_SET_OPTION_IMPROVE_CHARISMA, 10 + ip->Level * 5);
-        }
-    }
-    else if (GameLogic::Items::IsThirdTierWing(ip))
-    {
-        if (ip->ExcellentFlags & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_ONE_PERCENT_DAMAGE, 5);
-        }
-        if ((ip->ExcellentFlags >> 1) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_DAMAGE_REFLECTION, 5);
-        }
-        if ((ip->ExcellentFlags >> 2) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_RECOVER_FULL_LIFE, 5);
-        }
-        if ((ip->ExcellentFlags >> 3) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_RECOVER_FULL_MANA, 5);
-        }
-    }
-}
-
 // The Wizard's rings' options; the excellent options come from the definitions the item links.
 void CalcWizardsRingOptions(ITEM* ip)
 {
@@ -400,7 +329,8 @@ void SetItemAttributes(ITEM* ip)
 
     ip->SpecialNum = 0;
 
-    CalcWingOptions(ip);
+    // The wings' options in the excellent byte, before the skill as the tooltip shows them.
+    GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Wing);
 
     if (ip->HasSkill)
     {
@@ -413,200 +343,23 @@ void SetItemAttributes(ITEM* ip)
     GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Luck);
     GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Option);
 
-    // The Horn of Dinorant's and the wings' additional options are still code (9b5, 9b1); an item whose additional
-    // option is in data has it from its definition.
-    int Option3 = ip->OptionLevel;
-    if (Option3 && !GameLogic::Items::LinksOptionType(ip->Type, Data::Items::ItemOptionType::Option))
+    // The Horn of Dinorant's option level is three option flags, still code (9b5); a horn whose additional option is in
+    // data has it from its definition instead.
+    const int dinorantFlags = ip->OptionLevel;
+    if (dinorantFlags != 0 && ip->Type == ITEM_HORN_OF_DINORANT &&
+        !GameLogic::Items::LinksOptionType(ip->Type, Data::Items::ItemOptionType::Option))
     {
-        if (ip->Type == ITEM_HORN_OF_DINORANT)
+        if (dinorantFlags & 0x01)
         {
-            if (Option3 & 0x01)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_DAMAGE_ABSORB, 5);
-            }
-            if ((Option3 >> 1) & 0x01)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_AG_MAX, 50);
-            }
-            if ((Option3 >> 2) & 0x01)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_ATTACK_SPEED, 5);
-            }
+            GameLogic::Items::AddOptionSlot(*ip, AT_DAMAGE_ABSORB, 5);
         }
-        else
+        if ((dinorantFlags >> 1) & 0x01)
         {
-            if (ip->Type == ITEM_WING)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-            }
-            else if (ip->Type == ITEM_WINGS_OF_HEAVEN || ip->Type == ITEM_WING_OF_CURSE)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-            }
-            else if (ip->Type == ITEM_WINGS_OF_SATAN)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-            }
-            else if (ip->Type == ITEM_WINGS_OF_SPIRITS)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WINGS_OF_SOUL)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WINGS_OF_DRAGON)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-            }
-            else if (ip->Type == ITEM_WINGS_OF_DARKNESS)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_CAPE_OF_LORD)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-            }
-            else if (ip->Type == ITEM_CAPE_OF_FIGHTER)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-            }
-            else if (ip->Type == ITEM_WINGS_OF_DESPAIR)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_CURSE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_STORM)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_ETERNAL)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_ILLUSION)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_RUIN)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_CAPE_OF_EMPEROR || ip->Type == ITEM_CAPE_OF_OVERRULE)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_DIMENSION)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_CURSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-            }
+            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_AG_MAX, 50);
+        }
+        if ((dinorantFlags >> 2) & 0x01)
+        {
+            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_ATTACK_SPEED, 5);
         }
     }
     if (ip->Type == ITEM_DARK_HORSE_ITEM)

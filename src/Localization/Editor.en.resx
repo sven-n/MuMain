@@ -6256,4 +6256,10 @@
   <data name="Other languages in the Translations tab" xml:space="preserve">
     <value>The names of the other languages are in the Translations tab.</value>
   </data>
+  <data name="By the item's level" xml:space="preserve">
+    <value>By the item's level</value>
+  </data>
+  <data name="The list goes by the item's level 0 to 15, not the option level" xml:space="preserve">
+    <value>The list goes by the item's level 0 to 15, not the option level</value>
+  </data>
 </root>

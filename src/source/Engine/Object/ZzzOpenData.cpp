@@ -50,6 +50,7 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/DataHandler/BuffData/BuffStorage.h"
+#include "Data/DataHandler/SkillData/MasterSkillStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/MapData/WarpStorage.h"
 #include "I18N/All.h"
@@ -395,6 +396,17 @@ static void OpenBuffData()
     if (!Data::Buffs::LoadBuffs(errorMessage))
     {
         StopOnDataError("Buff data error", errorMessage);
+    }
+}
+
+// Loads the master skills' buff parts (Data/Skills/MasterSkills.json), after the
+// buffs and the skill data it is checked against; errors stop the game.
+static void OpenMasterSkillData()
+{
+    std::string errorMessage;
+    if (!Data::Skills::LoadMasterSkills(errorMessage))
+    {
+        StopOnDataError("Master skill data error", errorMessage);
     }
 }
 
@@ -2239,6 +2251,7 @@ static void OpenBasicDataStep9()
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SkillDataHandler.Load(Text);
+    OpenMasterSkillData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SocketItemMgr.OpenSocketItemScript(Text);

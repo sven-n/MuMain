@@ -44,16 +44,24 @@ PreviewOptionControls FindPreviewOptionControls(const Data::Items::ItemDefinitio
                                                 const Data::Items::ItemOptionDatabase& options)
 {
     PreviewOptionControls controls;
-    for (const Data::Items::ItemOptionIndex index : options.ResolveLinks(item.options))
+    for (const Data::Items::ItemOptionIndex index : options.ResolveLinks(item))
     {
         const Data::Items::ItemOptionDefinition& definition = options.Get(index);
         if (definition.type == Data::Items::ItemOptionType::Option && controls.additional == nullptr)
         {
             controls.additional = &definition;
         }
-        else if (definition.type == Data::Items::ItemOptionType::Excellent && controls.excellent == nullptr)
+        else if ((definition.type == Data::Items::ItemOptionType::Excellent ||
+                  definition.type == Data::Items::ItemOptionType::Wing) &&
+                 controls.excellent == nullptr)
         {
+            // A wing definition's options are the wing options of the excellent byte (second and third tier wings,
+            // capes); of an item that links both types ResolveLinks keeps the one the item's byte holds.
             controls.excellent = &definition;
+            if (definition.type == Data::Items::ItemOptionType::Wing)
+            {
+                controls.byteUse = ExcellentByteUse::WingOptions;
+            }
         }
     }
     if (controls.additional != nullptr)
@@ -80,12 +88,6 @@ PreviewOptionControls FindPreviewOptionControls(const Data::Items::ItemDefinitio
         {
             controls.byteUse = ExcellentByteUse::Kinds;
         }
-    }
-    if (controls.excellent == nullptr && controls.excellentBits == 0 && item.slot == Data::Items::ItemSlot::Wings)
-    {
-        // The wings' own code reads their options from the byte: the bits as a server sends them.
-        controls.excellentBits = Data::Items::AllExcellentOptionFlags;
-        controls.byteUse = ExcellentByteUse::WingOptions;
     }
     return controls;
 }
