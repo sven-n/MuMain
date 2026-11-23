@@ -6397,12 +6397,12 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
 
 namespace
 {
-// The sound of an item which the player changed, e.g. with a jewel. An equipped item is only updated by the server
-// (a rented item expired), so it plays none.
+// The sound of an item which the player changed, e.g. with a jewel. An equipped item is only updated by the server,
+// and so is a rented item which expired in the bag, so they play none.
 void PlayModifiedItemSound(int itemindex)
 {
     const ITEM* pItem = IsPlayerInventorySlot(itemindex) ? UI::Inventory::FindPlayerItem(itemindex) : nullptr;
-    if (pItem == nullptr || GambleSystem::Instance().IsGambleShop())
+    if (pItem == nullptr || GameLogic::Items::IsExpiredRental(pItem) || GambleSystem::Instance().IsGambleShop())
     {
         return;
     }
