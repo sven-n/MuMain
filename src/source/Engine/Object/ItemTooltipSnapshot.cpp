@@ -89,6 +89,9 @@ constexpr TooltipVariant TooltipVariants[] = {
     {"option type 1", [](ItemCreationParams& params) { ApplyOption(params, 1, 1); }},
     {"option type 2", [](ItemCreationParams& params) { ApplyOption(params, 1, 2); }},
     {"option type 3", [](ItemCreationParams& params) { ApplyOption(params, 1, 3); }},
+    // The wings' other option types at the last level Season 6 sends.
+    {"option 4 type 2", [](ItemCreationParams& params) { ApplyOption(params, 4, 2); }},
+    {"option 4 type 3", [](ItemCreationParams& params) { ApplyOption(params, 4, 3); }},
     {"excellent",
      [](ItemCreationParams& params)
      {

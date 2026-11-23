@@ -930,11 +930,11 @@ file per option group, and each item names the ones it can have in its
 `options` list. Which of them an item has comes from the server: its item
 data turns them on (luck by the luck flag, the additional option by its
 level, the excellent options by the excellent byte, the ancient bonus by
-the ancient byte's bonus level). Luck, the additional option of the items
-that are no wings, the excellent options and the ancient bonus are in data
-so far; the wings' and the Horn of Dinorant's options, the Wizard's rings',
-the harmony, guardian, socket and pet options and the ancient set options
-are still code and move into data one group at a time.
+the ancient byte's bonus level). Luck, the additional options, the
+excellent options, the wings' options and the ancient bonus are in data so
+far; the Horn of Dinorant's options, the Wizard's rings', the harmony,
+guardian, socket and pet options and the ancient set options are still code
+and move into data one group at a time.
 
 ```json
 {
@@ -966,7 +966,14 @@ are still code and move into data one group at a time.
   `ancientBonus` is the ancient byte's bonus level (its high four bits),
   with one option without a number, its value by that level;
   `ancientOption` is an ancient set's options, numbered from 1 (no
-  definition has it yet: the item sets bring them). Each option group
+  definition has it yet: the item sets bring them); `wing` is the second and
+  third tier wings' and the capes' options in the excellent byte, numbered
+  1 to 6 as excellent options (both read the excellent byte, which holds
+  wing options on wings and excellent options on every other item: of an
+  item that links both, the one its byte holds counts and the loader
+  reports the other, as for two definitions of one type; the loader also
+  reports wing options on a horn, an error, and on any other item that is
+  no wing, a warning). Each option group
   brings its type when it moves into data. An item links at most one
   definition of a type.
 - `displayName`: the definition's name by language, English first.
@@ -978,7 +985,9 @@ are still code and move into data one group at a time.
   and adds its value as it is (`add`), after the other additions
   (`addFinal`) or in per cent (`percent`). The value is an object:
   `{"values": 5}` is 5 at every level, `{"values": [4, 8, 12, 16]}` one
-  value per level from level 1, the last one also above the list. `per`
+  value per level from level 1, the last one also above the list.
+  `"levelType": "itemLevel"` takes the list by the item's + level from
+  level 0 instead (the wings' HP, mana and command). `per`
   adds terms on the hero's attributes, each rounded down on its own:
   `{"values": 0, "per": [{"attribute": "level", "divisor": 20}]}` is the
   hero's level / 20 (`times` multiplies instead). The client reads `level`,
@@ -1017,8 +1026,51 @@ last value, and a longer list gives a server that sends more its own
 values. A magic sword's one option fills one slot and shows two lines. The
 other items of group 13 (the Transformation Rings, the quest items, Loch's
 Feather and the others) have no additional option, as on OpenMU. The
-wings, the capes and the Horn of Dinorant keep their additional options in
-code until they move into data.
+Horn of Dinorant keeps its option flags in code until it moves into data.
+
+`Options/Wings.json` holds the wings' options, as OpenMU's (`Wings.cs`):
+one additional option definition per wing, named after it, and the wing
+options of the excellent byte. Each wing's additional option is the option
+type the server sends, numbered as OpenMU numbers it; a type the wing has
+no option for gives none (the client before gave the first tier wings and
+the Cape of Lord their option for any type). Damage, wizardry, curse and
+defense are +4 to +16, recovery 1 to 4 %, and damage adds after the others
+(`addFinal`, as OpenMU); OpenMU's server values: a 25 % chance, one per
+item.
+
+| Definition | Wing | Option types |
+|---|---|---|
+| `wingsOfElf` | 12/0 | 0 recovery |
+| `wingsOfHeaven`, `wingsOfCurse` | 12/1, 12/41 | 0 wizardry |
+| `wingsOfSatan` | 12/2 | 0 damage |
+| `wingsOfSpirits` | 12/3 | 0 damage, 2 recovery |
+| `wingsOfSoul` | 12/4 | 0 recovery, 2 wizardry |
+| `wingsOfDragon`, `capeOfFighter` | 12/5, 12/49 | 0 recovery, 2 damage |
+| `wingsOfDarkness` | 12/6 | 0 wizardry, 2 damage |
+| `wingsOfDespair` | 12/42 | 0 curse, 2 wizardry |
+| `capeOfLordOption` | 13/30 | 0 damage |
+| `wingOfStorm`, `wingOfIllusion`, `capeOfEmperor`, `capeOfOverrule` | 12/36, 12/38, 12/40, 12/50 | 0 recovery, 2 defense, 3 damage |
+| `wingOfEternal` | 12/37 | 0 recovery, 2 defense, 3 wizardry |
+| `wingOfRuin` | 12/39 | 0 recovery, 2 wizardry, 3 damage |
+| `wingOfDimension` | 12/43 | 0 recovery, 2 curse, 3 wizardry |
+
+The wing options (type `wing`, a 10 % chance, one per item on OpenMU):
+
+| Definition | Wings | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|---|
+| `secondTierWing` | 12/3 to 12/6, 12/42 | Max HP +50 to +125 | Max mana +50 to +125 | Ignore defense 3 % | Max AG +50 | Attack speed +5 |
+| `capeOfFighterWing` | 12/49 | Max HP | Max mana | Ignore defense 3 % | – | – |
+| `capeOfLord` | 13/30 | Max HP | Max mana | Ignore defense 3 % | Command +10 to +85 | – |
+| `thirdTierWing` | 12/36 to 12/40, 12/43, 12/50 | Ignore defense 5 % | Reflect damage 5 % | Full life recovery 5 % | Full mana recovery 5 % | – |
+
+HP, mana and command go by the item's + level (`"levelType": "itemLevel"`,
+16 values from +0). The second tier wings' AG and attack speed are the
+client's: OpenMU's "2nd Wing Options" have the first three only, and Season
+6 never applied the two; the client keeps them, so the exchange shows them
+as the client's. The Cape of Fighter keeps the first three in a definition
+of its own, as before; it and `secondTierWing` both carry OpenMU's "2nd Wing
+Options" label. The wing options take their slots before the skill and luck,
+as before, and wings with wing options are not excellent (see below).
 
 `Options/Excellent.json` holds the excellent options, as OpenMU's (OpenMU's
 server values: a 0.1 % chance, two per item). Each option is the byte's bit
@@ -1217,20 +1269,24 @@ an option without `attribute` or with none or more than one of `add`,
 0 to 65535 or that has `perLevel`, a term (`per`) without `attribute` or
 without exactly one of `times` and `divisor` (whole numbers from 1), a
 number used twice in a definition, an additional option's number above 15,
-an excellent option's number outside 1 to 6, an ancient set option's
+an excellent or wing option's number outside 1 to 6, a `levelType`
+other than `itemLevel`, an ancient set option's
 number below 1, a luck or ancient bonus definition with more than one
 option or a numbered one, OpenMU
 labels or server values of the wrong kind, and a rule naming a
 definition that does not exist or a condition it does not have. Errors:
 an item linking a definition that does not exist (the link is left out)
-or two of one type (the later one is left out), wings or a horn
+or two of one type (the one left out is named), wings or a horn
 mount linking excellent options (the excellent byte of wings holds their
-wing options, the Horn of Fenrir's its kind; no horn is excellent), an option naming a text
+wing options, the Horn of Fenrir's its kind; no horn is excellent), a
+horn mount linking wing options, an option naming a text
 the texts do not have, and a text without English or with a placeholder
 other than `{value}` and `{divisor}` (the lines that name it are left
 out). Warnings:
 unknown fields, an attribute the client does not compute, a term on a hero
-attribute the client does not read, a text with `{divisor}` on an option
+attribute the client does not read, a `levelType` on one value (it is
+left out), a list longer than its levels (more than 15 values, or 16 by the item's level: the rest is never used), an item that is no wing linking wing options (its excellent
+byte holds excellent options), a text with `{divisor}` on an option
 without a term that has a divisor (the line shows 0 there) or with several
 (it shows the first one's), a definition no
 item and no rule links (but the four ancient bonus definitions the item's
@@ -2345,9 +2401,10 @@ luck, the additional option's level (0 to 15, the option byte's four bits;
 off while the item links no `option` definition) and, for a definition whose
 options are numbered by it (wings), its type (0 to the highest number of
 its options), one checkbox per excellent option of the item's excellent
-definition (without one: the bits the item's name lines name as the whole
+definition, or per wing option of its wing definition (named "Wing option
+bit N"; without either: the bits the item's name lines name as the whole
 byte, as the Horn of Fenrir's `excellentFlags=1`, `=2` and `=4` kinds, each
-named by its line; else all six bits on wings, whose own code reads the byte),
+named by its line),
 and a set (one of the
 item's sets) with its ancient bonus level (0 to 2), and shows such an item's
 name in two rows:
@@ -2460,7 +2517,8 @@ back) until **Revert**.
   the client computes for the type, or another, which is warned about), how
   it adds its value, the value (a constant, or one value per level with
   **+**, **-** and **Fill levels** from a start level, a value there and a
-  step to a last level), its terms (`level` / 20 and the like) and the names
+  step to a last level; **By the item's level** takes the list by the
+  item's + level 0 to 15), its terms (`level` / 20 and the like) and the names
   of its texts with their English text. **New** adds a definition of a type
   with one option to fill in, **Copy** a copy without OpenMU's labels; both
   are applied with the other changes. **Rename** renames the definition in
@@ -2468,8 +2526,8 @@ back) until **Revert**.
   keep their names, since the items' `attackType` picks them by name (and
   counts as a use). **Remove** works while no item and no rule uses it.
 - **Highest level per list**: the checkbox before a definition marks it, and
-  **Fill levels of … marked** makes each of their value lists end at one
-  level: a shorter list goes on by its own step (the difference of its last
+  **Fill levels of … marked** makes each of their value lists by the option
+  level end at one level (a list by the item's level stays): a shorter list goes on by its own step (the difference of its last
   two values), a longer one is cut. So all damage and defense lists go from
   +16 to +28 at once (`[4, 8, 12, 16]` to `[4, … 28]`), while the jewelry
   lists (`[1, 2, 3]`) are marked or not on their own. A level above a list's

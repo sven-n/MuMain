@@ -9,6 +9,7 @@
 #include "Data/GameData/ItemData/ItemOptionValidation.h"
 
 #include <algorithm>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -107,9 +108,55 @@ TEST_CASE(
     CHECK(names == std::vector<std::string>{"luck", "otherLuck", "nothing"});
 
     // Luck has one byte to turn it on: the first definition of it in that order counts.
-    const std::vector<ItemOptionIndex> links = options.ResolveLinks(std::vector<std::string>{"nothing", "otherLuck"});
+    const std::vector<ItemOptionIndex> links = options.ResolveLinks(MakeItem(0, 0, {"nothing", "otherLuck"}));
     CHECK(links == std::vector<ItemOptionIndex>{1});
-    CHECK(options.ResolveLinks(std::vector<std::string>{"otherLuck", "luck"}) == std::vector<ItemOptionIndex>{0});
+    CHECK(options.ResolveLinks(MakeItem(0, 0, {"otherLuck", "luck"})) == std::vector<ItemOptionIndex>{0});
+
+    // Excellent and wing options both read the excellent byte: the one the byte holds on the item counts, wing
+    // options on wings, excellent options on a sword, whatever the order.
+    ItemOptionDefinition excellent = MakeLuck("excellentDefense");
+    excellent.type = ItemOptionType::Excellent;
+    ItemOptionDefinition wing = MakeLuck("secondTierWing");
+    wing.type = ItemOptionType::Wing;
+    const ItemOptionDatabase byte({MakeLuck("luck"), excellent, wing}, MakeTexts());
+    ItemDefinition wings = MakeItem(12, 3, {"excellentDefense", "secondTierWing", "luck"});
+    wings.slot = ItemSlot::Wings;
+    CHECK(byte.ResolveLinks(wings) == std::vector<ItemOptionIndex>{2, 0});
+    const ItemDefinition sword = MakeItem(0, 0, {"secondTierWing", "excellentDefense", "luck"});
+    CHECK(byte.ResolveLinks(sword) == std::vector<ItemOptionIndex>{0, 1});
+    // Without the byte's own type the other one counts (the loader warns about wing options on a sword).
+    CHECK(byte.ResolveLinks(MakeItem(0, 1, {"secondTierWing"})) == std::vector<ItemOptionIndex>{2});
+
+    // The loader names the definition it leaves out and the one it keeps.
+    std::vector<ItemDataIssue> issues;
+    ValidateItemOptionLinks(std::vector<ItemDefinition>{sword}, byte, issues);
+    const bool namesBoth = std::ranges::any_of(
+        issues, [](const ItemDataIssue& issue)
+        { return issue.message.starts_with("\"secondTierWing\" is left out: \"excellentDefense\""); });
+    CHECK(namesBoth);
+}
+
+TEST_CASE("An item takes excellent options from the highest bit down and wing options from the lowest up "
+          "[data][items]")
+{
+    const auto numbered = [](const std::string& name, ItemOptionType type, std::vector<int> numbers)
+    {
+        ItemOptionDefinition definition = MakeLuck(name);
+        definition.type = type;
+        const ItemOption option = definition.options.front();
+        definition.options.clear();
+        for (const int number : numbers)
+        {
+            definition.options.push_back(option);
+            definition.options.back().number = number;
+        }
+        return definition;
+    };
+    const ItemOptionDatabase options({numbered("excellentDefense", ItemOptionType::Excellent, {1, 3, 2}),
+                                      numbered("secondTierWing", ItemOptionType::Wing, {3, 1, 2})},
+                                     MakeTexts());
+    CHECK(options.GetOptionOrder(0) == std::vector<size_t>{1, 2, 0});
+    CHECK(options.GetOptionOrder(1) == std::vector<size_t>{1, 2, 0});
 }
 
 TEST_CASE("An option's effect is what the client computes for its attribute, or none [data][items]")
@@ -177,7 +224,7 @@ TEST_CASE("An item's links name definitions, one of each byte, and every definit
 
 // The excellent byte of wings and the Horn of Fenrir means something else, and no horn is excellent, so they can't link
 // excellent options.
-TEST_CASE("Wings and horn mounts link no excellent options [data][items]")
+TEST_CASE("Wings and horn mounts link no excellent options, only wings link wing options [data][items]")
 {
     ItemOptionDefinition excellent;
     excellent.name = "excellent";
@@ -206,6 +253,27 @@ TEST_CASE("Wings and horn mounts link no excellent options [data][items]")
     CHECK_FALSE(linksIssue(0, 0));
     CHECK_FALSE(linksIssue(12, 4));
     CHECK(linksIssue(13, 2));
+
+    // Wing options: a horn's byte holds its kind (an error), a sword's excellent options (a warning).
+    ItemOptionDefinition wingOptions = MakeLuck("secondTierWing");
+    wingOptions.type = ItemOptionType::Wing;
+    const ItemOptionDatabase wingDatabase({MakeLuck("luck"), wingOptions}, MakeTexts());
+    ItemDefinition fenrir = MakeItem(13, 37, {"secondTierWing"});
+    fenrir.tags.Set(ItemTag::HornMount);
+    ItemDefinition spirits = MakeItem(12, 3, {"luck", "secondTierWing"});
+    spirits.slot = ItemSlot::Wings;
+    issues.clear();
+    ValidateItemOptionLinks(std::vector<ItemDefinition>{fenrir, MakeItem(0, 0, {"secondTierWing"}), spirits},
+                            wingDatabase, issues);
+    const auto severityOf = [&](int group, int number)
+    {
+        const auto found = std::ranges::find_if(issues, [&](const ItemDataIssue& issue)
+                                                { return issue.group == group && issue.number == number; });
+        return found != issues.end() ? std::optional<ItemDataIssueSeverity>(found->severity) : std::nullopt;
+    };
+    CHECK(severityOf(13, 37) == ItemDataIssueSeverity::Error);
+    CHECK(severityOf(0, 0) == ItemDataIssueSeverity::Warning);
+    CHECK_FALSE(severityOf(12, 3).has_value());
 }
 
 TEST_CASE("An edited item's option list follows the option rules while it is the one they give [data][items]")

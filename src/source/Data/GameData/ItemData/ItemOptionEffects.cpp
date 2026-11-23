@@ -23,9 +23,11 @@ struct EffectRow
 // (GameLogic::Combat::GetHeroCriticalDamageRate). The additional options write theirs. A magic sword's option
 // (baseDamageBonus) is one slot, AT_IMPROVE_DAMAGE, as before, which the stat code adds to the wizardry damage too;
 // its definition shows two lines.
-constexpr std::array<EffectRow, 28> EffectRows = {{
+constexpr std::array<EffectRow, 38> EffectRows = {{
     {ItemOptionType::Luck, "criticalDamageChance", ItemOptionAdd::Percent, {AT_LUCK, true}},
     {ItemOptionType::Option, "physicalBaseDmg", ItemOptionAdd::Add, {AT_IMPROVE_DAMAGE, true}},
+    // The wings' damage adds after the other additions on OpenMU (AddFinal); in the client the same slot.
+    {ItemOptionType::Option, "physicalBaseDmg", ItemOptionAdd::AddFinal, {AT_IMPROVE_DAMAGE, true}},
     {ItemOptionType::Option, "baseDamageBonus", ItemOptionAdd::Add, {AT_IMPROVE_DAMAGE, true, true}},
     {ItemOptionType::Option, "wizardryBaseDmg", ItemOptionAdd::Add, {AT_IMPROVE_MAGIC, true}},
     {ItemOptionType::Option, "curseBaseDmg", ItemOptionAdd::Add, {AT_IMPROVE_CURSE, true}},
@@ -57,6 +59,16 @@ constexpr std::array<EffectRow, 28> EffectRows = {{
     {ItemOptionType::AncientBonus, "totalAgility", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_DEXTERITY, false}},
     {ItemOptionType::AncientBonus, "totalEnergy", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_ENERGY, false}},
     {ItemOptionType::AncientBonus, "totalVitality", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_VITALITY, false}},
+    // The wings' options in the excellent byte write their values into the slots the stat code and the tooltip read.
+    {ItemOptionType::Wing, "maximumHealth", ItemOptionAdd::Add, {AT_IMPROVE_HP_MAX, true}},
+    {ItemOptionType::Wing, "maximumMana", ItemOptionAdd::Add, {AT_IMPROVE_MP_MAX, true}},
+    {ItemOptionType::Wing, "defenseIgnoreChance", ItemOptionAdd::Percent, {AT_ONE_PERCENT_DAMAGE, true}},
+    {ItemOptionType::Wing, "maximumAbility", ItemOptionAdd::Add, {AT_IMPROVE_AG_MAX, true}},
+    {ItemOptionType::Wing, "attackSpeedAny", ItemOptionAdd::Add, {AT_IMPROVE_ATTACK_SPEED, true}},
+    {ItemOptionType::Wing, "totalLeadership", ItemOptionAdd::Add, {AT_SET_OPTION_IMPROVE_CHARISMA, true}},
+    {ItemOptionType::Wing, "fullyReflectDamageAfterHitChance", ItemOptionAdd::Percent, {AT_DAMAGE_REFLECTION, true}},
+    {ItemOptionType::Wing, "fullyRecoverHealthAfterHitChance", ItemOptionAdd::Percent, {AT_RECOVER_FULL_LIFE, true}},
+    {ItemOptionType::Wing, "fullyRecoverManaAfterHitChance", ItemOptionAdd::Percent, {AT_RECOVER_FULL_MANA, true}},
 }};
 } // namespace
 

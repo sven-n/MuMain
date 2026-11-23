@@ -46,9 +46,8 @@ VariantOptions ResolveVariantOptions(const ItemDefinition& item, const Requireme
     VariantOptions options;
     if (variant.optionLevel > 0 || variant.excellent)
     {
-        options.links = g_ItemDatabase.GetOptions().ResolveLinks(item.options);
-        options.optionLevel = GameLogic::Items::CountAdditionalOptionLevel(
-            options.links, item.slot == Data::Items::ItemSlot::Wings, variant.optionLevel, 0);
+        options.links = g_ItemDatabase.GetOptions().ResolveLinks(item);
+        options.optionLevel = GameLogic::Items::CountAdditionalOptionLevel(options.links, variant.optionLevel, 0);
     }
     return options;
 }

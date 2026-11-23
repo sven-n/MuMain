@@ -43,10 +43,9 @@ int GetAdditionalOptionLevel(const ITEM& item);
 // the server sends: the game's count.
 int CountAdditionalOptionLevel(int itemType, int optionLevel, int optionType);
 
-// The same for an item with these option links (indices of the database's options) that is a wing or not: what an
-// item draft counts, whose links and slot can differ from the stored item's.
-int CountAdditionalOptionLevel(std::span<const Data::Items::ItemOptionIndex> links, bool wing, int optionLevel,
-                               int optionType);
+// The same for an item with these option links (indices of the database's options): what an item draft counts, whose
+// links can differ from the stored item's.
+int CountAdditionalOptionLevel(std::span<const Data::Items::ItemOptionIndex> links, int optionLevel, int optionType);
 
 // Whether the item's damage option (AT_IMPROVE_DAMAGE) raises its wizardry damage too: the effect of a magic sword's
 // option (ItemOptionEffect::raisesWizardry).

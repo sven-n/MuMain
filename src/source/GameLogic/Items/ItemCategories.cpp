@@ -41,20 +41,9 @@ namespace GameLogic::Items
         return g_ItemDatabase.GetSlot(pItem->Type) == ItemSlot::Wings;
     }
 
-    // The capes of the second tier have their own formulas.
-    bool IsSecondTierWingExceptCape(const ITEM* pItem)
-    {
-        return HasWingTier(pItem, WingTier::Second) && !HasTag(pItem, ItemTag::Cape);
-    }
-
     bool IsSecondTierWing(const ITEM* pItem)
     {
         return HasWingTier(pItem, WingTier::Second);
-    }
-
-    bool IsThirdTierWing(const ITEM* pItem)
-    {
-        return HasWingTier(pItem, WingTier::Third);
     }
 
     bool IsSecondOrThirdTierWing(const ITEM* pItem)

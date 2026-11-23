@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <optional>
 
 namespace Data::Items
 {
@@ -13,9 +14,16 @@ namespace
 // options, the skill (no definition), luck, the additional option, the Dark Horse, excellent options, fixed options.
 // The ancient types follow them only for the order of a saved list (names of no definition last): they take no slot,
 // and the tooltip shows the ancient bonus above the slots' lines.
-constexpr std::array<ItemOptionType, 5> TakeOrder = {ItemOptionType::Luck, ItemOptionType::Option,
-                                                     ItemOptionType::Excellent, ItemOptionType::AncientOption,
-                                                     ItemOptionType::AncientBonus};
+constexpr std::array<ItemOptionType, 6> TakeOrder = {ItemOptionType::Wing,          ItemOptionType::Luck,
+                                                     ItemOptionType::Option,        ItemOptionType::Excellent,
+                                                     ItemOptionType::AncientOption, ItemOptionType::AncientBonus};
+
+// The part of the server's item data a type reads, as one of the types that read it: excellent and wing options both
+// read the excellent byte.
+ItemOptionType ReadDataOf(ItemOptionType type)
+{
+    return type == ItemOptionType::Wing ? ItemOptionType::Excellent : type;
+}
 
 size_t GetTakeOrder(ItemOptionType type)
 {
@@ -48,6 +56,12 @@ ItemOptionDatabase::ItemOptionDatabase(std::vector<ItemOptionDefinition> definit
             std::stable_sort(order.begin(), order.end(), [&definition](size_t left, size_t right)
                              { return definition.options[left].number > definition.options[right].number; });
         }
+        // The wing options by their bit, as CalcWingOptions wrote them, whatever order the file has.
+        else if (definition.type == ItemOptionType::Wing)
+        {
+            std::stable_sort(order.begin(), order.end(), [&definition](size_t left, size_t right)
+                             { return definition.options[left].number < definition.options[right].number; });
+        }
     }
     for (size_t attackType = 0; attackType < AncientBonusNames.size(); ++attackType)
     {
@@ -66,10 +80,24 @@ int ItemOptionDatabase::Find(std::string_view name) const
     return found != m_definitions.end() ? static_cast<int>(found - m_definitions.begin()) : NoDefinition;
 }
 
-std::vector<ItemOptionIndex> ItemOptionDatabase::ResolveLinks(std::span<const std::string> names) const
+std::vector<ItemOptionIndex> ItemOptionDatabase::ResolveLinks(const ItemDefinition& item) const
+{
+    return ResolveLinks(item.options, ExcellentByteMeansOther(item) ? ItemOptionType::Wing : ItemOptionType::Excellent);
+}
+
+std::vector<ItemOptionIndex> ItemOptionDatabase::ResolveLinks(std::span<const std::string> names,
+                                                              ItemOptionType excellentByte) const
 {
     std::vector<std::string> ordered(names.begin(), names.end());
     OrderLinks(ordered);
+    const auto typeOf = [this](const std::string& name)
+    {
+        const int index = Find(name);
+        return index == NoDefinition ? std::optional<ItemOptionType>() : m_definitions[static_cast<size_t>(index)].type;
+    };
+    // A link of the excellent byte's type leaves out the other type that reads the byte.
+    const bool linksExcellentByteType =
+        std::ranges::any_of(ordered, [&](const std::string& name) { return typeOf(name) == excellentByte; });
     std::vector<ItemOptionIndex> links;
     for (const std::string& name : ordered)
     {
@@ -78,11 +106,14 @@ std::vector<ItemOptionIndex> ItemOptionDatabase::ResolveLinks(std::span<const st
         {
             continue;
         }
-        // The definitions of one type read the same part of the server's item data: the first counts.
+        // The definitions of one type read the same part of the server's item data, and so do excellent and wing
+        // options (the excellent byte): the first counts, of the two byte types the one the byte holds on this item.
         const ItemOptionType type = m_definitions[static_cast<size_t>(index)].type;
-        const bool typeTaken = std::any_of(links.begin(), links.end(),
-                                           [&](ItemOptionIndex link) { return m_definitions[link].type == type; });
-        if (!typeTaken)
+        const bool otherByteType =
+            linksExcellentByteType && type != excellentByte && ReadsSameItemData(type, excellentByte);
+        const bool typeTaken = std::any_of(links.begin(), links.end(), [&](ItemOptionIndex link)
+                                           { return ReadsSameItemData(m_definitions[link].type, type); });
+        if (!typeTaken && !otherByteType)
         {
             links.push_back(static_cast<ItemOptionIndex>(index));
         }
@@ -106,5 +137,10 @@ void ItemOptionDatabase::OrderLinks(std::vector<std::string>& names) const
 bool ExcellentByteMeansOther(const ItemDefinition& item)
 {
     return item.slot == ItemSlot::Wings || item.tags.Has(ItemTag::HornMount);
+}
+
+bool ReadsSameItemData(ItemOptionType left, ItemOptionType right)
+{
+    return ReadDataOf(left) == ReadDataOf(right);
 }
 } // namespace Data::Items

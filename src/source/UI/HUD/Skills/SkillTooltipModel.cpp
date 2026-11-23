@@ -7,7 +7,9 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"   // PartyNumber, STRP_*
+#include "GameLogic/Buffs/SkillBuffValues.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/HUD/Skills/SkillBuffLines.h"
 #include "UI/Inventory/UIJewelHarmony.h"     // StrengthenCapability
 #include "UI/Core/UIManager.h"          // g_pUIJewelHarmonyinfo
 
@@ -216,22 +218,11 @@ void EmitMagicalDamage(Model& m, int skillType, const DamageContext& ctx)
 {
     if (ctx.heroClass != CLASS_WIZARD && ctx.heroClass != CLASS_SUMMONER) return;
 
+    // Soul Barrier's lines come from its buff's data (EmitBuffValues).
     if (skillType == AT_SKILL_SOUL_BARRIER
         || skillType == AT_SKILL_SOUL_BARRIER_STR
         || skillType == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
     {
-        int damageShield = (int)(10 + (ctx.dexterity / 50.f) + (ctx.energy / 200.f));
-        if (skillType == AT_SKILL_SOUL_BARRIER_STR || skillType == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
-        {
-            auto additionalValue = CharacterAttribute->MasterSkillInfo[skillType].GetSkillValue();
-            damageShield += (int)additionalValue;
-        }
-        int deleteMana = (int)(CharacterAttribute->ManaMax * 0.02f);
-        int limitTime  = (int)(60 + (ctx.energy / 40.f));
-
-        AddFormatted(m, I18N::Game::AbsorbDOfDamage, LineColor::White, damageShield);
-        AddFormatted(m, I18N::Game::ManaDecreaseD, LineColor::White, deleteMana);
-        AddFormatted(m, I18N::Game::DurationDseconds, LineColor::White, limitTime);
         return;
     }
 
@@ -352,7 +343,7 @@ void EmitPlasmaStormFenrirDamage(Model& m, int skillType, const DamageContext& c
     AddFormatted(m, I18N::Game::SkillDamageDD, LineColor::White, minDamage, maxDamage + ctx.skillAttackPowerRate);
 }
 
-// Elf buff-value computations (Healing/Defense/Attack/Recover).
+// Elf heal and recovery values (Healing/Recover): not buffs, so not in Buffs.json.
 void EmitElfBuffValues(Model& m, int skillType, const DamageContext& ctx)
 {
     if (ctx.heroClass != CLASS_ELF) return;
@@ -370,32 +361,7 @@ void EmitElfBuffValues(Model& m, int skillType, const DamageContext& ctx)
     case AT_SKILL_HEALING:
         AddFormatted(m, I18N::Game::HealingD, LineColor::White, ctx.energy / 5 + 5);
         return;
-    case AT_SKILL_DEFENSE_STR:
-    case AT_SKILL_DEFENSE_MASTERY:
-    {
-        int value = ctx.energy / 8 + 2;
-        auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_STR].GetSkillValue();
-        auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_MASTERY].GetSkillValue();
-        value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
-        AddFormatted(m, I18N::Game::DefensiveAbilityIncreaseD, LineColor::White, value);
-        return;
-    }
-    case AT_SKILL_DEFENSE:
-        AddFormatted(m, I18N::Game::DefensiveAbilityIncreaseD, LineColor::White, ctx.energy / 8 + 2);
-        return;
-    case AT_SKILL_ATTACK_STR:
-    case AT_SKILL_ATTACK_MASTERY:
-    {
-        int value = ctx.energy / 7 + 3;
-        auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_STR].GetSkillValue();
-        auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_MASTERY].GetSkillValue();
-        value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
-        AddFormatted(m, I18N::Game::OffensiveAbilityIncreaseD, LineColor::White, value);
-        return;
-    }
-    case AT_SKILL_ATTACK:
-        AddFormatted(m, I18N::Game::OffensiveAbilityIncreaseD, LineColor::White, ctx.energy / 7 + 3);
-        return;
+    // Greater Defense and Greater Damage show their buff's data (EmitBuffValues).
     case AT_SKILL_RECOVER:
     {
         int cal = ctx.energy / 4;
@@ -408,6 +374,18 @@ void EmitElfBuffValues(Model& m, int skillType, const DamageContext& ctx)
     }
 }
 
+// A buff skill's values from its buff's data with the hero as the caster (buffs design B9), for every class that has
+// the skill.
+void EmitBuffValues(Model& m, int skillType)
+{
+    GameLogic::Buffs::SkillBuffValues values;
+    const GameLogic::Buffs::BuffCasterStats stats = GameLogic::Buffs::GetHeroCasterStats();
+    if (GameLogic::Buffs::ComputeSkillBuff(skillType, *CharacterAttribute, stats, values))
+    {
+        AddSkillBuffLines(m, values, stats);
+    }
+}
+
 void EmitBodyDamage(Model& m, int skillType)
 {
     const int before = m.count;
@@ -416,6 +394,7 @@ void EmitBodyDamage(Model& m, int skillType)
     EmitPhysicalDamage(m, skillType, ctx);
     EmitPlasmaStormFenrirDamage(m, skillType, ctx);
     EmitElfBuffValues(m, skillType, ctx);
+    EmitBuffValues(m, skillType);
     EndSection(m, before);
 }
 
@@ -580,13 +559,7 @@ void EmitBlueTags(Model& m, int skillType)
     {
         AddRaw(m, MasteryTypeText(MasteryType), LineColor::Blue);
     }
-
-    if (skillType == AT_SKILL_EXPANSION_OF_WIZARDRY
-        || skillType == AT_SKILL_EXPANSION_OF_WIZARDRY_STR
-        || skillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
-    {
-        AddRaw(m, I18N::Game::MinimumWizardryIncrement20, LineColor::Blue);
-    }
+    // Expansion of Wizardry's value comes from its buff's data (EmitBuffValues), not Webzen's "+20%" tag.
     EndSection(m, before);
 }
 

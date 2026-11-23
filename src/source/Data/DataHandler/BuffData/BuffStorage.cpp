@@ -6,8 +6,10 @@
 #include "Data/DataHandler/DataIssueReport.h"
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/BuffData/BuffDatabase.h"
+#include "Data/GameData/BuffData/BuffLineTexts.h"
 #include "Data/GameData/BuffData/BuffsJson.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/OptionTextsJson.h"
 #include "Core/Utilities/StringUtils.h"
 #include "I18N/All.h"
 
@@ -19,12 +21,15 @@ namespace Data::Buffs
 namespace
 {
 constexpr const char* BuffsFile = "Data/Buffs/Buffs.json";
+constexpr const char* BuffTextsFile = "Data/Buffs/BuffTexts.json";
+constexpr std::string_view BuffTextsLabel = "BuffTexts";
 constexpr std::string_view BuffsLabel = "Buffs";
 constexpr std::string_view BuffsName = "buffs";
 
 void OnLocaleChanged(void* /*context*/) noexcept
 {
     g_BuffDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    g_BuffLineTexts.SetDisplayLocale(I18N::GetCurrentLocale());
 }
 
 void AddWarning(std::vector<Items::ItemDataIssue>& issues, const std::string& source, const std::string& field,
@@ -64,6 +69,27 @@ void FollowLocaleChanges()
 std::filesystem::path GetBuffsFile()
 {
     return BuffsFile;
+}
+
+std::filesystem::path GetBuffTextsFile()
+{
+    return BuffTextsFile;
+}
+
+BuffTextsLoadResult LoadBuffTextsFile(const std::filesystem::path& file)
+{
+    BuffTextsLoadResult result;
+    const std::string source = file.generic_string();
+    if (const std::optional<std::string> text = ReadTextFile(file))
+    {
+        Items::ReadOptionTextsJson(*text, source, result.texts, result.issues);
+        Items::ValidateOptionTextLocales(result.texts, I18N::GetAvailableLocales(), source, result.issues);
+    }
+    else
+    {
+        AddWarning(result.issues, source, "", "could not be read: the skill tooltips show no buff values");
+    }
+    return result;
 }
 
 BuffsLoadResult LoadBuffsFile(const std::filesystem::path& file)
@@ -140,6 +166,10 @@ bool LoadBuffs(std::string& errorMessage)
         return false;
     }
     g_BuffDatabase.Build(result.buffs, I18N::GetCurrentLocale());
+    // The skill tooltip's value texts: a problem only leaves lines out, so none stops the game.
+    BuffTextsLoadResult texts = LoadBuffTextsFile(GetBuffTextsFile());
+    LogDataIssues(BuffTextsLabel, texts.issues);
+    g_BuffLineTexts.SetTexts(std::move(texts.texts), I18N::GetCurrentLocale());
     FollowLocaleChanges();
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} buffs from {} in {:.1f} ms", result.buffs.size(),

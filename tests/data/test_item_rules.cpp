@@ -254,8 +254,6 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     CHECK(IsWingItem(&wingsOfElf));
     CHECK(IsWingItem(&capeOfLord));
     CHECK_FALSE(IsWingItem(&kris));
-    CHECK(IsSecondTierWingExceptCape(&wingsOfSpirits));
-    CHECK_FALSE(IsSecondTierWingExceptCape(&capeOfLord));
     const ITEM wingOfStorm = MakeItem(ITEM_WING_OF_STORM);
     const ITEM capeOfEmperor = MakeItem(ITEM_CAPE_OF_EMPEROR);
     const ITEM smallCapeOfLord = MakeItem(ITEM_SMALL_CAPE_OF_LORD);

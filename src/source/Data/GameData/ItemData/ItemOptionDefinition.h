@@ -33,12 +33,48 @@ enum class ItemOptionType : BYTE
     // (ITEM::AncientBonusOption). Until the item sets link it, the item's attackType picks the definition
     // (ItemOptionDatabase::FindAncientBonus).
     AncientBonus,
+    // The second and third tier wings' and the capes' options in the excellent byte (ITEM::ExcellentFlags), OpenMU's
+    // Wing type: numbered 1 to 6, each on with the byte's bit number - 1, as excellent options.
+    Wing,
 };
 
 // An excellent option's number - 1 is its bit of the excellent byte, whose bits 0 to 5 hold them.
 constexpr int MaxExcellentOptionNumber = 6;
 // The excellent byte with every excellent option on.
 constexpr BYTE AllExcellentOptionFlags = (1 << MaxExcellentOptionNumber) - 1;
+
+// Whether the options of a type have a number (OpenMU's ItemOption.Number): all but luck and the ancient bonus.
+constexpr bool HasOptionNumbers(ItemOptionType type)
+{
+    return type != ItemOptionType::Luck && type != ItemOptionType::AncientBonus;
+}
+
+// The numbers the options of a type take, as the loader checks them: the additional option's the option types the
+// server sends (0 to 15), excellent and wing options the excellent byte's bits (1 to 6), an ancient set's options from
+// 1 in the order the set gives them.
+struct ItemOptionNumberRange
+{
+    int minimum = 0;
+    int maximum = 0;
+};
+
+constexpr ItemOptionNumberRange GetOptionNumberRange(ItemOptionType type)
+{
+    constexpr int MaxOptionTypeNumber = 15;
+    constexpr int MaxNumber = 255;
+    switch (type)
+    {
+    case ItemOptionType::Option:
+        return {0, MaxOptionTypeNumber};
+    case ItemOptionType::Excellent:
+    case ItemOptionType::Wing:
+        return {1, MaxExcellentOptionNumber};
+    case ItemOptionType::AncientOption:
+        return {1, MaxNumber};
+    default:
+        return {0, MaxNumber};
+    }
+}
 
 // How an option's value adds to its attribute: as it is, after the other additions (OpenMU's AddFinal), or in per
 // cent.
@@ -80,20 +116,36 @@ struct ItemOptionTerm
     }
 };
 
-// An option's value: a constant, or a list with one value per level from level 1, whose last entry also counts above
-// it; plus its terms on hero attributes, computed when the value is asked (GameLogic::Items::ComputeOptionValue).
+// Which level a value's list is by: the option's own level (the additional option's, the ancient bonus level; 1 for
+// the types without one), or the item's + level (OpenMU's LevelType.ItemLevel: the wings' HP, mana and command).
+enum class ItemOptionLevelType : BYTE
+{
+    OptionLevel,
+    ItemLevel,
+};
+
+// An option's value: a constant, or a list with one value per level from level 1 (from the item's level 0 with
+// levelType ItemLevel), whose last entry also counts above it; plus its terms on hero attributes, computed when the
+// value is asked (GameLogic::Items::ComputeOptionValue).
 struct ItemOptionValue
 {
     std::vector<int> values;
     // Written as a list, also with one entry; else values holds the constant.
     bool isList = false;
     std::vector<ItemOptionTerm> per;
+    ItemOptionLevelType levelType = ItemOptionLevelType::OptionLevel;
 
-    // The value at `level` without its terms: the constant, or the list's entry (0 below level 1, the last entry above
-    // the list).
+    // The level the list's first entry is for: 1, or the item's level 0.
+    int FirstLevel() const
+    {
+        return levelType == ItemOptionLevelType::ItemLevel ? 0 : 1;
+    }
+
+    // The value at `level` without its terms: the constant, or the list's entry (0 below its first level, the last
+    // entry above the list).
     int At(int level) const
     {
-        if (values.empty() || (isList && level < 1))
+        if (values.empty() || (isList && level < FirstLevel()))
         {
             return 0;
         }
@@ -101,7 +153,7 @@ struct ItemOptionValue
         {
             return values.front();
         }
-        const size_t index = static_cast<size_t>(level - 1);
+        const size_t index = static_cast<size_t>(level - FirstLevel());
         return index < values.size() ? values[index] : values.back();
     }
 

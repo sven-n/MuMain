@@ -178,7 +178,6 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
         {
             continue;
         }
-        size_t known = 0;
         for (const std::string& name : item.options)
         {
             if (options.Find(name) == ItemOptionDatabase::NoDefinition)
@@ -186,16 +185,26 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                 issues.push_back(
                     {ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
                      "\"" + name + "\" is no option definition of Data/Items/Options: the link is left out"});
+            }
+        }
+        const std::vector<ItemOptionIndex> links = options.ResolveLinks(item);
+        for (const std::string& name : item.options)
+        {
+            const int index = options.Find(name);
+            if (index == ItemOptionDatabase::NoDefinition ||
+                std::ranges::find(links, static_cast<ItemOptionIndex>(index)) != links.end())
+            {
                 continue;
             }
-            ++known;
-        }
-        const std::vector<ItemOptionIndex> links = options.ResolveLinks(item.options);
-        if (links.size() < known)
-        {
+            const ItemOptionType type = options.Get(static_cast<ItemOptionIndex>(index)).type;
+            const auto kept = std::ranges::find_if(links, [&](ItemOptionIndex link)
+                                                   { return ReadsSameItemData(options.Get(link).type, type); });
+            const std::string keptName = kept != links.end() ? options.Get(*kept).name : std::string();
             issues.push_back({ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
-                              "links two definitions whose options the same part of the server's item data turns on "
-                              "(of one type): the later one is left out"});
+                              "\"" + name + "\" is left out: \"" + keptName +
+                                  "\" reads the same part of the server's item data (of one type, or excellent and "
+                                  "wing options, which both read the excellent byte; it holds wing options on wings, "
+                                  "excellent options on other items)"});
         }
         const bool byteMeansOther = ExcellentByteMeansOther(item);
         const bool linksExcellent = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
@@ -206,6 +215,20 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
                 {ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
                  "links excellent options, but its excellent byte holds its wing options or a horn's kind, "
                  "or nothing: no horn is excellent"});
+        }
+        const bool linksWing = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
+                                           { return options.Get(link).type == ItemOptionType::Wing; });
+        if (linksWing && item.tags.Has(ItemTag::HornMount))
+        {
+            issues.push_back({ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
+                              "links wing options, but a horn's excellent byte holds its kind, or nothing: the kind's "
+                              "bits would turn on wing options"});
+        }
+        else if (linksWing && item.slot != ItemSlot::Wings)
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", item.group, item.number, OptionsField,
+                              "links wing options, but it is no wing: the server sends excellent options in its "
+                              "excellent byte, and their bits turn on the wing options"});
         }
         // Until the item sets link them (phase 10), the item's attackType picks its ancient bonus; its set options come
         // from its set (the ancient byte's set number).

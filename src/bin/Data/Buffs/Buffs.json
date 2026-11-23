@@ -33,7 +33,25 @@
         "uk": "Сила атаки збільшується.",
         "zh-CN": "攻击力提高。",
         "zh-TW": "攻擊力提高。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60
+      },
+      "powerUps": [
+        {
+          "attribute": "greaterDamageBonus",
+          "add": {
+            "values": 3,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 7
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "number": 2,
@@ -67,7 +85,25 @@
         "uk": "Захист збільшується.",
         "zh-CN": "防御力提高。",
         "zh-TW": "防禦力提高。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60
+      },
+      "powerUps": [
+        {
+          "attribute": "greaterDefenseBonus",
+          "add": {
+            "values": 2,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 8
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "number": 3,
@@ -158,7 +194,47 @@
         "uk": "Мана поглинає шкоду.",
         "zh-CN": "以魔法值吸收伤害。",
         "zh-TW": "以法力吸收傷害。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 40
+          }
+        ]
+      },
+      "powerUps": [
+        {
+          "attribute": "soulBarrierReceiveDecrement",
+          "add": {
+            "values": 0.1,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 20000
+              },
+              {
+                "attribute": "totalAgility",
+                "divisor": 5000
+              }
+            ]
+          }
+        },
+        {
+          "attribute": "soulBarrierManaTollPerHit",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "maximumMana",
+                "times": 0.02
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "number": 5,
@@ -193,6 +269,35 @@
         "zh-CN": "幸运一击伤害提高。",
         "zh-TW": "暴擊傷害提高。"
       },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 10
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "criticalDamageBonus",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 30
+              },
+              {
+                "attribute": "totalLeadership",
+                "divisor": 25
+              }
+            ]
+          }
+        }
+      ],
       "family": "criticalDamageIncrease"
     },
     {
@@ -225,6 +330,24 @@
         "zh-CN": "不消耗箭矢。",
         "zh-TW": "不消耗箭矢。"
       },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 600
+      },
+      "powerUps": [
+        {
+          "attribute": "ammunitionConsumptionRate",
+          "add": {
+            "values": -1
+          }
+        },
+        {
+          "attribute": "attackDamageIncrease",
+          "add": {
+            "values": 0
+          }
+        }
+      ],
       "family": "infinityArrow",
       "cancelSkill": 77
     },
@@ -278,6 +401,40 @@
         "zh-CN": "最大生命值提高。",
         "zh-TW": "最大生命提高。"
       },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 180
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "swellLifeHealthIncrease",
+          "add": {
+            "values": 0.12,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 2000
+              },
+              {
+                "attribute": "totalVitality",
+                "divisor": 10000
+              },
+              {
+                "attribute": "nearbyPartyMemberCount",
+                "divisor": 100
+              }
+            ],
+            "maximum": 2
+          }
+        }
+      ],
       "family": "swellLife"
     },
     {
@@ -2363,7 +2520,33 @@
         "uk": "Відбиває частину шкоди.",
         "zh-CN": "反射部分伤害。",
         "zh-TW": "反射部分傷害。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 30,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 24
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "damageReflection",
+          "add": {
+            "values": 0.3,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 4200
+              }
+            ],
+            "maximum": 0.6
+          }
+        }
+      ]
     },
     {
       "number": 72,
@@ -2722,7 +2905,95 @@
         "uk": "Прокляття, магія, сила атаки та макс. мана збільшуються.\nЗахист і макс. життя знижуються.",
         "zh-CN": "诅咒力、魔力、攻击力与最大魔法值提高。\n防御力与最大生命值降低。",
         "zh-TW": "詛咒、魔力、攻擊力與最大法力提高。\n防禦力與最大生命降低。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 30,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 20
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "berserkerManaMultiplier",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 3000
+              }
+            ],
+            "maximum": 1
+          }
+        },
+        {
+          "attribute": "berserkerHealthDecrement",
+          "add": {
+            "values": -0.4,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 6000
+              }
+            ],
+            "maximum": -0.1
+          }
+        },
+        {
+          "attribute": "berserkerMinPhysDmgBonus",
+          "add": {
+            "values": 140,
+            "per": [
+              {
+                "attribute": "totalStrengthAndAgility",
+                "divisor": 50
+              }
+            ]
+          },
+          "multipliedBy": "berserkerManaMultiplier"
+        },
+        {
+          "attribute": "berserkerMaxPhysDmgBonus",
+          "add": {
+            "values": 160,
+            "per": [
+              {
+                "attribute": "totalStrengthAndAgility",
+                "divisor": 30
+              }
+            ]
+          },
+          "multipliedBy": "berserkerManaMultiplier"
+        },
+        {
+          "attribute": "berserkerWizardryMultiplier",
+          "add": {
+            "values": 0
+          },
+          "valueOf": [
+            "berserkerManaMultiplier",
+            "berserkerProficiencyMultiplier"
+          ]
+        },
+        {
+          "attribute": "berserkerCurseMultiplier",
+          "add": {
+            "values": 0
+          },
+          "valueOf": "berserkerManaMultiplier"
+        },
+        {
+          "attribute": "berserkerProficiencyMultiplier",
+          "add": {
+            "values": 0
+          }
+        }
+      ]
     },
     {
       "number": 82,
@@ -2754,6 +3025,25 @@
         "zh-CN": "最小魔力提高。",
         "zh-TW": "最小魔力提高。"
       },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "minimumWizBaseDmg",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 45
+              }
+            ],
+            "maximum": 100
+          }
+        }
+      ],
       "family": "expansionOfWizardry",
       "cancelSkill": 233
     },
@@ -4269,7 +4559,33 @@
         "uk": "Підвищує шанс завдати шкоди, ігноруючи захист ворога.",
         "zh-CN": "提高无视敌人防御力造成伤害的几率。",
         "zh-TW": "提高無視敵人防禦力造成傷害的機率。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 5
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "defenseIgnoreChance",
+          "add": {
+            "values": -0.0104,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 10000
+              }
+            ],
+            "maximum": 0.1
+          }
+        }
+      ]
     },
     {
       "number": 130,
@@ -4302,7 +4618,33 @@
         "uk": "Підвищує показник здоров'я.",
         "zh-CN": "提高体力属性。",
         "zh-TW": "提高活力屬性。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 5
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "totalVitality",
+          "add": {
+            "values": 16.8,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 10
+              }
+            ],
+            "maximum": 200
+          }
+        }
+      ]
     },
     {
       "number": 131,
@@ -4336,7 +4678,33 @@
         "uk": "Підвищує макс. рівень захисту.",
         "zh-CN": "提高最大防御率。",
         "zh-TW": "提高最大防禦率。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 5
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "increaseBlockBonus",
+          "add": {
+            "values": 2,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 10
+              }
+            ],
+            "maximum": 100
+          }
+        }
+      ]
     },
     {
       "number": 132,
@@ -4467,6 +4835,52 @@
         "zh-CN": "提高最大生命值与魔法值。",
         "zh-TW": "提高最大生命與法力。"
       },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 180
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "swellLifeHealthIncrease",
+          "add": {
+            "values": 0.12,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 2000
+              },
+              {
+                "attribute": "totalVitality",
+                "divisor": 10000
+              },
+              {
+                "attribute": "nearbyPartyMemberCount",
+                "divisor": 100
+              }
+            ],
+            "maximum": 2
+          }
+        },
+        {
+          "attribute": "swellLifeManaIncrease",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "nearbyPartyMemberCount",
+                "divisor": 100
+              }
+            ]
+          }
+        }
+      ],
       "family": "swellLife",
       "tier": 1
     },
@@ -4567,6 +4981,31 @@
         "zh-CN": "提高最小魔力与最大魔力。",
         "zh-TW": "提高最小魔力與最大魔力。"
       },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "minimumWizBaseDmg",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 45
+              }
+            ],
+            "maximum": 100
+          }
+        },
+        {
+          "attribute": "maximumWizBaseDmgIncrease",
+          "add": {
+            "values": 0
+          }
+        }
+      ],
       "family": "expansionOfWizardry",
       "tier": 1,
       "cancelSkill": 380
@@ -4601,6 +5040,37 @@
         "zh-CN": "提高最小与最大魔力\n以及幸运一击伤害几率。",
         "zh-TW": "提高最小與最大魔力\n以及暴擊傷害率。"
       },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 1800
+      },
+      "powerUps": [
+        {
+          "attribute": "minimumWizBaseDmg",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 45
+              }
+            ],
+            "maximum": 100
+          }
+        },
+        {
+          "attribute": "maximumWizBaseDmgIncrease",
+          "add": {
+            "values": 0
+          }
+        },
+        {
+          "attribute": "criticalDamageChance",
+          "add": {
+            "values": 0
+          }
+        }
+      ],
       "family": "expansionOfWizardry",
       "tier": 2,
       "cancelSkill": 383
@@ -4883,6 +5353,41 @@
         "zh-CN": "提高幸运一击伤害与幸运一击伤害几率。",
         "zh-TW": "提高暴擊傷害與暴擊傷害率。"
       },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 10
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "criticalDamageBonus",
+          "add": {
+            "values": 0,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 30
+              },
+              {
+                "attribute": "totalLeadership",
+                "divisor": 25
+              }
+            ]
+          }
+        },
+        {
+          "attribute": "criticalDamageChance",
+          "add": {
+            "values": 0
+          }
+        }
+      ],
       "family": "criticalDamageIncrease",
       "tier": 2
     },
@@ -5041,7 +5546,39 @@
         "uk": "Підвищує шанс успішного захисту.",
         "zh-CN": "提高防御成功率。",
         "zh-TW": "提高防禦成功率。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 5
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "increaseBlockBonus",
+          "add": {
+            "values": 2,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 10
+              }
+            ],
+            "maximum": 100
+          }
+        },
+        {
+          "attribute": "defenseRatePvmIncrease",
+          "add": {
+            "values": 0
+          }
+        }
+      ]
     },
     {
       "number": 154,
@@ -5075,7 +5612,45 @@
         "uk": "Підвищує макс. захист і шанс успішного захисту.",
         "zh-CN": "提高最大防御力与防御成功率。",
         "zh-TW": "提高最大防禦力與防禦成功率。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 5
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "increaseBlockBonus",
+          "add": {
+            "values": 2,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 10
+              }
+            ],
+            "maximum": 100
+          }
+        },
+        {
+          "attribute": "defenseRatePvmIncrease",
+          "add": {
+            "values": 0
+          }
+        },
+        {
+          "attribute": "defenseFinal",
+          "add": {
+            "values": 0
+          }
+        }
+      ]
     },
     {
       "number": 155,
@@ -5109,7 +5684,33 @@
         "uk": "Підвищує HP.",
         "zh-CN": "提高生命值。",
         "zh-TW": "提高生命值。"
-      }
+      },
+      "valuesFrom": "caster",
+      "duration": {
+        "values": 60,
+        "per": [
+          {
+            "attribute": "totalEnergy",
+            "divisor": 5
+          }
+        ],
+        "maximum": 180
+      },
+      "powerUps": [
+        {
+          "attribute": "totalVitality",
+          "add": {
+            "values": 16.8,
+            "per": [
+              {
+                "attribute": "totalEnergy",
+                "divisor": 10
+              }
+            ],
+            "maximum": 200
+          }
+        }
+      ]
     },
     {
       "number": 156,
