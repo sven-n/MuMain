@@ -2,6 +2,7 @@
  "files": [
   "Data/Audio/SoundEvents.json",
   "Data/Audio/SoundFiles.json",
+  "Data/Buffs/BuffTexts.json",
   "Data/Buffs/Buffs.json",
   "Data/Effect/!SwordEff.OZJ",
   "Data/Effect/BowE.OZJ",
@@ -4845,6 +4846,7 @@
   "Data/Skill/youngza01.OZJ",
   "Data/Skill/youngza022.OZT",
   "Data/Skill/youngza03_R.OZJ",
+  "Data/Skills/MasterSkills.json",
   "Data/World1/rain01.OZT",
   "Data/World1/rain02.OZT",
   "Data/World10/rain03.OZT",

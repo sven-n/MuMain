@@ -569,7 +569,7 @@ TEST_CASE("Every item buff keeps the values and duration of its item's add optio
             }
             else
             {
-                CHECK(entry.value == Data::Items::ItemOptionValue{{value}});
+                CHECK(entry.value == Data::Buffs::BuffValue{static_cast<double>(value)});
             }
             ++powerUp;
         }
@@ -599,10 +599,10 @@ TEST_CASE("An aura's value is its row's value times the hero's level [data][item
             g_BuffDatabase.FindByItem(itemType / MAX_ITEM_INDEX, itemType % MAX_ITEM_INDEX);
         REQUIRE(buff != nullptr);
         REQUIRE(buff->powerUps.size() == 1);
-        const Data::Items::ItemOptionValue& value = buff->powerUps.front().value;
-        CHECK(value.At(0) == 0);
+        const Data::Buffs::BuffValue& value = buff->powerUps.front().value;
+        CHECK(value.values == 0);
         REQUIRE(value.per.size() == 1);
-        CHECK(value.per.front().heroAttribute == Data::Items::ItemOptionTermAttribute::Level);
+        CHECK(value.per.front().heroAttribute == Data::Buffs::BuffTermAttribute::Level);
         const int rowValue = g_pItemAddOptioninfo->GetItemAddOtioninfo(itemType).m_byValue1;
         REQUIRE(rowValue != 0);
         CHECK(GameLogic::Buffs::GetPowerUpValue(*buff, 0) == rowValue * 150);
@@ -689,7 +689,7 @@ TEST_CASE("A debuff's power-ups add nothing to the stats [data][items][buffs]")
     REQUIRE(debuff != changed.end());
     Data::Buffs::BuffPowerUp lower;
     lower.attribute = "defenseBase";
-    lower.value.values = {20};
+    lower.value.values = 20;
     debuff->powerUps = {lower};
     const int number = debuff->number;
     const std::string locale = g_BuffDatabase.GetDisplayLocale();

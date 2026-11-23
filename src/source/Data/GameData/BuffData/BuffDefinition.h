@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Data/GameData/BuffData/BuffAttributes.h"
+#include "Data/GameData/BuffData/BuffValue.h"
 #include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemOptionDefinition.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -26,23 +28,47 @@ enum class BuffKind : std::uint8_t
     Debuff,
 };
 
+// Whose attributes a buff's values are computed with: the buff's owner (an item, the Elf Soldier) or the one who cast
+// it (a skill buff, buffs design B3). Only the server knows another caster's attributes, so the character stats skip
+// a caster's buff (B16); the skill tooltip computes it with the hero as the caster.
+enum class BuffValuesFrom : std::uint8_t
+{
+    Owner,
+    Caster,
+};
+
+// The index of no power-up (BuffPowerUp::multipliedByIndex, valueOfIndices).
+constexpr int NoPowerUp = -1;
+// The most power-ups one power-up's valueOf names that the values computed every frame keep.
+constexpr size_t MaxValueOf = 4;
+
 // What the buff raises: an attribute, by OpenMU's Stats name in camelCase ("defenseBase"), or by a name of Webzen's
-// item add options where OpenMU has none ("mobility"), and the value it adds, in the item options' value format. The
-// value is the one of Webzen's Season 6 data: a rate in percent ("experienceRate" 150 is 150 %).
+// item add options where OpenMU has none ("mobility"), and the value it adds (BuffValue). An item buff's value is the
+// one of Webzen's Season 6 data: a rate in percent ("experienceRate" 150 is 150 %); a skill buff's is OpenMU's, in
+// the attribute's unit (BuffAttributeUnit).
 struct BuffPowerUp
 {
     std::string attribute;
     Items::ItemOptionAdd add = Items::ItemOptionAdd::Add;
-    Items::ItemOptionValue value;
+    BuffValue value;
+    // OpenMU's class rules that chain one power-up to another (Berserker, buffs design B21): the attribute of another
+    // power-up of the buff this one is multiplied by, and those whose values it adds to its own (the wizardry
+    // multiplier adds the mana and the proficiency multipliers). Empty for none.
+    std::string multipliedBy;
+    std::vector<std::string> valueOf;
     // The attribute's index in BuffAttributes, which the buff table resolves when it loads (BuffDatabase::Build), so
     // the character stats summed every frame never compare a name; NoBuffAttribute until then.
     int attributeIndex = NoBuffAttribute;
+    // The power-ups multipliedBy and valueOf name, by their index in the buff (or NoPowerUp), resolved with
+    // attributeIndex.
+    int multipliedByIndex = NoPowerUp;
+    std::vector<int> valueOfIndices;
 
-    // The data only: attributeIndex follows from the name, so a loaded power-up equals an edited one with the same
-    // data.
+    // The data only: the indices follow from the names, so a loaded power-up equals an edited one with the same data.
     bool operator==(const BuffPowerUp& other) const
     {
-        return attribute == other.attribute && add == other.add && value == other.value;
+        return attribute == other.attribute && add == other.add && value == other.value &&
+               multipliedBy == other.multipliedBy && valueOf == other.valueOf;
     }
 };
 
@@ -67,9 +93,10 @@ struct BuffDefinition
     // Its tooltip lines, separated by '\n'; empty for none.
     LocalizedString description;
     std::optional<BuffItemLink> item;
+    BuffValuesFrom valuesFrom = BuffValuesFrom::Owner;
     // How long the buff lasts, in seconds, when the server sends no time; none when only the server knows it (an item
-    // of the cash shop lasts as long as it was bought for).
-    std::optional<Items::ItemOptionValue> duration;
+    // of the cash shop lasts as long as it was bought for). A caster's buff may grow with the caster's attributes.
+    std::optional<BuffValue> duration;
     // What it raises, in their order: an item's tooltip shows the first as {addOptionValue1}, the second as
     // {addOptionValue2}.
     std::vector<BuffPowerUp> powerUps;

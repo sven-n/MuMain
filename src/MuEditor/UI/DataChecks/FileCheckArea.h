@@ -45,7 +45,9 @@ std::unique_ptr<DataCheckArea> CreateEffectCheckArea();
 std::unique_ptr<DataCheckArea> CreateModelFileCheckArea();
 // The buffs (Data/Buffs/Buffs.json) as the game reads them at start, with
 // their items checked against the item list as the item tools have it
-// (unsaved changes too); no tool edits them yet.
+// (unsaved changes too), the master skills' buff parts
+// (Data/Skills/MasterSkills.json) against those buffs and the skill tooltip's
+// buff texts (Data/Buffs/BuffTexts.json); no tool edits them yet.
 std::unique_ptr<DataCheckArea> CreateBuffCheckArea();
 // The sounds of map objects (Data/Maps/ObjectSounds.json) as the Map Editor
 // has them; a click opens the Map Editor.

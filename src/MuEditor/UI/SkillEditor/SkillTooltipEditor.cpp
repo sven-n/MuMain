@@ -29,6 +29,7 @@ const ImVec4 IMGUI_COLOR_BLUE = ImVec4(0.4f, 0.6f, 1.0f, 1.0f);
 const ImVec4 IMGUI_COLOR_RED = ImVec4(0.95f, 0.35f, 0.35f, 1.0f);   // plain red text
 const ImVec4 IMGUI_COLOR_DARKRED_FG = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);  // white text on red background
 const ImU32 IMGUI_BG_DARKRED = IM_COL32(170, 30, 30, 255);
+const ImVec4 IMGUI_COLOR_GRAY = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
 
 ImVec4 ImGuiColor(LineColor c)
 {
@@ -38,6 +39,8 @@ ImVec4 ImGuiColor(LineColor c)
     case LineColor::Blue:     return IMGUI_COLOR_BLUE;
     case LineColor::Red:      return IMGUI_COLOR_RED;
     case LineColor::DarkRed:  return IMGUI_COLOR_DARKRED_FG;
+    case LineColor::Gray:
+        return IMGUI_COLOR_GRAY;
     }
     return IMGUI_COLOR_WHITE;
 }
