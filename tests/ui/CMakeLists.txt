@@ -25,6 +25,14 @@ target_compile_definitions(map_name_tests PRIVATE
 mu_allow_gcc13_stringop_overflow(map_name_tests test_map_name.cpp)
 
 mu_add_test(
+    NAME held_item_update_tests
+    SOURCES
+        test_held_item_update.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME cursed_temple_skill_tests
     SOURCES
         test_cursed_temple_skill.cpp

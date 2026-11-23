@@ -4,6 +4,7 @@
 #include <span>
 
 typedef struct tagITEM ITEM;
+enum struct STORAGE_TYPE;
 
 namespace UI::Inventory
 {
@@ -18,6 +19,9 @@ void DiscardPickedItem();
 // another item (the update of the target answers the use) or it's the updated item itself. Any other held item stays
 // in the hand, e.g. when a rented item expires while the player moves something else.
 void DiscardPickedItemUpdatedBy(int index);
+// The rule of DiscardPickedItemUpdatedBy: whether the server's update of the item at `updatedIndex` ends a held item
+// which came from `sourcePos` of `source` and was (or wasn't) used on another item.
+bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, bool usedOnItem, int updatedIndex);
 void RestorePickedItem();
 int TransferSourceIndex();
 bool ReceivePlayerTransfer(int index, std::span<const std::uint8_t> itemData);

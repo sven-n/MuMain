@@ -60,10 +60,15 @@ void DiscardPickedItemUpdatedBy(int index)
     if (pickedItem == nullptr)
         return;
 
-    const bool isUpdatedItem =
-        pickedItem->GetSourceStorageType() == STORAGE_TYPE::INVENTORY && pickedItem->GetSourceLinealPos() == index;
-    if (pickedItem->IsUsedOnItem() || isUpdatedItem)
+    if (IsHeldItemEndedByUpdate(pickedItem->GetSourceStorageType(), pickedItem->GetSourceLinealPos(),
+                                pickedItem->IsUsedOnItem(), index))
         DiscardPickedItem();
+}
+
+bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, bool usedOnItem, int updatedIndex)
+{
+    const bool isUpdatedItem = source == STORAGE_TYPE::INVENTORY && sourcePos == updatedIndex;
+    return usedOnItem || isUpdatedItem;
 }
 
 void RestorePickedItem()
