@@ -3011,9 +3011,9 @@ int CompareItemAdditionalOptions(const ITEM& first, const ITEM& second)
     const bool firstHasOption = firstSlot < first.SpecialNum;
     const bool secondHasOption = secondSlot < second.SpecialNum;
 
-    // Different options use different scales, so only compare values within the same kind.
+    // Different options use different scales, so the copies cannot be ranked; they are not the same either.
     if (firstHasOption && secondHasOption && first.Special[firstSlot] != second.Special[secondSlot])
-        return Engine::Items::CompareResult::Same;
+        return Engine::Items::CompareResult::OtherOptionKind;
 
     const int firstValue = firstHasOption ? first.SpecialValue[firstSlot] : 0;
     const int secondValue = secondHasOption ? second.SpecialValue[secondSlot] : 0;

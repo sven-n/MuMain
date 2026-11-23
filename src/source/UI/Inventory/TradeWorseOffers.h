@@ -12,7 +12,8 @@ namespace UI::Trade
 struct OfferedItemCheck
 {
     int itemType = -1;
-    // The remembered copy of its type is better than it.
+    // The remembered copy of its type is better than it, or has another additional option kind
+    // (CompareResult::OtherOptionKind), so the swap cannot be ranked and is warned about.
     bool worseThanRemembered = false;
     // The remembered copy of its type is the same as it.
     bool sameAsRemembered = false;

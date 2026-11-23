@@ -1339,21 +1339,24 @@ TEST_CASE("Trade compares lower Jewel of Life values on actual items [items][tra
     }
 }
 
-TEST_CASE("Trade compares durability when Jewel of Life option kinds differ [items][trade]")
+TEST_CASE("Trade does not rank copies whose Jewel of Life option kinds differ [items][trade]")
 {
     using namespace Engine::Items::CompareResult;
+    // Wings of Spirits come with either the damage or the HP recovery option.
     ITEM remembered{};
-    remembered.Type = ITEM_WING;
+    remembered.Type = ITEM_WINGS_OF_SPIRITS;
     remembered.SpecialNum = 1;
-    remembered.Special[0] = AT_LIFE_REGENERATION;
-    remembered.SpecialValue[0] = 4;
+    remembered.Special[0] = AT_IMPROVE_DAMAGE;
+    remembered.SpecialValue[0] = 16;
     remembered.Durability = 10;
 
     ITEM offered = remembered;
-    offered.Special[0] = AT_IMPROVE_DAMAGE;
-    offered.SpecialValue[0] = 16;
-    CHECK(CompareItem(remembered, offered) == Same);
+    offered.Special[0] = AT_LIFE_REGENERATION;
+    offered.SpecialValue[0] = 4;
+    CHECK(CompareItem(remembered, offered) == OtherOptionKind);
+    CHECK(CompareItem(offered, remembered) == OtherOptionKind);
 
-    offered.Durability = 9;
-    CHECK(CompareItem(remembered, offered) == FirstIsBetter);
+    // The option kind decides before the durability does.
+    offered.Durability = 11;
+    CHECK(CompareItem(remembered, offered) == OtherOptionKind);
 }

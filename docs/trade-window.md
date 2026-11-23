@@ -48,7 +48,10 @@ difference decides:
    of Life raises, including HP recovery, max mana and max AG). Having the
    option is better than having none. Values are compared when both copies
    have the same option kind, so a +16 to +4 damage swap or a +4% to +1% HP
-   recovery swap is marked. If the option kinds differ, durability decides;
+   recovery swap is marked. If the option kinds differ (for example Wings
+   of Spirits with damage and with HP recovery), the copies use different
+   scales and are not ranked: the offered copy is marked, it does not clear
+   the marks of its kind, and the remembered copy stays;
 5. the durability, so a copy with less durability is also marked.
 
 The comparison never reads the Jewel of Harmony option, the 380 option, the

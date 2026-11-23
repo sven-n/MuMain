@@ -115,6 +115,26 @@ TEST_CASE("an offered item with no remembered copy of its type is neither worse 
     CHECK_FALSE(check.sameAsRemembered);
 }
 
+TEST_CASE("an offered copy with another additional option kind counts as worse, not unchanged")
+{
+    const OfferedItemCheck check = CheckOffer(SwordType, CompareResult::OtherOptionKind);
+
+    CHECK(check.worseThanRemembered);
+    CHECK_FALSE(check.sameAsRemembered);
+}
+
+TEST_CASE("a copy with another additional option kind keeps the warning of a worse copy of its type")
+{
+    // Remembered +16 damage, offered +4 damage and an HP recovery copy of the same type.
+    const std::array offers{CheckOffer(SwordType, CompareResult::FirstIsBetter),
+                            CheckOffer(SwordType, CompareResult::OtherOptionKind)};
+    std::array<bool, 2> marked{};
+
+    CHECK(MarkWorseOffers(offers, marked));
+    CHECK(marked[0]);
+    CHECK(marked[1]);
+}
+
 namespace
 {
 // Stands in for ITEM: CompareItem's level rule is enough to tell the argument order.

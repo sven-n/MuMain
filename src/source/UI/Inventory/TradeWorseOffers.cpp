@@ -20,7 +20,8 @@ OfferedItemCheck CheckOffer(int itemType, int compareWithRemembered)
     namespace CompareResult = Engine::Items::CompareResult;
     return {
         .itemType = itemType,
-        .worseThanRemembered = (compareWithRemembered == CompareResult::FirstIsBetter),
+        .worseThanRemembered = (compareWithRemembered == CompareResult::FirstIsBetter ||
+                                compareWithRemembered == CompareResult::OtherOptionKind),
         .sameAsRemembered = (compareWithRemembered == CompareResult::Same),
     };
 }
