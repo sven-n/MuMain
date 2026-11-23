@@ -14,6 +14,8 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/AdditionalOptionComparison.h"
+#include "Engine/Object/CompareItemResult.h"
 #include "Engine/Object/ItemOptionLines.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
@@ -2976,6 +2978,46 @@ void SetItemColor(int index, ITEM* Inv, int color)
     }
 }
 
+namespace
+{
+int FindAdditionalOptionSlot(const ITEM& item)
+{
+    for (int slot = 0; slot < item.SpecialNum; ++slot)
+    {
+        switch (item.Special[slot])
+        {
+        case AT_IMPROVE_DAMAGE:
+        case AT_IMPROVE_MAGIC:
+        case AT_IMPROVE_CURSE:
+        case AT_IMPROVE_BLOCKING:
+        case AT_IMPROVE_DEFENSE:
+        case AT_LIFE_REGENERATION:
+        case AT_IMPROVE_MAX_MANA:
+        case AT_IMPROVE_MAX_AG:
+            return slot;
+        }
+    }
+
+    return item.SpecialNum;
+}
+
+int CompareItemAdditionalOptions(const ITEM& first, const ITEM& second)
+{
+    const int firstSlot = FindAdditionalOptionSlot(first);
+    const int secondSlot = FindAdditionalOptionSlot(second);
+    const bool firstHasOption = firstSlot < first.SpecialNum;
+    const bool secondHasOption = secondSlot < second.SpecialNum;
+
+    // Different options use different scales, so the copies cannot be ranked; they are not the same either.
+    if (firstHasOption && secondHasOption && first.Special[firstSlot] != second.Special[secondSlot])
+        return Engine::Items::CompareResult::OtherOptionKind;
+
+    const int firstValue = firstHasOption ? first.SpecialValue[firstSlot] : 0;
+    const int secondValue = secondHasOption ? second.SpecialValue[secondSlot] : 0;
+    return Engine::Items::CompareAdditionalOption(firstHasOption, firstValue, secondHasOption, secondValue);
+}
+} // namespace
+
 int CompareItem(ITEM item1, ITEM item2)
 {
     int equal = 0;
@@ -3037,45 +3079,7 @@ int CompareItem(ITEM item1, ITEM item2)
                 }
                 else
                 {
-                    int     Num = std::max<int>(item1.SpecialNum, item2.SpecialNum);
-                    int     addOption1 = 0;
-                    int     addOptionV1 = 0;
-                    int     addOption2 = 0;
-                    int     addOptionV2 = 0;
-                    for (int i = 0; i < Num; ++i)
-                    {
-                        switch (item1.Special[i])
-                        {
-                        case AT_IMPROVE_DAMAGE:
-                        case AT_IMPROVE_MAGIC:
-                        case AT_IMPROVE_CURSE:
-                        case AT_IMPROVE_BLOCKING:
-                        case AT_IMPROVE_DEFENSE:
-                            addOption1 = 1;
-                            addOptionV1 = item1.SpecialValue[i];
-                            break;
-                        }
-                        switch (item2.Special[i])
-                        {
-                        case AT_IMPROVE_DAMAGE:
-                        case AT_IMPROVE_MAGIC:
-                        case AT_IMPROVE_CURSE:
-                        case AT_IMPROVE_BLOCKING:
-                        case AT_IMPROVE_DEFENSE:
-                            addOption2 = 1;
-                            addOptionV2 = item2.SpecialValue[i];
-                            break;
-                        }
-                    }
-
-                    if (addOption1 < addOption2 || addOptionV1 < addOptionV2)
-                    {
-                        equal = -1;
-                    }
-                    else if (addOption1 != addOption2 && addOptionV1 != addOptionV2)
-                    {
-                        equal = 1;
-                    }
+                    equal = CompareItemAdditionalOptions(item1, item2);
                 }
             }
             if (equal == 0)

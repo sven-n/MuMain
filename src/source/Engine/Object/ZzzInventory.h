@@ -193,6 +193,7 @@ bool CheckEmptyInventory(ITEM* Inv, int InvWidth, int InvHeight);
 void AutoEquipmentChange(int sx, int sy, ITEM* Inv, int InvWidth, int InvHeight);
 #endif // AUTO_CHANGE_ITEM
 
+// Returns one of Engine::Items::CompareResult (CompareItemResult.h).
 int CompareItem(ITEM item1, ITEM item2);
 void ConvertGold(double dGold, wchar_t* szText, int iDecimals = 0);
 void ConvertGold64(__int64 Gold, wchar_t* Text);
