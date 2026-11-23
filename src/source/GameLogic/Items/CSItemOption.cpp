@@ -652,7 +652,7 @@ void CSItemOption::getAllAddState(std::uint16_t* Strength, std::uint16_t* Dexter
 {
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < MAX_EQUIPMENT; ++i)
     {
-        ITEM* item = CharacterMachine->GetEffectiveEquipment(i);
+        const ITEM* item = CharacterMachine->GetEffectiveEquipment(i);
 
         if (item->Durability <= 0)
         {
@@ -693,7 +693,7 @@ void CSItemOption::getAllAddOptionStatesbyCompare(std::uint16_t* Strength, std::
 {
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < MAX_EQUIPMENT; ++i)
     {
-        ITEM* item = CharacterMachine->GetEffectiveEquipment(i);
+        const ITEM* item = CharacterMachine->GetEffectiveEquipment(i);
 
         if (item->RequireStrength > iCompareStrength ||
             item->RequireDexterity > iCompareDexterity ||
@@ -777,7 +777,7 @@ void CSItemOption::CheckItemSetOptions()
             continue;
         }
 
-        ITEM* ip = CharacterMachine->GetEffectiveEquipment(i);
+        const ITEM* ip = CharacterMachine->GetEffectiveEquipment(i);
 
         if (ip->RequireDexterity > AllDexterity || ip->RequireEnergy > AllEnergy || ip->RequireStrength > AllStrength || ip->RequireLevel > AllLevel || ip->RequireCharisma > AllCharisma || ip->Durability <= 0 || (IsRequireEquipItem(ip) == false)) {
             continue;
