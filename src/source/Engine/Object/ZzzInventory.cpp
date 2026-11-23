@@ -419,21 +419,22 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
     DisableAlphaBlend();
 }
 
-void SendRequestUse(int Index, int Target, bool addPoints)
+bool SendRequestUse(int Index, int Target, bool addPoints)
 {
     if (!IsCanUseItem())
     {
         g_pSystemLogBox->AddText(I18N::Game::YouCannotUseYourItemsWhileUsingTheVaultOrWhileTrading, mu::ui::window::TYPE_ERROR_MESSAGE);
-        return;
+        return false;
     }
     if (EnableUse > 0)
     {
-        return;
+        return false;
     }
 
     EnableUse = 10;
     SocketClient->ToGameServer()->SendConsumeItemRequest(Index, Target, addPoints ? FruitUsage::AddPoints : FruitUsage::RemovePoints);
     g_ConsoleDebug->Write(MCD_SEND, L"0x26 [SendRequestUse(%d)]", Index);
+    return true;
 }
 
 bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex)
@@ -1804,10 +1805,6 @@ enum class ItemTooltipBuild
 static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
 {
     if (ip->Type == -1)
-        return ItemTooltipBuild::Nothing;
-
-    // A timed item whose end time hasn't come yet shows no tooltip.
-    if (ip->bPeriodItem && !ip->bExpiredPeriod && ip->lExpireTime == 0)
         return ItemTooltipBuild::Nothing;
 
     TextNum = 0;

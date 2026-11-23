@@ -280,7 +280,7 @@ from it.
         {"id": "blankAfterOptions", "text": ""},
         {"section": "afterOptions"},
         {"text": "@expiredItem", "when": ["timed", "expired"], "color": "red"},
-        {"text": "{expireDate}", "when": ["timed", "!expired"], "color": "blue"}
+        {"text": "{expireDate}", "when": ["timed", "hasExpireDate"], "color": "blue"}
       ]
     },
     {"name": "noClassLines", "base": "default", "hide": ["classLinesBlank", "classLines"]}
@@ -354,6 +354,7 @@ The **states** a condition can name:
 | `classUsable` | On a line with `forEachClass`: the hero is that class at the level the item needs or above |
 | `boots`, `gloves` | Boots (group 11) or gloves (group 10) |
 | `expired` | A timed item whose time is up |
+| `hasExpireDate` | A timed item that isn't expired and whose end the server has sent (`D2 12`). The server sends the date a moment after the item, and only for the inventory, so a rented item in the Chaos Machine or in another player's shop shows its tooltip without the end |
 
 A **section** is a part of the tooltip the code still writes, and the lines
 of a layout go between them: the lines after a section come right after what

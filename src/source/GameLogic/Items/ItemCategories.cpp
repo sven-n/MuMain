@@ -469,9 +469,14 @@ namespace GameLogic::Items
 
         if (IsPandaOrSkeletonItem(pItem) || IsDemonOrSpiritOfGuardian(pItem))
         {
-            return pItem->bPeriodItem && pItem->bExpiredPeriod;
+            return IsExpiredRental(pItem);
         }
 
         return true;
+    }
+
+    bool IsExpiredRental(const ITEM* pItem)
+    {
+        return pItem != nullptr && pItem->bPeriodItem && pItem->bExpiredPeriod;
     }
 }

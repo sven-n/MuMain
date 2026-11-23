@@ -113,6 +113,10 @@ namespace GameLogic::Items
     // Item value
     bool IsHighValueItem(const ITEM* pItem);
 
+    // Rented items
+    // A rented (period) item whose time ran out. It stays where it is but has no effect.
+    bool IsExpiredRental(const ITEM* pItem);
+
     // Only used for drawing items and for tooltips; still hardcoded until
     // phase 4 (model data) and phase 8 (tooltip data).
     bool IsClothWing(const ITEM* pItem);

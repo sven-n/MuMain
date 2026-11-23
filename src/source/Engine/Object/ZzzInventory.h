@@ -204,7 +204,9 @@ void RepairAllGold(void);
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
 
-void SendRequestUse(int Index, int Target, bool addPoints = true);
+// Asks the server to use the item at Index (on the item at Target). False if nothing was sent: items can't be used
+// while the vault or a trade is open, or while an earlier use waits for its answer.
+bool SendRequestUse(int Index, int Target, bool addPoints = true);
 bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex);
 bool IsCanUseItem();
 bool IsCanTrade();

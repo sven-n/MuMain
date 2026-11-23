@@ -1377,8 +1377,10 @@ const GameLogic::Npcs::TalkWorld& GameTalkWorld()
         .isCursedTemple = [] { return gMapManager.IsCursedTemple(); },
         .questState = [](int quest) { return static_cast<int>(g_csQuest.getQuestState2(quest)); },
         .gold = [] { return static_cast<unsigned long>(CharacterMachine->Gold); },
-        .hasDarkHorse = [] { return CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_DARK_HORSE_ITEM; },
-        .hasDarkRaven = [] { return CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_DARK_RAVEN_ITEM; },
+        .hasDarkHorse = []
+        { return CharacterMachine->GetEffectiveEquipment(EQUIPMENT_HELPER)->Type == ITEM_DARK_HORSE_ITEM; },
+        .hasDarkRaven = []
+        { return CharacterMachine->GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT)->Type == ITEM_DARK_RAVEN_ITEM; },
         .sendTalk = [](int key) { SocketClient->ToGameServer()->SendTalkToNpcRequest(key); },
         .sendEnterRefuge = [] { SocketClient->ToGameServer()->SendEnterOnWerewolfRequest(); },
         .sendEnterBarracks = [] { SocketClient->ToGameServer()->SendEnterOnGatekeeperRequest(); },
@@ -2784,13 +2786,16 @@ void CheckGate()
                         Success = true;
                     if (Success)
                     {
+                        // An expired rented item has no effect, so it counts as an empty slot.
+                        const int helperType = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_HELPER)->Type;
                         if (((i >= 45 && i <= 49) || (i >= 55 && i <= 56)) &&
-                            ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HORN_OF_UNIRIA && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HORN_OF_DINORANT)))
+                            (helperType >= ITEM_HORN_OF_UNIRIA && helperType <= ITEM_HORN_OF_DINORANT))
                         {
                             g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, mu::ui::window::TYPE_ERROR_MESSAGE);
                         }
-                        else if ((62 <= i && i <= 65) &&
-                            !GameLogic::Items::HasFlightEquipment(&CharacterMachine->Equipment[EQUIPMENT_HELPER], &CharacterMachine->Equipment[EQUIPMENT_WING]))
+                        else if ((62 <= i && i <= 65) && !GameLogic::Items::HasFlightEquipment(
+                                                             CharacterMachine->GetEffectiveEquipment(EQUIPMENT_HELPER),
+                                                             CharacterMachine->GetEffectiveEquipment(EQUIPMENT_WING)))
                         {
                             g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, mu::ui::window::TYPE_ERROR_MESSAGE);
 

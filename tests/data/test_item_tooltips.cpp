@@ -328,9 +328,13 @@ TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data]
                             local->tm_hour, local->tm_min),
                   TEXT_COLOR_BLUE));
     CHECK_FALSE(HasLine(timedLines, Formatted(L"Durability: [%d/%d]", maxDurability, maxDurability)));
-    // Without its end date (the server sends it apart), it shows no tooltip.
+    // Without its end date (the server sends it apart, and only for the inventory), it still shows its tooltip, but
+    // no end, and no durability either.
     timed.lExpireTime = 0;
-    CHECK(BuildItemTooltipLines(&timed, false).empty());
+    const std::vector<ItemTooltipLine> withoutDate = BuildItemTooltipLines(&timed, false);
+    CHECK_FALSE(withoutDate.empty());
+    CHECK_FALSE(HasLine(withoutDate, L"Expiration Day", TEXT_COLOR_ORANGE));
+    CHECK_FALSE(HasLine(withoutDate, Formatted(L"Durability: [%d/%d]", maxDurability, maxDurability)));
     items.DeleteItem(&timed);
 
     SetItemTooltipTextMeasure(nullptr);

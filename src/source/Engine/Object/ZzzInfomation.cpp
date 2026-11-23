@@ -1399,11 +1399,11 @@ void CHARACTER_MACHINE::CalculateDamage()
 {
     WORD    DamageMin, DamageMax;
 
-    ITEM* Right = &Equipment[EQUIPMENT_WEAPON_RIGHT];
-    ITEM* Left = &Equipment[EQUIPMENT_WEAPON_LEFT];
-    ITEM* Amulet = &Equipment[EQUIPMENT_AMULET];
-    ITEM* RRing = &Equipment[EQUIPMENT_RING_RIGHT];
-    ITEM* LRing = &Equipment[EQUIPMENT_RING_LEFT];
+    ITEM* Right = GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT);
+    ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    ITEM* Amulet = GetEffectiveEquipment(EQUIPMENT_AMULET);
+    ITEM* RRing = GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
+    ITEM* LRing = GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
 
     WORD Strength = Character.Strength + Character.AddStrength;
     WORD Dexterity = Character.Dexterity + Character.AddDexterity;
@@ -1486,17 +1486,18 @@ void CHARACTER_MACHINE::CalculateDamage()
         }
     }
 
-    if (Equipment[EQUIPMENT_WING].Type != -1)
+    ITEM* wing = GetEffectiveEquipment(EQUIPMENT_WING);
+    if (wing->Type != -1)
     {
-        ITEM_ATTRIBUTE* p = &ItemAttribute[Equipment[EQUIPMENT_WING].Type];
+        ITEM_ATTRIBUTE* p = &ItemAttribute[wing->Type];
 
         if (p->Durability != 0)
         {
-            float   percent = CalcDurabilityPercent(Equipment[EQUIPMENT_WING].Durability, p->Durability, Equipment[EQUIPMENT_WING].Level, 0, 0);//Equipment[EQUIPMENT_WING].Option1);
+            float percent = CalcDurabilityPercent(wing->Durability, p->Durability, wing->Level, 0, 0);
 
             DamageMin = 0; DamageMax = 0;
-            PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, &Equipment[EQUIPMENT_WING]);
-            PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, &Equipment[EQUIPMENT_WING]);
+            PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, wing);
+            PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, wing);
 
             DamageMin = DamageMin - (WORD)(DamageMin * percent);
             DamageMax = DamageMax - (WORD)(DamageMax * percent);
@@ -1660,26 +1661,26 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
     Character.MagicDamageMin = Energy / 9;
     Character.MagicDamageMax = Energy / 4;
 
-    ITEM* Right = &Equipment[EQUIPMENT_WEAPON_RIGHT];
-    ITEM* Left = &Equipment[EQUIPMENT_WEAPON_LEFT];
-    ITEM* Amulet = &Equipment[EQUIPMENT_AMULET];
-    ITEM* RRing = &Equipment[EQUIPMENT_RING_RIGHT];
-    ITEM* LRing = &Equipment[EQUIPMENT_RING_LEFT];
+    ITEM* Right = GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT);
+    ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    ITEM* Amulet = GetEffectiveEquipment(EQUIPMENT_AMULET);
+    ITEM* RRing = GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
+    ITEM* LRing = GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
     float   percent;
     WORD    DamageMin = 0;
     WORD    DamageMax = 0;
 
     // 날개
-    if (Equipment[EQUIPMENT_WING].Type != -1)
+    ITEM* ipWing = GetEffectiveEquipment(EQUIPMENT_WING);
+    if (ipWing->Type != -1)
     {
-        ITEM_ATTRIBUTE* p = &ItemAttribute[Equipment[EQUIPMENT_WING].Type];
-        ITEM* ipWing = &Equipment[EQUIPMENT_WING];
+        ITEM_ATTRIBUTE* p = &ItemAttribute[ipWing->Type];
         percent = CalcDurabilityPercent(ipWing->Durability, p->Durability, ipWing->Level, 0);//ipWing->Option1);
 
         DamageMin = 0;
         DamageMax = 0;
-        PlusSpecial(&DamageMin, AT_IMPROVE_MAGIC, &Equipment[EQUIPMENT_WING]);
-        PlusSpecial(&DamageMax, AT_IMPROVE_MAGIC, &Equipment[EQUIPMENT_WING]);
+        PlusSpecial(&DamageMin, AT_IMPROVE_MAGIC, ipWing);
+        PlusSpecial(&DamageMax, AT_IMPROVE_MAGIC, ipWing);
 
         DamageMin = DamageMin - (WORD)(DamageMin * percent);
         DamageMax = DamageMax - (WORD)(DamageMax * percent);
@@ -1837,7 +1838,7 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
     Character.CurseDamageMin = wEnergy / 9;
     Character.CurseDamageMax = wEnergy / 4;
 
-    ITEM* pEquipWing = &Equipment[EQUIPMENT_WING];
+    ITEM* pEquipWing = GetEffectiveEquipment(EQUIPMENT_WING);
     if (pEquipWing->Type != -1)
     {
         ITEM_ATTRIBUTE* pAttribute = &ItemAttribute[pEquipWing->Type];
@@ -1856,7 +1857,7 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
         Character.CurseDamageMax += wDamageMax;
     }
 
-    ITEM* pEquipLeft = &Equipment[EQUIPMENT_WEAPON_LEFT];
+    ITEM* pEquipLeft = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
     if (pEquipLeft->Type != -1 && pEquipLeft->Durability != 0)
     {
         ITEM_ATTRIBUTE* pAttribute = &ItemAttribute[pEquipLeft->Type];
@@ -2005,7 +2006,7 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
         Character.SuccessfulBlocking = Dexterity / 3;
     }
 
-    ITEM* Left = &Equipment[EQUIPMENT_WEAPON_LEFT];
+    ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
     if (Left->Type != -1 && Left->Durability != 0)
     {
         ITEM_ATTRIBUTE* p = &ItemAttribute[Left->Type];
@@ -2023,15 +2024,20 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
         PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, Left);
     }
 
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_HELM]);
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_ARMOR]);
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_PANTS]);
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_GLOVES]);
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_BOOTS]);
     PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
-                             &Equipment[EQUIPMENT_RING_LEFT]);
+                             GetEffectiveEquipment(EQUIPMENT_HELM));
     PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
-                             &Equipment[EQUIPMENT_RING_RIGHT]);
+                             GetEffectiveEquipment(EQUIPMENT_ARMOR));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_PANTS));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_GLOVES));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_BOOTS));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_RING_LEFT));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_RING_RIGHT));
 
     Character.SuccessfulBlocking *= g_SocketItemMgr.m_StatusBonus.m_fDefenceRateBonus;
 }
@@ -2072,19 +2078,21 @@ void CHARACTER_MACHINE::CalculateDefense()
     WORD    Defense = 0;
     for (int i = EQUIPMENT_WEAPON_LEFT; i <= EQUIPMENT_WING; ++i)
     {
-        if (Equipment[i].Durability != 0)
+        ITEM* item = GetEffectiveEquipment(i);
+        if (item->Durability != 0)
         {
-            WORD defense = ItemDefense(&Equipment[i]);
+            WORD defense = ItemDefense(item);
 
-            ITEM_ATTRIBUTE* p = &ItemAttribute[Equipment[i].Type];
+            ITEM_ATTRIBUTE* p = &ItemAttribute[item->Type];
             float percent;
             if (i == EQUIPMENT_WING)
             {
-                percent = CalcDurabilityPercent(Equipment[i].Durability, p->Durability, Equipment[i].Level, 0);//Equipment[i].Option1);
+                percent = CalcDurabilityPercent(item->Durability, p->Durability, item->Level, 0);
             }
             else
             {
-                percent = CalcDurabilityPercent(Equipment[i].Durability, p->Durability, Equipment[i].Level, Equipment[i].ExcellentFlags, Equipment[i].AncientDiscriminator);
+                percent = CalcDurabilityPercent(item->Durability, p->Durability, item->Level, item->ExcellentFlags,
+                                                item->AncientDiscriminator);
             }
 
             defense -= (WORD)(defense * percent);
@@ -2139,22 +2147,23 @@ void CHARACTER_MACHINE::CalculateDefense()
 
     g_csItemOption.PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE);
 
-    if (GameLogic::Items::IsShieldType(Equipment[EQUIPMENT_WEAPON_LEFT].Type))
+    if (GameLogic::Items::IsShieldType(GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT)->Type))
     {
         g_csItemOption.PlusSpecialPercent(&Character.Defense, AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE);
     }
 
-    PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_HELPER]);
-    if (GameLogic::Items::IsSecondTierCape(&Equipment[EQUIPMENT_WING]))
+    PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, GetEffectiveEquipment(EQUIPMENT_HELPER));
+    if (GameLogic::Items::IsSecondTierCape(GetEffectiveEquipment(EQUIPMENT_WING)))
     {
-        PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_WING]);
+        PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, GetEffectiveEquipment(EQUIPMENT_WING));
     }
 
     Character.Defense += g_SocketItemMgr.m_StatusBonus.m_iDefenceBonus;
 
-    if (Equipment[EQUIPMENT_WEAPON_LEFT].Type != -1 && Equipment[EQUIPMENT_WEAPON_LEFT].Durability != 0)
+    const ITEM* shield = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    if (shield->Type != -1 && shield->Durability != 0)
     {
-        Character.Defense += Equipment[EQUIPMENT_WEAPON_LEFT].Defense * g_SocketItemMgr.m_StatusBonus.m_iShieldDefenceBonus * 0.01f;
+        Character.Defense += shield->Defense * g_SocketItemMgr.m_StatusBonus.m_iShieldDefenceBonus * 0.01f;
     }
 }
 
@@ -2162,23 +2171,26 @@ void CHARACTER_MACHINE::CalculateMagicDefense()
 {
     for (int i = EQUIPMENT_HELM; i <= EQUIPMENT_WING; ++i)
     {
-        if (Equipment[i].Durability != 0)
+        ITEM* item = GetEffectiveEquipment(i);
+        if (item->Durability != 0)
         {
-            Character.MagicDefense = ItemMagicDefense(&Equipment[i]);
+            Character.MagicDefense = ItemMagicDefense(item);
         }
     }
 }
 
 void CHARACTER_MACHINE::CalculateWalkSpeed()
 {
-    if (Equipment[EQUIPMENT_BOOTS].Durability != 0)
+    ITEM* boots = GetEffectiveEquipment(EQUIPMENT_BOOTS);
+    if (boots->Durability != 0)
     {
-        Character.WalkSpeed = ItemWalkSpeed(&Equipment[EQUIPMENT_BOOTS]);
+        Character.WalkSpeed = ItemWalkSpeed(boots);
     }
 
-    if (Equipment[EQUIPMENT_WING].Durability != 0)
+    ITEM* wing = GetEffectiveEquipment(EQUIPMENT_WING);
+    if (wing->Durability != 0)
     {
-        Character.WalkSpeed += ItemWalkSpeed(&Equipment[EQUIPMENT_WING]);
+        Character.WalkSpeed += ItemWalkSpeed(wing);
     }
 }
 
@@ -2224,6 +2236,19 @@ void CHARACTER_MACHINE::CalulateMasterLevelNextExperience()
             );
 
     Master_Level_Data.lNext_MasterLevel_Experince = (iData_Master - (int64_t)3892250000) / (int64_t)2;
+}
+
+ITEM* CHARACTER_MACHINE::GetEffectiveEquipment(int slot)
+{
+    ITEM* item = &Equipment[slot];
+    if (item->Type != -1 && !GameLogic::Items::IsExpiredRental(item))
+    {
+        return item;
+    }
+
+    m_NoEffectEquipment = ITEM{};
+    m_NoEffectEquipment.Type = -1;
+    return &m_NoEffectEquipment;
 }
 
 bool CHARACTER_MACHINE::IsZeroDurability()
@@ -2314,9 +2339,9 @@ void CHARACTER_MACHINE::CalculateAll()
     g_csItemOption.getAllAddOptionStatesbyCompare(&Character.AddStrength, &Character.AddDexterity, &Character.AddEnergy, &Character.AddVitality, &Character.AddCharisma, wStrengthResult, wDexterityResult, wEnergyResult, wVitalityResult, wCharismaResult);
     g_csItemOption.CheckItemSetOptions();
 
-    if (Data::Items::ToModelSlot(CharacterMachine->Equipment[EQUIPMENT_WING].Type) == MODEL_CAPE_OF_LORD)
+    if (Data::Items::ToModelSlot(GetEffectiveEquipment(EQUIPMENT_WING)->Type) == MODEL_CAPE_OF_LORD)
     {
-        PlusSpecial(&Character.AddCharisma, AT_SET_OPTION_IMPROVE_CHARISMA, &CharacterMachine->Equipment[EQUIPMENT_WING]);
+        PlusSpecial(&Character.AddCharisma, AT_SET_OPTION_IMPROVE_CHARISMA, GetEffectiveEquipment(EQUIPMENT_WING));
     }
 
     CalculateBasicState();

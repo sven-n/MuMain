@@ -54,6 +54,23 @@ void DiscardPickedItem()
     mu::ui::window::CInventoryCtrl::DeletePickedItem();
 }
 
+void DiscardPickedItemUpdatedBy(int index)
+{
+    auto* pickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
+    if (pickedItem == nullptr)
+        return;
+
+    if (IsHeldItemEndedByUpdate(pickedItem->GetSourceStorageType(), pickedItem->GetSourceLinealPos(),
+                                pickedItem->IsUsedOnItem(), index))
+        DiscardPickedItem();
+}
+
+bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, bool usedOnItem, int updatedIndex)
+{
+    const bool isUpdatedItem = source == STORAGE_TYPE::INVENTORY && sourcePos == updatedIndex;
+    return usedOnItem || isUpdatedItem;
+}
+
 void RestorePickedItem()
 {
     mu::ui::window::CInventoryCtrl::BackupPickedItem();
