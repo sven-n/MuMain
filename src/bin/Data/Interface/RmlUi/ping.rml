@@ -1,0 +1,16 @@
+<rml>
+<head>
+    <title>Ping</title>
+    <link type="text/rcss" href="base.rcss"/>
+    <link type="text/rcss" href="ping.rcss"/>
+</head>
+<body data-model="ping">
+    <!-- $ping: the time a message needs to the game server and back, for a few seconds. -->
+    <div id="panel">
+        <div class="section-back"></div>
+        <div class="title" data-if="!measuring &amp;&amp; !unanswered">Ping {{ms}} ms</div>
+        <div class="title" data-if="measuring">Ping ...</div>
+        <div class="title" data-if="unanswered">Ping: no answer</div>
+    </div>
+</body>
+</rml>

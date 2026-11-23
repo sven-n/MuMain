@@ -142,6 +142,8 @@ constexpr DocumentPlacement Placements[] = {
     // The item on the cursor: the original's camera at 10.9, over the windows and message boxes.
     {"cursor_item.rml", 10.9f, MainScene},
     {"notices.rml", NoticesDepth, AnyScene},
+    // The ping ($ping), passive like the notices and over the windows.
+    {"ping.rml", NoticesDepth, MainScene},
     {"char_info_balloon.rml", SceneBalloonDepth, AnyScene},
     {"login.rml", SceneWindowDepth, AnyScene},
     {"login_main.rml", SceneWindowDepth, AnyScene},

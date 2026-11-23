@@ -36,6 +36,19 @@ void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, c
                      clientSerial);
 }
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendRoundTripRequestFn)(int32_t, uint32_t);
+
+void PacketFunctions_ClientToServer_Custom::SendRoundTripRequest(uint32_t token)
+{
+    // A library from before the packet lacks it; the ping then reads as unanswered.
+    static const SendRoundTripRequestFn dotnet_SendRoundTripRequest =
+        LoadManagedSymbol<SendRoundTripRequestFn>("ConnectionManager_SendRoundTripRequest");
+    if (dotnet_SendRoundTripRequest)
+    {
+        dotnet_SendRoundTripRequest(this->GetHandle(), token);
+    }
+}
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExtFn)(int32_t, uint16_t, uint32_t);
 
 void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uint32_t token)

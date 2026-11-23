@@ -5,6 +5,7 @@
 namespace MUnique.Client.Library;
 
 using System;
+using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 using System.Text;
 using MUnique.OpenMU.Network;
@@ -83,6 +84,44 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             ManagedLog.Write(ManagedLog.Level.Error, $"NET: Login packet staging failed, handle={handle}: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Sends a RoundTripRequest (C1 F5 0C) to this connection: the server answers it right away with a
+    /// RoundTripResponse carrying the same token, so the time in between is the ping.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="token">The token the server sends back.</param>
+    /// <remarks>
+    /// shortcut: written by hand because the OpenMU packets package this library uses predates the packet;
+    /// generate it from the package once a release has it.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_SendRoundTripRequest")]
+    public static void SendRoundTripRequest(int handle, uint token)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                const int length = 8;
+                var packet = pipeWriter.GetSpan(length)[..length];
+                packet[0] = 0xC1;
+                packet[1] = length;
+                packet[2] = 0xF5;
+                packet[3] = 0x0C;
+                BinaryPrimitives.WriteUInt32LittleEndian(packet[4..], token);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Round trip request staging failed, handle={handle}: {ex}");
         }
     }
 }
