@@ -1525,6 +1525,7 @@ and server share.
 | `effectValues` | The values the item sets for the fields of its effect that each item sets, like `renderStyleValues`. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
 | `material` | `{ "specular": 0.5 }`: the strength of the highlight under Enhanced lighting, 0 (none) to 1; see [enhanced-look.md](enhanced-look.md). Optional. |
+| `worn` | Where a worn wing or cape hangs on the character: `{ "bone": 19, "link": true, "offset": [0, 0, 15] }`. `bone` is the character's bone (default `47`, the wing bone; capes and cloaks use `19`), `link` places it by the bone's whole pose instead of only its position (default `false`; capes and cloaks use `true`), `offset` moves it from the bone (default `[0, 0, 15]`). Optional; without it the item hangs like a wing. |
 
 `inventory` and `ground` hold these values; a missing value has the
 default, which is the look of items without values of their own:

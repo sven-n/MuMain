@@ -533,6 +533,10 @@
         "level": 0,
         "excellent": false
       },
+      "worn": {
+        "bone": 19,
+        "link": true
+      },
       "renderStyle": "capeOfEmperor"
     },
     {
@@ -690,6 +694,10 @@
       "glow": {
         "level": 0,
         "excellent": false
+      },
+      "worn": {
+        "bone": 19,
+        "link": true
       },
       "renderStyle": "capeOfEmperor"
     },

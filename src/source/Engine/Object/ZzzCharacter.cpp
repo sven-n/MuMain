@@ -70,6 +70,7 @@
 #include "Engine/Object/CullingConstants.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Render/Items/ItemModelLookup.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Monsters/MonsterLooks.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -14008,7 +14009,7 @@ void PrepareCarriedParts(CHARACTER* c)
 
     if (!gMapManager.InChaosCastle() && w->Type != -1)
     {
-        w->LinkBone = IsLinkedCape(w->Type) ? 19 : 47;
+        w->LinkBone = static_cast<BYTE>(WornOf(w->Type).bone);
         w->PlaySpeed = IsFlying(o) ? (w->Type == MODEL_WING_OF_STORM ? 0.5f : 1.f) : 0.25f;
     }
     else if (BloodCastleQuestItem(c) != 0)
@@ -14040,9 +14041,11 @@ bool IsFlying(const OBJECT* o)
     return o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW;
 }
 
-bool IsLinkedCape(int type)
+const Data::Items::ItemWorn& WornOf(int type)
 {
-    return type == MODEL_CAPE_OF_EMPEROR || type == MODEL_CAPE_OF_OVERRULE;
+    static const Data::Items::ItemWorn Wing;
+    const Data::Items::ItemModelDefinition* model = Render::Items::FindItemModel(type);
+    return model != nullptr ? model->worn : Wing;
 }
 
 int BloodCastleQuestItem(const CHARACTER* c)
@@ -14169,7 +14172,11 @@ void PlanAttachments(CHARACTER* c)
         {
             PART_t* w = &c->Wing;
             if (w->Type != -1)
-                plan(0.f, 0.f, 15.f, w, w->Type, IsLinkedCape(w->Type), true, -1, w->PlaySpeed, o->Scale);
+            {
+                const Data::Items::ItemWorn& worn = WornOf(w->Type);
+                plan(static_cast<float>(worn.offset[0]), static_cast<float>(worn.offset[1]),
+                     static_cast<float>(worn.offset[2]), w, w->Type, worn.link, true, -1, w->PlaySpeed, o->Scale);
+            }
             if (c->Helper.Type == MODEL_IMP)
             {
                 vec3_t at;
@@ -14258,8 +14265,10 @@ bool RenderCharacterBackItem(const CHARACTER* c, const OBJECT* o, bool bTranslat
             if (w->Type != -1)
             {
                 // Its bone is the one PrepareCarriedParts set.
-                RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, IsLinkedCape(w->Type),
-                                 bTranslate);
+                const Data::Items::ItemWorn& worn = WornOf(w->Type);
+                RenderLinkObject(static_cast<float>(worn.offset[0]), static_cast<float>(worn.offset[1]),
+                                 static_cast<float>(worn.offset[2]), c, w, w->Type, w->Level, w->ExcellentFlags,
+                                 worn.link, bTranslate);
             }
 
             // 사탄

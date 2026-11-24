@@ -2,6 +2,7 @@
 #define __ZZCHARACTER_H__
 
 #include "Engine/Object/CharacterAttachments.h"
+#include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Render/Models/ZzzBMD.h"
 #include <span>
 
@@ -190,8 +191,8 @@ bool RenderCharacterBackItem(const CHARACTER* c, const OBJECT* o, bool bTranslat
 bool DrawsWeaponOnBack(const CHARACTER* c, const OBJECT* o, int index);
 void PrepareCarriedParts(CHARACTER* c);
 bool IsFlying(const OBJECT* o);
-// The capes that hang from the shoulders (bone 19) and link to the body.
-bool IsLinkedCape(int type);
+// Where a worn wing or cape hangs, from its item model's data.
+const Data::Items::ItemWorn& WornOf(int type);
 // The Archangel quest item a Blood Castle player carries on the back, or 0.
 int BloodCastleQuestItem(const CHARACTER* c);
 // The quest item plays on the wing part, at its own speed.

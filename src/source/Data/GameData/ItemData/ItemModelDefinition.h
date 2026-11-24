@@ -118,6 +118,19 @@ struct ItemMaterial
     bool operator==(const ItemMaterial&) const = default;
 };
 
+// Where a worn wing or cape hangs on the character. The defaults are how
+// wings hang: from the wing bone, placed by the bone's position only.
+struct ItemWorn
+{
+    int bone = 47;
+    // Placed by the bone's whole pose (position and rotation), as capes are.
+    bool link = false;
+    // Moves the model from the bone (x, y, z).
+    std::array<double, 3> offset{0.0, 0.0, 15.0};
+
+    bool operator==(const ItemWorn&) const = default;
+};
+
 // The model of one item: which .bmd file is opened for it, where its
 // textures are and how it is drawn. One entry of the model files
 // (Data/Items/Models). Each item keeps its own model slot (ToModelSlot);
@@ -148,6 +161,7 @@ struct ItemModelDefinition
     bool cloth = false;
     ItemGlow glow;
     ItemMaterial material;
+    ItemWorn worn;
     // The look of the model when it is more than a plain textured model: the
     // name of a render style (Render/Items/ItemRenderStyles). Empty: plain.
     std::string renderStyle;
