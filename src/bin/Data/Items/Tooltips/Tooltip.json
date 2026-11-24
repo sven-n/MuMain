@@ -1376,8 +1376,8 @@
         {"id": "blankAfterOptions", "text": ""},
         {"section": "afterOptions"},
         {"text": "@expiredItem", "when": ["timed", "expired"], "color": "red"},
-        {"text": "@expirationDay", "when": ["timed", "!expired"], "color": "orange"},
-        {"text": "{expireDate}", "when": ["timed", "!expired"], "color": "blue"}
+        {"text": "@expirationDay", "when": ["timed", "hasExpireDate"], "color": "orange"},
+        {"text": "{expireDate}", "when": ["timed", "hasExpireDate"], "color": "blue"}
       ]
     },
     {

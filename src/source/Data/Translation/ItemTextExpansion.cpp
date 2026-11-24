@@ -38,7 +38,42 @@ TextsChangedObservers& Observers()
     return observers;
 }
 
-const wchar_t* ExpandWide(const wchar_t* text, int textLocaleIndex) noexcept
+std::string ExpandText(std::string_view text, std::string_view textLocale, bool isPrintfFormat)
+{
+    std::string expanded;
+    expanded.reserve(text.size());
+    std::size_t position = 0;
+    for (const ItemReferenceMatch& match : FindItemReferences(text))
+    {
+        expanded.append(text.substr(position, match.position - position));
+        const std::string_view written = text.substr(match.position, match.length);
+        std::optional<std::string> name;
+        if (match.reference && Resolver())
+        {
+            name = Resolver()(*match.reference, textLocale);
+        }
+        if (name && isPrintfFormat)
+        {
+            for (const char ch : *name)
+            {
+                if (ch == '%')
+                {
+                    expanded.push_back('%');
+                }
+                expanded.push_back(ch);
+            }
+        }
+        else
+        {
+            expanded.append(name ? std::string_view(*name) : written);
+        }
+        position = match.position + match.length;
+    }
+    expanded.append(text.substr(position));
+    return expanded;
+}
+
+const wchar_t* ExpandWide(const wchar_t* text, int textLocaleIndex, bool isPrintfFormat) noexcept
 {
     try
     {
@@ -47,7 +82,7 @@ const wchar_t* ExpandWide(const wchar_t* text, int textLocaleIndex) noexcept
             return text;
         }
         const std::string written = Core::Text::ToUtf8(text);
-        const std::string expanded = ExpandText(written, I18N::GetAvailableLocales()[textLocaleIndex]);
+        const std::string expanded = ExpandText(written, I18N::GetAvailableLocales()[textLocaleIndex], isPrintfFormat);
         if (expanded == written)
         {
             return text;
@@ -70,23 +105,7 @@ void SetNameResolver(NameResolver resolver)
 
 std::string ExpandText(std::string_view text, std::string_view textLocale)
 {
-    std::string expanded;
-    expanded.reserve(text.size());
-    std::size_t position = 0;
-    for (const ItemReferenceMatch& match : FindItemReferences(text))
-    {
-        expanded.append(text.substr(position, match.position - position));
-        const std::string_view written = text.substr(match.position, match.length);
-        std::optional<std::string> name;
-        if (match.reference && Resolver())
-        {
-            name = Resolver()(*match.reference, textLocale);
-        }
-        expanded.append(name ? std::string_view(*name) : written);
-        position = match.position + match.length;
-    }
-    expanded.append(text.substr(position));
-    return expanded;
+    return ExpandText(text, textLocale, false);
 }
 
 void RegisterTextsChangedObserver(TextsChangedObserver observer, void* context)

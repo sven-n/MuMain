@@ -35,7 +35,7 @@ int ElementTooltip::Hovered() const
     return m_Element ? m_Key : -1;
 }
 
-void ElementTooltip::Show(std::vector<Tooltip::Line> lines, const Placement& placement)
+void ElementTooltip::Show(std::span<const Tooltip::Line> lines, const Placement& placement)
 {
     Rml::Vector2f offset, size;
     if (lines.empty() || !m_Element || !m_Element->IsVisible(true) ||
@@ -46,14 +46,13 @@ void ElementTooltip::Show(std::vector<Tooltip::Line> lines, const Placement& pla
     }
 
     Tooltip::Config config;
-    config.lines = std::move(lines);
     config.box = placement.box;
     config.anchor = placement.anchor;
     config.anchorX = offset.x + size.x / 2.f;
     config.anchorY = offset.y + size.y * placement.anchorAt;
     config.centerHorizontally = true;
     config.textAlign = Tooltip::Config::TextAlign::Center;
-    Tooltip::Show(config, this);
+    Tooltip::ShowLines(lines, config, this);
 }
 
 void ElementTooltip::Hide()

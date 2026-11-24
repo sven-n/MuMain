@@ -26,6 +26,7 @@
 #include <clocale>
 #include <cstring>
 #include <filesystem>
+#include <regex>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -102,6 +103,39 @@ TEST_CASE("The texts that name items are listed with their group and key [data][
     CHECK(has("Game", "Jewel of Soul"));
     CHECK(has("Dialog", "Answer_65_Slot_0"));
     CHECK_FALSE(has("Game", "Jewel of Bless and Jewel of Soul"));
+}
+
+TEST_CASE("A text escapes item names in the languages whose text formats, by its values and not its key "
+          "[data][texts]")
+{
+    // ResxGen's printf rule (CppEmitter.cs, HasPrintfConversion): a conversion after '%', "%%" aside and without the
+    // space flag. A language escapes when its own value formats or the English one does, whatever the key says.
+    const std::wregex conversion(
+        LR"(%(?:[0-9]+\$)?[-+#0']*(?:\d+|\*(?:[0-9]+\$)?)?(?:\.(?:\d*|\*(?:[0-9]+\$)?))?(?:hh|ll|I32|I64|[hlLjztI])?[cCdiouxXeEfgGaAnpsS])");
+    const auto formats = [&](const wchar_t* value)
+    {
+        std::wstring text(value);
+        for (size_t at = text.find(L"%%"); at != std::wstring::npos; at = text.find(L"%%", at))
+        {
+            text.erase(at, 2);
+        }
+        return std::regex_search(text, conversion);
+    };
+
+    const size_t localeCount = I18N::GetAvailableLocales().size();
+    bool someFormat = false;
+    for (const I18N::ItemText& text : I18N::GetItemTexts())
+    {
+        const bool englishFormats = formats(text.values[0]);
+        for (size_t index = 0; index < localeCount; ++index)
+        {
+            const bool expected = englishFormats || formats(text.values[index]);
+            someFormat = someFormat || expected;
+            INFO(text.group, ".", text.key, " in locale ", I18N::GetAvailableLocales()[index]);
+            CHECK(((text.printfLocales >> index) & 1u) == (expected ? 1u : 0u));
+        }
+    }
+    CHECK(someFormat);
 }
 
 TEST_CASE("The jewel window names the jewels as the item data does, translated or not [data][texts]")

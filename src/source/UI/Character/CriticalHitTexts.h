@@ -17,22 +17,26 @@ namespace UI::Character
 class CriticalHitTexts
 {
 public:
-    // What the texts show, and in which language. The names they show (the Scroll of Battle, the buffs' skills) are
-    // compared with the item and skill tables in place: they change with "Translate item names", the editors and a
-    // reload of the data.
+    // What the texts show. A language switch or a refresh of the item texts reaches them through Invalidate (the window
+    // watches for both: TextsChangedWatch); the names they show (the Scroll of Battle, the buffs' skills) are also
+    // compared with the item and skill tables in place, since the skill editor changes them without either.
     struct Parts
     {
         GameLogic::Combat::CriticalDamageRate rate;
         GameLogic::Combat::CriticalDamageBonus bonus;
         int excellentBonus = 0;
         DamageRange damageRange;
-        std::string locale;
 
         bool operator==(const Parts&) const = default;
     };
 
     // Formats the texts again when `parts` differ from what they were built from; returns whether it did.
     bool Update(const Parts& parts);
+    // The language or an item text changed: the next Update formats the texts again.
+    void Invalidate()
+    {
+        m_Built.reset();
+    }
 
     const CriticalDamageRateLine& RateLine() const
     {

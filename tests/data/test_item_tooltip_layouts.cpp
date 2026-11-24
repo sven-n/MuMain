@@ -664,6 +664,7 @@ TEST_CASE("Every tooltip state is one the game sets [data][items][tooltip]")
     values.strength.asked = values.dexterity.asked = true;
     values.socketItem = values.upperTierWings = values.skillLuckOrOption = values.setItem = true;
     values.allClasses = values.classUsable = values.boots = values.gloves = values.expired = true;
+    values.hasExpireDate = true;
     for (const std::string_view state : GetTooltipStates())
     {
         INFO(state);

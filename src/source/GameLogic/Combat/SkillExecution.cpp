@@ -373,7 +373,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                         g_MovementSkill.m_bMagic = TRUE;
                         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
                         g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
-                        if (SkillWarrior(c, &CharacterMachine->Equipment[i]))
+                        if (SkillWarrior(c, CharacterMachine->GetEffectiveEquipment(i)))
                         {
                             return (int) ExecuteSkillComplete(c);
                         }
@@ -384,7 +384,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                     g_MovementSkill.m_bMagic = TRUE;
                     g_MovementSkill.m_iSkill = Hero->CurrentSkill;
                     g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
-                    if (SkillElf(c, &CharacterMachine->Equipment[i]))
+                    if (SkillElf(c, CharacterMachine->GetEffectiveEquipment(i)))
                     {
                         return (int) ExecuteSkillComplete(c);
                     }

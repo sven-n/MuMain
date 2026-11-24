@@ -22,6 +22,8 @@
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
+#include "UI/Diagnostics/PingOverlay.h"
+#include "Network/RoundTripMeter.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
 #include "Core/Text/Utf8.h"
@@ -94,6 +96,7 @@ extern CTimer* g_pTimer;
 extern DWORD g_dwMouseUseUIID;
 extern wchar_t GrabFileName[256];
 extern CHARACTER* Hero;
+extern BOOL g_bGameServerConnected;
 extern int HeroTile;
 extern bool Destroy;
 extern double WorldTime;
@@ -803,6 +806,19 @@ static void UpdateDiagnostics()
     UI::Diagnostics::Update(summary);
 }
 
+// The ping after $ping: requests go to the game server only, the connect server doesn't know them.
+static void UpdatePing()
+{
+    Network::RoundTripMeter& meter = Network::Ping();
+    const auto now = Network::RoundTripMeter::Clock::now();
+    if (SocketClient != nullptr && g_bGameServerConnected && SocketClient->State() == Network::ConnectionState::Open)
+    {
+        if (const std::optional<uint32_t> token = meter.NextRequest(now))
+            SocketClient->ToGameServer()->SendRoundTripRequest(*token);
+    }
+    UI::Diagnostics::PingOverlay::Update(meter.Read(now));
+}
+
 static void UpdateLoginSceneReconnect()
 {
     LoginSceneReconnect& reconnect = LoginSceneReconnect::Instance();
@@ -1285,6 +1301,7 @@ void MainScene(HDC hDC)
         {
             FRAME_PROFILE(Overlay);
             UpdateDiagnostics();
+            UpdatePing();
             UI::Reconnect::RenderDialog();
         }
 

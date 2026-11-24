@@ -6,6 +6,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_round_trip_meter
+    SOURCES
+        test_round_trip_meter.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Network/RoundTripMeter.cpp
+)
+
+mu_add_test(
     NAME test_byte_order
     SOURCES
         test_byte_order.cpp

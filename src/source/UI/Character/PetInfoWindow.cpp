@@ -208,6 +208,7 @@ void CPetInfoWindow::CalcDamage(int iNumTapButton)
         }
 
         pPetInfo = Hero->GetEquipedPetInfo(PET_TYPE_DARK_HORSE);
+        giPetManager::CalcPetInfo(pPetInfo);
         m_aiDamage[0] = pPetInfo->m_wDamageMin + iSkillDamage[0] + master_boost;
         m_aiDamage[1] = pPetInfo->m_wDamageMax + iSkillDamage[1] + master_boost;
     }
@@ -224,6 +225,7 @@ void CPetInfoWindow::CalcDamage(int iNumTapButton)
         }
 
         pPetInfo = Hero->GetEquipedPetInfo(PET_TYPE_DARK_SPIRIT);
+        giPetManager::CalcPetInfo(pPetInfo);
 
         m_fAddDamagePercent /= 100.f;
         m_aiDamage[0] = pPetInfo->m_wDamageMin + (int)(pPetInfo->m_wDamageMin * m_fAddDamagePercent);

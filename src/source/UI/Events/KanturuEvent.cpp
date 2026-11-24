@@ -497,10 +497,11 @@ bool mu::ui::window::CKanturu2ndEnterNpc::HasMoonstonePendant(ITEM* pItemRingLef
 
 void mu::ui::window::CKanturu2ndEnterNpc::ValidateEquipmentForEntry()
 {
-    ITEM* pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-    ITEM* pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-    ITEM* pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-    ITEM* pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
+    // An expired rented item has no effect, so it counts as an empty slot here too.
+    ITEM* pItemHelper = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_HELPER);
+    ITEM* pItemRingLeft = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
+    ITEM* pItemRingRight = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
+    ITEM* pItemWing = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_WING);
 
     if (IsRidingUniria(pItemHelper))
     {
