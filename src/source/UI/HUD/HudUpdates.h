@@ -21,6 +21,8 @@ void ShowExperienceGain(std::int64_t previous, std::int64_t gained, bool master)
 void ClearSkillHotkeys();
 // `skillIndex` is the slot in the character's skill list.
 void SetSkillHotkey(int hotkey, int skillIndex);
+// The slot in the character's skill list on `hotkey`, -1 when it's free.
+int GetSkillHotkey(int hotkey);
 
 enum class ItemHotkey : std::uint8_t
 {
