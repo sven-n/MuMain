@@ -198,3 +198,24 @@ The run uses the English language files; the other languages ship whole in `Data
 (`Data/Sound`) and music (`Data/Music`) are not in the repository, so no list names them: a port
 that has them ships both folders with the shared files. The same holds for an installed texture
 pack (`Data/TexturePacks`).
+
+### Checking the lists while the game plays
+
+The test above records what a run without frames opens. A load that happens only while the game plays (per-frame
+code, effects, server-triggered events) is not in it, and nothing else notices one that is missing from the lists.
+The audit mode does, on any platform and in any playtest:
+
+- start the client with `MU_CONTENT_LISTS=audit`;
+- each content read that finds its file is checked against `Shared.json`, the list of the map the server last sent
+  (`Map<n>.json`) and the lists of the monsters spawned so far (`Monsters.json`);
+- a read outside them logs one line, once per file (the log is the one in
+  [where settings and logs live](build/README.md#where-settings-and-logs-live)):
+  `Content audit: <file> is read outside the file lists on map <n>` (`(no map yet)` before the first map);
+- a name that is not a file, such as a path the game tries before another, is not a read of content and logs
+  nothing;
+- the lists themselves, `Data/Sound`, `Data/Music`, `Data/TexturePacks` and `shaders` are not checked: the
+  repository does not hold the first three's contents, so a port ships them whole;
+- without the variable no list is loaded and a read costs one flag check.
+
+For a reported file, record how the game reaches it in the generator test (`FrameModels`, a `MapStates` entry, a
+phase of the shared run) and rewrite the lists as described above.

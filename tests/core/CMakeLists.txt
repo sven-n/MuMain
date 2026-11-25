@@ -234,8 +234,10 @@ mu_add_test(
 mu_add_test(
     NAME test_content
     SOURCES
+        test_content_audit.cpp
         test_content_path.cpp
         test_content_store.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Content/ContentAudit.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Content/ContentPath.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Content/ContentStore.cpp
     LINK_LIBS
