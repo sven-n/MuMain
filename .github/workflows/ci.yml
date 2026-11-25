@@ -917,8 +917,8 @@ jobs:
       # A target file shaped like a port's (docs/build/README.md, Targets) still configures and builds: it needs
       # neither OpenSSL nor libcurl, brings its own network library adapter, and builds SDL and the game as shared
       # libraries, so every static library in the game must be position independent. From the sources fetched above;
-      # before the trim, so the compiler cache keeps its objects too. Precompiled headers as in the build above: with
-      # them ccache cannot cache the game's files, SDL's or RmlUi's, so each run compiled all of them again.
+      # before the trim, so the compiler cache keeps its objects too. Without precompiled headers outside release runs,
+      # as in the build above, so ccache can cache the game's, SDL's and RmlUi's files.
       # Its compiler cache statistics go to the summary on their own, after the player build's.
       - name: Build a port-like target
         run: |
