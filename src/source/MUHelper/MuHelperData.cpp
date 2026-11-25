@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "MuHelperData.h"
 
+#include <algorithm>
+
 namespace MUHelper
 {
 
@@ -121,6 +123,7 @@ void ConfigDataSerDe::Serialize(const ConfigData& gameData, PRECEIVE_MUHELPER_DA
     netData.ExcellentItem = gameData.bPickExcellent ? 1 : 0;
     netData.SetItem = gameData.bPickAncient ? 1 : 0;
     netData.AddExtraItem = gameData.bPickExtraItems ? 1 : 0;
+    netData.PickSocketMinimum = static_cast<BYTE>(std::clamp(gameData.iPickSocketMinimum, 0, MaxPickSocketMinimum));
 
     memset(netData.ExtraItems, 0, sizeof(netData.ExtraItems));
     int iItemIndex = 0;
@@ -213,6 +216,7 @@ void ConfigDataSerDe::Deserialize(const PRECEIVE_MUHELPER_DATA& netData, ConfigD
     gameData.bPickExcellent = (bool)netData.ExcellentItem;
     gameData.bPickAncient = (bool)netData.SetItem;
     gameData.bPickExtraItems = (bool)netData.AddExtraItem;
+    gameData.iPickSocketMinimum = std::min(static_cast<int>(netData.PickSocketMinimum), MaxPickSocketMinimum);
 
     wchar_t wsExtraItemBuffer[15 + 1];
     for (int i = 0; i < sizeof(netData.ExtraItems) / sizeof(netData.ExtraItems[0]); i++)

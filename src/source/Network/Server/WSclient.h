@@ -3678,7 +3678,8 @@ typedef struct
     BYTE bFallbackBasicAttack : 1;           // Index: 33 (bit 3)
     BYTE : 4;                                // Unused bits of Index 33
 
-    BYTE _UnusedPadding[35];                 // Index: 34 (35 bytes remaining)
+    BYTE PickSocketMinimum;                  // Index: 34 (0 = off, 1-5 = minimum socket count)
+    BYTE _UnusedPadding[34];                 // Index: 35 (34 bytes remaining)
     char ExtraItems[12][15];                 // Index: 69
 } PRECEIVE_MUHELPER_DATA, * LPRECEIVE_MUHELPER_DATA;
 #pragma pack(pop)

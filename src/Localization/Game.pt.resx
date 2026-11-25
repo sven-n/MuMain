@@ -8868,6 +8868,9 @@ Tela cheia muda o monitor para a resolução escolhida.</value>
   <data name="Socket items" xml:space="preserve">
     <value>Itens de soquete</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>Recolhe os itens com pelo menos esta quantidade de soquetes (1-5).</value>
+  </data>
   <data name="Item Refinement" xml:space="preserve">
     <value>Refinamento de itens</value>
   </data>

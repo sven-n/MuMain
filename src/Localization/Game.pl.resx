@@ -9185,6 +9185,9 @@ Pełny ekran przełącza monitor na wybraną rozdzielczość.</value>
   <data name="Socket items" xml:space="preserve">
     <value>Przedmioty gniazdowe</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>Podnosi przedmioty z co najmniej tyloma gniazdami (1-5).</value>
+  </data>
   <data name="Item Refinement" xml:space="preserve">
     <value>Uszlachetnianie przedmiotu</value>
   </data>

@@ -20,7 +20,8 @@ bool ShouldPickUpHelperItem(const MUHelper::ConfigData& config, ITEM* item)
     }
 
     if ((config.bPickZen && IsMoneyItem(item)) || (config.bPickJewel && GameLogic::Items::IsJewelItem(item)) ||
-        (config.bPickAncient && IsAncientItem(item)) || (config.bPickExcellent && IsExcellentItem(item)))
+        (config.bPickAncient && IsAncientItem(item)) || (config.bPickExcellent && IsExcellentItem(item)) ||
+        (config.iPickSocketMinimum > 0 && item->SocketCount >= config.iPickSocketMinimum))
     {
         return true;
     }

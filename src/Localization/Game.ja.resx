@@ -7765,4 +7765,7 @@
   <data name="Warp resets %d" xml:space="preserve">
     <value>R %d</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>このソケット数以上のアイテムを拾います (1-5)。</value>
+  </data>
 </root>

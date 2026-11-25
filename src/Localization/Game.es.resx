@@ -8868,6 +8868,9 @@ Pantalla completa cambia el monitor a la resolución elegida.</value>
   <data name="Socket items" xml:space="preserve">
     <value>Artículos de enchufe</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>Recoge los ítems con al menos esta cantidad de sockets (1-5).</value>
+  </data>
   <data name="Item Refinement" xml:space="preserve">
     <value>Refinamiento del artículo</value>
   </data>

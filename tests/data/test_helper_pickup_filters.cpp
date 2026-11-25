@@ -235,3 +235,62 @@ TEST_CASE("Helper All and Selected retain their category semantics [data][helper
     CHECK(GameLogic::Automation::ShouldPickUpHelperItem(config, &jewel));
     CHECK_FALSE(GameLogic::Automation::ShouldPickUpHelperItem(config, &money));
 }
+
+TEST_CASE("Helper socket filter picks up items with at least the minimum socket count [data][helper][pickup]")
+{
+    MUHelper::ConfigData config;
+    config.bPickSelectItems = true;
+    config.iPickSocketMinimum = 3;
+
+    ITEM item = MakeItem(SerpentSwordType);
+    for (int sockets = 0; sockets <= MAX_SOCKETS; ++sockets)
+    {
+        CAPTURE(sockets);
+        item.SocketCount = static_cast<BYTE>(sockets);
+        CHECK(GameLogic::Automation::ShouldPickUpHelperItem(config, &item) == (sockets >= 3));
+    }
+
+    SUBCASE("off when the minimum is 0")
+    {
+        config.iPickSocketMinimum = 0;
+        item.SocketCount = MAX_SOCKETS;
+        CHECK_FALSE(GameLogic::Automation::ShouldPickUpHelperItem(config, &item));
+    }
+
+    SUBCASE("only with selected items")
+    {
+        config.bPickSelectItems = false;
+        item.SocketCount = MAX_SOCKETS;
+        CHECK_FALSE(GameLogic::Automation::ShouldPickUpHelperItem(config, &item));
+    }
+}
+
+TEST_CASE("Helper socket minimum is stored in its own byte of the packet [helper][pickup]")
+{
+    MUHelper::ConfigData config;
+    config.iPickSocketMinimum = 4;
+    config.bPickExtraItems = true;
+    config.aExtraItems.insert(L"Sphere (Tri)");
+
+    PRECEIVE_MUHELPER_DATA packet{};
+    MUHelper::ConfigDataSerDe::Serialize(config, packet);
+    const auto* bytes = reinterpret_cast<const BYTE*>(&packet);
+    CHECK(offsetof(PRECEIVE_MUHELPER_DATA, PickSocketMinimum) == 30); // packet index 34
+    CHECK(offsetof(PRECEIVE_MUHELPER_DATA, ExtraItems) == 65);        // unchanged
+    CHECK(bytes[30] == 4);
+
+    MUHelper::ConfigData read;
+    MUHelper::ConfigDataSerDe::Deserialize(packet, read);
+    CHECK(read.iPickSocketMinimum == 4);
+    CHECK(read.aExtraItems.count(L"Sphere (Tri)") == 1);
+
+    SUBCASE("clamped to 5")
+    {
+        config.iPickSocketMinimum = 9;
+        MUHelper::ConfigDataSerDe::Serialize(config, packet);
+        CHECK(packet.PickSocketMinimum == 5);
+        packet.PickSocketMinimum = 200;
+        MUHelper::ConfigDataSerDe::Deserialize(packet, read);
+        CHECK(read.iPickSocketMinimum == 5);
+    }
+}

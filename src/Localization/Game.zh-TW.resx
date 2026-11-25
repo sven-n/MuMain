@@ -8851,6 +8851,9 @@
   <data name="Socket items" xml:space="preserve">
     <value>插座項目</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>拾取鑲嵌孔數量不少於此值的物品 (1-5)。</value>
+  </data>
   <data name="Item Refinement" xml:space="preserve">
     <value>物品精煉</value>
   </data>

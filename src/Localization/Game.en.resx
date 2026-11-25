@@ -9297,6 +9297,9 @@ Fullscreen changes the monitor to the chosen resolution.</value>
   <data name="Socket items" xml:space="preserve">
     <value>Socket items</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>Picks up the items with at least this many sockets (1-5).</value>
+  </data>
   <data name="Item Refinement" xml:space="preserve">
     <value>Item Refinement</value>
   </data>

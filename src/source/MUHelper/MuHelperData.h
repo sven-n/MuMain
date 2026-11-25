@@ -33,6 +33,9 @@ DEFINE_ENUM_FLAG_OPERATORS(ESkillActivationBase);
 DEFINE_ENUM_FLAG_OPERATORS(ESkillActivationPreCon);
 DEFINE_ENUM_FLAG_OPERATORS(ESkillActivationSubCon);
 
+// An item has at most 5 sockets (MAX_SOCKETS).
+constexpr int MaxPickSocketMinimum = 5;
+
 constexpr uint32_t MUHELPER_SKILL_PRECON_CLEAR =
     ~(static_cast<uint32_t>(ON_MOBS_NEARBY) | static_cast<uint32_t>(ON_MOBS_ATTACKING));
 
@@ -91,6 +94,8 @@ typedef struct _PetAttackConfig
     bool bPickExcellent = false;
     bool bPickExtraItems = false;
     std::set<std::wstring> aExtraItems;
+    // Picks up, with "selected items", the drops with at least this many sockets. 0 = off, 1-5.
+    int iPickSocketMinimum = 0;
 
     // Client-local settings (byte index 33, bits 0-3).
     // The server (OpenMU) stores MuHelperConfiguration as byte[] echoed

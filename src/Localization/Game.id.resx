@@ -8851,6 +8851,9 @@
   <data name="Socket items" xml:space="preserve">
     <value>Item soket</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>Mengambil item dengan setidaknya sebanyak ini soket (1-5).</value>
+  </data>
   <data name="Item Refinement" xml:space="preserve">
     <value>Penyempurnaan Barang</value>
   </data>
