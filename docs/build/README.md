@@ -375,7 +375,8 @@ SHA-256 (**Install compiler cache**). Before a compiler cache is saved, **Trim
 compiler cache** removes the objects the build did not use (ccache marks each object
 it finds), so an entry holds one build's objects, not every build's since the cache
 began: about 0.5 GB on Windows, whose objects carry their debug info (`/Z7`). PR
-and main push builds configure with `-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`: SDL,
+and main push builds, the Linux port-like target's too, configure with
+`-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`: SDL,
 RmlUi and the game (`stdafx.h`) use precompiled headers, which ccache does not
 cache, so their files would compile again on every run (SDL and RmlUi alone are over
 a quarter of each build: 503 of 1666 compile calls on Linux, 421 of 1584 on macOS).

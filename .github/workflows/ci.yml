@@ -917,11 +917,13 @@ jobs:
       # A target file shaped like a port's (docs/build/README.md, Targets) still configures and builds: it needs
       # neither OpenSSL nor libcurl, brings its own network library adapter, and builds SDL and the game as shared
       # libraries, so every static library in the game must be position independent. From the sources fetched above;
-      # before the trim, so the compiler cache keeps its objects too.
+      # before the trim, so the compiler cache keeps its objects too. Precompiled headers as in the build above: with
+      # them ccache cannot cache the game's files, SDL's or RmlUi's, so each run compiled all of them again.
       - name: Build a port-like target
         run: |
           cmake --preset linux-x64 -B out/build/port-like \
             "-DMU_TARGET_FILE=${{ github.workspace }}/tests/cmake/port-like-target.cmake" \
+            -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }} \
             -DCMAKE_DISABLE_FIND_PACKAGE_OpenSSL=ON \
             -DCMAKE_DISABLE_FIND_PACKAGE_CURL=ON \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \

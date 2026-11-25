@@ -642,6 +642,11 @@ check(
     "PR compilation must restore without creating isolated cache entries",
 )
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
+check(
+    "-DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }}"
+    in step(linux_job, "build-linux", "Build a port-like target"),
+    "Linux port-like build must configure without precompiled headers outside releases, or ccache cannot cache it",
+)
 # PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
 # entries out of the repository's 10 GB. Only main pushes save them: the nightly runs beside the pushes, so with both
 # saving, an older commit's entry could be saved last and be the one the prune job keeps.
