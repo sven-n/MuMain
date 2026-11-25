@@ -2,6 +2,8 @@
 
 #include "doctest.h"
 
+#include "Engine/Object/ZzzObject.h"
+#include "Network/Server/SocketSystem.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Inventory/ItemMng.h"
 
@@ -86,4 +88,27 @@ TEST_CASE("The level byte of an item carries the period state of a rented item [
     CHECK(expiredParams.Level == 9);
     CHECK(expiredParams.WithExpiration);
     CHECK(expiredParams.IsExpired);
+}
+
+// A drop on the ground keeps the sockets of its item data, and a reused drop slot doesn't keep the previous drop's.
+TEST_CASE("A dropped item keeps the sockets of its item data [network][items]")
+{
+    // Two sockets: the first one empty, the second one with a seed sphere.
+    constexpr BYTE SeedSphere = 2 * SEASON4A::MAX_SOCKET_OPTION + 7;
+    const std::array<BYTE, 8> itemData{0x00, 22, 9, 40, static_cast<BYTE>(ItemOptionFlags::HasSockets), 0x02,
+                                       SOCKET_EMPTY, SeedSphere};
+    const ItemCreationParams params = ParseItemData(itemData);
+
+    ITEM_t drop{};
+    drop.Item.SocketCount = MAX_SOCKETS;
+    drop.Item.SocketSeedID[0] = 3;
+    drop.Item.SocketSphereLv[0] = 4;
+    vec3_t position{};
+    CreateItemDrop(&drop, params, position, false);
+
+    CHECK(drop.Item.SocketCount == 2);
+    CHECK(drop.Item.SocketSeedID[0] == SOCKET_EMPTY);
+    CHECK(drop.Item.SocketSphereLv[0] == 0);
+    CHECK(drop.Item.SocketSeedID[1] == 7);
+    CHECK(drop.Item.SocketSphereLv[1] == 3);
 }

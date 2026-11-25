@@ -29,6 +29,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ItemDropModel.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "UI/Inventory/ItemMng.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -5797,6 +5798,8 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
     n->AncientDiscriminator = params.AncientDiscriminator;
     n->AncientBonusOption = params.AncientBonusOption;
     n->option_380 = params.HasGuardianOption;
+    // The drop's slot is reused, so every field is set, the sockets too (the MU Helper filters by their count).
+    ApplySocketParameters(*n, params);
 
     if (isFreshDrop)
     {

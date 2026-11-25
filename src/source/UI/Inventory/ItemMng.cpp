@@ -194,6 +194,15 @@ void FillItemFromParameters(ITEM& item, const ItemCreationParams& parameters)
     item.Jewel_Of_Harmony_Option = parameters.HarmonyOptionType;
     item.Jewel_Of_Harmony_OptionLevel = parameters.HarmonyOptionLevel;
     item.option_380 = parameters.HasGuardianOption;
+    ApplySocketParameters(item, parameters);
+
+    item.byColorState = ITEM_COLOR_NORMAL;
+
+    SetItemAttributes(&item);
+}
+
+void ApplySocketParameters(ITEM& item, const ItemCreationParams& parameters)
+{
     item.SocketCount = parameters.SocketCount;
     item.SocketSeedSetOption = parameters.SocketBonusOption;
     for (int i = 0; i < MAX_SOCKETS; ++i)
@@ -202,6 +211,7 @@ void FillItemFromParameters(ITEM& item, const ItemCreationParams& parameters)
         if (item.bySocketOption[i] == SOCKET_EMPTY)
         {
             item.SocketSeedID[i] = SOCKET_EMPTY;
+            item.SocketSphereLv[i] = 0;
         }
         else
         {
@@ -209,10 +219,6 @@ void FillItemFromParameters(ITEM& item, const ItemCreationParams& parameters)
             item.SocketSphereLv[i] = (item.bySocketOption[i] / SEASON4A::MAX_SOCKET_OPTION) + 1;
         }
     }
-
-    item.byColorState = ITEM_COLOR_NORMAL;
-
-    SetItemAttributes(&item);
 }
 
 ITEM* mu::ui::window::CItemMng::CreateItemByParameters(const ItemCreationParams* parameters)

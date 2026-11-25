@@ -49,6 +49,9 @@ ItemCreationParams ParseItemData(std::span<const BYTE> itemData);
 // left 0 (the item manager gives them).
 void FillItemFromParameters(ITEM& item, const ItemCreationParams& parameters);
 
+// Gives `item` the sockets the parameters describe: their count, the bonus option and each socket's seed and sphere.
+void ApplySocketParameters(ITEM& item, const ItemCreationParams& parameters);
+
 namespace mu::ui::window
 {
     class CItemMng
