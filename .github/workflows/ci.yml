@@ -50,6 +50,8 @@ jobs:
       # The image has no cppcheck; it comes from an apt cache, as the Linux build's packages do.
       APT_PACKAGES: cppcheck
       APT_ARCHIVES: ${{ github.workspace }}/.apt-archives
+      # The naga-cli the shader check converts with.
+      NAGA_VERSION: '30.0.2'
 
     steps:
       # Game data except what the gates read (RmlUi documents, fonts, Dec2.dat) is about 700 MB that only the native
@@ -86,6 +88,30 @@ jobs:
         run: |
           cmake -S tests/static -B out/static-checks
           ctest --test-dir out/static-checks -C Release --parallel 4 --output-on-failure --no-tests=error
+
+      # A browser build needs every shader as WGSL, so a change that stops one converting shows in review. naga-cli is
+      # built once and cached, saved by main pushes like the other caches. The RmlUi renderer's shaders are not checked
+      # yet (nitoygo/RmlUi#5 makes its blur shaders convert).
+      - name: Restore naga
+        id: naga
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.cargo/bin/naga
+          key: naga-cli-${{ env.NAGA_VERSION }}-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Install naga
+        if: steps.naga.outputs.cache-hit != 'true'
+        run: cargo install naga-cli --version "$NAGA_VERSION" --locked
+
+      - name: Save naga
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.naga.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.cargo/bin/naga
+          key: ${{ steps.naga.outputs.cache-primary-key }}
+
+      - name: Check that the shaders convert to WGSL
+        run: python3 scripts/check_shaders_wgsl.py --naga "$HOME/.cargo/bin/naga"
 
       - name: Validate game data inputs
         run: |

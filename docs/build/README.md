@@ -337,6 +337,22 @@ individual platform jobs, which do not run on every event. Do not enable **Requi
 branches to be up to date** just to reduce builds: it can force another build after
 each main merge. Update a PR when its integration state needs revalidation.
 
+### Shaders convert to WGSL
+
+Quality Gates converts every `src/shaders/compiled/*.spv` to WGSL with naga, so
+that a change a browser build cannot use shows in review (an array passed between
+shader stages, for example). To run it after regenerating the shaders:
+
+```sh
+cargo install naga-cli --version 30.0.2 --locked
+python3 scripts/check_shaders_wgsl.py
+```
+
+SDL GPU puts a texture and its sampler on one binding, which WGSL forbids; the
+script separates them before converting, as a WebGPU backend will have to. It
+does not run a browser's uniformity analysis, and it does not cover the RmlUi
+renderer's shaders yet.
+
 ### No warnings
 
 The three player builds (Windows, Linux and macOS, editor and control socket OFF)
