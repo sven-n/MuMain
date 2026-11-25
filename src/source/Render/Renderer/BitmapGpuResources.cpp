@@ -142,9 +142,14 @@ bool BitmapGpuResources::TryRetire(Slot& slot)
     {
         return false;
     }
-    // Signaled, so this returns at once; it is still called because SDL's Vulkan backend cleans up finished
-    // submissions only on a fence wait or a frame submit, and texture creation slows as they pile up in a load.
-    m_calls.wait(m_device, true, &slot.fence, 1);
+    // Signaled, so on desktop this returns at once; it is still called because SDL's Vulkan backend cleans up finished
+    // submissions only on a fence wait or a frame submit, and texture creation slows as they pile up in a load. Not
+    // where frames may not wait: a browser backend can give the page the thread inside the call, even for a signaled
+    // fence, and the frame's swapchain texture is gone when it comes back.
+    if (m_calls.waitAtCeiling)
+    {
+        m_calls.wait(m_device, true, &slot.fence, 1);
+    }
     m_calls.releaseFence(m_device, slot.fence);
     slot.fence = nullptr;
     return true;
