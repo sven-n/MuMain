@@ -64,7 +64,7 @@ extern int g_iFollowCharacter;
 
 namespace GameLogic::Combat
 {
-bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, ActionSkillType iSkill)
+bool CastWarriorSkill(CHARACTER* c, OBJECT* o, const ITEM* p, ActionSkillType iSkill)
 {
     if (c == NULL)	return false;
     if (o == NULL)	return false;
@@ -111,7 +111,7 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, ActionSkillType iSkill)
     return (Success);
 }
 
-bool SkillWarrior(CHARACTER* c, ITEM* p)
+bool SkillWarrior(CHARACTER* c, const ITEM* p)
 {
     OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
@@ -1164,7 +1164,7 @@ bool UseSkillRagePosition(CHARACTER* pCha)
     return false;
 }
 
-bool SkillElf(CHARACTER* c, ITEM* p)
+bool SkillElf(CHARACTER* c, const ITEM* p)
 {
     OBJECT* o = &c->Object;
     bool Success = false;

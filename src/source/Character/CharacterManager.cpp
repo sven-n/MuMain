@@ -309,7 +309,7 @@ int CCharacterManager::GetEquipedBowType()
     return BOWTYPE_NONE;
 }
 
-int CCharacterManager::GetEquipedBowType(ITEM* pItem)
+int CCharacterManager::GetEquipedBowType(const ITEM* pItem)
 {
     if (GameLogic::Items::IsBowType(pItem->Type))
     {
