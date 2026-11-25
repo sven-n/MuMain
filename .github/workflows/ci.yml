@@ -919,8 +919,10 @@ jobs:
       # libraries, so every static library in the game must be position independent. From the sources fetched above;
       # before the trim, so the compiler cache keeps its objects too. Precompiled headers as in the build above: with
       # them ccache cannot cache the game's files, SDL's or RmlUi's, so each run compiled all of them again.
+      # Its compiler cache statistics go to the summary on their own, after the player build's.
       - name: Build a port-like target
         run: |
+          ccache --zero-stats
           cmake --preset linux-x64 -B out/build/port-like \
             "-DMU_TARGET_FILE=${{ github.workspace }}/tests/cmake/port-like-target.cmake" \
             -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }} \
@@ -937,6 +939,13 @@ jobs:
             "-DFETCHCONTENT_SOURCE_DIR_SDL3_TTF=${{ github.workspace }}/out/build/linux-ci/_deps/sdl3_ttf-src" \
             "-DFETCHCONTENT_SOURCE_DIR_SPDLOG=${{ github.workspace }}/out/build/linux-ci/_deps/spdlog-src"
           cmake --build out/build/port-like --config Release --target Main
+          ccache --show-stats
+          {
+            echo '### Linux compiler cache, port-like target'
+            echo '```text'
+            ccache --show-stats
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Trim compiler cache
         # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
