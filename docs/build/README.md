@@ -368,27 +368,26 @@ their image (`ubuntu-26.04`, `macos-26`, `windows-2025-vs2026`) instead of a
 warns about the move in every job meanwhile.
 
 All three builds use a compiler cache (ccache). The job logs and the **Windows
-compiler cache**, **Linux compiler cache** and **macOS compiler cache** step
-summaries show hits and misses; compare the Build step duration on a warm run with
-the first run. Windows downloads a pinned ccache release and checks it against its
-SHA-256 (**Install compiler cache**). Before a compiler cache is saved, **Trim
-compiler cache** removes the objects the build did not use (ccache marks each object
-it finds), so an entry holds one build's objects, not every build's since the cache
-began: about 0.5 GB on Windows, whose objects carry their debug info (`/Z7`). PR
-and main push builds, the Linux port-like target's too, configure with
-`-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`: SDL,
-RmlUi and the game (`stdafx.h`) use precompiled headers, which ccache does not
-cache, so their files would compile again on every run (SDL and RmlUi alone are over
-a quarter of each build: 503 of 1666 compile calls on Linux, 421 of 1584 on macOS).
-The nightly and manual release builds keep the precompiled headers, as local builds
-do, so a change that breaks only with them fails there; those builds save no cache,
-so SDL, RmlUi and the game files that include `stdafx.h` compile without one. All
-builds restore the compiler cache; only
-successful main pushes save it, so PR-only entries do not displace shared caches,
-and a PR starts from the latest main. Windows vcpkg primary
-keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
-A broader fallback also restores older binary archives; vcpkg checks compatibility
-before reusing packages across image or compiler updates.
+compiler cache**, **Linux compiler cache** (and **Linux compiler cache, port-like
+target**) and **macOS compiler cache** step summaries show hits and misses; compare
+the Build step duration on a warm run with the first run. Windows downloads a pinned
+ccache release and checks it against its SHA-256 (**Install compiler cache**).
+Before a compiler cache is saved, **Trim compiler cache** removes the objects the
+build did not use (ccache marks each object it finds), so an entry holds one build's
+objects, not every build's since the cache began: about 0.5 GB on Windows, whose
+objects carry their debug info (`/Z7`). PR and main push builds, including the Linux
+port-like target, configure with `-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`: SDL, RmlUi
+and the game (`stdafx.h`) use precompiled headers, which ccache does not cache, so
+their files would compile again on every run (SDL and RmlUi alone are over a quarter
+of each build: 503 of 1666 compile calls on Linux, 421 of 1584 on macOS). The
+nightly and manual release builds keep the precompiled headers, as local builds do,
+so a change that breaks only with them fails there; those builds save no cache, so
+SDL, RmlUi and the game files that include `stdafx.h` compile without one. All
+builds restore the compiler cache; only successful main pushes save it, so PR-only
+entries do not displace shared caches, and a PR starts from the latest main. Windows
+vcpkg primary keys include the runner image, compiler, vcpkg revision, manifest and
+toolchain. A broader fallback also restores older binary archives; vcpkg checks
+compatibility before reusing packages across image or compiler updates.
 
 The library caches keep the downloaded library sources (`_deps/*-src`,
 `_deps/*-subbuild`) and the NuGet packages, not the libraries' build folders: ninja
