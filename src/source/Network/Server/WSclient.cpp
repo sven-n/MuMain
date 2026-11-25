@@ -7071,7 +7071,9 @@ void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
 
         break;
     case 0xfd:
+        // The server refused the use of an item (ItemConsumptionFailed).
         EnableUse = 0;
+        UI::Inventory::RefusePickedItemUse();
         break;
     default:
         // todo: is that ever used?

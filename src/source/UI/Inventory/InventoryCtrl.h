@@ -116,8 +116,10 @@ namespace mu::ui::window
         void HidePickedItem();
 
         // The held item was used on the item at `targetIndex` (a jewel on a weapon, ...). It stays in the hand until
-        // the server answers with the update of that item, which consumes it; a refusal leaves it a normal held item.
+        // the server answers with the update of that item, which consumes it. A refusal clears the mark
+        // (ClearUsedOnItem), so it's a normal held item again.
         void MarkUsedOnItem(int targetIndex);
+        void ClearUsedOnItem();
         // The item the held item was used on, if any.
         std::optional<int> GetUsedOnIndex() const;
 

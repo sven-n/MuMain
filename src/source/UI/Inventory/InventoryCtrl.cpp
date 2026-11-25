@@ -111,7 +111,11 @@ bool mu::ui::window::CPickedItem::Create(CItemMng* pNewItemMng, CInventoryCtrl* 
 
 void mu::ui::window::CPickedItem::Release()
 {
-    m_pNewItemMng->DeleteDuplicatedItem(m_pPickedItem);
+    // A picked item which was never created has no item to delete.
+    if (m_pNewItemMng != nullptr)
+    {
+        m_pNewItemMng->DeleteDuplicatedItem(m_pPickedItem);
+    }
     m_pPickedItem = nullptr;
     m_pNewItemMng = nullptr;
     m_pSrcInventory = nullptr;
@@ -198,6 +202,11 @@ void mu::ui::window::CPickedItem::GetRect(RECT& rcBox)
 void mu::ui::window::CPickedItem::MarkUsedOnItem(int targetIndex)
 {
     m_usedOnIndex = targetIndex;
+}
+
+void mu::ui::window::CPickedItem::ClearUsedOnItem()
+{
+    m_usedOnIndex.reset();
 }
 
 std::optional<int> mu::ui::window::CPickedItem::GetUsedOnIndex() const

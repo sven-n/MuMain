@@ -74,6 +74,12 @@ bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, std::optional<i
     return answersTheUse || isUpdatedItem;
 }
 
+void RefusePickedItemUse()
+{
+    if (auto* pickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem())
+        pickedItem->ClearUsedOnItem();
+}
+
 void RestorePickedItem()
 {
     mu::ui::window::CInventoryCtrl::BackupPickedItem();

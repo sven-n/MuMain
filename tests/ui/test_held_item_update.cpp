@@ -2,6 +2,7 @@
 #include "doctest.h"
 
 #include "UI/Inventory/InventoryContents.h"
+#include "UI/Inventory/InventoryCtrl.h"
 
 #include <optional>
 
@@ -35,4 +36,19 @@ TEST_CASE("A held jewel whose use was refused stays on an unrelated update [ui][
     // The server refused the jewel (ItemConsumptionFailed), so the target is never updated; a rented item expiring
     // in another slot must not end the jewel, which the server still has.
     CHECK_FALSE(UI::Inventory::IsHeldItemEndedByUpdate(STORAGE_TYPE::INVENTORY, HeldSlot, TargetSlot, OtherSlot));
+}
+
+TEST_CASE("A refused jewel stays on a later update of its target [ui][inventory][held item]")
+{
+    // The jewel was used on the target and the server refused it (ItemConsumptionFailed), which clears the mark; the
+    // target is then updated for another reason, e.g. it's a rented item which expires.
+    mu::ui::window::CPickedItem jewel;
+    jewel.MarkUsedOnItem(TargetSlot);
+    CHECK(
+        UI::Inventory::IsHeldItemEndedByUpdate(STORAGE_TYPE::INVENTORY, HeldSlot, jewel.GetUsedOnIndex(), TargetSlot));
+
+    jewel.ClearUsedOnItem();
+    CHECK_FALSE(jewel.GetUsedOnIndex().has_value());
+    CHECK_FALSE(
+        UI::Inventory::IsHeldItemEndedByUpdate(STORAGE_TYPE::INVENTORY, HeldSlot, jewel.GetUsedOnIndex(), TargetSlot));
 }

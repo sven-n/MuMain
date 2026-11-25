@@ -23,6 +23,9 @@ void DiscardPickedItemUpdatedBy(int index);
 // The rule of DiscardPickedItemUpdatedBy: whether the server's update of the item at `updatedIndex` ends a held item
 // which came from `sourcePos` of `source` and was used on the item at `usedOnIndex`, if any.
 bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, std::optional<int> usedOnIndex, int updatedIndex);
+// The server refused the use of the held item (ItemConsumptionFailed): it's a normal held item again, which no later
+// item update ends.
+void RefusePickedItemUse();
 void RestorePickedItem();
 int TransferSourceIndex();
 bool ReceivePlayerTransfer(int index, std::span<const std::uint8_t> itemData);
