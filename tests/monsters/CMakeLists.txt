@@ -18,6 +18,7 @@ mu_add_test(
         test_monster_sound_event_loads.cpp
         test_monster_creation_models.cpp
         test_monster_creation_recorder.cpp
+        test_monster_packs_creation.cpp
         test_monster_setup.cpp
         test_npc_talk.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp

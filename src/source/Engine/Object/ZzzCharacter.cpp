@@ -53,6 +53,8 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Monsters/MonsterSetupApply.h"
 #include "GameLogic/Monsters/UnknownMonsters.h"
+#include "GameLogic/Monsters/MonsterPacks.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "World/GameMaps/MonsterSpawnWorld.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/MainScene.h"
@@ -13839,6 +13841,14 @@ void Setting_Monster(CHARACTER* c, EMonsterType Type)
 
 CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
 {
+    // Where the monster's files arrive after start-up and are not here yet, a stand-in stands for it; the pump of
+    // the packs makes the monster again, in place, when they are.
+    if (!GameLogic::Monsters::Packs::ReadyToCreate(static_cast<int>(Type), Key))
+    {
+        CHARACTER* standIn = GameLogic::Monsters::Unknown::CreateStandIn(PositionX, PositionY, Key);
+        Setting_Monster(standIn, Type);
+        return standIn;
+    }
     // A monster comes from its entry in the monster data (MN4), on every map.
     Data::Monsters::UnknownReason why = Data::Monsters::UnknownReason::NoEntry;
     if (const Data::Monsters::MonsterDefinition* entry = g_MonsterDatabase.Find(Type))
@@ -13857,6 +13867,23 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     CHARACTER* c = GameLogic::Monsters::Unknown::Create(Type, why, PositionX, PositionY, Key);
     Setting_Monster(c, Type);
     return c;
+}
+
+void RemakeMonstersWhoseFilesArrived()
+{
+    GameLogic::Monsters::Packs::Pump(
+        [](const GameLogic::Monsters::Packs::Waiting& monster)
+        {
+            const CHARACTER* standIn = FindCharacterByKey(monster.key);
+            // The slot may hold another monster by now: that one is not remade.
+            if (standIn != nullptr && standIn->MonsterIndex == monster.number)
+            {
+                // A model whose file was missing before the pack came is tried again.
+                Data::Monsters::ModelLoader::ForgetMissingFiles();
+                CreateMonster(static_cast<EMonsterType>(monster.number), standIn->PositionX, standIn->PositionY,
+                              monster.key);
+            }
+        });
 }
 
 CHARACTER* CreateHero(int Index, CLASS_TYPE Class, int Skin, float x, float y, float Rotate)

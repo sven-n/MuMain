@@ -65,6 +65,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Monsters/MonsterPacks.h"
 #include "Engine/Object/AnimationTaskPool.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -1721,6 +1722,8 @@ bool IterateClient()
     }
     // A map change a packet started: the next steps, between frames.
     World::MapLoad::Pump(mu::BitmapUploadsOverStagingCap);
+    // Monsters whose files arrived after their spawn take their own model.
+    RemakeMonstersWhoseFilesArrived();
     if (World::MapLoad::TakeFailure())
     {
         ReconnectManager::Instance().OnMapFilesFailed();
@@ -2664,6 +2667,7 @@ bool StartClient(char* szCmdLine)
         {
             // A map load quit midway holds world state (a texture batch) that the teardown after this releases.
             World::MapLoad::Cancel();
+            GameLogic::Monsters::Packs::Cancel();
             if (SocketClient != nullptr)
             {
                 SocketClient->Close();

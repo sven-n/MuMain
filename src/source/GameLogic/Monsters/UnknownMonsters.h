@@ -19,6 +19,10 @@ namespace GameLogic::Monsters::Unknown
 // it. Writes one log line for each number it makes, with the look or not.
 CHARACTER* Create(int number, Data::Monsters::UnknownReason reason, int positionX, int positionY, int key);
 
+// The Bull Fighter's body at the tile with the key, for a monster whose files have not arrived (MonsterPacks.h). It
+// is not an unknown monster: no look, no log line.
+CHARACTER* CreateStandIn(int positionX, int positionY, int key);
+
 // The slot gets a new character (CreateCharacter): it shows the look only
 // when Create gives it again.
 void Forget(const CHARACTER& character);

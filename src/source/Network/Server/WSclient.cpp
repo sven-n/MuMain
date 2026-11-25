@@ -28,6 +28,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Monsters/MonsterPacks.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Chat/Whisper.h"
 #include "Core/Input/ImeInput.h"
@@ -1146,6 +1147,7 @@ void ResetClientToLoginScene()
     App::Control::Events::RecordDisconnected("the game session was torn down");
     // Before ReleaseMainData: a map load's steps hold world state that it releases.
     World::MapLoad::Cancel();
+    GameLogic::Monsters::Packs::Cancel();
     // A long load showed the loading screen, which only an entered world closes.
     HideLoadingSceneOverlay();
 

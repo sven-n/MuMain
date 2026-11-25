@@ -15,6 +15,10 @@ DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 CHARACTER* FindCharacterByID(wchar_t* szName);
 CHARACTER* FindCharacterByKey(int Key);
 
+// Once a frame: a monster that stands in for its files (GameLogic/Monsters/MonsterPacks.h) is made again, in place,
+// when they arrive or fail to.
+void RemakeMonstersWhoseFilesArrived();
+
 // A linked part's own scale and light, where they are not its owner's.
 struct LinkedPartLook
 {
