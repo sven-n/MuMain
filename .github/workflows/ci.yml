@@ -955,7 +955,8 @@ jobs:
 
       - name: Trim compiler cache
         # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
-        # uses. Without them a save holds this build's objects, not every build's since the cache began.
+        # uses. Without them a save holds this build's objects, not every build's since the cache began. Its statistics
+        # count the port-like build only, which zeroes them; the size is the whole cache's.
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
         run: |
           ccache --evict-older-than "$(( $(date +%s) - BUILD_STARTED + 60 ))s"
