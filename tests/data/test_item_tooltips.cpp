@@ -677,6 +677,37 @@ TEST_CASE("The stats add up the values of every buff the hero has by attribute [
     CHECK(GameLogic::Buffs::SumPowerUps(active, "defenseBase") == 60);
 }
 
+// The Elf Soldier's buff (3) grows with the hero's level as OpenMU's does, also above level 180, where the old check in
+// the character window stopped; she gives it up to level 220.
+TEST_CASE("The Elf Soldier's buff adds 45 + level / 3 damage and 50 + level / 5 defense [data][buffs]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    HeroScope hero;
+
+    Buff active;
+    active.RegisterBuff(eBuff_HelpNpc);
+    struct Expected
+    {
+        WORD level;
+        int damage;
+        int defense;
+    };
+    for (const Expected& expected :
+         {Expected{1, 45, 50}, Expected{180, 105, 86}, Expected{200, 111, 90}, Expected{220, 118, 94}})
+    {
+        CAPTURE(expected.level);
+        hero.Hero().Level = expected.level;
+        CHECK(GameLogic::Buffs::SumPowerUps(active, "greaterDamageBonus") == expected.damage);
+        CHECK(GameLogic::Buffs::SumPowerUps(active, "defenseFinal") == expected.defense);
+    }
+    // Neither is a stat the character stats add on their own, so nothing counts twice.
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "baseDamageBonus") == 0);
+    CHECK(GameLogic::Buffs::SumPowerUps(active, "defenseBase") == 0);
+}
+
 // A value only raises its attribute, so a debuff's power-up would raise what the debuff lowers: it adds nothing (and
 // Buffs.json warns about it).
 TEST_CASE("A debuff's power-ups add nothing to the stats [data][items][buffs]")

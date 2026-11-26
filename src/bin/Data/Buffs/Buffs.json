@@ -137,7 +137,33 @@
         "uk": "Сила атаки та захист збільшуються.",
         "zh-CN": "攻击力与防御力提高。",
         "zh-TW": "攻擊力與防禦力提高。"
-      }
+      },
+      "powerUps": [
+        {
+          "attribute": "greaterDamageBonus",
+          "add": {
+            "values": 45,
+            "per": [
+              {
+                "attribute": "level",
+                "divisor": 3
+              }
+            ]
+          }
+        },
+        {
+          "attribute": "defenseFinal",
+          "add": {
+            "values": 50,
+            "per": [
+              {
+                "attribute": "level",
+                "divisor": 5
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "number": 4,

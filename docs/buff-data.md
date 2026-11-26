@@ -86,7 +86,13 @@ tooltip shows its buff's first value as `{addOptionValue1}`, the second as
   for it, so its +50 damage and +60 defense never showed. Elixirs of different
   stats add up too, where the old checks counted only the first of them;
   OpenMU lets a character have one elixir at a time, so nothing changes there.
-  The Scroll of Battle adds `criticalDamageChance` the same way.
+  The Scroll of Battle adds `criticalDamageChance` the same way. The character
+  window adds `greaterDamageBonus` to the shown damage range and `defenseFinal`
+  to the shown defense, as OpenMU's Elf Soldier buff (number 3) raises them:
+  `{"values": 45, "per": [{"attribute": "level", "divisor": 3}]}` and
+  `{"values": 50, "per": [{"attribute": "level", "divisor": 5}]}`, so a hero of
+  level 200 sees 111 more damage and 90 more defense. OpenMU adds the defense
+  as a final value; the client adds it as `add`, like every value.
 - **The Christmas buffs still in code.** The Santa NPC's event buffs
   (Blessing of Xmas, Strength of Santa, Defense of Santa) are still added by
   their own checks in `ZzzInfomation.cpp` and have no `powerUps` yet. A
@@ -214,3 +220,6 @@ data (SK1) takes it over later.
 - A right-click on the strengthened Infinity Arrow and Expansion of Wizardry
   (buffs 143, 138, 139) cancelled nothing: the code knew only the first tier's
   skill.
+- The Elf Soldier's buff (number 3) was a level check in the character
+  window, which stopped at level 180, so above it the window showed less than
+  the server gives. She gives the buff up to level 220.

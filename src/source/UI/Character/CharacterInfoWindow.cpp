@@ -29,6 +29,7 @@
 #include "GameLogic/Pets/PetStats.h"
 #include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
+#include "GameLogic/Buffs/BuffValues.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -740,21 +741,10 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             iAttackRatingPK = iPlusRating;
         }
     }
-    if (g_isCharacterBuff((&Hero->Object), eBuff_HelpNpc))
-    {
-        int iTemp = 0;
-        if (CharacterAttribute->Level > 180)
-        {
-            iTemp = (180 / 3) + 45;
-        }
-        else
-        {
-            iTemp = (CharacterAttribute->Level / 3) + 45;
-        }
-
-        iAttackDamageMin += iTemp;
-        iAttackDamageMax += iTemp;
-    }
+    // The Elf Soldier's buff raises it this way (Data/Buffs/Buffs.json, docs/buff-data.md).
+    const int greaterDamageBonus = GameLogic::Buffs::GetHeroPowerUpTotal("greaterDamageBonus");
+    iAttackDamageMin += greaterDamageBonus;
+    iAttackDamageMax += greaterDamageBonus;
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
     {
@@ -1097,17 +1087,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     int t_adjdef = CharacterAttribute->Defense + add_defense;
 
-    if (g_isCharacterBuff((&Hero->Object), eBuff_HelpNpc))
-    {
-        if (CharacterAttribute->Level > 180)
-        {
-            t_adjdef += 180 / 5 + 50;
-        }
-        else
-        {
-            t_adjdef += (CharacterAttribute->Level / 5 + 50);
-        }
-    }
+    t_adjdef += GameLogic::Buffs::GetHeroPowerUpTotal("defenseFinal");
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
     {
