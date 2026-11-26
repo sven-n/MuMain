@@ -18,6 +18,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/PlayerActionState.h"
+#include "Engine/Object/TeleportState.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -3224,17 +3225,19 @@ void MoveHero()
                     SendMove(c, o);
             }
         }
-        else if (Success &&
-            ((o->CurrentAction != PLAYER_SHOCK && (o->Teleport != TELEPORT_BEGIN && o->Teleport != TELEPORT && o->Alpha >= 0.7f) &&
-                !Engine::Object::IsAttackAction(o->CurrentAction)
-                && (o->CurrentAction<PLAYER_SKILL_SLEEP || o->CurrentAction>PLAYER_SKILL_LIGHTNING_SHOCK)
-                && o->CurrentAction != PLAYER_RECOVER_SKILL
-                && (o->CurrentAction<PLAYER_SKILL_THRUST || o->CurrentAction>PLAYER_SKILL_HP_UP_OURFORCES))
-                || (o->CurrentAction >= PLAYER_STOP_TWO_HAND_SWORD_TWO && o->CurrentAction <= PLAYER_RUN_TWO_HAND_SWORD_TWO)
-                || (o->CurrentAction >= PLAYER_DARKLORD_STAND && o->CurrentAction <= PLAYER_RUN_RIDE_HORSE)
-                || (o->CurrentAction >= PLAYER_FENRIR_RUN && o->CurrentAction <= PLAYER_FENRIR_WALK_ONE_LEFT)
-                || (o->CurrentAction >= PLAYER_RAGE_FENRIR_WALK && o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
-                ))
+        // The teleport check covers the mounted stances too: a mounted hero is back in
+        // its stand pose while still invisible mid-teleport, and must not walk then.
+        else if (Success && !Engine::Object::IsMidTeleport(o->Teleport, o->Alpha) &&
+                 ((o->CurrentAction != PLAYER_SHOCK && !Engine::Object::IsAttackAction(o->CurrentAction) &&
+                   (o->CurrentAction < PLAYER_SKILL_SLEEP || o->CurrentAction > PLAYER_SKILL_LIGHTNING_SHOCK) &&
+                   o->CurrentAction != PLAYER_RECOVER_SKILL &&
+                   (o->CurrentAction < PLAYER_SKILL_THRUST || o->CurrentAction > PLAYER_SKILL_HP_UP_OURFORCES)) ||
+                  (o->CurrentAction >= PLAYER_STOP_TWO_HAND_SWORD_TWO &&
+                   o->CurrentAction <= PLAYER_RUN_TWO_HAND_SWORD_TWO) ||
+                  (o->CurrentAction >= PLAYER_DARKLORD_STAND && o->CurrentAction <= PLAYER_RUN_RIDE_HORSE) ||
+                  (o->CurrentAction >= PLAYER_FENRIR_RUN && o->CurrentAction <= PLAYER_FENRIR_WALK_ONE_LEFT) ||
+                  (o->CurrentAction >= PLAYER_RAGE_FENRIR_WALK &&
+                   o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)))
         {
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;

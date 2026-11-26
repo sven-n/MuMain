@@ -232,3 +232,9 @@ mu_add_test(
         test_key_configuration_gate.cpp
         ${CMAKE_SOURCE_DIR}/src/source/GameLogic/KeyConfiguration/KeyConfigurationGate.cpp
 )
+
+mu_add_test(
+    NAME test_teleport_state
+    SOURCES
+        test_teleport_state.cpp
+)
