@@ -1454,7 +1454,7 @@ void GMEmpireGuardian1::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     } // switch end
 }
 
-bool GMEmpireGuardian1::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool GMEmpireGuardian1::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
         gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
@@ -1633,19 +1633,6 @@ bool GMEmpireGuardian1::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b
     {
         b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
                       look.hiddenMesh);
-    }
-        return true;
-
-    case MODEL_RAYMOND:
-    case MODEL_LUCAS:
-    case MODEL_EVIL_GATE:
-    case MODEL_LION_GATE:
-    case MODEL_STATUE:
-    case MODEL_DEVIL_LORD:
-    case MODEL_QUARTER_MASTER:
-    case MODEL_DEFENDER:
-    {
-        RenderMonster(o, look, b, ExtraMon);
     }
         return true;
     }
@@ -1943,110 +1930,6 @@ bool GMEmpireGuardian1::UpdateObjectEffects(OBJECT* o, BMD* b)
     return false;
 }
 
-bool GMEmpireGuardian1::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
-{
-    switch (o->Type)
-    {
-    case MODEL_RAYMOND:
-    {
-        float fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        vec3_t _temp;
-        VectorCopy(b->BodyLight, _temp);
-        Vector(b->BodyLight[0] * 3.0f, b->BodyLight[0] * 3.0f, b->BodyLight[0] * 3.0f, b->BodyLight);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fBlendMeshLight, look.blendMeshU,
-                      look.blendMeshV, BITMAP_RAYMOND_SWORD);
-        VectorCopy(_temp, b->BodyLight);
-        b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-    }
-        return true;
-    case MODEL_LUCAS:
-    {
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-
-        b->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        // b->RenderMesh ( 4, RENDER_BRIGHT|RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-        // look.blendMeshU, look.blendMeshV ); b->RenderMesh ( 4, RENDER_BRIGHT|RENDER_CHROME6, look.alpha,
-        // look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV );
-    }
-        return true;
-    case MODEL_DEVIL_LORD:
-    {
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_CHROME4, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-    }
-        return true;
-    case MODEL_QUARTER_MASTER:
-    {
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, 0.3f, 2, 0.3f, look.blendMeshU, look.blendMeshV);
-    }
-        return true;
-    case MODEL_DEFENDER:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-    }
-        return true;
-    case MODEL_EVIL_GATE:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-    }
-        return true;
-
-    case MODEL_LION_GATE:
-    {
-        if (o->CurrentAction != MONSTER01_DIE)
-        {
-            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV, look.hiddenMesh);
-        }
-    }
-        return true;
-    case MODEL_STATUE:
-    {
-        if (o->CurrentAction != MONSTER01_DIE)
-        {
-            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                          look.blendMeshV, look.hiddenMesh);
-        }
-    }
-        return true;
-    }
-
-    return false;
-}
-
 bool GMEmpireGuardian1::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     vec3_t vLight, vPos;
@@ -2223,7 +2106,7 @@ bool GMEmpireGuardian1::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-void GMEmpireGuardian1::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+void GMEmpireGuardian1::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (gMapManager.IsEmpireGuardian1() == false)
         return;

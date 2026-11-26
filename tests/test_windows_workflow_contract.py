@@ -79,6 +79,7 @@ EXPECTED_WINDOWS_OS_DLLS = {
     "mfreadwrite.dll",
     "mfsensorgroup.dll",
     "msvcrt.dll",
+    "ncrypt.dll",
     "normaliz.dll",
     "ntdll.dll",
     "ole32.dll",

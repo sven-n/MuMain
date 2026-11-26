@@ -37,7 +37,7 @@ std::span<const std::string_view> GetNames();
 // the drawing code then draws the model itself.
 bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType);
 
-// Whether the model's render style draws alone (design L47): the drawing then draws it right after the item effect,
+// Whether the model's render style draws alone (design L47): the drawing then draws it right after the effect,
 // and nothing of its own after it.
 bool DrawsAlone(int modelType);
 

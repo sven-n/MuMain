@@ -66,6 +66,10 @@ private:
     // The field's control on a setup that has it; true when a control that
     // changes at once changed it.
     bool RenderValue(std::string_view key, Data::Monsters::MonsterSetup& setup, const std::string& undoLabel);
+    // The model's look for a look field (renderStyle, effect); nullptr for another field.
+    const std::string* ModelLookOf(std::string_view key) const;
+    // A look picked by its name ("none" for none), with Edit to open it in the Style Editor.
+    bool RenderLookValue(std::string& name, bool effect);
     // The field's own-value state, by where the rows edit: the field itself
     // on the monster's setup, the map or state variants on a variant.
     OwnValues::State FieldState(std::string_view key) const;
@@ -99,6 +103,9 @@ private:
     // frame: a corner ticked on starts from it.
     std::array<float, 3> m_modelBoxMin{};
     std::array<float, 3> m_modelBoxMax{};
+    // The looks the model shown names for its monsters (MN8, ML1); empty for none.
+    std::string m_modelRenderStyle;
+    std::string m_modelEffect;
     // The selection's numbers while the window draws.
     std::vector<int> m_numbers;
     // How many of their living monsters wait for their next spawn, by field.

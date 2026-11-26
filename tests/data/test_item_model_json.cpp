@@ -54,7 +54,7 @@ ItemModelDefinition MakeDarkHorse()
     model.textureFolders = {"Item", "Skill"};
     model.noneBlendMeshes = {1, 3};
     model.renderStyle = "darkHorse";
-    model.itemEffect = "darkHorseAura";
+    model.effect = "darkHorseAura";
     return model;
 }
 } // namespace
@@ -226,15 +226,15 @@ TEST_CASE("The values an item sets for its render style write on one line and re
                         "renderStyleValues"));
 
     ItemModelDefinition glowing = MakeDarkHorse();
-    glowing.itemEffect = "glowing";
-    glowing.itemEffectValues = {{"glowMesh", "2"}};
+    glowing.effect = "glowing";
+    glowing.effectValues = {{"glowMesh", "2"}};
     const std::string effectText = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{glowing});
-    CHECK(effectText.find(R"("itemEffect": "glowing",)") != std::string::npos);
-    CHECK(effectText.find(R"("itemEffectValues": {"glowMesh": 2})") != std::string::npos);
+    CHECK(effectText.find(R"("effect": "glowing",)") != std::string::npos);
+    CHECK(effectText.find(R"("effectValues": {"glowMesh": 2})") != std::string::npos);
     const ReadResult effectRead = Read(effectText);
     CHECK(effectRead.issues.empty());
     REQUIRE(effectRead.models.size() == 1);
-    CHECK(effectRead.models[0].itemEffectValues == glowing.itemEffectValues);
+    CHECK(effectRead.models[0].effectValues == glowing.effectValues);
     CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyleValues": {"two words": 1}})",
                         "renderStyleValues.two words"));
 }
@@ -273,21 +273,21 @@ TEST_CASE("The render style of a model is a name [data][items]")
     CHECK(result.models[0].renderStyle.empty());
 }
 
-TEST_CASE("The item effect of a model is a name [data][items]")
+TEST_CASE("The effect of a model is a name [data][items]")
 {
     const std::string text = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{MakeDarkHorse()});
-    CHECK(text.find(R"("itemEffect": "darkHorseAura")") != std::string::npos);
-    // The item effect comes after the render style.
-    CHECK(text.find(R"("renderStyle")") < text.find(R"("itemEffect")"));
+    CHECK(text.find(R"("effect": "darkHorseAura")") != std::string::npos);
+    // The effect comes after the render style.
+    CHECK(text.find(R"("renderStyle")") < text.find(R"("effect")"));
 
-    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": ["sparks"]})", "itemEffect"));
-    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": "red sparks"})", "itemEffect"));
-    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": ""})", "itemEffect"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "effect": ["sparks"]})", "effect"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "effect": "red sparks"})", "effect"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "effect": ""})", "effect"));
 
-    // Without an item effect the model is only drawn.
+    // Without an effect the model is only drawn.
     const ReadResult result = Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.bmd"})"));
     REQUIRE(result.models.size() == 1);
-    CHECK(result.models[0].itemEffect.empty());
+    CHECK(result.models[0].effect.empty());
 }
 
 TEST_CASE("A model with errors is not read [data][items]")

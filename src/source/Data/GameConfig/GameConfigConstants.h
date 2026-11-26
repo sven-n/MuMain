@@ -36,6 +36,7 @@ namespace CfgKeys
     // Connection
     inline constexpr wchar_t CfgKeyServerIP[]   = L"ServerIP";
     inline constexpr wchar_t CfgKeyServerPort[] = L"ServerPort";
+    inline constexpr wchar_t CfgKeyRelay[] = L"Relay";
 
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
@@ -123,6 +124,7 @@ namespace CfgDefaults
 
     inline constexpr wchar_t CfgDefaultServerIP[] = L"localhost";
     inline constexpr int CfgDefaultServerPort = 44406;
+    inline constexpr wchar_t CfgDefaultRelay[] = L"";
 
     inline constexpr int CfgDefaultZoom = 1735;  // OrbitalCamera DEFAULT_RADIUS — matches Default-cam camera-to-Hero distance
 

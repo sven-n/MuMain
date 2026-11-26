@@ -48,6 +48,7 @@ enum class TooltipState : unsigned char
     Boots,
     Gloves,
     Expired,
+    HasExpireDate,
     Count,
 };
 // The state of that name, or nothing for another name.

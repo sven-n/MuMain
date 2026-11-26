@@ -64,3 +64,26 @@ TEST_CASE("An item shorter than its five fixed bytes has the length of what ther
     CHECK(CalcItemLength(itemStart) == 3);
     CHECK(CalcItemLength(std::span<const BYTE>()) == 0);
 }
+
+// The level byte carries the period state of a time-limited (rented) item in its two highest bits: 0x40 for an item
+// which expires, 0x80 once it expired. The level is in the low 6 bits.
+TEST_CASE("The level byte of an item carries the period state of a rented item [network][items]")
+{
+    const std::array<BYTE, 5> permanent{0x00, 22, 9, 40, 0};
+    const ItemCreationParams permanentParams = ParseItemData(permanent);
+    CHECK(permanentParams.Level == 9);
+    CHECK_FALSE(permanentParams.WithExpiration);
+    CHECK_FALSE(permanentParams.IsExpired);
+
+    const std::array<BYTE, 5> rented{0x00, 22, 9 | 0x40, 40, 0};
+    const ItemCreationParams rentedParams = ParseItemData(rented);
+    CHECK(rentedParams.Level == 9);
+    CHECK(rentedParams.WithExpiration);
+    CHECK_FALSE(rentedParams.IsExpired);
+
+    const std::array<BYTE, 5> expired{0x00, 22, 9 | 0x40 | 0x80, 40, 0};
+    const ItemCreationParams expiredParams = ParseItemData(expired);
+    CHECK(expiredParams.Level == 9);
+    CHECK(expiredParams.WithExpiration);
+    CHECK(expiredParams.IsExpired);
+}

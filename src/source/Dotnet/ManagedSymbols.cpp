@@ -22,7 +22,11 @@ constexpr ManagedExport kManagedExports_Connection[] = {
     {"ConnectionManager_SetLogCallback"},
     // Libraries from before it lack it; the error report then says the version is unknown.
     {"ConnectionManager_GetLibraryVersion", true},
+    // Libraries from before it connect over TCP only.
+    {"ConnectionManager_SetRelay", true},
     {"ConnectionManager_SendLogin"},
+    // Libraries from before it can't measure the ping.
+    {"ConnectionManager_SendRoundTripRequest", true},
     {"ConnectionManager_SendAuthenticateExt"},
     {"ConnectionManager_SendChatMessageExt"},
 };

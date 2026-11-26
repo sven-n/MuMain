@@ -64,7 +64,7 @@ extern int g_iFollowCharacter;
 
 namespace GameLogic::Combat
 {
-bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, ActionSkillType iSkill)
+bool CastWarriorSkill(CHARACTER* c, OBJECT* o, const ITEM* p, ActionSkillType iSkill)
 {
     if (c == NULL)	return false;
     if (o == NULL)	return false;
@@ -111,7 +111,7 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, ActionSkillType iSkill)
     return (Success);
 }
 
-bool SkillWarrior(CHARACTER* c, ITEM* p)
+bool SkillWarrior(CHARACTER* c, const ITEM* p)
 {
     OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
@@ -911,7 +911,16 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     break;
     case AT_SKILL_DRAGON_ROAR:
     case AT_SKILL_DRAGON_ROAR_STR:
+    case AT_SKILL_PHOENIX_SHOT:
     {
+        // Phoenix Shot is cast at its target: the caster turns to it first, as for Killing Blow (Dragon Roar
+        // strikes all around and keeps the caster's facing).
+        if (iSkill == AT_SKILL_PHOENIX_SHOT && g_MovementSkill.m_iTarget >= 0 &&
+            g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+        {
+            VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
+            pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
+        }
         BYTE angle = (BYTE)((((pObj->Angle[2] + 180.f) / 360.f) * 255.f));
         WORD TKey = 0xffff;
         if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
@@ -1155,7 +1164,7 @@ bool UseSkillRagePosition(CHARACTER* pCha)
     return false;
 }
 
-bool SkillElf(CHARACTER* c, ITEM* p)
+bool SkillElf(CHARACTER* c, const ITEM* p)
 {
     OBJECT* o = &c->Object;
     bool Success = false;

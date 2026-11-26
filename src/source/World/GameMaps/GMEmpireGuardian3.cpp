@@ -687,12 +687,12 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     } // switch end
 }
 
-bool GMEmpireGuardian3::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool GMEmpireGuardian3::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (gMapManager.IsEmpireGuardian3() == false)
         return false;
 
-    if (true == g_EmpireGuardian1.RenderObjectMesh(o, look, b, ExtraMon))
+    if (true == g_EmpireGuardian1.RenderObjectMesh(o, look, b))
     {
         return true;
     }
@@ -965,7 +965,7 @@ bool GMEmpireGuardian3::UpdateObjectEffects(OBJECT* o, BMD* b)
     return false;
 }
 
-bool GMEmpireGuardian3::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool GMEmpireGuardian3::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b)
 {
     return false;
 }
@@ -1090,7 +1090,7 @@ bool GMEmpireGuardian3::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o,
     return false;
 }
 
-void GMEmpireGuardian3::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+void GMEmpireGuardian3::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (gMapManager.IsEmpireGuardian3() == false)
         return;

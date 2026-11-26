@@ -28,8 +28,8 @@ public:
     bool CreateObject(OBJECT* object) override;
     bool MoveObject(OBJECT* object) override;
     bool UpdateObjectEffects(OBJECT* object, BMD* bmd) override;
-    bool RenderObjectMesh(const OBJECT* object, DrawLook& look, BMD* bmd, bool extraMon = false) override;
-    void RenderAfterObjectMesh(const OBJECT* object, DrawLook& look, BMD* bmd, bool extraMon = false) override;
+    bool RenderObjectMesh(const OBJECT* object, DrawLook& look, BMD* bmd) override;
+    void RenderAfterObjectMesh(const OBJECT* object, DrawLook& look, BMD* bmd) override;
 
     bool MoveMonsterVisual(OBJECT* object, BMD* bmd) override;
     void MoveBlurEffect(CHARACTER* character, OBJECT* object, BMD* bmd) override;
@@ -46,7 +46,7 @@ public:
 private:
     CGM_PK_Field();
 
-    bool RenderMonster(const OBJECT* object, DrawLook& look, BMD* bmd, bool extraMon);
+    bool RenderMonster(const OBJECT* object, DrawLook& look, BMD* bmd);
 };
 
 bool IsPKField();

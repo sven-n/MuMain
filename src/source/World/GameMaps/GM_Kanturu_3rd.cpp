@@ -424,7 +424,7 @@ bool M39Kanturu3rd::UpdateKanturu3rdObjectEffects(OBJECT* o, BMD* b)
     return true;
 }
 
-bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (IsInKanturu3rd())
     {
@@ -594,10 +594,10 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(const OBJECT* o, DrawLook& look, 
         }
     }
 
-    return RenderKanturu3rdMonsterObjectMesh(o, look, b, ExtraMon);
+    return RenderKanturu3rdMonsterObjectMesh(o, look, b);
 }
 
-void M39Kanturu3rd::RenderKanturu3rdAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+void M39Kanturu3rd::RenderKanturu3rdAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (IsInKanturu3rd())
     {
@@ -1175,126 +1175,10 @@ bool M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     return false;
 }
 
-bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_PERSONA:
-    {
-        float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi2, look.blendMeshU, look.blendMeshV,
-                      BITMAP_PRSONA_EFFECT);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi2, look.blendMeshU, look.blendMeshV,
-                      BITMAP_PRSONA_EFFECT2);
-        return true;
-    }
-    break;
-    case MODEL_TWIN_TAIL:
-    {
-        float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f);
-
-        if (o->CurrentAction != MONSTER01_DIE)
-        {
-            Vector(0.9f, 0.9f, 1.0f, b->BodyLight);
-        }
-        else
-        {
-            Vector(0.3f, 1.0f, 0.2f, b->BodyLight);
-        }
-
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi2, look.blendMeshU, look.blendMeshV,
-                      BITMAP_TWINTAIL_EFFECT);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi);
-        return true;
-    }
-    break;
-    case MODEL_DREADFEAR:
-    {
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                      look.hiddenMesh);
-        return true;
-    }
-    break;
-    case MODEL_DARK_SKULL_SOLDIER_5:
-    {
-        b->BeginRender(1.f);
-
-        b->BodyLight[0] = 1.0f;
-        b->BodyLight[1] = 1.0f;
-        b->BodyLight[2] = 1.0f;
-
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-
-        float fLumi = (sinf(WorldTime * 0.003f) + 1.f) * 0.35f;
-
-        b->BodyLight[0] = fLumi;
-        b->BodyLight[1] = fLumi;
-        b->BodyLight[2] = fLumi;
-
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV, BITMAP_NIGHTMARE_EFFECT2);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV, BITMAP_NIGHTMARE_EFFECT1);
-
-        if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            b->BodyLight[0] = 0.7f;
-            b->BodyLight[1] = 0.7f;
-            b->BodyLight[2] = 1.0f;
-
-            b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME2, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV);
-            b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME2, look.alpha, look.blendMesh, look.blendMeshLight,
-                          look.blendMeshU, look.blendMeshV);
-        }
-
-        b->EndRender();
-    }
-    return true;
-    case MODEL_MAYA_HAND_LEFT:
-    {
-        b->BeginRender(1.f);
-
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-
-        b->EndRender();
-    }
-    return true;
-    case MODEL_MAYA_HAND_RIGHT:
-    {
-        b->BeginRender(1.f);
-
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-
-        b->EndRender();
-    }
-    return true;
     case MODEL_SUMMON:
     case MODEL_STORM2:
     {

@@ -281,7 +281,11 @@ bool CMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 
     if (pTempItem->Type == ITEM_DARK_RAVEN_ITEM)
     {
-        CreatePetDarkSpirit(Hero);
+        // Like the other pets: an expired rented raven has no effect, so it doesn't follow the hero.
+        if (!GameLogic::Items::IsExpiredRental(pTempItem))
+        {
+            CreatePetDarkSpirit(Hero);
+        }
         SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkRaven, StorageType::Inventory, iIndex);
     }
 
@@ -349,6 +353,10 @@ void CMyInventory::UnequipAllItems()
 bool CMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
 {
     if (pItem == nullptr)
+        return false;
+
+    // An expired rented item has no effect, so it can't be worn.
+    if (GameLogic::Items::IsExpiredRental(pItem))
         return false;
 
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
@@ -1228,76 +1236,17 @@ ITEM* CMyInventory::GetStandbyItem() const
 void CMyInventory::CreateEquippingEffect(ITEM* pItem)
 {
     SetCharacterClass(Hero);
-    OBJECT* pHeroObject = &Hero->Object;
-    if (false == gMapManager.InChaosCastle())
+    // An expired rented item has no effect: no pet or mount accompanies the hero (nor collects zen), and a
+    // Wizard's Ring gives no mane.
+    const bool hasEffect = !GameLogic::Items::IsExpiredRental(pItem);
+    if (hasEffect && !gMapManager.InChaosCastle())
     {
-        switch (pItem->Type)
-        {
-        case ITEM_HELPER:
-            CreateMount(MODEL_HELPER, pHeroObject->Position, pHeroObject);
-            break;
-        case ITEM_HORN_OF_UNIRIA:
-            CreateMount(MODEL_UNICON, pHeroObject->Position, pHeroObject);
-            if (!Hero->SafeZone)
-                CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
-            break;
-        case ITEM_HORN_OF_DINORANT:
-            CreateMount(MODEL_PEGASUS, pHeroObject->Position, pHeroObject);
-            if (!Hero->SafeZone)
-                CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
-            break;
-        case ITEM_DARK_HORSE_ITEM:
-            CreateMount(MODEL_DARK_HORSE, pHeroObject->Position, pHeroObject);
-            if (!Hero->SafeZone)
-                CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
-            break;
-        case ITEM_HORN_OF_FENRIR:
-            Hero->Helper.ExcellentFlags = pItem->ExcellentFlags;
-            if (pItem->ExcellentFlags == 0x01)
-            {
-                CreateMount(MODEL_FENRIR_BLACK, pHeroObject->Position, pHeroObject);
-            }
-            else if (pItem->ExcellentFlags == 0x02)
-            {
-                CreateMount(MODEL_FENRIR_BLUE, pHeroObject->Position, pHeroObject);
-            }
-            else if (pItem->ExcellentFlags == 0x04)
-            {
-                CreateMount(MODEL_FENRIR_GOLD, pHeroObject->Position, pHeroObject);
-            }
-            else
-            {
-                CreateMount(MODEL_FENRIR_RED, pHeroObject->Position, pHeroObject);
-            }
-
-            if (!Hero->SafeZone)
-            {
-                CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
-            }
-            break;
-        case ITEM_DEMON:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_DEMON, pHeroObject->Position, Hero);
-            break;
-        case ITEM_SPIRIT_OF_GUARDIAN:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_SPIRIT_OF_GUARDIAN, pHeroObject->Position, Hero);
-            break;
-        case ITEM_PET_RUDOLF:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_RUDOLF, pHeroObject->Position, Hero);
-            break;
-        case ITEM_PET_PANDA:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_PANDA, pHeroObject->Position, Hero);
-            break;
-        case ITEM_PET_UNICORN:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_UNICORN, pHeroObject->Position, Hero);
-            break;
-        case ITEM_PET_SKELETON:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_SKELETON, pHeroObject->Position, Hero);
-            break;
-        }
+        CreatePetOrMount(pItem);
     }
+
     if (Hero->EtcPart <= 0 || Hero->EtcPart > 3)
     {
-        if (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 3)
+        if (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 3 && hasEffect)
         {
             DeleteParts(Hero);
             Hero->EtcPart = PARTS_LION;
@@ -1306,6 +1255,78 @@ void CMyInventory::CreateEquippingEffect(ITEM* pItem)
     if (GameLogic::Items::IsClothWing(pItem))
     {
         DeleteCloth(Hero, &Hero->Object);
+    }
+}
+
+void CMyInventory::CreatePetOrMount(ITEM* pItem)
+{
+    OBJECT* pHeroObject = &Hero->Object;
+    switch (pItem->Type)
+    {
+    case ITEM_HELPER:
+        CreateMount(MODEL_HELPER, pHeroObject->Position, pHeroObject);
+        break;
+    case ITEM_HORN_OF_UNIRIA:
+        CreateMount(MODEL_UNICON, pHeroObject->Position, pHeroObject);
+        if (!Hero->SafeZone)
+            CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1,
+                         pHeroObject);
+        break;
+    case ITEM_HORN_OF_DINORANT:
+        CreateMount(MODEL_PEGASUS, pHeroObject->Position, pHeroObject);
+        if (!Hero->SafeZone)
+            CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1,
+                         pHeroObject);
+        break;
+    case ITEM_DARK_HORSE_ITEM:
+        CreateMount(MODEL_DARK_HORSE, pHeroObject->Position, pHeroObject);
+        if (!Hero->SafeZone)
+            CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1,
+                         pHeroObject);
+        break;
+    case ITEM_HORN_OF_FENRIR:
+        Hero->Helper.ExcellentFlags = pItem->ExcellentFlags;
+        if (pItem->ExcellentFlags == 0x01)
+        {
+            CreateMount(MODEL_FENRIR_BLACK, pHeroObject->Position, pHeroObject);
+        }
+        else if (pItem->ExcellentFlags == 0x02)
+        {
+            CreateMount(MODEL_FENRIR_BLUE, pHeroObject->Position, pHeroObject);
+        }
+        else if (pItem->ExcellentFlags == 0x04)
+        {
+            CreateMount(MODEL_FENRIR_GOLD, pHeroObject->Position, pHeroObject);
+        }
+        else
+        {
+            CreateMount(MODEL_FENRIR_RED, pHeroObject->Position, pHeroObject);
+        }
+
+        if (!Hero->SafeZone)
+        {
+            CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1,
+                         pHeroObject);
+        }
+        break;
+    case ITEM_DEMON:
+        ThePetProcess().CreatePet(pItem->Type, MODEL_DEMON, pHeroObject->Position, Hero);
+        break;
+    case ITEM_SPIRIT_OF_GUARDIAN:
+        ThePetProcess().CreatePet(pItem->Type, MODEL_SPIRIT_OF_GUARDIAN, pHeroObject->Position, Hero);
+        break;
+    case ITEM_PET_RUDOLF:
+        ThePetProcess().CreatePet(pItem->Type, MODEL_PET_RUDOLF, pHeroObject->Position, Hero);
+        break;
+    case ITEM_PET_PANDA:
+        ThePetProcess().CreatePet(pItem->Type, MODEL_PET_PANDA, pHeroObject->Position, Hero);
+        break;
+    case ITEM_PET_UNICORN:
+        ThePetProcess().CreatePet(pItem->Type, MODEL_PET_UNICORN, pHeroObject->Position, Hero);
+        break;
+    case ITEM_PET_SKELETON:
+        ThePetProcess().CreatePet(pItem->Type, MODEL_PET_SKELETON, pHeroObject->Position, Hero);
+        break;
     }
 }
 
@@ -1468,7 +1489,7 @@ bool CMyInventory::EquipmentWindowProcess()
             ITEM* pItemObj = pPickedItem->GetItem();
             const int iSourceIndex = pPickedItem->GetSourceLinealPos();
             const int iTargetIndex = m_iPointedSlot;
-            if (pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
+            if (GameLogic::Items::IsExpiredRental(pItemObj))
             {
                 g_pSystemLogBox->AddText(I18N::Game::CanTWearItem, mu::ui::window::TYPE_ERROR_MESSAGE);
                 CInventoryCtrl::BackupPickedItem();

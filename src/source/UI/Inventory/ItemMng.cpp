@@ -13,6 +13,12 @@ using namespace mu::ui::window;
 
 namespace
 {
+// The level byte of an item's data: the item level in the low 6 bits, and the period state of a time-limited
+// (rented) item in the two highest bits, like the bits 0x02 and 0x04 of byte 5 in the original item format.
+constexpr BYTE ItemLevelMask = 0x3F;
+constexpr BYTE TimeLimitedItemFlag = 0x40;
+constexpr BYTE ExpiredItemFlag = 0x80;
+
 // The byte at `index` of an item's data, 0 past its end: an item cut short reads as one without the missing options.
 BYTE ItemByteAt(std::span<const BYTE> itemData, size_t index)
 {
@@ -47,7 +53,9 @@ ItemCreationParams ParseItemData(std::span<const BYTE> itemData)
 
     params.Group = (itemData[0] >> 4) & 0xF;
     params.Number = ((itemData[0] & 0xF) << 8) + itemData[1];
-    params.Level = itemData[2];
+    params.Level = itemData[2] & ItemLevelMask;
+    params.WithExpiration = (itemData[2] & TimeLimitedItemFlag) != 0;
+    params.IsExpired = (itemData[2] & ExpiredItemFlag) != 0;
     params.Durability = itemData[3];
     auto flags = static_cast<ItemOptionFlags>(itemData[4]);
     params.WithLuck = flags & ItemOptionFlags::HasLuck;

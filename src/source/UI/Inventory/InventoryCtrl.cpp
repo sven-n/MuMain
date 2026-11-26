@@ -70,6 +70,7 @@ mu::ui::window::CPickedItem::CPickedItem()
     m_pSrcInventory = nullptr;
     m_pPickedItem = nullptr;
     m_bShow = true;
+    m_bUsedOnItem = false;
     m_Pos.x = m_Pos.y = 0;
     m_Size.cx = m_Size.cy = 0;
 }
@@ -193,6 +194,16 @@ void mu::ui::window::CPickedItem::GetRect(RECT& rcBox)
     rcBox.top = m_Pos.y;
     rcBox.right = rcBox.left + m_Size.cx;
     rcBox.bottom = rcBox.top + m_Size.cy;
+}
+
+void mu::ui::window::CPickedItem::MarkUsedOnItem()
+{
+    m_bUsedOnItem = true;
+}
+
+bool mu::ui::window::CPickedItem::IsUsedOnItem() const
+{
+    return m_bUsedOnItem;
 }
 
 int mu::ui::window::CPickedItem::GetSourceLinealPos()

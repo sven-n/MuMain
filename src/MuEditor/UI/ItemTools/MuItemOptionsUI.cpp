@@ -41,6 +41,7 @@ using Data::Items::ItemOption;
 using Data::Items::ItemOptionAdd;
 using Data::Items::ItemOptionDefinition;
 using Data::Items::ItemOptionFiles;
+using Data::Items::ItemOptionLevelType;
 using Data::Items::ItemOptionTerm;
 using Data::Items::ItemOptionType;
 using Data::Items::ItemOptionValue;
@@ -64,8 +65,23 @@ constexpr int LevelsPerRow = 8;
 // The option byte's level has four bits: a list longer than 15 gives levels no server sends.
 constexpr int MaxOptionLevel = 15;
 constexpr int MaxValue = 1000000;
-constexpr int MaxOptionNumber = 255;
 constexpr int MaxOptionsPerItem = 255;
+
+// The lowest number of the type's range no option of the definition has, or none when every number is taken (the loader
+// refuses a number two options share).
+std::optional<int> FindFreeOptionNumber(const ItemOptionDefinition& definition)
+{
+    const Data::Items::ItemOptionNumberRange range = Data::Items::GetOptionNumberRange(definition.type);
+    for (int number = range.minimum; number <= range.maximum; ++number)
+    {
+        if (std::ranges::none_of(definition.options,
+                                 [number](const ItemOption& each) { return each.number == number; }))
+        {
+            return number;
+        }
+    }
+    return std::nullopt;
+}
 
 const ItemOptionFiles& StoredFiles()
 {
@@ -86,7 +102,7 @@ ItemOptionDefinition MakeNewDefinition(const ItemOptionFiles& files, const std::
     ItemOptionDefinition definition{.name = name, .type = type, .file = FindFileOfType(files, type)};
     definition.displayName.Set("en", name);
     ItemOption option;
-    option.number = type == ItemOptionType::Excellent || type == ItemOptionType::AncientOption ? 1 : 0;
+    option.number = Data::Items::GetOptionNumberRange(type).minimum;
     const std::vector<std::string_view> attributes = Data::Items::FindItemOptionAttributes(type);
     option.attribute = attributes.empty() ? std::string() : std::string(attributes.front());
     option.value.values = {0};
@@ -587,18 +603,18 @@ void CMuItemOptionsUI::RenderDefinition(ItemOptionDefinition& definition)
         RenderOption(definition, index);
         ImGui::PopID();
     }
-    // The types whose definitions have one option take no second one (the reader stops on it).
-    const bool oneOption = definition.type == ItemOptionType::Luck || definition.type == ItemOptionType::AncientBonus;
-    ImGui::BeginDisabled(oneOption && !definition.options.empty());
+    // The types whose definitions have one option take no second one (the reader stops on it), the numbered types none
+    // when every number of their range is taken (six bits of the excellent byte).
+    const bool numbered = Data::Items::HasOptionNumbers(definition.type);
+    const std::optional<int> freeNumber = numbered ? FindFreeOptionNumber(definition) : std::nullopt;
+    ImGui::BeginDisabled(numbered ? !freeNumber.has_value() : !definition.options.empty());
     if (ImGui::SmallButton(I18N::Editor::AddAnOption))
     {
         ItemOption option = definition.options.empty() ? MakeNewDefinition(m_edit, "", definition.type).options.front()
                                                        : definition.options.back();
-        if (!definition.options.empty() &&
-            (definition.type == ItemOptionType::Excellent || definition.type == ItemOptionType::AncientOption ||
-             definition.type == ItemOptionType::Option))
+        if (!definition.options.empty() && freeNumber)
         {
-            option.number = std::min(option.number + 1, MaxOptionNumber);
+            option.number = *freeNumber;
         }
         definition.options.push_back(std::move(option));
     }
@@ -668,10 +684,10 @@ void CMuItemOptionsUI::RenderServer(ItemOptionDefinition& definition)
 void CMuItemOptionsUI::RenderOption(ItemOptionDefinition& definition, size_t index)
 {
     ItemOption& option = definition.options[index];
-    const bool numbered = definition.type != ItemOptionType::Luck && definition.type != ItemOptionType::AncientBonus;
-    if (numbered)
+    if (Data::Items::HasOptionNumbers(definition.type))
     {
-        InputNumber(I18N::Editor::Number, option.number, 0, MaxOptionNumber, Fields::NumberWidth * 0.6f);
+        const Data::Items::ItemOptionNumberRange range = Data::Items::GetOptionNumberRange(definition.type);
+        InputNumber(I18N::Editor::Number, option.number, range.minimum, range.maximum, Fields::NumberWidth * 0.6f);
         ImGui::SameLine();
     }
     ImGui::SetNextItemWidth(Fields::ScaledWidth(Fields::NumberWidth * 2.0f));
@@ -730,7 +746,9 @@ void CMuItemOptionsUI::RenderValue(ItemOptionValue& value, size_t option)
         }
         if (!isList)
         {
+            // A constant has no levels, and no level type either.
             value.values.resize(1);
+            value.levelType = ItemOptionLevelType::OptionLevel;
         }
     }
     if (!value.isList)
@@ -745,8 +763,25 @@ void CMuItemOptionsUI::RenderValue(ItemOptionValue& value, size_t option)
     else
     {
         ImGui::SameLine();
-        ImGui::TextDisabled("%s",
-                            I18N::Format(I18N::Editor::HighestLevel0, {std::to_string(value.values.size())}).c_str());
+        bool byItemLevel = value.levelType == ItemOptionLevelType::ItemLevel;
+        if (ImGui::Checkbox(I18N::Editor::ByTheItemSLevel, &byItemLevel))
+        {
+            value.levelType = byItemLevel ? ItemOptionLevelType::ItemLevel : ItemOptionLevelType::OptionLevel;
+            // The item levels go 0 to 15, the option levels 1 to 15: drop what no option level reaches.
+            if (!byItemLevel && value.values.size() > static_cast<size_t>(MaxOptionLevel))
+            {
+                value.values.resize(MaxOptionLevel);
+            }
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::TheListGoesByTheItemSLevel0To15NotTheOptionLevel);
+        }
+        const int firstLevel = value.FirstLevel();
+        ImGui::SameLine();
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::HighestLevel0,
+                                               {std::to_string(static_cast<int>(value.values.size()) + firstLevel - 1)})
+                                      .c_str());
         for (size_t level = 0; level < value.values.size(); ++level)
         {
             if (level % LevelsPerRow != 0)
@@ -762,11 +797,14 @@ void CMuItemOptionsUI::RenderValue(ItemOptionValue& value, size_t option)
             }
             if (ImGui::IsItemHovered())
             {
-                ImGui::SetTooltip("%s", I18N::Format(I18N::Editor::Level0, {std::to_string(level + 1)}).c_str());
+                ImGui::SetTooltip(
+                    "%s",
+                    I18N::Format(I18N::Editor::Level0, {std::to_string(static_cast<int>(level) + firstLevel)}).c_str());
             }
             ImGui::PopID();
         }
-        ImGui::BeginDisabled(value.values.size() >= static_cast<size_t>(MaxOptionLevel));
+        // Option levels 1 to 15, or the item levels 0 to 15.
+        ImGui::BeginDisabled(value.values.size() >= static_cast<size_t>(MaxOptionLevel + 1 - firstLevel));
         if (ImGui::SmallButton("+"))
         {
             const int step = value.values.size() >= 2 ? value.values.back() - value.values[value.values.size() - 2]
@@ -785,10 +823,10 @@ void CMuItemOptionsUI::RenderValue(ItemOptionValue& value, size_t option)
         if (ImGui::SmallButton(I18N::Editor::FillLevels))
         {
             m_valueFillOption = option;
-            m_valueFillFrom = 1;
+            m_valueFillFrom = firstLevel;
             m_valueFillStart = value.values.front();
             m_valueFillStep = value.values.size() >= 2 ? value.values[1] - value.values[0] : value.values.front();
-            m_valueFillTo = static_cast<int>(value.values.size());
+            m_valueFillTo = static_cast<int>(value.values.size()) + firstLevel - 1;
             m_openValueFill = true;
         }
     }
@@ -972,13 +1010,15 @@ void CMuItemOptionsUI::RenderValueFill()
     {
         return;
     }
-    InputNumber(I18N::Editor::FromLevel, m_valueFillFrom, 1, MaxOptionLevel, Fields::NumberWidth * 0.6f);
+    ItemOptionDefinition* definition = FindEdited(m_picked);
+    const bool valid = definition != nullptr && m_valueFillOption < definition->options.size();
+    // A list by the item's level counts from its level 0.
+    const int firstLevel = valid ? definition->options[m_valueFillOption].value.FirstLevel() : 1;
+    InputNumber(I18N::Editor::FromLevel, m_valueFillFrom, firstLevel, MaxOptionLevel, Fields::NumberWidth * 0.6f);
     InputNumber(I18N::Editor::ValueThere, m_valueFillStart, -MaxValue, MaxValue);
     InputNumber(I18N::Editor::Step, m_valueFillStep, -MaxValue, MaxValue);
     InputNumber(I18N::Editor::ToLevel, m_valueFillTo, m_valueFillFrom, MaxOptionLevel, Fields::NumberWidth * 0.6f);
     m_valueFillTo = std::max(m_valueFillTo, m_valueFillFrom);
-    ItemOptionDefinition* definition = FindEdited(m_picked);
-    const bool valid = definition != nullptr && m_valueFillOption < definition->options.size();
     ImGui::BeginDisabled(!valid);
     if (ImGui::Button(I18N::Editor::Fill))
     {

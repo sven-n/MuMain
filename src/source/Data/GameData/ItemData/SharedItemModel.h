@@ -9,7 +9,7 @@ namespace Data::Items
 // A model that several items use (Data/Items/Models/SharedModels.json): one
 // .bmd file, opened once. The model entries of these items name it with
 // "model" instead of having a file of their own; their inventory and ground
-// display, glow, render style and item effect stay their own.
+// display, glow, render style and effect stay their own.
 struct SharedItemModel
 {
     // A name of letters and digits: "skillParchment".

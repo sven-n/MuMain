@@ -2,6 +2,8 @@
   "formatVersion": 1,
   "languages": {
     "de": ["gen", "dat", "acc"],
-    "pl": ["gen", "dat", "acc", "ins", "loc"]
+    "pl": ["gen", "dat", "acc", "ins", "loc"],
+    "ru": ["gen"],
+    "uk": ["gen"]
   }
 }

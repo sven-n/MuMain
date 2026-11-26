@@ -553,8 +553,8 @@
   <data name="Render style" xml:space="preserve">
     <value>Styl renderowania</value>
   </data>
-  <data name="Item effect" xml:space="preserve">
-    <value>Efekt przedmiotu</value>
+  <data name="Effect" xml:space="preserve">
+    <value>Efekt</value>
   </data>
   <data name="Used by" xml:space="preserve">
     <value>używany przez</value>

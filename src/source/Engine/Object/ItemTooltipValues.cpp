@@ -190,14 +190,15 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope s
                                     [](BYTE level) { return level == 1; });
     values.boots = type >= ITEM_BOOTS && type < ITEM_BOOTS + MAX_ITEM_INDEX;
     values.gloves = type >= ITEM_GLOVES && type < ITEM_GLOVES + MAX_ITEM_INDEX;
-    values.expired = item.bPeriodItem && item.bExpiredPeriod;
+    values.expired = GameLogic::Items::IsExpiredRental(&item);
+    values.hasExpireDate = item.bPeriodItem && !values.expired && item.lExpireTime != 0;
     if (scope == TooltipValueScope::Basics)
     {
         return values;
     }
 
     // When a timed item ends, as the tooltip has always written it.
-    if (item.bPeriodItem && !item.bExpiredPeriod && item.lExpireTime != 0)
+    if (values.hasExpireDate)
     {
         _tzset();
         const time_t expireTime = item.lExpireTime;
@@ -311,6 +312,7 @@ bool NeedsAllTooltipValues(Data::Items::TooltipState state)
     case TooltipState::Boots:
     case TooltipState::Gloves:
     case TooltipState::Expired:
+    case TooltipState::HasExpireDate:
     case TooltipState::Count:
         break;
     }
@@ -503,6 +505,8 @@ bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipSt
         return values.gloves;
     case TooltipState::Expired:
         return values.expired;
+    case TooltipState::HasExpireDate:
+        return values.hasExpireDate;
     case TooltipState::Count:
         break;
     }

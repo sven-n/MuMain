@@ -42,6 +42,16 @@ ResolvedUserFolder ResolveUserFolder(const char* variable, const std::filesystem
 // `path` with `home` shown as "~", for the log: a pasted MuError.log then doesn't carry the OS user's name.
 std::string DisplayPath(const std::filesystem::path& path, const std::filesystem::path& home);
 
+// A file in the user folder was written, created or removed. Where the folder is on disk that is all; a target that
+// keeps it elsewhere until told to (a browser's IndexedDB, a console's save data) stores it at the next
+// CommitUserFiles. Safe from any thread.
+void UserFilesChanged();
+// Stores the folder when a file in it changed since the last call; true when it did. The main loop calls it once a
+// frame and once on quit, so a burst of writes (every entry of config.ini) is stored once.
+bool CommitUserFiles();
+// The target's store of the folder, from the adapter its CMake picks; nothing to do where the folder is on disk.
+void TargetCommitUserFiles(const std::filesystem::path& folder);
+
 enum class Seeded
 {
     Existing,

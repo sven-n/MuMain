@@ -212,6 +212,7 @@ any character.
 | `outline` | The thickness of its outline when pointed at |
 | `subType` | Its skin |
 | `lookLevel` | Its render tier (the glow of higher levels), 0 to 65535 |
+| `renderStyle`, `effect` | The looks it is drawn with, in place of its model's ([Looks](#looks)): a render style of `Data/Effects/RenderStyles.json` and an effect of `Data/Effects/Effects.json` by name, or `"none"` for none where its model names one |
 | `glowMesh`, `glowLight` | The mesh that glows, and its light |
 | `hiddenMesh` | A mesh that is not drawn (-2: none drawn) |
 | `shadow` | `false`: no shadow |
@@ -411,6 +412,7 @@ without a model (the glow, marks and message only in the game).
 | `headBone` | The bone the head turns with; without it as the file has it |
 | `streamMesh` | The mesh drawn as a stream; without it as the file has it |
 | `noneBlendMeshes` | Meshes drawn without blending |
+| `renderStyle`, `effect` | The looks every monster of the model is drawn with ([Looks](#looks)); a monster can name others |
 | `cues` | Named points of its animations that [sound events](#sound-events) play on: `name` (unique in the model), `animation`, and `frames`, from the first to below the second (the game checks the frame each game frame): where Raymond's feet land in the walk |
 | `timers` | Up to 4 timers of its animations (Q-MN91): `name` (unique in the model), `animation`, and `everyMs`, 1 to 60000; one ticks while the character is in the animation, each time more than `everyMs` passed since its last tick. The map's code for the model may ask for one by name (Twintail's `hair swing`, which swings its hair) and sound events play on it (`timers`), on the same tick. The timers the code asks for are listed in `CodeModelTimers` (`MonsterModelDefinition.h`): a model without its timer is an error of the model list |
 | `namedBones` | Names for bones that the game's code finds by name, registered in this order when one of its monsters appears (Q-MN37): `{"Rabbit_1": 3, "Rabbit_2": 16}`. The Lunar Rabbit's lights, the Golden Stone Golem's arms and Twin Tail's hair use theirs |
@@ -429,6 +431,81 @@ Square 2. OpenMU sends the extended client the stage with the map
 Square keeps its stage); a number names all of its stages, and with another
 server every stage is 0. The lists' older names (`worldTextureFolders`,
 `worlds`) are fatal problems that name the new ones.
+
+### Looks
+
+What a monster looks like beyond its model, size and equipment is a look of
+`Data/Effects`, the same looks the items have ([item-data.md](item-data.md#render-styles-and-effects)):
+a **render style** draws it in layers (chrome, glow, a scrolling texture, a
+pulse, by mesh), an **effect** sets values before it is drawn (its glow mesh,
+hidden mesh, scroll). The rest of an effect, its object light, its things on
+bones and its animation speed, runs for items only: a monster that names such
+an effect gets only its values before the drawing, and Data Checks and the
+game's load warn about it. An entry's `glowsLikeLevel` on a monster only
+sets the level its render style's `onlyWhen` conditions see: a monster has no
+glow by level, so an effect such as `potion` shows no +7 glow on it. A model
+entry names the
+looks of all its monsters (`"renderStyle": "balrogBlueChrome"`); a monster
+entry, one of its numbers, a map variant or a state variant names another in
+their place, the most specific one winning: state variant, map variant,
+number, entry, model. `"none"` draws a monster without the look its model
+names. The names are found when the monster appears, and again when the looks
+change.
+
+The monsters that were drawn as variants of a shared model name their own
+render style: Metal Balrog (`metalBalrog`), Alpha Crust, Great Drakan, the
+White Wizard, the Orc Soldier and Archer of Doom, Hero Mutant, Omega Wing,
+Axl Hero, Gigas Golem, Scout (Hero) and Werewolf (Hero). The Balrog
+(`balrogChrome`), the Silver Valkyrie, the golden monsters drawn as their
+model with a golden glow (`goldenChrome`: Golden Budge Dragon, Goblin, Derkon,
+Lizard King, Vepar, Tantalos, Wheel, Dark Knight, Iron Knight, Napin, Rabbit and
+the Great Golden Dragon) and the Golden Titan and Soldier (`goldenShine`) have
+theirs too, and so do the Golden Devil, Crust and Satyros (`goldenDevil`,
+`goldenCrust`, `goldenSatyros`: their models' looks with the golden glow) and
+Zaikan (`zaikan`: its glowing skins under a faint golden chrome). Some models name the look of all their monsters: the Devil (`devil`: a
+scrolling blue chrome over its body), the Crust (`crust`: a scrolling skin
+under its body), the Phantom
+Knight (`phantomKnight`), the Kalima shop, the Werewolf Quarrel, the Cherry
+Blossom spirit and the Seed Master, the Drakan (`drakan`), and the Lizard
+Warrior, Fire Golem, Queen Bee, Poison Golem and Axe Warrior; Aida's stone
+golems, death riders and Hell Maine, and Kanturu's Berserk, Gigantis, Splinter
+Wolf and Kentauros (the Berserk and Gigantis glows left out while they die,
+`"notAnimation": "die"`), Persona, Twin Tail (green while it dies), the Blade
+Hunter (`bladeHunter`: its blade glow left out while it dies, and its body
+drawn glowing once it has faded to 0.8, `"opacityAtMost": 0.8`) and the Maya
+hands, the Death Spirit (`deathSpirit`: its third mesh at most 0.3 opaque), the Erohim, Kanturu's gate and the Nightmare's skull soldier, and the
+Crywolf and Balgass barracks' Balgass, Soram and Dark Elf (Trainee Soldier), and Karutan's Bone Scorpion,
+Crypta, Crypos, Condra and Narcondra (their glows, and all of Condra and
+Narcondra, left out while they die), and the Empire Guardian's Erkanne,
+Galia, Quartermaster, Knight Commander and Grand Wizard (green while it dies),
+and its Castle Gates 2 and 4 and Stone Statue (`goneWhenDying`: not drawn while
+they die). Jerint (505) names `jerint` on its entry, as Jerint the Assistant
+shares its model and keeps the model's plain look; the Satyros names `satyros`
+on its entry too, as the Golden Satyros shares its model and names its golden
+look. Raymond (`raymond`) and the
+PK Field's Zombie Fighter and Resurrected Gladiator (`zombieFighter`, their glow
+drawn on top), Ash Slaughterer, and Blood and Cruel Blood Assassin (not drawn
+while they die), and the Ruthless and Burning Lava Giant (`lavaGiant`,
+`burningLavaGiant`: their lava pulses, three glows in the first half of a
+6.28-second cycle and one plain draw in the second, `"cycleHalf"`) name theirs
+too, as do Doppelganger's Slaughterer and Furious
+Slaughterer (`doppelgangerSlaughterer`) and the Doppelganger itself
+(`doppelganger`: its body glowing, under a faint chrome). Doppelganger's Ice Walker (531) and Larva (532)
+name their retextured looks on their numbers, as the Ice Walker and Larva of
+the other maps share their models. On Crywolf (map 34) a map variant of the
+Red Dragon, Dragon, Tantalos, Bloody Wolf, Beam Knight and Death Beam Knight
+names `crywolfGreenChrome`: their meshes in a green light with a chrome over
+each; Zaikan's names `zaikanCrywolfGreen`, the same with its faint golden
+chrome. A texture
+a map loads (the Erohim's wing) is drawn from where the map loaded it while the
+hero is on that map: the looks find their textures again when a map loads. A
+monster drawn with a
+render style is drawn by it alone: no pass of the code draws over its body.
+
+A look name that no look file has is an Error in Data Checks (areas Monsters
+and Monster models), and the monster is drawn without it. Monster Setup and
+Monster Model pick the looks from their lists, with Open in Style Editor; an
+unset look of Monster Setup shows the model's, "(model: balrogBlueChrome)".
 
 ### The map picker
 
@@ -666,8 +743,11 @@ Fire Golem is Devil Square 5's boss and plays the generic pattern there):
 [Models](#model-fields): Devil Square 5–7 is 32, `{"map": 9, "stage": 2}` is
 Devil Square 2). A map or stage in two variants of a monster is a fatal
 problem, and a variant without `attacks` or a setup field changes nothing
-(a warning). A monster without `attacks` of its own plays the variant's on
-its maps and the generic pattern elsewhere.
+(a warning). A variant on a map where none of its numbers appears (their
+`maps`) is a warning too, unless it names only looks: a map's own look of
+the monster, as Crywolf's green chrome, is kept for a server that places it
+there. A monster without `attacks` of its own plays the variant's on its maps
+and the generic pattern elsewhere.
 
 A variant's [setup fields](#setup-at-spawn) replace the monster's one by one
 on its maps; the monster's other fields stay (the Cursed Wizard has a

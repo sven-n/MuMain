@@ -46,7 +46,7 @@ std::vector<std::unique_ptr<DataCheckArea>> CreateAllAreas()
     areas.push_back(CreateMapSoundCheckArea());
     areas.push_back(CreateWarpCheckArea());
     areas.push_back(Looks::CreateRenderStyleCheckArea());
-    areas.push_back(Looks::CreateItemEffectCheckArea());
+    areas.push_back(Looks::CreateLookEffectCheckArea());
     areas.push_back(CreateLookCheckArea());
     return areas;
 }

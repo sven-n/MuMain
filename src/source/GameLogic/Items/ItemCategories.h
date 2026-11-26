@@ -8,10 +8,8 @@ namespace GameLogic::Items
 {
     // Wings
     bool IsWingItem(const ITEM* pItem);
-    bool IsSecondTierWingExceptCape(const ITEM* pItem);
     // Every second tier wing, the Capes of Lord and Fighter included.
     bool IsSecondTierWing(const ITEM* pItem);
-    bool IsThirdTierWing(const ITEM* pItem);
     bool IsSecondOrThirdTierWing(const ITEM* pItem);
     // The Capes of Lord and Fighter.
     bool IsSecondTierCape(const ITEM* pItem);
@@ -114,6 +112,10 @@ namespace GameLogic::Items
 
     // Item value
     bool IsHighValueItem(const ITEM* pItem);
+
+    // Rented items
+    // A rented (period) item whose time ran out. It stays where it is but has no effect.
+    bool IsExpiredRental(const ITEM* pItem);
 
     // Only used for drawing items and for tooltips; still hardcoded until
     // phase 4 (model data) and phase 8 (tooltip data).

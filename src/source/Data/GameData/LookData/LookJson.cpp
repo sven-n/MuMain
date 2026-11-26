@@ -6,6 +6,7 @@
 #include "Data/GameData/Common/MeshLimits.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/LookData/BoneThingTypes.h"
+#include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterJsonCommon.h"
 
 #include <algorithm>
@@ -33,7 +34,7 @@ constexpr const char* LookFolders = "lookFolders";
 constexpr const char* Name = "name";
 constexpr const char* Layers = "layers";
 constexpr const char* ItemValuesAfter = "itemValuesAfter";
-constexpr const char* ItemValuesBefore = "itemValuesBefore";
+constexpr const char* ValuesBefore = "valuesBefore";
 constexpr const char* Motion = "motion";
 constexpr const char* Blend = "blend";
 constexpr const char* Where = "where";
@@ -51,6 +52,8 @@ constexpr const char* Light = "light";
 constexpr const char* Tint = "tint";
 constexpr const char* Brightness = "brightness";
 constexpr const char* ScrollingMesh = "scrollingMesh";
+constexpr const char* LightMap = "lightMap";
+constexpr const char* OnTop = "onTop";
 constexpr const char* Shape = "shape";
 constexpr const char* From = "from";
 constexpr const char* To = "to";
@@ -60,12 +63,21 @@ constexpr const char* Step = "step";
 constexpr const char* Count = "count";
 constexpr const char* SecondsEach = "secondsEach";
 constexpr const char* TimesItem = "timesItem";
+constexpr const char* AtMost = "atMost";
+constexpr const char* TimesOpacity = "timesOpacity";
+constexpr const char* FromRed = "fromRed";
 constexpr const char* NotFor = "notFor";
 constexpr const char* OnlyWhen = "onlyWhen";
 constexpr const char* Place = "place";
 constexpr const char* Level = "level";
 constexpr const char* Buff = "buff";
 constexpr const char* WithoutBuff = "withoutBuff";
+constexpr const char* Animation = "animation";
+constexpr const char* NotAnimation = "notAnimation";
+constexpr const char* OpacityAbove = "opacityAbove";
+constexpr const char* OpacityAtMost = "opacityAtMost";
+constexpr const char* CycleHalf = "cycleHalf";
+constexpr const char* Half = "half";
 constexpr const char* EachItem = "eachItem";
 constexpr const char* Default = "default";
 constexpr const char* DrawingOpacity = "drawingOpacity";
@@ -93,20 +105,21 @@ constexpr const char* AnimationSpeed = "animationSpeed";
 } // namespace Keys
 
 constexpr const char* RenderStyleKind = "renderStyle";
-constexpr const char* ItemEffectKind = "itemEffect";
+constexpr const char* EffectLookKind = "effect";
 
 const char* KindName(LookKind kind)
 {
-    return kind == LookKind::ItemEffect ? ItemEffectKind : RenderStyleKind;
+    return kind == LookKind::Effect ? EffectLookKind : RenderStyleKind;
 }
 constexpr const char* Drawing = "drawing";
 constexpr const char* None = "none";
 constexpr const char* All = "all";
 
-constexpr std::array<std::pair<LayerKind, const char*>, 3> LayerKindNames{{
+constexpr std::array<std::pair<LayerKind, const char*>, 4> LayerKindNames{{
     {LayerKind::Texture, "texture"},
     {LayerKind::Reflection, "reflection"},
     {LayerKind::FlatColor, "flatColor"},
+    {LayerKind::GlowOnly, "glowOnly"},
 }};
 
 constexpr std::array<std::pair<Motion, const char*>, 9> MotionNames{{
@@ -163,8 +176,9 @@ constexpr std::array<std::pair<Place, const char*>, 4> PlaceNames{{
     {Place::Ground, "ground"},
 }};
 
-constexpr std::array<std::pair<LookBuff, const char*>, 1> BuffNames{{
+constexpr std::array<std::pair<LookBuff, const char*>, 2> BuffNames{{
     {LookBuff::InfinityArrow, "infinityArrow"},
+    {LookBuff::TintingDebuff, "tintingDebuff"},
 }};
 
 constexpr std::array<std::pair<ChanceDraw, const char*>, 2> ChanceDrawNames{{
@@ -292,8 +306,8 @@ private:
 
     bool ReadLook(const OrderedJson& json, const std::string& field, LookDefinition& look);
     void ReadRenderStyleParts(const OrderedJson& json, const std::string& field, LookDefinition& look);
-    void ReadItemEffectParts(const OrderedJson& json, const std::string& field, LookDefinition& look);
-    void ReadItemValuesBefore(const OrderedJson& json, const std::string& field, ItemValuesBefore& entry);
+    void ReadEffectParts(const OrderedJson& json, const std::string& field, LookDefinition& look);
+    void ReadValuesBefore(const OrderedJson& json, const std::string& field, ValuesBefore& entry);
     void ReadItemValueFields(const OrderedJson& json, const std::string& field, ItemValues& values);
     void ReadLayer(const OrderedJson& json, const std::string& field, Layer& layer);
     void ReadMeshes(const OrderedJson& json, const std::string& field, MeshSet& meshes);
@@ -387,9 +401,9 @@ bool LookReader::ReadLook(const OrderedJson& json, const std::string& field, Loo
         return false;
     }
     look.name = name->get<std::string>();
-    if (m_kind == LookKind::ItemEffect)
+    if (m_kind == LookKind::Effect)
     {
-        ReadItemEffectParts(json, field, look);
+        ReadEffectParts(json, field, look);
         return true;
     }
     const auto layers = json.find(Keys::Layers);
@@ -431,38 +445,37 @@ void LookReader::ReadRenderStyleParts(const OrderedJson& json, const std::string
     {
         ReadItemValues(*after, field + "." + Keys::ItemValuesAfter, look.itemValuesAfter);
     }
-    if (json.contains(Keys::ItemValuesBefore))
+    if (json.contains(Keys::ValuesBefore))
     {
-        AddFatal(field + "." + Keys::ItemValuesBefore,
-                 "is a part of item effects; a render style leaves its item values after drawing (itemValuesAfter)");
+        AddFatal(field + "." + Keys::ValuesBefore,
+                 "is a part of effects; a render style leaves its item values after drawing (itemValuesAfter)");
     }
     for (const char* part : {Keys::ObjectLight, Keys::OnBones, Keys::AnimationSpeed})
     {
         if (json.contains(part))
         {
-            AddFatal(field + "." + part, "is a part of item effects");
+            AddFatal(field + "." + part, "is a part of effects");
         }
     }
     WarnAboutUnknownKeys(json,
                          {Keys::Name, Keys::NotFor, Keys::DrawsAlone, Keys::Layers, Keys::ItemValuesAfter,
-                          Keys::ItemValuesBefore, Keys::ObjectLight, Keys::OnBones, Keys::AnimationSpeed},
+                          Keys::ValuesBefore, Keys::ObjectLight, Keys::OnBones, Keys::AnimationSpeed},
                          field);
 }
 
-// An item effect (design L13): the item values it sets before the drawing, and the light it puts on the object.
-void LookReader::ReadItemEffectParts(const OrderedJson& json, const std::string& field, LookDefinition& look)
+// An effect (design L13): the item values it sets before the drawing, and the light it puts on the object.
+void LookReader::ReadEffectParts(const OrderedJson& json, const std::string& field, LookDefinition& look)
 {
     for (const char* part : {Keys::Layers, Keys::NotFor, Keys::DrawsAlone, Keys::ItemValuesAfter})
     {
         if (json.contains(part))
         {
-            AddFatal(field + "." + part,
-                     "is a part of render styles; an item effect does what comes before the drawing");
+            AddFatal(field + "." + part, "is a part of render styles; an effect does what comes before the drawing");
         }
     }
-    if (const auto before = json.find(Keys::ItemValuesBefore); before != json.end())
+    if (const auto before = json.find(Keys::ValuesBefore); before != json.end())
     {
-        const std::string beforeField = field + "." + Keys::ItemValuesBefore;
+        const std::string beforeField = field + "." + Keys::ValuesBefore;
         if (!before->is_array())
         {
             AddFatal(beforeField, "must be a list of item values, each with its Only when");
@@ -471,9 +484,9 @@ void LookReader::ReadItemEffectParts(const OrderedJson& json, const std::string&
         {
             for (std::size_t i = 0; i < before->size(); ++i)
             {
-                ItemValuesBefore entry;
-                ReadItemValuesBefore((*before)[i], beforeField + "[" + std::to_string(i) + "]", entry);
-                look.itemValuesBefore.push_back(std::move(entry));
+                ValuesBefore entry;
+                ReadValuesBefore((*before)[i], beforeField + "[" + std::to_string(i) + "]", entry);
+                look.valuesBefore.push_back(std::move(entry));
             }
         }
     }
@@ -508,18 +521,18 @@ void LookReader::ReadItemEffectParts(const OrderedJson& json, const std::string&
             look.animationSpeed = speed->get<float>();
         }
     }
-    if (look.itemValuesBefore.empty() && !look.objectLight && look.onBones.empty() && !look.animationSpeed)
+    if (look.valuesBefore.empty() && !look.objectLight && look.onBones.empty() && !look.animationSpeed)
     {
         AddIssue(ItemDataIssueSeverity::Warning, field,
                  "does nothing: no item values before the drawing, no object light, nothing on bones, no animation");
     }
     WarnAboutUnknownKeys(json,
-                         {Keys::Name, Keys::ItemValuesBefore, Keys::ObjectLight, Keys::OnBones, Keys::AnimationSpeed,
+                         {Keys::Name, Keys::ValuesBefore, Keys::ObjectLight, Keys::OnBones, Keys::AnimationSpeed,
                           Keys::Layers, Keys::NotFor, Keys::DrawsAlone, Keys::ItemValuesAfter},
                          field);
 }
 
-// The things an item effect creates on the item's bones (section 7b): a list of entries, each one thing or a group.
+// The things an effect creates on the item's bones (section 7b): a list of entries, each one thing or a group.
 void LookReader::ReadOnBones(const OrderedJson& json, const std::string& field, std::vector<OnBones>& onBones)
 {
     const auto list = json.find(Keys::OnBones);
@@ -869,7 +882,7 @@ bool LookReader::ReadColor(const OrderedJson& json, const std::string& field, st
     return valid;
 }
 
-void LookReader::ReadItemValuesBefore(const OrderedJson& marked, const std::string& field, ItemValuesBefore& entry)
+void LookReader::ReadValuesBefore(const OrderedJson& marked, const std::string& field, ValuesBefore& entry)
 {
     if (!marked.is_object())
     {
@@ -958,10 +971,36 @@ void LookReader::ReadLayer(const OrderedJson& marked, const std::string& field, 
             layer.scrollingMesh = mesh;
         }
     }
+    if (const auto lightMap = json.find(Keys::LightMap); lightMap != json.end())
+    {
+        if (!lightMap->is_boolean())
+        {
+            AddFatal(field + "." + Keys::LightMap, "must be true or false");
+        }
+        else if (layer.kind != LayerKind::Reflection)
+        {
+            AddFatal(field + "." + Keys::LightMap, "is only for a reflection");
+        }
+        else
+        {
+            layer.lightMap = lightMap->get<bool>();
+        }
+    }
+    if (const auto onTop = json.find(Keys::OnTop); onTop != json.end())
+    {
+        if (!onTop->is_boolean())
+        {
+            AddFatal(field + "." + Keys::OnTop, "must be true or false");
+        }
+        else
+        {
+            layer.onTop = onTop->get<bool>();
+        }
+    }
     WarnAboutUnknownKeys(json,
                          {Keys::Kind, Keys::Motion, Keys::Where, Keys::Blend, Keys::Meshes, Keys::OnlyWhen,
                           Keys::Texture, Keys::Opacity, Keys::GlowMesh, Keys::GlowStrength, Keys::ScrollU,
-                          Keys::ScrollV, Keys::Light, Keys::ScrollingMesh},
+                          Keys::ScrollV, Keys::Light, Keys::ScrollingMesh, Keys::LightMap, Keys::OnTop},
                          field);
 }
 
@@ -1081,11 +1120,67 @@ void LookReader::ReadOnlyWhen(const OrderedJson& json, const std::string& field,
     {
         onlyWhen.withoutBuff = buff;
     }
+    for (const auto& [key, target] :
+         {std::pair{Keys::Animation, &onlyWhen.animation}, std::pair{Keys::NotAnimation, &onlyWhen.notAnimation}})
+    {
+        const auto animation = entry->find(key);
+        if (animation == entry->end())
+        {
+            continue;
+        }
+        const std::optional<int> action =
+            animation->is_string() ? Monsters::FindMonsterAnimation(animation->get<std::string>()) : std::nullopt;
+        if (!action)
+        {
+            AddFatal(whenField + "." + key, "must be a monster's animation: stop1, stop2, walk, attack1, attack2, "
+                                            "shock, die, appear, attack3, attack4, run or attack5");
+            continue;
+        }
+        *target = action;
+    }
+    for (const auto& [key, target] : {std::pair{Keys::OpacityAbove, &onlyWhen.opacityAbove},
+                                      std::pair{Keys::OpacityAtMost, &onlyWhen.opacityAtMost}})
+    {
+        const auto opacity = entry->find(key);
+        if (opacity == entry->end())
+        {
+            continue;
+        }
+        if (!opacity->is_number() || opacity->get<double>() < 0.0 || opacity->get<double>() > 1.0)
+        {
+            AddFatal(whenField + "." + key, "must be an opacity from 0 to 1");
+            continue;
+        }
+        *target = opacity->get<double>();
+    }
+    if (const auto half = entry->find(Keys::CycleHalf); half != entry->end())
+    {
+        const std::string halfField = whenField + "." + Keys::CycleHalf;
+        const auto seconds = half->is_object() ? half->find(Keys::Seconds) : half->end();
+        const auto which = half->is_object() ? half->find(Keys::Half) : half->end();
+        if (!half->is_object() || seconds == half->end() || !seconds->is_number() || !(seconds->get<double>() > 0.0))
+        {
+            AddFatal(halfField + "." + Keys::Seconds, "must be a cycle's seconds above 0");
+        }
+        else if (which == half->end() || !which->is_string() ||
+                 (which->get<std::string>() != "first" && which->get<std::string>() != "second"))
+        {
+            AddFatal(halfField + "." + Keys::Half, "must be \"first\" or \"second\"");
+        }
+        else
+        {
+            onlyWhen.cycleHalf =
+                CycleHalf{.seconds = seconds->get<double>(), .first = which->get<std::string>() == "first"};
+            WarnAboutUnknownKeys(*half, {Keys::Seconds, Keys::Half}, halfField);
+        }
+    }
     if (entry->empty())
     {
         AddIssue(ItemDataIssueSeverity::Warning, whenField, "sets no condition: the layer always draws");
     }
-    WarnAboutUnknownKeys(*entry, {Keys::Place, Keys::Level, Keys::HiddenMesh, Keys::Buff, Keys::WithoutBuff},
+    WarnAboutUnknownKeys(*entry,
+                         {Keys::Place, Keys::Level, Keys::HiddenMesh, Keys::Buff, Keys::WithoutBuff, Keys::Animation,
+                          Keys::NotAnimation, Keys::OpacityAbove, Keys::OpacityAtMost, Keys::CycleHalf},
                          whenField);
 }
 
@@ -1238,7 +1333,19 @@ bool LookReader::ReadShape(const OrderedJson& json, const std::string& field, Sh
     }
     const std::string kind = NameOf(ShapeNames, shape.kind);
     bool valid = true;
-    Items::Json::KeySet known{Keys::Shape, Keys::TimesItem};
+    Items::Json::KeySet known{Keys::Shape, Keys::TimesItem, Keys::AtMost};
+    if (const auto atMost = json.find(Keys::AtMost); atMost != json.end())
+    {
+        if (!atMost->is_number())
+        {
+            AddFatal(field + "." + Keys::AtMost, "must be a number");
+            valid = false;
+        }
+        else
+        {
+            shape.atMost = atMost->get<double>();
+        }
+    }
     if (const auto times = json.find(Keys::TimesItem); times != json.end())
     {
         if (!times->is_boolean())
@@ -1348,15 +1455,21 @@ void LookReader::ReadLight(const OrderedJson& json, const std::string& field, st
     if (entry->is_object())
     {
         const auto tint = entry->find(Keys::Tint);
-        if (tint == entry->end() || entry->size() != 1)
+        const auto timesOpacity = entry->find(Keys::TimesOpacity);
+        const auto fromRed = entry->find(Keys::FromRed);
+        if (entry->size() != 1 || (tint == entry->end() && timesOpacity == entry->end() && fromRed == entry->end()))
         {
-            AddFatal(lightField,
-                     "must be [red, green, blue], {\"tint\": [red, green, blue]} or {\"brightness\": a number}");
+            AddFatal(lightField, "must be [red, green, blue], {\"tint\": [red, green, blue]}, {\"timesOpacity\": "
+                                 "[red, green, blue]}, {\"fromRed\": [red, green, blue]} or {\"brightness\": a "
+                                 "number}");
             return;
         }
-        read.tint = true;
-        color = &*tint;
-        colorField += std::string(".") + Keys::Tint;
+        read.tint = tint != entry->end();
+        read.timesOpacity = timesOpacity != entry->end();
+        read.fromRed = fromRed != entry->end();
+        const char* key = read.tint ? Keys::Tint : read.timesOpacity ? Keys::TimesOpacity : Keys::FromRed;
+        color = &(*entry)[key];
+        colorField += std::string(".") + key;
     }
     if (!color->is_array() || color->size() != 3)
     {
@@ -1472,6 +1585,10 @@ OrderedJson WriteShape(Shape shape)
     if (shape.timesItem)
     {
         json[Keys::TimesItem] = true;
+    }
+    if (shape.atMost)
+    {
+        json[Keys::AtMost] = WriteDouble(*shape.atMost);
     }
     return json;
 }
@@ -1688,6 +1805,29 @@ OrderedJson WriteOnlyWhen(const OnlyWhen& onlyWhen)
     {
         json[Keys::WithoutBuff] = NameOf(BuffNames, *onlyWhen.withoutBuff);
     }
+    if (onlyWhen.animation)
+    {
+        json[Keys::Animation] = Monsters::GetMonsterAnimationName(*onlyWhen.animation);
+    }
+    if (onlyWhen.notAnimation)
+    {
+        json[Keys::NotAnimation] = Monsters::GetMonsterAnimationName(*onlyWhen.notAnimation);
+    }
+    if (onlyWhen.opacityAbove)
+    {
+        json[Keys::OpacityAbove] = WriteDouble(*onlyWhen.opacityAbove);
+    }
+    if (onlyWhen.opacityAtMost)
+    {
+        json[Keys::OpacityAtMost] = WriteDouble(*onlyWhen.opacityAtMost);
+    }
+    if (onlyWhen.cycleHalf)
+    {
+        OrderedJson half;
+        half[Keys::Seconds] = WriteDouble(onlyWhen.cycleHalf->seconds);
+        half[Keys::Half] = onlyWhen.cycleHalf->first ? "first" : "second";
+        json[Keys::CycleHalf] = half;
+    }
     return json;
 }
 
@@ -1716,6 +1856,14 @@ OrderedJson WriteLight(const LayerLight& light)
     for (const Number& channel : light.color)
     {
         color.push_back(WriteNumber(channel));
+    }
+    if (light.timesOpacity)
+    {
+        return OrderedJson{{Keys::TimesOpacity, std::move(color)}};
+    }
+    if (light.fromRed)
+    {
+        return OrderedJson{{Keys::FromRed, std::move(color)}};
     }
     return light.tint ? OrderedJson{{Keys::Tint, std::move(color)}} : color;
 }
@@ -1784,6 +1932,14 @@ OrderedJson WriteLayer(const Layer& layer)
     {
         json[Keys::ScrollingMesh] = *layer.scrollingMesh;
     }
+    if (layer.lightMap)
+    {
+        json[Keys::LightMap] = true;
+    }
+    if (layer.onTop)
+    {
+        json[Keys::OnTop] = true;
+    }
     PutEachItem(json, layer.eachItem,
                 {Keys::Kind, Keys::Motion, Keys::Where, Keys::Blend, Keys::Meshes, Keys::OnlyWhen, Keys::Texture,
                  Keys::Opacity, Keys::GlowMesh, Keys::GlowStrength, Keys::ScrollU, Keys::ScrollV, Keys::Light,
@@ -1838,7 +1994,7 @@ OrderedJson WriteItemValues(const ItemValues& values)
     return json;
 }
 
-OrderedJson WriteItemValuesBefore(const ItemValuesBefore& entry)
+OrderedJson WriteValuesBefore(const ValuesBefore& entry)
 {
     OrderedJson json = OrderedJson::object();
     if (!entry.onlyWhen.IsEmpty())
@@ -1872,7 +2028,7 @@ std::string_view GetRenderStylesFileName()
 
 std::string_view GetLookFileName(LookKind kind)
 {
-    return kind == LookKind::ItemEffect ? "ItemEffects.json" : GetRenderStylesFileName();
+    return kind == LookKind::Effect ? "Effects.json" : GetRenderStylesFileName();
 }
 
 void ReadRenderStylesFile(std::string_view text, const std::string& source, RenderStylesFile& file,
@@ -1944,7 +2100,7 @@ std::set<std::string> EachItemNames(const LookDefinition& look)
         add(layer.eachItem);
     }
     add(look.itemValuesAfter.eachItem);
-    for (const ItemValuesBefore& entry : look.itemValuesBefore)
+    for (const ValuesBefore& entry : look.valuesBefore)
     {
         add(entry.values.eachItem);
     }
@@ -1987,9 +2143,9 @@ LookDefinition ResolveForItem(const LookDefinition& look, const std::map<std::st
     {
         put(json[Keys::ItemValuesAfter], look.itemValuesAfter.eachItem);
     }
-    for (std::size_t i = 0; i < look.itemValuesBefore.size(); ++i)
+    for (std::size_t i = 0; i < look.valuesBefore.size(); ++i)
     {
-        put(json[Keys::ItemValuesBefore][i], look.itemValuesBefore[i].values.eachItem);
+        put(json[Keys::ValuesBefore][i], look.valuesBefore[i].values.eachItem);
     }
     LookFile file;
     std::vector<Items::ItemDataIssue> read;
@@ -2039,16 +2195,16 @@ std::string WriteLookFileJson(LookKind kind, std::vector<LookDefinition> looks,
     {
         OrderedJson json = OrderedJson::object();
         json[Keys::Name] = look.name;
-        if (kind == LookKind::ItemEffect)
+        if (kind == LookKind::Effect)
         {
-            if (!look.itemValuesBefore.empty())
+            if (!look.valuesBefore.empty())
             {
                 OrderedJson before = OrderedJson::array();
-                for (const ItemValuesBefore& entry : look.itemValuesBefore)
+                for (const ValuesBefore& entry : look.valuesBefore)
                 {
-                    before.push_back(WriteItemValuesBefore(entry));
+                    before.push_back(WriteValuesBefore(entry));
                 }
-                json[Keys::ItemValuesBefore] = std::move(before);
+                json[Keys::ValuesBefore] = std::move(before);
             }
             if (look.objectLight)
             {
@@ -2110,7 +2266,7 @@ std::string WriteLookFileJson(LookKind kind, std::vector<LookDefinition> looks,
     text = Items::Json::PutListsOnOneLine(text, Keys::NotFor);
     text = Items::Json::PutListEntriesOnOneLine(text, Keys::Layers);
     text = Items::Json::PutObjectsOnOneLine(text, Keys::ItemValuesAfter);
-    text = Items::Json::PutListEntriesOnOneLine(text, Keys::ItemValuesBefore);
+    text = Items::Json::PutListEntriesOnOneLine(text, Keys::ValuesBefore);
     text = Items::Json::PutListsOnOneLine(text, Keys::ObjectLight);
     text = Items::Json::PutListEntriesOnOneLine(text, Keys::OnBones);
     return text + "\n";

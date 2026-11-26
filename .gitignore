@@ -61,6 +61,10 @@ src/bin/Data/Items/**/*.tmp
 !src/bin/Data/Monsters/
 !src/bin/Data/Monsters/**
 src/bin/Data/Monsters/**/*.tmp
+# The master skills' buff parts (Data/Skills/MasterSkills.json, buffs design B18) are source-controlled; the
+# skill effects beside them (Data/Skill) are not.
+!src/bin/Data/Skills/
+!src/bin/Data/Skills/**
 # Effect data (JSON), e.g. the glow colors of the items.
 !src/bin/Data/Effects/
 !src/bin/Data/Effects/**

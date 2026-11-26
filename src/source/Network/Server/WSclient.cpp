@@ -137,6 +137,7 @@ using namespace mu::ui::window;
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "GameLogic/Skills/SkillHotkeyConfiguration.h"
+#include "Network/RoundTripMeter.h"
 
 #define MAX_DEBUG_MAX 10
 
@@ -6406,6 +6407,29 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
     return (TRUE);
 }
 
+namespace
+{
+// The sound of an item which the player changed, e.g. with a jewel. An equipped item is only updated by the server,
+// and so is a rented item which expired in the bag, so they play none.
+void PlayModifiedItemSound(int itemindex)
+{
+    const ITEM* pItem = IsPlayerInventorySlot(itemindex) ? UI::Inventory::FindPlayerItem(itemindex) : nullptr;
+    if (pItem == nullptr || GameLogic::Items::IsExpiredRental(pItem) || GambleSystem::Instance().IsGambleShop())
+    {
+        return;
+    }
+
+    if (pItem->Type == ITEM_LOST_MAP || pItem->Type == ITEM_POTION + 111)
+    {
+        PlayBuffer(SOUND_KUNDUN_ITEM_SOUND);
+    }
+    else
+    {
+        PlayBuffer(SOUND_JEWEL01);
+    }
+}
+} // namespace
+
 void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
 {
     auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_ITEM_EXTENDED>(ReceiveBuffer);
@@ -6420,36 +6444,26 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     int length = CalcItemLength(itemData);
     itemData = itemData.subspan(0, length);
 
-    if (UI::Inventory::HasPickedItem())
-    {
-        UI::Inventory::DiscardPickedItem();
-    }
-
     int itemindex = Data->Index;
+    UI::Inventory::DiscardPickedItemUpdatedBy(itemindex);
+
     if (IsPlayerInventorySlot(itemindex) && UI::Inventory::FindPlayerItem(itemindex))
         UI::Inventory::RemoveItem(itemindex);
 
     bool shouldResyncInventory = false;
     if (IsPlayerInventorySlot(itemindex))
         shouldResyncInventory = !UI::Inventory::InsertItem(itemindex, itemData);
+    else if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
+        // An equipped item changed, e.g. a rented one expired: it's equipped again, with the new data.
+        shouldResyncInventory = !UI::Inventory::InsertItem(itemindex, itemData);
 
     if (shouldResyncInventory)
     {
         RequestInventorySync();
+        return;
     }
 
-    int iType = Items[itemindex].Item.Type;
-    if (iType == ITEM_LOST_MAP || iType == ITEM_POTION + 111)
-    {
-        PlayBuffer(SOUND_KUNDUN_ITEM_SOUND);
-    }
-    else if (GambleSystem::Instance().IsGambleShop())
-    {
-    }
-    else
-    {
-        PlayBuffer(SOUND_JEWEL01);
-    }
+    PlayModifiedItemSound(itemindex);
 }
 
 BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
@@ -13236,7 +13250,8 @@ bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
     }
     else
     {
-        ITEM* pItem = UI::Inventory::FindMainInventoryItem(Data->wItemSlotIndex);
+        // The main inventory or its extension.
+        ITEM* pItem = UI::Inventory::FindPlayerItem(Data->wItemSlotIndex);
 
         if (pItem == nullptr)
             return false;
@@ -14042,6 +14057,13 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             {
                 g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x0B] (too short: %d bytes)", Size);
             }
+        }
+        else if (subcode == 0x0D && bIsC1C3 && Size >= 8)
+        {
+            // The answer to a round trip request of the ping: the token the request carried.
+            const uint32_t token = ReceiveBuffer[4] | (ReceiveBuffer[5] << 8) | (ReceiveBuffer[6] << 16) |
+                                   (static_cast<uint32_t>(ReceiveBuffer[7]) << 24);
+            Network::Ping().Answered(token, Network::RoundTripMeter::Clock::now());
         }
         else
         {

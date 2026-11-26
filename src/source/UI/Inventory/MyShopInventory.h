@@ -56,7 +56,7 @@ namespace mu::ui::window
 
             // Former RenderTextInfo() -- only stillOpening's visibility ever changes at runtime
             // (m_EnablePersonalShop), so every other line here is set once (BuildRmlUi()) and never
-            // re-synced, same convention CCharacterInfoWindow's own static labels use. Colors are
+            // re-synced. Colors are
             // plain RCSS now (my_shop.rcss's .myshop-line-* rules), not data-bound -- these are
             // fixed per-line decorative constants, not a live gameplay signal the way e.g.
             // CMixInventory's success-rate color is.

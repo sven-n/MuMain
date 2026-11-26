@@ -15,8 +15,9 @@ enum class LineColor : uint8_t
 {
     White,
     Blue,
-    Red,        // plain red text (unmet requirement lines, "(lacking N)" deficits)
-    DarkRed,    // white text on a red background (warnings, siege badge, brand info)
+    Red,     // plain red text (unmet requirement lines, "(lacking N)" deficits)
+    DarkRed, // white text on a red background (warnings, siege badge, brand info)
+    Gray,    // the parts of a buff value (buffs design B9)
 };
 
 constexpr int MAX_TOOLTIP_LINE_TEXT = 128;

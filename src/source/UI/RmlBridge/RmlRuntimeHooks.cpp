@@ -5,6 +5,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
+#include "UI/Diagnostics/PingOverlay.h"
 #include "UI/RmlBridge/RmlClickSounds.h"
 #include "UI/RmlBridge/RmlDocumentHints.h"
 #include "UI/RmlBridge/RmlMarquee.h"
@@ -43,10 +44,12 @@ void InstallRuntimeHooks()
         SetSelectedFontFamily(StringUtils::WideToNarrow(GameConfig::GetInstance().GetFontSelection().c_str()));
         LoadActiveThemeFonts();
         UI::Diagnostics::Initialize();
+        UI::Diagnostics::PingOverlay::Initialize();
     };
     hooks.beforeDestroy = []
     {
         UI::Diagnostics::Release();
+        UI::Diagnostics::PingOverlay::Release();
         ClearThemeFontCache();
     };
     hooks.beforeUpdate = []

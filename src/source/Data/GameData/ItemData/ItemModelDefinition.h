@@ -154,12 +154,12 @@ struct ItemModelDefinition
     // What the model does before it is drawn (sprites and particles on its
     // bones, a pulsing glow mesh, its own drawing, ...): the name of an item
     // effect (Render/Items/ItemEffects). Empty: none.
-    std::string itemEffect;
+    std::string effect;
     // The values this item sets for the fields its render style lets each item set (design L12): a value's name and
     // the value as the look file writes it (JSON text). The look says what each one must be.
     std::map<std::string, std::string> renderStyleValues;
-    // The same for the item effect's fields.
-    std::map<std::string, std::string> itemEffectValues;
+    // The same for the effect's fields.
+    std::map<std::string, std::string> effectValues;
 
     bool Exists() const
     {

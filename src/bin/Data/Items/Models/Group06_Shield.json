@@ -133,7 +133,7 @@
       "ground": {
         "rotation": [0, 270, 225]
       },
-      "itemEffect": "pulsingGlow"
+      "effect": "pulsingGlow"
     },
     {
       "number": 12,
@@ -145,7 +145,7 @@
       "ground": {
         "rotation": [0, 270, 225]
       },
-      "itemEffect": "pulsingGlow"
+      "effect": "pulsingGlow"
     },
     {
       "number": 13,
@@ -157,7 +157,7 @@
       "ground": {
         "rotation": [0, 270, 225]
       },
-      "itemEffect": "pulsingGlow"
+      "effect": "pulsingGlow"
     },
     {
       "number": 14,
@@ -169,7 +169,7 @@
       "ground": {
         "rotation": [0, 270, 225]
       },
-      "itemEffect": "shimmeringGlow"
+      "effect": "shimmeringGlow"
     },
     {
       "number": 15,
@@ -200,7 +200,7 @@
         "hiddenMesh": 2
       },
       "renderStyle": "elementalShield",
-      "itemEffect": "hideMesh2"
+      "effect": "hideMesh2"
     },
     {
       "number": 17,

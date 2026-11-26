@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.WebSockets;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Logging.Abstractions;
 using MUnique.Client.Library;
@@ -30,6 +32,94 @@ internal static class Program
         await LocalhostReachesAnIPv4OnlyServerQuickly();
         await RefusedOnEveryAddressFailsByCode();
         await ClosingWhileThePeerStopsReadingLetsGo();
+        RelayAddressNamesTheServer();
+        await ThroughARelayTheStreamIsTheSame();
+        await ARelayThatRefusesFails();
+    }
+
+    private static void RelayAddressNamesTheServer()
+    {
+        var address = DeferredTcpPipe.RelayAddress("wss://relay.example.com/mu/{host}/{port}", "game server", 55901);
+        Expect(address.AbsoluteUri == "wss://relay.example.com/mu/game%20server/55901", $"the relay's address names the server ({address})");
+    }
+
+    // Through a relay the game sees the same stream: early writes go out, the server's bytes arrive, a close ends it.
+    private static async Task ThroughARelayTheStreamIsTheSame()
+    {
+        using var listener = Listen();
+        using var pipe = new DeferredTcpPipe();
+        var events = new Events();
+        await WriteAsync(pipe, "early;");
+        pipe.Start(DeferredTcpPipe.RelayAddress($"ws://127.0.0.1:{Port(listener)}/{{host}}/{{port}}", "localhost", 44405), Wait, events.Opened, events.Failed);
+        var (path, server) = await AcceptWebSocketAsync(listener).WaitAsync(Wait);
+        using var serverSocket = server;
+        Expect(path == "/localhost/44405", $"the relay is asked for the server ({path})");
+        await events.OpenedTask.WaitAsync(Wait);
+        await WriteAsync(pipe, "late;");
+        Expect(await ReceiveAsync(server, "early;late;".Length) == "early;late;", "bytes written before open go out first, through the relay");
+
+        await server.SendAsync(Encoding.ASCII.GetBytes("hello"), WebSocketMessageType.Binary, true, CancellationToken.None);
+        var result = await pipe.Input.ReadAtLeastAsync(5).AsTask().WaitAsync(Wait);
+        Expect(Encoding.ASCII.GetString(result.Buffer.Slice(0, 5).ToArray()) == "hello", "the relay's bytes reach Input");
+        pipe.Input.AdvanceTo(result.Buffer.GetPosition(5));
+
+        await pipe.Output.CompleteAsync();
+        var closing = await server.ReceiveAsync(new byte[16], CancellationToken.None).WaitAsync(Wait);
+        Expect(closing.MessageType == WebSocketMessageType.Close, "closing the pipe closes the WebSocket");
+    }
+
+    private static async Task ARelayThatRefusesFails()
+    {
+        using var listener = Listen();
+        using var pipe = new DeferredTcpPipe();
+        var events = new Events();
+        pipe.Start(new Uri($"ws://127.0.0.1:{Port(listener)}/localhost/44405"), Wait, events.Opened, events.Failed);
+        using var client = await listener.AcceptTcpClientAsync().WaitAsync(Wait);
+        var stream = client.GetStream();
+        await ReadRequestAsync(stream);
+        await stream.WriteAsync("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"u8.ToArray());
+        await events.FailedTask.WaitAsync(Wait);
+        Expect(!events.OpenedTask.IsCompleted, "a refused relay never opens");
+        await ExpectInputFailsAsync(pipe);
+    }
+
+    // A WebSocket server as small as the test needs: the handshake by hand, then the framework's server side.
+    private static async Task<(string Path, WebSocket Socket)> AcceptWebSocketAsync(TcpListener listener)
+    {
+        var client = await listener.AcceptTcpClientAsync();
+        var stream = client.GetStream();
+        var request = await ReadRequestAsync(stream);
+        var key = request.Split("\r\n").First(line => line.StartsWith("Sec-WebSocket-Key:", StringComparison.OrdinalIgnoreCase))[18..].Trim();
+        var accept = Convert.ToBase64String(SHA1.HashData(Encoding.ASCII.GetBytes(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")));
+        await stream.WriteAsync(Encoding.ASCII.GetBytes($"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: {accept}\r\n\r\n"));
+        return (request.Split(' ')[1], WebSocket.CreateFromStream(stream, isServer: true, subProtocol: null, keepAliveInterval: Timeout.InfiniteTimeSpan));
+    }
+
+    private static async Task<string> ReadRequestAsync(NetworkStream stream)
+    {
+        var request = new StringBuilder();
+        var one = new byte[1];
+        while (!request.ToString().EndsWith("\r\n\r\n", StringComparison.Ordinal))
+        {
+            Expect(await stream.ReadAsync(one) == 1, "the request's headers arrive");
+            request.Append((char)one[0]);
+        }
+
+        return request.ToString();
+    }
+
+    private static async Task<string> ReceiveAsync(WebSocket socket, int count)
+    {
+        var buffer = new byte[count];
+        var received = 0;
+        while (received < count)
+        {
+            var result = await socket.ReceiveAsync(buffer.AsMemory(received), CancellationToken.None).AsTask().WaitAsync(Wait);
+            Expect(result.MessageType == WebSocketMessageType.Binary, "the relay carries binary messages while bytes are expected");
+            received += result.Count;
+        }
+
+        return Encoding.ASCII.GetString(buffer);
     }
 
     // A server that stopped reading keeps the send pending forever; the close must still give the socket up.
@@ -299,7 +389,7 @@ internal static class Program
             var result = await pipe.Input.ReadAsync().AsTask().WaitAsync(Wait);
             Expect(false, $"Input ends with the connect's error, not a read (completed={result.IsCompleted})");
         }
-        catch (Exception ex) when (ex is SocketException or OperationCanceledException)
+        catch (Exception ex) when (ex is SocketException or WebSocketException or OperationCanceledException)
         {
         }
     }

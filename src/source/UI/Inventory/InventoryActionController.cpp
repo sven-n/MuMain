@@ -656,7 +656,12 @@ bool CInventoryActionController::ApplyJewel(CInventoryCtrl* targetControl, CPick
         return true;
     }
 
-    SendRequestUse(iSourceIndex, targetIndex);
+    // Only a request which was sent gets an answer which ends the held jewel; one which wasn't (another use still
+    // pending, or the vault or a trade open) leaves it a normal held item.
+    if (SendRequestUse(iSourceIndex, targetIndex))
+    {
+        pPickedItem->MarkUsedOnItem();
+    }
     PlayBuffer(SOUND_GET_ITEM01);
     return true;
 }

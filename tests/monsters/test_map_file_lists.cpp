@@ -53,6 +53,9 @@ using MonsterRecorder::CreationScope;
 // Folders shipped whole: what a run without a window does not open (interface documents and their images, fonts),
 // every language, not only the one the run loads, and the renderer's look file.
 constexpr std::string_view WholeFolders[] = {"Data/Interface", "Data/Local", "Data/Render", "fonts"};
+// Files only the editor build reads (the option rules: ItemDataHandler's WithRules): the lists are the game's, so they
+// are the same whichever build writes or checks them.
+constexpr std::string_view EditorOnlyFiles[] = {"Data/Items/Options/OptionRules.json"};
 
 // The event states that make a map read other files, or spawn other models. LoadWorld reads some (the siege, Crywolf's
 // occupation) and resets the others, which the game then sets while the map is loaded.
@@ -428,6 +431,10 @@ Lists RecordLists()
             // The dragons MoveBoids sends over any map while the server runs an event.
             OpenMonsterModel(MONSTER_MODEL_DRAGON);
         });
+    for (const std::string_view file : EditorOnlyFiles)
+    {
+        lists.shared.erase(std::string(file));
+    }
     recorder.KeepAsShared();
     for (const std::string_view folder : WholeFolders)
     {

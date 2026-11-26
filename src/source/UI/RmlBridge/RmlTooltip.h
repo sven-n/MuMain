@@ -5,6 +5,7 @@
 #include "UI/Scaling/UITransform.h"
 
 #include <optional>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -165,6 +166,8 @@ namespace UI::RmlBridge::Tooltip
     // check): content identical to what is showing is not rebuilt or measured again, only placed at
     // the anchor. No-op if RmlUiRuntime isn't created yet or `config.lines` is empty.
     void Show(const Config& config, Owner owner = nullptr);
+    // Renders the supplied lines using the placement and styling from config.
+    void ShowLines(std::span<const Line> lines, const Config& config, Owner owner = nullptr);
 
     // Hides the shared tooltip document -- but only if `owner` matches the current owner (or
     // either is nullptr). No-op if it was never built, already hidden, or owned by someone else.

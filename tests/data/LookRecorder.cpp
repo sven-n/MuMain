@@ -38,6 +38,7 @@
 #include <cstring>
 #include <iterator>
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -347,7 +348,7 @@ std::vector<Situation> SituationsFor(std::string_view renderStyle, Data::Looks::
     {
         conditions.push_back(layer.onlyWhen);
     }
-    for (const Data::Looks::ItemValuesBefore& entry : look->itemValuesBefore)
+    for (const Data::Looks::ValuesBefore& entry : look->valuesBefore)
     {
         conditions.push_back(entry.onlyWhen);
     }
@@ -527,7 +528,7 @@ void ShippedItems::Open(std::span<const int> itemTypes)
         }
     }
     Data::Items::ModelLoader::ReopenModels(items, {});
-    // As the game loads them before the looks find theirs: the textures of OpenBasicData and the item effect textures
+    // As the game loads them before the looks find theirs: the textures of OpenBasicData and the effect textures
     // at their indices, which looks in code name; then the textures the looks in data name.
     static const bool effectTexturesLoaded = []
     {
@@ -535,7 +536,7 @@ void ShippedItems::Open(std::span<const int> itemTypes)
         {
             LoadBitmap(texture.file, texture.index, GL_LINEAR, texture.wrap);
         }
-        OpenItemEffectTextures();
+        OpenEffectTextures();
         return true;
     }();
     (void)effectTexturesLoaded;
@@ -547,7 +548,7 @@ std::vector<int> ItemsUsing(std::string_view renderStyle, Data::Looks::LookKind 
     std::vector<int> items;
     for (const Data::Items::ItemModelDefinition& model : ShippedModels().models)
     {
-        if ((kind == Data::Looks::LookKind::ItemEffect ? model.itemEffect : model.renderStyle) == renderStyle)
+        if ((kind == Data::Looks::LookKind::Effect ? model.effect : model.renderStyle) == renderStyle)
         {
             items.push_back(Data::Items::MakeItemType(model.group, model.number));
         }
@@ -605,24 +606,35 @@ Record RecordItem(int itemType, const Situation& situation)
     model.StreamMesh = -1;
     model.Animation(BoneTransform, 0.f, 0.f, 0, object.Angle, object.HeadAngle, false, false);
 
-    RecordingDrawer drawer;
-    Render::Drawing::DrawCallLog log;
-    Render::ModelDrawing::SetModelDrawer(&drawer);
-    mu::SetRendererOverride(&log);
-    Render::Drawing::ResetLegacyState();
-    log.calls.clear();
     const vec3_t light = {situation.light, situation.light, situation.light};
     std::optional<Render::Items::Looks::InventoryDrawing> inventory;
     if (situation.inInventory)
     {
         inventory.emplace();
     }
-    RenderPartObject(&object, slot, nullptr, light, situation.alpha, situation.level, situation.excellent ? 1 : 0, 0,
-                     true, situation.hideSkin, false, 0, situation.renderType);
+    Record record = RecordDrawing(model,
+                                  [&]
+                                  {
+                                      RenderPartObject(&object, slot, nullptr, light, situation.alpha, situation.level,
+                                                       situation.excellent ? 1 : 0, 0, true, situation.hideSkin, false,
+                                                       0, situation.renderType);
+                                  });
+    WorldTime = previousWorldTime;
+    return record;
+}
+
+Record RecordDrawing(const BMD& model, const std::function<void()>& draw)
+{
+    RecordingDrawer drawer;
+    Render::Drawing::DrawCallLog log;
+    Render::ModelDrawing::SetModelDrawer(&drawer);
+    mu::SetRendererOverride(&log);
+    Render::Drawing::ResetLegacyState();
+    log.calls.clear();
+    draw();
     log.NoteFinalState();
     mu::SetRendererOverride(nullptr);
     Render::ModelDrawing::SetModelDrawer(nullptr);
-    WorldTime = previousWorldTime;
 
     Record record;
     record.meshDraws = std::move(drawer.draws);

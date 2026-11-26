@@ -36,9 +36,6 @@ constexpr const char* Attribute = "attribute";
 constexpr const char* Text = "text";
 } // namespace Keys
 
-constexpr int MaxNumber = 255;
-// The additional option's number is the option type the server sends, the option byte's high four bits.
-constexpr int MaxOptionTypeNumber = 15;
 constexpr int MaxOptionsPerItem = 255;
 // OpenMU's GUIDs: 8, 4, 4, 4 and 12 hexadecimal digits.
 constexpr std::array<size_t, 5> GuidGroupLengths = {8, 4, 4, 4, 12};
@@ -50,13 +47,7 @@ const KeySet ServerKeys = {Keys::AddsRandomly, Keys::AddChance, Keys::MaximumOpt
 const KeySet OptionKeys = {Keys::Number,         Keys::Attribute,      ItemOptionAddKeys[0],
                            ItemOptionAddKeys[1], ItemOptionAddKeys[2], Keys::Text};
 
-// Whether the options of a type have a number (OpenMU's ItemOption.Number), and whether a definition of it has one
-// option only.
-bool HasNumbers(ItemOptionType type)
-{
-    return type != ItemOptionType::Luck && type != ItemOptionType::AncientBonus;
-}
-
+// Whether a definition of the type has one option only.
 bool HasOneOption(ItemOptionType type)
 {
     return type == ItemOptionType::Luck || type == ItemOptionType::AncientBonus;
@@ -303,7 +294,7 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
                                    ItemOption& option)
 {
     const auto number = json.find(Keys::Number);
-    if (!HasNumbers(type))
+    if (!HasOptionNumbers(type))
     {
         if (number != json.end())
         {
@@ -317,12 +308,8 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
         AddFatal(field + "." + Keys::Number, "missing");
         return;
     }
-    // Excellent options count from 1 (bit number - 1), an ancient set's options in the order the set gives them.
-    const int minimum = type == ItemOptionType::Excellent || type == ItemOptionType::AncientOption ? 1 : 0;
-    const int maximum = type == ItemOptionType::Option      ? MaxOptionTypeNumber
-                        : type == ItemOptionType::Excellent ? MaxExcellentOptionNumber
-                                                            : MaxNumber;
-    ReadWholeNumber(*number, field + "." + Keys::Number, minimum, maximum, option.number);
+    const ItemOptionNumberRange range = GetOptionNumberRange(type);
+    ReadWholeNumber(*number, field + "." + Keys::Number, range.minimum, range.maximum, option.number);
 }
 
 void ItemOptionsReader::ReadAdd(const OrderedJson& json, const std::string& field, ItemOption& option)
@@ -397,7 +384,7 @@ void ItemOptionsReader::ReadOptions(const OrderedJson& json, const std::string& 
         const std::string optionField = optionsField + "[" + std::to_string(index) + "]";
         ItemOption option;
         ReadOption((*options)[index], optionField, definition.type, option);
-        if (HasNumbers(definition.type) && !numbers.insert(option.number).second)
+        if (HasOptionNumbers(definition.type) && !numbers.insert(option.number).second)
         {
             AddFatal(optionField + "." + Keys::Number,
                      std::to_string(option.number) + " is the number of an option before it");
@@ -430,7 +417,7 @@ bool ItemOptionsReader::ReadDefinition(const OrderedJson& json, const std::strin
 OrderedJson WriteOption(const ItemOption& option, ItemOptionType type)
 {
     OrderedJson json;
-    if (HasNumbers(type))
+    if (HasOptionNumbers(type))
     {
         json[Keys::Number] = option.number;
     }

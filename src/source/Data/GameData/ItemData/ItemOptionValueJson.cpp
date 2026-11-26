@@ -9,6 +9,7 @@ namespace
 namespace ValueKey
 {
 constexpr const char* Values = "values";
+constexpr const char* LevelType = "levelType";
 constexpr const char* PerLevel = "perLevel";
 constexpr const char* Per = "per";
 constexpr const char* Attribute = "attribute";
@@ -16,8 +17,14 @@ constexpr const char* Times = "times";
 constexpr const char* Divisor = "divisor";
 } // namespace ValueKey
 
+// The one level type besides the option's own level.
+constexpr const char* ItemLevelType = "itemLevel";
+
+// The highest level a list counts: option levels go 1 to 15, item levels 0 to 15.
+constexpr int MaxLevel = 15;
+
 // perLevel has an error of its own, so it is no unknown field.
-const KeySet ValueFields = {ValueKey::Values, ValueKey::PerLevel, ValueKey::Per};
+const KeySet ValueFields = {ValueKey::LevelType, ValueKey::Values, ValueKey::PerLevel, ValueKey::Per};
 const KeySet TermFields = {ValueKey::Attribute, ValueKey::Times, ValueKey::Divisor};
 
 void ReadTerms(const OrderedJson& json, const std::string& field, std::vector<ItemOptionTerm>& terms,
@@ -82,7 +89,27 @@ void ReadOptionValue(const OrderedJson& json, const std::string& field, ItemOpti
         fatal(field + "." + ValueKey::Values, "missing, or neither a number nor a list of one value per level");
         return;
     }
+    if (const auto levelType = json.find(ValueKey::LevelType); levelType != json.end())
+    {
+        if (levelType->is_string() && levelType->get<std::string>() == ItemLevelType)
+        {
+            value.levelType = ItemOptionLevelType::ItemLevel;
+        }
+        else
+        {
+            fatal(field + "." + ValueKey::LevelType,
+                  std::string("must be \"") + ItemLevelType +
+                      "\" (the item's + level), or left out (the option's own level)");
+        }
+    }
     value.isList = values->is_array();
+    if (!value.isList && value.levelType == ItemOptionLevelType::ItemLevel)
+    {
+        // A constant has no levels.
+        warning(field + "." + ValueKey::LevelType, "does nothing on one value, only on a list of one value per level: "
+                                                   "it is left out");
+        value.levelType = ItemOptionLevelType::OptionLevel;
+    }
     if (!value.isList)
     {
         int constant = 0;
@@ -98,6 +125,14 @@ void ReadOptionValue(const OrderedJson& json, const std::string& field, ItemOpti
                                    0, maximum, entry, fatal);
             value.values.push_back(entry);
         }
+        if (const size_t levels = static_cast<size_t>(MaxLevel + 1 - value.FirstLevel()); value.values.size() > levels)
+        {
+            // Kept as written: the values past the last level are never used.
+            warning(field + "." + ValueKey::Values,
+                    "has " + std::to_string(value.values.size()) + " values, but the levels go " +
+                        std::to_string(value.FirstLevel()) + " to " + std::to_string(MaxLevel) + ": values[" +
+                        std::to_string(levels) + "] and after are never used");
+        }
     }
     if (const auto per = json.find(ValueKey::Per); per != json.end())
     {
@@ -109,6 +144,10 @@ void ReadOptionValue(const OrderedJson& json, const std::string& field, ItemOpti
 OrderedJson WriteOptionValue(const ItemOptionValue& value)
 {
     OrderedJson json;
+    if (value.levelType == ItemOptionLevelType::ItemLevel)
+    {
+        json[ValueKey::LevelType] = ItemLevelType;
+    }
     if (value.isList)
     {
         json[ValueKey::Values] = value.values;

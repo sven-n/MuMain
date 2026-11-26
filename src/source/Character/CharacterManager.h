@@ -27,7 +27,7 @@ public:
     BYTE GetStepClass(const CLASS_TYPE byClass);
     int GetEquipedBowType(const CHARACTER* pChar);
     int GetEquipedBowType();
-    int GetEquipedBowType(ITEM* pItem);
+    int GetEquipedBowType(const ITEM* pItem);
     int GetEquipedBowType_Skill();
     void GetMagicSkillDamage(int iType, int* piMinDamage, int* piMaxDamage);
     void GetCurseSkillDamage(int iType, int* piMinDamage, int* piMaxDamage);

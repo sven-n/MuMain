@@ -898,7 +898,7 @@ own inside its PR, with its comparison before the old code goes (D50).
 | 3b | MN4 | Setup at spawn | after 3a | – |
 | 3c | MN5 | NPC rules | after 3b | – |
 | later | MN6 (and MN-B in OpenMU) | OpenMU sync | when items phase 7 has landed | – |
-| later | MN8 | Looks | when items phase 13 exists | – |
+| later | MN8 | Looks: its own design, the [monster looks design](2026-11-13-monster-looks-design.md) (draft) | items phase 13 exists (#1022, #1050) | – |
 | MP1 | – | Map object sounds: its own area, [maps design](2026-11-01-data-driven-maps-design.md) | before MN9 | – |
 | later | MN9 | Cleanup | last | – |
 

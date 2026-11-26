@@ -43,6 +43,9 @@ using DotNetBridge::LoadManagedSymbol;
 // native services the library calls. A source that lacks a required export turns the network off.
 void InitializeDotNetBridge(const DotNetBridge::ManagedSymbolSource& source);
 
+// The WebSocket relay the connections opened from now on go through ({host} and {port} filled in), or empty for TCP.
+void SetConnectionRelay(const char16_t* relay);
+
 class Connection
 {
 private:

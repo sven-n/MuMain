@@ -31,7 +31,7 @@ constexpr std::string_view TooltipKeys[] = {"groundLabels", "tooltipLayout", "to
 
 // The keys of a model entry in the model files.
 constexpr std::string_view ModelKeys[] = {"file",  "model", "textureFolders", "noneBlendMeshes", "inventory", "ground",
-                                          "cloth", "glow",  "material",       "renderStyle",     "itemEffect"};
+                                          "cloth", "glow",  "material",       "renderStyle",     "effect"};
 constexpr std::string_view RequirementKeys[] = {"requirements", "requirementsByLevel", "classRequirements",
                                                 "excellentRaisesLevel"};
 // The rule flags, in the order of the item data (ItemRuleFlags).

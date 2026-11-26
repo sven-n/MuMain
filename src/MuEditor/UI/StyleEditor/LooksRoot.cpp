@@ -30,14 +30,14 @@ namespace
 {
 bool ExistsInCode(Data::Looks::LookKind kind, std::string_view name)
 {
-    // Every item effect is data since the things on bones moved into it.
+    // Every effect is data since the things on bones moved into it.
     return kind == Data::Looks::LookKind::RenderStyle && Render::Items::Styles::ExistsInCode(name);
 }
 } // namespace
 
 const char* LooksRoot::GetRootName() const
 {
-    return m_kind == Data::Looks::LookKind::ItemEffect ? I18N::Editor::ItemEffects : I18N::Editor::RenderStyles;
+    return m_kind == Data::Looks::LookKind::Effect ? I18N::Editor::Effects : I18N::Editor::RenderStyles;
 }
 
 int LooksRoot::GetVersion() const
@@ -102,7 +102,9 @@ bool LooksRoot::IsCode(const std::string& name) const
 
 int LooksRoot::CountUsers(const std::string& name)
 {
-    return m_kind == Data::Looks::LookKind::ItemEffect ? m_counts.ItemEffect(name) : m_counts.RenderStyle(name);
+    // The items' models and the monsters that name it (MN8): a look only monsters name is used too.
+    const int items = m_kind == Data::Looks::LookKind::Effect ? m_counts.Effect(name) : m_counts.RenderStyle(name);
+    return items + m_monsterUses.Count(name, m_kind);
 }
 
 void LooksRoot::Update() const
@@ -117,7 +119,7 @@ void LooksRoot::Update() const
     {
         names.insert(look.name);
     }
-    const std::span<const std::string_view> all = m_kind == Data::Looks::LookKind::ItemEffect
+    const std::span<const std::string_view> all = m_kind == Data::Looks::LookKind::Effect
                                                       ? Render::Items::ItemEffects::GetNames()
                                                       : Render::Items::Styles::GetNames();
     for (const std::string_view name : all)

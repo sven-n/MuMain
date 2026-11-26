@@ -2,6 +2,7 @@
 
 #include "Data/GameData/BuffData/BuffDefinition.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/ItemData/ItemOptionDefinition.h"
 
 #include <filesystem>
 #include <span>
@@ -33,6 +34,19 @@ void ValidateBuffsForGame(std::span<const BuffDefinition> buffs, std::span<const
 // ValidateBuffItems against the item list as the game has it (g_ItemDatabase), for the file's buffs.
 void ValidateBuffItemsInGame(std::span<const BuffDefinition> buffs, const std::string& source,
                              std::vector<Items::ItemDataIssue>& issues);
+
+// "Data/Buffs/BuffTexts.json", the skill tooltip's buff value texts (buffs design B9).
+std::filesystem::path GetBuffTextsFile();
+
+struct BuffTextsLoadResult
+{
+    Items::ItemOptionTexts texts;
+    std::vector<Items::ItemDataIssue> issues;
+};
+
+// Reads the texts and warns about languages the game has no texts in; a file it can't read is a warning, since a
+// missing text only leaves its lines out.
+BuffTextsLoadResult LoadBuffTextsFile(const std::filesystem::path& file);
 
 // At start: the file into the table in the display language, its problems logged; the table follows later language
 // changes. False, with the table left as it was and `errorMessage` describing them, on fatal ones.

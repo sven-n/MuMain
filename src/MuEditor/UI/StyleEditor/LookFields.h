@@ -23,15 +23,15 @@ namespace MuEditor::Looks::Fields
 bool Layer(Data::Looks::Layer& layer, const std::vector<LookPart>& parts = {});
 // The look's own options: Not for (doppelgangers, outside a monster's hands) and Draws alone (design L47).
 bool LookOptions(Data::Looks::LookDefinition& look);
-// `light`: whether the values can set the light; the values an item effect sets before the drawing can't.
+// `light`: whether the values can set the light; the values an effect sets before the drawing can't.
 bool ItemValues(Data::Looks::ItemValues& values, const std::vector<LookPart>& parts = {}, bool light = true);
-// An item effect's entry before the drawing (design L13): when it holds, the item values it sets, the drawing's
+// An effect's entry before the drawing (design L13): when it holds, the item values it sets, the drawing's
 // opacity and the level the item glows like from then on.
-bool ItemValuesBeforeEntry(Data::Looks::ItemValuesBefore& entry, const std::vector<LookPart>& parts = {});
-// An item effect's light of the object (design L45): none, or red, green and blue, each a number or a shape.
+bool ValuesBeforeEntry(Data::Looks::ValuesBefore& entry, const std::vector<LookPart>& parts = {});
+// An effect's light of the object (design L45): none, or red, green and blue, each a number or a shape.
 bool ObjectLight(std::optional<std::array<Data::Looks::Number, 3>>& light);
-// One line for an entry of the item effect's list: "Only when: glow mesh, glows like level +7".
-std::string DescribeItemValuesBefore(const Data::Looks::ItemValuesBefore& entry);
+// One line for an entry of the effect's list: "Only when: glow mesh, glows like level +7".
+std::string DescribeValuesBefore(const Data::Looks::ValuesBefore& entry);
 
 // Where an entry's things go, as its fields choose it.
 enum class PlaceMode
@@ -44,7 +44,7 @@ enum class PlaceMode
 // hidden there, and the reader refuses it at the item's place, so the look would not load.
 void ChangePlaceMode(Data::Looks::OnBones& entry, PlaceMode mode);
 
-// A button of an item effect's entry list (the entries before the drawing, the things on bones).
+// A button of an effect's entry list (the entries before the drawing, the things on bones).
 enum class EntryButton
 {
     Copy,
@@ -104,7 +104,7 @@ struct OnBonesShown
     // The bone a number field points at (the mouse on it, or typed into).
     std::optional<int> pointedBone;
 };
-// An entry of an item effect's things on bones (design L55, L56, section 7b): where (at bones, between pairs of bones,
+// An entry of an effect's things on bones (design L55, L56, section 7b): where (at bones, between pairs of bones,
 // at the item's place) with its bones as number fields, its chance, Together, and its things, each with its kind, its
 // type by name from the effect catalogue, SubType, scale, color, a sprite's rotation, lightning's direction and, in a
 // group, its own chance. `chosenBetween`: Between bones chosen before the entry's first pair, which the caller keeps

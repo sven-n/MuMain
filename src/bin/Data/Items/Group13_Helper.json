@@ -233,8 +233,28 @@
         "en": "Dark Horse",
         "de": "Dunkles Pferd",
         "es": "Caballo Oscuro",
+        "id": "Kuda Hitam",
+        "ja": "ダークホース",
         "pl": "Mroczny Koń",
-        "pt": "Cavalo negro"
+        "pt": "Cavalo negro",
+        "ru": "Тёмный конь",
+        "uk": "Темний кінь",
+        "zh-CN": "黑王马",
+        "zh-TW": "黑王馬"
+      },
+      "nameForms": {
+        "de": {
+          "gen": "Dunklen Pferdes"
+        },
+        "pl": {
+          "gen": "Mrocznego Konia"
+        },
+        "ru": {
+          "gen": "Тёмного коня"
+        },
+        "uk": {
+          "gen": "Темного коня"
+        }
       },
       "tags": ["mount", "flying", "darkLordPet", "valuable"],
       "description": [
@@ -257,6 +277,26 @@
       },
       "classRequirements": {
         "darkLord": 1
+      },
+      "petStats": {
+        "minimumDamage": {
+          "perPetLevel": 5,
+          "strengthDivisor": 10,
+          "commandDivisor": 10
+        },
+        "maximumDamage": {
+          "minimumPercent": 150
+        },
+        "attackSpeed": {
+          "add": 20,
+          "perPetLevel": 4,
+          "petLevelDivisor": 5,
+          "commandDivisor": 50
+        },
+        "attackSuccess": {
+          "add": 1000,
+          "perPetLevel": 16
+        }
       }
     },
     {
@@ -265,8 +305,28 @@
         "en": "Dark Raven",
         "de": "Dunkler Rabe",
         "es": "Cuervo Oscuro",
+        "id": "Gagak Gelap",
+        "ja": "ダークスピリット",
         "pl": "Mroczny Kruk",
-        "pt": "Corvo negro"
+        "pt": "Corvo negro",
+        "ru": "Тёмный ворон",
+        "uk": "Темний ворон",
+        "zh-CN": "暗黑乌鸦",
+        "zh-TW": "暗鴉"
+      },
+      "nameForms": {
+        "de": {
+          "gen": "Dunklen Raben"
+        },
+        "pl": {
+          "gen": "Mrocznego Kruka"
+        },
+        "ru": {
+          "gen": "Тёмного ворона"
+        },
+        "uk": {
+          "gen": "Темного ворона"
+        }
       },
       "tags": ["darkLordPet", "valuable"],
       "description": [
@@ -287,6 +347,28 @@
         "fairyElf": 1,
         "magicGladiator": 1,
         "darkLord": 1
+      },
+      "petStats": {
+        "minimumDamage": {
+          "add": 180,
+          "perPetLevel": 15,
+          "commandDivisor": 8
+        },
+        "maximumDamage": {
+          "add": 200,
+          "perPetLevel": 15,
+          "commandDivisor": 4
+        },
+        "attackSpeed": {
+          "add": 20,
+          "perPetLevel": 4,
+          "petLevelDivisor": 5,
+          "commandDivisor": 50
+        },
+        "attackSuccess": {
+          "add": 1000,
+          "perPetLevel": 16
+        }
       }
     },
     {
@@ -2018,7 +2100,7 @@
         "pt": "Capa do Lorde"
       },
       "tags": ["cape", "valuable"],
-      "options": ["luck"],
+      "options": ["capeOfLord", "luck", "capeOfLordOption"],
       "description": [
         {
           "text": "@damageIncrease",

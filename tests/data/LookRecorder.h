@@ -3,6 +3,7 @@
 #include "Data/GameData/LookData/LookDefinition.h"
 
 #include <array>
+#include <functional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -18,6 +19,8 @@
 //
 // The world is pinned: WorldTime per situation, the key of Random::DrawRand, the model's scrolling mesh, and one
 // OBJECT for every drawing, set up by the game's ItemObjectAttribute.
+class BMD;
+
 namespace LookRecorder
 {
 // How an item is drawn.
@@ -50,7 +53,7 @@ std::vector<Situation> Situations();
 
 // The situations the items of a render style are drawn in: those of every look, and the ones the conditions of the look
 // of that name in g_LookStore ask for (design L25): with the buff of a layer's condition, and the levels +1 to +6 for a
-// condition on the level or the hidden mesh, which item effects set by level. A look with a layer only for the
+// condition on the level or the hidden mesh, which effects set by level. A look with a layer only for the
 // inventory or the ground is drawn as the game draws there: worn and on the ground in a grey light, and in the
 // inventory, in white light, at +0, +1, +3 and +7.
 std::vector<Situation> SituationsFor(std::string_view renderStyle,
@@ -95,7 +98,7 @@ constexpr int PartModelDrawn(int modelSlot)
     return -1 - modelSlot;
 }
 
-// The item types whose shipped model entry names this render style (or item effect), in item type order, then the
+// The item types whose shipped model entry names this render style (or effect), in item type order, then the
 // part models whose shipped entry names the render style (PartModelDrawn), in the order of PartModelSlots.
 std::vector<int> ItemsUsing(std::string_view renderStyle,
                             Data::Looks::LookKind kind = Data::Looks::LookKind::RenderStyle);
@@ -106,7 +109,11 @@ std::string DescribeItem(int itemType);
 // Draws the item as the game draws it, in the situation, and records the drawing.
 Record RecordItem(int itemType, const Situation& situation);
 
-// Draws the item with the render style (or item effect) of its name taken from the code: the data look of that name
+// Records what `draw` draws with the game's drawing (each mesh draw, and the GPU calls), and what it left on `model`;
+// the monster looks' recorder draws a monster with it (tests/monsters/MonsterLookRecorder.h).
+Record RecordDrawing(const BMD& model, const std::function<void()>& draw);
+
+// Draws the item with the render style (or effect) of its name taken from the code: the data look of that name
 // and kind is left out of g_LookStore while it draws.
 Record RecordItemWithCode(int itemType, const Situation& situation, std::string_view renderStyle,
                           Data::Looks::LookKind kind = Data::Looks::LookKind::RenderStyle);
@@ -130,7 +137,7 @@ constexpr int AllowedFloatSteps = 8;
 std::string FirstDifference(const Record& code, const Record& data);
 
 // The grid of a Digest: steps of 0.0001 for the drawings, whose numbers are near 1; relative to each number's size
-// (about a ten-thousandth of it) for the things an item effect creates, whose places in the world are near 13000,
+// (about a ten-thousandth of it) for the things an effect creates, whose places in the world are near 13000,
 // where a float step is about ten steps of 0.0001.
 enum class Grid
 {

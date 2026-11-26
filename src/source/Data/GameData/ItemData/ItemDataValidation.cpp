@@ -296,6 +296,52 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
     }
 }
 
+// A pet stat formula's divisors and shares: a divisor below 0, a level term without a divisor and a negative share
+// give no meaningful value; the minimum damage cannot take a share of itself.
+void ValidatePetStatFormula(const ItemDefinition& definition, const PetStatFormula& formula, const char* field,
+                            bool isMinimumDamage, std::vector<ItemDataIssue>& issues)
+{
+    if (formula.strengthDivisor < 0 || formula.commandDivisor < 0 || formula.petLevelDivisor < 0 ||
+        formula.minimumPercent < 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a negative divisor or percent", field);
+    }
+    if (formula.perPetLevel != 0 && formula.petLevelDivisor == 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a per pet level term with a divisor of 0",
+                 field);
+    }
+    if (isMinimumDamage && formula.minimumPercent != 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "takes a share of the minimum damage in the minimum damage itself", field);
+    }
+}
+
+// Only the Dark Lord's pets have pet stats: the game reads them for the Dark Raven and the Dark Horse.
+void ValidatePetStats(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const bool isDarkLordPet = definition.tags.Has(ItemTag::DarkLordPet);
+    if (definition.petStats.IsEmpty())
+    {
+        if (isDarkLordPet)
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a darkLordPet tag but no pet stats",
+                     "petStats");
+        }
+        return;
+    }
+    if (!isDarkLordPet)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has pet stats, but no darkLordPet tag",
+                 "petStats");
+    }
+    ValidatePetStatFormula(definition, definition.petStats.minimumDamage, "petStats.minimumDamage", true, issues);
+    ValidatePetStatFormula(definition, definition.petStats.maximumDamage, "petStats.maximumDamage", false, issues);
+    ValidatePetStatFormula(definition, definition.petStats.attackSpeed, "petStats.attackSpeed", false, issues);
+    ValidatePetStatFormula(definition, definition.petStats.attackSuccess, "petStats.attackSuccess", false, issues);
+}
+
 // The highest level an item can need of a class: its third class.
 constexpr BYTE ThirdClassLevel = 3;
 
@@ -377,6 +423,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateDescription(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
+        ValidatePetStats(definition, issues);
         ValidateClassRequirements(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
@@ -1206,7 +1253,7 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
 }
 
 void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
-                            LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues)
+                            LookNameExists effectExists, std::vector<ItemDataIssue>& issues)
 {
     const auto check =
         [&](const ItemModelDefinition& model, const char* field, const std::string& name, LookNameExists exists)
@@ -1220,7 +1267,7 @@ void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNam
     for (const ItemModelDefinition& model : models)
     {
         check(model, "renderStyle", model.renderStyle, renderStyleExists);
-        check(model, "itemEffect", model.itemEffect, itemEffectExists);
+        check(model, "effect", model.effect, effectExists);
     }
 }
 

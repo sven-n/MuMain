@@ -11,7 +11,7 @@
 #include <string_view>
 #include <vector>
 
-// The render style file, Data/Effects/RenderStyles.json (docs/item-data.md, "Render styles and item effects"):
+// The render style file, Data/Effects/RenderStyles.json (docs/item-data.md, "Render styles and effects"):
 //
 //   { "formatVersion": 1, "kind": "renderStyle",
 //     "looks": [ { "name": "chromeMesh0",
@@ -37,7 +37,7 @@ const char* MotionName(Motion motion);
 std::optional<Motion> MotionNamed(std::string_view name);
 // "slowDrift, fastSweep, ...", for messages.
 std::string MotionNameList();
-// The file of a kind of looks: "RenderStyles.json" or "ItemEffects.json".
+// The file of a kind of looks: "RenderStyles.json" or "Effects.json".
 std::string_view GetLookFileName(LookKind kind);
 
 // A look file as the Style Editor has it: its looks and the folders it sorts them in.
@@ -83,7 +83,7 @@ LookDefinition ResolveForItem(const LookDefinition& look, const std::map<std::st
 // The text of a render style file: the folders (each on a line), looks sorted by name, fields in a fixed order, values
 // that are the item's left out.
 std::string WriteRenderStylesJson(std::vector<LookDefinition> looks, std::span<const Colors::ColorFolder> folders = {});
-// The text of a look file of that kind, as WriteRenderStylesJson; an item effect writes its item values before the
+// The text of a look file of that kind, as WriteRenderStylesJson; an effect writes its item values before the
 // drawing, one entry a line, and its object light.
 std::string WriteLookFileJson(LookKind kind, std::vector<LookDefinition> looks,
                               std::span<const Colors::ColorFolder> folders = {});

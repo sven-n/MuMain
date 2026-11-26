@@ -337,6 +337,11 @@ struct MonsterSetup
     std::optional<int> subType;
     // CHARACTER::Level, the render tier.
     std::optional<int> lookLevel;
+    // The looks it is drawn with (MN8, ML1): a render style and an effect of
+    // Data/Effects by name, in place of its model's; "none" draws it without
+    // the model's.
+    std::optional<std::string> renderStyle;
+    std::optional<std::string> effect;
     std::optional<int> glowMesh;
     std::optional<float> glowLight;
     std::optional<int> hiddenMesh;

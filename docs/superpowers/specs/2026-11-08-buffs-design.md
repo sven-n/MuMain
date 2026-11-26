@@ -61,6 +61,12 @@ time left and the value of each buff on the hero.
 | B13 | Item buffs' values and durations (Q-BF11) | `Buffs.json` is the one place (D26), as in OpenMU, where an item's `ConsumeEffect` points at the magic effect that holds the duration and the boosts. The item tooltip's `{addOptionValue1}`, `{addOptionValue2}` and `{addOptionDuration}` read the item's buff (the buff whose `item` is that item); the buff part of `ItemAddOption.bmd` goes. The item options design (O13) and the items design (phase 11) get a note that this part moved here. |
 | B14 | Where the countdown limit lives (Q-BF12) | A player option in the options window's Interface tab, "Buff countdown", 0 to 30 s (0 turns it off), saved in `config.ini`, default 10. |
 | B15 | Who brings the value terms (Q-BF13) | Item options 9a3, as its design plans it (O7, O20). Buffs PR 1 and the OpenMU pull request can come any time; buffs PR 2 and PR 3 follow 9a3. |
+| B16 | What reads the skill buffs' values (PR 2b, Q-BF14) | Only the skill tooltip (B9). The character stats skip the power-ups of buffs whose values come from the caster (`valuesFrom: caster`); their code for Critical Damage Increase, Expansion of Wizardry, Increase Health, Increase Block and Berserker stays until PR 5 brings the server's finished values (B3), so the character window changes once. |
+| B17 | How the skill buffs' numbers are written (Q-BF15) | As OpenMU writes them: decimals and negatives (`0.10`, `16.8`, `-0.0104`) and decimal `times`/`divisor`, summed as decimals and cut once at the end, so the tooltip equals the server. Each buff attribute has a unit in `BuffAttributes.h` (a fraction shown as %, or a flat value). Values and durations take a `maximum`; skill buffs' durations take `per` terms. The item options keep whole numbers. |
+| B18 | Where master skill parts come from (Q-BF16) | A new `Data/Skills/MasterSkills.json`, in OpenMU's shape: per master skill the buff attribute it raises, `add` or `multiply`, and `extendsDuration`. The skill tooltip walks the shown skill down to its base skills (`MasterSkillToBaseSkillIndex`) and adds the learned ones' values (`MasterSkillInfo`) after the maximum, as OpenMU does. Skills as data (SK1) takes the file over later. |
+| B19 | Swell Life's party count (Q-BF17) | `nearbyPartyMemberCount` is the number of party members the client sees, like OpenMU's observer count (`Party.cs:593`). |
+| B20 | Skills whose buff OpenMU numbers differently (Q-BF18) | `castsBuff` in `MasterSkills.json` (441 casts 6, 469 and 470 cast 81) wins over the skill data's `Effect`; 143, 150 and 151 stay strip entries without values. Buffs OpenMU doesn't define (9, 136, 140, 142, 149) get no values. |
+| B21 | Berserker (Q-BF19) | Its chained values are data: a power-up's `multipliedBy` multiplies it by another power-up of the buff, `valueOf` adds the values of one or more others (the wizardry multiplier adds the mana and the proficiency multipliers); the evaluator computes them in reference order and the loader rejects loops and unknown names. The tooltip shows mana, life, physical damage, wizardry, curse and, with Berserker Proficiency (470), the final wizardry and curse damage. Its defense rule (`ClassSummoner.cs:122`) is shown only after an in-game check. |
 
 ## Current state
 
@@ -376,13 +382,13 @@ Answered on 2026-11-08: Q-BF1 (B1), Q-BF2 (B2), Q-BF3 (B3), Q-BF4 (B4),
 Q-BF4b (B5), Q-BF4c (B6), Q-BF5 (B7), Q-BF5b (B8), Q-BF6 (B9), Q-BF7 (B10),
 Q-BF8 (B11), Q-BF10 (B12), Q-BF11 (B13), Q-BF12 (B14) and Q-BF13 (B15); Q-BF9
 placed this document on its own branch. New questions from the pull requests
-are added here.
+are added here. Answered on 2026-11-22 for PR 2b: Q-BF14 (B16) to Q-BF19 (B21).
 
 Left to the pull requests:
 
 - The OpenMU packet's shape (section 5).
 - How the client counts Swell Life's nearby party members like the server
-  (section 3).
+  (section 3): answered by B19.
 
 ## Tasks
 

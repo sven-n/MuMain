@@ -4,6 +4,8 @@
 
 #include "UI/Inventory/Trade.h"
 #include "UI/Inventory/HeldItemPlacement.h"
+#include "UI/Inventory/TradeWorseOffers.h"
+#include "Engine/Object/CompareItemResult.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -26,6 +28,10 @@
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 
+#include <algorithm>
+#include <array>
+#include <span>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -42,6 +48,14 @@ const wchar_t* const* const kTradeAlertLines[] = {
     &I18N::Game::PleaseCheckWhetherTheItemIs,
     &I18N::Game::TheSameItemThatYouWantToTrade,
 };
+
+namespace CompareResult = Engine::Items::CompareResult;
+
+// The trade's dialogs close with the window: an OK after it would act on a trade that has ended.
+bool TradeWindowIsOpen()
+{
+    return g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE);
+}
 } // namespace
 
 CTrade::CTrade()
@@ -80,8 +94,9 @@ bool CTrade::Create(CManager* pNewUIMng)
 
     LoadImages();
 
-    ::memset(m_szYourID, 0, MAX_USERNAME_SIZE + 1);
+    ::memset(m_szYourID, 0, sizeof(m_szYourID));
     m_bTradeAlert = false;
+    m_bForgetBackUpOnClose = false;
 
     InitTradeInfo();
     InitYourInvenBackUp();
@@ -157,6 +172,7 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
             cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
             cfg.input->maxLength = 8;
             cfg.input->numericOnly = true;
+            cfg.isValid = TradeWindowIsOpen;
             cfg.onPrimary = [this]
             {
                 const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
@@ -187,6 +203,7 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
                 cfg.showCancel = true;
                 for (const wchar_t* const* line : kTradeAlertLines)
                     cfg.lines.push_back({*line, true});
+                cfg.isValid = TradeWindowIsOpen;
                 cfg.onPrimary = [this] { AlertTrade(); };
                 mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
@@ -289,7 +306,7 @@ bool CTrade::UpdateKeyEvent()
     {
         if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            SocketClient->ToGameServer()->SendTradeCancel();
+            CancelTrade();
             g_pNewUISystem->Hide(mu::ui::window::INTERFACE_TRADE);
             PlayBuffer(SOUND_CLICK01);
 
@@ -551,7 +568,7 @@ void CTrade::ProcessClosing()
     m_pYourInvenCtrl->RemoveAllItems();
     m_pMyInvenCtrl->RemoveAllItems();
 
-    if (m_bTradeAlert)
+    if (m_bForgetBackUpOnClose)
         InitYourInvenBackUp();
 }
 
@@ -650,10 +667,22 @@ void CTrade::SendRequestMyGoldInput(int nInputGold)
 void CTrade::ProcessCloseBtn()
 {
     if (CInventoryCtrl::GetPickedItem() == NULL)
-    {
-        m_bTradeAlert = false;
-        SocketClient->ToGameServer()->SendTradeCancel();
-    }
+        CancelTrade();
+}
+
+void CTrade::CancelTrade()
+{
+    // The window may hide right after this, before the server's answer: remember the offers now.
+    RememberOffersOfFailedTrade();
+    SocketClient->ToGameServer()->SendTradeCancel();
+}
+
+void CTrade::RememberOffersOfFailedTrade()
+{
+    m_bForgetBackUpOnClose = false;
+    const int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
+    for (int i = 0; i < nYourItems; ++i)
+        BackUpYourInven(m_pYourInvenCtrl->GetItem(i));
 }
 
 bool CTrade::ProcessBtns()
@@ -668,7 +697,7 @@ void CTrade::AlertTrade()
 {
     m_bMyConfirm = !m_bMyConfirm;
 
-    m_bTradeAlert = true;
+    m_bForgetBackUpOnClose = true;
     SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm ? TradeButtonState::Checked : TradeButtonState::Unchecked);
 }
 
@@ -685,14 +714,13 @@ bool CTrade::ProcessToReceiveTradeRequest(const wchar_t* pszYourID)
         return false;
     }
 
-    wcsncpy(m_szYourID, pszYourID, MAX_USERNAME_SIZE);
-    m_szYourID[MAX_USERNAME_SIZE] = L'\0';
-
+    // m_szYourID keeps the last partner until a trade opens: the remembered items belong to that partner, and this
+    // request may be declined.
     mu::ui::window::GenericDialogConfig cfg;
     cfg.showCancel = true;
     cfg.lines = {
-        { m_szYourID, false },
-        { I18N::Game::WouldLikeToTradeWithYou, false },
+        {pszYourID, false},
+        {I18N::Game::WouldLikeToTradeWithYou, false},
     };
     cfg.onPrimary = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(true); };
     cfg.onCancel = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(false); };
@@ -725,12 +753,15 @@ void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI
         wchar_t szTempID[MAX_USERNAME_SIZE + 1]{ };
         wcsncpy(szTempID, std::wstring(partner.name).c_str(), MAX_USERNAME_SIZE);
 
-        if (!m_bTradeAlert && ::wcscmp(m_szYourID, szTempID))
+        // The remembered items belong to the last partner only.
+        if (::wcscmp(m_szYourID, szTempID) != 0)
             InitYourInvenBackUp();
 
         m_bTradeAlert = false;
+        m_bForgetBackUpOnClose = false;
         m_nYourGuildType = partner.guildKey;
         wcsncpy(m_szYourID, szTempID, MAX_USERNAME_SIZE);
+        m_szYourID[MAX_USERNAME_SIZE] = L'\0';
         m_nYourLevel = partner.level;
         break;
     }
@@ -738,17 +769,14 @@ void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI
 
 void CTrade::ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex)
 {
-    BackUpYourInven(int(byYourInvenIndex));
     ITEM* pYourItemObj = m_pYourInvenCtrl->FindItem(int(byYourInvenIndex));
+    if (pYourItemObj == nullptr)
+        return; // The server removed a slot this window shows empty.
+
+    BackUpYourInven(pYourItemObj);
     m_pYourInvenCtrl->RemoveItem(pYourItemObj);
     AlertYourTradeInven();
     ::PlayBuffer(SOUND_GET_ITEM01);
-}
-
-void CTrade::BackUpYourInven(int nYourInvenIndex)
-{
-    ITEM* pYourItemObj = m_pYourInvenCtrl->FindItem(nYourInvenIndex);
-    BackUpYourInven(pYourItemObj);
 }
 
 void CTrade::BackUpYourInven(ITEM* pYourItemObj)
@@ -773,18 +801,18 @@ void CTrade::BackUpYourInven(ITEM* pYourItemObj)
                 continue;
 
             nCompareValue = ::CompareItem(m_aYourInvenBackUp[i], *pYourItemObj);
-            if (0 == nCompareValue)
+            if (nCompareValue == CompareResult::Same)
             {
                 bSameItem = true;
                 break;
             }
-            else if (-1 == nCompareValue)
+            else if (nCompareValue == CompareResult::SecondIsBetter)
             {
                 bSameItem = true;
                 m_aYourInvenBackUp[i] = *pYourItemObj;
                 break;
             }
-            else if (2 != nCompareValue)
+            else if (nCompareValue != CompareResult::OtherType)
             {
                 bSameItem = true;
             }
@@ -813,53 +841,20 @@ void CTrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const 
 
 void CTrade::AlertYourTradeInven()
 {
-    int nCount = 0;
-    int nCompareItemType[10];
+    const size_t nYourItems = std::min(m_pYourInvenCtrl->GetNumberOfItems(), static_cast<size_t>(MAX_TRADE_INVEN));
 
-    m_bTradeAlert = false;
+    std::array<UI::Trade::OfferedItemCheck, MAX_TRADE_INVEN> offers{};
+    for (size_t i = 0; i < nYourItems; ++i)
+        offers[i] = UI::Trade::CheckAgainstRemembered(std::span<const ITEM>(m_aYourInvenBackUp),
+                                                      *m_pYourInvenCtrl->GetItem(static_cast<int>(i)), ::CompareItem);
 
-    int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
-    ITEM* pYourItemObj;
-    int nCompareValue;
+    std::array<bool, MAX_TRADE_INVEN> marked{};
+    m_bTradeAlert =
+        UI::Trade::MarkWorseOffers(std::span(offers.data(), nYourItems), std::span(marked.data(), nYourItems));
 
-    for (int i = 0; i < nYourItems; ++i)
-    {
-        pYourItemObj = m_pYourInvenCtrl->GetItem(i);
-        for (int j = 0; j < MAX_TRADE_INVEN; ++j)
-        {
-            if (m_aYourInvenBackUp[j].Type == pYourItemObj->Type)
-            {
-                nCompareValue = ::CompareItem(m_aYourInvenBackUp[j], *pYourItemObj);
-                if (1 == nCompareValue)
-                {
-                    m_bTradeAlert = true;
-                    pYourItemObj->byColorState = ITEM_COLOR_TRADE_WARNING;
-                }
-                else
-                {
-                    if (0 == nCompareValue)
-                        nCompareItemType[nCount++] = m_aYourInvenBackUp[j].Type;
-
-                    pYourItemObj->byColorState = ITEM_COLOR_NORMAL;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (nCount > 0)
-    {
-        m_bTradeAlert = false;
-        for (int i = 0; i < nCount; ++i)
-        {
-            for (int j = 0; j < nYourItems; ++j)
-            {
-                pYourItemObj = m_pYourInvenCtrl->GetItem(j);
-                if (nCompareItemType[i] == pYourItemObj->Type)
-                    pYourItemObj->byColorState = ITEM_COLOR_NORMAL;
-            }
-        }
-    }
+    for (size_t i = 0; i < nYourItems; ++i)
+        m_pYourInvenCtrl->GetItem(static_cast<int>(i))->byColorState =
+            marked[i] ? ITEM_COLOR_TRADE_WARNING : ITEM_COLOR_NORMAL;
 }
 
 void CTrade::ProcessToReceiveMyTradeGold(BYTE bySuccess)
@@ -896,17 +891,13 @@ void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
     case UI::Trade::CloseReason::Cancelled:
     {
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
-
-        m_bTradeAlert = false;
-
-        int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
-        for (int i = 0; i < nYourItems; ++i)
-            BackUpYourInven(m_pYourInvenCtrl->GetItem(i));
+        RememberOffersOfFailedTrade();
     }
     break;
 
     case UI::Trade::CloseReason::InventoryFull:
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceledBecauseYourInventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
+        RememberOffersOfFailedTrade();
         break;
 
     case UI::Trade::CloseReason::RequestCancelled:
@@ -915,9 +906,12 @@ void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
 
     case UI::Trade::CloseReason::ReinforcedItem:
         g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
+        RememberOffersOfFailedTrade();
         break;
 
     case UI::Trade::CloseReason::Completed:
+        // Also when a cancel of ours lost the race against the completion: the items changed hands.
+        InitYourInvenBackUp();
         break;
     }
 

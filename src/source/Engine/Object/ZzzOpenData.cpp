@@ -50,6 +50,7 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/DataHandler/BuffData/BuffStorage.h"
+#include "Data/DataHandler/SkillData/MasterSkillStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/MapData/WarpStorage.h"
 #include "I18N/All.h"
@@ -398,6 +399,17 @@ static void OpenBuffData()
     }
 }
 
+// Loads the master skills' buff parts (Data/Skills/MasterSkills.json), after the
+// buffs and the skill data it is checked against; errors stop the game.
+static void OpenMasterSkillData()
+{
+    std::string errorMessage;
+    if (!Data::Skills::LoadMasterSkills(errorMessage))
+    {
+        StopOnDataError("Master skill data error", errorMessage);
+    }
+}
+
 // Loads the effect types (Data/Effects) and builds the effect registry from
 // their creation values; errors stop the game.
 // Reads the model file table (Data/Models/ModelFiles.json, MU_DATA_OVERLAY
@@ -447,7 +459,7 @@ static void OpenPartModel(int modelType)
 // Models that are drawn for items, but are no item models themselves:
 // event models, the level 14/15 armor decorations and the parts of the
 // Rage Fighter weapons.
-static void OpenItemEffectModels()
+static void OpenEffectModels()
 {
     gLoadData.AccessModel(MODEL_EVENT + 18, L"Data\\Item\\", L"LifeStoneItem");
 
@@ -514,7 +526,7 @@ void PrepareGrandSoulPantsClothMesh()
                   BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
 }
 
-// Loads the looks that are data (Data/Effects/RenderStyles.json and ItemEffects.json), before the item models are
+// Loads the looks that are data (Data/Effects/RenderStyles.json and Effects.json), before the item models are
 // opened, which check the names of their looks.
 static void OpenRenderStyleData()
 {
@@ -523,9 +535,9 @@ static void OpenRenderStyleData()
     {
         StopOnDataError("Render style data error", errorMessage);
     }
-    if (!Data::Looks::LoadItemEffects(errorMessage))
+    if (!Data::Looks::LoadEffects(errorMessage))
     {
-        StopOnDataError("Item effect data error", errorMessage);
+        StopOnDataError("Effect data error", errorMessage);
     }
 }
 
@@ -538,14 +550,14 @@ void OpenItems()
         Data::Items::ModelLoader::OpenModels({Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
         PrepareGrandSoulPantsClothMesh();
     }
-    OpenItemEffectModels();
+    OpenEffectModels();
 
     LoadBitmap(L"Item\\NCcape.tga", BITMAP_NCCAPE, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\monk_manto01.TGA", BITMAP_MANTO01, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\monke_manto.TGA", BITMAP_MANTOE, GL_LINEAR, GL_REPEAT);
 }
 
-static void OpenItemEffectModelTextures()
+static void OpenEffectModelTextures()
 {
     gLoadData.OpenTexture(MODEL_EVENT + 11, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 12, L"Item\\");
@@ -574,7 +586,7 @@ static void OpenItemEffectModelTextures()
 }
 
 // Textures that the effect code of items draws with.
-void OpenItemEffectTextures()
+void OpenEffectTextures()
 {
     LoadBitmap(L"Item\\msword01_r.jpg", BITMAP_3RDWING_LAYER, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\rollofpaper_R.jpg", BITMAP_ROOLOFPAPER_EFFECT_R, GL_LINEAR);
@@ -604,9 +616,9 @@ void OpenItemTextures()
     // Before the effect textures, like the old code: a model texture that is
     // also an effect bitmap below stays a texture of its own, with its filter.
     Data::Items::ModelLoader::OpenTextures();
-    OpenItemEffectModelTextures();
+    OpenEffectModelTextures();
     gLoadData.OpenTexture(MODEL_ARROW, L"Item\\Bow\\");
-    OpenItemEffectTextures();
+    OpenEffectTextures();
 }
 
 void DeleteNpcs()
@@ -1455,6 +1467,8 @@ void OpenSounds()
     LoadGameSound(SOUND_RAGESKILL_DRAGONKICK_ATTACK);
     LoadGameSound(SOUND_RAGESKILL_BUFF_1);
     LoadGameSound(SOUND_RAGESKILL_BUFF_2);
+    LoadGameSound(SOUND_RAGESKILL_PHOENIXSHOT);
+    LoadGameSound(SOUND_RAGESKILL_PHOENIXSHOT_ATTACK);
 }
 
 bool OpenFont()
@@ -1496,6 +1510,7 @@ void SaveMacro()
         fwprintf(fp, L"%ls\n", MacroText[i]);
     }
     fclose(fp);
+    Core::Platform::UserFilesChanged();
 }
 
 void OpenMacro()
@@ -1888,6 +1903,7 @@ static void OpenBasicDataStep1()
     LoadBitmap(L"Effect\\joint_sword_red.jpg", BITMAP_BLUR + 11, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\motion_blur_r2.jpg", BITMAP_BLUR + 12, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\motion_blur_r3.jpg", BITMAP_BLUR + 13, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Effect\\SwordEffor2_blur.jpg", BITMAP_BLUR + 14, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\blur02.jpg", BITMAP_BLUR2, GL_NEAREST, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\lightning2.jpg", BITMAP_LIGHTNING + 1, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\Thunder01.jpg", BITMAP_ENERGY, GL_LINEAR, GL_REPEAT);
@@ -2235,6 +2251,7 @@ static void OpenBasicDataStep9()
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SkillDataHandler.Load(Text);
+    OpenMasterSkillData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SocketItemMgr.OpenSocketItemScript(Text);

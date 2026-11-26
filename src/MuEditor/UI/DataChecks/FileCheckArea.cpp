@@ -12,12 +12,14 @@
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/MapData/WarpStorage.h"
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
+#include "Data/DataHandler/SkillData/MasterSkillStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemOptionValidation.h"
 #include "Data/GameData/MapData/LightMood.h"
 #include "Data/GameData/MapData/LookProfile.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Data/GameData/MapData/WarpDatabase.h"
+#include "Data/GameData/SkillData/MasterSkillsJson.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
 #include "Render/Look/LookFileSystem.h"
@@ -78,7 +80,7 @@ std::unique_ptr<DataCheckArea> CreateServerListCheckArea()
 std::unique_ptr<DataCheckArea> CreateEffectCheckArea()
 {
     return std::make_unique<FileCheckArea>(
-        &I18N::Editor::Effects,
+        &I18N::Editor::EffectTypes,
         [] { return Data::Effects::LoadEffectTypeFiles(Data::Effects::GetEffectDataDirectory()).issues; },
         &ToolWindows::effectBrowser, WindowIds::EffectBrowser);
 }
@@ -101,6 +103,24 @@ std::unique_ptr<DataCheckArea> CreateBuffCheckArea()
             {
                 Data::Buffs::ValidateBuffItemsInGame(loaded.buffs, Data::Buffs::GetBuffsFile().generic_string(),
                                                      loaded.issues);
+            }
+            // The master skills' buff parts against those buffs, and the skill tooltip's buff texts (buffs design
+            // B9, B18), as the game reads them at start.
+            Data::Skills::MasterSkillsLoadResult masters =
+                Data::Skills::LoadMasterSkillsFile(Data::Skills::GetMasterSkillsFile());
+            // Like the game, which reads the master skills only after Buffs.json loaded.
+            if (!Data::Items::HasFatal(loaded.issues) && !Data::Items::HasFatal(masters.issues))
+            {
+                Data::Skills::ValidateMasterSkillBuffs(
+                    masters.skills, {}, loaded.buffs,
+                    [&](int skill) { return Data::Skills::FindMasterSkillBuff(skill, masters.skills); },
+                    Data::Skills::GetMasterSkillsFile().generic_string(), masters.issues);
+            }
+            Data::Buffs::BuffTextsLoadResult texts = Data::Buffs::LoadBuffTextsFile(Data::Buffs::GetBuffTextsFile());
+            for (auto* more : {&masters.issues, &texts.issues})
+            {
+                loaded.issues.insert(loaded.issues.end(), std::make_move_iterator(more->begin()),
+                                     std::make_move_iterator(more->end()));
             }
             return loaded.issues;
         },

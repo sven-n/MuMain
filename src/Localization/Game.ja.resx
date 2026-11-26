@@ -7732,6 +7732,30 @@
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>合計: +%d</value>
   </data>
+  <data name="Attack rate (PvM): +%d" xml:space="preserve">
+    <value>攻撃成功率 (PvM): +%d</value>
+  </data>
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
+    <value>{item:13,5}の攻撃力: +%d~%+d</value>
+  </data>
+  <data name="Dark Raven attack speed: +%d" xml:space="preserve">
+    <value>{item:13,5}の攻撃速度: +%d</value>
+  </data>
+  <data name="Dark Raven attack success rate: +%d" xml:space="preserve">
+    <value>{item:13,5}の攻撃成功率: +%d</value>
+  </data>
+  <data name="Dark Horse damage: +%d~%d" xml:space="preserve">
+    <value>{item:13,4}の攻撃力: +%d~%+d</value>
+  </data>
+  <data name="Dark Horse attack speed: +%d" xml:space="preserve">
+    <value>{item:13,4}の攻撃速度: +%d</value>
+  </data>
+  <data name="Dark Horse attack success rate: +%d" xml:space="preserve">
+    <value>{item:13,4}の攻撃成功率: +%d</value>
+  </data>
+  <data name="Guild members as guild master: +%d" xml:space="preserve">
+    <value>ギルドマスター時のギルド人数: +%d</value>
+  </data>
   <data name="WarpBlockedByEquipment" xml:space="preserve">
     <value>その装備ではそこへ移動できません。</value>
   </data>
