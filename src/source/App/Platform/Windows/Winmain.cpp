@@ -59,6 +59,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include <SDL3/SDL.h>
+#include "Core/Content/ContentAudit.h"
 #include "Core/Content/ContentStore.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -2083,6 +2084,7 @@ static std::string OpenContent()
         return "cannot open " + root + " (" + SDL_GetError() + "), reading the working directory";
     }
     Content::Open(storage);
+    Content::Audit::StartFromEnvironment();
     return root;
 }
 
@@ -2141,7 +2143,12 @@ bool StartClient(char* szCmdLine)
     g_teardown.Push([] { mu::log::Shutdown(); });
     // Runs late in the quit: after the last settings are written.
     g_teardown.Push([] { Core::Platform::CommitUserFiles(); });
-    g_teardown.Push([] { Content::Close(); });
+    g_teardown.Push(
+        []
+        {
+            Content::Audit::Stop();
+            Content::Close();
+        });
     // Installed before SDL starts so init failures are captured; SDL_Quit may still log, so it outlives SDL.
     static std::optional<Core::Log::Sdl::ScopedLogOutput> sdlLogOutput;
     sdlLogOutput.emplace();

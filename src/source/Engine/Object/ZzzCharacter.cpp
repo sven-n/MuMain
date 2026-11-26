@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "Render/Effects/AuraJointLifecycle.h"
+#include "Core/Content/ContentAudit.h"
 #include "Core/Utilities/Random.h"
 #include <execution>
 #include <optional>
@@ -13839,6 +13840,7 @@ void Setting_Monster(CHARACTER* c, EMonsterType Type)
 
 CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
 {
+    Content::Audit::NoteMonster(static_cast<int>(Type));
     // A monster comes from its entry in the monster data (MN4), on every map.
     Data::Monsters::UnknownReason why = Data::Monsters::UnknownReason::NoEntry;
     if (const Data::Monsters::MonsterDefinition* entry = g_MonsterDatabase.Find(Type))

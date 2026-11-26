@@ -139,6 +139,7 @@ mu_add_test_objects(NAME mu_test_asset_path SOURCES ${MU_GAME_SOURCE}/Render/Tex
 mu_add_test_objects(NAME mu_test_path_resolve SOURCES ${MU_GAME_SOURCE}/Core/Platform/PathResolve.cpp)
 # With mu_test_path_resolve in the same LINK_LIBS: an object library's objects reach only its direct consumers.
 mu_add_test_objects(NAME mu_test_content SOURCES
+    ${MU_GAME_SOURCE}/Core/Content/ContentAudit.cpp
     ${MU_GAME_SOURCE}/Core/Content/ContentPath.cpp
     ${MU_GAME_SOURCE}/Core/Content/ContentStore.cpp
     LINK_LIBS SDL3::SDL3)

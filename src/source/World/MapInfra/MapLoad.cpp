@@ -2,11 +2,13 @@
 
 #include "World/MapInfra/MapLoad.h"
 
+#include "Core/Content/ContentAudit.h"
 #include "Core/Content/ContentStore.h"
 #include "Core/Utilities/StagedLoad.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include <chrono>
+#include <cstdlib>
 #include <optional>
 #include <string>
 #include <utility>
@@ -68,6 +70,11 @@ void Begin(std::string pack, std::vector<Core::StagedLoad::Step> steps, std::fun
         {
         }
         Finish();
+    }
+    // The audit of the file lists (MU_CONTENT_LISTS=audit) checks the load's reads against this map's list.
+    if (Content::Audit::Active() && pack.rfind("map", 0) == 0)
+    {
+        Content::Audit::EnterMap(std::atoi(pack.c_str() + 3));
     }
     s_load.emplace(std::move(pack), std::move(steps), std::move(afterLoad));
     // Asked now, so a download starts with the packet that changes the map.

@@ -1,5 +1,7 @@
 #include "Core/Content/ContentStore.h"
 
+#include "Core/Content/ContentAudit.h"
+
 #ifndef _WIN32
 #include "Core/Platform/PathResolve.h"
 #endif
@@ -233,6 +235,8 @@ std::optional<std::string> ReadAll(const Path& path, std::string* error)
         std::string bytes(static_cast<std::size_t>(info.size), '\0');
         if (bytes.empty() || SDL_ReadStorageFile(CurrentStorage(state), stored->c_str(), bytes.data(), info.size))
         {
+            // A file read, not one looked for under a name it does not have: the lists name files that exist.
+            Audit::NoteRead(path.str());
             return bytes;
         }
         reason = SDL_GetError();
