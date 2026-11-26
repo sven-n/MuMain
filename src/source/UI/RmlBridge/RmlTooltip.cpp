@@ -220,7 +220,7 @@ namespace UI::RmlBridge::Tooltip
         // Lays the panel out for the model's content and measures it. The context update creates the
         // data-for rows with their resolved fonts; the width they need is then set explicitly and only
         // this document is laid out again.
-        Measurement Measure(Rml::Context& context, const Config& config)
+        Measurement Measure(Rml::Context& context, const Config& config, std::span<const Line> lines)
         {
             context.Update();
 
@@ -242,9 +242,9 @@ namespace UI::RmlBridge::Tooltip
 
             float maxLineWidth = 0.0f;
             const int lineCount = panel->GetNumChildren();
-            for (int i = 0; i < lineCount && i < static_cast<int>(config.lines.size()); ++i)
+            for (int i = 0; i < lineCount && i < static_cast<int>(lines.size()); ++i)
             {
-                const Line& line = config.lines[static_cast<size_t>(i)];
+                const Line& line = lines[static_cast<size_t>(i)];
                 if (line.kind != Line::Kind::Text)
                     continue; // spacer lines render no text -- nothing to measure.
                 if (Rml::Element* lineElement = panel->GetChild(i))
@@ -298,7 +298,12 @@ namespace UI::RmlBridge::Tooltip
 
     void Show(const Config& config, Owner owner)
     {
-        if (!RmlUiRuntime::Instance().IsCreated() || config.lines.empty())
+        ShowLines(config.lines, config, owner);
+    }
+
+    void ShowLines(std::span<const Line> lines, const Config& config, Owner owner)
+    {
+        if (!RmlUiRuntime::Instance().IsCreated() || lines.empty())
             return;
 
         if (!s_View.Ensure())
@@ -309,8 +314,8 @@ namespace UI::RmlBridge::Tooltip
         s_Refreshed = true;
 
         TooltipRmlModel next;
-        next.lines.reserve(config.lines.size());
-        for (const Line& line : config.lines)
+        next.lines.reserve(lines.size());
+        for (const Line& line : lines)
             next.lines.push_back(ToLineEntry(line));
         ApplyNativeMetrics(next, config);
 
@@ -321,7 +326,7 @@ namespace UI::RmlBridge::Tooltip
         if (!document->IsVisible())
             document->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
         if (contentChanged || !s_Measured || s_Measured->dpRatio != context.GetDensityIndependentPixelRatio())
-            s_Measured = Measure(context, config);
+            s_Measured = Measure(context, config, lines);
 
         const Rml::Vector2f position = Place(config, *s_Measured, context.GetDimensions());
         if (model.posX != position.x)

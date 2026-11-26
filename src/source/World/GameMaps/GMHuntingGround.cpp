@@ -159,7 +159,7 @@ bool M31HuntingGround::UpdateHuntingGroundObjectEffects(OBJECT* pObject, BMD* pM
 
     return true;
 }
-bool M31HuntingGround::RenderHuntingGroundObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
+bool M31HuntingGround::RenderHuntingGroundObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (IsInHuntingGround())
     {
@@ -197,7 +197,7 @@ bool M31HuntingGround::RenderHuntingGroundObjectMesh(const OBJECT* pObject, Draw
                                look.blendMeshV, look.hiddenMesh);
         }
     }
-    return RenderHuntingGroundMonsterObjectMesh(pObject, look, pModel, ExtraMon);
+    return RenderHuntingGroundMonsterObjectMesh(pObject, look, pModel);
 }
 
 bool M31HuntingGround::MoveHuntingGroundMonsterVisual(OBJECT* pObject, BMD* pModel)
@@ -614,200 +614,10 @@ bool M31HuntingGround::UpdateHuntingGroundMonsterEffects(CHARACTER* pCharacter, 
     }
     return false;
 }
-bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel,
-                                                            bool ExtraMon)
+bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     switch (pObject->Type)
     {
-    case MODEL_LIZARD_WARRIOR:
-    {
-        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                           look.blendMeshV, 1);
-        pModel->BeginRender(1.f);
-        vec3_t LightBackup;
-        VectorCopy(pModel->BodyLight, LightBackup); //. backup
-        Vector(0.6f, 0.4f, 0.4f, pModel->BodyLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                           look.blendMeshV);
-        VectorCopy(LightBackup, pModel->BodyLight); //. restore
-        pModel->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_FIRE_GOLEM:
-    {
-        pModel->BeginRender(1.f);
-        vec3_t LightBackup;
-        VectorCopy(pModel->BodyLight, LightBackup); //. backup
-        float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
-        if (Luminosity > 1.3f)
-            Luminosity = 1.3f;
-
-        pModel->BodyLight[0] *= Luminosity;
-        pModel->BodyLight[1] *= Luminosity;
-        pModel->BodyLight[2] *= Luminosity;
-
-        pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
-                           (int)WorldTime % 10000 * 0.0002f, (int)WorldTime % 10000 * 0.0002f);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                           look.blendMeshU, look.blendMeshV);
-        pModel->StreamMesh = -1;
-
-        VectorCopy(LightBackup, pModel->BodyLight); //. restore
-
-        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                           look.blendMeshV);
-        pModel->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_QUEEN_BEE:
-    {
-        pModel->BeginRender(1.f);
-
-        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                           look.blendMeshV, 0);
-
-        vec3_t LightBackup;
-        VectorCopy(pModel->BodyLight, LightBackup); //. backup
-
-        // Vector ( 0.7f, 0.7f, 0.7f, pModel->BodyLight );
-        Vector(1.f, 1.f, 1.f, pModel->BodyLight);
-        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, -1, 1.f, look.blendMeshU, look.blendMeshV);
-        // Vector ( 0.75f, 0.65f, 0.5f, pModel->BodyLight );
-        Vector(0.8f, 0.6f, 1.f, pModel->BodyLight);
-        pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, -1, 1.f, look.blendMeshU, look.blendMeshV);
-
-        VectorCopy(LightBackup, pModel->BodyLight); //. restore
-
-        pModel->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_POISON_GOLEM:
-    {
-        pModel->BeginRender(1.f);
-        vec3_t LightBackup;
-        if (ExtraMon)
-        {
-            Vector(1.f, 1.f, 1.f, pModel->BodyLight);
-        }
-        VectorCopy(pModel->BodyLight, LightBackup); //. backup
-        float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
-        if (Luminosity > 1.3f)
-            Luminosity = 1.3f;
-
-        pModel->BodyLight[0] *= (Luminosity * 0.1f);
-        pModel->BodyLight[1] *= Luminosity;
-        pModel->BodyLight[2] *= (Luminosity * 0.1f);
-
-        pModel->StreamMesh = 1;
-        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
-                           (int)WorldTime % 10000 * 0.0002f, (int)WorldTime % 10000 * 0.0002f);
-
-        if (ExtraMon)
-        {
-            pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-        }
-        else
-            pModel->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                               look.blendMeshU, look.blendMeshV);
-
-        pModel->StreamMesh = -1;
-
-        VectorCopy(LightBackup, pModel->BodyLight); //. restore
-
-        pModel->RenderMesh(0, RENDER_TEXTURE, sinf(WorldTime * 0.0012f) * 0.2f + 0.8f, look.blendMesh,
-                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-        if (ExtraMon)
-        {
-            pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-        }
-        pModel->StreamMesh = 2;
-        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, 2, 0.5f, look.blendMeshU, look.blendMeshV);
-        if (ExtraMon)
-        {
-            pModel->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-        }
-        pModel->StreamMesh = -1;
-        pModel->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_AXE_HERO:
-    {
-        pModel->BeginRender(1.f);
-        vec3_t LightBackup;
-        if (ExtraMon)
-        {
-            Vector(1.f, 1.f, 1.f, pModel->BodyLight);
-        }
-        VectorCopy(pModel->BodyLight, LightBackup); //. backup
-        pModel->BodyLight[0] *= 0.5f;
-        pModel->BodyLight[1] *= 0.6f;
-        pModel->BodyLight[2] *= 0.8f;
-        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                           look.blendMeshV);
-
-        if (ExtraMon)
-            pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-
-        Vector(0.5f, 0.8f, 0.6f, pModel->BodyLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                           look.blendMeshV);
-
-        if (ExtraMon)
-            pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
-
-        VectorCopy(LightBackup, pModel->BodyLight); //. restore
-        pModel->EndRender();
-        return true;
-    }
-    break;
-    case MODEL_EROHIM:
-    {
-        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                           look.blendMeshV, 5);
-
-        pModel->BeginRender(1.f);
-
-        look.alpha = 1.0f;
-        pModel->RenderMesh(5, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                           BITMAP_HGBOSS_WING);
-        pModel->RenderMesh(5, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-
-        vec3_t LightBackup;
-        VectorCopy(pModel->BodyLight, LightBackup); //. backup
-
-        Vector(1.f, 0.5f, 0.f, pModel->BodyLight);
-        pModel->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                           look.blendMeshU, look.blendMeshV);
-
-        Vector(0.75f, 0.65f, 0.5f, pModel->BodyLight);
-        pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                           look.blendMeshU, look.blendMeshV);
-        pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                           look.blendMeshU, look.blendMeshV);
-        pModel->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                           look.blendMeshU, look.blendMeshV);
-
-        float Luminosity = sinf(WorldTime * 0.0012f) * 0.3f + 0.6f;
-        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, 0, Luminosity, look.blendMeshU, look.blendMeshV,
-                           BITMAP_HGBOSS_PATTERN);
-
-        VectorCopy(LightBackup, pModel->BodyLight); //. restore
-
-        pModel->EndRender();
-
-        return true;
-    }
-    break;
     case MODEL_FISSURE:
     {
         pModel->BeginRender(1.f);

@@ -5,6 +5,7 @@
 #include "MuMonsterSetupUI.h"
 
 #include "MonsterEdits.h"
+#include "MonsterLookPicker.h"
 #include "MonsterSelection.h"
 #include "MonsterSetupLists.h"
 #include "MonsterShownModel.h"
@@ -23,6 +24,7 @@
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Core/Globals/_define.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
@@ -62,6 +64,8 @@ MonsterSetup MakeStartValues()
     setup.outline = 1.0f;
     setup.subType = 0;
     setup.lookLevel = 0;
+    setup.renderStyle = "none";
+    setup.effect = "none";
     setup.glowMesh = 0;
     setup.glowLight = 1.0f;
     setup.hiddenMesh = 0;
@@ -170,6 +174,10 @@ std::string Describe(std::string_view key, const MonsterSetup& setup)
         return optionalNumber(setup.subType);
     if (key == "lookLevel")
         return optionalNumber(setup.lookLevel);
+    if (key == "renderStyle")
+        return *setup.renderStyle;
+    if (key == "effect")
+        return *setup.effect;
     if (key == "glowMesh")
         return optionalNumber(setup.glowMesh);
     if (key == "glowLight")
@@ -655,6 +663,8 @@ void MuMonsterSetupUI::RenderSetup(MonsterDefinition& monster)
     const std::optional<int> modelSlot = Data::Monsters::FindMonsterModelReference(modelName);
     const Data::Monsters::MonsterModelDefinition* model = modelSlot ? g_MonsterModelDatabase.Find(*modelSlot) : nullptr;
     m_modelBoxMin = Engine::Object::MonsterBody::GetBoxMin(model != nullptr ? &model->body : nullptr);
+    m_modelRenderStyle = model != nullptr ? model->renderStyle : std::string();
+    m_modelEffect = model != nullptr ? model->effect : std::string();
     // A player-shaped monster has the player's box, as its character slot.
     m_modelBoxMax = model == nullptr && modelSlot == MODEL_PLAYER
                         ? Engine::Object::MonsterBody::PlayerBoxMax
@@ -1006,8 +1016,15 @@ void MuMonsterSetupUI::RenderField(const SetupFields::Field& field, MonsterDefin
     }
     else if (!set)
     {
-        // Not set: the game's value, or the monster's under a variant.
-        ImGui::TextDisabled("%s", Describe(key, inherited != nullptr ? *inherited : setup).c_str());
+        // Not set: the game's value, or the monster's under a variant; a look is the model's (MN8, ML1).
+        const MonsterSetup& shown = inherited != nullptr ? *inherited : setup;
+        const std::string* modelLook = ModelLookOf(key);
+        if (modelLook != nullptr && !SetupFields::IsSet(key, shown))
+            ImGui::TextDisabled(
+                "%s", I18N::Format(I18N::Editor::ModelLook0, {modelLook->empty() ? I18N::Editor::None : *modelLook})
+                          .c_str());
+        else
+            ImGui::TextDisabled("%s", Describe(key, shown).c_str());
         ImGui::SameLine();
         if (ImGui::SmallButton(I18N::Editor::Set))
         {
@@ -1019,6 +1036,9 @@ void MuMonsterSetupUI::RenderField(const SetupFields::Field& field, MonsterDefin
                 setup.boxMin = m_modelBoxMin;
                 setup.boxMax = m_modelBoxMax;
             }
+            // A look starts as the model's.
+            if (!fromMonster && modelLook != nullptr && !modelLook->empty())
+                (key == "renderStyle" ? setup.renderStyle : setup.effect) = *modelLook;
             changed = true;
         }
     }
@@ -1040,6 +1060,21 @@ void MuMonsterSetupUI::RenderField(const SetupFields::Field& field, MonsterDefin
         RenderTakesOf(field.key, field.takes);
     m_draft.AfterChange(changed, SetupLabel());
     ImGui::PopID();
+}
+
+const std::string* MuMonsterSetupUI::ModelLookOf(std::string_view key) const
+{
+    if (key == "renderStyle")
+        return &m_modelRenderStyle;
+    if (key == "effect")
+        return &m_modelEffect;
+    return nullptr;
+}
+
+bool MuMonsterSetupUI::RenderLookValue(std::string& name, bool effect)
+{
+    return LookPicker::Render(name, effect ? Data::Looks::LookKind::Effect : Data::Looks::LookKind::RenderStyle, "none",
+                              "none", Items::Fields::ScaledWidth(Items::Fields::NumberWidth) * 2.0f);
 }
 
 bool MuMonsterSetupUI::RenderValue(std::string_view key, MonsterSetup& setup, const std::string& undoLabel)
@@ -1095,6 +1130,8 @@ bool MuMonsterSetupUI::RenderValue(std::string_view key, MonsterSetup& setup, co
         return intField(setup.subType);
     if (key == "lookLevel")
         return intField(setup.lookLevel, 0, Data::Monsters::MaxLookLevel);
+    if (key == "renderStyle" || key == "effect")
+        return RenderLookValue(key == "effect" ? *setup.effect : *setup.renderStyle, key == "effect");
     if (key == "glowMesh")
         return intField(setup.glowMesh);
     if (key == "glowLight")

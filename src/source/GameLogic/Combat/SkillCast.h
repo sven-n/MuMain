@@ -10,13 +10,13 @@ typedef tagITEM ITEM;
 // dispatcher. Extracted from ZzzInterface.cpp.
 namespace GameLogic::Combat
 {
-    bool SkillWarrior(CHARACTER* c, ITEM* p);
-    bool SkillElf(CHARACTER* c, ITEM* p);
-    void UseSkillWarrior(CHARACTER* c, OBJECT* o);
-    void UseSkillWizard(CHARACTER* c, OBJECT* o);
-    void UseSkillElf(CHARACTER* c, OBJECT* o);
-    void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj);
-    void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj);
-    void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance);
-    bool UseSkillRagePosition(CHARACTER* pCha);
+bool SkillWarrior(CHARACTER* c, const ITEM* p);
+bool SkillElf(CHARACTER* c, const ITEM* p);
+void UseSkillWarrior(CHARACTER* c, OBJECT* o);
+void UseSkillWizard(CHARACTER* c, OBJECT* o);
+void UseSkillElf(CHARACTER* c, OBJECT* o);
+void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj);
+void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj);
+void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance);
+bool UseSkillRagePosition(CHARACTER* pCha);
 }

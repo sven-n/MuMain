@@ -4,8 +4,10 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/Character/CommandHintTexts.h"
 #include "UI/Character/CriticalHitTexts.h"
 #include "UI/Character/DamageHint.h"
+#include "UI/Character/TextsChangedWatch.h"
 #include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Dialogs/MessageBox.h"
@@ -102,6 +104,7 @@ namespace mu::ui::window
             NoLineHint = -1,
             DamageHint = 0,
             CriticalDamageRateHint = 1,
+            CommandHint = 2,
         };
 
         // One derived-stat display line below an attribute's label/value row (attack, defense,
@@ -124,9 +127,15 @@ namespace mu::ui::window
         void BuildSubjectTexts();
         void BuildTableTexts();
         void BuildAttributeLines();
-        // The critical damage rate's line under the strength's lines, the damage line's colour while the hero's own
-        // Increase Critical Damage is on, and the hint of the line the pointer is over.
+        // The critical damage rate's line under the strength's lines and the damage line's colour while the hero's
+        // own Increase Critical Damage is on.
         void BuildCriticalHits();
+        // The command row, the Dark Lord's only: its value, where the value comes from, and its hint.
+        void BuildCommandRow();
+        // The command row's hint, from the command the row shows.
+        void BuildCommandHint(int command);
+        // Shows the hint of the line the pointer is over.
+        void ShowLineHint();
 
         struct CharacterInfoRmlModel
         {
@@ -156,6 +165,8 @@ namespace mu::ui::window
             Rml::String vitValueText, vitValueSource;
             Rml::String eneValueText, eneValueSource;
             Rml::String cmdValueText, cmdValueSource;
+            // The command row's LineHint.
+            int cmdHint = CommandHint;
 
             std::vector<StatLine> strLines;
             std::vector<StatLine> agiLines;
@@ -165,16 +176,23 @@ namespace mu::ui::window
 
             bool masterLevelEnabled = false;
 
-            // Set once at Create() -- static tooltip text, no per-frame update needed.
+            // Set when the model is bound and again after a language switch (SyncChangedTexts).
             Rml::String exitTooltip, questTooltip, petTooltip, masterLevelTooltip;
         };
 
         void BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model);
+        // The attribute labels and the buttons' tooltips, which change only with the language.
+        void SetStaticTexts(CharacterInfoRmlModel& model);
+        // After a language switch or a refresh of the item texts: sets the static texts again and has the hints
+        // formatted again.
+        void SyncChangedTexts();
         UI::RmlBridge::ThemedView<CharacterInfoRmlModel> m_RmlView{"character_info",
             [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/character_info.rml"}}};
 
     private:
+        friend struct CharacterInfoTextTestAccess;
+
         CManager* m_pNewUIMng;
         // The hint of the line the pointer is over (StatLine::hint), in the shared tooltip.
         UI::RmlBridge::ElementTooltip m_LineHint;
@@ -183,5 +201,9 @@ namespace mu::ui::window
 
         // The critical damage rate line and the hints, formatted again only when what they show changes.
         UI::Character::CriticalHitTexts m_CriticalHitTexts;
+        // What the Dark Lord's command adds, formatted again only when it changes.
+        UI::Character::CommandHintTexts m_CommandHintTexts;
+        // A language switch or a refresh of the item texts since the last sync.
+        UI::Character::TextsChangedWatch m_TextsChanged;
     };
 }

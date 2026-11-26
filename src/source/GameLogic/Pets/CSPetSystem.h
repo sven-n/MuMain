@@ -38,7 +38,8 @@ public:
     virtual void CalcPetInformation(const PET_INFO& Petinfo) = 0;
     // Marks whether the frame's view shows the pet; part of the character prepare, before the draw.
     virtual void CullPet() {}
-    virtual void RenderPet(int PetState = 0) const = 0;
+    // `cloaked`: its owner has the cloaking buff, and it draws as a faint outline.
+    virtual void RenderPet(bool cloaked = false) const = 0;
     // The effects and state changes of the pet's draw, for a pet the last frame drew.
     virtual void UpdatePetEffects() = 0;
 
@@ -71,7 +72,7 @@ public:
     void MovePet(void) override;
     void CalcPetInformation(const PET_INFO& Petinfo) override;
     void CullPet() override;
-    void RenderPet(int PetState = 0) const override;
+    void RenderPet(bool cloaked = false) const override;
     void UpdatePetEffects() override;
 
     void Eff_LevelUp(void) override;

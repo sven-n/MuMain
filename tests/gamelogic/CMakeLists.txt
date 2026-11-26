@@ -150,6 +150,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_expired_rental_equipment
+    SOURCES
+        test_expired_rental_equipment.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_ancient_set_options
     SOURCES
         test_ancient_set_options.cpp
@@ -200,6 +209,15 @@ mu_add_test(
     NAME test_skill_hotkey_configuration
     SOURCES
         test_skill_hotkey_configuration.cpp
+)
+
+mu_add_test(
+    NAME test_command_effects
+    SOURCES
+        test_command_effects.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Character/CommandEffects.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Social/GuildSize.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Data/GameData/ItemData/ItemPetStats.cpp
 )
 
 mu_add_test(

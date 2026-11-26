@@ -228,7 +228,7 @@ TEST_CASE("Threads drawing at the same time each count every call [random]")
 
 TEST_CASE("Setting up a shimmering item for a draw takes nothing from the gameplay sequences [random]")
 {
-    // The shimmer is the item effect's (design L27): its random scroll is drawn from the draw's own randomness.
+    // The shimmer is the effect's (design L27): its random scroll is drawn from the draw's own randomness.
     const ShippedLooksScope looks;
     REQUIRE(looks.IsComplete());
     const ItemModelDatabaseScope restoreModels;
@@ -238,7 +238,7 @@ TEST_CASE("Setting up a shimmering item for a draw takes nothing from the gamepl
         entry.group = group;
         entry.number = number;
         entry.file = "Data/Item/Sword01.bmd";
-        entry.itemEffect = effect;
+        entry.effect = effect;
         return entry;
     };
     g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{model(6, 14, "shimmeringGlow"),

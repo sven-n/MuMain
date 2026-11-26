@@ -44,3 +44,23 @@ target_compile_definitions(map_file_lists_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 )
+
+# The draw recorder of monster looks (MN8): monsters drawn by the game's character drawing through the item looks'
+# recording drawer, against the baseline of what their old code drew.
+mu_add_test(
+    NAME monster_look_tests
+    SOURCES
+        MonsterCreationRecorder.cpp
+        MonsterCreationScope.cpp
+        MonsterModelRecorder.cpp
+        MonsterLookRecorder.cpp
+        test_monster_look_recorder.cpp
+        ${CMAKE_SOURCE_DIR}/tests/data/LookRecorder.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(monster_look_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_MONSTER_LOOK_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/MonsterLookDraws.txt"
+)

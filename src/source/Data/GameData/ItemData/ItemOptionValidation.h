@@ -24,8 +24,9 @@ void ValidateOptionRules(std::span<const OptionRule> rules, std::span<const Item
                          const std::string& source, std::vector<ItemDataIssue>& issues);
 
 // The items' links: a name of no definition (an error: the link is left out), two definitions whose options the
-// same part of the server's item data turns on (an error: the later one is left out), excellent options on wings and
-// horns (an error), and an ancient bonus or set options (a warning: the item sets give them, not the item's links).
+// same part of the server's item data turns on (an error naming the one left out), excellent options on wings and
+// horns and wing options on horns (errors), wing options on another item that is no wing (a warning: its byte holds
+// excellent options), and an ancient bonus or set options (a warning: the item sets give them, not the item's links).
 void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOptionDatabase& options,
                              std::vector<ItemDataIssue>& issues);
 

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MuMain.Tools.ResxGen;
 
@@ -219,6 +220,21 @@ internal static class CppEmitter
             // is not currently registered.
             void UnregisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept;
 
+            """);
+        WriteMasterItemTextDeclarations(sb);
+        sb.Append($$"""
+
+            }  // namespace {{RootNamespace}}
+
+            """);
+
+        File.WriteAllText(Path.Combine(outputDir, $"{MasterFileName}.h"), sb.ToString());
+    }
+
+    private static void WriteMasterItemTextDeclarations(StringBuilder sb)
+    {
+        sb.Append("""
+
             // A text of an item text group (ResxGen --item-text-groups) that names
             // an item with {item:group,number} in at least one locale
             // (docs/translation-system.md, "Texts that name items").
@@ -230,6 +246,7 @@ internal static class CppEmitter
                 const wchar_t* const* values;  // one per locale in GetAvailableLocales order; the
                                                // English text where a locale has none of its own
                 std::uint32_t ownLocales;      // bit i: locale i has a text of its own
+                std::uint32_t printfLocales;   // bit i: escape item names in locale i before formatting
             };
 
             // Every text that names an item, group by group in file order. The
@@ -241,7 +258,7 @@ internal static class CppEmitter
             // current one, or the default locale when the current locale has no
             // text of its own. The returned string must stay valid for the
             // program's lifetime: copies of the old pointer may still be read.
-            using ItemTextExpander = const wchar_t* (*)(const wchar_t* text, int textLocaleIndex) noexcept;
+            using ItemTextExpander = const wchar_t* (*)(const wchar_t* text, int textLocaleIndex, bool isPrintfFormat) noexcept;
 
             // Sets the expander that ExpandItemTexts uses; null shows the texts as
             // written. Set by the item data once its names are known.
@@ -252,11 +269,7 @@ internal static class CppEmitter
             // true when a text changed.
             bool ExpandItemTexts() noexcept;
 
-            }  // namespace {{RootNamespace}}
-
             """);
-
-        File.WriteAllText(Path.Combine(outputDir, $"{MasterFileName}.h"), sb.ToString());
     }
 
     public static void WriteMasterSource(string outputDir, IReadOnlyList<ResourceGroup> groups)
@@ -348,48 +361,9 @@ internal static class CppEmitter
                 }
             }
 
-            std::span<const ItemText> GetItemTexts() noexcept
-            {
-                static const std::vector<ItemText> texts = [] {
-                    std::vector<ItemText> all;
-
             """);
-
-        foreach (var g in groups.Where(g => g.NamesItems))
-        {
-            sb.AppendLine($"        const std::span<const ItemText> {CamelCase(g.Name)}Texts = {g.Name}::ItemTexts();");
-            sb.AppendLine($"        all.insert(all.end(), {CamelCase(g.Name)}Texts.begin(), {CamelCase(g.Name)}Texts.end());");
-        }
-
+        WriteMasterItemTextRuntime(sb, groups);
         sb.Append($$"""
-                    return all;
-                }();
-                return texts;
-            }
-
-            void SetItemTextExpander(ItemTextExpander expander) noexcept
-            {
-                g_itemTextExpander = expander;
-            }
-
-            bool ExpandItemTexts() noexcept
-            {
-                bool changed = false;
-                for (const ItemText& text : GetItemTexts())
-                {
-                    const wchar_t* written = text.values[g_currentLocaleIndex];
-                    const bool own = ((text.ownLocales >> g_currentLocaleIndex) & 1u) != 0;
-                    const int textLocale = own ? g_currentLocaleIndex : kDefaultLocaleIndex;
-                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale) : written;
-                    if (shown == nullptr) shown = written;
-                    if (*text.slot != shown)
-                    {
-                        *text.slot = shown;
-                        changed = true;
-                    }
-                }
-                return changed;
-            }
 
             void RegisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept
             {
@@ -512,6 +486,57 @@ internal static class CppEmitter
         File.WriteAllText(Path.Combine(outputDir, $"{MasterFileName}.cpp"), sb.ToString());
     }
 
+    private static void WriteMasterItemTextRuntime(StringBuilder sb, IReadOnlyList<ResourceGroup> groups)
+    {
+        sb.Append($$"""
+
+            std::span<const ItemText> GetItemTexts() noexcept
+            {
+                static const std::vector<ItemText> texts = [] {
+                    std::vector<ItemText> all;
+
+            """);
+
+        foreach (var g in groups.Where(g => g.NamesItems))
+        {
+            sb.AppendLine($"        const std::span<const ItemText> {CamelCase(g.Name)}Texts = {g.Name}::ItemTexts();");
+            sb.AppendLine($"        all.insert(all.end(), {CamelCase(g.Name)}Texts.begin(), {CamelCase(g.Name)}Texts.end());");
+        }
+
+        sb.Append($$"""
+                    return all;
+                }();
+                return texts;
+            }
+
+            void SetItemTextExpander(ItemTextExpander expander) noexcept
+            {
+                g_itemTextExpander = expander;
+            }
+
+            bool ExpandItemTexts() noexcept
+            {
+                bool changed = false;
+                for (const ItemText& text : GetItemTexts())
+                {
+                    const wchar_t* written = text.values[g_currentLocaleIndex];
+                    const bool own = ((text.ownLocales >> g_currentLocaleIndex) & 1u) != 0;
+                    const int textLocale = own ? g_currentLocaleIndex : kDefaultLocaleIndex;
+                    const bool isPrintfFormat = ((text.printfLocales >> g_currentLocaleIndex) & 1u) != 0;
+                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale, isPrintfFormat) : written;
+                    if (shown == nullptr) shown = written;
+                    if (*text.slot != shown)
+                    {
+                        *text.slot = shown;
+                        changed = true;
+                    }
+                }
+                return changed;
+            }
+
+            """);
+    }
+
     private static void WriteLocaleRegistry(StringBuilder sb, IReadOnlyList<ResourceGroup> groups)
     {
         var locales = ComputeMasterLocales(groups);
@@ -617,12 +642,23 @@ internal static class CppEmitter
             foreach (var (entry, row) in rows)
             {
                 uint own = 0;
+                uint printfLocales = 0;
+                var englishValue = entry.Translations[ResxLoader.DefaultLocale];
+                var englishFormat = HasPrintfConversion(englishValue);
                 for (var i = 0; i < masterLocales.Count; i++)
                 {
-                    if (entry.Translations.ContainsKey(masterLocales[i])) own |= 1u << i;
+                    var bit = 1u << i;
+                    if (entry.Translations.TryGetValue(masterLocales[i], out var value))
+                    {
+                        own |= bit;
+                    }
+                    if (englishFormat || (value != null && HasPrintfConversion(value)))
+                    {
+                        printfLocales |= bit;
+                    }
                 }
                 sb.AppendLine($"    {{ {Naming.EscapeCppString(group.Name)}, {Naming.EscapeCppString(entry.Key)}, &{entry.Identifier}, " +
-                              $"kSlots[{row}].values, 0x{own:X}u }},");
+                              $"kSlots[{row}].values, 0x{own:X}u, 0x{printfLocales:X}u }},");
             }
             sb.AppendLine("};");
         }
@@ -633,6 +669,13 @@ internal static class CppEmitter
         sb.AppendLine(rows.Count > 0 ? "    return kItemTexts;" : "    return {};");
         sb.AppendLine("}");
     }
+
+    /// A printf conversion after a '%', "%%" aside. The space flag is left out on purpose, so that prose such as
+    /// "50% damage" does not count as a format; the trade-off is that a real "% d" is not detected either, and an
+    /// item name's '%' in such a text would not be escaped. No item text uses the space flag.
+    private static bool HasPrintfConversion(string value) =>
+        Regex.IsMatch(value.Replace("%%", ""),
+            @"%(?:[0-9]+\$)?[-+#0']*(?:\d+|\*(?:[0-9]+\$)?)?(?:\.(?:\d*|\*(?:[0-9]+\$)?))?(?:hh|ll|I32|I64|[hlLjztI])?[cCdiouxXeEfgGaAnpsS]");
 
     /// "Game" -> "game", for local variable names in the emitted code.
     private static string CamelCase(string name) => char.ToLowerInvariant(name[0]) + name[1..];

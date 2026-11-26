@@ -1,0 +1,103 @@
+{
+  "formatVersion": 1,
+  "masterSkills": [
+    {
+      "skill": 356,
+      "raises": "swellLifeHealthIncrease",
+      "how": "add"
+    },
+    {
+      "skill": 360,
+      "raises": "swellLifeManaIncrease",
+      "how": "add"
+    },
+    {
+      "skill": 380,
+      "raises": "maximumWizBaseDmgIncrease",
+      "how": "add"
+    },
+    {
+      "skill": 383,
+      "raises": "criticalDamageChance",
+      "how": "add"
+    },
+    {
+      "skill": 403,
+      "raises": "soulBarrierReceiveDecrement",
+      "how": "add"
+    },
+    {
+      "skill": 404,
+      "extendsDuration": true
+    },
+    {
+      "skill": 417,
+      "raises": "greaterDefenseBonus",
+      "how": "multiply"
+    },
+    {
+      "skill": 420,
+      "raises": "greaterDamageBonus",
+      "how": "multiply"
+    },
+    {
+      "skill": 422,
+      "raises": "greaterDamageBonus",
+      "how": "multiply",
+      "extendsDuration": true
+    },
+    {
+      "skill": 423,
+      "raises": "greaterDefenseBonus",
+      "how": "multiply",
+      "extendsDuration": true
+    },
+    {
+      "skill": 441,
+      "raises": "attackDamageIncrease",
+      "how": "add",
+      "castsBuff": 6
+    },
+    {
+      "skill": 469,
+      "raises": "berserkerCurseMultiplier",
+      "how": "add",
+      "castsBuff": 81
+    },
+    {
+      "skill": 470,
+      "raises": "berserkerProficiencyMultiplier",
+      "how": "add",
+      "castsBuff": 81
+    },
+    {
+      "skill": 511,
+      "raises": "criticalDamageBonus",
+      "how": "add"
+    },
+    {
+      "skill": 515,
+      "extendsDuration": true
+    },
+    {
+      "skill": 517,
+      "raises": "criticalDamageChance",
+      "how": "add"
+    },
+    {
+      "skill": 569,
+      "raises": "defenseRatePvmIncrease",
+      "how": "add"
+    },
+    {
+      "skill": 572,
+      "raises": "defenseFinal",
+      "how": "add"
+    },
+    {
+      "skill": 573,
+      "raises": "totalVitality",
+      "how": "add"
+    }
+  ]
+}

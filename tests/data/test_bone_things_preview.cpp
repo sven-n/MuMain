@@ -181,7 +181,7 @@ float DistanceTo(const float* a, const float* b)
     return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-// What view 0 shows of `item`: the item effect its model runs.
+// What view 0 shows of `item`: the effect its model runs.
 MuEditor::Looks::BoneThingsShown Shown(int item, MuEditor::Effects::PreviewItemPose pose,
                                        std::optional<double> stoppedAt = std::nullopt)
 {
@@ -286,7 +286,7 @@ TEST_CASE("A Style Editor view creates its item's things on bones at the charact
 {
     const ShippedLooksScope looks;
     REQUIRE(looks.IsComplete());
-    const std::vector<int> items = LookRecorder::ItemsUsing("wingsOfDarkness", Data::Looks::LookKind::ItemEffect);
+    const std::vector<int> items = LookRecorder::ItemsUsing("wingsOfDarkness", Data::Looks::LookKind::Effect);
     REQUIRE_FALSE(items.empty());
     LookRecorder::ShippedItems shipped;
     shipped.Open(items);
@@ -423,7 +423,7 @@ TEST_CASE("Each view keeps its own lightning, and the game's lightning of the sa
 {
     const ShippedLooksScope looks;
     REQUIRE(looks.IsComplete());
-    const std::vector<int> items = LookRecorder::ItemsUsing("wingsOfDarkness", Data::Looks::LookKind::ItemEffect);
+    const std::vector<int> items = LookRecorder::ItemsUsing("wingsOfDarkness", Data::Looks::LookKind::Effect);
     REQUIRE_FALSE(items.empty());
     LookRecorder::ShippedItems shipped;
     shipped.Open(items);
@@ -621,7 +621,7 @@ TEST_CASE("The bone marks find the bones of a shown item as its view poses them 
 {
     const ShippedLooksScope looks;
     REQUIRE(looks.IsComplete());
-    const std::vector<int> items = LookRecorder::ItemsUsing("wingsOfDarkness", Data::Looks::LookKind::ItemEffect);
+    const std::vector<int> items = LookRecorder::ItemsUsing("wingsOfDarkness", Data::Looks::LookKind::Effect);
     REQUIRE_FALSE(items.empty());
     LookRecorder::ShippedItems shipped;
     shipped.Open(items);
@@ -651,7 +651,7 @@ TEST_CASE("The bone marks sit where a view creates its things on those bones (de
 {
     const ShippedLooksScope looks;
     REQUIRE(looks.IsComplete());
-    const std::vector<int> items = LookRecorder::ItemsUsing("wingsOfDarkness", Data::Looks::LookKind::ItemEffect);
+    const std::vector<int> items = LookRecorder::ItemsUsing("wingsOfDarkness", Data::Looks::LookKind::Effect);
     REQUIRE_FALSE(items.empty());
     LookRecorder::ShippedItems shipped;
     shipped.Open(items);

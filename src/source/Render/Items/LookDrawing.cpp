@@ -73,9 +73,17 @@ int LayerFlags(const Layer& layer, int renderType)
     {
         return renderType;
     }
-    const int flags = layer.kind == LayerKind::Texture     ? RENDER_TEXTURE
-                      : layer.kind == LayerKind::FlatColor ? RENDER_COLOR
-                                                           : MotionFlag(layer.motion);
+    if (layer.kind == LayerKind::GlowOnly)
+    {
+        return RENDER_BRIGHT;
+    }
+    int flags = layer.kind == LayerKind::Texture     ? RENDER_TEXTURE
+                : layer.kind == LayerKind::FlatColor ? RENDER_COLOR
+                                                     : MotionFlag(layer.motion);
+    if (layer.lightMap)
+    {
+        flags |= RENDER_LIGHTMAP;
+    }
     if (layer.blend == Blend::Glow)
     {
         return flags | RENDER_BRIGHT;
@@ -88,6 +96,8 @@ struct Moment
 {
     const OBJECT* object = nullptr;
     std::uint32_t salt = 0;
+    // The drawing's opacity, which a light times the opacity reads.
+    float alpha = 1.f;
 };
 
 // The angle at the clock `time` (milliseconds) of a sine that turns `radiansPerCycle` in `seconds`, as the looks in
@@ -104,7 +114,7 @@ double Milliseconds(double seconds)
     return std::round(seconds * 1.0e6) / 1.0e3;
 }
 
-float ValueAt(const Shape& shape, Moment& moment)
+float RawValueAt(const Shape& shape, Moment& moment)
 {
     const double from = shape.from;
     const double to = shape.to;
@@ -138,9 +148,25 @@ float ValueAt(const Shape& shape, Moment& moment)
     return static_cast<float>(from);
 }
 
+// A shape's value, never above its top (atMost).
+float ValueAt(const Shape& shape, Moment& moment)
+{
+    const float value = RawValueAt(shape, moment);
+    return shape.atMost ? std::min(value, static_cast<float>(*shape.atMost)) : value;
+}
+
+float UncappedAtClock(const Shape& shape, double time);
 } // namespace
 
 float ShapeAtClock(const Shape& shape, double time)
+{
+    const float value = UncappedAtClock(shape, time);
+    return shape.atMost ? std::min(value, static_cast<float>(*shape.atMost)) : value;
+}
+
+namespace
+{
+float UncappedAtClock(const Shape& shape, double time)
 {
     const double from = shape.from;
     const double to = shape.to;
@@ -193,8 +219,6 @@ float ShapeAtClock(const Shape& shape, double time)
     return static_cast<float>(from);
 }
 
-namespace
-{
 float NumberAt(const Number& number, Moment& moment)
 {
     if (const Shape* shape = std::get_if<Shape>(&number))
@@ -339,7 +363,17 @@ void DrawLayer(const Layer& layer, BMD* b, const DrawLook& look, float alpha, in
     }
     const int scrolling = b->StreamMesh;
     b->StreamMesh = layer.scrollingMesh.value_or(scrolling);
+    // A layer on top draws without the depth test, which is then as it was.
+    const bool restoreDepthTest = layer.onTop && DepthTestEnable;
+    if (layer.onTop)
+    {
+        DisableDepthTest();
+    }
     DrawMeshes(layer, b, look, *draw);
+    if (restoreDepthTest)
+    {
+        EnableDepthTest();
+    }
     b->StreamMesh = scrolling;
 }
 
@@ -387,6 +421,9 @@ bool HasBuff(LookBuff buff, const OBJECT* o)
     {
     case LookBuff::InfinityArrow:
         return o != nullptr && g_isCharacterBuff(o, eBuff_InfinityArrow);
+    case LookBuff::TintingDebuff:
+        return o != nullptr && (g_isCharacterBuff(o, eDeBuff_Poison) || g_isCharacterBuff(o, eDeBuff_Freeze) ||
+                                g_isCharacterBuff(o, eDeBuff_BlowOfDestruction));
     }
     return false;
 }
@@ -409,8 +446,9 @@ bool AtPlace(Place place, const BMD* b)
     return false;
 }
 
-// Whether a layer's Only when holds in this drawing (design L11).
-bool Holds(const OnlyWhen& when, const BMD* b, const OBJECT* o, const DrawLook& look)
+// Whether a layer's Only when holds in this drawing (design L11). The opacity conditions read the drawing's opacity
+// (`alpha`), the one a light times the opacity is dimmed by.
+bool Holds(const OnlyWhen& when, const BMD* b, const OBJECT* o, const DrawLook& look, float alpha)
 {
     if (when.place && !AtPlace(*when.place, b))
     {
@@ -425,6 +463,20 @@ bool Holds(const OnlyWhen& when, const BMD* b, const OBJECT* o, const DrawLook& 
         return false;
     }
     if (when.withoutBuff && HasBuff(*when.withoutBuff, o))
+    {
+        return false;
+    }
+    const int action = o != nullptr ? o->CurrentAction : 0;
+    if ((when.animation && action != *when.animation) || (when.notAnimation && action == *when.notAnimation))
+    {
+        return false;
+    }
+    if ((when.opacityAbove && !(alpha > static_cast<float>(*when.opacityAbove))) ||
+        (when.opacityAtMost && alpha > static_cast<float>(*when.opacityAtMost)))
+    {
+        return false;
+    }
+    if (when.cycleHalf && (sinf(Angle(2.0 * Pi, when.cycleHalf->seconds, WorldTime)) >= 0.f) != when.cycleHalf->first)
     {
         return false;
     }
@@ -449,7 +501,10 @@ std::array<float, 3> LightOf(const LayerLight& light, const vec3_t modelLight, M
     for (int channel = 0; channel < 3; ++channel)
     {
         const float value = NumberAt(light.color[channel], moment);
-        color[channel] = light.tint ? value * modelLight[channel] : value;
+        color[channel] = light.tint           ? value * modelLight[channel]
+                         : light.fromRed      ? value * modelLight[0]
+                         : light.timesOpacity ? value * moment.alpha
+                                              : value;
     }
     return color;
 }
@@ -487,7 +542,7 @@ void DrawMeshByMesh(const LookDefinition& style, BMD* b, const OBJECT* o, const 
     std::array<float, 3> found{modelLight[0], modelLight[1], modelLight[2]};
     for (const Layer& layer : style.layers)
     {
-        if (!Holds(layer.onlyWhen, b, o, look))
+        if (!Holds(layer.onlyWhen, b, o, look, alpha))
         {
             continue;
         }
@@ -517,8 +572,17 @@ void DrawMeshByMesh(const LookDefinition& style, BMD* b, const OBJECT* o, const 
         const int scrolling = b->StreamMesh;
         b->StreamMesh = pass.layer->scrollingMesh.value_or(scrolling);
         const LayerDraw& draw = *pass.draw;
+        const bool restoreDepthTest = pass.layer->onTop && DepthTestEnable;
+        if (pass.layer->onTop)
+        {
+            DisableDepthTest();
+        }
         b->RenderScriptedMesh(mesh, flags, draw.opacity, draw.glowMesh, draw.glowStrength, draw.u, draw.v,
                               draw.texture);
+        if (restoreDepthTest)
+        {
+            EnableDepthTest();
+        }
         b->StreamMesh = scrolling;
     };
     const auto drawKeepingLight = [b, &drawPass](const MeshPass& pass, int mesh, int flags)
@@ -600,15 +664,13 @@ void LeaveItemValues(const ItemValues& values, const vec3_t modelLight, BMD* b, 
         LightLayer(*values.light, modelLight, b, moment);
     }
 }
-// Finds the texture's index, loading it when no code loaded it. A missing one is logged when `logMissing` and it wasn't
-// missing before.
-void PrepareTexture(const std::string& look, const std::string& texture, bool logMissing)
+// Takes the texture's index: that of `loaded`, the texture the game loaded already (an effect texture), or one it loads
+// now. A missing one is logged when `logMissing` and it wasn't missing before.
+void TakeTexture(const std::string& look, const std::string& texture, bool logMissing, const BITMAP_t* loaded)
 {
     const auto known = s_textures.find(texture);
     const bool missingBefore = known != s_textures.end() && known->second == BITMAP_UNKNOWN;
-    // A texture the game loaded already (an item effect texture) keeps its index.
     const std::wstring file = BitmapFileName(texture);
-    const BITMAP_t* loaded = Bitmaps.FindTexture(file);
     const GLuint index = loaded != nullptr ? loaded->BitmapIndex : Bitmaps.LoadImage(file, GL_LINEAR, GL_REPEAT);
     if (index == BITMAP_UNKNOWN && logMissing && !missingBefore)
     {
@@ -616,6 +678,12 @@ void PrepareTexture(const std::string& look, const std::string& texture, bool lo
                      "Render style data error: {}: texture \"{}\" is not found; the layer is skipped", look, texture);
     }
     s_textures[texture] = index;
+}
+
+// Finds the texture's index, loading it when no code loaded it (TakeTexture).
+void PrepareTexture(const std::string& look, const std::string& texture, bool logMissing)
+{
+    TakeTexture(look, texture, logMissing, Bitmaps.FindTexture(BitmapFileName(texture)));
 }
 
 // The textures of one look that are not found yet: new names, and names missing before, whose file may have come since.
@@ -647,12 +715,12 @@ bool DrawRenderStyle(const LookDefinition& style, BMD* b, const OBJECT* o, DrawL
     {
         renderType &= ~RENDER_EXTRA;
     }
-    Moment moment{.object = o};
+    Moment moment{.object = o, .alpha = alpha};
     vec3_t modelLight;
     VectorCopy(b->BodyLight, modelLight);
     const bool meshByMesh =
-        std::ranges::any_of(style.layers, [b, o, &look](const Layer& layer)
-                            { return layer.where == Where::UnderHoles && Holds(layer.onlyWhen, b, o, look); });
+        std::ranges::any_of(style.layers, [b, o, &look, alpha](const Layer& layer)
+                            { return layer.where == Where::UnderHoles && Holds(layer.onlyWhen, b, o, look, alpha); });
     if (meshByMesh)
     {
         DrawMeshByMesh(style, b, o, look, alpha, renderType, modelLight, moment);
@@ -662,7 +730,7 @@ bool DrawRenderStyle(const LookDefinition& style, BMD* b, const OBJECT* o, DrawL
         // A layer without a light of its own keeps the one on the model, as the looks in code drew.
         for (const Layer& layer : style.layers)
         {
-            if (!Holds(layer.onlyWhen, b, o, look))
+            if (!Holds(layer.onlyWhen, b, o, look, alpha))
             {
                 continue;
             }
@@ -697,10 +765,10 @@ void ApplyItemEffect(const LookDefinition& effect, BMD* b, const OBJECT* o, Draw
     Moment moment{.object = o};
     vec3_t modelLight;
     VectorCopy(b->BodyLight, modelLight);
-    for (const ItemValuesBefore& entry : effect.itemValuesBefore)
+    for (const ValuesBefore& entry : effect.valuesBefore)
     {
         look.level = level;
-        if (!Holds(entry.onlyWhen, b, o, look))
+        if (!Holds(entry.onlyWhen, b, o, look, alpha))
         {
             continue;
         }
@@ -886,7 +954,7 @@ void PrepareTextures()
 
 void LogUnknownBoneThingTypes()
 {
-    for (const LookDefinition& effect : g_LookStore.GetItemEffects())
+    for (const LookDefinition& effect : g_LookStore.GetEffects())
     {
         for (std::size_t entry = 0; entry < effect.onBones.size(); ++entry)
         {
@@ -899,7 +967,7 @@ void LogUnknownBoneThingTypes()
                     // Named as Data Checks names it.
                     const std::string group = onBones.together ? ".things[" + std::to_string(i) + "]" : "";
                     MU_LOG_ERROR(mu::log::Get("data"),
-                                 "Item effect data error: {}: onBones[{}]{}.{}: \"{}\" is not in the effect "
+                                 "Effect data error: {}: onBones[{}]{}.{}: \"{}\" is not in the effect "
                                  "catalogue; it is not created",
                                  effect.name, entry, group, Data::Looks::BoneThingKey(thing.kind), thing.type);
                 }
@@ -911,6 +979,26 @@ void LogUnknownBoneThingTypes()
 void PrepareTextures(const LookDefinition& style)
 {
     PrepareMissingTextures(style, true);
+}
+
+void RefindTextures()
+{
+    std::vector<std::string> names;
+    std::vector<std::wstring> files;
+    names.reserve(s_textures.size());
+    files.reserve(s_textures.size());
+    for (const auto& [texture, index] : s_textures)
+    {
+        names.push_back(texture);
+        files.push_back(BitmapFileName(texture));
+    }
+    // The lowest index of a file comes first: a map's slot before the copy the looks loaded. All of them are found in
+    // one pass over the textures.
+    const std::vector<BITMAP_t*> loaded = Bitmaps.FindTextures(files);
+    for (size_t place = 0; place < names.size(); ++place)
+    {
+        TakeTexture({}, names[place], false, loaded[place]);
+    }
 }
 
 void PrepareDraftTextures(const LookDefinition& style)

@@ -26,6 +26,8 @@ int LegacyColor(LineColor c)
     case LineColor::Blue:     return TEXT_COLOR_BLUE;
     case LineColor::Red:      return TEXT_COLOR_RED;
     case LineColor::DarkRed:  return TEXT_COLOR_DARKRED;
+    case LineColor::Gray:
+        return TEXT_COLOR_GRAY;
     }
     return TEXT_COLOR_WHITE;
 }
@@ -127,6 +129,9 @@ std::vector<UI::RmlBridge::Tooltip::Line> ToRmlBridgeLines(const Model& model)
         case LineColor::Blue: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
         case LineColor::Red: line.color = UI::RmlBridge::Tooltip::LineColor::Red; break;
         case LineColor::DarkRed: line.color = UI::RmlBridge::Tooltip::LineColor::DarkRedHighlight; break;
+        case LineColor::Gray:
+            line.color = UI::RmlBridge::Tooltip::LineColor::Gray;
+            break;
         case LineColor::White: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
         }
         lines.push_back(std::move(line));

@@ -46,6 +46,8 @@ const MonsterSetupField SetupFields[] = {
     MONSTER_SETUP_OPTIONAL(outline),
     MONSTER_SETUP_OPTIONAL(subType),
     MONSTER_SETUP_OPTIONAL(lookLevel),
+    MONSTER_SETUP_OPTIONAL(renderStyle),
+    MONSTER_SETUP_OPTIONAL(effect),
     MONSTER_SETUP_OPTIONAL(glowMesh),
     MONSTER_SETUP_OPTIONAL(glowLight),
     MONSTER_SETUP_OPTIONAL(hiddenMesh),

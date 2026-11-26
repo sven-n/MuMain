@@ -390,6 +390,13 @@
                 "SOUND_RAGESKILL_THRUST",
                 "SOUND_RAGESKILL_THRUST_ATTACK"
               ]
+            },
+            {
+              "name": "Phoenix Shot",
+              "sounds": [
+                "SOUND_RAGESKILL_PHOENIXSHOT",
+                "SOUND_RAGESKILL_PHOENIXSHOT_ATTACK"
+              ]
             }
           ]
         },

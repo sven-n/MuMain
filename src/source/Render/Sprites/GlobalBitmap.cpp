@@ -8,10 +8,12 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <cwctype>
 #include <fstream>
 #include <iterator>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 CBitmapCache::CBitmapCache() = default;
@@ -352,6 +354,64 @@ BITMAP_t* CGlobalBitmap::FindTexture(const std::wstring& filename)
             return pBitmap;
     }
     return nullptr;
+}
+
+namespace
+{
+// A file name as wcsicmp compares it.
+std::wstring FoldedFileName(const wchar_t* filename)
+{
+    std::wstring folded(filename);
+    std::transform(folded.begin(), folded.end(), folded.begin(), [](wchar_t c) { return towlower(c); });
+    return folded;
+}
+} // namespace
+
+std::vector<BITMAP_t*> CGlobalBitmap::FindTextures(std::span<const std::wstring> filenames)
+{
+    std::unordered_map<std::wstring, std::vector<size_t>> wanted;
+    for (size_t place = 0; place < filenames.size(); ++place)
+    {
+        wanted[FoldedFileName(filenames[place].c_str())].push_back(place);
+    }
+    // The pending loads of those files are committed first, as FindTexture commits those of its file.
+    if (m_pending)
+    {
+        std::vector<GLuint> matching;
+        for (const GLuint index : m_pending->order)
+        {
+            const auto found = m_pending->loads.find(index);
+            if (found != m_pending->loads.end() &&
+                wanted.contains(FoldedFileName(found->second.request.filename.c_str())))
+            {
+                matching.push_back(index);
+            }
+        }
+        for (const GLuint index : matching)
+        {
+            FlushPending(index);
+        }
+    }
+    std::vector<BITMAP_t*> textures(filenames.size(), nullptr);
+    for (auto& pair : m_mapBitmap)
+    {
+        BITMAP_t* bitmap = pair.second.get();
+        const auto found = wanted.find(FoldedFileName(bitmap->FileName));
+        if (found == wanted.end())
+        {
+            continue;
+        }
+        for (const size_t place : found->second)
+        {
+            textures[place] = bitmap;
+        }
+        wanted.erase(found);
+        if (wanted.empty())
+        {
+            break;
+        }
+    }
+    return textures;
 }
 
 BITMAP_t* CGlobalBitmap::FindTextureByName(const std::wstring& name)

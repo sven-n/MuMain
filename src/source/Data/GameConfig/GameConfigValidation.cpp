@@ -50,6 +50,60 @@ std::wstring ValidateServerIP(const std::wstring& value, const std::wstring& def
     return value.substr(first, last - first + 1);
 }
 
+std::wstring ValidateRelay(const std::wstring& value)
+{
+    std::wstring relay = ValidateServerIP(value, L"");
+    const auto schemeEnd = relay.find(L"://");
+    if (schemeEnd == std::wstring::npos)
+    {
+        return {};
+    }
+    std::wstring scheme = relay.substr(0, schemeEnd);
+    std::transform(scheme.begin(), scheme.end(), scheme.begin(), [](wchar_t c) { return std::towlower(c); });
+    if (scheme != L"ws" && scheme != L"wss")
+    {
+        return {};
+    }
+
+    const auto authorityStart = schemeEnd + 3;
+    std::wstring_view authority(relay);
+    authority = authority.substr(authorityStart, relay.find_first_of(L"/?#", authorityStart) - authorityStart);
+    if (const auto at = authority.rfind(L'@'); at != std::wstring_view::npos)
+    {
+        authority.remove_prefix(at + 1);
+    }
+    std::wstring_view host = authority;
+    std::wstring_view port;
+    if (authority.starts_with(L'['))
+    {
+        const auto close = authority.find(L']');
+        if (close == std::wstring_view::npos)
+        {
+            return {};
+        }
+        host = authority.substr(0, close + 1);
+        port = authority.substr(close + 1);
+    }
+    else if (const auto colon = authority.find(L':'); colon != std::wstring_view::npos)
+    {
+        host = authority.substr(0, colon);
+        port = authority.substr(colon);
+    }
+
+    const bool hostValid = !host.empty() && std::none_of(host.begin(), host.end(), [](wchar_t c)
+                                                         { return std::iswspace(c) || c == L'{' || c == L'}'; });
+    bool portValid = port.empty();
+    if (port.size() > 1 && port.size() <= 6 && port.front() == L':' &&
+        std::all_of(port.begin() + 1, port.end(), [](wchar_t c) { return c >= L'0' && c <= L'9'; }))
+    {
+        const int number = std::stoi(std::wstring(port.substr(1)));
+        portValid = number > 0 && number <= 65535;
+    }
+    const bool pathValid =
+        std::none_of(relay.begin() + authorityStart, relay.end(), [](wchar_t c) { return std::iswspace(c); });
+    return hostValid && portValid && pathValid ? relay : std::wstring();
+}
+
 int ValidateAnisotropy(int value)
 {
     return value < 1 ? 1 : value;

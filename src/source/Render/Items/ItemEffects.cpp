@@ -29,7 +29,7 @@ namespace Render::Items::ItemEffects
 {
 namespace
 {
-// The item effect of an item, as the item has it (it can set values of it), with the catalogue types of its things on
+// The effect of an item, as the item has it (it can set values of it), with the catalogue types of its things on
 // bones.
 struct ItemEffectOf
 {
@@ -44,21 +44,21 @@ struct EffectView
     const Looks::BoneThingTypes* types = nullptr;
 };
 
-// An item effect that is data as an item that sets values of it has it (design L12); those are made again with the
+// An effect that is data as an item that sets values of it has it (design L12); those are made again with the
 // effect table, after a change of the item models or of the looks.
 const Data::Looks::LookDefinition* DataEffectOfItem(const Data::Items::ItemModelDefinition& model,
                                                     const Data::Looks::LookDefinition& effect)
 {
-    if (model.itemEffectValues.empty() || !Data::Looks::SetsEachItem(effect))
+    if (model.effectValues.empty() || !Data::Looks::SetsEachItem(effect))
     {
         return &effect;
     }
-    static ItemLooks<Data::Looks::LookDefinition> itemEffects;
+    static ItemLooks<Data::Looks::LookDefinition> effects;
     // A value that can't be one keeps the look's; Data Checks names the problem.
     std::vector<Data::Items::ItemDataIssue> issues;
-    return itemEffects.Keep(
+    return effects.Keep(
         Data::Items::MakeItemType(model.group, model.number),
-        Data::Looks::ResolveForItem(effect, model.itemEffectValues, "", issues, Data::Looks::LookKind::ItemEffect));
+        Data::Looks::ResolveForItem(effect, model.effectValues, "", issues, Data::Looks::LookKind::Effect));
 }
 
 // The effect of every item type, taken from the item model database after
@@ -66,11 +66,11 @@ const Data::Looks::LookDefinition* DataEffectOfItem(const Data::Items::ItemModel
 ItemModelTable<ItemEffectOf> g_itemEffects{
     [](const Data::Items::ItemModelDefinition& model) -> ItemEffectOf
     {
-        if (model.itemEffect.empty())
+        if (model.effect.empty())
         {
             return {};
         }
-        if (const Data::Looks::LookDefinition* data = Data::Looks::g_LookStore.FindItemEffect(model.itemEffect))
+        if (const Data::Looks::LookDefinition* data = Data::Looks::g_LookStore.FindEffect(model.effect))
         {
             const Data::Looks::LookDefinition* effect = DataEffectOfItem(model, *data);
             return {effect, Looks::ResolveBoneThingTypes(*effect)};
@@ -118,7 +118,7 @@ PreviewEffect::~PreviewEffect()
 
 bool Exists(std::string_view name)
 {
-    return Data::Looks::g_LookStore.FindItemEffect(name) != nullptr;
+    return Data::Looks::g_LookStore.FindEffect(name) != nullptr;
 }
 
 std::span<const std::string_view> GetNames()
@@ -129,7 +129,7 @@ std::span<const std::string_view> GetNames()
     {
         version = Data::Looks::g_LookStore.GetVersion();
         names.clear();
-        for (const Data::Looks::LookDefinition& look : Data::Looks::g_LookStore.GetItemEffects())
+        for (const Data::Looks::LookDefinition& look : Data::Looks::g_LookStore.GetEffects())
         {
             names.emplace_back(look.name);
         }
@@ -157,8 +157,7 @@ const Data::Looks::LookDefinition* EffectOf(int modelType)
 bool Spawns(int modelType)
 {
     const EffectView effect = EffectOfModel(modelType);
-    return effect.data != nullptr && (effect.data->objectLight.has_value() || !effect.data->onBones.empty() ||
-                                      effect.data->animationSpeed.has_value());
+    return effect.data != nullptr && Data::Looks::RunsInUpdate(*effect.data);
 }
 
 void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])

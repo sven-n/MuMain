@@ -1,0 +1,23 @@
+/* The ping ($ping), in the look of the FPS counter. The workspace places this passive panel at the
+   top-right corner of the content area. */
+body { pointer-events: none; }
+#panel {
+    position: absolute;
+    left: 4dp;
+    top: 4dp;
+    padding: 3dp 5dp;
+    font-family: "token(font-body)";
+    font-size: 9dp;
+    line-height: 13dp;
+    white-space: nowrap;
+    pointer-events: none;
+}
+#panel.workspace-placed { transform-origin: left top; }
+#panel div { display: block; }
+.section-back { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.title { position: relative; font-weight: bold; }
+
+/* The original's look, kept light: white text on faint black, a yellow title. */
+#panel { color: #eeeeee; }
+.section-back { background-color: rgba(0, 0, 0, 100); }
+.title { color: #ffe0a0; }

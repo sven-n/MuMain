@@ -11,6 +11,7 @@
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "UI/StyleEditor/LooksRoot.h"
 
 #include <algorithm>
 #include <array>
@@ -73,6 +74,24 @@ public:
     NamesChangedListener& operator=(const NamesChangedListener&) = delete;
 };
 
+class MonstersChangedListener
+{
+public:
+    MonstersChangedListener()
+    {
+        g_toldNumbers.clear();
+        g_MonsterDataHandler.SetMonstersChangedCallback(&RememberNamesChanged);
+    }
+
+    ~MonstersChangedListener()
+    {
+        g_MonsterDataHandler.SetMonstersChangedCallback(nullptr);
+    }
+
+    MonstersChangedListener(const MonstersChangedListener&) = delete;
+    MonstersChangedListener& operator=(const MonstersChangedListener&) = delete;
+};
+
 const ItemDataIssue* FindIssue(const std::vector<ItemDataIssue>& issues, int number)
 {
     const auto found = std::ranges::find(issues, number, &ItemDataIssue::number);
@@ -110,6 +129,30 @@ TEST_CASE("Monster table: the editor sets and removes one number in place [data]
     g_MonsterDatabase.Set(Monster(-1, "Nobody"));
     g_MonsterDatabase.Remove(1024);
     CHECK(g_MonsterDatabase.GetVersion() == version);
+}
+
+// A look only monsters name has users (MN8): the Style Editor keeps it from being renamed or removed, and Data Checks
+// does not call it unused.
+TEST_CASE("The Style Editor counts the monsters that name a look among its users [data][monsters][editor][looks]")
+{
+    MonsterDefinition golden = Monster(2, "Golden Budge Dragon");
+    golden.setup.renderStyle = "monsterOnlyLook";
+    MonsterDefinition plain = Monster(3, "Larva");
+    plain.mapVariants.push_back({.maps = {{.map = 34}}});
+    plain.mapVariants.back().setup.renderStyle = "monsterOnlyLook";
+    plain.mapVariants.back().setup.effect = "monsterOnlyEffect";
+    const std::array monsters = {golden, plain};
+    g_MonsterDatabase.Build(monsters, "en");
+
+    MuEditor::Looks::LooksRoot styles(Data::Looks::LookKind::RenderStyle);
+    MuEditor::Looks::LooksRoot effects(Data::Looks::LookKind::Effect);
+    CHECK(styles.CountUsers("monsterOnlyLook") == 2);
+    CHECK(effects.CountUsers("monsterOnlyEffect") == 1);
+    CHECK(styles.CountUsers("monsterOnlyEffect") == 0);
+
+    // A change of the monsters counts again.
+    g_MonsterDatabase.Remove(2);
+    CHECK(styles.CountUsers("monsterOnlyLook") == 1);
 }
 
 TEST_CASE("Monster data: the editor reads monsters as snapshots and restores them exactly [data][monsters][editor]")
@@ -150,6 +193,33 @@ TEST_CASE("Monster data: the editor reads monsters as snapshots and restores the
     g_toldNumbers.clear();
     g_MonsterDataHandler.RestoreMonsters(std::span<const MonsterSnapshot>());
     CHECK(g_toldNumbers.empty());
+}
+
+TEST_CASE("Monster data: a model edit makes the living monsters take their looks again only when a look it names "
+          "changes (MN8) [data][monsters][editor][looks]")
+{
+    using Data::Monsters::MonsterModelDefinition;
+    using Data::Monsters::MonsterModelSnapshot;
+    const int slot = MODEL_MONSTER01 + MONSTER_MODEL_BULL_FIGHTER;
+    const std::optional<MonsterModelDefinition> before = g_MonsterDataHandler.ReadModel(slot);
+    MonsterModelDefinition model = before.value_or(MonsterModelDefinition{});
+    const auto restore = [&](const std::optional<MonsterModelDefinition>& entry)
+    {
+        const std::array snapshots = {MonsterModelSnapshot{slot, entry}};
+        g_MonsterDataHandler.RestoreModels(snapshots);
+    };
+    {
+        MonstersChangedListener listener;
+        // A value no look depends on: the model is reopened, the living monsters are not told.
+        model.headBone = model.headBone.value_or(0) + 1;
+        restore(model);
+        CHECK(g_toldNumbers.empty());
+        model.renderStyle = model.renderStyle == "phantomKnight" ? "quarrel" : "phantomKnight";
+        restore(model);
+        CHECK(g_toldNumbers == std::vector<int>{MonsterDataHandler::AllNumbers});
+    }
+    restore(before);
+    g_MonsterDataHandler.ReopenChangedModels();
 }
 
 TEST_CASE("Monster data: the editor's checks are those of loading and saving [data][monsters][editor]")

@@ -75,6 +75,7 @@ namespace mu::ui::window
         ITEM* m_pPickedItem;
 
         bool m_bShow;
+        bool m_bUsedOnItem;
         POINT m_Pos;
         SIZE m_Size;
         UI::Items::PickupAnchor m_Anchor;
@@ -112,6 +113,11 @@ namespace mu::ui::window
         bool IsVisible() const;
         void ShowPickedItem();
         void HidePickedItem();
+
+        // The held item was used on another item (a jewel on a weapon, ...). It stays in the hand until the server
+        // answers with the update of the target item, which consumes it.
+        void MarkUsedOnItem();
+        bool IsUsedOnItem() const;
 
         void Render3D();
     };

@@ -53,6 +53,7 @@ const std::map<int, std::vector<int>> MoreRecordedSubTypes = {
     {MODEL_ALICE_BUFFSKILL_EFFECT, {4}}, // a branch for 4
     {MODEL_CHANGE_UP_NASA, {4}},         // the end of its range of SubTypes 1 to 3
     {MODEL_WINDFOCE, {4, 5}},            // callers pass them
+    {BITMAP_TWLIGHT, {4, 5}},            // Phoenix Shot passes them
 };
 
 std::vector<int> RecordedSubTypesOf(int type)
@@ -336,9 +337,6 @@ constexpr const char* CreationBaselineHeader =
     "# (MU_EFFECT_RECORDER_WRITE=1); the file and its test are removed once the\n"
     "# catalogue is edited on purpose (docs/effect-data.md).\n";
 
-// Types whose creation code set nothing and was deleted without a row.
-const std::array<int, 1> CreatedWithoutRow = {MODEL_PHOENIX_SHOT};
-
 struct BaselineType
 {
     std::string name;
@@ -363,10 +361,6 @@ std::vector<BaselineType> BaselineTypes()
         {
             type.variantSubTypes.insert(type.variantSubTypes.end(), variant.subTypes.begin(), variant.subTypes.end());
         }
-    }
-    for (const int type : CreatedWithoutRow)
-    {
-        types.push_back({std::string(catalogue.GetName(EffectKind::Effect, type)), type});
     }
     std::sort(types.begin(), types.end(),
               [](const BaselineType& left, const BaselineType& right) { return left.name < right.name; });
@@ -532,12 +526,14 @@ TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [ef
     // The flags of pattern A are false already.
     CHECK(Find(RecordCall(CallOf(MODEL_CLOUD), {1.f, SlotPattern::B}), "Effects[0].LightEnable") == "false");
 
-    // Its case set nothing, so it has no row and creates with the common setup.
+    // Its case set nothing; the row Phoenix Shot's rig got later gives it its life and speed.
     const Render::Effects::EffectDescriptor* phoenix = Render::Effects::Lookup(MODEL_PHOENIX_SHOT);
-    CHECK((phoenix == nullptr || !phoenix->create.has_value()));
+    REQUIRE(phoenix != nullptr);
+    CHECK(phoenix->create.has_value());
     const Record shot = RecordCall(CallOf(MODEL_PHOENIX_SHOT), {});
     CHECK(Find(shot, "Effects[0].Live") == "true");
-    CHECK_FALSE(Find(shot, "Effects[0].LifeTime").has_value());
+    CHECK(RecordedFloat(shot, "Effects[0].LifeTime") == 70.f);
+    CHECK(RecordedFloat(shot, "Effects[0].Velocity") == 1.5f);
 }
 
 // FX1.5 moved the creation of these types from code into the catalogue, with

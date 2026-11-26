@@ -99,7 +99,7 @@ TEST_CASE("The item checks send each field of a model entry to the model tool [e
 {
     const std::string_view fields[] = {
         "file",  "model",         "textureFolders",    "noneBlendMeshes", "inventory.scale", "ground.rotation",
-        "cloth", "glow.level[3]", "material.specular", "renderStyle",     "itemEffect"};
+        "cloth", "glow.level[3]", "material.specular", "renderStyle",     "effect"};
     for (const std::string_view field : fields)
     {
         INFO(std::string(field));
@@ -148,7 +148,7 @@ TEST_CASE("The item checks send the problems the model checks find to the model 
 {
     std::vector<ItemModelDefinition> models = {MakeModel(1, SwordFile), MakeModel(2, SwordFile), MakeModel(3, "")};
     models[0].renderStyle = "noSuchStyle";
-    models[0].itemEffect = "noSuchEffect";
+    models[0].effect = "noSuchEffect";
     models[1].glow.color = "noSuchColor";
     models[2].model = "noSuchSharedModel";
     const auto noLook = [](std::string_view) { return false; };
@@ -162,7 +162,7 @@ TEST_CASE("The item checks send the problems the model checks find to the model 
     ApplySharedItemModels(models, {}, "SharedModels.json", issues);
 
     CHECK(FindTool(issues, "renderStyle", "noSuchStyle") == ItemTool::Model);
-    CHECK(FindTool(issues, "itemEffect", "noSuchEffect") == ItemTool::Model);
+    CHECK(FindTool(issues, "effect", "noSuchEffect") == ItemTool::Model);
     CHECK(FindTool(issues, "glow.color", "noSuchColor") == ItemTool::Model);
     CHECK(FindTool(issues, "file", SwordFile) == ItemTool::Model);
     CHECK(FindTool(issues, "model", "noSuchSharedModel") == ItemTool::Model);

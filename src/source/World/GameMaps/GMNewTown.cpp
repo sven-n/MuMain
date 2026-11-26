@@ -735,13 +735,13 @@ bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 
 extern float  IntensityTransform[MAX_MESH][MAX_VERTICES];
 
-bool GMNewTown::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
+bool GMNewTown::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (!IsCurrentMap())
         return false;
 
     if (IsNewMap73_74())
-        return g_EmpireGuardian4.RenderObjectMesh(pObject, look, pModel, ExtraMon);
+        return g_EmpireGuardian4.RenderObjectMesh(pObject, look, pModel);
 
     // ���
     if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
@@ -827,14 +827,14 @@ bool GMNewTown::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel,
     return true;
 }
 
-void GMNewTown::RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon0)
+void GMNewTown::RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (!IsCurrentMap())
         return;
 
     if (IsNewMap73_74())
     {
-        g_EmpireGuardian4.RenderAfterObjectMesh(pObject, look, pModel, ExtraMon0);
+        g_EmpireGuardian4.RenderAfterObjectMesh(pObject, look, pModel);
         return;
     }
 

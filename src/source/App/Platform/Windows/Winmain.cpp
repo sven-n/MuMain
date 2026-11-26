@@ -1725,6 +1725,8 @@ bool IterateClient()
     {
         ReconnectManager::Instance().OnMapFilesFailed();
     }
+    // What the last frame wrote into the user folder (settings, macros, screenshots), stored once.
+    Core::Platform::CommitUserFiles();
 
     // Run a pending reconnect teardown between frames (self-guards on its
     // pending flag). Replaces the old WM_START_RECONNECT round-trip.
@@ -2115,6 +2117,10 @@ static void SelectConnectServer(wchar_t* commandLine)
     g_ErrorReport.Write(L"> Server = %hs, from %ls.\r\n",
                         Network::DescribeEndpointForLog(mu_wchar_to_utf8(szServerIpAddress), g_ServerPort).c_str(),
                         fromCommandLine ? L"the command line" : L"config.ini");
+
+    static const std::wstring relay = GameConfig::GetInstance().GetRelay();
+    SetConnectionRelay(MU_C16(relay.c_str()));
+    g_ErrorReport.Write(L"> Connections: %ls.\r\n", relay.empty() ? L"TCP" : L"through a WebSocket relay");
 }
 
 // The content opens first: the user folder's name comes from the shipped defaults, and the log goes into that folder.
@@ -2133,6 +2139,8 @@ bool StartClient(char* szCmdLine)
 {
     const std::string contentRoot = InitializeWorkingDirectoryAndLog();
     g_teardown.Push([] { mu::log::Shutdown(); });
+    // Runs late in the quit: after the last settings are written.
+    g_teardown.Push([] { Core::Platform::CommitUserFiles(); });
     g_teardown.Push([] { Content::Close(); });
     // Installed before SDL starts so init failures are captured; SDL_Quit may still log, so it outlives SDL.
     static std::optional<Core::Log::Sdl::ScopedLogOutput> sdlLogOutput;

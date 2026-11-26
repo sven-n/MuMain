@@ -17,7 +17,7 @@
 // it is opened now, its model file (picked from Data/Item and Data/Player) or
 // shared model, texture folders, inventory display (beside the item in an
 // inventory grid) and ground display, the model's meshes, cloth,
-// material, glow, and the render style and item effect picked from their
+// material, glow, and the render style and effect picked from their
 // lists, each with the other items that use it (D24, D26). A changed file is
 // opened again before the next frame. The preview stays at the top while the
 // fields below it scroll.

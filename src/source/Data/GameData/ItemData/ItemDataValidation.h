@@ -117,11 +117,11 @@ void ValidateItemModelShines(std::span<const ItemModelDefinition> models, std::s
 // (Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists).
 using LookNameExists = bool (*)(std::string_view name);
 
-// A render style or item effect that no look of that name has: a warning for
+// A render style or effect that no look of that name has: a warning for
 // each, since the model is then drawn plainly (the model loader reports the
 // same when it opens the models).
 void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
-                            LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues);
+                            LookNameExists effectExists, std::vector<ItemDataIssue>& issues);
 
 // The part models (PartModels.json, design L28): a warning for an entry whose name is no part model slot (the game
 // draws nothing of it), for a render style no look has (the model is drawn plainly; not checked when

@@ -485,22 +485,23 @@ void mu::ui::window::CKanturu2ndEnterNpc::RejectEnterRequest(MSGBOX_TYPE popup)
     ClosingProcess();
 }
 
-bool mu::ui::window::CKanturu2ndEnterNpc::IsRidingUniria(ITEM* pItemHelper)
+bool mu::ui::window::CKanturu2ndEnterNpc::IsRidingUniria(const ITEM* pItemHelper)
 {
     return pItemHelper->Type == ITEM_HORN_OF_UNIRIA;
 }
 
-bool mu::ui::window::CKanturu2ndEnterNpc::HasMoonstonePendant(ITEM* pItemRingLeft, ITEM* pItemRingRight)
+bool mu::ui::window::CKanturu2ndEnterNpc::HasMoonstonePendant(const ITEM* pItemRingLeft, const ITEM* pItemRingRight)
 {
     return pItemRingLeft->Type == ITEM_MOONSTONE_PENDANT || pItemRingRight->Type == ITEM_MOONSTONE_PENDANT;
 }
 
 void mu::ui::window::CKanturu2ndEnterNpc::ValidateEquipmentForEntry()
 {
-    ITEM* pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-    ITEM* pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-    ITEM* pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-    ITEM* pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
+    // An expired rented item has no effect, so it counts as an empty slot here too.
+    const ITEM* pItemHelper = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_HELPER);
+    const ITEM* pItemRingLeft = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
+    const ITEM* pItemRingRight = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
+    const ITEM* pItemWing = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_WING);
 
     if (IsRidingUniria(pItemHelper))
     {

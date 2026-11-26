@@ -53,7 +53,7 @@ namespace SEASON3A
         bool RenderObject_AfterCharacter(const OBJECT* o, DrawLook& look, BMD* b);
         bool UpdateObjectEffects(OBJECT* o, BMD* b);
         bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
-        bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+        bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
         void UpdateTempleSystemMsg(int _Value);
         void SetGaugebarEnabled(bool bFlag);
         void SetGaugebarCloseTimer();

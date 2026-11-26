@@ -26,6 +26,7 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Character/CriticalDamageRateLine.h"
+#include "GameLogic/Pets/PetStats.h"
 #include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
 
@@ -157,6 +158,7 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
     c.Bind("ene_value_source", &model.eneValueSource);
     c.Bind("cmd_value_text", &model.cmdValueText);
     c.Bind("cmd_value_source", &model.cmdValueSource);
+    c.Bind("cmd_hint", &model.cmdHint);
 
     auto statLine = c.RegisterStruct<StatLine>();
     statLine.RegisterMember("text", &StatLine::text);
@@ -197,6 +199,11 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
                         });
     c.BindEventCallback("chainfo_line_leave", [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
                         { m_LineHint.Leave(event); });
+    SetStaticTexts(model);
+}
+
+void mu::ui::window::CCharacterInfoWindow::SetStaticTexts(CharacterInfoRmlModel& model)
+{
     model.strLabel = StringUtils::WideToNarrow(I18N::Game::STR);
     model.agiLabel = StringUtils::WideToNarrow(I18N::Game::AGI);
     model.vitLabel = StringUtils::WideToNarrow(I18N::Game::STA);
@@ -210,6 +217,22 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
     model.questTooltip = StringUtils::WideToNarrow(strText);
     model.petTooltip = StringUtils::WideToNarrow(I18N::Game::Pet);
     model.masterLevelTooltip = StringUtils::WideToNarrow(I18N::Game::MasterSkillTreeA);
+}
+
+void mu::ui::window::CCharacterInfoWindow::SyncChangedTexts()
+{
+    if (!m_TextsChanged.TakeChanged())
+    {
+        return;
+    }
+    m_CriticalHitTexts.Invalidate();
+    m_CommandHintTexts.Invalidate();
+    SetStaticTexts(m_RmlView.GetModel());
+    for (const char* field : {"str_label", "agi_label", "vit_label", "ene_label", "cmd_label", "exit_tooltip",
+                              "quest_tooltip", "pet_tooltip", "masterlevel_tooltip"})
+    {
+        m_RmlView.MarkDirty(field);
+    }
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
@@ -420,6 +443,7 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     auto& model = m_RmlView.GetModel();
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+    SyncChangedTexts();
 
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::canLevelUp, "can_level_up", CharacterAttribute->LevelUpPoint > 0);
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::showCharisma, "show_charisma",
@@ -429,13 +453,14 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     BuildTableTexts();
     BuildAttributeLines();
     BuildCriticalHits();
+    ShowLineHint();
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
 {
-    const UI::Character::CriticalHitTexts::Parts parts{
-        GameLogic::Combat::GetHeroCriticalDamageRate(), GameLogic::Combat::GetHeroCriticalDamageBonus(),
-        GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange, I18N::GetCurrentLocale()};
+    const UI::Character::CriticalHitTexts::Parts parts{GameLogic::Combat::GetHeroCriticalDamageRate(),
+                                                       GameLogic::Combat::GetHeroCriticalDamageBonus(),
+                                                       GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange};
     m_CriticalHitTexts.Update(parts);
     const UI::Character::CriticalDamageRateLine& line = m_CriticalHitTexts.RateLine();
 
@@ -451,7 +476,47 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
     {
         model.strLines.front().source = "buffed";
     }
+}
 
+void mu::ui::window::CCharacterInfoWindow::BuildCommandRow()
+{
+    const WORD wCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
+    const char* charismaSource =
+        AttributeSource(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5), CharacterAttribute->AddCharisma != 0);
+
+    wchar_t strCharisma[256];
+    mu_swprintf(strCharisma, L"%d", wCharisma);
+    SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueText, "cmd_value_text",
+              StringUtils::WideToNarrow(strCharisma));
+    SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueSource, "cmd_value_source",
+              Rml::String(charismaSource));
+    BuildCommandHint(wCharisma);
+}
+
+namespace
+{
+// A pet for the command hint: its item's pet stats, the equipped pet's level (0 without one) and the hero's strength.
+// A stat that takes a share of the whole minimum damage (the Dark Horse's maximum) counts them too.
+GameLogic::Character::DarkLordPet MakeHintPet(int itemType, int petType)
+{
+    GameLogic::Character::DarkLordPet pet;
+    pet.stats = GameLogic::Pets::GetItemPetStats(itemType);
+    const PET_INFO* equipped = Hero->GetEquipedPetInfo(petType);
+    pet.petLevel = equipped != nullptr && equipped->m_dwPetType != PET_TYPE_NONE ? equipped->m_wLevel : 0;
+    pet.strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
+    return pet;
+}
+} // namespace
+
+void mu::ui::window::CCharacterInfoWindow::BuildCommandHint(int command)
+{
+    const GameLogic::Character::DarkLordPets pets{MakeHintPet(ITEM_DARK_RAVEN_ITEM, PET_TYPE_DARK_SPIRIT),
+                                                  MakeHintPet(ITEM_DARK_HORSE_ITEM, PET_TYPE_DARK_HORSE)};
+    m_CommandHintTexts.Update(GameLogic::Character::GetCommandEffects(CharacterAttribute->Level, command, pets));
+}
+
+void mu::ui::window::CCharacterInfoWindow::ShowLineHint()
+{
     switch (m_LineHint.Hovered())
     {
     case DamageHint:
@@ -459,6 +524,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
         break;
     case CriticalDamageRateHint:
         m_LineHint.Show(m_CriticalHitTexts.RateHintLines());
+        break;
+    case CommandHint:
+        m_LineHint.Show(m_CommandHintTexts.Lines());
         break;
     default:
         m_LineHint.Hide();
@@ -1562,17 +1630,6 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     if (iBaseClass == CLASS_DARK_LORD)
     {
-        WORD wCharisma;
-
-        wCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-
-        const char* charismaSource = AttributeSource(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5),
-                                                     CharacterAttribute->AddCharisma != 0);
-
-        wchar_t strCharisma[256];
-        mu_swprintf(strCharisma, L"%d", wCharisma);
-        SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueText, "cmd_value_text",
-                  StringUtils::WideToNarrow(strCharisma));
-        SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::cmdValueSource, "cmd_value_source", Rml::String(charismaSource));
+        BuildCommandRow();
     }
 }

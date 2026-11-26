@@ -218,4 +218,110 @@ void ValidateMonsterNameLocales(std::span<const MonsterDefinition> monsters, std
         }
     }
 }
+namespace
+{
+const char* const NoneLook = "none";
+
+void CheckLookName(const std::optional<std::string>& name, const char* field, const char* kind, const char* file,
+                   const LookExists& exists, const std::string& place, const std::string& source, int number,
+                   std::vector<ItemDataIssue>& issues)
+{
+    if (!name || *name == NoneLook || !exists || exists(*name))
+        return;
+    issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, number, place + " " + field,
+                      *name + " is no " + kind + " of " + file + ": it is drawn without it"});
+}
+
+// An effect a monster names that does something in the update, which only items run.
+void CheckEffectParts(const std::optional<std::string>& name, const LookExists& exists, const LookExists& runsInUpdate,
+                      const std::string& place, const std::string& source, int number,
+                      std::vector<ItemDataIssue>& issues)
+{
+    if (!name || *name == NoneLook || !runsInUpdate || (exists && !exists(*name)) || !runsInUpdate(*name))
+        return;
+    issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, number, place + " effect",
+                      *name + " has an object light, things on bones or an animation speed, which only items run: "
+                              "the monster gets only its values before the drawing"});
+}
+} // namespace
+
+void ValidateMonsterLooks(std::span<const MonsterDefinition* const> monsters, const LookExists& renderStyleExists,
+                          const LookExists& effectExists, const std::string& source, std::vector<ItemDataIssue>& issues,
+                          const LookExists& runsInUpdate)
+{
+    for (const MonsterDefinition* monster : monsters)
+    {
+        const auto check = [&](const MonsterSetup& setup, const std::string& where)
+        {
+            const std::string place = "monster " + std::to_string(monster->number) + where;
+            CheckLookName(setup.renderStyle, "renderStyle", "render style", "Data/Effects/RenderStyles.json",
+                          renderStyleExists, place, source, monster->number, issues);
+            CheckLookName(setup.effect, "effect", "effect", "Data/Effects/Effects.json", effectExists, place, source,
+                          monster->number, issues);
+            CheckEffectParts(setup.effect, effectExists, runsInUpdate, place, source, monster->number, issues);
+        };
+        const auto checkStates = [&](const MonsterSetup& setup, const std::string& where)
+        {
+            check(setup, where);
+            for (size_t index = 0; index < setup.stateVariants.size(); ++index)
+                check(setup.stateVariants[index].setup, where + " stateVariants[" + std::to_string(index) + "]");
+        };
+        checkStates(monster->setup, "");
+        for (size_t index = 0; index < monster->mapVariants.size(); ++index)
+            checkStates(monster->mapVariants[index].setup, " mapVariants[" + std::to_string(index) + "]");
+    }
+}
+
+std::map<std::string, int, std::less<>> CountMonsterLookUses(std::span<const MonsterDefinition* const> monsters,
+                                                             std::span<const MonsterModelDefinition* const> models,
+                                                             bool effects)
+{
+    std::map<std::string, int, std::less<>> uses;
+    std::set<std::string, std::less<>> named;
+    const auto add = [&](const std::optional<std::string>& name)
+    {
+        if (name && *name != NoneLook)
+            named.insert(*name);
+    };
+    const auto addStates = [&](const MonsterSetup& setup)
+    {
+        add(effects ? setup.effect : setup.renderStyle);
+        for (const MonsterStateVariant& state : setup.stateVariants)
+            add(effects ? state.setup.effect : state.setup.renderStyle);
+    };
+    for (const MonsterDefinition* monster : monsters)
+    {
+        named.clear();
+        addStates(monster->setup);
+        for (const MonsterMapVariant& variant : monster->mapVariants)
+            addStates(variant.setup);
+        for (const std::string& name : named)
+            ++uses[name];
+    }
+    for (const MonsterModelDefinition* model : models)
+    {
+        const std::string& name = effects ? model->effect : model->renderStyle;
+        if (!name.empty())
+            ++uses[name];
+    }
+    return uses;
+}
+
+void ValidateMonsterModelLooks(std::span<const MonsterModelDefinition* const> models,
+                               const LookExists& renderStyleExists, const LookExists& effectExists,
+                               const std::string& source, std::vector<ItemDataIssue>& issues,
+                               const LookExists& runsInUpdate)
+{
+    const auto named = [](const std::string& name) { return name.empty() ? std::nullopt : std::optional(name); };
+    for (const MonsterModelDefinition* model : models)
+    {
+        const std::string place = "model " + model->slot;
+        CheckLookName(named(model->renderStyle), "renderStyle", "render style", "Data/Effects/RenderStyles.json",
+                      renderStyleExists, place, source, ItemDataIssue::NoItem, issues);
+        CheckLookName(named(model->effect), "effect", "effect", "Data/Effects/Effects.json", effectExists, place,
+                      source, ItemDataIssue::NoItem, issues);
+        CheckEffectParts(named(model->effect), effectExists, runsInUpdate, place, source, ItemDataIssue::NoItem,
+                         issues);
+    }
+}
 } // namespace Data::Monsters

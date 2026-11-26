@@ -33,6 +33,7 @@ ItemOptionFiles MakeFiles()
     files.definitions.push_back(MakeDefinition("wingOption", ItemOptionType::Option, {1, 2, 3}));
     files.definitions.push_back(MakeDefinition("excellentWeapon", ItemOptionType::Excellent, {1, 2, 3, 4, 5, 6}));
     files.definitions.push_back(MakeDefinition("excellentPartial", ItemOptionType::Excellent, {2, 5}));
+    files.definitions.push_back(MakeDefinition("secondTierWing", ItemOptionType::Wing, {1, 2, 3, 4, 5}));
     return files;
 }
 
@@ -75,19 +76,28 @@ TEST_CASE("Item Tooltip's preview takes only the option settings the item has co
         CHECK(DescribeExcellentBit(controls.excellent, 1).empty());
     }
 
-    SUBCASE("wings: the option type up to the definition's highest number, and the six excellent bits")
+    SUBCASE("wings: the option type up to the definition's highest number, and the bits of their wing definition")
+    {
+        ItemDefinition wings = MakeItem({"secondTierWing", "wingOption"});
+        wings.slot = ItemSlot::Wings;
+        const PreviewOptionControls controls = FindPreviewOptionControls(wings, options);
+        CHECK(controls.highestType == 3);
+        CHECK(controls.excellentBits == 0x1F);
+        CHECK(controls.byteUse == ExcellentByteUse::WingOptions);
+        const PreviewOptionBytes bytes = ResolvePreviewOptions(controls, 4, 9, 0x21);
+        CHECK(bytes.optionLevel == 4);
+        CHECK(bytes.optionType == 3);
+        CHECK(bytes.excellentFlags == 0x01);
+        CHECK(DescribeExcellentBit(controls.excellent, 1) == "attribute1");
+    }
+
+    SUBCASE("wings without a wing definition (the first tier): no excellent bits")
     {
         ItemDefinition wings = MakeItem({"wingOption"});
         wings.slot = ItemSlot::Wings;
         const PreviewOptionControls controls = FindPreviewOptionControls(wings, options);
-        CHECK(controls.highestType == 3);
-        CHECK(controls.excellentBits == AllExcellentOptionFlags);
-        CHECK(controls.byteUse == ExcellentByteUse::WingOptions);
-        const PreviewOptionBytes bytes = ResolvePreviewOptions(controls, 4, 9, 0x01);
-        CHECK(bytes.optionLevel == 4);
-        CHECK(bytes.optionType == 3);
-        CHECK(bytes.excellentFlags == 0x01);
-        CHECK(DescribeExcellentBit(controls.excellent, 1).empty());
+        CHECK(controls.excellentBits == 0);
+        CHECK(controls.excellent == nullptr);
     }
 
     SUBCASE("the kinds an item's name lines name as the byte (the Fenrir's), not six excellent options")

@@ -64,6 +64,12 @@ public:
     /// </remarks>
     void SendLogin(const wchar_t* username, const wchar_t* password, const BYTE* clientVersion,
                    const BYTE* clientSerial);
+
+    /// <summary>
+    /// Sends a RoundTripRequest (C1 F5 0C): the game server answers it right away with the same token.
+    /// </summary>
+    /// <param name="token">The token the server sends back.</param>
+    void SendRoundTripRequest(uint32_t token);
 };
 
 /// <summary>

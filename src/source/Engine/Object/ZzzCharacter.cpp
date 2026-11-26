@@ -12,6 +12,7 @@
 #include <optional>
 #include <algorithm>
 #include <span>
+#include <memory>
 #include "Render/Drawing/LegacyCalls.h"
 #include "UI/Chat/Chat.h"
 #include "Core/Globals/_enum.h"
@@ -71,6 +72,7 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Render/Items/ItemRenderStyles.h"
+#include "Render/Monsters/MonsterLooks.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
@@ -1075,6 +1077,7 @@ void SetAttackSpeed()
     Models[MODEL_PLAYER].Actions[PLAYER_SKILL_DARKSIDE_ATTACK].PlaySpeed = 0.3f + RageAttackSpeed;
     Models[MODEL_PLAYER].Actions[PLAYER_SKILL_DRAGONKICK].PlaySpeed = 0.4f + RageAttackSpeed;
     Models[MODEL_PLAYER].Actions[PLAYER_SKILL_DRAGONLORE].PlaySpeed = 0.3f + RageAttackSpeed;
+    Models[MODEL_PLAYER].Actions[PLAYER_SKILL_PHOENIX_SHOT].PlaySpeed = 0.4f + RageAttackSpeed;
     Models[MODEL_PLAYER].Actions[PLAYER_SKILL_ATT_UP_OURFORCES].PlaySpeed = 0.35f;
     Models[MODEL_PLAYER].Actions[PLAYER_SKILL_HP_UP_OURFORCES].PlaySpeed = 0.35f;
     Models[MODEL_PLAYER].Actions[PLAYER_RAGE_FENRIR_ATTACK_RIGHT].PlaySpeed = 0.25f + RageAttackSpeed;
@@ -5375,7 +5378,7 @@ static bool FullSetOf(const CHARACTER* c, int& levelSet, bool& addDefense)
             if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
                 continue;
 
-            if (CharacterMachine->Equipment[i].Type == -1)
+            if (CharacterMachine->GetEffectiveEquipment(i)->Type == -1)
             {
                 Success = false;
                 break;
@@ -5384,20 +5387,20 @@ static bool FullSetOf(const CHARACTER* c, int& levelSet, bool& addDefense)
 
         if (Success)
         {
-            int Type = Data::Items::GetItemNumber(CharacterMachine->Equipment[EQUIPMENT_BOOTS].Type);
-            tmpLevel = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Level;
+            int Type = Data::Items::GetItemNumber(CharacterMachine->GetEffectiveEquipment(EQUIPMENT_BOOTS)->Type);
+            tmpLevel = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_BOOTS)->Level;
             for (int i = start; i >= end; i--)
             {
                 if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
                     continue;
-                int Level = CharacterMachine->Equipment[i].Level;
+                int Level = CharacterMachine->GetEffectiveEquipment(i)->Level;
                 if (Level < 9)
                 {
                     levelSet = 0;
                     Success = false;
                     break;
                 }
-                if (Type != Data::Items::GetItemNumber(CharacterMachine->Equipment[i].Type))
+                if (Type != Data::Items::GetItemNumber(CharacterMachine->GetEffectiveEquipment(i)->Type))
                 {
                     levelSet = 0;
                     Success = false;
@@ -5416,14 +5419,10 @@ static bool FullSetOf(const CHARACTER* c, int& levelSet, bool& addDefense)
 
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK && Success)
         {
-            if (CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_STORM_CROW_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_THUNDER_HAWK_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_HURRICANE_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_VOLCANO_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_VALIANT_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_DESTORY_ARMOR
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_PHANTOM_ARMOR
-                )
+            const int armorType = CharacterMachine->GetEffectiveEquipment(EQUIPMENT_ARMOR)->Type;
+            if (armorType != ITEM_STORM_CROW_ARMOR && armorType != ITEM_THUNDER_HAWK_ARMOR &&
+                armorType != ITEM_HURRICANE_ARMOR && armorType != ITEM_VOLCANO_ARMOR &&
+                armorType != ITEM_VALIANT_ARMOR && armorType != ITEM_DESTORY_ARMOR && armorType != ITEM_PHANTOM_ARMOR)
             {
                 addDefense = false;
             }
@@ -7352,7 +7351,7 @@ void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bon
     vec3_t Position;
     VectorCopy(position, Position);
 
-    // The item effects also reach the part's bones through its item object (TransformByObjectBone).
+    // The effects also reach the part's bones through its item object (TransformByObjectBone).
     struct ItemBones
     {
         OBJECT* object;
@@ -9563,6 +9562,27 @@ void UpdatePlayerBodyParts(CHARACTER* c)
     }
 }
 
+bool CreateMagicSkeletonCloth(OBJECT* o)
+{
+    constexpr int MeshIndex = 2;
+    constexpr int BoneIndex = 18;
+    if (!CPhysicsClothMesh::CanCreate(o->Type, MeshIndex))
+    {
+        static bool reported = false;
+        if (!reported)
+            g_ErrorReport.Write(L"Magic Skeleton cloth creation failed: model=%d\r\n", o->Type);
+        reported = true;
+        return false;
+    }
+    auto cloth = std::make_unique<CPhysicsClothMesh[]>(1);
+    cloth[0].Create(o, MeshIndex, BoneIndex, PCT_HEAVY);
+    cloth[0].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, BoneIndex);
+    cloth[0].AddCollisionSphere(0.0f, -20.0f, 0.0f, 30.0f, BoneIndex);
+    o->m_pCloth = cloth.release();
+    o->m_byNumCloth = 1;
+    return true;
+}
+
 // Creates, simulates and drops a character's cloth, under the conditions its draw renders it.
 void UpdateCharacterCloth(CHARACTER* c)
 {
@@ -9575,18 +9595,13 @@ void UpdateCharacterCloth(CHARACTER* c)
         monster == MONSTER_MAGIC_SKELETON_5 || monster == MONSTER_MAGIC_SKELETON_6 ||
         monster == MONSTER_MAGIC_SKELETON_7)
     {
-        if (!o->m_pCloth)
+        // Cloth reads skinned vertices during update, before this model's first draw.
+        // Refresh them for this instance every tick: fixed vertices read them too.
+        SkinObjectMeshes(o, &Models[o->Type], true);
+        if (o->m_pCloth || CreateMagicSkeletonCloth(o))
         {
-            auto* pCloth = new CPhysicsClothMesh[1];
-            pCloth[0].Create(o, 2, 18, PCT_HEAVY);
-            pCloth[0].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, 18);
-            pCloth[0].AddCollisionSphere(0.0f, -20.0f, 0.0f, 30.0f, 18);
-            o->m_pCloth = (void*)pCloth;
-            o->m_byNumCloth = 1;
-        }
-        if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
-        {
-            DeleteCloth(c, o);
+            if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
+                DeleteCloth(c, o);
         }
     }
     else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST ||
@@ -9757,7 +9772,7 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
     case MONSTER_MAGIC_SKELETON_6:
     case MONSTER_MAGIC_SKELETON_7:
     {
-        BOOL bRender = Calc_RenderObject(o, Translate, Select, 0);
+        BOOL bRender = Calc_RenderObject(o, Translate, Select);
 
         if (auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth)
         {
@@ -9765,7 +9780,7 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
         }
         if (bRender)
         {
-            Draw_RenderObject(o, Translate, Select, 0);
+            Draw_RenderObject(o, Translate, Select, false);
         }
     }
     break;
@@ -9824,29 +9839,18 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
         }
     }
 
+    // A monster with a render style (MN8) is drawn by it (RenderObject), not by the code's afterimage of the
+    // Dreadfear's second attack.
+    const bool styled = Render::Monsters::Looks::RenderStyleOf(*o) != nullptr;
     if (byRender == CHARACTER_RENDER_OBJ)
     {
-        if (MONSTER_METAL_BALROG == c->MonsterIndex || MONSTER_ALPHA_CRUST == c->MonsterIndex ||
-            MONSTER_GREAT_DRAKAN == c->MonsterIndex || MONSTER_WHITE_WIZARD == c->MonsterIndex ||
-            MONSTER_ORC_SOLDIER_OF_DOOM == c->MonsterIndex || MONSTER_ORC_ARCHER_OF_DOOM == c->MonsterIndex ||
-            MONSTER_MUTANT_HERO == c->MonsterIndex || MONSTER_OMEGA_WING == c->MonsterIndex ||
-            MONSTER_AXE_HERO == c->MonsterIndex || MONSTER_GIGAS_GOLEM == c->MonsterIndex ||
-            MONSTER_SCOUTHERO == c->MonsterIndex || MONSTER_WEREWOLFHERO == c->MonsterIndex ||
-            MONSTER_VALAM == c->MonsterIndex || MONSTER_SOLAM == c->MonsterIndex || MONSTER_SCOUT == c->MonsterIndex ||
-            319 == c->MonsterIndex)
+        if (!styled && c->MonsterIndex == MONSTER_DREADFEAR && o->CurrentAction == MONSTER01_ATTACK2)
         {
-            RenderObject(o, Translate, Select, c->MonsterIndex);
+            RenderObject_AfterImage(o, Translate, Select);
         }
         else
         {
-            if ((c->MonsterIndex == MONSTER_DREADFEAR && o->CurrentAction == MONSTER01_ATTACK2))
-            {
-                RenderObject_AfterImage(o, Translate, Select, 0);
-            }
-            else
-            {
-                RenderObject(o, Translate, Select, 0);
-            }
+            RenderObject(o, Translate, Select, 0);
         }
     }
 
@@ -9885,50 +9889,7 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
         }
     }
 
-    if (c->MonsterIndex == MONSTER_BALROG || c->MonsterIndex == MONSTER_GOLDEN_BUDGE_DRAGON ||
-        c->MonsterIndex == MONSTER_SILVER_VALKYRIE || c->MonsterIndex == MONSTER_ZAIKAN ||
-        c->MonsterIndex == MONSTER_METAL_BALROG || (78 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GOLDEN_WHEEL) ||
-        (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT && c->MonsterIndex <= MONSTER_GOLDEN_RABBIT))
-    {
-        vec3_t vBackupBodyLight;
-
-        float Bright = 1.f;
-        if (c->MonsterIndex == MONSTER_ZAIKAN)
-            Bright = 0.5f;
-        if (c->MonsterIndex == MONSTER_GOLDEN_BUDGE_DRAGON ||
-            (78 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GOLDEN_WHEEL) ||
-            (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT && c->MonsterIndex <= MONSTER_GOLDEN_RABBIT))
-        {
-            if (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT)
-            {
-                VectorCopy(Models[o->Type].BodyLight, vBackupBodyLight);
-                Vector(1.f, 0.6f, 0.3f, Models[o->Type].BodyLight);
-            }
-
-            if (c->MonsterIndex == MONSTER_GOLDEN_GREAT_DRAGON)
-            {
-                VectorCopy(Models[o->Type].BodyLight, vBackupBodyLight);
-                Vector(1.f, 0.0f, 0.0f, Models[o->Type].BodyLight);
-            }
-            RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT, Bright);
-        }
-
-        if (c->MonsterIndex == MONSTER_METAL_BALROG)
-        {
-            RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha,
-                                      RENDER_CHROME | RENDER_BRIGHT | RENDER_EXTRA, Bright);
-        }
-        else
-        {
-            RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT, Bright);
-        }
-
-        if (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT && c->MonsterIndex <= MONSTER_GOLDEN_RABBIT)
-        {
-            VectorCopy(vBackupBodyLight, Models[o->Type].BodyLight);
-        }
-    }
-    else if (c->MonsterIndex == MONSTER_ALQUAMOS)
+    if (c->MonsterIndex == MONSTER_ALQUAMOS)
     {
         // Tints the body light below.
         const float Luminosity = (float)(Random::DrawRand(o, 1) % 30 + 70) * 0.01f;
@@ -9940,22 +9901,6 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
         if (auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth)
         {
             pCloth[0].Render();
-        }
-    }
-    else if (c->MonsterIndex == MONSTER_DRAKAN || c->MonsterIndex == MONSTER_GREAT_DRAKAN)
-    {
-        // Tints the body light below.
-        if (c->MonsterIndex == MONSTER_DRAKAN)
-            Vector(0.1f, 0.1f, 1.f, Light);
-
-        int RenderType = (c->MonsterIndex == MONSTER_DRAKAN) ? 0 : RENDER_EXTRA;
-        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT | RenderType,
-                                  1.f);
-
-        if (c->MonsterIndex == MONSTER_DRAKAN)
-        {
-            RenderPartObjectBodyColor2(&Models[o->Type], o, o->Type, o->Alpha,
-                                       RENDER_CHROME2 | RENDER_LIGHTMAP | RENDER_BRIGHT, 1.f);
         }
     }
     else if (c->MonsterIndex == MONSTER_DARK_PHOENIX)
@@ -9981,18 +9926,8 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
         }
     }
 
-    if (c->MonsterIndex == MONSTER_GOLDEN_TITAN || c->MonsterIndex == MONSTER_GOLDEN_SOLDIER)
-    {
-        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT, 1.f,
-                                  BITMAP_SHINY + 1);
-    }
-
     if (RendersWingCarriedModels(c))
         RenderWingCarriedModels(c, Translate);
-    else if (c->MonsterIndex == MONSTER_WHITE_WIZARD)
-    {
-        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_BRIGHT | RENDER_EXTRA, 1.0f);
-    }
 
     if (o->Type == MODEL_NPC_CHERRYBLOSSOM)
     {
@@ -12686,6 +12621,9 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     c->Run = 0;
     c->GuildMarkIndex = -1;
     c->PK = PVP_NEUTRAL;
+    // A monster's setup names its looks (MN8); others have none.
+    o->RenderStyleLook = 0;
+    o->EffectLook = 0;
     o->Type = Type;
     o->Scale = 0.9f;
     o->Timer = 0.f;
@@ -13008,6 +12946,16 @@ void SetCharacterScale(CHARACTER* c)
     }
 }
 
+namespace
+{
+// An equipment slot of the hero is drawn if it holds an item with effect: an expired rented item has none, so
+// the hero looks as if the slot was empty.
+bool IsShownEquipment(int slot)
+{
+    return CharacterMachine->GetEffectiveEquipment(slot)->Type != -1;
+}
+} // namespace
+
 void SetCharacterClass(CHARACTER* c)
 {
     if (c->Object.Type != MODEL_PLAYER)
@@ -13017,7 +12965,7 @@ void SetCharacterClass(CHARACTER* c)
 
     ITEM* p = CharacterMachine->Equipment;
 
-    if (p[EQUIPMENT_WEAPON_RIGHT].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_WEAPON_RIGHT))
     {
         c->Weapon[0].Type = -1;
     }
@@ -13026,7 +12974,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Weapon[0].Type = Data::Items::ToModelSlot(p[EQUIPMENT_WEAPON_RIGHT].Type);
     }
 
-    if (p[EQUIPMENT_WEAPON_LEFT].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_WEAPON_LEFT))
     {
         c->Weapon[1].Type = -1;
     }
@@ -13035,7 +12983,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Weapon[1].Type = Data::Items::ToModelSlot(p[EQUIPMENT_WEAPON_LEFT].Type);
     }
 
-    if (p[EQUIPMENT_WING].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_WING))
     {
         c->Wing.Type = -1;
     }
@@ -13044,7 +12992,7 @@ void SetCharacterClass(CHARACTER* c)
         c->Wing.Type = Data::Items::ToModelSlot(p[EQUIPMENT_WING].Type);
     }
 
-    if (p[EQUIPMENT_HELPER].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_HELPER))
     {
         c->Helper.Type = -1;
     }
@@ -13081,7 +13029,7 @@ void SetCharacterClass(CHARACTER* c)
         SetPlayerStop(c);
     }
 
-    if (p[EQUIPMENT_HELM].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_HELM))
     {
         c->BodyPart[BODYPART_HELM].Type = static_cast<int>(MODEL_BODY_HELM) + c->SkinIndex;
         c->BodyPart[BODYPART_HELM].Level = 0;
@@ -13096,7 +13044,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_HELM].AncientDiscriminator = p[EQUIPMENT_HELM].AncientDiscriminator;
     }
 
-    if (p[EQUIPMENT_ARMOR].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_ARMOR))
     {
         c->BodyPart[BODYPART_ARMOR].Type = static_cast<int>(MODEL_BODY_ARMOR) + c->SkinIndex;
         c->BodyPart[BODYPART_ARMOR].Level = 0;
@@ -13111,7 +13059,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = p[EQUIPMENT_ARMOR].AncientDiscriminator;
     }
 
-    if (p[EQUIPMENT_PANTS].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_PANTS))
     {
         c->BodyPart[BODYPART_PANTS].Type = static_cast<int>(MODEL_BODY_PANTS) + c->SkinIndex;
         c->BodyPart[BODYPART_PANTS].Level = 0;
@@ -13126,7 +13074,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_PANTS].AncientDiscriminator = p[EQUIPMENT_PANTS].AncientDiscriminator;
     }
 
-    if (p[EQUIPMENT_GLOVES].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_GLOVES))
     {
         c->BodyPart[BODYPART_GLOVES].Type = static_cast<int>(MODEL_BODY_GLOVES) + c->SkinIndex;
         c->BodyPart[BODYPART_GLOVES].Level = 0;
@@ -13141,7 +13089,7 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = p[EQUIPMENT_GLOVES].AncientDiscriminator;
     }
 
-    if (p[EQUIPMENT_BOOTS].Type == -1)
+    if (!IsShownEquipment(EQUIPMENT_BOOTS))
     {
         c->BodyPart[BODYPART_BOOTS].Type = static_cast<int>(MODEL_BODY_BOOTS) + c->SkinIndex;
         c->BodyPart[BODYPART_BOOTS].Level = 0;

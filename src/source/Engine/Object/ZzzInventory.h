@@ -193,6 +193,7 @@ bool CheckEmptyInventory(ITEM* Inv, int InvWidth, int InvHeight);
 void AutoEquipmentChange(int sx, int sy, ITEM* Inv, int InvWidth, int InvHeight);
 #endif // AUTO_CHANGE_ITEM
 
+// Returns one of Engine::Items::CompareResult (CompareItemResult.h).
 int CompareItem(ITEM item1, ITEM item2);
 void ConvertGold(double dGold, wchar_t* szText, int iDecimals = 0);
 void ConvertGold64(__int64 Gold, wchar_t* Text);
@@ -204,7 +205,9 @@ void RepairAllGold(void);
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
 
-void SendRequestUse(int Index, int Target, bool addPoints = true);
+// Asks the server to use the item at Index (on the item at Target). False if nothing was sent: items can't be used
+// while the vault or a trade is open, or while an earlier use waits for its answer.
+bool SendRequestUse(int Index, int Target, bool addPoints = true);
 bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex);
 bool IsCanUseItem();
 bool IsCanTrade();

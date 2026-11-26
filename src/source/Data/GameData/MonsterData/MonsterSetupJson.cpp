@@ -606,6 +606,15 @@ struct Reader
             Whole(value, name, setup.subType);
         else if (key == "lookLevel")
             WholeIn(value, name, 0, MaxLookLevel, setup.lookLevel);
+        else if (key == "renderStyle" || key == "effect")
+        {
+            if (!value.is_string() || value.get<std::string>().empty())
+            {
+                Fatal(name, "must be the name of a look, or none");
+                return;
+            }
+            (key == "renderStyle" ? setup.renderStyle : setup.effect) = value.get<std::string>();
+        }
         else if (key == "glowMesh")
             Whole(value, name, setup.glowMesh);
         else if (key == "glowLight")
@@ -1325,6 +1334,10 @@ OrderedJson WriteField(std::string_view key, const MonsterSetup& setup)
         return WriteOptional(setup.subType);
     if (key == "lookLevel")
         return WriteOptional(setup.lookLevel);
+    if (key == "renderStyle")
+        return *setup.renderStyle;
+    if (key == "effect")
+        return *setup.effect;
     if (key == "glowMesh")
         return WriteOptional(setup.glowMesh);
     if (key == "glowLight")

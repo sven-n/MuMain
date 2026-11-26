@@ -164,7 +164,7 @@ Record Moved(Record record, double delta)
 }
 
 // The baseline lines of a render style's items in every situation, as they draw now.
-// A look of the shipped files, by its kind and name; its baseline lines start with the name, and an item effect's
+// A look of the shipped files, by its kind and name; its baseline lines start with the name, and an effect's
 // with "effect <name>" (a name can be in both lists, design L13).
 struct ShippedLook
 {
@@ -173,16 +173,16 @@ struct ShippedLook
 
     [[nodiscard]] std::string Key() const
     {
-        return kind == LookKind::ItemEffect ? "effect " + name : name;
+        return kind == LookKind::Effect ? "effect " + name : name;
     }
 };
 
-// The render styles and item effects of the shipped files in g_LookStore while it lives; none afterwards.
+// The render styles and effects of the shipped files in g_LookStore while it lives; none afterwards.
 struct ShippedLooksScope
 {
     ShippedLooksScope()
     {
-        for (const LookKind kind : {LookKind::RenderStyle, LookKind::ItemEffect})
+        for (const LookKind kind : {LookKind::RenderStyle, LookKind::Effect})
         {
             RenderStylesLoadResult shipped = LoadLookFile(DataDirectory / "Effects", kind);
             REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
@@ -196,7 +196,7 @@ struct ShippedLooksScope
     ~ShippedLooksScope()
     {
         g_LookStore.SetRenderStyles({});
-        g_LookStore.SetItemEffects({});
+        g_LookStore.SetEffects({});
     }
     ShippedLooksScope(const ShippedLooksScope&) = delete;
     ShippedLooksScope& operator=(const ShippedLooksScope&) = delete;
@@ -229,7 +229,7 @@ std::map<std::string, std::string> RecordLook(const ShippedLook& look)
 const std::filesystem::path SpawnBaseline = MU_SPAWN_BASELINE;
 
 constexpr const char* SpawnBaselineHeader =
-    "# What the looks whose things on bones moved from code into Data/Effects/ItemEffects.json create in the update:\n"
+    "# What the looks whose things on bones moved from code into Data/Effects/Effects.json create in the update:\n"
     "# one line per item, clock time and random seed, the look, the item and the moment, then the number of things\n"
     "# and five digests of them and of what the look left on the object, rounded on five grids\n"
     "# (tests/data/LookRecorder.h). First recorded from the old code before each look moved\n"
@@ -240,8 +240,8 @@ constexpr const char* SpawnBaselineHeader =
     "# build, last against the old code's lines as first recorded in the pull request that moved these looks into\n"
     "# data.\n";
 
-// The looks whose things on bones move into data in step 3 (section 7b): the item effects, and the two render styles
-// whose things became item effects of the same name (design L29).
+// The looks whose things on bones move into data in step 3 (section 7b): the effects, and the two render styles
+// whose things became effects of the same name (design L29).
 constexpr std::array<std::string_view, 11> SpawnLooks{
     "devilsKey",      "devilsInvitation", "rena",       "wingsOfDarkness", "wingOfStorm",       "wingOfEternal",
     "wingOfIllusion", "wingOfRuin",       "wingOfDimension", "pumpkinOfLuck", "cursedCastleWater",
@@ -328,11 +328,11 @@ std::map<std::string, std::string> ReadSpawnBaseline()
     return lines;
 }
 
-// The items that create the look's things: those whose item effect, or (a look moved from a render style's things)
+// The items that create the look's things: those whose effect, or (a look moved from a render style's things)
 // whose render style, it is.
 std::vector<int> SpawningItems(std::string_view look)
 {
-    std::vector<int> items = LookRecorder::ItemsUsing(look, LookKind::ItemEffect);
+    std::vector<int> items = LookRecorder::ItemsUsing(look, LookKind::Effect);
     for (const int item : LookRecorder::ItemsUsing(look, LookKind::RenderStyle))
     {
         if (item >= 0 && std::ranges::find(items, item) == items.end())
@@ -343,13 +343,13 @@ std::vector<int> SpawningItems(std::string_view look)
     return items;
 }
 
-// "effect:potion" names the item effect, any other name the render style.
+// "effect:potion" names the effect, any other name the render style.
 ShippedLook LookNamed(const std::string& name)
 {
     constexpr std::string_view Effect = "effect:";
     if (name.starts_with(Effect))
     {
-        return {LookKind::ItemEffect, name.substr(Effect.size())};
+        return {LookKind::Effect, name.substr(Effect.size())};
     }
     return {LookKind::RenderStyle, name};
 }
@@ -583,6 +583,11 @@ TEST_CASE("Render styles moved into data draw as their old code did (the baselin
     for (const ShippedLook& look : looks.looks)
     {
         CAPTURE(look.Key());
+        // A look no item names is a monster's: the monster looks' baseline has it (tests/monsters).
+        if (LookRecorder::ItemsUsing(look.name, look.kind).empty())
+        {
+            continue;
+        }
         CHECK(withLines.contains(look.Key()));
         for (const auto& [key, digest] : RecordLook(look))
         {
@@ -650,7 +655,7 @@ TEST_CASE("Each render style in the data draws as its code while the code still 
 
 TEST_CASE("No render style is both in the data and in the code (design L14) [looks]")
 {
-    // Every item effect is data.
+    // Every effect is data.
     const RenderStylesLoadResult styles = LoadRenderStyleFile(DataDirectory / "Effects");
     for (const LookDefinition& look : styles.looks)
     {
@@ -663,13 +668,13 @@ TEST_CASE("The Devil's Eye puts the pulse of its code on its object in the updat
           "[looks][recorder]")
 {
     const ShippedLooksScope looks;
-    REQUIRE(g_LookStore.FindItemEffect("devilsEye") != nullptr);
+    REQUIRE(g_LookStore.FindEffect("devilsEye") != nullptr);
     ItemModelDatabaseScope database;
     Data::Items::ItemModelDefinition eye;
     eye.group = ITEM_DEVILS_EYE / MAX_ITEM_INDEX;
     eye.number = ITEM_DEVILS_EYE % MAX_ITEM_INDEX;
     eye.file = "Data/Item/devil_eye.bmd";
-    eye.itemEffect = "devilsEye";
+    eye.effect = "devilsEye";
     g_ItemModelDatabase.Build(std::span(&eye, 1), Data::Effects::GlowColorList{});
     const int slot = Data::Items::ToModelSlot(ITEM_DEVILS_EYE);
     REQUIRE(Render::Items::ItemEffects::Spawns(slot));
@@ -693,7 +698,7 @@ TEST_CASE("The Devil's Eye puts the pulse of its code on its object in the updat
     WorldTime = previousWorldTime;
 }
 
-TEST_CASE("Item effects whose things on bones moved into data create what their old code created (the baseline) "
+TEST_CASE("Effects whose things on bones moved into data create what their old code created (the baseline) "
           "[looks][recorder]")
 {
     std::map<std::string, std::string> baseline = ReadSpawnBaseline();

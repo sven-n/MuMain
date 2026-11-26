@@ -137,3 +137,5 @@ body {
 }
 /* The performance overlays start at the top-left corner, over the HUD's corner widgets. */
 .diagnostics-corner { left: 0; top: 0; }
+/* The ping ($ping) in the top-right corner of the content area, below the header. */
+.ping-corner { right: 0; top: 0; }

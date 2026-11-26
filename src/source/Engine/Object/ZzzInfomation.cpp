@@ -24,6 +24,7 @@
 
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "GameLogic/Items/CSItemOption.h"
+#include "GameLogic/Character/CommandEffects.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemCategories.h"
@@ -279,77 +280,6 @@ ActionSkillType GetSkillByBook(int Type)
     }
 }
 
-void CalcWingOptions(ITEM* ip)
-{
-    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
-    {
-        if (ip->ExcellentFlags & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_HP_MAX, 50 + ip->Level * 5);
-        }
-        if ((ip->ExcellentFlags >> 1) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MP_MAX, 50 + ip->Level * 5);
-        }
-        if ((ip->ExcellentFlags >> 2) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_ONE_PERCENT_DAMAGE, 3);
-        }
-        if ((ip->ExcellentFlags >> 3) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_AG_MAX, 50);
-        }
-        if ((ip->ExcellentFlags >> 4) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_ATTACK_SPEED, 5);
-        }
-    }
-    else if (ip->Type == ITEM_CAPE_OF_LORD
-        || ip->Type == ITEM_CAPE_OF_FIGHTER)
-    {
-        if (ip->ExcellentFlags & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_HP_MAX, 50 + ip->Level * 5);
-        }
-
-        if ((ip->ExcellentFlags >> 1) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MP_MAX, 50 + ip->Level * 5);
-        }
-
-        if ((ip->ExcellentFlags >> 2) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_ONE_PERCENT_DAMAGE, 3);
-        }
-
-        if ((ip->ExcellentFlags >> 3) & 0x01
-            && (ip->Type != ITEM_CAPE_OF_FIGHTER)
-        )
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_SET_OPTION_IMPROVE_CHARISMA, 10 + ip->Level * 5);
-        }
-    }
-    else if (GameLogic::Items::IsThirdTierWing(ip))
-    {
-        if (ip->ExcellentFlags & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_ONE_PERCENT_DAMAGE, 5);
-        }
-        if ((ip->ExcellentFlags >> 1) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_DAMAGE_REFLECTION, 5);
-        }
-        if ((ip->ExcellentFlags >> 2) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_RECOVER_FULL_LIFE, 5);
-        }
-        if ((ip->ExcellentFlags >> 3) & 0x01)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_RECOVER_FULL_MANA, 5);
-        }
-    }
-}
-
 // The Wizard's rings' options; the excellent options come from the definitions the item links.
 void CalcWizardsRingOptions(ITEM* ip)
 {
@@ -399,7 +329,8 @@ void SetItemAttributes(ITEM* ip)
 
     ip->SpecialNum = 0;
 
-    CalcWingOptions(ip);
+    // The wings' options in the excellent byte, before the skill as the tooltip shows them.
+    GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Wing);
 
     if (ip->HasSkill)
     {
@@ -412,200 +343,23 @@ void SetItemAttributes(ITEM* ip)
     GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Luck);
     GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Option);
 
-    // The Horn of Dinorant's and the wings' additional options are still code (9b5, 9b1); an item whose additional
-    // option is in data has it from its definition.
-    int Option3 = ip->OptionLevel;
-    if (Option3 && !GameLogic::Items::LinksOptionType(ip->Type, Data::Items::ItemOptionType::Option))
+    // The Horn of Dinorant's option level is three option flags, still code (9b5); a horn whose additional option is in
+    // data has it from its definition instead.
+    const int dinorantFlags = ip->OptionLevel;
+    if (dinorantFlags != 0 && ip->Type == ITEM_HORN_OF_DINORANT &&
+        !GameLogic::Items::LinksOptionType(ip->Type, Data::Items::ItemOptionType::Option))
     {
-        if (ip->Type == ITEM_HORN_OF_DINORANT)
+        if (dinorantFlags & 0x01)
         {
-            if (Option3 & 0x01)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_DAMAGE_ABSORB, 5);
-            }
-            if ((Option3 >> 1) & 0x01)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_AG_MAX, 50);
-            }
-            if ((Option3 >> 2) & 0x01)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_ATTACK_SPEED, 5);
-            }
+            GameLogic::Items::AddOptionSlot(*ip, AT_DAMAGE_ABSORB, 5);
         }
-        else
+        if ((dinorantFlags >> 1) & 0x01)
         {
-            if (ip->Type == ITEM_WING)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-            }
-            else if (ip->Type == ITEM_WINGS_OF_HEAVEN || ip->Type == ITEM_WING_OF_CURSE)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-            }
-            else if (ip->Type == ITEM_WINGS_OF_SATAN)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-            }
-            else if (ip->Type == ITEM_WINGS_OF_SPIRITS)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WINGS_OF_SOUL)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WINGS_OF_DRAGON)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-            }
-            else if (ip->Type == ITEM_WINGS_OF_DARKNESS)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_CAPE_OF_LORD)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-            }
-            else if (ip->Type == ITEM_CAPE_OF_FIGHTER)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-            }
-            else if (ip->Type == ITEM_WINGS_OF_DESPAIR)
-            {
-                if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_CURSE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_STORM)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_ETERNAL)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_ILLUSION)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_RUIN)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_CAPE_OF_EMPEROR || ip->Type == ITEM_CAPE_OF_OVERRULE)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DEFENSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE, Option3 * 4);
-                }
-            }
-            else if (ip->Type == ITEM_WING_OF_DIMENSION)
-            {
-                if (ip->OptionType == 0)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_LIFE_REGENERATION, Option3);
-                }
-                else if (ip->OptionType == 2)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_CURSE, Option3 * 4);
-                }
-                else if (ip->OptionType == 3)
-                {
-                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
-                }
-            }
+            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_AG_MAX, 50);
+        }
+        if ((dinorantFlags >> 2) & 0x01)
+        {
+            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_ATTACK_SPEED, 5);
         }
     }
     if (ip->Type == ITEM_DARK_HORSE_ITEM)
@@ -1370,7 +1124,7 @@ EXIT_CALCULATE:
     return (int64_t)Gold;
 }
 
-bool IsRequireEquipItem(ITEM* pItem)
+bool IsRequireEquipItem(const ITEM* pItem)
 {
     if (pItem == NULL) {
         return false;
@@ -1447,12 +1201,12 @@ bool IsRequireEquipItem(ITEM* pItem)
     return bEquipable;
 }
 
-bool AreItemOptionsActive(ITEM* Item)
+bool AreItemOptionsActive(const ITEM* Item)
 {
     return Item->Type != -1 && Item->Durability != 0 && IsRequireEquipItem(Item);
 }
 
-void PlusSpecial(WORD* Value, int Special, ITEM* Item)
+void PlusSpecial(WORD* Value, int Special, const ITEM* Item)
 {
     if (!AreItemOptionsActive(Item))
     {
@@ -1466,7 +1220,7 @@ void PlusSpecial(WORD* Value, int Special, ITEM* Item)
     }
 }
 
-void PlusSpecialPercentOfSlot(WORD* Value, int Special, ITEM* Item)
+void PlusSpecialPercentOfSlot(WORD* Value, int Special, const ITEM* Item)
 {
     if (!AreItemOptionsActive(Item))
     {
@@ -1485,7 +1239,7 @@ void PlusSpecialPercentOfSlot(WORD* Value, int Special, ITEM* Item)
     }
 }
 
-WORD ItemDefense(ITEM* Item)
+WORD ItemDefense(const ITEM* Item)
 {
     if (Item->Type == -1) return 0;
     WORD Defense = Item->Defense;
@@ -1493,7 +1247,7 @@ WORD ItemDefense(ITEM* Item)
     return Defense;
 }
 
-WORD ItemMagicDefense(ITEM* Item)
+WORD ItemMagicDefense(const ITEM* Item)
 {
     if (Item->Type == -1) return 0;
     WORD MagicDefense = Item->MagicDefense;
@@ -1501,7 +1255,7 @@ WORD ItemMagicDefense(ITEM* Item)
     return MagicDefense;
 }
 
-WORD ItemWalkSpeed(ITEM* Item)
+WORD ItemWalkSpeed(const ITEM* Item)
 {
     if (Item->Type == -1) return 0;
     WORD WalkSpeed = Item->WalkSpeed;
@@ -1645,11 +1399,11 @@ void CHARACTER_MACHINE::CalculateDamage()
 {
     WORD    DamageMin, DamageMax;
 
-    ITEM* Right = &Equipment[EQUIPMENT_WEAPON_RIGHT];
-    ITEM* Left = &Equipment[EQUIPMENT_WEAPON_LEFT];
-    ITEM* Amulet = &Equipment[EQUIPMENT_AMULET];
-    ITEM* RRing = &Equipment[EQUIPMENT_RING_RIGHT];
-    ITEM* LRing = &Equipment[EQUIPMENT_RING_LEFT];
+    const ITEM* Right = GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT);
+    const ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    const ITEM* Amulet = GetEffectiveEquipment(EQUIPMENT_AMULET);
+    const ITEM* RRing = GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
+    const ITEM* LRing = GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
 
     WORD Strength = Character.Strength + Character.AddStrength;
     WORD Dexterity = Character.Dexterity + Character.AddDexterity;
@@ -1732,17 +1486,18 @@ void CHARACTER_MACHINE::CalculateDamage()
         }
     }
 
-    if (Equipment[EQUIPMENT_WING].Type != -1)
+    const ITEM* wing = GetEffectiveEquipment(EQUIPMENT_WING);
+    if (wing->Type != -1)
     {
-        ITEM_ATTRIBUTE* p = &ItemAttribute[Equipment[EQUIPMENT_WING].Type];
+        ITEM_ATTRIBUTE* p = &ItemAttribute[wing->Type];
 
         if (p->Durability != 0)
         {
-            float   percent = CalcDurabilityPercent(Equipment[EQUIPMENT_WING].Durability, p->Durability, Equipment[EQUIPMENT_WING].Level, 0, 0);//Equipment[EQUIPMENT_WING].Option1);
+            float percent = CalcDurabilityPercent(wing->Durability, p->Durability, wing->Level, 0, 0);
 
             DamageMin = 0; DamageMax = 0;
-            PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, &Equipment[EQUIPMENT_WING]);
-            PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, &Equipment[EQUIPMENT_WING]);
+            PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, wing);
+            PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, wing);
 
             DamageMin = DamageMin - (WORD)(DamageMin * percent);
             DamageMax = DamageMax - (WORD)(DamageMax * percent);
@@ -1906,26 +1661,26 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
     Character.MagicDamageMin = Energy / 9;
     Character.MagicDamageMax = Energy / 4;
 
-    ITEM* Right = &Equipment[EQUIPMENT_WEAPON_RIGHT];
-    ITEM* Left = &Equipment[EQUIPMENT_WEAPON_LEFT];
-    ITEM* Amulet = &Equipment[EQUIPMENT_AMULET];
-    ITEM* RRing = &Equipment[EQUIPMENT_RING_RIGHT];
-    ITEM* LRing = &Equipment[EQUIPMENT_RING_LEFT];
+    const ITEM* Right = GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT);
+    const ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    const ITEM* Amulet = GetEffectiveEquipment(EQUIPMENT_AMULET);
+    const ITEM* RRing = GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
+    const ITEM* LRing = GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
     float   percent;
     WORD    DamageMin = 0;
     WORD    DamageMax = 0;
 
     // 날개
-    if (Equipment[EQUIPMENT_WING].Type != -1)
+    const ITEM* ipWing = GetEffectiveEquipment(EQUIPMENT_WING);
+    if (ipWing->Type != -1)
     {
-        ITEM_ATTRIBUTE* p = &ItemAttribute[Equipment[EQUIPMENT_WING].Type];
-        ITEM* ipWing = &Equipment[EQUIPMENT_WING];
+        ITEM_ATTRIBUTE* p = &ItemAttribute[ipWing->Type];
         percent = CalcDurabilityPercent(ipWing->Durability, p->Durability, ipWing->Level, 0);//ipWing->Option1);
 
         DamageMin = 0;
         DamageMax = 0;
-        PlusSpecial(&DamageMin, AT_IMPROVE_MAGIC, &Equipment[EQUIPMENT_WING]);
-        PlusSpecial(&DamageMax, AT_IMPROVE_MAGIC, &Equipment[EQUIPMENT_WING]);
+        PlusSpecial(&DamageMin, AT_IMPROVE_MAGIC, ipWing);
+        PlusSpecial(&DamageMax, AT_IMPROVE_MAGIC, ipWing);
 
         DamageMin = DamageMin - (WORD)(DamageMin * percent);
         DamageMax = DamageMax - (WORD)(DamageMax * percent);
@@ -2083,7 +1838,7 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
     Character.CurseDamageMin = wEnergy / 9;
     Character.CurseDamageMax = wEnergy / 4;
 
-    ITEM* pEquipWing = &Equipment[EQUIPMENT_WING];
+    const ITEM* pEquipWing = GetEffectiveEquipment(EQUIPMENT_WING);
     if (pEquipWing->Type != -1)
     {
         ITEM_ATTRIBUTE* pAttribute = &ItemAttribute[pEquipWing->Type];
@@ -2102,7 +1857,7 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
         Character.CurseDamageMax += wDamageMax;
     }
 
-    ITEM* pEquipLeft = &Equipment[EQUIPMENT_WEAPON_LEFT];
+    const ITEM* pEquipLeft = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
     if (pEquipLeft->Type != -1 && pEquipLeft->Durability != 0)
     {
         ITEM_ATTRIBUTE* pAttribute = &ItemAttribute[pEquipLeft->Type];
@@ -2142,8 +1897,9 @@ void CHARACTER_MACHINE::CalculateAttackRating()
 
     if (gCharacterManager.GetBaseClass(Character.Class) == CLASS_DARK_LORD)
     {
-        Character.AttackRating = static_cast<WORD>(
-            (((Character.Level * 5) + (Dexterity * 5) / 2) + (Strength / 6) + (Charisma / 10)) & 0xFFFF);
+        Character.AttackRating = static_cast<WORD>((((Character.Level * 5) + (Dexterity * 5) / 2) + (Strength / 6) +
+                                                    GameLogic::Character::GetCommandAttackRate(Charisma)) &
+                                                   0xFFFF);
     }
     else if (gCharacterManager.GetBaseClass(Character.Class) == CLASS_RAGEFIGHTER)
     {
@@ -2250,7 +2006,7 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
         Character.SuccessfulBlocking = Dexterity / 3;
     }
 
-    ITEM* Left = &Equipment[EQUIPMENT_WEAPON_LEFT];
+    const ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
     if (Left->Type != -1 && Left->Durability != 0)
     {
         ITEM_ATTRIBUTE* p = &ItemAttribute[Left->Type];
@@ -2268,15 +2024,20 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
         PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, Left);
     }
 
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_HELM]);
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_ARMOR]);
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_PANTS]);
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_GLOVES]);
-    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_BOOTS]);
     PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
-                             &Equipment[EQUIPMENT_RING_LEFT]);
+                             GetEffectiveEquipment(EQUIPMENT_HELM));
     PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
-                             &Equipment[EQUIPMENT_RING_RIGHT]);
+                             GetEffectiveEquipment(EQUIPMENT_ARMOR));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_PANTS));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_GLOVES));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_BOOTS));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_RING_LEFT));
+    PlusSpecialPercentOfSlot(&Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT,
+                             GetEffectiveEquipment(EQUIPMENT_RING_RIGHT));
 
     Character.SuccessfulBlocking *= g_SocketItemMgr.m_StatusBonus.m_fDefenceRateBonus;
 }
@@ -2317,19 +2078,21 @@ void CHARACTER_MACHINE::CalculateDefense()
     WORD    Defense = 0;
     for (int i = EQUIPMENT_WEAPON_LEFT; i <= EQUIPMENT_WING; ++i)
     {
-        if (Equipment[i].Durability != 0)
+        const ITEM* item = GetEffectiveEquipment(i);
+        if (item->Durability != 0)
         {
-            WORD defense = ItemDefense(&Equipment[i]);
+            WORD defense = ItemDefense(item);
 
-            ITEM_ATTRIBUTE* p = &ItemAttribute[Equipment[i].Type];
+            ITEM_ATTRIBUTE* p = &ItemAttribute[item->Type];
             float percent;
             if (i == EQUIPMENT_WING)
             {
-                percent = CalcDurabilityPercent(Equipment[i].Durability, p->Durability, Equipment[i].Level, 0);//Equipment[i].Option1);
+                percent = CalcDurabilityPercent(item->Durability, p->Durability, item->Level, 0);
             }
             else
             {
-                percent = CalcDurabilityPercent(Equipment[i].Durability, p->Durability, Equipment[i].Level, Equipment[i].ExcellentFlags, Equipment[i].AncientDiscriminator);
+                percent = CalcDurabilityPercent(item->Durability, p->Durability, item->Level, item->ExcellentFlags,
+                                                item->AncientDiscriminator);
             }
 
             defense -= (WORD)(defense * percent);
@@ -2384,22 +2147,23 @@ void CHARACTER_MACHINE::CalculateDefense()
 
     g_csItemOption.PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE);
 
-    if (GameLogic::Items::IsShieldType(Equipment[EQUIPMENT_WEAPON_LEFT].Type))
+    if (GameLogic::Items::IsShieldType(GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT)->Type))
     {
         g_csItemOption.PlusSpecialPercent(&Character.Defense, AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE);
     }
 
-    PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_HELPER]);
-    if (GameLogic::Items::IsSecondTierCape(&Equipment[EQUIPMENT_WING]))
+    PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, GetEffectiveEquipment(EQUIPMENT_HELPER));
+    if (GameLogic::Items::IsSecondTierCape(GetEffectiveEquipment(EQUIPMENT_WING)))
     {
-        PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_WING]);
+        PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, GetEffectiveEquipment(EQUIPMENT_WING));
     }
 
     Character.Defense += g_SocketItemMgr.m_StatusBonus.m_iDefenceBonus;
 
-    if (Equipment[EQUIPMENT_WEAPON_LEFT].Type != -1 && Equipment[EQUIPMENT_WEAPON_LEFT].Durability != 0)
+    const ITEM* shield = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    if (shield->Type != -1 && shield->Durability != 0)
     {
-        Character.Defense += Equipment[EQUIPMENT_WEAPON_LEFT].Defense * g_SocketItemMgr.m_StatusBonus.m_iShieldDefenceBonus * 0.01f;
+        Character.Defense += shield->Defense * g_SocketItemMgr.m_StatusBonus.m_iShieldDefenceBonus * 0.01f;
     }
 }
 
@@ -2407,23 +2171,26 @@ void CHARACTER_MACHINE::CalculateMagicDefense()
 {
     for (int i = EQUIPMENT_HELM; i <= EQUIPMENT_WING; ++i)
     {
-        if (Equipment[i].Durability != 0)
+        const ITEM* item = GetEffectiveEquipment(i);
+        if (item->Durability != 0)
         {
-            Character.MagicDefense = ItemMagicDefense(&Equipment[i]);
+            Character.MagicDefense = ItemMagicDefense(item);
         }
     }
 }
 
 void CHARACTER_MACHINE::CalculateWalkSpeed()
 {
-    if (Equipment[EQUIPMENT_BOOTS].Durability != 0)
+    const ITEM* boots = GetEffectiveEquipment(EQUIPMENT_BOOTS);
+    if (boots->Durability != 0)
     {
-        Character.WalkSpeed = ItemWalkSpeed(&Equipment[EQUIPMENT_BOOTS]);
+        Character.WalkSpeed = ItemWalkSpeed(boots);
     }
 
-    if (Equipment[EQUIPMENT_WING].Durability != 0)
+    const ITEM* wing = GetEffectiveEquipment(EQUIPMENT_WING);
+    if (wing->Durability != 0)
     {
-        Character.WalkSpeed += ItemWalkSpeed(&Equipment[EQUIPMENT_WING]);
+        Character.WalkSpeed += ItemWalkSpeed(wing);
     }
 }
 
@@ -2469,6 +2236,32 @@ void CHARACTER_MACHINE::CalulateMasterLevelNextExperience()
             );
 
     Master_Level_Data.lNext_MasterLevel_Experince = (iData_Master - (int64_t)3892250000) / (int64_t)2;
+}
+
+namespace
+{
+// The item of a slot without effect: no item at all.
+const ITEM& NoEffectEquipment()
+{
+    static const ITEM item = []
+    {
+        ITEM empty{};
+        empty.Type = -1;
+        return empty;
+    }();
+    return item;
+}
+} // namespace
+
+const ITEM* CHARACTER_MACHINE::GetEffectiveEquipment(int slot) const
+{
+    const ITEM* item = &Equipment[slot];
+    if (item->Type != -1 && !GameLogic::Items::IsExpiredRental(item))
+    {
+        return item;
+    }
+
+    return &NoEffectEquipment();
 }
 
 bool CHARACTER_MACHINE::IsZeroDurability()
@@ -2559,9 +2352,9 @@ void CHARACTER_MACHINE::CalculateAll()
     g_csItemOption.getAllAddOptionStatesbyCompare(&Character.AddStrength, &Character.AddDexterity, &Character.AddEnergy, &Character.AddVitality, &Character.AddCharisma, wStrengthResult, wDexterityResult, wEnergyResult, wVitalityResult, wCharismaResult);
     g_csItemOption.CheckItemSetOptions();
 
-    if (Data::Items::ToModelSlot(CharacterMachine->Equipment[EQUIPMENT_WING].Type) == MODEL_CAPE_OF_LORD)
+    if (Data::Items::ToModelSlot(GetEffectiveEquipment(EQUIPMENT_WING)->Type) == MODEL_CAPE_OF_LORD)
     {
-        PlusSpecial(&Character.AddCharisma, AT_SET_OPTION_IMPROVE_CHARISMA, &CharacterMachine->Equipment[EQUIPMENT_WING]);
+        PlusSpecial(&Character.AddCharisma, AT_SET_OPTION_IMPROVE_CHARISMA, GetEffectiveEquipment(EQUIPMENT_WING));
     }
 
     CalculateBasicState();

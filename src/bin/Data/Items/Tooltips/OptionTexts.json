@@ -118,6 +118,45 @@
       "uk": "Відмінний рівень шкоди +{value}%",
       "zh-TW": "優 破損率+{value}%"
     },
+    "fullLifeRecovery": {
+      "en": "Complete recovery of life in {value}% rate",
+      "de": "Vollständige Wiederherstellung des Lebens mit {value}% Chance",
+      "es": "Recuperación completa de la vida en tasa {value}%",
+      "id": "Pemulihan penuh kehidupan pada tingkat {value}%.",
+      "ja": "{value}% 確率で生命完全回復",
+      "pl": "{value}% szansy na pełne odnowienie życia",
+      "pt": "Recuperação completa da vida na taxa {value}%",
+      "ru": "Полное восстановление жизни при скорости {value}%",
+      "tl": "Kumpletong pagbawi ng buhay sa {value}% rate",
+      "uk": "Повне відновлення життя зі швидкістю {value}%.",
+      "zh-TW": "{value}% 率完全恢復生命"
+    },
+    "fullManaRecovery": {
+      "en": "Complete recover of Mana in {value}% rate",
+      "de": "Vollständige Wiederherstellung des Manas mit {value}% Chance",
+      "es": "Recuperación completa de maná en tasa {value}%",
+      "id": "Selesaikan pemulihan Mana dalam tingkat {value}%.",
+      "ja": "{value}% 確率でマナ完全回復",
+      "pl": "{value}% szansy na pełne odnowienie many",
+      "pt": "Recuperação completa de Mana na taxa {value}%",
+      "ru": "Полное восстановление маны со скоростью {value}%.",
+      "tl": "Kumpletuhin ang pagbawi ng Mana sa {value}% rate",
+      "uk": "Повне відновлення мани зі швидкістю {value}%.",
+      "zh-TW": "以 {value}% 率完全恢復法力"
+    },
+    "ignoreDefense": {
+      "en": "Ignor opponent's defensive power by {value}%",
+      "de": "Ignoriert {value}% der Verteidigung des Gegners",
+      "es": "Ignora el poder defensivo del oponente por {value}%",
+      "id": "Abaikan kekuatan pertahanan lawan sebesar {value}%",
+      "ja": "{value}%の確率で敵に防御力無視攻撃",
+      "pl": "Ignoruje {value}% obrony przeciwnika",
+      "pt": "Ignora o poder defensivo do oponente em {value}%",
+      "ru": "Игнорировать защитную силу противника с помощью {value}%",
+      "tl": "Huwag pansinin ang defensive power ng kalaban sa pamamagitan ng {value}%",
+      "uk": "Ігнорувати оборонну силу супротивника на {value}%",
+      "zh-TW": "無視對手防禦力 {value}%"
+    },
     "increaseAgility": {
       "en": "Increase agility +{value}",
       "de": "Beweglichkeit erhöhen +{value}",
@@ -143,6 +182,19 @@
       "tl": "Dagdagan ang bilis ng Pag-atake(Wizardry) +{value}",
       "uk": "Збільшити швидкість атаки (чарівництво) +{value}",
       "zh-TW": "增加攻擊（魔法）速度+{value}"
+    },
+    "increaseCommand": {
+      "en": "Increase command +{value}",
+      "de": "Führung erhöhen +{value}",
+      "es": "Comando de aumento +{value}",
+      "id": "Tingkatkan perintah +{value}",
+      "ja": "統率増加 +{value}",
+      "pl": "Zwiększa dowodzenie +{value}",
+      "pt": "Comando de aumento +{value}",
+      "ru": "Команда увеличения +{value}",
+      "tl": "Dagdagan ang command +{value}",
+      "uk": "Збільшити команду +{value}",
+      "zh-TW": "增加指令+{value}"
     },
     "increaseDamageLevel20": {
       "en": "Increase Damage +level/{divisor}",
@@ -351,6 +403,58 @@
       "tl": "Sumasalamin sa Pinsala +{value}%",
       "uk": "Відбитий збиток +{value}%",
       "zh-TW": "反射傷害+{value}%"
+    },
+    "returnAttackPower": {
+      "en": "Return's the enemy's attack power in {value}%",
+      "de": "Wirft {value}% der Angriffskraft des Gegners zurück",
+      "es": "Devuelve el poder de ataque del enemigo en {value}%",
+      "id": "Mengembalikan kekuatan serangan musuh dalam {value}%",
+      "ja": "{value}% 確率で敵の攻撃を跳ね返す",
+      "pl": "{value}% szansy na odbicie ataku wroga",
+      "pt": "Retorno é o poder de ataque do inimigo em {value}%",
+      "ru": "Возвращает силу атаки врага в {value}%.",
+      "tl": "Ibalik ang lakas ng pag-atake ng kalaban sa {value}%",
+      "uk": "Повертайте силу атаки ворога в {value}%",
+      "zh-TW": "返回敵人的攻擊力 {value}%"
+    },
+    "wingMaxAg": {
+      "en": "Max AG +{value} increased",
+      "de": "Max. AG +{value} erhöht",
+      "es": "Máx. AG +{value} aumentado",
+      "id": "Maks AG +{value} meningkat",
+      "ja": "最大AG +{value}増加",
+      "pl": "Zwiększono maks. AG +{value}",
+      "pt": "Max AG +{value} aumentado",
+      "ru": "Макс. AG +{value} увеличен",
+      "tl": "Tumaas ang Max AG +{value}",
+      "uk": "Макс. AG +{value} збільшено",
+      "zh-TW": "最大 AG +{value} 增加"
+    },
+    "wingMaxHp": {
+      "en": "HP +{value} increased",
+      "de": "HP +{value} erhöht",
+      "es": "HP +{value} aumentado",
+      "id": "HP +{value} meningkat",
+      "ja": "生命 +{value}増加",
+      "pl": "Zwiększono HP +{value}",
+      "pt": "HP +{value} aumentado",
+      "ru": "HP +{value} увеличено.",
+      "tl": "Tumaas ang HP +{value}",
+      "uk": "HP +{value} збільшено",
+      "zh-TW": "HP +{value} 增加"
+    },
+    "wingMaxMana": {
+      "en": "Mana +{value} increased",
+      "de": "Mana +{value} erhöht",
+      "es": "Maná +{value} aumentado",
+      "id": "Mana +{value} meningkat",
+      "ja": "マナ +{value}増加",
+      "pl": "Zwiększona mana +{value}",
+      "pt": "Mana +{value} aumentada",
+      "ru": "Мана +{value} увеличена.",
+      "tl": "Tumaas ang Mana +{value}",
+      "uk": "Мана +{value} збільшена",
+      "zh-TW": "法力+{value}增加"
     },
     "zenAfterKill": {
       "en": "Increases acquisition rate of Zen after hunting monsters +{value}%",

@@ -61,6 +61,7 @@ void CORECLR_DELEGATE_CALLTYPE WriteManagedLog(BYTE level, const char* message)
 using ManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(BYTE, const char*);
 using SetManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(ManagedLogCallback);
 using GetManagedLibraryVersion = const char*(CORECLR_DELEGATE_CALLTYPE*)();
+using SetManagedRelay = void(CORECLR_DELEGATE_CALLTYPE*)(const char16_t*);
 
 // In a release download the library's commit is the client's, so a different one means a library from another
 // download. (A local build rebuilds the library only when its sources change, so there it can be older.)
@@ -121,6 +122,21 @@ void InitializeDotNetBridge(const DotNetBridge::ManagedSymbolSource& source)
     if (setManagedLogCallback != nullptr)
     {
         setManagedLogCallback(&WriteManagedLog);
+    }
+}
+
+void SetConnectionRelay(const char16_t* relay)
+{
+    const bool wanted = relay != nullptr && *relay != u'\0';
+    // An optional export: a library from before it connects over TCP only.
+    const auto setRelay = LoadManagedSymbol<SetManagedRelay>("ConnectionManager_SetRelay");
+    if (setRelay != nullptr)
+    {
+        setRelay(wanted ? relay : u"");
+    }
+    else if (wanted)
+    {
+        mu::log::Get("dotnet")->error("NET: this network library can't connect through a relay; connecting over TCP");
     }
 }
 

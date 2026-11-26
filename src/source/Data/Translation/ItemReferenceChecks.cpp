@@ -75,10 +75,9 @@ std::string DescribeStandardName(const Items::ItemDatabase& database, const Item
 
 // The message of a resolved reference's problem, or empty when the name shows as the text wants it.
 std::string DescribeProblem(const Items::ItemDatabase& database, const ItemReference& reference,
-                            std::string_view locale, bool uiText, ItemDataIssueSeverity& severity)
+                            std::string_view locale, ItemDataIssueSeverity& severity)
 {
-    const Items::ReferencedName name = uiText ? Items::ResolveUiTextName(database, reference, locale)
-                                              : Items::ResolveReferencedName(database, reference, locale);
+    const Items::ReferencedName name = Items::ResolveReferencedName(database, reference, locale);
     const std::string written = FormatItemReference(reference);
     switch (name.problem)
     {
@@ -113,11 +112,6 @@ std::string DescribeProblem(const Items::ItemDatabase& database, const ItemRefer
         severity = ItemDataIssueSeverity::Warning;
         return written + ": " + MissingFormReason(database, reference, locale) + "; the text shows \"" + name.text +
                "\", the name itself";
-    case ItemReferenceProblem::UnshowableName:
-        severity = ItemDataIssueSeverity::Error;
-        return written + ": the name of " + ItemNumber(reference) +
-               " has a '%', which this text, a printf format, would read as a conversion; the text shows the "
-               "reference as written";
     case ItemReferenceProblem::UndeclinedLine:
         severity = ItemDataIssueSeverity::Warning;
         return written + ": the name of " + ItemNumber(reference) + " at +" + std::to_string(*reference.level) +
@@ -377,7 +371,7 @@ void CheckItemReferences(const Items::ItemDatabase& database, const CheckedText&
             continue;
         }
         ItemDataIssueSeverity severity = ItemDataIssueSeverity::Warning;
-        std::string message = DescribeProblem(database, *match.reference, text.locale, text.uiText, severity);
+        std::string message = DescribeProblem(database, *match.reference, text.locale, severity);
         if (message.empty())
         {
             continue;
@@ -409,8 +403,7 @@ void CheckUiItemTexts(const Items::ItemDatabase& database, std::vector<ItemDataI
                                 std::string(itemText.group) + "." + std::string(locale) + ".resx",
                                 ItemDataIssue::NoItem,
                                 ItemDataIssue::NoItem,
-                                itemText.key,
-                                true};
+                                itemText.key};
             CheckItemReferences(database, checked, index == 0 ? std::string_view() : std::string_view(english), issues);
         }
     }

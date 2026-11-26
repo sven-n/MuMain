@@ -124,7 +124,7 @@ void CItemMeshList::Render(int itemType, ItemModelDefinition& entry, ItemEditDra
     }
     RenderNote(inPreview ? I18N::Editor::MeshListNote : I18N::Editor::MeshesNotInPreviewNote);
     RenderTable(entry, draft);
-    if (!entry.renderStyle.empty() || !entry.itemEffect.empty())
+    if (!entry.renderStyle.empty() || !entry.effect.empty())
     {
         RenderNote(I18N::Editor::MeshCodeLooksNote);
     }

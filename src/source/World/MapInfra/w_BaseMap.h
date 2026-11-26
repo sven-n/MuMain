@@ -41,11 +41,11 @@ public: // Object
     {
         return false;
     }
-    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0)
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
     {
         return false;
     }
-    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0) {}
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b) {}
 
     virtual void RenderFrontSideVisual() {}
 
