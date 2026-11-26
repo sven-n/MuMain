@@ -5,6 +5,7 @@
 #include "ItemModelDisplayJson.h"
 #include "ItemModelGlowJson.h"
 #include "ItemModelMaterialJson.h"
+#include "ItemModelWornJson.h"
 #include "ItemTextureFiles.h"
 
 #include "Data/GameData/ColorFolders/ColorFolders.h"
@@ -50,6 +51,7 @@ const std::set<std::string, std::less<>> ItemModelKeys{Keys::Number,
                                                        DisplayJson::ClothKey,
                                                        GlowJson::GlowKey,
                                                        MaterialJson::MaterialKey,
+                                                       WornJson::WornKey,
                                                        Keys::RenderStyle,
                                                        Keys::RenderStyleValues,
                                                        Keys::Effect,
@@ -105,6 +107,7 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
     DisplayJson::Write(model, json);
     GlowJson::Write(model, json);
     MaterialJson::Write(model, json);
+    WornJson::Write(model, json);
     if (!model.renderStyle.empty())
     {
         json[Keys::RenderStyle] = model.renderStyle;
@@ -411,6 +414,7 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     DisplayJson::Read(json, model, report);
     GlowJson::Read(json, model, report);
     MaterialJson::Read(json, model, report);
+    WornJson::Read(json, model, report);
     ReadLookName(json, Keys::RenderStyle, model.renderStyle);
     ReadLookValues(json, Keys::RenderStyleValues, model.renderStyleValues);
     ReadLookName(json, Keys::Effect, model.effect);

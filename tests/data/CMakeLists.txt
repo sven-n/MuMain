@@ -18,6 +18,7 @@ mu_add_test(
         test_item_model_display_json.cpp
         test_item_model_glow_json.cpp
         test_item_model_material_json.cpp
+        test_item_model_worn_json.cpp
         test_item_model_problems.cpp
         test_item_model_tool.cpp
         test_item_names.cpp
