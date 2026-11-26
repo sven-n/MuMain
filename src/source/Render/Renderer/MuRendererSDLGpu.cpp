@@ -349,6 +349,26 @@ struct FramePixelDownload
     PixelChannelOrder channelOrder;
 };
 
+// Where frames may not wait, a readback's download stays here until a later frame finds its fence signaled.
+struct DeferredFramePixelDownload
+{
+    FramePixelDownload download;
+    SDL_GPUFence* fence;
+    Uint32 width;
+    Uint32 height;
+};
+static std::optional<DeferredFramePixelDownload> s_deferredReadback;
+
+static void ReleaseDeferredFrameReadback()
+{
+    if (s_deferredReadback && s_device)
+    {
+        SDL_ReleaseGPUFence(s_device, s_deferredReadback->fence);
+        SDL_ReleaseGPUTransferBuffer(s_device, s_deferredReadback->download.transferBuffer);
+    }
+    s_deferredReadback.reset();
+}
+
 static void ReleaseFrameReadbackTexture()
 {
     if (s_frameReadbackTexture && s_device)
@@ -364,6 +384,7 @@ static void FailPendingFrameReadback()
     {
         s_frameReadbackState.Fail();
     }
+    ReleaseDeferredFrameReadback();
     ReleaseFrameReadbackTexture();
 }
 
@@ -458,6 +479,56 @@ static void BlitTextureToSwapchain(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUT
                               *channelOrder};
 }
 
+// Copies a finished download into the readback's result and releases the fence and the buffer. `finished` is false
+// when waiting for the fence failed.
+static void CompleteFramePixelDownload(const FramePixelDownload& download, SDL_GPUFence* fence, Uint32 width,
+                                       Uint32 height, bool finished)
+{
+    void* mapped = finished ? SDL_MapGPUTransferBuffer(s_device, download.transferBuffer, false) : nullptr;
+    if (finished && !mapped)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- frame readback map failed: {}", SDL_GetError());
+    }
+
+    FramePixels pixels;
+    bool converted = false;
+    if (mapped)
+    {
+        const auto* bytes = static_cast<const std::uint8_t*>(mapped);
+        converted = ConvertToTopDownRgb(std::span<const std::uint8_t>(bytes, download.byteCount), width, height,
+                                        download.rowPitch, download.channelOrder, false, pixels);
+        SDL_UnmapGPUTransferBuffer(s_device, download.transferBuffer);
+    }
+
+    SDL_ReleaseGPUFence(s_device, fence);
+    SDL_ReleaseGPUTransferBuffer(s_device, download.transferBuffer);
+
+    if (!converted)
+    {
+        if (mapped)
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- frame readback pixel conversion failed");
+        }
+        s_frameReadbackState.Fail();
+        return;
+    }
+
+    s_frameReadbackState.Complete(std::move(pixels));
+}
+
+// Before a frame takes the swapchain texture: a browser backend's map still gives the page the thread, which loses
+// nothing here.
+static void ResolveDeferredFrameReadback()
+{
+    if (!s_deferredReadback || !SDL_QueryGPUFence(s_device, s_deferredReadback->fence))
+    {
+        return;
+    }
+    const DeferredFramePixelDownload deferred = *s_deferredReadback;
+    s_deferredReadback.reset();
+    CompleteFramePixelDownload(deferred.download, deferred.fence, deferred.width, deferred.height, true);
+}
+
 [[nodiscard]] static bool SubmitFramePixelDownload(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUTexture* sourceTexture,
                                                    SDL_GPUTextureFormat format)
 {
@@ -481,42 +552,20 @@ static void BlitTextureToSwapchain(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUT
         return true;
     }
 
+    if (!Render::TargetFramesMayWait())
+    {
+        // The readback stays pending; ResolveDeferredFrameReadback completes it.
+        s_deferredReadback = DeferredFramePixelDownload{*download, fence, s_swapW, s_swapH};
+        return true;
+    }
+
     SDL_GPUFence* fences[] = {fence};
     const bool waitSucceeded = SDL_WaitForGPUFences(s_device, true, fences, 1u);
     if (!waitSucceeded)
     {
         mu::log::Get("render")->warn("SDL_gpu -- frame readback fence wait failed: {}", SDL_GetError());
     }
-    void* mapped = waitSucceeded ? SDL_MapGPUTransferBuffer(s_device, download->transferBuffer, false) : nullptr;
-    if (waitSucceeded && !mapped)
-    {
-        mu::log::Get("render")->warn("SDL_gpu -- frame readback map failed: {}", SDL_GetError());
-    }
-
-    FramePixels pixels;
-    bool converted = false;
-    if (mapped)
-    {
-        const auto* bytes = static_cast<const std::uint8_t*>(mapped);
-        converted = ConvertToTopDownRgb(std::span<const std::uint8_t>(bytes, download->byteCount), s_swapW, s_swapH,
-                                        download->rowPitch, download->channelOrder, false, pixels);
-        SDL_UnmapGPUTransferBuffer(s_device, download->transferBuffer);
-    }
-
-    SDL_ReleaseGPUFence(s_device, fence);
-    SDL_ReleaseGPUTransferBuffer(s_device, download->transferBuffer);
-
-    if (!converted)
-    {
-        if (mapped)
-        {
-            mu::log::Get("render")->warn("SDL_gpu -- frame readback pixel conversion failed");
-        }
-        s_frameReadbackState.Fail();
-        return true;
-    }
-
-    s_frameReadbackState.Complete(std::move(pixels));
+    CompleteFramePixelDownload(*download, fence, s_swapW, s_swapH, waitSucceeded);
     return true;
 }
 
@@ -1497,7 +1546,7 @@ static void ResolveFrameColorTarget()
     s_reconnectCaptureTexture = nullptr;
     s_frameReadbackFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
 
-    if (s_frameReadbackState.IsPending())
+    if (s_frameReadbackState.IsPending() && !s_deferredReadback)
     {
         s_frameReadbackFormat = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
         if (CreateFrameReadbackTexture(s_frameReadbackFormat))
@@ -2180,6 +2229,7 @@ public:
             return;
         }
 
+        ReleaseDeferredFrameReadback();
         ReleaseFrameReadbackTexture();
         s_frameReadbackState.Reset();
 
@@ -2325,6 +2375,8 @@ public:
 
         // Between frames: no draw has recorded a pipeline of the old sample count yet.
         ApplyPendingSampleCount();
+
+        ResolveDeferredFrameReadback();
 
         s_cmdBuf = SDL_AcquireGPUCommandBuffer(s_device);
         if (!s_cmdBuf)
@@ -3565,7 +3617,7 @@ public:
         // target and replays every recorded command (multisampled and post-processed frames
         // have no partial pass to continue), so a late target needs nothing special.
         SDL_GPUTextureFormat frameReadbackFormat = s_frameReadbackFormat;
-        if (s_frameReadbackState.IsPending() && !s_frameReadbackTexture)
+        if (s_frameReadbackState.IsPending() && !s_frameReadbackTexture && !s_deferredReadback)
         {
             frameReadbackFormat = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
             if (!CreateFrameReadbackTexture(frameReadbackFormat))
@@ -3894,6 +3946,7 @@ public:
     void CancelFramePixels() override
     {
         s_frameReadbackState.Reset();
+        ReleaseDeferredFrameReadback();
         ReleaseFrameReadbackTexture();
     }
 
