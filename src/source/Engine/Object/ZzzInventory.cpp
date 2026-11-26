@@ -421,6 +421,16 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
     DisableAlphaBlend();
 }
 
+namespace
+{
+std::optional<int> LastSentUseIndex;
+} // namespace
+
+std::optional<int> GetLastSentUseIndex()
+{
+    return LastSentUseIndex;
+}
+
 bool SendRequestUse(int Index, int Target, bool addPoints)
 {
     if (!IsCanUseItem())
@@ -434,6 +444,7 @@ bool SendRequestUse(int Index, int Target, bool addPoints)
     }
 
     EnableUse = 10;
+    LastSentUseIndex = Index;
     SocketClient->ToGameServer()->SendConsumeItemRequest(Index, Target, addPoints ? FruitUsage::AddPoints : FruitUsage::RemovePoints);
     g_ConsoleDebug->Write(MCD_SEND, L"0x26 [SendRequestUse(%d)]", Index);
     return true;

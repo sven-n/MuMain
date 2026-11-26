@@ -7071,9 +7071,10 @@ void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
 
         break;
     case 0xfd:
-        // The server refused the use of an item (ItemConsumptionFailed).
+        // The server refused the use of an item (ItemConsumptionFailed); the packet doesn't say which, so it's taken
+        // for the last use which was sent.
         EnableUse = 0;
-        UI::Inventory::RefusePickedItemUse();
+        UI::Inventory::RefusePickedItemUse(GetLastSentUseIndex());
         break;
     default:
         // todo: is that ever used?

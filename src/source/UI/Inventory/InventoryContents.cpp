@@ -74,10 +74,19 @@ bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, std::optional<i
     return answersTheUse || isUpdatedItem;
 }
 
-void RefusePickedItemUse()
+void RefusePickedItemUse(std::optional<int> refusedUseIndex)
 {
-    if (auto* pickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem())
+    auto* pickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
+    if (pickedItem == nullptr)
+        return;
+
+    if (IsRefusalOfHeldItemUse(pickedItem->GetSourceStorageType(), pickedItem->GetSourceLinealPos(), refusedUseIndex))
         pickedItem->ClearUsedOnItem();
+}
+
+bool IsRefusalOfHeldItemUse(STORAGE_TYPE source, int sourcePos, std::optional<int> refusedUseIndex)
+{
+    return source == STORAGE_TYPE::INVENTORY && refusedUseIndex == sourcePos;
 }
 
 void RestorePickedItem()

@@ -52,3 +52,14 @@ TEST_CASE("A refused jewel stays on a later update of its target [ui][inventory]
     CHECK_FALSE(
         UI::Inventory::IsHeldItemEndedByUpdate(STORAGE_TYPE::INVENTORY, HeldSlot, jewel.GetUsedOnIndex(), TargetSlot));
 }
+
+TEST_CASE("Only the refusal of the held jewel's own use clears its mark [ui][inventory][held item]")
+{
+    // The jewel came from HeldSlot. A refusal of its use clears the mark; the refusal of another use, e.g. an MU
+    // Helper potion sent while the jewel's answer was still due, keeps it, and so does a refusal with no sent use.
+    CHECK(UI::Inventory::IsRefusalOfHeldItemUse(STORAGE_TYPE::INVENTORY, HeldSlot, HeldSlot));
+    CHECK_FALSE(UI::Inventory::IsRefusalOfHeldItemUse(STORAGE_TYPE::INVENTORY, HeldSlot, OtherSlot));
+    CHECK_FALSE(UI::Inventory::IsRefusalOfHeldItemUse(STORAGE_TYPE::INVENTORY, HeldSlot, NotUsed));
+    // The same slot number in another storage is another item.
+    CHECK_FALSE(UI::Inventory::IsRefusalOfHeldItemUse(STORAGE_TYPE::VAULT, HeldSlot, HeldSlot));
+}
