@@ -56,6 +56,11 @@ void SetSkillHotkey(int hotkey, int skillIndex)
     g_pMainFrame->SetSkillHotKey(hotkey, skillIndex);
 }
 
+int GetSkillHotkey(int hotkey)
+{
+    return g_pMainFrame->GetSkillHotKey(hotkey);
+}
+
 void ClearItemHotkeys()
 {
     for (const int slot : ItemHotkeySlots)

@@ -10091,6 +10091,24 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
     };
 }
 
+// Selects the skill on the first bound key from 1 to 5 (#1166). The skill at index 0 of the server's list,
+// which stays selected otherwise, may sit on keys 6 to 0 and flip the HUD to that row on every login.
+static void SelectFirstRowSkill()
+{
+    namespace Hotkeys = GameLogic::Skills::HotkeyConfiguration;
+    std::array<int, Hotkeys::HotkeyCount> skillIndexOfHotkey{};
+    for (int hotkey = 0; hotkey < Hotkeys::HotkeyCount; ++hotkey)
+    {
+        skillIndexOfHotkey[hotkey] = UI::Hud::GetSkillHotkey(hotkey);
+    }
+
+    const int skillIndex = Hotkeys::InitialSkillIndex(skillIndexOfHotkey);
+    if (skillIndex != Hotkeys::NoSkillIndex)
+    {
+        Hero->CurrentSkill = static_cast<BYTE>(skillIndex);
+    }
+}
+
 void ReceiveOption(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_OPTION)ReceiveBuffer;
@@ -10118,6 +10136,7 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
             }
         }
     }
+    SelectFirstRowSkill();
 
     UI::Options::ApplySaved((Data->GameOption & AUTOATTACK_ON) == AUTOATTACK_ON,
                             (Data->GameOption & WHISPER_SOUND_ON) == WHISPER_SOUND_ON,
