@@ -233,6 +233,7 @@ mu_add_test(
         test_dark_lord_pet_tooltip.cpp
         test_item_bytes.cpp
         test_item_database_files.cpp
+        test_mu_helper_data.cpp
         test_item_descriptions.cpp
         test_item_exchange_file.cpp
         test_item_mesh_list.cpp

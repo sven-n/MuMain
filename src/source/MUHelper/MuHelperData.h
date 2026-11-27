@@ -105,7 +105,12 @@ namespace MUHelper
 		bool bAutoAcceptFriend = false;
 		bool bAutoAcceptGuild = false;
 		bool bFallbackBasicAttack = true;
-	} ConfigData;
+
+        // The bytes of the saved data which this client does not use. A server
+        // or another client may keep settings there, so they are saved back as
+        // they were received.
+        std::array<BYTE, sizeof(PRECEIVE_MUHELPER_DATA::_UnusedPadding)> aUnusedBytes{};
+    } ConfigData;
 
 	class ConfigDataSerDe {
 	public:
