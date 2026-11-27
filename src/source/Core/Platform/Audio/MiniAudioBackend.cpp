@@ -129,6 +129,35 @@ ma_result ContentInfo(ma_vfs*, ma_vfs_file file, ma_file_info* info)
 ma_vfs_callbacks g_contentVfs{ContentOpen, nullptr,     ContentClose, ContentRead,
                               nullptr,     ContentSeek, ContentTell,  ContentInfo};
 
+// "Data/Music/MuTheme.mp3" is the content pack "music_mutheme".
+std::string MusicPackName(const std::string& track)
+{
+    const std::size_t start = track.find_last_of('/') + 1;
+    const std::size_t end = track.find_last_of('.');
+    std::string pack = "music_";
+    for (std::size_t i = start; i < track.size() && i < end; ++i)
+    {
+        const char c = track[i];
+        if (c >= 'A' && c <= 'Z')
+        {
+            pack += static_cast<char>(c - 'A' + 'a');
+        }
+        else
+        {
+            pack += (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ? c : '_';
+        }
+    }
+    return pack;
+}
+
+// Whether the track's file is missing only because its pack has not arrived yet. Every pack is ready where all the
+// files are on disk.
+bool IsMusicOnItsWay(const std::string& track)
+{
+    return Content::Probe(Core::Text::PathFromUtf8(track)) != Content::Found::File &&
+           Content::RequestPack(MusicPackName(track)).state == Content::PackStatus::State::Pending;
+}
+
 // Same-track guard shared by PlayMusic()/StopMusic(). m_currentMusicName holds
 // the separators-normalized track name, NOT the filesystem-resolved path: the
 // guard runs every frame for many tracks from ManageBackgroundMusic(), so it
@@ -633,6 +662,11 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     }
     std::string identity(name);
     NormalizeSeparators(identity);
+    // Where a track comes in a content pack, it is not a failed one while its pack is on the way: asked again later.
+    if (IsMusicOnItsWay(identity))
+    {
+        return;
+    }
     if (!StartMusicStream(identity))
     {
         if (!HasFailedMusicTrack(identity.c_str()))

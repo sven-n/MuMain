@@ -15,6 +15,7 @@
 #undef private
 
 #include "Audio/SoundNumbers.h"
+#include "Core/Content/ContentStore.h"
 #include "Scenes/SceneCore.h"
 #ifdef _EDITOR
 #include "Audio/DSPlaySound.h"
@@ -452,6 +453,38 @@ TEST_CASE("missing tracks stay suppressed across frame requests and stops [audio
     CHECK(backend->IsEndMusic());
     CHECK(backend->m_failedMusicNames.size() == 1);
 
+    backend->Shutdown();
+    std::filesystem::remove_all(directory);
+}
+
+// A track delivered in a content pack ("Data/Music/<name>" is pack "music_<name>") is missing until the pack arrives.
+TEST_CASE("a track whose pack is on its way is asked again, not remembered as failed [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const auto directory = CreateMusicAsset();
+    const auto source = directory / "Data" / "Music" / "track.wav";
+    const auto late = directory / "Data" / "Music" / "Late-Theme.wav";
+    const std::string name = late.generic_string();
+
+    std::string asked;
+    Content::SetPackSource(
+        [&asked](std::string_view pack)
+        {
+            asked = pack;
+            return Content::PackStatus{.state = Content::PackStatus::State::Pending};
+        });
+    backend->PlayMusic(name.c_str(), false);
+    CHECK(asked == "music_late_theme");
+    CHECK(backend->m_failedMusicNames.empty());
+    CHECK(backend->m_currentMusicName.empty());
+
+    REQUIRE(std::filesystem::copy_file(source, late));
+    Content::Refresh();
+    backend->PlayMusic(name.c_str(), false);
+    CHECK(backend->GetMusicStarts() == 1);
+
+    Content::SetPackSource({});
     backend->Shutdown();
     std::filesystem::remove_all(directory);
 }
