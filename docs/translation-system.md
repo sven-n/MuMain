@@ -85,6 +85,19 @@ The generator takes two flags:
   `char*`. Today: `Game,Dialog`. Add a new group here if it needs wide chars
   (most do; the `Editor` group is the only narrow one).
 
+## Overriding texts without editing these files
+
+A distribution or a fork can keep its own wording, or add texts of a locale, outside `src/Localization`:
+put `.resx` files with the same names in a folder and configure with
+`-DMU_LOCALIZATION_OVERLAY_DIR=<folder>`. Each file holds only the entries it changes or adds:
+
+- an entry with a key of the file of the same name replaces that text;
+- a locale file the input folder doesn't have adds the locale to the group;
+- a key the default locale doesn't have is warned about and skipped, as in the input files;
+- a group the input folder doesn't have is an error.
+
+The same checks as for the other files apply to the merged texts.
+
 ## Generated C++ API
 
 ### Per-group accessors
