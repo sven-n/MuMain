@@ -117,7 +117,11 @@ endif()
 # SDL's ELF note check passes backslashes through a macro and expects them unescaped, as they were before CMake's
 # policy CMP0219; a CMake that knows the policy warns while it is unset.
 set(CMAKE_POLICY_DEFAULT_CMP0219 OLD)
-add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
+if(MU_SDL_SOURCE_DIR)
+  add_subdirectory("${MU_SDL_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/sdl-override" EXCLUDE_FROM_ALL)
+else()
+  add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
+endif()
 unset(CMAKE_POLICY_DEFAULT_CMP0219)
 set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
