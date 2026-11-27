@@ -200,6 +200,14 @@ mu_add_test(NAME ctest_guard_dropped_name SOURCES fixtures/ctest_guards/dropped_
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_subdirectory(static)
+
+# ResxGen is a .NET tool, so its check runs where the SDK is, not among the static ones.
+find_program(MU_TEST_DOTNET dotnet)
+if(MU_TEST_DOTNET)
+    add_test(NAME resxgen_overlay
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_LIST_DIR}/test_resxgen_overlay.py"
+            "${CMAKE_CURRENT_LIST_DIR}/.." "${MU_TEST_DOTNET}")
+endif()
 add_subdirectory(benchmark)
 
 add_subdirectory(text)

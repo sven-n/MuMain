@@ -25,9 +25,13 @@ internal static class ResxLoader
     /// Attribute on <data> holding the key.
     private const string ResxNameAttribute = "name";
 
-    public static IReadOnlyList<ResourceGroup> LoadGroups(string inputDir)
+    public static IReadOnlyList<ResourceGroup> LoadGroups(string inputDir, string? overlayDir = null)
     {
         var byGroup = ScanInputDir(inputDir);
+        if (overlayDir is not null)
+        {
+            ApplyOverlay(byGroup, ScanInputDir(overlayDir));
+        }
 
         var result = new List<ResourceGroup>(byGroup.Count);
         foreach (var (groupName, perLocale) in byGroup.OrderBy(kv => kv.Key, StringComparer.Ordinal))
@@ -59,6 +63,36 @@ internal static class ResxLoader
         }
 
         return byGroup;
+    }
+
+    /// An overlay file replaces or adds entries of the file with the same name; a locale the input
+    /// directory doesn't have is added to the group. It cannot create a group, which would change
+    /// the generated files.
+    private static void ApplyOverlay(
+        SortedDictionary<string, Dictionary<string, Dictionary<string, string>>> byGroup,
+        SortedDictionary<string, Dictionary<string, Dictionary<string, string>>> overlay)
+    {
+        foreach (var (groupName, overlayLocales) in overlay)
+        {
+            if (!byGroup.TryGetValue(groupName, out var perLocale))
+            {
+                throw new ResxLoadException($"Overlay group '{groupName}' has no files in the input directory");
+            }
+
+            foreach (var (locale, overlayEntries) in overlayLocales)
+            {
+                if (!perLocale.TryGetValue(locale, out var entries))
+                {
+                    perLocale[locale] = overlayEntries;
+                    continue;
+                }
+
+                foreach (var (key, value) in overlayEntries)
+                {
+                    entries[key] = value;
+                }
+            }
+        }
     }
 
     private static bool TrySplitName(string path, out string group, out string locale)

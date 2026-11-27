@@ -1035,6 +1035,17 @@ if (DOTNET_EXECUTABLE)
   set(RESX_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Generated/I18N")
   file(MAKE_DIRECTORY "${RESX_OUTPUT_DIR}")
 
+  # Optional texts of a distribution or a fork: .resx files whose entries replace or add to the ones of
+  # the same name in Localization/, so those stay unedited (docs/translation-system.md).
+  set(MU_LOCALIZATION_OVERLAY_DIR "" CACHE PATH "Folder of .resx files that override src/Localization")
+  set(RESX_OVERLAY_FILES "")
+  set(RESX_OVERLAY_ARGS "")
+  if(MU_LOCALIZATION_OVERLAY_DIR)
+    file(GLOB RESX_OVERLAY_FILES CONFIGURE_DEPENDS "${MU_LOCALIZATION_OVERLAY_DIR}/*.resx")
+    mu_native_path("${MU_LOCALIZATION_OVERLAY_DIR}" RESX_OVERLAY_DIR_NATIVE)
+    set(RESX_OVERLAY_ARGS --overlay "${RESX_OVERLAY_DIR_NATIVE}")
+  endif()
+
   file(GLOB RESX_FILES CONFIGURE_DEPENDS "${RESX_INPUT_DIR}/*.resx")
   file(GLOB_RECURSE RESXGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../tools/ResxGen/*.cs")
 
@@ -1079,8 +1090,8 @@ if (DOTNET_EXECUTABLE)
               "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
               "${DOTNET_EXECUTABLE}" run --project "${RESXGEN_PROJ_NATIVE}" -c Release
               -- --input "${RESX_INPUT_DIR_NATIVE}" --output "${RESX_OUTPUT_DIR_NATIVE}"
-              --wide-groups Game,Dialog --item-text-groups Game,Dialog
-      DEPENDS ${RESX_FILES} ${RESXGEN_SOURCES} "${RESXGEN_PROJ}"
+              --wide-groups Game,Dialog --item-text-groups Game,Dialog ${RESX_OVERLAY_ARGS}
+      DEPENDS ${RESX_FILES} ${RESX_OVERLAY_FILES} ${RESXGEN_SOURCES} "${RESXGEN_PROJ}"
       COMMENT "ResxGen: regenerating C++ I18N accessors from .resx"
       VERBATIM
     )

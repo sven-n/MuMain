@@ -41,12 +41,18 @@ internal static class Program
             return 1;
         }
 
+        if (options.OverlayDir is not null && !Directory.Exists(options.OverlayDir))
+        {
+            Console.Error.WriteLine($"Overlay directory not found: {options.OverlayDir}");
+            return 1;
+        }
+
         Directory.CreateDirectory(options.OutputDir);
 
         IReadOnlyList<ResourceGroup> groups;
         try
         {
-            groups = ResxLoader.LoadGroups(options.InputDir);
+            groups = ResxLoader.LoadGroups(options.InputDir, options.OverlayDir);
         }
         catch (ResxLoadException ex)
         {
