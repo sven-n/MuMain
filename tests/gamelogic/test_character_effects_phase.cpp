@@ -121,6 +121,9 @@ struct MagicSkeletonScope : CharacterScope
         BMD& model = Models[MODEL_MAGIC_SKELETON];
         model.NumMeshs = static_cast<short>(meshes.size());
         model.Meshs = meshes.data();
+        // One still action, so the update can rebuild a stale pose; the scope's models free it.
+        model.Actions = new Action_t[1]{};
+        model.Actions[0].NumAnimationKeys = 1;
         meshes[MeshIndex].NumVertices = static_cast<short>(vertices.size());
         meshes[MeshIndex].Vertices = vertices.data();
         vertices[0].Node = PinBone;
@@ -581,10 +584,9 @@ TEST_CASE("Magic Skeleton cloth is skinned before its first draw and follows the
     OBJECT& o = scope.character().Object;
     BMD& model = Models[o.Type];
     REQUIRE(model.m_pCurrentBoneTransform == nullptr);
+    // The pose's key holds where the feet stand, so moving the skeleton leaves a stale pose: the update rebuilds it
+    // before it skins the cloth, as on a character's first frame in the game.
     Vector(1000.f, 2000.f, 300.f, o.Position);
-    // The pose's key holds where the feet stand, so the pose is recorded again where the skeleton now is: a stale
-    // pose is rebuilt by the update, and this model has no actions to build it from.
-    Engine::Object::Pose::Record(&o, &model, false);
 
     UpdateCharacterEffects();
 
