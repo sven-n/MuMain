@@ -22,7 +22,8 @@ body { pointer-events: none; }
 .section > div { position: relative; }
 .section > .section-back { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
 #summary { min-width: 196dp; }
-#summary.fps-only { width: auto; }
+/* The counter alone sits under the map name and the pet frame, not over them. */
+#summary.fps-only { width: auto; margin-top: 48dp; }
 
 .title { font-weight: bold; margin-bottom: 1dp; }
 .heading { font-weight: bold; margin-top: 3dp; }
