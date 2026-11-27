@@ -3,6 +3,8 @@
 #include "Core/Text/TextLineWrap.h"
 
 #include <cwchar>
+#include <string>
+#include <vector>
 
 TEST_CASE("guards: null or non-positive args return 0")
 {
@@ -320,4 +322,80 @@ TEST_CASE("wrap to width: an indented word wider than the line gets no empty lin
     CHECK(afterBreak[3] == L"nts");
     CHECK(afterBreak[4].empty());
     CHECK(afterBreak[5] == L"end");
+}
+
+namespace
+{
+// One unit per character, as a fixed-width font would measure.
+int MeasureByCharacters(const wchar_t*, size_t length)
+{
+    return static_cast<int>(length);
+}
+} // namespace
+
+TEST_CASE("KeepFirstLinesWithEllipsis leaves lines alone when they are not too many")
+{
+    std::vector<std::wstring> lines = {L"one", L"two"};
+
+    KeepFirstLinesWithEllipsis(lines, 3, 10, MeasureByCharacters, L"...");
+
+    CHECK(lines == std::vector<std::wstring>{L"one", L"two"});
+}
+
+TEST_CASE("KeepFirstLinesWithEllipsis drops the rest and marks the last kept line")
+{
+    std::vector<std::wstring> lines = {L"one", L"two", L"three", L"four"};
+
+    KeepFirstLinesWithEllipsis(lines, 3, 10, MeasureByCharacters, L"...");
+
+    CHECK(lines == std::vector<std::wstring>{L"one", L"two", L"three..."});
+}
+
+TEST_CASE("KeepFirstLinesWithEllipsis shortens a full last line so the ellipsis fits")
+{
+    std::vector<std::wstring> lines = {L"abcdefghij", L"more"};
+
+    KeepFirstLinesWithEllipsis(lines, 1, 10, MeasureByCharacters, L"...");
+
+    CHECK(lines == std::vector<std::wstring>{L"abcdefg..."});
+}
+
+TEST_CASE("KeepFirstLinesWithEllipsis does not leave a space before the ellipsis")
+{
+    std::vector<std::wstring> lines = {L"abcde fghij", L"more"};
+
+    KeepFirstLinesWithEllipsis(lines, 1, 9, MeasureByCharacters, L"...");
+
+    CHECK(lines == std::vector<std::wstring>{L"abcde..."});
+}
+
+TEST_CASE("WrapTextToWidth gives the first line its own width")
+{
+    // A sender of four units in front of the first line leaves it six of ten.
+    const auto lines = WrapTextToWidth(L"aaa bbbb cc", 6, 10, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 2);
+    CHECK(lines[0] == L"aaa");
+    CHECK(lines[1] == L"bbbb cc");
+}
+
+TEST_CASE("WrapTextToWidth leaves the first line empty when the first word only fits a whole line")
+{
+    const auto lines = WrapTextToWidth(L"abcdefgh ij", 4, 10, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 3);
+    CHECK(lines[0].empty());
+    CHECK(lines[1] == L"abcdefgh");
+    CHECK(lines[2] == L"ij");
+}
+
+TEST_CASE("WrapTextToWidth with no room on the first line still breaks a word wider than a line")
+{
+    const auto lines = WrapTextToWidth(L"abcdefghijkl", 0, 5, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 4);
+    CHECK(lines[0].empty());
+    CHECK(lines[1] == L"abcde");
+    CHECK(lines[2] == L"fghij");
+    CHECK(lines[3] == L"kl");
 }
