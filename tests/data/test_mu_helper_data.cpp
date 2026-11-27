@@ -4,6 +4,7 @@
 #include "MUHelper/MuHelperData.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
 #include <iterator>
 
@@ -35,4 +36,21 @@ TEST_CASE("Helper data of a new configuration leaves the unused bytes empty [dat
 
     CHECK(std::all_of(std::begin(saved._UnusedPadding), std::end(saved._UnusedPadding),
                       [](BYTE value) { return value == 0; }));
+}
+
+// OpenMU stores the minimum socket count of its pickup option in byte 30 of the data, the first unused one here.
+TEST_CASE("Helper data keeps the server's setting in byte 30 [data][helper]")
+{
+    constexpr size_t ServerSettingByte = 30;
+    constexpr BYTE MinimumSockets = 3;
+    static_assert(offsetof(PRECEIVE_MUHELPER_DATA, _UnusedPadding) == ServerSettingByte);
+    PRECEIVE_MUHELPER_DATA received{};
+    reinterpret_cast<BYTE*>(&received)[ServerSettingByte] = MinimumSockets;
+
+    MUHelper::ConfigData config;
+    MUHelper::ConfigDataSerDe::Deserialize(received, config);
+    PRECEIVE_MUHELPER_DATA saved{};
+    MUHelper::ConfigDataSerDe::Serialize(config, saved);
+
+    CHECK(reinterpret_cast<const BYTE*>(&saved)[ServerSettingByte] == MinimumSockets);
 }
