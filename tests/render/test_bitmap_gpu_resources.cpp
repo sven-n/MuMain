@@ -797,6 +797,31 @@ TEST_CASE("where frames may not wait, a busy ring grows past its ceiling instead
     owner.Shutdown();
 }
 
+TEST_CASE("where frames may not wait, a finished slot is retired without a wait call")
+{
+    Fake fake;
+    Owner::Calls calls = fake.Calls();
+    calls.waitAtCeiling = false;
+    Owner owner(calls);
+    REQUIRE(owner.Initialize(Device()));
+    // The GPU keeps up, so each full image retires the slot an earlier one used.
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    for (int i = 0; i < 5; ++i)
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        REQUIRE(result);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(owner.Flush());
+    CHECK(owner.BytesInFlight() == 0);
+    CHECK(fake.releases > 0);
+    // Even a wait on a finished fence can give a browser the thread, and the frame its swapchain texture away.
+    CHECK(fake.finishedWaits == 0);
+    CHECK(fake.waits == 0);
+    CHECK_FALSE(fake.overwrite);
+    owner.Shutdown();
+}
+
 TEST_CASE("a trim that removes the next slot never leaves the ring on a lost one")
 {
     Fake fake;
