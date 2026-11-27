@@ -490,8 +490,8 @@ TEST_CASE("Buffs: the shipped file keeps the strip rules of the old client's cod
         {"ironDefense", {134, 165}},
         {"bloodHowl", {166, 167}},
     };
-    // SetDisableRenderBuff's effects.
-    const std::vector<int> oldHidden = {83, 84, 85, 120};
+    // SetDisableRenderBuff's effects, and the Game Master's (28), whose tile in the art is only its number.
+    const std::vector<int> oldHidden = {28, 83, 84, 85, 120};
     // CancellableSkill, with the strengthened tiers OpenMU also cancels.
     const std::map<int, int> cancelSkills = {{6, 77}, {82, 233}, {138, 380}, {139, 383}, {143, 441}};
 
