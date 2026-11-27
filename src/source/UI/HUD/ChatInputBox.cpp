@@ -28,6 +28,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Core/Text/WideString.h"
 #include "Core/Input/ImeInput.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
@@ -38,6 +39,18 @@ using namespace mu::ui::window;
 
 namespace
 {
+// Public chat and whisper go out as C1 packets: one length byte, so 255 bytes in all, of which the
+// header and the 10-byte character name take 13. The text travels as UTF-8, while MAX_CHAT_SIZE
+// counts characters; 90 letters of a three-byte script (Georgian, for example) overflowed the length
+// byte and the server dropped the connection. The text, its one-byte ~ @ $ channel prefix and the
+// string terminator must fit in what is left.
+constexpr std::size_t kChatPacketMaxBytes = 255;
+constexpr std::size_t kChatPacketHeaderAndNameBytes = 13;
+constexpr std::size_t kChatChannelPrefixBytes = 1;
+constexpr std::size_t kChatTerminatorBytes = 1;
+constexpr std::size_t kChatTextMaxUtf8Bytes =
+    kChatPacketMaxBytes - kChatPacketHeaderAndNameBytes - kChatChannelPrefixBytes - kChatTerminatorBytes;
+
 // Native's string table for the buttons' hints (RenderTooltip()), in the button row's order.
 const wchar_t* const* const kButtonHints[] = {
     &I18N::Game::RegularChat,        &I18N::Game::PartyChat,
@@ -338,8 +351,8 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
             type_string strChat, strWhisper;
             GetChatText(strChat);
             GetWhsprID(strWhisper);
-            wcsncpy(szChatText, strChat.c_str(), MAX_CHAT_SIZE);
-            szChatText[MAX_CHAT_SIZE] = L'\0';
+            Core::Text::CopyWideString(szChatText, MAX_CHAT_SIZE + 1, strChat.c_str());
+            Core::Text::CutWideStringToUtf8Bytes(szChatText, kChatTextMaxUtf8Bytes);
             wcsncpy(szWhisperID, strWhisper.c_str(), MAX_USERNAME_SIZE);
             szWhisperID[MAX_USERNAME_SIZE] = L'\0';
         }

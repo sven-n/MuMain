@@ -49,3 +49,70 @@ TEST_CASE("AppendWideString leaves a buffer without room alone")
     CHECK(destination == L'x');
     CHECK_FALSE(Core::Text::AppendWideString(nullptr, 4, L"abc"));
 }
+
+TEST_CASE("CutWideStringToUtf8Bytes keeps text that fits")
+{
+    wchar_t text[16] = L"Hello";
+
+    CHECK_FALSE(Core::Text::CutWideStringToUtf8Bytes(text, 5));
+    CHECK(std::wcscmp(text, L"Hello") == 0);
+}
+
+TEST_CASE("CutWideStringToUtf8Bytes counts letters outside ASCII in their UTF-8 bytes")
+{
+    // Georgian letters (U+10D0..) are three bytes each: seven bytes hold two of them, not three.
+    wchar_t text[16] = L"\u10D0\u10D1\u10D2";
+
+    CHECK(Core::Text::CutWideStringToUtf8Bytes(text, 7));
+    CHECK(std::wcscmp(text, L"\u10D0\u10D1") == 0);
+}
+
+TEST_CASE("CutWideStringToUtf8Bytes mixes one, two and three byte characters")
+{
+    // 'a' (1) + U+00E3 (2) + U+20AC (3) = 6 bytes.
+    wchar_t text[16] = L"a\u00E3\u20ACb";
+
+    CHECK(Core::Text::CutWideStringToUtf8Bytes(text, 6));
+    CHECK(std::wcscmp(text, L"a\u00E3\u20AC") == 0);
+}
+
+TEST_CASE("CutWideStringToUtf8Bytes never splits a character outside the BMP")
+{
+    // An emoji is four UTF-8 bytes (a surrogate pair where wchar_t is 16 bits).
+    wchar_t text[16] = L"ab\U0001F409";
+
+    CHECK(Core::Text::CutWideStringToUtf8Bytes(text, 5));
+    CHECK(std::wcscmp(text, L"ab") == 0);
+
+    wchar_t whole[16] = L"ab\U0001F409";
+    CHECK_FALSE(Core::Text::CutWideStringToUtf8Bytes(whole, 6));
+    CHECK(std::wcscmp(whole, L"ab\U0001F409") == 0);
+}
+
+TEST_CASE("CutWideStringToUtf8Bytes accepts a null text")
+{
+    CHECK_FALSE(Core::Text::CutWideStringToUtf8Bytes(nullptr, 4));
+}
+
+TEST_CASE("CopyWideString never ends between the halves of a surrogate pair")
+{
+    // 'a', 'b', then an emoji as two UTF-16 units. Four units hold three units and the terminator, which would end
+    // on the pair's first half.
+    const wchar_t source[] = {L'a', L'b', static_cast<wchar_t>(0xD83D), static_cast<wchar_t>(0xDC09), L'\0'};
+    wchar_t destination[4] = {};
+
+    CHECK_FALSE(Core::Text::CopyWideString(destination, std::size(destination), source));
+    CHECK(std::wcscmp(destination, L"ab") == 0);
+
+    wchar_t whole[5] = {};
+    CHECK(Core::Text::CopyWideString(whole, std::size(whole), source));
+    CHECK(std::wcscmp(whole, source) == 0);
+}
+
+TEST_CASE("CopyWideString cuts plain text at the buffer size")
+{
+    wchar_t destination[4] = {};
+
+    CHECK_FALSE(Core::Text::CopyWideString(destination, std::size(destination), L"abcdef"));
+    CHECK(std::wcscmp(destination, L"abc") == 0);
+}
