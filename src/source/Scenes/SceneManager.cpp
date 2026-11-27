@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "App/Control/DrawPurityCheck.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
+#include "Render/Renderer/PresentedFrameStats.h"
 #include "Audio/SoundSource.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
@@ -788,7 +789,9 @@ static void UpdateDiagnostics()
     summary.details = g_bShowDebugInfo;
     summary.counters = g_bShowGLStatsOverlay;
     summary.fpsOnly = g_bShowFpsCounter;
-    summary.fps = FPS_AVG;
+    // Presented frames, not loop turns; FPS_AVG until the renderer has a full second of them.
+    const double presentedFps = Render::FrameStatsOfRenderer().Rate();
+    summary.fps = presentedFps > 0.0 ? presentedFps : FPS_AVG;
     summary.averageFps = s_avgFps;
     summary.lowFps = s_onePercentLow;
     summary.slowestFps = s_slowestFrameFps;

@@ -37,6 +37,7 @@
 #include "GpuDevice.h"
 #include "GpuShaderFormats.h"
 #include "MuRenderer.h"
+#include "PresentedFrameStats.h"
 #include "QuadTopology.h"
 #include "RangeAllocator.h"
 #include "SdlGpuPixelFormat.h"
@@ -348,6 +349,20 @@ struct FramePixelDownload
     Uint32 byteCount;
     PixelChannelOrder channelOrder;
 };
+
+static double NowMs()
+{
+    return static_cast<double>(SDL_GetTicksNS()) / 1.0e6;
+}
+
+static void CountPresentedFrame()
+{
+    if (const auto report = Render::FrameStatsOfRenderer().Presented(NowMs()))
+    {
+        mu::log::Get("render")->info("PERF: presented fps={:.1f} low1={:.1f} frames={} skipped={} work_ms={:.2f}",
+                                     report->fps, report->lowFps, report->presented, report->skipped, report->workMs);
+    }
+}
 
 static void ReleaseFrameReadbackTexture()
 {
@@ -2407,6 +2422,7 @@ public:
         s_dbgVertexUniformPushesThisFrame = 0u;
         s_dbgFragmentUniformPushesThisFrame = 0u;
         ++s_dbgFrameCount;
+        Render::FrameStatsOfRenderer().Begin(NowMs());
 
         s_swapW = 0u;
         s_swapH = 0u;
@@ -2436,6 +2452,7 @@ public:
         // where frames may not wait.
         if (!s_swapchainTexture)
         {
+            Render::FrameStatsOfRenderer().Skipped();
             // A requested readback stays pending for the next frame that renders;
             // its consumer decides how long to wait.
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
@@ -3814,6 +3831,7 @@ public:
         }
 
         s_swapchainTexture = nullptr;
+        CountPresentedFrame();
 
         ++s_submittedFrames;
         std::erase_if(s_deferredSkinnedMeshFrees,
