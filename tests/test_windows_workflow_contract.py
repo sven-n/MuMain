@@ -654,8 +654,9 @@ check(port_like_build.lstrip().startswith("id: port_like") and "ccache --zero-st
 for required in ("if: ${{ !cancelled() && steps.port_like.outcome != 'skipped' }}", "ccache --show-stats",
                  "### Linux compiler cache, port-like target", '"$GITHUB_STEP_SUMMARY"'):
     check(required in port_like_report, f"Port-like compiler cache report missing {required}")
-check(linux_job.index("- name: Build a port-like target") < linux_job.index("- name: Report port-like compiler cache"),
-      "Port-like compiler cache report must follow the port-like build")
+port_like_build_at = linux_job.find("- name: Build a port-like target")
+port_like_report_at = linux_job.find("- name: Report port-like compiler cache")
+check(0 <= port_like_build_at < port_like_report_at, "Port-like compiler cache report must follow the port-like build")
 # PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
 # entries out of the repository's 10 GB. Only main pushes save them: the nightly runs beside the pushes, so with both
 # saving, an older commit's entry could be saved last and be the one the prune job keeps.
