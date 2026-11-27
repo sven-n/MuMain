@@ -198,3 +198,21 @@ The run uses the English language files; the other languages ship whole in `Data
 (`Data/Sound`) and music (`Data/Music`) are not in the repository, so no list names them: a port
 that has them ships both folders with the shared files. The same holds for an installed texture
 pack (`Data/TexturePacks`).
+
+## Packs that arrive after start-up
+
+A target that cannot hold every file at start-up (a browser's downloads, an app store's asset packs) plugs a pack source
+into `Content::SetPackSource`. The game asks it by pack name (`Content::RequestPack`) and the source answers ready,
+pending or failed. Where there is no source, every pack is ready.
+
+- `map<n>`: a map's files, as `Data/Maps/Files/Map<n>.json` lists them. A map change asks for it and waits (the old
+  map stays on screen) before its first load step. A failed pack drops the map change.
+- `monster<n>`: one monster's or NPC's files, as `Data/Maps/Files/Monsters.json` lists them under its number. A server
+  can spawn any monster on any map, so `CreateMonster` asks for the pack at each spawn; the source answers ready for a
+  pack it already has, such as the monsters of the map's own pack.
+  - While the pack is pending the monster stands in as a Bull Fighter's body, with its name, and the frame's pump
+    (`RemakeMonstersWhoseFilesArrived`) makes it again, in place and at the tile it stands on, once the pack is ready.
+    What the server sent for it in between, such as its life and buffs, is not kept: only the spawn is.
+  - A failed pack is logged once per monster and the monster is made as usual, which gives the unknown monsters' look
+    to a model whose file is missing.
+  - A session that is torn down drops the waiting monsters.

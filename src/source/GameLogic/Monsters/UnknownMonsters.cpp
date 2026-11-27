@@ -212,6 +212,13 @@ CHARACTER* Create(int number, UnknownReason reason, int positionX, int positionY
     return character;
 }
 
+CHARACTER* CreateStandIn(int positionX, int positionY, int key)
+{
+    OpenMonsterModel(MONSTER_MODEL_BULL_FIGHTER);
+    return CreateCharacter(key, MODEL_BULL_FIGHTER, static_cast<unsigned char>(positionX),
+                           static_cast<unsigned char>(positionY));
+}
+
 void Forget(const CHARACTER& character)
 {
     if (const auto found = Find(character); found != g_shown.end())
