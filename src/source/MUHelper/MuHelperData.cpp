@@ -144,6 +144,8 @@ void ConfigDataSerDe::Serialize(const ConfigData& gameData, PRECEIVE_MUHELPER_DA
     netData.bAutoAcceptFriend = gameData.bAutoAcceptFriend ? 1 : 0;
     netData.bAutoAcceptGuild = gameData.bAutoAcceptGuild ? 1 : 0;
     netData.bFallbackBasicAttack = gameData.bFallbackBasicAttack ? 1 : 0;
+
+    std::copy(gameData.aUnusedBytes.begin(), gameData.aUnusedBytes.end(), netData._UnusedPadding);
 }
 
 void ConfigDataSerDe::Deserialize(const PRECEIVE_MUHELPER_DATA& netData, ConfigData& gameData)
@@ -238,6 +240,8 @@ void ConfigDataSerDe::Deserialize(const PRECEIVE_MUHELPER_DATA& netData, ConfigD
     gameData.bAutoAcceptFriend = (bool)netData.bAutoAcceptFriend;
     gameData.bAutoAcceptGuild = (bool)netData.bAutoAcceptGuild;
     gameData.bFallbackBasicAttack = (bool)netData.bFallbackBasicAttack;
+
+    std::copy(std::begin(netData._UnusedPadding), std::end(netData._UnusedPadding), gameData.aUnusedBytes.begin());
 }
 
 } // namespace MUHelper
