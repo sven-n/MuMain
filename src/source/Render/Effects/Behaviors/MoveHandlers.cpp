@@ -9301,6 +9301,14 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // The character a skill's owner is aiming at, or nullptr when it has none or it isn't in view
+    // (FindCharacterIndex's "not found" is MAX_CHARACTERS_CLIENT).
+    static CHARACTER* SkillTargetOf(const OBJECT* owner)
+    {
+        const int index = owner->m_sTargetIndex;
+        return index >= 0 && index < MAX_CHARACTERS_CLIENT ? &CharactersClient[index] : nullptr;
+    }
+
     // BITMAP_SBUMB
     bool Move_BITMAP_SBUMB(OBJECT* o, int index, float Luminosity)
     {
@@ -9309,10 +9317,11 @@ namespace Render::Effects::Behaviors
         {
             vec3_t vLight, vPosition;
             Vector(1.0f, 1.0f, 1.0f, vLight);
-            if (o->Owner->m_sTargetIndex < 0)
+            const CHARACTER* target = SkillTargetOf(o->Owner);
+            if (target == nullptr)
                 return true;
 
-            VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
+            VectorCopy(target->Object.Position, vPosition);
             Vector(vPosition[0] + Random::Rand() % 80 - 40, vPosition[1] + Random::Rand() % 80 - 40,
                    vPosition[2] + Random::Rand() % 120 + 30, vPosition);
             float Scale = 1.5f + (Random::Rand() % 10 * 0.02f);
@@ -9328,93 +9337,99 @@ namespace Render::Effects::Behaviors
     }
 
     // MODEL_DOWN_ATTACK_DUMMY_L
+    // Beast Uppercut's fists. CreateBomb3 creates MODEL_STONE1/2 effects without an owner; a fist which is already
+    // marked dead when it calls CreateBomb3 can have its slot taken by such a stone, and reading o->Owner after that
+    // read through null. So each fist stays alive while it creates the bomb and reads its owner, and is marked dead
+    // as its last step.
     bool Move_MODEL_DOWN_ATTACK_DUMMY_L(OBJECT* o, int index, float Luminosity)
     {
-        vec3_t Light;
-        Vector(1.f, 1.f, 1.f, Light);
-    {
-        if (o->Owner->Live)
+        if (o->Owner == nullptr || !o->Owner->Live)
         {
-            BMD* pModel = &Models[o->Type];
-            pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
-
-            if (o->AnimationFrame >= 8.0f || !o->Owner->Live)
-                o->Live = false;
-
-            if (o->AnimationFrame >= 5.0f && o->LifeTime > 50)
-            {
-                if (o->Owner->m_sTargetIndex < 0)
-                    return true;
-                CreateBomb3(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, 3, 0.9f);
-                StopBuffer(SOUND_RAGESKILL_STAMP_ATTACK, true);
-                PlayBuffer(SOUND_RAGESKILL_STAMP_ATTACK);
-                o->LifeTime = 40;
-            }
-
-            vec3_t _StartPos, _EndPos;
-            pModel->TransformByObjectBone(_StartPos, o, 0);
-            CreateJointFpsChecked(BITMAP_FORCEPILLAR, _StartPos, _StartPos, o->Angle, 0, o, 50.0f);
-
-            VectorCopy(o->Owner->Angle, o->Angle);
-            VectorCopy(o->Owner->Position, o->Position);
-
-            vec3_t Light;
-            Vector(0.47f, 0.36f, 0.24f, Light);
-            pModel->TransformByObjectBone(_EndPos, o, 0);
-            CreateSprite(BITMAP_FLARE, _EndPos, 5.0f, Light, o);
+            o->Live = false;
+            return false;
         }
-        else
+
+        OBJECT* owner = o->Owner;
+        BMD* pModel = &Models[o->Type];
+        pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                          o->HeadAngle, false, false);
+
+        if (o->AnimationFrame >= 5.0f && o->LifeTime > 50)
+        {
+            if (CHARACTER* target = SkillTargetOf(owner))
+            {
+                CreateBomb3(target->Object.Position, 3, 0.9f);
+            }
+            StopBuffer(SOUND_RAGESKILL_STAMP_ATTACK, true);
+            PlayBuffer(SOUND_RAGESKILL_STAMP_ATTACK);
+            o->LifeTime = 40;
+        }
+
+        vec3_t _StartPos, _EndPos;
+        pModel->TransformByObjectBone(_StartPos, o, 0);
+        CreateJointFpsChecked(BITMAP_FORCEPILLAR, _StartPos, _StartPos, o->Angle, 0, o, 50.0f);
+
+        VectorCopy(owner->Angle, o->Angle);
+        VectorCopy(owner->Position, o->Position);
+
+        vec3_t Light;
+        Vector(0.47f, 0.36f, 0.24f, Light);
+        pModel->TransformByObjectBone(_EndPos, o, 0);
+        CreateSprite(BITMAP_FLARE, _EndPos, 5.0f, Light, o);
+
+        if (o->AnimationFrame >= 8.0f)
         {
             o->Live = false;
         }
-    }
         return true;
     }
 
     // MODEL_DOWN_ATTACK_DUMMY_R
     bool Move_MODEL_DOWN_ATTACK_DUMMY_R(OBJECT* o, int index, float Luminosity)
     {
-        vec3_t Light;
-        Vector(1.f, 1.f, 1.f, Light);
-    {
-        if (o->Owner->Live)
-        {
-            BMD* pModel = &Models[o->Type];
-            pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
-
-            if (o->AnimationFrame >= 6.0f || !o->Owner->Live)
-            {
-                o->Live = false;
-                CreateEffectFpsChecked(MODEL_DOWN_ATTACK_DUMMY_L, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 0, o->Owner);
-            }
-
-            if (o->AnimationFrame >= 3.0f && o->LifeTime > 50)
-            {
-                if (o->Owner->m_sTargetIndex < 0)
-                    return true;
-                CreateBomb3(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, 3, 0.9f);
-                StopBuffer(SOUND_RAGESKILL_STAMP_ATTACK, true);
-                PlayBuffer(SOUND_RAGESKILL_STAMP_ATTACK);
-                o->LifeTime = 40;
-            }
-
-            vec3_t _StartPos, _EndPos;
-            pModel->TransformByObjectBone(_StartPos, o, 0);
-            CreateJointFpsChecked(BITMAP_FORCEPILLAR, _StartPos, _StartPos, o->Angle, 1, o, 50.0f);
-
-            VectorCopy(o->Owner->Angle, o->Angle);
-            VectorCopy(o->Owner->Position, o->Position);
-
-            vec3_t Light;
-            Vector(0.47f, 0.36f, 0.24f, Light);
-            pModel->TransformByObjectBone(_EndPos, o, 0);
-            CreateSprite(BITMAP_FLARE, _EndPos, 5.0f, Light, o);
-        }
-        else
+        if (o->Owner == nullptr || !o->Owner->Live)
         {
             o->Live = false;
+            return false;
         }
-    }
+
+        OBJECT* owner = o->Owner;
+        BMD* pModel = &Models[o->Type];
+        pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                          o->HeadAngle, false, false);
+
+        if (o->AnimationFrame >= 3.0f && o->LifeTime > 50)
+        {
+            if (CHARACTER* target = SkillTargetOf(owner))
+            {
+                CreateBomb3(target->Object.Position, 3, 0.9f);
+            }
+            StopBuffer(SOUND_RAGESKILL_STAMP_ATTACK, true);
+            PlayBuffer(SOUND_RAGESKILL_STAMP_ATTACK);
+            o->LifeTime = 40;
+        }
+
+        vec3_t _StartPos, _EndPos;
+        pModel->TransformByObjectBone(_StartPos, o, 0);
+        CreateJointFpsChecked(BITMAP_FORCEPILLAR, _StartPos, _StartPos, o->Angle, 1, o, 50.0f);
+
+        VectorCopy(owner->Angle, o->Angle);
+        VectorCopy(owner->Position, o->Position);
+
+        vec3_t Light;
+        Vector(0.47f, 0.36f, 0.24f, Light);
+        pModel->TransformByObjectBone(_EndPos, o, 0);
+        CreateSprite(BITMAP_FLARE, _EndPos, 5.0f, Light, o);
+
+        if (o->AnimationFrame >= 6.0f)
+        {
+            // The right fist is done and the left one follows, created every time (once, so no FPS check). It may
+            // take this very slot, so nothing of `o` is used after it, and false keeps MoveEffect's shared tail off
+            // the new effect.
+            o->Live = false;
+            CreateEffect(MODEL_DOWN_ATTACK_DUMMY_L, owner->Position, owner->Angle, owner->Light, 0, owner);
+            return false;
+        }
         return true;
     }
 
@@ -9476,10 +9491,11 @@ namespace Render::Effects::Behaviors
             CreateEffectFpsChecked(MODEL_SHOCKWAVE_SPIN01, vPosition, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 0.5f);
             CreateEffectFpsChecked(MODEL_SHOCKWAVE_SPIN01, vPosition, Angle, Light, 1, o->Owner, -1, 0, 0, 0, 0.9f);
 
-            if (o->Owner->m_sTargetIndex < 0)
+            const CHARACTER* target = SkillTargetOf(o->Owner);
+            if (target == nullptr)
                 return true;
 
-            VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
+            VectorCopy(target->Object.Position, vPosition);
             CreateEffectFpsChecked(BITMAP_SHINY + 4, vPosition, o->Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.9f);
             StopBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK, true);
             PlayBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK);
@@ -9574,10 +9590,11 @@ namespace Render::Effects::Behaviors
             vec3_t vLight, vPosition;
             Vector(0.6f, 0.94f, 1.0f, vLight);
 
-            if (o->Owner->m_sTargetIndex < 0)
+            const CHARACTER* target = SkillTargetOf(o->Owner);
+            if (target == nullptr)
                 return true;
 
-            VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
+            VectorCopy(target->Object.Position, vPosition);
             Vector(vPosition[0] + Random::Rand() % 90 - 40, vPosition[1] + Random::Rand() % 90 - 40,
                    vPosition[2] + Random::Rand() % 100 + 50, vPosition);
             float Scale = 1.5f + (Random::Rand() % 5 * 0.01f);
