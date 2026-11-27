@@ -587,6 +587,8 @@ TEST_CASE("Magic Skeleton cloth is skinned before its first draw and follows the
     // The pose's key holds where the feet stand, so moving the skeleton leaves a stale pose: the update rebuilds it
     // before it skins the cloth, as on a character's first frame in the game.
     Vector(1000.f, 2000.f, 300.f, o.Position);
+    // A stale bone the rebuild resets: a cloth skinned from the stale pose would sit this far off.
+    o.BoneTransform[MagicSkeletonScope::PinBone][0][3] = 500.f;
 
     UpdateCharacterEffects();
 
