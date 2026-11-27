@@ -582,6 +582,9 @@ TEST_CASE("Magic Skeleton cloth is skinned before its first draw and follows the
     BMD& model = Models[o.Type];
     REQUIRE(model.m_pCurrentBoneTransform == nullptr);
     Vector(1000.f, 2000.f, 300.f, o.Position);
+    // The pose's key holds where the feet stand, so the pose is recorded again where the skeleton now is: a stale
+    // pose is rebuilt by the update, and this model has no actions to build it from.
+    Engine::Object::Pose::Record(&o, &model, false);
 
     UpdateCharacterEffects();
 
