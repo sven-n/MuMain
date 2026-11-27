@@ -62,6 +62,9 @@ add_test(NAME network_bridge_exports_listed_and_headers_platform_free
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_network_bridge.py" "${MU_REPO_ROOT}")
 add_test(NAME network_bridge_check_fixtures
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_network_bridge.py")
+# The shader check itself runs in CI with naga (scripts/check_shaders_wgsl.py); its binding split needs none.
+add_test(NAME shaders_wgsl_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_shaders_wgsl.py")
 add_test(NAME platform_services_only_in_adapters
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_platform_services.py" "${MU_REPO_ROOT}")
 add_test(NAME platform_services_check_fixtures
