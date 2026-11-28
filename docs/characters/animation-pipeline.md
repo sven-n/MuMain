@@ -195,6 +195,12 @@ standing hero stays in `ZzzInterface.cpp`.
   only after the hero has gone (off screen or 8 tiles away), and at most every 10 s. The hero, if it can turn its head
   to them (60 degrees), looks at them and nods back after 1.6 to 2.8 s. Only on this screen: the server isn't told.
 
+### Chat emotes
+
+`/dance` starts the point dance from standing; outside the safe zone it does not start while riding. Anything after
+`/dance` is ignored rather than sent as chat. The translated Dance word (Dance, Tanzen, Bailar, …) in a normal chat
+line also starts it. Other players see the dance because the server relays the action.
+
 ## The player's skeleton (`Data/Player/player.bmd`, 60 bones)
 
 | Index | Bone | Parent |

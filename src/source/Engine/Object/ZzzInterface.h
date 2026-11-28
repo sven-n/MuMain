@@ -85,6 +85,7 @@ bool FindText(const wchar_t* Text, const wchar_t* Token, bool First = false);
 bool FindTextABS(const wchar_t* Text, const wchar_t* Token, bool First = false);
 bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash = true);
 bool CheckAbuseNameFilter(wchar_t* Text);
+bool CanUseChatEmote();
 bool CheckCommand(wchar_t* Text, bool bMacroText = false);
 void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType);
 void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disabled = false, bool clipping = true);

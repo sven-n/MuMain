@@ -2,6 +2,8 @@
 #include "Core/Utilities/Random.h"
 #include "UI/Chat/ChatInput.h"
 
+#include <cwctype>
+
 // Includes mirror ZzzInterface.cpp.
 #include "Core/Platform/Imm.h"
 #include "UI/Core/UIManager.h"
@@ -48,6 +50,79 @@
 
 namespace UI::Chat
 {
+namespace
+{
+std::wstring_view TrimLeft(std::wstring_view text)
+{
+    while (!text.empty() && std::iswspace(static_cast<wint_t>(text.front())))
+    {
+        text.remove_prefix(1);
+    }
+    return text;
+}
+
+// Only letters and digits of space-separated scripts are word characters here.
+// Kana and CJK write without spaces; treating them as boundaries keeps ダンス and
+// 舞蹈 findable inside 「一緒にダンス」 and 「一起舞蹈吧」.
+bool IsSpaceSeparatedWordCharacter(wchar_t character)
+{
+    return (character >= L'0' && character <= L'9') || (character >= L'A' && character <= L'Z') ||
+           (character >= L'a' && character <= L'z') || (character >= 0x00C0 && character <= 0x00D6) ||
+           (character >= 0x00D8 && character <= 0x00F6) || (character >= 0x00F8 && character <= 0x024F) ||
+           (character >= 0x0400 && character <= 0x04FF);
+}
+} // namespace
+
+bool IsDanceCommand(std::wstring_view text)
+{
+    text = TrimLeft(text);
+    if (text.size() < DanceCommand.size() || _wcsnicmp(text.data(), DanceCommand.data(), DanceCommand.size()) != 0)
+    {
+        return false;
+    }
+
+    return text.size() == DanceCommand.size() || std::iswspace(static_cast<wint_t>(text[DanceCommand.size()]));
+}
+
+bool ContainsWord(std::wstring_view text, std::wstring_view word)
+{
+    if (word.empty() || word.size() > text.size())
+    {
+        return false;
+    }
+
+    for (std::size_t position = 0; position + word.size() <= text.size(); ++position)
+    {
+        if (_wcsnicmp(text.data() + position, word.data(), word.size()) != 0)
+        {
+            continue;
+        }
+
+        if (position > 0)
+        {
+            const wchar_t previous = text[position - 1];
+            if (previous == L'/' || IsSpaceSeparatedWordCharacter(previous))
+            {
+                continue;
+            }
+        }
+
+        if (position + word.size() < text.size() && IsSpaceSeparatedWordCharacter(text[position + word.size()]))
+        {
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+bool ContainsDanceWord(std::wstring_view text)
+{
+    return ContainsWord(text, I18N::Game::Dance);
+}
+
 void CheckChatText(wchar_t* Text)
 {
     CHARACTER* c = Hero;
@@ -55,112 +130,94 @@ void CheckChatText(wchar_t* Text)
     if (FindText(Text, I18N::Game::Hello) || FindText(Text, I18N::Game::Hi) || FindText(Text, I18N::Game::Welcome) || FindText(Text, I18N::Game::Welcome) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks))
     {
         SetActionClass(c, o, PLAYER_GREETING1, AT_GREETING1);
-        SendRequestAction(Hero->Object, AT_GREETING1);
     }
     else if (FindText(Text, I18N::Game::EnjoyTheGame) || FindText(Text, I18N::Game::Bye) || FindText(Text, I18N::Game::Bye280))
     {
         SetActionClass(c, o, PLAYER_GOODBYE1, AT_GOODBYE1);
-        SendRequestAction(Hero->Object, AT_GOODBYE1);
     }
     else if (FindText(Text, I18N::Game::Good) || FindText(Text, I18N::Game::Good) || FindText(Text, I18N::Game::Wow) || FindText(Text, I18N::Game::Wow) || FindText(Text, I18N::Game::Nice) || FindText(Text, I18N::Game::Nice))
     {
         SetActionClass(c, o, PLAYER_CLAP1, AT_CLAP1);
-        SendRequestAction(Hero->Object, AT_CLAP1);
     }
     else if (FindText(Text, I18N::Game::Here) || FindText(Text, I18N::Game::Here) || FindText(Text, I18N::Game::Come) || FindText(Text, I18N::Game::Come))
     {
         SetActionClass(c, o, PLAYER_GESTURE1, AT_GESTURE1);
-        SendRequestAction(Hero->Object, AT_GESTURE1);
     }
     else if (FindText(Text, I18N::Game::There) || FindText(Text, I18N::Game::There) || FindText(Text, I18N::Game::That) || FindText(Text, I18N::Game::That))
     {
         SetActionClass(c, o, PLAYER_DIRECTION1, AT_DIRECTION1);
-        SendRequestAction(Hero->Object, AT_DIRECTION1);
     }
     else if (FindText(Text, I18N::Game::Not) || FindText(Text, I18N::Game::Not) || FindText(Text, I18N::Game::Never) || FindText(Text, I18N::Game::Never) || FindText(Text, I18N::Game::DoNot) || FindText(Text, I18N::Game::DoNot) || FindText(Text, I18N::Game::DoNot302))
     {
         SetActionClass(c, o, PLAYER_UNKNOWN1, AT_UNKNOWN1);
-        SendRequestAction(Hero->Object, AT_UNKNOWN1);
     }
     else if (FindText(Text, L";") || FindText(Text, I18N::Game::Sorry) || FindText(Text, I18N::Game::Sorry) || FindText(Text, I18N::Game::Sorry))
     {
         SetActionClass(c, o, PLAYER_AWKWARD1, AT_AWKWARD1);
-        SendRequestAction(Hero->Object, AT_AWKWARD1);
     }
     else if (FindText(Text, L"ㅠ.ㅠ") || FindText(Text, L"ㅜ.ㅜ") || FindText(Text, L"T_T") || FindText(Text, I18N::Game::Sad) || FindText(Text, I18N::Game::Sad) || FindText(Text, I18N::Game::Cry) || FindText(Text, I18N::Game::Cry))
     {
         SetActionClass(c, o, PLAYER_CRY1, AT_CRY1);
-        SendRequestAction(Hero->Object, AT_CRY1);
     }
     else if (FindText(Text, L"ㅡ.ㅡ") || FindText(Text, L"ㅡ.,ㅡ") || FindText(Text, L"ㅡ,.ㅡ") || FindText(Text, L"-.-") || FindText(Text, L"-_-") || FindText(Text, I18N::Game::Huh) || FindText(Text, I18N::Game::Pooh))
     {
         SetActionClass(c, o, PLAYER_SEE1, AT_SEE1);
-        SendRequestAction(Hero->Object, AT_SEE1);
     }
     else if (FindText(Text, L"^^") || FindText(Text, L"^.^") || FindText(Text, L"^_^") || FindText(Text, I18N::Game::Haha) || FindText(Text, I18N::Game::Hehe) || FindText(Text, I18N::Game::Hoho) || FindText(Text, I18N::Game::Hoho) || FindText(Text, I18N::Game::Hihi))
     {
         SetActionClass(c, o, PLAYER_SMILE1, AT_SMILE1);
-        SendRequestAction(Hero->Object, AT_SMILE1);
     }
     else if (FindText(Text, I18N::Game::Great) || FindText(Text, I18N::Game::OhYeah) || FindText(Text, I18N::Game::OhYeah320) || FindText(Text, I18N::Game::BeatIt))
     {
         SetActionClass(c, o, PLAYER_CHEER1, AT_CHEER1);
-        SendRequestAction(Hero->Object, AT_CHEER1);
     }
     else if (FindText(Text, I18N::Game::Win) || FindText(Text, I18N::Game::Win) || FindText(Text, I18N::Game::Victory) || FindText(Text, I18N::Game::Victory))
     {
         SetActionClass(c, o, PLAYER_WIN1, AT_WIN1);
-        SendRequestAction(Hero->Object, AT_WIN1);
     }
     else if (FindText(Text, I18N::Game::Sleep) || FindText(Text, I18N::Game::Sleep) || FindText(Text, I18N::Game::Tired) || FindText(Text, I18N::Game::Tired))
     {
         SetActionClass(c, o, PLAYER_SLEEP1, AT_SLEEP1);
-        SendRequestAction(Hero->Object, AT_SLEEP1);
     }
     else if (FindText(Text, I18N::Game::Cold) || FindText(Text, I18N::Game::Cold) || FindText(Text, I18N::Game::Hurt) || FindText(Text, I18N::Game::Hurt) || FindText(Text, I18N::Game::Hurt))
     {
         SetActionClass(c, o, PLAYER_COLD1, AT_COLD1);
-        SendRequestAction(Hero->Object, AT_COLD1);
     }
     else if (FindText(Text, I18N::Game::Again) || FindText(Text, I18N::Game::Again) || FindText(Text, I18N::Game::OK) || FindText(Text, I18N::Game::Great))
     {
         SetActionClass(c, o, PLAYER_AGAIN1, AT_AGAIN1);
-        SendRequestAction(Hero->Object, AT_AGAIN1);
     }
     else if (FindText(Text, I18N::Game::Respect) || FindText(Text, I18N::Game::Respect) || FindText(Text, I18N::Game::Defeated))
     {
         SetActionClass(c, o, PLAYER_RESPECT1, AT_RESPECT1);
-        SendRequestAction(Hero->Object, AT_RESPECT1);
     }
     else if (FindText(Text, I18N::Game::Sir) || FindText(Text, I18N::Game::Sir) || FindText(Text, L"/ㅡ") || FindText(Text, L"ㅡ^"))
     {
         SetActionClass(c, o, PLAYER_SALUTE1, AT_SALUTE1);
-        SendRequestAction(Hero->Object, AT_SALUTE1);
     }
     else if (FindText(Text, I18N::Game::Rush) || FindText(Text, I18N::Game::Rush) || FindText(Text, I18N::Game::GoGo) || FindText(Text, I18N::Game::GoGo))
     {
         SetActionClass(c, o, PLAYER_RUSH1, AT_RUSH1);
-        SendRequestAction(Hero->Object, AT_RUSH1);
     }
     else if (FindText(Text, I18N::Game::Hustle) || FindText(Text, L"hustle"))
     {
         SetActionClass(c, o, PLAYER_HUSTLE, AT_HUSTLE);
-        SendRequestAction(Hero->Object, AT_HUSTLE);
+    }
+    else if (ContainsDanceWord(Text))
+    {
+        SetActionClass(c, o, PLAYER_POINT_DANCE, AT_POINT_DANCE);
     }
     else if (FindText(Text, I18N::Game::ComeOn))
     {
         SetActionClass(c, o, PLAYER_PROVOCATION, AT_PROVOCATION);
-        SendRequestAction(Hero->Object, AT_PROVOCATION);
     }
     else if (FindText(Text, I18N::Game::Great))
     {
         SetActionClass(c, o, PLAYER_CHEERS, AT_CHEERS);
-        SendRequestAction(Hero->Object, AT_CHEERS);
     }
     else if (FindText(Text, I18N::Game::LookAround))
     {
         SetActionClass(c, o, PLAYER_LOOK_AROUND, AT_LOOK_AROUND);
-        SendRequestAction(Hero->Object, AT_LOOK_AROUND);
     }
     else if (FindText(Text, I18N::Game::TheForehead))
     {
