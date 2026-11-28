@@ -922,20 +922,6 @@
         "zh-CN": "晋升印章",
         "zh-TW": "晉升印章"
       },
-      "description": {
-        "en": "EXP gain 150%",
-        "de": "Erfahrungsgewinn 150%",
-        "es": "EXP gana incremento 150%",
-        "id": "Perolehan EXP 150%",
-        "ja": "経験値獲得 150%",
-        "pl": "Zdobywane Exp 150%",
-        "pt": "Aumento de ganho de EXP de 150%",
-        "ru": "Прирост опыта 150%",
-        "tl": "Nakukuhang EXP 150%",
-        "uk": "Збільшення досвіду 150%",
-        "zh-CN": "经验值获得 150%",
-        "zh-TW": "經驗值獲得 150%"
-      },
       "item": {
         "group": 13,
         "number": 43
@@ -1140,20 +1126,6 @@
         "zh-CN": "杰克灯笼的祝福",
         "zh-TW": "傑克燈籠的祝福"
       },
-      "description": {
-        "en": "Attack speed +10",
-        "de": "Angriffsgeschwindigkeit +10",
-        "es": "Incremento velocidad de ataque +10",
-        "id": "Kecepatan serangan +10",
-        "ja": "攻撃速度 +10",
-        "pl": "Szybkość ataku +10",
-        "pt": "Aumento de +10 na velocidade de ataque",
-        "ru": "Скорость атаки +10",
-        "tl": "Bilis ng pag-atake +10",
-        "uk": "Швидкість атаки +10",
-        "zh-CN": "攻击速度 +10",
-        "zh-TW": "攻擊速度 +10"
-      },
       "item": {
         "group": 14,
         "number": 46
@@ -1187,20 +1159,6 @@
         "uk": "Лють Джека О'Лантерна",
         "zh-CN": "杰克灯笼之怒",
         "zh-TW": "傑克燈籠之怒"
-      },
-      "description": {
-        "en": "Attack power +25",
-        "de": "Angriffskraft +25",
-        "es": "Incremento poder de ataque +25",
-        "id": "Kekuatan serangan +25",
-        "ja": "攻撃力 +25",
-        "pl": "Siła ataku +25",
-        "pt": "Aumento de +25 no poder de ataque",
-        "ru": "Сила атаки +25",
-        "tl": "Lakas ng pag-atake +25",
-        "uk": "Сила атаки +25",
-        "zh-CN": "攻击力 +25",
-        "zh-TW": "攻擊力 +25"
       },
       "item": {
         "group": 14,
@@ -1236,20 +1194,6 @@
         "zh-CN": "杰克灯笼的尖叫",
         "zh-TW": "傑克燈籠的尖叫"
       },
-      "description": {
-        "en": "Defense +100",
-        "de": "Verteidigung +100",
-        "es": "Incremento capacidad defensiva +100",
-        "id": "Pertahanan +100",
-        "ja": "防御力 +100",
-        "pl": "Obrona +100",
-        "pt": "Aumento de +100 na capacidade de defesa",
-        "ru": "Защита +100",
-        "tl": "Depensa +100",
-        "uk": "Захист +100",
-        "zh-CN": "防御力 +100",
-        "zh-TW": "防禦力 +100"
-      },
       "item": {
         "group": 14,
         "number": 48
@@ -1283,20 +1227,6 @@
         "uk": "Їжа Джека О'Лантерна",
         "zh-CN": "杰克灯笼的食物",
         "zh-TW": "傑克燈籠的食物"
-      },
-      "description": {
-        "en": "Maximum life +500",
-        "de": "Max. Leben +500",
-        "es": "Máximo Incremento de Vida +500",
-        "id": "Kehidupan maksimum +500",
-        "ja": "最大生命力 +500",
-        "pl": "Maks. życie +500",
-        "pt": "Aumento de +500 na vida máxima",
-        "ru": "Макс. жизнь +500",
-        "tl": "Max na buhay +500",
-        "uk": "Макс. життя +500",
-        "zh-CN": "最大生命值 +500",
-        "zh-TW": "最大生命 +500"
       },
       "item": {
         "group": 14,
@@ -1332,20 +1262,6 @@
         "zh-CN": "杰克灯笼的饮料",
         "zh-TW": "傑克燈籠的飲料"
       },
-      "description": {
-        "en": "Maximum mana +500",
-        "de": "Max. Mana +500",
-        "es": "Máximo incremento de Maná +500",
-        "id": "Mana maksimum +500",
-        "ja": "最大マナ +500",
-        "pl": "Maks. mana +500",
-        "pt": "Aumento de +500 na mana máxima",
-        "ru": "Макс. мана +500",
-        "tl": "Max na mana +500",
-        "uk": "Макс. мана +500",
-        "zh-CN": "最大魔法值 +500",
-        "zh-TW": "最大法力 +500"
-      },
       "item": {
         "group": 14,
         "number": 50
@@ -1380,20 +1296,6 @@
         "zh-CN": "晋升印章",
         "zh-TW": "晉升印章"
       },
-      "description": {
-        "en": "EXP gain 150%",
-        "de": "Erfahrungsgewinn 150%",
-        "es": "EXP gana incremento 150%",
-        "id": "Perolehan EXP 150%",
-        "ja": "経験値獲得 150%",
-        "pl": "Zdobywane Exp 150%",
-        "pt": "Aumento de ganho de EXP de 150%",
-        "ru": "Прирост опыта 150%",
-        "tl": "Nakukuhang EXP 150%",
-        "uk": "Збільшення досвіду 150%",
-        "zh-CN": "经验值获得 150%",
-        "zh-TW": "經驗值獲得 150%"
-      },
       "item": {
         "group": 13,
         "number": 43
@@ -1427,20 +1329,6 @@
         "uk": "Печатка багатства",
         "zh-CN": "财富印章",
         "zh-TW": "財富印章"
-      },
-      "description": {
-        "en": "EXP gain 200%\nItem gain 150%",
-        "de": "Erfahrungsgewinn 200%\nGegenstands-Drop 150%",
-        "es": "EXP gana incremento 200%\nÍtem gana incremento 150%",
-        "id": "Perolehan EXP 200%\nPerolehan item 150%",
-        "ja": "経験値獲得 200%\nアイテム獲得 150%",
-        "pl": "Zdobywane Exp 200%\nDrop przedmiotów 150%",
-        "pt": "Aumento de ganho de EXP de 200%\naumento de ganho de itens de 150%",
-        "ru": "Прирост опыта 200%\nВыпадение предметов 150%",
-        "tl": "Nakukuhang EXP 200%\nNakukuhang item 150%",
-        "uk": "Збільшення досвіду 200%\nВипадіння предметів 150%",
-        "zh-CN": "经验值获得 200%\n物品获得 150%",
-        "zh-TW": "經驗值獲得 200%\n物品獲得 150%"
       },
       "item": {
         "group": 13,
@@ -1575,20 +1463,6 @@
         "zh-CN": "迅捷卷轴",
         "zh-TW": "迅捷捲軸"
       },
-      "description": {
-        "en": "Attack speed +15",
-        "de": "Angriffsgeschwindigkeit +15",
-        "es": "Incremento velocidad de ataque +15",
-        "id": "Kecepatan serangan +15",
-        "ja": "攻撃速度 +15",
-        "pl": "Szybkość ataku +15",
-        "pt": "Aumento de +15 na velocidade de ataque",
-        "ru": "Скорость атаки +15",
-        "tl": "Bilis ng pag-atake +15",
-        "uk": "Швидкість атаки +15",
-        "zh-CN": "攻击速度 +15",
-        "zh-TW": "攻擊速度 +15"
-      },
       "item": {
         "group": 14,
         "number": 72
@@ -1620,20 +1494,6 @@
         "zh-CN": "防御卷轴",
         "zh-TW": "防禦捲軸"
       },
-      "description": {
-        "en": "Defense +60",
-        "de": "Verteidigung +60",
-        "es": "Incremento capacidad defensiva +60",
-        "id": "Pertahanan +60",
-        "ja": "防御力 +60",
-        "pl": "Obrona +60",
-        "pt": "Aumento de +60 na capacidade de defesa",
-        "ru": "Защита +60",
-        "tl": "Depensa +60",
-        "uk": "Захист +60",
-        "zh-CN": "防御力 +60",
-        "zh-TW": "防禦力 +60"
-      },
       "item": {
         "group": 14,
         "number": 73
@@ -1664,20 +1524,6 @@
         "uk": "Сувій гніву",
         "zh-CN": "愤怒卷轴",
         "zh-TW": "憤怒捲軸"
-      },
-      "description": {
-        "en": "Attack power +30",
-        "de": "Angriffskraft +30",
-        "es": "Incremento poder de ataque +30",
-        "id": "Kekuatan serangan +30",
-        "ja": "攻撃力 +30",
-        "pl": "Siła ataku +30",
-        "pt": "Aumento de +30 no poder de ataque",
-        "ru": "Сила атаки +30",
-        "tl": "Lakas ng pag-atake +30",
-        "uk": "Сила атаки +30",
-        "zh-CN": "攻击力 +30",
-        "zh-TW": "攻擊力 +30"
       },
       "item": {
         "group": 14,
@@ -1713,19 +1559,6 @@
         "zh-CN": "魔力卷轴",
         "zh-TW": "魔力捲軸"
       },
-      "description": {
-        "en": "Wizardry +30",
-        "de": "Zauberei +30",
-        "es": "Incremento de Magia +30",
-        "id": "Sihir +30",
-        "ja": "魔力 +30",
-        "pl": "Obrażenia magiczne +30",
-        "pt": "Aumento do poder de magia +30",
-        "ru": "Волшебство +30",
-        "uk": "Магія +30",
-        "zh-CN": "魔力 +30",
-        "zh-TW": "魔力 +30"
-      },
       "item": {
         "group": 14,
         "number": 75
@@ -1759,14 +1592,6 @@
         "uk": "Сувій здоров'я",
         "zh-CN": "生命卷轴",
         "zh-TW": "生命捲軸"
-      },
-      "description": {
-        "en": "HP +200",
-        "es": "Incremento HP +200",
-        "ja": "生命力 +200",
-        "pt": "Aumento de +200 em HP",
-        "zh-CN": "生命值 +200",
-        "zh-TW": "生命值 +200"
       },
       "item": {
         "group": 14,
@@ -1802,16 +1627,6 @@
         "zh-CN": "魔法卷轴",
         "zh-TW": "法力捲軸"
       },
-      "description": {
-        "en": "Mana +300",
-        "es": "Incremento de Maná +300",
-        "ja": "マナ +300",
-        "pt": "Aumento de +300 na mana",
-        "ru": "Мана +300",
-        "uk": "Мана +300",
-        "zh-CN": "魔法值 +300",
-        "zh-TW": "法力 +300"
-      },
       "item": {
         "group": 14,
         "number": 77
@@ -1845,20 +1660,6 @@
         "uk": "Еліксир сили",
         "zh-CN": "力量秘药",
         "zh-TW": "力量秘藥"
-      },
-      "description": {
-        "en": "Strength +50",
-        "de": "Stärke +50",
-        "es": "Estatus de Fuerza +50",
-        "id": "Kekuatan +50",
-        "ja": "力 +50",
-        "pl": "Siła +50",
-        "pt": "Atributo da força +50",
-        "ru": "Сила +50",
-        "tl": "Lakas +50",
-        "uk": "Сила +50",
-        "zh-CN": "力量 +50",
-        "zh-TW": "力量 +50"
       },
       "item": {
         "group": 14,
@@ -1894,19 +1695,6 @@
         "zh-CN": "敏捷秘药",
         "zh-TW": "敏捷秘藥"
       },
-      "description": {
-        "en": "Agility +50",
-        "de": "Beweglichkeit +50",
-        "es": "Estatus de Agilidad +50",
-        "id": "Kelincahan +50",
-        "ja": "敏捷性 +50",
-        "pl": "Zwinność +50",
-        "pt": "Atributo da agilidade +50",
-        "ru": "Ловкость +50",
-        "uk": "Спритність +50",
-        "zh-CN": "敏捷 +50",
-        "zh-TW": "敏捷 +50"
-      },
       "item": {
         "group": 14,
         "number": 79
@@ -1940,20 +1728,6 @@
         "uk": "Еліксир здоров'я",
         "zh-CN": "体力秘药",
         "zh-TW": "活力秘藥"
-      },
-      "description": {
-        "en": "Vitality +50",
-        "de": "Vitalität +50",
-        "es": "Estatus de Salud +50",
-        "id": "Vitalitas +50",
-        "ja": "体力 +50",
-        "pl": "Witalność +50",
-        "pt": "Atributo da vida +50",
-        "ru": "Жизненная сила +50",
-        "tl": "Kasiglahan +50",
-        "uk": "Життєздатність +50",
-        "zh-CN": "体力 +50",
-        "zh-TW": "活力 +50"
       },
       "item": {
         "group": 14,
@@ -1989,20 +1763,6 @@
         "zh-CN": "智力秘药",
         "zh-TW": "能量秘藥"
       },
-      "description": {
-        "en": "Energy +50",
-        "de": "Energie +50",
-        "es": "Estatus de Energía +50",
-        "id": "Energi +50",
-        "ja": "エナジー +50",
-        "pl": "Energia +50",
-        "pt": "Atributo da energia +50",
-        "ru": "Энергия +50",
-        "tl": "Enerhiya +50",
-        "uk": "Енергія +50",
-        "zh-CN": "智力 +50",
-        "zh-TW": "能量 +50"
-      },
       "item": {
         "group": 14,
         "number": 81
@@ -2036,20 +1796,6 @@
         "uk": "Еліксир контролю",
         "zh-CN": "统率秘药",
         "zh-TW": "統率秘藥"
-      },
-      "description": {
-        "en": "Command +50",
-        "de": "Führung +50",
-        "es": "Estatus de Control +50",
-        "id": "Perintah +50",
-        "ja": "統率 +50",
-        "pl": "Dowodzenie +50",
-        "pt": "Atributo do controle +50",
-        "ru": "Командование +50",
-        "tl": "Utos +50",
-        "uk": "Командування +50",
-        "zh-CN": "统率 +50",
-        "zh-TW": "統率 +50"
       },
       "item": {
         "group": 14,
@@ -2726,20 +2472,6 @@
         "zh-CN": "樱花酒",
         "zh-TW": "櫻花酒"
       },
-      "description": {
-        "en": "Maximum mana +700",
-        "de": "Max. Mana +700",
-        "es": "Máximo incremento de Maná +700",
-        "id": "Mana maksimum +700",
-        "ja": "最大マナ +700",
-        "pl": "Maks. mana +700",
-        "pt": "Aumento de +700 na mana máxima",
-        "ru": "Макс. мана +700",
-        "tl": "Max na mana +700",
-        "uk": "Макс. мана +700",
-        "zh-CN": "最大魔法值 +700",
-        "zh-TW": "最大法力 +700"
-      },
       "item": {
         "group": 14,
         "number": 85
@@ -2774,20 +2506,6 @@
         "zh-CN": "樱花年糕",
         "zh-TW": "櫻花年糕"
       },
-      "description": {
-        "en": "Maximum life +700",
-        "de": "Max. Leben +700",
-        "es": "Máximo Incremento de Vida +700",
-        "id": "Kehidupan maksimum +700",
-        "ja": "最大生命力 +700",
-        "pl": "Maks. życie +700",
-        "pt": "Aumento de +700 na vida máxima",
-        "ru": "Макс. жизнь +700",
-        "tl": "Max na buhay +700",
-        "uk": "Макс. життя +700",
-        "zh-CN": "最大生命值 +700",
-        "zh-TW": "最大生命 +700"
-      },
       "item": {
         "group": 14,
         "number": 86
@@ -2821,20 +2539,6 @@
         "uk": "Пелюстка сакури",
         "zh-CN": "樱花花瓣",
         "zh-TW": "櫻花花瓣"
-      },
-      "description": {
-        "en": "Attack power +40",
-        "de": "Angriffskraft +40",
-        "es": "Incremento poder de ataque +40",
-        "id": "Kekuatan serangan +40",
-        "ja": "攻撃力 +40",
-        "pl": "Siła ataku +40",
-        "pt": "Aumento de +40 no poder de ataque",
-        "ru": "Сила атаки +40",
-        "tl": "Lakas ng pag-atake +40",
-        "uk": "Сила атаки +40",
-        "zh-CN": "攻击力 +40",
-        "zh-TW": "攻擊力 +40"
       },
       "item": {
         "group": 14,
@@ -3127,20 +2831,6 @@
         "zh-CN": "治愈印章",
         "zh-TW": "治癒印章"
       },
-      "description": {
-        "en": "EXP gain 150%\nRecovers 5% life automatically",
-        "de": "Erfahrungsgewinn 150%\nStellt automatisch 5% Leben wieder her",
-        "es": "EXP gana incremento 150%\nrecuperación de Vida Automática al 5%",
-        "id": "Perolehan EXP 150%\nMemulihkan 5% kehidupan secara otomatis",
-        "ja": "経験値獲得 150%\n生命力を5%自動回復",
-        "pl": "Zdobywane Exp 150%\nAutomatycznie odnawia 5% życia",
-        "pt": "Aumento do ganho de EXP de 150%\nRecuperação automática de vida de 5%",
-        "ru": "Прирост опыта 150%\nАвтовосстановление 5% жизни",
-        "tl": "Nakukuhang EXP 150%\nAwtomatikong bumabawi ng 5% na buhay",
-        "uk": "Збільшення досвіду 150%\nАвтовідновлення 5% життя",
-        "zh-CN": "经验值获得 150%\n自动恢复 5% 生命值",
-        "zh-TW": "經驗值獲得 150%\n自動恢復 5% 生命"
-      },
       "item": {
         "group": 13,
         "number": 62
@@ -3180,20 +2870,6 @@
         "uk": "Печатка божественності",
         "zh-CN": "神圣印章",
         "zh-TW": "神聖印章"
-      },
-      "description": {
-        "en": "Item gain 150%\nRecovers 5% mana automatically",
-        "de": "Gegenstands-Drop 150%\nStellt automatisch 5% Mana wieder her",
-        "es": "Ítem gana incremento 150%\nrecuperación de Maná Automática al 5%",
-        "id": "Perolehan item 150%\nMemulihkan 5% mana secara otomatis",
-        "ja": "アイテム獲得 150%\nマナを5%自動回復",
-        "pl": "Drop przedmiotów 150%\nAutomatycznie odnawia 5% many",
-        "pt": "Aumento do ganho de itens de 150%\nRecuperação automática de mana de 5%",
-        "ru": "Выпадение предметов 150%\nАвтовосстановление 5% маны",
-        "tl": "Nakukuhang item 150%\nAwtomatikong bumabawi ng 5% na mana",
-        "uk": "Випадіння предметів 150%\nАвтовідновлення 5% мани",
-        "zh-CN": "物品获得 150%\n自动恢复 5% 魔法值",
-        "zh-TW": "物品獲得 150%\n自動恢復 5% 法力"
       },
       "item": {
         "group": 13,
@@ -3235,19 +2911,6 @@
         "zh-CN": "战斗卷轴",
         "zh-TW": "戰鬥捲軸"
       },
-      "description": {
-        "en": "Critical damage rate +20%",
-        "de": "Kritische Schadensrate +20%",
-        "es": "Incremento Daño Crítico al 20%",
-        "id": "Tingkat kerusakan kritis +20%",
-        "ja": "クリティカルダメージ確率 +20%",
-        "pl": "Szansa na obrażenia krytyczne +20%",
-        "pt": "Aumento do dano crítico em 20%",
-        "ru": "Шанс критического урона +20%",
-        "uk": "Шанс критичної шкоди +20%",
-        "zh-CN": "幸运一击伤害几率 +20%",
-        "zh-TW": "暴擊傷害率 +20%"
-      },
       "item": {
         "group": 14,
         "number": 97
@@ -3281,19 +2944,6 @@
         "uk": "Сувій сили",
         "zh-CN": "力量卷轴",
         "zh-TW": "力量捲軸"
-      },
-      "description": {
-        "en": "Excellent damage rate +20%",
-        "de": "Exzellente Schadensrate +20%",
-        "es": "Incremento Daño Excelente al 20%",
-        "id": "Tingkat kerusakan luar biasa +20%",
-        "ja": "エクセレントダメージ確率 +20%",
-        "pl": "Szansa na obrażenia doskonałe +20%",
-        "pt": "Aumento do dano excelente em 20%",
-        "ru": "Шанс отличного урона +20%",
-        "uk": "Шанс відмінної шкоди +20%",
-        "zh-CN": "卓越一击伤害几率 +20%",
-        "zh-TW": "卓越傷害率 +20%"
       },
       "item": {
         "group": 14,
@@ -3703,20 +3353,6 @@
         "zh-CN": "大师晋升印章",
         "zh-TW": "大師晉升印章"
       },
-      "description": {
-        "en": "EXP gain increase 150%",
-        "de": "Erfahrungsgewinn 150%",
-        "es": "EXP gana incremento 150%",
-        "id": "Perolehan EXP 150%",
-        "ja": "経験値獲得 150%",
-        "pl": "Zdobywane Exp 150%",
-        "pt": "Aumento de ganho de EXP de 150%",
-        "ru": "Прирост опыта 150%",
-        "tl": "Nakukuhang EXP 150%",
-        "uk": "Збільшення досвіду 150%",
-        "zh-CN": "经验值获得 150%",
-        "zh-TW": "經驗值獲得 150%"
-      },
       "item": {
         "group": 13,
         "number": 93
@@ -3750,20 +3386,6 @@
         "uk": "Печатка багатства майстра",
         "zh-CN": "大师财富印章",
         "zh-TW": "大師財富印章"
-      },
-      "description": {
-        "en": "EXP gain increase 200%\nItem gain increase 150%",
-        "de": "Erfahrungsgewinn 200%\nGegenstands-Drop 150%",
-        "es": "EXP gana incremento 200%\nÍtem gana incremento 150%",
-        "id": "Perolehan EXP 200%\nPerolehan item 150%",
-        "ja": "経験値獲得 200%\nアイテム獲得 150%",
-        "pl": "Zdobywane Exp 200%\nDrop przedmiotów 150%",
-        "pt": "Aumento de ganho de EXP de 200%\naumento de ganho de itens de 150%",
-        "ru": "Прирост опыта 200%\nВыпадение предметов 150%",
-        "tl": "Nakukuhang EXP 200%\nNakukuhang item 150%",
-        "uk": "Збільшення досвіду 200%\nВипадіння предметів 150%",
-        "zh-CN": "经验值获得 200%\n物品获得 150%",
-        "zh-TW": "經驗值獲得 200%\n物品獲得 150%"
       },
       "item": {
         "group": 13,
@@ -4382,20 +4004,6 @@
         "zh-CN": "财富印章",
         "zh-TW": "財富印章"
       },
-      "description": {
-        "en": "Item drop rate 150%",
-        "de": "Gegenstands-Droprate 150%",
-        "es": "Incrementa Índice de Ítem Suelto al 150%.",
-        "id": "Tingkat drop item 150%",
-        "ja": "アイテムドロップ率 150%",
-        "pl": "Drop przedmiotów 150%",
-        "pt": "Aumenta a taxa de itens para 150%.",
-        "ru": "Выпадение предметов 150%",
-        "tl": "Item Drop Rate 150%",
-        "uk": "Випадіння предметів 150%",
-        "zh-CN": "物品掉落率 150%",
-        "zh-TW": "物品掉落率 150%"
-      },
       "item": {
         "group": 13,
         "number": 116
@@ -4464,20 +4072,6 @@
         "uk": "Сувій зцілення",
         "zh-CN": "治愈卷轴",
         "zh-TW": "治癒捲軸"
-      },
-      "description": {
-        "en": "HP regeneration +3%\nHP +100",
-        "de": "HP-Regeneration +3%\nHP +100",
-        "es": "Regeneración de HP +3%\nHP +100",
-        "id": "Regenerasi HP +3%\nHP +100",
-        "ja": "生命力回復 +3%\n生命力 +100",
-        "pl": "Regeneracja HP +3%\nHP +100",
-        "pt": "+3% de regeneração de HP\n+100 HP",
-        "ru": "Восстановление HP +3%\nHP +100",
-        "tl": "Regenerasyon ng HP +3%\nHP +100",
-        "uk": "Відновлення HP +3%\nHP +100",
-        "zh-CN": "生命值恢复 +3%\n生命值 +100",
-        "zh-TW": "生命值恢復 +3%\n生命值 +100"
       },
       "item": {
         "group": 14,

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "GameLogic/Buffs/BuffValues.h"
+#include "GameLogic/Buffs/BuffServerValues.h"
 #include "Core/Utilities/Random.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -1810,7 +1811,13 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         Character.MagicDamageMin += value;
         Character.MagicDamageMax += value;
     }
-    if (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower))
+    // The server's value, which knows the caster, of every buff that raises it (Expansion of Wizardry and its master
+    // skills' buffs, buffs design B24); the hero's own formula for the base buff without it.
+    if (const std::optional<double> sent = GameLogic::Buffs::GetHeroSentTotal("minimumWizBaseDmg"); sent.has_value())
+    {
+        Character.MagicDamageMin += GameLogic::Buffs::CutToWhole(*sent);
+    }
+    else if (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower))
     {
         int iAdd_MP = (CharacterAttribute->Energy / 9) * 0.2f;
         Character.MagicDamageMin += iAdd_MP;
@@ -2285,10 +2292,17 @@ void CHARACTER_MACHINE::CalculateBasicState()
     Character.AddVitality += static_cast<WORD>(GameLogic::Buffs::GetHeroPowerUpTotal("totalVitality"));
     Character.AddEnergy += static_cast<WORD>(GameLogic::Buffs::GetHeroPowerUpTotal("totalEnergy"));
     Character.AddCharisma += static_cast<WORD>(GameLogic::Buffs::GetHeroPowerUpTotal("totalLeadership"));
-    if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
+    // The server's value, which knows the caster, of every buff that raises it (Increase Health and its master skill's
+    // buff, buffs design B24); the hero's own formula for the base buff without it.
+    if (const std::optional<double> sent = GameLogic::Buffs::GetHeroSentTotal("totalVitality"); sent.has_value())
+    {
+        Character.AddVitality += static_cast<WORD>(std::max(0, GameLogic::Buffs::CutToWhole(*sent)));
+    }
+    else if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
     {
         WORD _AddStat = 0;
-        if (Character.Energy >= 132) {
+        if (Character.Energy >= 132)
+        {
             _AddStat = (WORD)(30 + (WORD)((Character.Energy - 132) / 10));
         }
         if (_AddStat > 200)

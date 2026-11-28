@@ -1,12 +1,18 @@
-
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Buffs/BuffValues.h"
 #include "Data/GameData/BuffData/BuffDatabase.h"
 #include "w_BuffTimeControl.h"
-#include "Core/Time/FrameTimerScheduler.h"
 #include "I18N/All.h"
+
+#include <utility>
+
+namespace
+{
+constexpr std::uint64_t MillisecondsPerSecond = 1000;
+constexpr DWORD SecondsPerMinute = 60;
+} // namespace
 
 BuffTimeControlPtr BuffTimeControl::Make()
 {
@@ -14,155 +20,113 @@ BuffTimeControlPtr BuffTimeControl::Make()
     return bufftimecontrol;
 }
 
-BuffTimeControl::BuffTimeControl()
+BuffTimeControl::BuffTimeControl() : m_clock([] { return static_cast<std::uint64_t>(GetTickCount64()); }) {}
+
+BuffTimeControl::~BuffTimeControl() = default;
+
+void BuffTimeControl::SetClock(std::function<std::uint64_t()> clock)
 {
+    m_clock = std::move(clock);
 }
 
-BuffTimeControl::~BuffTimeControl()
+DWORD BuffTimeControl::GetFallbackSeconds(eBuffState bufftype) const
 {
-    for (auto iter = m_BuffTimeList.begin(); iter != m_BuffTimeList.end(); )
+    // Without a time from the server, an item buff lasts its duration in Buffs.json; another one has no time.
+    const Data::Buffs::BuffDefinition* buff = g_BuffDatabase.Find(bufftype);
+    const int duration = buff != nullptr && buff->item ? GameLogic::Buffs::GetDuration(*buff) : 0;
+    return duration > 0 ? static_cast<DWORD>(duration) : 0;
+}
+
+void BuffTimeControl::Start(eBuffState bufftype, DWORD seconds, TimeSource source)
+{
+    BuffTime& time = m_times[static_cast<int>(bufftype)];
+    time.fullMilliseconds = static_cast<std::uint64_t>(seconds) * MillisecondsPerSecond;
+    time.startTick = m_clock();
+    time.source = source;
+}
+
+void BuffTimeControl::RegisterBuffTime(eBuffState bufftype, DWORD seconds)
+{
+    if (seconds > 0)
     {
-        auto tempiter = iter;
-        ++iter;
-
-        auto bufftimetype = static_cast<eBuffTimeType>((*tempiter).first);
-
-        Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
-        m_BuffTimeList.erase(tempiter);
+        Start(bufftype, seconds, TimeSource::Sent);
+        return;
     }
-
-    m_BuffTimeList.clear();
-}
-
-eBuffTimeType BuffTimeControl::CheckBuffTimeType(eBuffState bufftype)
-{
-    if (g_IsBuffClass(bufftype) == eBuffClass_Count)
+    const DWORD fallback = GetFallbackSeconds(bufftype);
+    if (fallback > 0)
     {
-        return eBuffTime_None;
-    }
-
-    BuffInfo bInfo = g_BuffInfo(bufftype);
-
-    return eBuffTimeType(1005 + bInfo.s_BuffEffectType);
-}
-
-DWORD BuffTimeControl::GetBuffEventTime(eBuffTimeType bufftimetype)
-{
-    return 1000;
-}
-
-DWORD BuffTimeControl::GetBuffMaxTime(eBuffState bufftype, DWORD curbufftime)
-{
-    if (curbufftime == 0)
-    {
-        // Without a time from the server, an item buff lasts its duration in Buffs.json; another one has no time.
-        const Data::Buffs::BuffDefinition* buff = g_BuffDatabase.Find(bufftype);
-        const int duration = buff != nullptr && buff->item ? GameLogic::Buffs::GetDuration(*buff) : 0;
-        return duration > 0 ? static_cast<DWORD>(duration) : static_cast<DWORD>(-1);
-    }
-
-    return curbufftime;
-}
-
-bool BuffTimeControl::IsBuffTime(eBuffTimeType bufftype)
-{
-    auto iter = m_BuffTimeList.find(bufftype);
-
-    if (iter == m_BuffTimeList.end())
-    {
-        return false;
+        Start(bufftype, fallback, TimeSource::Fallback);
     }
     else
     {
-        return true;
+        m_times.erase(static_cast<int>(bufftype));
     }
 }
 
-void BuffTimeControl::RegisterBuffTime(eBuffState bufftype, DWORD curbufftime)
+void BuffTimeControl::SetSentTime(eBuffState bufftype, std::uint32_t seconds)
 {
-    eBuffTimeType  bufftimetype = CheckBuffTimeType(bufftype);
-
-    curbufftime = GetBuffMaxTime(bufftype, curbufftime);
-
-    if (bufftimetype == eBuffTime_None || curbufftime == -1)
+    if (seconds > 0)
     {
-        return;
+        Start(bufftype, seconds, TimeSource::Sent);
     }
-
-    if (IsBuffTime(bufftimetype)) return;
-
-    BuffTimeInfo  buffinfo;
-    buffinfo.s_BuffType = bufftype;
-    buffinfo.s_CurBuffTime = curbufftime * 1000;
-    buffinfo.s_EventBuffTime = GetTickCount();
-
-    m_BuffTimeList.insert(std::make_pair(bufftimetype, buffinfo));
-
-    // Tick the buff's remaining time every 900ms; the timer removes itself once
-    // the buff expires (replaces the per-buff SetTimer/WM_TIMER).
-    Core::Time::FrameTimerScheduler::Instance().SetRepeating(bufftimetype, 900,
-        [this, bufftimetype]
-        {
-            if (!CheckBuffTime(bufftimetype))
-                Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
-        });
+    else
+    {
+        m_times.erase(static_cast<int>(bufftype));
+    }
 }
 
 bool BuffTimeControl::UnRegisterBuffTime(eBuffState bufftype)
 {
-    eBuffTimeType  bufftimetype = CheckBuffTimeType(bufftype);
+    return m_times.erase(static_cast<int>(bufftype)) > 0;
+}
 
-    auto iter = m_BuffTimeList.find(bufftimetype);
+void BuffTimeControl::Clear()
+{
+    m_times.clear();
+}
 
-    if (iter != m_BuffTimeList.end())
+std::optional<std::uint64_t> BuffTimeControl::GetRemainingMilliseconds(eBuffState bufftype) const
+{
+    const auto found = m_times.find(static_cast<int>(bufftype));
+    if (found == m_times.end())
     {
-        Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[Buff End] No. %d\r\n", bufftimetype);
-
-        m_BuffTimeList.erase(iter);
-        return true;
+        return std::nullopt;
     }
+    const std::uint64_t passed = m_clock() - found->second.startTick;
+    return passed < found->second.fullMilliseconds ? found->second.fullMilliseconds - passed : 0;
+}
 
-    return false;
+std::optional<std::uint64_t> BuffTimeControl::GetFullMilliseconds(eBuffState bufftype) const
+{
+    const auto found = m_times.find(static_cast<int>(bufftype));
+    return found != m_times.end() ? std::optional<std::uint64_t>(found->second.fullMilliseconds) : std::nullopt;
+}
+
+std::optional<BuffTimeControl::TimeSource> BuffTimeControl::GetSource(eBuffState bufftype) const
+{
+    const auto found = m_times.find(static_cast<int>(bufftype));
+    return found != m_times.end() ? std::optional<TimeSource>(found->second.source) : std::nullopt;
 }
 
 void BuffTimeControl::GetBuffStringTime(eBuffState bufftype, std::wstring& timeText)
 {
-    for (BuffTimeInfoMap::iterator iter = m_BuffTimeList.begin(); iter != m_BuffTimeList.end(); ++iter)
+    const std::optional<std::uint64_t> remaining = GetRemainingMilliseconds(bufftype);
+    if (!remaining.has_value() || *remaining == 0)
     {
-        BuffTimeInfo& bufftimeinfo = (*iter).second;
-
-        if (bufftimeinfo.s_BuffType == bufftype)
-        {
-            float fTime = bufftimeinfo.s_CurBuffTime * 0.001f;
-            GetStringTime(fTime, timeText, true);
-        }
+        return;
     }
-}
-
-void BuffTimeControl::GetBuffStringTime(DWORD type, std::wstring& timeText, bool issecond)
-{
-    auto iter = m_BuffTimeList.find(type);
-
-    if (iter != m_BuffTimeList.end())
+    // Whole seconds, rounded up: a buff with half a second left shows 1, not 0.
+    const auto seconds = static_cast<DWORD>((*remaining + MillisecondsPerSecond - 1) / MillisecondsPerSecond);
+    if (seconds < SecondsPerMinute)
     {
-        BuffTimeInfo& bufftimeinfo = (*iter).second;
-        float fTime = bufftimeinfo.s_CurBuffTime * 0.001f;
-        GetStringTime(fTime, timeText, issecond);
+        // The buff's last minute counts down in seconds (buffs design B7, P3); item tooltips keep "Less than 1
+        // minute" for a duration this short.
+        wchar_t buffer[100];
+        mu_swprintf(buffer, L"%d %ls", seconds, I18N::Game::Second);
+        timeText = buffer;
+        return;
     }
-}
-
-const DWORD BuffTimeControl::GetBuffTime(DWORD type)
-{
-    auto iter = m_BuffTimeList.find(type);
-
-    if (iter != m_BuffTimeList.end())
-    {
-        BuffTimeInfo& bufftimeinfo = (*iter).second;
-
-        return bufftimeinfo.s_CurBuffTime;
-    }
-    return 0;
+    GetStringTime(seconds, timeText, true);
 }
 
 void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isSecond)
@@ -220,37 +184,3 @@ void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isS
         }
     }
 }
-
-bool BuffTimeControl::CheckBuffTime(DWORD type)
-{
-    auto iter = m_BuffTimeList.find(type);
-
-    if (iter != m_BuffTimeList.end())
-    {
-        BuffTimeInfo& bufftimeinfo = (*iter).second;
-
-        DWORD iCurBufftime = bufftimeinfo.s_CurBuffTime;
-        if (iCurBufftime > GetTickCount() - bufftimeinfo.s_EventBuffTime)
-        {
-            iCurBufftime -= GetTickCount() - bufftimeinfo.s_EventBuffTime;
-        }
-        else
-        {
-            iCurBufftime = 0;
-        }
-        bufftimeinfo.s_EventBuffTime = GetTickCount();
-
-        if (iCurBufftime <= 0)
-        {
-            bufftimeinfo.s_CurBuffTime = 0;
-            return false;
-        }
-        else
-        {
-            bufftimeinfo.s_CurBuffTime = iCurBufftime;
-            return true;
-        }
-    }
-    return false;
-}
-

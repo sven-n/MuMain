@@ -4,6 +4,9 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
+#include "GameLogic/Buffs/BuffTooltipLines.h"
+
+#include <cstdint>
 
 #include <vector>
 
@@ -69,6 +72,18 @@ namespace mu::ui::window
         // The hovered slot's buff, in the shared tooltip.
         UI::RmlBridge::ElementTooltip m_Tooltip;
         void SyncTooltip();
+        // The hovered buff's value lines, kept until the buff, the server's values, the texts or the hero's
+        // attributes change.
+        struct ValueLinesCache
+        {
+            int buff = -1;
+            std::uint32_t sentVersion = 0;
+            std::uint32_t textsVersion = 0;
+            GameLogic::Buffs::BuffCasterStats stats{};
+            std::vector<GameLogic::Buffs::BuffTooltipLine> lines;
+        };
+        ValueLinesCache m_ValueLines;
+        const std::vector<GameLogic::Buffs::BuffTooltipLine>& HoveredValueLines(eBuffState buff);
 
         void SyncRmlModel();
         void OnBuffRightClick(int slot);
