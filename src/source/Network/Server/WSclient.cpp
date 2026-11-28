@@ -6,6 +6,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
 #include "UI/Chat/ChatMessages.h"
+#include "UI/Chat/IncomingFilters.h"
 #include "UI/Combat/SiegeUpdates.h"
 #include "UI/Events/DoppelgangerUpdates.h"
 #include "UI/Events/EmpireGuardianUpdates.h"
@@ -2100,6 +2101,11 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText, messageSize);
     Text[messageSize] = L'\0';
 
+    if (!UI::Chat::FilterIncoming(UI::Chat::IncomingKind::Whisper, ID, Text))
+    {
+        return;
+    }
+
     UI::Chat::Whisper::Register(10, ID);
 
     if (UI::Options::IsWhisperSoundOn())
@@ -2156,6 +2162,15 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     auto Data = (LPPRECEIVE_NOTICE)ReceiveBuffer;
     wchar_t Text[256]{};
     CMultiLanguage::ConvertFromUtf8(Text, Data->Notice);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%ls)]", Text);
+
+    const UI::Chat::IncomingKind kind = Data->Result == 1   ? UI::Chat::IncomingKind::System
+                                        : Data->Result == 2 ? UI::Chat::IncomingKind::Guild
+                                                            : UI::Chat::IncomingKind::Banner;
+    if (!UI::Chat::FilterIncoming(kind, L"", Text))
+    {
+        return;
+    }
 
     if (Data->Result == 0)
     {
@@ -2188,8 +2203,6 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
                                     Data->Color);
         }
     }
-
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%ls)]", Text);
 }
 
 void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)

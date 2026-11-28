@@ -54,3 +54,10 @@ add_test(
     COMMAND "${CMAKE_COMMAND}" "-DSDL3_TTF_SOURCE=${SDL3_TTF_SOURCE}"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_sdl_ttf_vendored_versions.cmake"
 )
+
+mu_add_test(
+    NAME incoming_filter_tests
+    SOURCES
+        test_incoming_filters.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Chat/IncomingFilters.cpp
+)
