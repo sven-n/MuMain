@@ -43,6 +43,7 @@ void BuffLineTextTable::SetTexts(Items::ItemOptionTexts texts, std::string_view 
 void BuffLineTextTable::SetDisplayLocale(std::string_view locale)
 {
     m_locale = std::string(locale);
+    ++m_version;
     const auto resolve = [&](std::string_view key)
     {
         const LocalizedString* text = m_texts.Find(key);

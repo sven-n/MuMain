@@ -765,3 +765,43 @@ TEST_CASE("Master skills: the file reads back as written, and its checks find wh
                                            issues);
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "masterSkills[2].castsBuff", "no buff of Buffs.json"));
 }
+
+TEST_CASE(
+    "Buffs: each attribute OpenMU has carries OpenMU's id, read from the sent bytes (buffs design B22) [data][buffs]")
+{
+    using Data::Buffs::BuffAttributes;
+    using Data::Buffs::FindBuffAttribute;
+    using Data::Buffs::FindBuffAttributeByOpenMuId;
+    using Data::Buffs::IsOpenMuIdText;
+    using Data::Buffs::ParseOpenMuId;
+
+    std::set<std::string_view> ids;
+    for (const Data::Buffs::BuffAttribute& attribute : BuffAttributes)
+    {
+        CAPTURE(attribute.name);
+        if (attribute.openMuId.empty())
+        {
+            continue;
+        }
+        CHECK(IsOpenMuIdText(attribute.openMuId));
+        CHECK(ids.insert(attribute.openMuId).second);
+        CHECK(FindBuffAttributeByOpenMuId(ParseOpenMuId(attribute.openMuId)) == FindBuffAttribute(attribute.name));
+    }
+    CHECK(ids.size() == 46);
+
+    // Taken from OpenMU's Stats.cs; the server sends an id as the bytes of its text form.
+    CHECK(BuffAttributes[FindBuffAttribute("criticalDamageBonus")].openMuId == "33F53519-16F3-44C2-9D36-432C36329C78");
+    CHECK(BuffAttributes[FindBuffAttribute("defenseBase")].openMuId == "EB098C46-60D4-4CA6-BBD4-5B6270A1407B");
+    CHECK(BuffAttributes[FindBuffAttribute("maximumWizBaseDmgIncrease")].openMuId ==
+          "44B8236A-BF5B-4082-BA8B-5DEDA1458D33"); // MaximumWizBaseDmg
+    const Data::Buffs::OpenMuAttributeId sent{0x33, 0xF5, 0x35, 0x19, 0x16, 0xF3, 0x44, 0xC2,
+                                              0x9D, 0x36, 0x43, 0x2C, 0x36, 0x32, 0x9C, 0x78};
+    CHECK(FindBuffAttributeByOpenMuId(sent) == FindBuffAttribute("criticalDamageBonus"));
+    CHECK(Data::Buffs::FormatOpenMuId(sent) == L"33F53519-16F3-44C2-9D36-432C36329C78");
+    CHECK(FindBuffAttributeByOpenMuId(Data::Buffs::OpenMuAttributeId{}) == Data::Buffs::NoBuffAttribute);
+    CHECK(BuffAttributes[FindBuffAttribute("mobility")].openMuId.empty());
+
+    CHECK_FALSE(IsOpenMuIdText("33F53519-16F3-44C2-9D36-432C36329C7"));
+    CHECK_FALSE(IsOpenMuIdText("33F53519+16F3-44C2-9D36-432C36329C78"));
+    CHECK_FALSE(IsOpenMuIdText("33F53519-16F3-44C2-9D36-432C36329CXY"));
+}

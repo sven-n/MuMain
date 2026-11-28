@@ -17,6 +17,8 @@
 #include "Network/Server/ServerListManager.h"
 #include "I18N/All.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Buffs/BuffServerValues.h"
+#include "GameLogic/Buffs/BuffValues.h"
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -758,11 +760,24 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
     {
-        int nTemp = CharacterAttribute->Strength + CharacterAttribute->AddStrength
-            + CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-        float fTemp = int(CharacterAttribute->Energy / 30) / 100.f;
-        iAttackDamageMin += nTemp / 7 * fTemp;
-        iAttackDamageMax += nTemp / 4 * fTemp;
+        // The server's bonuses times its mana multiplier, as OpenMU chains them (buffs design B21, B24); the hero's
+        // own formula without them.
+        const std::optional<double> mana = GameLogic::Buffs::GetHeroSentTotal("berserkerManaMultiplier");
+        const std::optional<double> minBonus = GameLogic::Buffs::GetHeroSentTotal("berserkerMinPhysDmgBonus");
+        const std::optional<double> maxBonus = GameLogic::Buffs::GetHeroSentTotal("berserkerMaxPhysDmgBonus");
+        if (mana.has_value() && minBonus.has_value() && maxBonus.has_value())
+        {
+            iAttackDamageMin += GameLogic::Buffs::CutToWhole(*minBonus * *mana);
+            iAttackDamageMax += GameLogic::Buffs::CutToWhole(*maxBonus * *mana);
+        }
+        else
+        {
+            int nTemp = CharacterAttribute->Strength + CharacterAttribute->AddStrength + CharacterAttribute->Dexterity +
+                        CharacterAttribute->AddDexterity;
+            float fTemp = int(CharacterAttribute->Energy / 30) / 100.f;
+            iAttackDamageMin += nTemp / 7 * fTemp;
+            iAttackDamageMax += nTemp / 4 * fTemp;
+        }
     }
 
     int iMinIndex = 0, iMaxIndex = 0, iMagicalIndex = 0;
@@ -1156,9 +1171,16 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
     const int defenseSuccessRate = static_cast<int>(CharacterAttribute->SuccessfulBlocking * defenseSuccessRateMultiplier);
 
     int nAdd_FulBlocking = 0;
-    if (g_isCharacterBuff((&Hero->Object), eBuff_Def_up_Ourforces))
+    // The server's value, which knows the caster, of every buff that raises it (Increase Block and its master skills'
+    // buffs, buffs design B24) is OpenMU's flat defense rate (it adds it to DefenseRatePvm); without it, the hero's own
+    // formula for the base buff raises the defense rate by a percent.
+    if (const std::optional<double> sent = GameLogic::Buffs::GetHeroSentTotal("increaseBlockBonus"); sent.has_value())
     {
-        int _AddStat = (10 + (float)(CharacterAttribute->Energy - 80) / 10);
+        nAdd_FulBlocking += GameLogic::Buffs::CutToWhole(*sent);
+    }
+    else if (g_isCharacterBuff((&Hero->Object), eBuff_Def_up_Ourforces))
+    {
+        int _AddStat = static_cast<int>(10 + (float)(CharacterAttribute->Energy - 80) / 10);
         if (_AddStat > 100)
             _AddStat = 100;
 
@@ -1478,7 +1500,12 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
         {
             int nTemp = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-            float fTemp = int(CharacterAttribute->Energy / 30) / 100.f;
+            // The server's multiplier: its mana multiplier plus Berserker Proficiency's part, as OpenMU adds them
+            // (buffs design B21, B24); the hero's own without it.
+            const std::optional<double> mana = GameLogic::Buffs::GetHeroSentTotal("berserkerManaMultiplier");
+            const double master = GameLogic::Buffs::GetHeroSentTotal("berserkerProficiencyMultiplier").value_or(0.0);
+            float fTemp =
+                mana.has_value() ? static_cast<float>(*mana + master) : int(CharacterAttribute->Energy / 30) / 100.f;
             iMagicDamageMin += nTemp / 9 * fTemp;
             iMagicDamageMax += nTemp / 4 * fTemp;
         }
@@ -1525,7 +1552,12 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
         {
             int nTemp = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-            float fTemp = int(CharacterAttribute->Energy / 30) / 100.f;
+            // The server's multiplier: its mana multiplier plus Berserker Strengthener's part, as OpenMU adds them
+            // (buffs design B21, B24); the hero's own without it.
+            const std::optional<double> mana = GameLogic::Buffs::GetHeroSentTotal("berserkerManaMultiplier");
+            const double master = GameLogic::Buffs::GetHeroSentTotal("berserkerCurseMultiplier").value_or(0.0);
+            float fTemp =
+                mana.has_value() ? static_cast<float>(*mana + master) : int(CharacterAttribute->Energy / 30) / 100.f;
             iCurseDamageMin += nTemp / 9 * fTemp;
             iCurseDamageMax += nTemp / 4 * fTemp;
         }

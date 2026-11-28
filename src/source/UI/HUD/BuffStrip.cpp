@@ -15,6 +15,9 @@
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Data/GameData/BuffData/BuffDatabase.h"
+#include "GameLogic/Buffs/BuffServerValues.h"
+#include "GameLogic/Buffs/BuffTooltipLines.h"
+#include "Data/GameData/BuffData/BuffLineTexts.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include <algorithm>
@@ -78,12 +81,15 @@ int CancellableSkill(eBuffState buff)
 
 // The original's tooltip rows (RenderBuffTooltip()): the buff's name in bold blue, its
 // description lines, then the remaining duration in purple if it has one.
-std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltip(eBuffState buff)
+// The value lines (buffs design B7, B8, B26) replace the description; a buff without them shows its description.
+std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltip(eBuffState buff,
+                                                       const std::vector<GameLogic::Buffs::BuffTooltipLine>& values)
 {
     using UI::RmlBridge::Tooltip::LineColor;
     std::vector<UI::RmlBridge::Tooltip::Line> lines;
     std::list<std::wstring> tooltipinfo;
     g_BuffToolTipString(tooltipinfo, buff);
+
     bool first = true;
     for (const std::wstring& text : tooltipinfo)
     {
@@ -94,7 +100,18 @@ std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltip(eBuffState buff)
             line.color = LineColor::Blue;
             line.bold = true;
         }
+        else if (!values.empty() && text != L"\n")
+        {
+            continue;
+        }
         first = false;
+        lines.push_back(std::move(line));
+    }
+    for (const GameLogic::Buffs::BuffTooltipLine& value : values)
+    {
+        UI::RmlBridge::Tooltip::Line line;
+        line.text = StringUtils::WideToNarrow(value.text.c_str());
+        line.color = value.note ? LineColor::Gray : LineColor::White;
         lines.push_back(std::move(line));
     }
 
@@ -254,7 +271,32 @@ void CBuffStrip::SyncTooltip()
     // Native RenderTipTextList() hung the box from the icon's centre, 20 of its 28 units down.
     UI::RmlBridge::ElementTooltip::Placement placement;
     placement.anchorAt = 20.f / 28.f;
-    m_Tooltip.Show(BuildTooltip(static_cast<eBuffState>(m_ShownBuffs[slot])), placement);
+    const auto buff = static_cast<eBuffState>(m_ShownBuffs[slot]);
+    m_Tooltip.Show(BuildTooltip(buff, HoveredValueLines(buff)), placement);
+}
+
+const std::vector<GameLogic::Buffs::BuffTooltipLine>& CBuffStrip::HoveredValueLines(eBuffState buff)
+{
+    // The tooltip shows every frame; its value lines change only with the buff, the values the server sent, the
+    // texts' language or the hero's attributes an own value reads (coding rules, section 12).
+    const std::uint32_t sentVersion = GameLogic::Buffs::HeroServerBuffValues().Version();
+    const std::uint32_t textsVersion = g_BuffLineTexts.Version();
+    const GameLogic::Buffs::BuffCasterStats stats = GameLogic::Buffs::GetHeroCasterStats();
+    if (m_ValueLines.buff != static_cast<int>(buff) || m_ValueLines.sentVersion != sentVersion ||
+        m_ValueLines.textsVersion != textsVersion || m_ValueLines.stats != stats)
+    {
+        m_ValueLines.buff = static_cast<int>(buff);
+        m_ValueLines.sentVersion = sentVersion;
+        m_ValueLines.textsVersion = textsVersion;
+        m_ValueLines.stats = stats;
+        m_ValueLines.lines.clear();
+        if (const Data::Buffs::BuffDefinition* entry = g_BuffDatabase.Find(buff); entry != nullptr)
+        {
+            m_ValueLines.lines =
+                GameLogic::Buffs::BuildBuffValueLines(*entry, GameLogic::Buffs::HeroServerBuffValues(), stats);
+        }
+    }
+    return m_ValueLines.lines;
 }
 
 void CBuffStrip::OnBuffRightClick(int slot)
