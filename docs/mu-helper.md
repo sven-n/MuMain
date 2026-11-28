@@ -65,3 +65,19 @@ removes the drop; if the server refuses it, for example because the inventory is
 full, the Helper tries again after three and then six seconds, and gives the drop up
 after a third refused request. Monsters that leave hunting range stay tracked but
 are not chased or counted until they are back in range.
+
+## Picking up socket items
+
+With *Pick Selected Items* on, *Socket items* also picks up every drop with at least
+the number of sockets in the field next to it: 2 picks up the items with 2, 3, 4 or
+5 sockets. The field takes 1 to 5; ticking the option with the field empty starts
+at 3, and saving with 0 turns the option off. Hovering the option shows what the
+number means. It adds to the other selected kinds (jewels, set items, excellent
+items, zen, extra items): a drop matching any of them is picked up.
+
+The range goes up to 5 because some servers have items with 5 sockets; on a server
+whose items have fewer, a higher minimum simply matches nothing. The client doesn't
+know the server's maximum. The setting is saved with the other Helper settings, in
+the first byte of what was unused padding (packet index 34, before the extra item names),
+so older saves keep it off; servers that run offline leveling from these settings
+can read it there.

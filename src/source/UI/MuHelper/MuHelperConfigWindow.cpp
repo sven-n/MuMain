@@ -38,6 +38,26 @@ namespace
 
     constexpr const char* NumberFieldIds[] = { "distance_time", "skill2_delay", "skill3_delay" };
 
+    // The fields only accept digits as they are typed, but a paste bypasses that filter.
+    int ParseNumberField(const Rml::String& text)
+    {
+        const std::wstring digits = StringUtils::NarrowToWide(UI::RmlBridge::KeepDigitsOnly(text));
+        return UI::MuHelper::ParseIntInput(digits.c_str());
+    }
+
+    // The minimum socket count the field next to "Socket items" asks for: 1-5, or 0 when it is empty or 0.
+    int SocketMinimumOfField(const Rml::String& text)
+    {
+        const int value = ParseNumberField(text);
+        return value <= 0 ? 0 : std::min(value, MaxPickSocketMinimum);
+    }
+
+    // What the field shows for a config: its minimum, or the default while the option is off.
+    Rml::String SocketMinimumText(int pickSocketMinimum, int defaultMinimum)
+    {
+        return std::to_string(pickSocketMinimum > 0 ? pickSocketMinimum : defaultMinimum);
+    }
+
     // The extra-item list's own reference rect (mu_helper_config.rcss). The wheel is only claimed
     // over it, as native's list did -- elsewhere over the panel it still reaches the camera.
 
@@ -82,6 +102,7 @@ bool CMuHelperConfigWindow::Create(CManager* pNewUIMng)
     model.distanceTime = std::to_string(config.iMaxSecondsAway);
     model.skill2Delay = std::to_string(config.aiSkillInterval[1]);
     model.skill3Delay = std::to_string(config.aiSkillInterval[2]);
+    model.pickSocketMinimum = SocketMinimumText(config.iPickSocketMinimum, DefaultPickSocketMinimum);
 
     Show(false);
 
@@ -242,6 +263,22 @@ void CMuHelperConfigWindow::OnToggle(const Rml::String& key)
     else if (key == "pick_zen") flip(c.bPickZen);
     else if (key == "pick_excellent") flip(c.bPickExcellent);
     else if (key == "pick_extra") flip(c.bPickExtraItems);
+    else if (key == "pick_socket")
+    {
+        // Ticking it takes the number of the field (1-5); an empty field or 0 starts at the default.
+        if (c.iPickSocketMinimum > 0)
+        {
+            c.iPickSocketMinimum = 0;
+        }
+        else
+        {
+            MuHelperConfigRmlModel& model = m_RmlView.GetModel();
+            const int fromField = SocketMinimumOfField(model.pickSocketMinimum);
+            c.iPickSocketMinimum = fromField > 0 ? fromField : DefaultPickSocketMinimum;
+            model.pickSocketMinimum = std::to_string(c.iPickSocketMinimum);
+            m_RmlView.MarkDirty("pick_socket_minimum");
+        }
+    }
     else if (key == "auto_friend") flip(c.bAutoAcceptFriend);
     else if (key == "auto_guild") flip(c.bAutoAcceptGuild);
     else if (key == "auto_defend") flip(c.bUseSelfDefense);
@@ -415,7 +452,9 @@ void CMuHelperConfigWindow::ApplyConfig()
     model.distanceTime = std::to_string(c.iMaxSecondsAway);
     model.skill2Delay = std::to_string(c.aiSkillInterval[1]);
     model.skill3Delay = std::to_string(c.aiSkillInterval[2]);
+    model.pickSocketMinimum = SocketMinimumText(c.iPickSocketMinimum, DefaultPickSocketMinimum);
     m_RmlView.MarkDirty("distance_time");
+    m_RmlView.MarkDirty("pick_socket_minimum");
     m_RmlView.MarkDirty("skill2_delay");
     m_RmlView.MarkDirty("skill3_delay");
 
@@ -463,6 +502,7 @@ void CMuHelperConfigWindow::Reset()
     c.bPickExcellent = false;
     c.bPickAncient = false;
     c.bPickExtraItems = false;
+    c.iPickSocketMinimum = 0;
     c.aExtraItems.clear();
     m_selectedExtraItem.clear();
 
@@ -483,15 +523,14 @@ void CMuHelperConfigWindow::SaveConfig()
     ConfigData& c = UI::MuHelper::StagedConfig();
     const MuHelperConfigRmlModel& model = m_RmlView.GetModel();
 
-    // The fields only accept digits as they are typed, but a paste bypasses that filter.
-    auto parse = [](const Rml::String& text)
+    c.iMaxSecondsAway = ParseNumberField(model.distanceTime);
+    c.aiSkillInterval[1] = ParseNumberField(model.skill2Delay);
+    c.aiSkillInterval[2] = ParseNumberField(model.skill3Delay);
+    // While "Socket items" is ticked the field is its minimum; 0 or an empty field turns it off.
+    if (c.iPickSocketMinimum > 0)
     {
-        const std::wstring digits = StringUtils::NarrowToWide(UI::RmlBridge::KeepDigitsOnly(text));
-        return UI::MuHelper::ParseIntInput(digits.c_str());
-    };
-    c.iMaxSecondsAway = parse(model.distanceTime);
-    c.aiSkillInterval[1] = parse(model.skill2Delay);
-    c.aiSkillInterval[2] = parse(model.skill3Delay);
+        c.iPickSocketMinimum = SocketMinimumOfField(model.pickSocketMinimum);
+    }
 
     for (int i = 0; i < 3; ++i)
     {
@@ -544,6 +583,7 @@ void CMuHelperConfigWindow::BindRmlModel(Rml::DataModelConstructor& c, MuHelperC
     checks.RegisterMember("pick_zen", &MuHelperConfigChecks::pickZen);
     checks.RegisterMember("pick_excellent", &MuHelperConfigChecks::pickExcellent);
     checks.RegisterMember("pick_extra", &MuHelperConfigChecks::pickExtra);
+    checks.RegisterMember("pick_socket", &MuHelperConfigChecks::pickSocket);
     checks.RegisterMember("auto_friend", &MuHelperConfigChecks::autoFriend);
     checks.RegisterMember("auto_guild", &MuHelperConfigChecks::autoGuild);
     checks.RegisterMember("auto_defend", &MuHelperConfigChecks::autoDefend);
@@ -561,6 +601,7 @@ void CMuHelperConfigWindow::BindRmlModel(Rml::DataModelConstructor& c, MuHelperC
     c.Bind("distance_time", &model.distanceTime);
     c.Bind("skill2_delay", &model.skill2Delay);
     c.Bind("skill3_delay", &model.skill3Delay);
+    c.Bind("pick_socket_minimum", &model.pickSocketMinimum);
     c.Bind("item_name", &model.itemName);
 
     auto item = c.RegisterStruct<MuHelperExtraItem>();
@@ -606,6 +647,8 @@ void CMuHelperConfigWindow::BindRmlModel(Rml::DataModelConstructor& c, MuHelperC
     labels.RegisterMember("pick_zen", &MuHelperConfigLabels::pickZen);
     labels.RegisterMember("pick_excellent", &MuHelperConfigLabels::pickExcellent);
     labels.RegisterMember("pick_extra", &MuHelperConfigLabels::pickExtra);
+    labels.RegisterMember("pick_socket", &MuHelperConfigLabels::pickSocket);
+    labels.RegisterMember("pick_socket_hint", &MuHelperConfigLabels::pickSocketHint);
     labels.RegisterMember("auto_friend", &MuHelperConfigLabels::autoFriend);
     labels.RegisterMember("auto_guild", &MuHelperConfigLabels::autoGuild);
     labels.RegisterMember("auto_defend", &MuHelperConfigLabels::autoDefend);
@@ -705,6 +748,8 @@ void CMuHelperConfigWindow::BindRmlModel(Rml::DataModelConstructor& c, MuHelperC
     l.pickZen = Narrow(I18N::Game::Zen);
     l.pickExcellent = Narrow(I18N::Game::ExcellentItem);
     l.pickExtra = Narrow(I18N::Game::AddExtraItem);
+    l.pickSocket = Narrow(I18N::Game::SocketItems);
+    l.pickSocketHint = Narrow(I18N::Game::SocketItemsHint);
     l.autoFriend = Narrow(I18N::Game::AutoAcceptFriend);
     l.autoGuild = Narrow(I18N::Game::AutoAcceptGuildMember);
     l.autoDefend = Narrow(I18N::Game::PVPCounterattack);
@@ -725,6 +770,8 @@ void CMuHelperConfigWindow::OnRmlBuilt()
         if (Rml::Element* field = m_RmlView.Document()->GetElementById(id))
             field->SetAttribute("maxlength", UI::MuHelper::MaxNumberDigits);
     }
+    if (Rml::Element* field = m_RmlView.Document()->GetElementById("pick_socket_minimum"))
+        field->SetAttribute("maxlength", PickSocketMinimumDigits);
     if (Rml::Element* field = m_RmlView.Document()->GetElementById("item_name"))
         field->SetAttribute("maxlength", MAX_ITEM_NAME);
 
@@ -811,6 +858,7 @@ void CMuHelperConfigWindow::SyncRmlModel()
     checks.pickZen = c.bPickZen;
     checks.pickExcellent = c.bPickExcellent;
     checks.pickExtra = c.bPickExtraItems;
+    checks.pickSocket = c.iPickSocketMinimum > 0;
     checks.autoFriend = c.bAutoAcceptFriend;
     checks.autoGuild = c.bAutoAcceptGuild;
     checks.autoDefend = c.bUseSelfDefense;

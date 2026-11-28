@@ -8888,6 +8888,9 @@ Vollbild stellt den Monitor auf die gewählte Auflösung um.</value>
   <data name="Socket items" xml:space="preserve">
     <value>Sockelgegenstände</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>Hebt Gegenstände mit mindestens so vielen Sockeln auf (1-5).</value>
+  </data>
   <data name="Item Refinement" xml:space="preserve">
     <value>Gegenstandsverfeinerung</value>
   </data>

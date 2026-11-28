@@ -1290,4 +1290,7 @@
   <data name="Warp resets %d" xml:space="preserve">
     <value>转生 %d</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>拾取镶嵌孔数量不少于此值的物品 (1-5)。</value>
+  </data>
 </root>

@@ -8868,6 +8868,9 @@
   <data name="Socket items" xml:space="preserve">
     <value>Розетки</value>
   </data>
+  <data name="Socket items hint" xml:space="preserve">
+    <value>Подбирает предметы, у которых не меньше указанного числа сокетов (1-5).</value>
+  </data>
   <data name="Item Refinement" xml:space="preserve">
     <value>Уточнение предмета</value>
   </data>

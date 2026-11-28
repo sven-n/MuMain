@@ -189,6 +189,10 @@
 .mhc-grid { display: flex; flex-direction: row; flex-wrap: wrap; padding-left: 5px; }
 #mhc_body .mhc-grid > .mh-check { flex: 0 0 50%; }
 #cb_pick_extra { margin-left: 5px; }
+/* "Socket items" and its minimum socket count (a number field, 1-5, like the delays). */
+.mhc-socket-row { display: flex; flex-direction: row; align-items: center; padding-left: 5px; }
+.mhc-socket-row > .mh-check { flex: 1 1 auto; }
+.mhc-socket-row > .mhc-number { flex: 0 0 auto; }
 .mhc-entry { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; padding-left: 16px; }
 .mhc-entry > .mhc-btn { margin-left: auto; }
 .mhc-string { position: relative; flex: 1 1 auto; min-width: 40px; height: 15px; min-height: 1.3em; margin-right: 4px; }

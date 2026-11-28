@@ -42,6 +42,7 @@ namespace mu::ui::window
         bool usePet = false, party = false, autoHeal = false, drainLife = false;
         bool repair = false, pickAll = false, pickSelected = false;
         bool pickJewel = false, pickAncient = false, pickZen = false, pickExcellent = false, pickExtra = false;
+        bool pickSocket = false;
         bool autoFriend = false, autoGuild = false, autoDefend = false;
 
         bool operator==(const MuHelperConfigChecks&) const = default;
@@ -70,7 +71,8 @@ namespace mu::ui::window
         Rml::String extensionUsed, extensionNone;
         Rml::String potion, longDistance, origPosition, delay, condition, combo, fallback, buffDuration;
         Rml::String usePet, party, autoHeal, drainLife, ravenCease, ravenAuto, ravenTogether;
-        Rml::String repair, pickAll, pickSelected, pickJewel, pickAncient, pickZen, pickExcellent, pickExtra;
+        Rml::String repair, pickAll, pickSelected, pickJewel, pickAncient, pickZen, pickExcellent, pickExtra,
+            pickSocket, pickSocketHint;
         Rml::String autoFriend, autoGuild, autoDefend;
         Rml::String setting, add, remove, save, init, closeTip;
     };
@@ -91,6 +93,7 @@ namespace mu::ui::window
         Rml::String distanceTime;
         Rml::String skill2Delay;
         Rml::String skill3Delay;
+        Rml::String pickSocketMinimum; // the number field next to "Socket items", 1-5
         Rml::String itemName;
         std::vector<MuHelperExtraItem> extraItems;
 
@@ -110,6 +113,8 @@ namespace mu::ui::window
         static constexpr int WindowWidth = 190;
         static constexpr int WindowHeight = 429;
         static constexpr int SkillSlotCount = 6;
+        static constexpr int DefaultPickSocketMinimum = 3;
+        static constexpr int PickSocketMinimumDigits = 1;
 
         CMuHelperConfigWindow();
         ~CMuHelperConfigWindow() override;
