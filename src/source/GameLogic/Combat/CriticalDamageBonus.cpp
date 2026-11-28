@@ -4,6 +4,7 @@
 
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "GameLogic/Buffs/BuffServerValues.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/SocketSystem.h"
@@ -91,7 +92,18 @@ bool KnowsCriticalDamageSkill()
 // can cast it too counts with the hero's values.
 void AddOwnBuff(CriticalDamageBonus& bonus)
 {
-    if (Hero == nullptr || CharacterAttribute == nullptr || !HasCriticalDamageBuff() || !KnowsCriticalDamageSkill())
+    if (Hero == nullptr || CharacterAttribute == nullptr || !HasCriticalDamageBuff())
+    {
+        return;
+    }
+    // The server's value counts for any caster, a party member too (buffs design B24).
+    if (const std::optional<double> sent = GameLogic::Buffs::GetHeroSentTotal("criticalDamageBonus"); sent.has_value())
+    {
+        bonus.buffSkill = AT_SKILL_ADD_CRITICAL;
+        bonus.buff = static_cast<float>(*sent);
+        return;
+    }
+    if (!KnowsCriticalDamageSkill())
     {
         return;
     }

@@ -5,6 +5,8 @@
 #include "ClientDataScope.h"
 #include "HeroScope.h"
 #include "TooltipDataScope.h"
+#include "CharacterMachineScope.h"
+#include "Network/Server/WSclient.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
@@ -15,13 +17,22 @@
 #include "Data/GameData/SkillData/MasterSkillsJson.h"
 #include "GameLogic/Buffs/BuffValues.h"
 #include "GameLogic/Buffs/SkillBuffValues.h"
+#include "GameLogic/Buffs/BuffServerValues.h"
+#include "GameLogic/Buffs/BuffTooltipLines.h"
+#include "GameLogic/Buffs/w_BuffTimeControl.h"
 #include "GameLogic/Buffs/w_Buff.h"
 #include "UI/HUD/Skills/SkillBuffLines.h"
 
 #include <algorithm>
+#include <bit>
+#include <cstdint>
 #include <filesystem>
 #include <limits>
+#include <memory>
+#include <span>
 #include <string>
+#include <string_view>
+#include <tuple>
 #include <vector>
 
 // The skill buffs' values (Data/Buffs/Buffs.json, buffs PR 2b): OpenMU's numbers with the hero as the caster, the
@@ -524,4 +535,342 @@ TEST_CASE("MasterSkills.json's check finds a skill's buff as the tooltip does, d
     INFO(field);
     CHECK(std::any_of(issues.begin(), issues.end(), [&](const Data::Items::ItemDataIssue& issue)
                       { return issue.field == field && issue.message.find("berserker (81)") != std::string::npos; }));
+}
+
+namespace
+{
+// An extended C1 07 (MUnique/OpenMU#1476) for buff `buff` on player 0x1234 with `seconds` left and these values.
+std::vector<std::uint8_t>
+ExtendedStatus(int buff, std::uint32_t seconds,
+               std::initializer_list<std::tuple<std::string_view, std::uint8_t, float>> values)
+{
+    std::vector<std::uint8_t> packet = {0xC1, 0, 0x07, 1, 0x12, 0x34, static_cast<std::uint8_t>(buff)};
+    for (int shift = 0; shift < 32; shift += 8)
+    {
+        packet.push_back(static_cast<std::uint8_t>(seconds >> shift));
+    }
+    packet.push_back(static_cast<std::uint8_t>(values.size()));
+    for (const auto& [id, kind, value] : values)
+    {
+        const Data::Buffs::OpenMuAttributeId bytes = Data::Buffs::ParseOpenMuId(id);
+        packet.insert(packet.end(), bytes.begin(), bytes.end());
+        packet.push_back(kind);
+        const auto bits = std::bit_cast<std::uint32_t>(value);
+        for (int shift = 0; shift < 32; shift += 8)
+        {
+            packet.push_back(static_cast<std::uint8_t>(bits >> shift));
+        }
+    }
+    packet[1] = static_cast<std::uint8_t>(packet.size());
+    return packet;
+}
+
+constexpr std::string_view CriticalDamageBonusId = "33F53519-16F3-44C2-9D36-432C36329C78";
+constexpr std::string_view SoulBarrierId = "CBC5404A-6232-4BF3-9B85-9AA0AE0F9BA4";
+constexpr std::string_view UnknownId = "00000000-0000-0000-0000-000000000001";
+
+std::string_view OpenMuIdOf(std::string_view name)
+{
+    return Data::Buffs::BuffAttributes[Data::Buffs::FindBuffAttribute(name)].openMuId;
+}
+
+std::vector<std::wstring> Texts(const std::vector<GameLogic::Buffs::BuffTooltipLine>& lines)
+{
+    std::vector<std::wstring> texts;
+    for (const GameLogic::Buffs::BuffTooltipLine& line : lines)
+    {
+        texts.push_back(line.note ? L"(note) " + line.text : line.text);
+    }
+    return texts;
+}
+
+const Data::Buffs::BuffDefinition& Entry(int number)
+{
+    const Data::Buffs::BuffDefinition* buff = g_BuffDatabase.Find(number);
+    REQUIRE(buff != nullptr);
+    return *buff;
+}
+} // namespace
+
+TEST_CASE("The extended C1 07 brings the time left and each value by its OpenMU attribute (buffs design B22) [buffs]")
+{
+    using GameLogic::Buffs::ReadExtendedBuffStatus;
+    using GameLogic::Buffs::SentValueKind;
+
+    const std::vector<std::uint8_t> packet =
+        ExtendedStatus(5, 180, {{CriticalDamageBonusId, 0, 126.0f}, {UnknownId, 2, 7.0f}});
+    REQUIRE(packet.size() == 12 + 2 * 21);
+    const auto status = ReadExtendedBuffStatus(packet);
+    REQUIRE(status.has_value());
+    CHECK(status->playerKey == 0x1234);
+    CHECK(status->buff == 5);
+    CHECK(status->seconds == 180);
+    REQUIRE(status->values.size() == 1);
+    CHECK(status->values[0].attribute == Data::Buffs::FindBuffAttribute("criticalDamageBonus"));
+    CHECK(status->values[0].kind == SentValueKind::AddRaw);
+    CHECK(status->values[0].value == doctest::Approx(126.0f));
+    // B23: an id the client doesn't know is kept apart, for the log.
+    REQUIRE(status->unknown.size() == 1);
+    CHECK(status->unknown[0].id == Data::Buffs::ParseOpenMuId(UnknownId));
+    CHECK_FALSE(status->unknown[0].knownAttribute);
+    // A known attribute with a kind the client doesn't know is kept apart too, as such.
+    const auto unknownKind = ReadExtendedBuffStatus(ExtendedStatus(5, 180, {{CriticalDamageBonusId, 9, 126.0f}}));
+    REQUIRE(unknownKind.has_value());
+    CHECK(unknownKind->values.empty());
+    REQUIRE(unknownKind->unknown.size() == 1);
+    CHECK(unknownKind->unknown[0].knownAttribute);
+    CHECK(unknownKind->unknown[0].kind == 9);
+
+    // The short 0x07 of an older server or of someone else's buff, and the end of a buff, aren't the extended one.
+    const std::vector<std::uint8_t> shortPacket = {0xC1, 7, 0x07, 1, 0x12, 0x34, 5};
+    CHECK_FALSE(ReadExtendedBuffStatus(shortPacket).has_value());
+    std::vector<std::uint8_t> ended = packet;
+    ended[3] = 0;
+    CHECK_FALSE(ReadExtendedBuffStatus(ended).has_value());
+    // A length that doesn't fit the value count.
+    std::vector<std::uint8_t> cut(packet.begin(), packet.end() - 1);
+    cut[1] = static_cast<std::uint8_t>(cut.size());
+    CHECK_FALSE(ReadExtendedBuffStatus(cut).has_value());
+
+    // A factor raises its attribute by what it adds to 1.
+    CHECK(GameLogic::Buffs::SentValueAmount({0, SentValueKind::Multiplicate, 1.25f}) == doctest::Approx(0.25));
+    CHECK(GameLogic::Buffs::SentValueAmount({0, SentValueKind::AddFinal, 30.0f}) == doctest::Approx(30.0));
+    // OpenMU keeps the critical damage chance as a fraction, the client in percent (the Scroll of Battle's 20).
+    CHECK(GameLogic::Buffs::SentValueAmount({Data::Buffs::FindBuffAttribute("criticalDamageChance"),
+                                             SentValueKind::AddRaw, 0.2f}) == doctest::Approx(20.0));
+    CHECK(GameLogic::Buffs::SentValueAmount({Data::Buffs::FindBuffAttribute("criticalDamageChance"),
+                                             SentValueKind::Multiplicate, 1.1f}) == doctest::Approx(10.0));
+}
+
+TEST_CASE("A buff's time is kept by its number and every new time restarts it (buffs design section 4, B25) [buffs]")
+{
+    SkillBuffScope scope;
+    REQUIRE(scope.loaded);
+    BuffTimeControlPtr times = BuffTimeControl::Make();
+    std::uint64_t now = 1000;
+    times->SetClock([&now] { return now; });
+    const auto blessings = static_cast<eBuffState>(35); // Jack O'Lantern Blessings, 30 minutes
+    const auto criticalDamage = static_cast<eBuffState>(5);
+
+    times->RegisterBuffTime(criticalDamage, 180);
+    CHECK(times->GetRemainingMilliseconds(criticalDamage) == 180000u);
+    CHECK(times->GetSource(criticalDamage) == BuffTimeControl::TimeSource::Sent);
+    now += 30000;
+    CHECK(times->GetRemainingMilliseconds(criticalDamage) == 150000u);
+    CHECK(times->GetFullMilliseconds(criticalDamage) == 180000u);
+    // A recast restarts it (P2).
+    times->SetSentTime(criticalDamage, 200);
+    CHECK(times->GetRemainingMilliseconds(criticalDamage) == 200000u);
+    // B25: a server that sends no time for the buff ends the time.
+    times->SetSentTime(criticalDamage, 0);
+    CHECK_FALSE(times->GetRemainingMilliseconds(criticalDamage).has_value());
+    // Without a time from the server, a skill buff has none, an item buff its duration in Buffs.json.
+    times->RegisterBuffTime(criticalDamage, 0);
+    CHECK_FALSE(times->GetRemainingMilliseconds(criticalDamage).has_value());
+    times->RegisterBuffTime(blessings, 0);
+    CHECK(times->GetSource(blessings) == BuffTimeControl::TimeSource::Fallback);
+    CHECK(times->GetFullMilliseconds(blessings) == static_cast<DWORD>(GameLogic::Buffs::GetDuration(Entry(35)) * 1000));
+    // A time past what 32 bits of milliseconds hold (49.7 days) keeps its length.
+    const std::uint32_t sixtyDays = 60 * 24 * 60 * 60;
+    times->SetSentTime(criticalDamage, sixtyDays);
+    CHECK(times->GetRemainingMilliseconds(criticalDamage) == std::uint64_t{sixtyDays} * 1000);
+    // A time past its end is 0 left; the buff's end removes it.
+    now += 100000000;
+    CHECK(times->GetRemainingMilliseconds(blessings) == 0u);
+    CHECK(times->UnRegisterBuffTime(blessings));
+    CHECK_FALSE(times->GetRemainingMilliseconds(blessings).has_value());
+}
+
+TEST_CASE("The buff tooltip shows the server's values, '?' without them, and item buffs' own (B7, B8, B26) [buffs]")
+{
+    SkillBuffScope scope;
+    REQUIRE(scope.loaded);
+    using GameLogic::Buffs::BuildBuffValueLines;
+    using GameLogic::Buffs::ReadExtendedBuffStatus;
+    const BuffCasterStats owner = Stats({});
+
+    GameLogic::Buffs::ServerBuffValues sent;
+    CHECK(Texts(BuildBuffValueLines(Entry(5), sent, owner)) ==
+          std::vector<std::wstring>{L"Critical damage +?", L"(note) The value depends on its caster"});
+
+    // Without values, a part only a master skill fills gets no "?" line.
+    const std::vector<std::wstring> berserkerUnknown = Texts(BuildBuffValueLines(Entry(81), sent, owner));
+    CHECK(std::find(berserkerUnknown.begin(), berserkerUnknown.end(), L"Final wizardry and curse damage +? %") ==
+          berserkerUnknown.end());
+    CHECK(std::find(berserkerUnknown.begin(), berserkerUnknown.end(), L"Maximum mana +? %") != berserkerUnknown.end());
+
+    auto read = ReadExtendedBuffStatus(ExtendedStatus(5, 180, {{CriticalDamageBonusId, 0, 126.9f}}));
+    REQUIRE(read.has_value());
+    sent.Set(5, read->values);
+    CHECK(Texts(BuildBuffValueLines(Entry(5), sent, owner)) == std::vector<std::wstring>{L"Critical damage +126"});
+
+    read = ReadExtendedBuffStatus(ExtendedStatus(4, 60, {{SoulBarrierId, 0, 0.3f}}));
+    REQUIRE(read.has_value());
+    sent.Set(4, read->values);
+    CHECK(Texts(BuildBuffValueLines(Entry(4), sent, owner)).front() == L"Damage absorbed 30 %");
+
+    // Berserker chains the server's values as its entry does: the damage bonuses times the mana multiplier, and the
+    // wizardry multiplier (not one of the server's effect) adds the mana and the proficiency multipliers.
+    read = ReadExtendedBuffStatus(ExtendedStatus(81, 0,
+                                                 {{OpenMuIdOf("berserkerManaMultiplier"), 0, 0.5f},
+                                                  {OpenMuIdOf("berserkerHealthDecrement"), 0, -0.2f},
+                                                  {OpenMuIdOf("berserkerMinPhysDmgBonus"), 0, 150.0f},
+                                                  {OpenMuIdOf("berserkerMaxPhysDmgBonus"), 0, 190.0f},
+                                                  {OpenMuIdOf("berserkerCurseMultiplier"), 0, 0.0f},
+                                                  {OpenMuIdOf("berserkerProficiencyMultiplier"), 0, 0.1f}}));
+    REQUIRE(read.has_value());
+    sent.Set(81, read->values);
+    CHECK(Texts(BuildBuffValueLines(Entry(81), sent, owner)) ==
+          std::vector<std::wstring>{L"Maximum mana +50 %", L"Maximum life -20 %", L"Minimum damage +75",
+                                    L"Maximum damage +95", L"Wizardry damage +60 %", L"Curse damage +50 %",
+                                    L"Final wizardry and curse damage +10 %"});
+
+    // OpenMU sends Berserker's life decrement without the -10 % its class rules stop it at; the entry's maximum does.
+    read = ReadExtendedBuffStatus(ExtendedStatus(81, 0, {{OpenMuIdOf("berserkerHealthDecrement"), 0, 0.1f}}));
+    REQUIRE(read.has_value());
+    sent.Set(81, read->values);
+    CHECK(Texts(BuildBuffValueLines(Entry(81), sent, owner)) == std::vector<std::wstring>{L"Maximum life -10 %"});
+
+    // Increase Health's master skill adds its part after the 200 the base stops at, so the sent 290 stays.
+    read = ReadExtendedBuffStatus(ExtendedStatus(155, 0, {{OpenMuIdOf("totalVitality"), 2, 290.0f}}));
+    REQUIRE(read.has_value());
+    sent.Set(155, read->values);
+    CHECK(Texts(BuildBuffValueLines(Entry(155), sent, owner)) == std::vector<std::wstring>{L"Vitality +290"});
+
+    // B26: an item buff's lines from Buffs.json; one with a description shows that instead.
+    CHECK(Texts(BuildBuffValueLines(Entry(45), sent, owner)) == std::vector<std::wstring>{L"Defense +60"});
+    CHECK(Texts(BuildBuffValueLines(Entry(36), sent, owner)) == std::vector<std::wstring>{L"Attack power +25"});
+    CHECK(BuildBuffValueLines(Entry(43), sent, owner).empty());
+    CHECK(BuildBuffValueLines(Entry(104), sent, owner).empty());
+}
+
+TEST_CASE("The character stats sum the server's values over the buffs whose values come from the caster (B24) [buffs]")
+{
+    SkillBuffScope scope;
+    REQUIRE(scope.loaded);
+    using GameLogic::Buffs::SentValue;
+    using GameLogic::Buffs::SentValueKind;
+    const int minimumWizardry = Data::Buffs::FindBuffAttribute("minimumWizBaseDmg");
+    const int totalVitality = Data::Buffs::FindBuffAttribute("totalVitality");
+
+    GameLogic::Buffs::ServerBuffValues sent;
+    // Expansion of Wizardry (82) and its master skill's buff (139) both count; the data says so, not the code.
+    sent.Set(82, {SentValue{minimumWizardry, SentValueKind::AddRaw, 60.0f}});
+    sent.Set(139, {SentValue{minimumWizardry, SentValueKind::AddRaw, 40.0f}});
+    // An item buff's values are its own (Buffs.json), so the Elixir of Health's sent vitality doesn't count again.
+    sent.Set(52, {SentValue{totalVitality, SentValueKind::AddRaw, 50.0f}});
+    const auto all = [](int) { return true; };
+
+    CHECK(GameLogic::Buffs::SumSentValues(sent, minimumWizardry, all) == doctest::Approx(100.0));
+    CHECK(GameLogic::Buffs::SumSentValues(sent, minimumWizardry, [](int buff) { return buff == 82; }) ==
+          doctest::Approx(60.0));
+    CHECK_FALSE(GameLogic::Buffs::SumSentValues(sent, totalVitality, all).has_value());
+    CHECK_FALSE(GameLogic::Buffs::SumSentValues(sent, minimumWizardry, [](int) { return false; }).has_value());
+}
+
+void ReceiveSkillStatus(std::span<const BYTE> ReceiveBuffer);
+void ReceiveBuffState(const BYTE* ReceiveBuffer);
+void ResetHeroForNewWorld();
+
+namespace
+{
+// The hero as the packet handlers find it: a live character with a key in the client's character list, and a
+// character machine for the stats the handlers recompute.
+struct HandlerScope
+{
+    static constexpr int HeroKey = 0x1234;
+
+    SkillBuffScope data;
+    CharacterMachineScope machine;
+    // One more than the list holds: FindCharacterIndex answers MAX_CHARACTERS_CLIENT for a key it doesn't find.
+    std::unique_ptr<CHARACTER[]> characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT + 1);
+    CHARACTER* previousCharacters = CharactersClient;
+    CHARACTER* previousHero = Hero;
+
+    HandlerScope()
+    {
+        CharactersClient = characters.get();
+        Hero = &CharactersClient[0];
+        Hero->Key = HeroKey;
+        Hero->Object.Live = true;
+        TheBuffTimeControl().Clear();
+        GameLogic::Buffs::HeroServerBuffValues().ClearAll();
+    }
+
+    ~HandlerScope()
+    {
+        TheBuffTimeControl().Clear();
+        GameLogic::Buffs::HeroServerBuffValues().ClearAll();
+        Hero = previousHero;
+        CharactersClient = previousCharacters;
+    }
+
+    HandlerScope(const HandlerScope&) = delete;
+    HandlerScope& operator=(const HandlerScope&) = delete;
+};
+
+void SendItemBuff(int buff, int seconds, bool add)
+{
+    PMSG_ITEMEFFECTCANCEL packet{};
+    packet.byEffectOption = add ? 0 : 1;
+    packet.wEffectTime = seconds;
+    packet.byBuffType = static_cast<BYTE>(buff);
+    ReceiveBuffState(reinterpret_cast<const BYTE*>(&packet));
+}
+} // namespace
+
+TEST_CASE("OpenMU's order: 0x2D starts an item buff's time, the extended C1 07 then wins (section 4, B25) [buffs]")
+{
+    HandlerScope scope;
+    REQUIRE(scope.data.loaded);
+    constexpr int Blessings = 35; // Jack O'Lantern Blessings, 30 minutes in Buffs.json
+    const auto buff = static_cast<eBuffState>(Blessings);
+    const std::string_view attackSpeed = OpenMuIdOf("attackSpeedAny");
+
+    // 0x2D without a time (the effect's time is off on the server): the item buff's own duration, for now.
+    SendItemBuff(Blessings, 0, true);
+    CHECK(TheBuffTimeControl().GetSource(buff) == BuffTimeControl::TimeSource::Fallback);
+    CHECK(TheBuffTimeControl().GetFullMilliseconds(buff) == 1800000u);
+
+    // The extended C1 07 that follows says the server sends no time: none shows.
+    const std::vector<std::uint8_t> noTime = ExtendedStatus(Blessings, 0, {{attackSpeed, 0, 10.0f}});
+    std::vector<std::uint8_t> packet = noTime;
+    packet[4] = static_cast<std::uint8_t>(HandlerScope::HeroKey >> 8);
+    packet[5] = static_cast<std::uint8_t>(HandlerScope::HeroKey & 0xFF);
+    ReceiveSkillStatus(packet);
+    CHECK_FALSE(TheBuffTimeControl().GetRemainingMilliseconds(buff).has_value());
+    REQUIRE(GameLogic::Buffs::HeroServerBuffValues().Find(Blessings) != nullptr);
+    CHECK(GameLogic::Buffs::HeroServerBuffValues().Find(Blessings)->front().value == doctest::Approx(10.0f));
+
+    // A recast of the buff that is already on: the new time and values replace the old ones.
+    packet = ExtendedStatus(Blessings, 900, {{attackSpeed, 0, 15.0f}});
+    packet[4] = static_cast<std::uint8_t>(HandlerScope::HeroKey >> 8);
+    packet[5] = static_cast<std::uint8_t>(HandlerScope::HeroKey & 0xFF);
+    ReceiveSkillStatus(packet);
+    CHECK(TheBuffTimeControl().GetSource(buff) == BuffTimeControl::TimeSource::Sent);
+    CHECK(TheBuffTimeControl().GetFullMilliseconds(buff) == 900000u);
+    CHECK(GameLogic::Buffs::HeroServerBuffValues().Find(Blessings)->front().value == doctest::Approx(15.0f));
+
+    // The end (0x2D off) takes both away.
+    SendItemBuff(Blessings, 0, false);
+    CHECK_FALSE(TheBuffTimeControl().GetRemainingMilliseconds(buff).has_value());
+    CHECK(GameLogic::Buffs::HeroServerBuffValues().Find(Blessings) == nullptr);
+}
+
+TEST_CASE("Joining a world forgets the times and values the server sent for the hero's buffs (section 4) [buffs]")
+{
+    HandlerScope scope;
+    REQUIRE(scope.data.loaded);
+    constexpr int CriticalDamage = 5;
+    std::vector<std::uint8_t> packet = ExtendedStatus(CriticalDamage, 180, {{CriticalDamageBonusId, 0, 126.0f}});
+    packet[4] = static_cast<std::uint8_t>(HandlerScope::HeroKey >> 8);
+    packet[5] = static_cast<std::uint8_t>(HandlerScope::HeroKey & 0xFF);
+    ReceiveSkillStatus(packet);
+    REQUIRE(TheBuffTimeControl().GetRemainingMilliseconds(static_cast<eBuffState>(CriticalDamage)).has_value());
+    REQUIRE(GameLogic::Buffs::HeroServerBuffValues().Find(CriticalDamage) != nullptr);
+
+    // What ReceiveJoinMapServer does before it reads the packet; the hero is the scope's own.
+    ResetHeroForNewWorld();
+    CHECK_FALSE(TheBuffTimeControl().GetRemainingMilliseconds(static_cast<eBuffState>(CriticalDamage)).has_value());
+    CHECK(GameLogic::Buffs::HeroServerBuffValues().Find(CriticalDamage) == nullptr);
 }

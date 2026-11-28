@@ -3,6 +3,7 @@
 #include "UI/HUD/Skills/SkillBuffLines.h"
 
 #include "Data/GameData/BuffData/BuffLineTexts.h"
+#include "GameLogic/Buffs/BuffLineFormat.h"
 #include "Engine/Object/ZzzInfomation.h"
 
 #include <cmath>
@@ -19,81 +20,26 @@ using GameLogic::Buffs::SkillBuffValue;
 
 constexpr size_t NumberSize = 32;
 constexpr double PercentPerFraction = 100.0;
-// A number this close to a whole one shows without decimals.
-constexpr double WholeTolerance = 0.05;
 constexpr wchar_t PartIndent[] = L"  ";
-constexpr wchar_t ValuePlaceholder[] = L"{value}";
-constexpr wchar_t DivisorPlaceholder[] = L"{divisor}";
 
 using Number = wchar_t[NumberSize];
 
-// `value` in its unit, with a "+" before it when `withSign` and it is not negative: a flat number cut to a whole one,
-// as the game counts it (so a value's cut parts can add up to less than its total, which is cut once); a fraction in
-// percent with " %" when `withPercent`, whole when it is close to whole, else with one decimal (a master skill's 32.4
-// %).
+// The shared formats (GameLogic/Buffs/BuffLineFormat.h) straight into the tooltip's fixed buffers: the tooltip builds
+// its lines every frame while it shows, so nothing allocates.
 void FormatNumber(double value, BuffAttributeUnit unit, bool withSign, bool withPercent, Number& out)
 {
-    const bool fraction = unit == BuffAttributeUnit::Fraction;
-    const double shown = fraction ? value * PercentPerFraction : value;
-    const wchar_t* sign = withSign && shown >= 0 ? L"+" : L"";
-    const wchar_t* percent = fraction && withPercent ? L" %" : L"";
-    if (!fraction)
-    {
-        std::swprintf(out, NumberSize, L"%ls%d", sign, GameLogic::Buffs::CutToWhole(shown));
-    }
-    else if (std::abs(shown - std::round(shown)) < WholeTolerance)
-    {
-        std::swprintf(out, NumberSize, L"%ls%d%ls", sign, GameLogic::Buffs::CutToWhole(std::round(shown)), percent);
-    }
-    else
-    {
-        std::swprintf(out, NumberSize, L"%ls%.1f%ls", sign, shown, percent);
-    }
+    GameLogic::Buffs::FormatBuffNumber(value, unit, withSign, withPercent, out);
 }
 
-// A total as the game counts it: cut to a whole number in its unit (a fraction's percent).
 void FormatTotal(double value, BuffAttributeUnit unit, Number& out)
 {
-    const bool fraction = unit == BuffAttributeUnit::Fraction;
-    const int whole = GameLogic::Buffs::CutToWhole(fraction ? value * PercentPerFraction : value);
-    std::swprintf(out, NumberSize, L"%d", whole);
+    GameLogic::Buffs::FormatBuffTotal(value, unit, out);
 }
 
 // `text` with {value} and {divisor} replaced, appended to `out` (a line of MAX_TOOLTIP_LINE_TEXT letters).
 void AppendFilled(wchar_t* out, std::wstring_view text, const wchar_t* value, const wchar_t* divisor = L"")
 {
-    size_t length = std::wcslen(out);
-    const auto append = [&](std::wstring_view part)
-    {
-        for (const wchar_t letter : part)
-        {
-            if (length + 1 >= MAX_TOOLTIP_LINE_TEXT)
-            {
-                return;
-            }
-            out[length++] = letter;
-        }
-        out[length] = L'\0';
-    };
-    size_t at = 0;
-    while (at < text.size())
-    {
-        if (text.compare(at, std::size(ValuePlaceholder) - 1, ValuePlaceholder) == 0)
-        {
-            append(value);
-            at += std::size(ValuePlaceholder) - 1;
-        }
-        else if (text.compare(at, std::size(DivisorPlaceholder) - 1, DivisorPlaceholder) == 0)
-        {
-            append(divisor);
-            at += std::size(DivisorPlaceholder) - 1;
-        }
-        else
-        {
-            append(text.substr(at, 1));
-            ++at;
-        }
-    }
+    GameLogic::Buffs::AppendBuffText(std::span<wchar_t>(out, MAX_TOOLTIP_LINE_TEXT), text, value, divisor);
 }
 
 Line& StartLine(Model& model, LineColor color)

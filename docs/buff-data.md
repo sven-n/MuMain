@@ -31,9 +31,9 @@ The design and the steps still to come are in
 | `number` | The effect number the server sends (1 to 255); the icon is the one of that number. The game shows buffs 1 to 205 only (`eBuff_Count`); a higher number is a warning. An effect number the server sends that has no entry gets no icon or tooltip, and none of the effects the game starts when a buff arrives (its countdown, its arrival effects); checks of whether a character has the buff still see it. |
 | `name` | The name other data uses for the buff: letters and digits, used once. |
 | `kind` | `buff` or `debuff`. On the buff strip, buffs come first and debuffs last. |
-| `group` | Buffs of one group are the same kind of effect. The cash shop asks before an item replaces an active buff of its group. Buffs of one group share one countdown: a second buff of the group shows no time left, and the end of either ends the countdown. |
+| `group` | Buffs of one group are the same kind of effect. The cash shop asks before an item replaces an active buff of its group. |
 | `displayName` | The name in the tooltip, in every language the game has; a language without one shows the English. |
-| `description` | The tooltip lines under the name, separated by `\n`; left out for none. |
+| `description` | The tooltip lines under the name, separated by `\n`; left out for none. A buff with power-ups shows its value lines instead when it has none (see "The buff tooltip"), so a description is for what the lines can't say: a switch without a number (Seal of Mobility), a condition ("Only in Vulcanus") or a buff without values (Poison). |
 | `item` | The item that gives the buff (`group`, `number`); left out for none. The item's tooltip shows the buff's values and duration (see [Values](#values)). Moving the item in the item tools does not move this link yet (the Buffs tool will); the buff then names a missing item, an error. |
 | `duration` | How long the buff lasts in seconds, in the [value format of the item options](item-data.md#item-options) (`{"values": 1800}`, without `per` terms), when the server sends no time; left out when only the server knows it. Only an item buff's countdown uses it. |
 | `powerUps` | What the buff raises, in their order: each an `attribute` and its value in the item options' format under `add`. `addFinal` and `percent` are read, but the client adds every value as `add` (a warning). See [Values](#values). |
@@ -153,12 +153,11 @@ hero as the caster; nothing else reads them yet.
   also multiplies the final wizardry and curse damage, so it has a line of its
   own. Berserker's
   defense rule (`ClassSummoner.cs`) is left out until it is checked in game.
-- **The character stats** don't count a caster's buff: only the server knows
-  the caster's attributes, and the server's values come with buffs PR 5. Until
-  then the code for Critical Damage Increase, Expansion of Wizardry, Increase
-  Health, Increase Block and Berserker stays, so the character window may show
-  another number than the tooltip (Increase Block is a percent there, flat in
-  OpenMU).
+- **The character stats** don't sum a caster's buff like the others: only
+  the server knows the caster's attributes. The character window reads the
+  server's values for Critical Damage Increase, Expansion of Wizardry,
+  Increase Health, Increase Block and Berserker's damage (see "What the server
+  sends"), and its own formulas for the hero only on a server that sends none.
 - **No values.** Buffs OpenMU doesn't define have none: 9 Swell Mana and the
   next-season skills' 136, 140, 142 and 149. 143, 150 and 151, which the skill
   data names for skills 441, 469 and 470, are strip entries; OpenMU casts 6 and
@@ -167,9 +166,67 @@ hero as the caster; nothing else reads them yet.
   format of the item option texts: a value line per attribute
   (`"criticalDamageBonus": "Critical damage +{value}"`), a label per term
   attribute (`"termTotalEnergy": "energy {value}"`), and `duration`, `base`,
-  `seconds`, `maximum`, `ruleDivisor` and `ruleTimes`. An attribute without a
-  text shows no lines (Infinity Arrow's arrow use, which the tooltip's banner
-  already says).
+  `seconds`, `maximum`, `ruleDivisor`, `ruleTimes` and `dependsOnCaster`. An
+  attribute without a text shows no lines (Infinity Arrow's arrow use, which
+  the tooltip's banner already says). Every text is in all 12 client
+  languages.
+
+## What the server sends
+
+OpenMU sends the open source client an extended C1 07 for each effect on the
+hero (MUnique/OpenMU#1476): at its start, a recast and a shortened time, the
+seconds left and the effect's finished values, each named by OpenMU's
+attribute id. The others and the end come as the short C1 07.
+
+- **Ids.** `BuffAttributes.h` holds OpenMU's id of each attribute that OpenMU
+  has (`Stats.cs`); `maximumWizBaseDmgIncrease` and `defenseRatePvmIncrease`
+  carry those of `MaximumWizBaseDmg` and `DefenseRatePvm`, which they stand
+  for. A value of an id the list lacks, or of a kind the client doesn't
+  know, is left out and named once in `MuError.log`.
+- **Time.** The sent seconds win and restart the buff's time; 0 means the
+  server sends no time for the buff (its admin turned it off on the "Effect
+  times" page), so the buff shows none. A server without the extended packet
+  sends a time only for item buffs (0x2D); without one, an item buff counts
+  down its `duration`. Each buff keeps its own time, by its number. Its last
+  minute counts down in seconds. Times and values the server sent reset
+  when the hero joins a world (login, character switch, another server).
+- **Values.** They count only for buffs whose values come from the caster:
+  the buff tooltip and the character window read them, a factor (OpenMU's
+  Multiplicate, 1.22) as what it adds (22 %). Berserker's are chained as its
+  entry says (the damage bonuses times the mana multiplier). Item buffs keep
+  their own numbers, since OpenMU counts some at another step (Scroll of
+  Defense: base defense +60 here, final defense +30 there).
+- **Units.** An attribute OpenMU keeps in another unit converts with its
+  `openMuScale` in `BuffAttributes.h`: the critical damage chance is a
+  fraction there (0.2) and a percent here (20).
+- **Maximums.** A sent value stops at its power-up's `maximum` where OpenMU
+  applies it outside the effect (Berserker's life decrement at -10 %); where
+  a master skill raises the attribute, the value is the base stopped at its
+  maximum plus the master part, and passes the maximum.
+- **The character window** sums an attribute's sent values over the hero's
+  buffs whose values come from the caster, so the master skills' buffs (138,
+  139, 155) count like their base skills': critical damage, the minimum
+  wizardry damage, vitality, Increase Block's defense rate (a flat value in
+  OpenMU, a percent in the client's own formula) and Berserker's damage.
+  Without sent values it keeps the original client's formulas for the base
+  buffs. Not read yet: the maximum wizardry damage factor (138, 139), the final
+  defense (154) and the critical damage chance (139, 148) of the master skills'
+  buffs. Increase Block's master skill buffs (153, 154) count only their flat
+  part: OpenMU adds the master skill's percent of the defense rate into the
+  same value (52.44 = 52 flat + 0.44 of the defense rate), so the window adds
+  52 where OpenMU adds 316 at a defense rate of 600.
+
+## The buff tooltip
+
+The tooltip of a buff icon shows its name, its value lines and its time:
+
+- a buff whose values come from the caster: a line per value the server sent
+  ("Critical damage +136"); without them its lines with "?" and the gray
+  "The value depends on its caster", leaving out the parts only a master
+  skill fills;
+- another buff with a `description`: the description;
+- another buff with power-ups: a line per power-up with its number from this
+  file ("Defense +60"), so a changed number shows in every language.
 
 ## Master skills
 

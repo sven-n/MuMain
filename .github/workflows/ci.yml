@@ -917,11 +917,16 @@ jobs:
       # A target file shaped like a port's (docs/build/README.md, Targets) still configures and builds: it needs
       # neither OpenSSL nor libcurl, brings its own network library adapter, and builds SDL and the game as shared
       # libraries, so every static library in the game must be position independent. From the sources fetched above;
-      # before the trim, so the compiler cache keeps its objects too.
+      # before the trim, so the compiler cache keeps its objects too. Without precompiled headers outside release runs,
+      # as in the build above, so ccache can cache the game's, SDL's and RmlUi's files.
+      # It zeroes the compiler cache statistics, so Report port-like compiler cache counts this build alone.
       - name: Build a port-like target
+        id: port_like
         run: |
+          ccache --zero-stats
           cmake --preset linux-x64 -B out/build/port-like \
             "-DMU_TARGET_FILE=${{ github.workspace }}/tests/cmake/port-like-target.cmake" \
+            -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }} \
             -DCMAKE_DISABLE_FIND_PACKAGE_OpenSSL=ON \
             -DCMAKE_DISABLE_FIND_PACKAGE_CURL=ON \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
@@ -936,9 +941,22 @@ jobs:
             "-DFETCHCONTENT_SOURCE_DIR_SPDLOG=${{ github.workspace }}/out/build/linux-ci/_deps/spdlog-src"
           cmake --build out/build/port-like --config Release --target Main
 
+      - name: Report port-like compiler cache
+        # Also when the port-like build fails; not when it did not run, as the statistics would be the player build's.
+        if: ${{ !cancelled() && steps.port_like.outcome != 'skipped' }}
+        run: |
+          ccache --show-stats
+          {
+            echo '### Linux compiler cache, port-like target'
+            echo '```text'
+            ccache --show-stats
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Trim compiler cache
         # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
-        # uses. Without them a save holds this build's objects, not every build's since the cache began.
+        # uses. Without them a save holds this build's objects, not every build's since the cache began. Its statistics
+        # count the port-like build only, which zeroes them; the size is the whole cache's.
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
         run: |
           ccache --evict-older-than "$(( $(date +%s) - BUILD_STARTED + 60 ))s"

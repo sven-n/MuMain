@@ -67,6 +67,13 @@ time left and the value of each buff on the hero.
 | B19 | Swell Life's party count (Q-BF17) | `nearbyPartyMemberCount` is the number of party members the client sees, like OpenMU's observer count (`Party.cs:593`). |
 | B20 | Skills whose buff OpenMU numbers differently (Q-BF18) | `castsBuff` in `MasterSkills.json` (441 casts 6, 469 and 470 cast 81) wins over the skill data's `Effect`; 143, 150 and 151 stay strip entries without values. Buffs OpenMU doesn't define (9, 136, 140, 142, 149) get no values. |
 | B21 | Berserker (Q-BF19) | Its chained values are data: a power-up's `multipliedBy` multiplies it by another power-up of the buff, `valueOf` adds the values of one or more others (the wizardry multiplier adds the mana and the proficiency multipliers); the evaluator computes them in reference order and the loader rejects loops and unknown names. The tooltip shows mana, life, physical damage, wizardry, curse and, with Berserker Proficiency (470), the final wizardry and curse damage. Its defense rule (`ClassSummoner.cs:122`) is shown only after an in-game check. |
+| B22 | How the client names a sent value (PR 5, Q-BF20) | Each value of the extended C1 07 names its attribute by OpenMU's attribute id (a Guid). `BuffAttributes.h` gets the id next to each attribute's name and unit; attributes OpenMU doesn't have (Webzen's add options) get none, and the two client stand-ins (`maximumWizBaseDmgIncrease`, `defenseRatePvmIncrease`) carry the id of the OpenMU attribute they stand for. A test checks the ids. |
+| B23 | A sent value the client can't name (Q-BF21) | It is left out of the tooltip and logged once per id to `MuError.log`, naming the buff and the id. A factor (kind Multiplicate, 1.22) shows as "+22 %". |
+| B24 | Which values count (Q-BF22) | The server's values count only for buffs whose values come from the caster (`valuesFrom: caster`): the buff tooltip and the character window (B16's code for Critical Damage Increase, Expansion of Wizardry, Increase Health, Increase Block and Berserker) use them. Without them the character window falls back to the client's formulas for the hero (B3), and the buff tooltip shows "?" (B8). Item buffs keep the numbers of `Buffs.json` (Webzen's Season 6); the server's item values aren't used, since OpenMU counts some at another step (Scroll of Defense: the client's base defense +60 is OpenMU's final defense +30). The time is the server's for both (B2). |
+| B25 | A time of 0 (Q-BF23) | OpenMU sends 0 seconds for an effect whose time the admin turned off (its "Effect times" page, `SendDuration`). An extended C1 07 shows that the server has the switch, so its 0 means no time: no time line, nothing counts down. A server without the extended packet keeps today's fallback to the item buff's `duration`. The player's own choice per buff (`showTime`) comes with the strip in PR 3. |
+| B26 | Item buffs' tooltip lines (Q-BF24) | An item buff shows one value line per power-up, built from its attribute's text and its `Buffs.json` number, like the skill buffs, so a changed number shows in every language. A buff whose `description` is set shows that instead: switches without a number (Seal of Mobility) and any buff whose built lines don't read well. The descriptions that only repeat the numbers go. |
+| B27 | Languages of `BuffTexts.json` (Q-BF25) | Every client language (12), for the new attribute texts and those of PR 2b. |
+| B28 | The time bar pull request sven-n/MuMain#1040 (Q-BF26) | PR 5 comes first with the time store of section 4; the bar follows in PR 3 as B4 describes. |
 
 ## Current state
 
@@ -236,8 +243,11 @@ and where the time came from (computed or sent).
 - **Own cast:** when the hero casts a skill whose skill data names the buff,
   and the buff comes on or is already on, the time starts or restarts at the
   computed duration (B2).
-- **Sent:** a time from the server (0x2D today, the new packet of section 5)
-  sets both and wins over a computed one.
+- **Sent:** a time from the server (0x2D, or the extended C1 07 of section 5)
+  sets both and wins over a computed one. A recast or update the server sends
+  for a buff that is already on restarts it with the new time and values.
+- **Sent 0:** with the extended C1 07, the server turned the time off: no time
+  (B25). From 0x2D alone (an older server), the item buff's `duration`.
 - **Unknown:** neither: no bar, no time line (B5).
 - The fixed list of `InsertBuffLogicalEffect` goes (P1); timers are keyed by the
   buff number and every new time restarts them (P2).
@@ -252,9 +262,14 @@ A pull request to MUnique/OpenMU, proposed separately:
   time left and each power-up's current value (B2, B3).
 - Only clients that understand it get it: OpenMU picks view plug-ins by client
   version. The original client keeps getting 0x07 and 0x2D as today.
-- The packet's shape is decided in that pull request (an extended 0x2D or a new
-  custom packet). A value is what it is at that moment; a later change of the
-  caster's stats shows at the next cast or restart.
+- The packet (MUnique/OpenMU#1476, merged 2026-11-19) is an extended C1 07 for
+  the open source client: the first 7 bytes of 0x07, the seconds left (0 when
+  the effect's `SendDuration` is off), then up to 11 values of 21 bytes:
+  attribute id (B22), kind (AddRaw, Multiplicate, AddFinal, Maximum) and a
+  float, one finished value per attribute of the effect. It comes at
+  activation and when the effect is recast or shortened, only to the owner;
+  others and the end get the short 0x07. A value is what it is at that moment;
+  a later change of the caster's stats shows at the next cast or restart.
 - It can also fix P6.
 
 ### 6. Buff strip
@@ -280,6 +295,8 @@ A pull request to MUnique/OpenMU, proposed separately:
 | No values | Poison · Loses HP over time · Time left: 12 s |
 | Someone else's, value sent (B3) | Critical Damage Increase · Critical damage +126 · Time left: 3 min |
 | Someone else's, no value (B8) | Critical Damage Increase · Critical damage +? · *The value depends on its caster* |
+| Item buff (B26) | Scroll of Defense · Defense +60 · Time left: 28 min |
+| Item buff with a description (B26) | Seal of Mobility · Mobility enabled · Time left: 5 days |
 
 ### 8. Skill tooltip
 
@@ -350,12 +367,14 @@ A proposal; each one says what it changes in game.
    for the skill and item effects; the item tooltips' add option values read
    the item's buff (B13); the skill tooltip lines (B9) replace the hand-written
    ones.
-3. **Time and the strip.** Time tracking (B2, section 4), the bars and countdown
-   (B4 to B6) with the player option (B14), the buff tooltip (B7, B8); fixes P1
-   to P3.
+3. **The strip.** The bars and countdown (B4 to B6) with the player option
+   (B14), the hero's own computed times (B2), `showTime` per buff; fixes P3.
 4. **OpenMU** (MUnique/OpenMU): time and values for the owner (section 5); any
    time.
-5. **The client reads it** (B3): sent times and values win.
+5. **The client reads it** (B3, B22 to B28): the extended C1 07, the time store
+   of section 4 (fixes P1 and P2), the buff tooltip (B7, B8, B26), the
+   character window's caster buffs on the server's values (B16, B24), and
+   `BuffTexts.json` in every language (B27). Comes before PR 3.
 
 Later: the Buffs tool in MuEditor ("used by": the skills whose data names the
 buff, the items that give it); the OpenMU sync.
@@ -383,10 +402,11 @@ Q-BF4b (B5), Q-BF4c (B6), Q-BF5 (B7), Q-BF5b (B8), Q-BF6 (B9), Q-BF7 (B10),
 Q-BF8 (B11), Q-BF10 (B12), Q-BF11 (B13), Q-BF12 (B14) and Q-BF13 (B15); Q-BF9
 placed this document on its own branch. New questions from the pull requests
 are added here. Answered on 2026-11-22 for PR 2b: Q-BF14 (B16) to Q-BF19 (B21).
+Answered on 2026-11-23 and 2026-11-24 for PR 5: Q-BF20 (B22) to Q-BF26 (B28).
 
 Left to the pull requests:
 
-- The OpenMU packet's shape (section 5).
+- The OpenMU packet's shape (section 5): settled by MUnique/OpenMU#1476.
 - How the client counts Swell Life's nearby party members like the server
   (section 3): answered by B19.
 

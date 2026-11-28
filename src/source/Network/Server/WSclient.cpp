@@ -39,6 +39,7 @@
 #include "Engine/Object/Movement/FlightFeel.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Effects/StatDownDebuffLights.h"
+#include "GameLogic/Buffs/BuffServerValues.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -1213,16 +1214,24 @@ int GetJoinMapServerStage(std::span<const BYTE> packet)
 
 static void FinishJoinMapServer(CHARACTER* c, const PRECEIVE_JOIN_MAP_SERVER_EXTENDED* Data);
 
+// What a hero starts a world with, before the join packet is read: no ability running, and no time or value the server
+// sent for its buffs before (a new hero, or the same one in a new world).
+void ResetHeroForNewWorld()
+{
+    CharacterAttribute->Ability = 0;
+    CharacterAttribute->AbilityTime[0] = 0;
+    CharacterAttribute->AbilityTime[1] = 0;
+    CharacterAttribute->AbilityTime[2] = 0;
+    GameLogic::Buffs::ForgetHeroSentBuffs();
+}
+
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
     MouseLButton = false;
     HeroIndex = Random::Rand() % MAX_CHARACTERS_CLIENT;
     CHARACTER* c = &CharactersClient[HeroIndex];
 
-    CharacterAttribute->Ability = 0;
-    CharacterAttribute->AbilityTime[0] = 0;
-    CharacterAttribute->AbilityTime[1] = 0;
-    CharacterAttribute->AbilityTime[2] = 0;
+    ResetHeroForNewWorld();
 
     auto const Data = safe_cast<PRECEIVE_JOIN_MAP_SERVER_EXTENDED>(ReceiveBuffer, "PRECEIVE_JOIN_MAP_SERVER_EXTENDED");
     if (Data == nullptr)
@@ -3890,9 +3899,64 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x18 [ReceiveAction(%d)]", Data->Angle);
 }
 
-void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
+namespace
 {
-    auto Data = (LPPMSG_VIEWSKILLSTATE)ReceiveBuffer;
+// Names each value of the buff the client can't use in MuError.log, once per id (buffs design B23).
+void LogUnknownSentValues(const GameLogic::Buffs::ExtendedBuffStatus& status, eBuffState buff,
+                          GameLogic::Buffs::ServerBuffValues& values)
+{
+    for (const GameLogic::Buffs::UnknownSentValue& unknown : status.unknown)
+    {
+        if (!values.NoteUnknownId(unknown.id))
+        {
+            continue;
+        }
+        const std::wstring id = Data::Buffs::FormatOpenMuId(unknown.id);
+        if (unknown.knownAttribute)
+        {
+            g_ErrorReport.Write(L"Buff %d: the server sent a value of attribute %ls of kind %d, which the client "
+                                L"doesn't know.\r\n",
+                                static_cast<int>(buff), id.c_str(), static_cast<int>(unknown.kind));
+        }
+        else
+        {
+            g_ErrorReport.Write(
+                L"Buff %d: the server sent a value of attribute %ls, which the client doesn't know.\r\n",
+                static_cast<int>(buff), id.c_str());
+        }
+    }
+}
+
+// The time and the values OpenMU sends with the extended C1 07 for a buff on the hero (buffs design B22 to B25): the
+// time wins (0 means the server sends none for the buff), the values replace those of an earlier activation.
+void ApplyExtendedBuffStatus(std::span<const BYTE> packet, const CHARACTER* c, eBuffState buff)
+{
+    if (c != Hero)
+    {
+        return;
+    }
+    std::optional<GameLogic::Buffs::ExtendedBuffStatus> status = GameLogic::Buffs::ReadExtendedBuffStatus(packet);
+    if (!status.has_value())
+    {
+        return;
+    }
+
+    GameLogic::Buffs::ServerBuffValues& values = GameLogic::Buffs::HeroServerBuffValues();
+    LogUnknownSentValues(*status, buff, values);
+
+    TheBuffTimeControl().SetSentTime(buff, status->seconds);
+    values.Set(static_cast<int>(buff), std::move(status->values));
+    CharacterMachine->CalculateAll();
+}
+} // namespace
+
+void ReceiveSkillStatus(std::span<const BYTE> ReceiveBuffer)
+{
+    if (ReceiveBuffer.size() < sizeof(PMSG_VIEWSKILLSTATE))
+    {
+        return;
+    }
+    auto Data = (LPPMSG_VIEWSKILLSTATE)ReceiveBuffer.data();
     int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
     CHARACTER* c = &CharactersClient[FindCharacterIndex(Key)];
     OBJECT* o = &c->Object;
@@ -3946,6 +4010,9 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
 
             g_ConsoleDebug->Write(MCD_RECEIVE, L"RegisterBuff ID : %ls, Buff : %d", c->ID, static_cast<int>(bufftype));
         }
+
+        // A recast or an update of a buff that is already on comes the same way.
+        ApplyExtendedBuffStatus(ReceiveBuffer, c, bufftype);
     }
     else // clear
     {
@@ -13720,7 +13787,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         ReceiveMagicFinish(ReceiveBuffer);
         break;
     case 0x07: // setmagicstatus
-        ReceiveSkillStatus(ReceiveBuffer);
+        ReceiveSkillStatus(std::span<const BYTE>(ReceiveBuffer, static_cast<std::size_t>(Size)));
         break;
     // case 0x16://die character(exp)
     //     if (!ReceiveDieExp(ReceiveBuffer, bEncrypted))
@@ -15068,7 +15135,7 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
     return true;
 }
 
-void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
+void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o)
 {
     if (o && o == &Hero->Object)
     {
@@ -15080,8 +15147,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         case eBuff_Hellowin4:
         case eBuff_Hellowin5:
         {
-            g_RegisterBuffTime(buff, bufftime);
-
             if (buff == eBuff_Hellowin2)
             {
                 CharacterMachine->CalculateDamage();
@@ -15090,31 +15155,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
             {
                 CharacterMachine->CalculateDefense();
             }
-        }
-        break;
-        case eBuff_PcRoomSeal1:
-        case eBuff_PcRoomSeal2:
-        case eBuff_PcRoomSeal3:
-        {
-            g_RegisterBuffTime(buff, bufftime);
-        }
-        break;
-        case eBuff_Seal1:
-        case eBuff_Seal2:
-        case eBuff_Seal3:
-        case eBuff_Seal4:
-        case eBuff_Seal_HpRecovery:
-        case eBuff_Seal_MpRecovery:
-        case eBuff_GuardCharm:
-        case eBuff_ItemGuardCharm:
-        case eBuff_AscensionSealMaster:
-        case eBuff_WealthSealMaster:
-        case eBuff_NewWealthSeal:
-        case eBuff_AG_Addition:
-        case eBuff_SD_Addition:
-        case eBuff_PartyExpBonus:
-        {
-            g_RegisterBuffTime(buff, bufftime);
         }
         break;
         case eBuff_EliteScroll1:
@@ -15127,8 +15167,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         case eBuff_Scroll_Strengthen:
         case eBuff_Scroll_Healing:
         {
-            g_RegisterBuffTime(buff, bufftime);
-
             if (buff == eBuff_EliteScroll2)
             {
                 CharacterMachine->CalculateDefense();
@@ -15149,8 +15187,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         case eBuff_SecretPotion4:
         case eBuff_SecretPotion5:
         {
-            g_RegisterBuffTime(buff, bufftime);
-
             CharacterMachine->CalculateAll();
         }
         break;
@@ -15158,8 +15194,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         case eBuff_CherryBlossom_RiceCake:
         case eBuff_CherryBlossom_Petal:
         {
-            g_RegisterBuffTime(buff, bufftime);
-
             if (buff == eBuff_CherryBlossom_Petal)
             {
                 CharacterMachine->CalculateDamage();
@@ -15168,8 +15202,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         break;
         case eBuff_SwellOfMagicPower:
         {
-            g_RegisterBuffTime(buff, bufftime);
-
             if (buff == eBuff_SwellOfMagicPower)
             {
                 CharacterMachine->CalculateMagicDamage();
@@ -15184,8 +15216,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         case eBuff_QuickOfSanta:
         case eBuff_LuckOfSanta:
         {
-            g_RegisterBuffTime(buff, bufftime);
-
             wchar_t _Temp[64] = {
                 0,
             };
@@ -15242,11 +15272,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
             UI::Windows::Show(mu::ui::window::INTERFACE_DUELWATCH_USERLIST);
         }
         break;
-        case eBuff_HonorOfGladiator:
-        {
-            g_RegisterBuffTime(buff, bufftime);
-        }
-        break;
         default:
             break;
         }
@@ -15265,8 +15290,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         case eBuff_Hellowin4:
         case eBuff_Hellowin5:
         {
-            g_UnRegisterBuffTime(buff);
-
             if (buff == eBuff_Hellowin2)
             {
                 int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
@@ -15286,31 +15309,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
             }
         }
         break;
-        case eBuff_PcRoomSeal1:
-        case eBuff_PcRoomSeal2:
-        case eBuff_PcRoomSeal3:
-        {
-            g_UnRegisterBuffTime(buff);
-        }
-        break;
-        case eBuff_Seal1:
-        case eBuff_Seal2:
-        case eBuff_Seal3:
-        case eBuff_Seal4:
-        case eBuff_Seal_HpRecovery:
-        case eBuff_Seal_MpRecovery:
-        case eBuff_GuardCharm:
-        case eBuff_ItemGuardCharm:
-        case eBuff_AscensionSealMaster:
-        case eBuff_WealthSealMaster:
-        case eBuff_NewWealthSeal:
-        case eBuff_AG_Addition:
-        case eBuff_SD_Addition:
-        case eBuff_PartyExpBonus:
-        {
-            g_UnRegisterBuffTime(buff);
-        }
-        break;
         case eBuff_EliteScroll1:
         case eBuff_EliteScroll2:
         case eBuff_EliteScroll3:
@@ -15321,8 +15319,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         case eBuff_Scroll_Strengthen:
         case eBuff_Scroll_Healing:
         {
-            g_UnRegisterBuffTime(buff);
-
             if (buff == eBuff_EliteScroll2)
             {
                 CharacterMachine->CalculateDefense();
@@ -15343,8 +15339,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         case eBuff_SecretPotion4:
         case eBuff_SecretPotion5:
         {
-            g_UnRegisterBuffTime(buff);
-
             CharacterMachine->CalculateAll();
         }
         break;
@@ -15352,8 +15346,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         case eBuff_CherryBlossom_RiceCake:
         case eBuff_CherryBlossom_Petal:
         {
-            g_UnRegisterBuffTime(buff);
-
             if (buff == eBuff_CherryBlossom_Petal)
             {
                 CharacterMachine->CalculateDamage();
@@ -15362,8 +15354,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         break;
         case eBuff_SwellOfMagicPower:
         {
-            g_UnRegisterBuffTime(buff);
-
             CharacterMachine->CalculateMagicDamage();
         }
         break;
@@ -15375,8 +15365,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         case eBuff_QuickOfSanta:
         case eBuff_LuckOfSanta:
         {
-            g_UnRegisterBuffTime(buff);
-
             if (buff == eBuff_BlessingOfXmax)
             {
                 CharacterMachine->CalculateDamage();
@@ -15398,11 +15386,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
             UI::Windows::Hide(mu::ui::window::INTERFACE_DUELWATCH_USERLIST);
             UI::Windows::Show(mu::ui::window::INTERFACE_MAINFRAME);
             UI::Windows::Show(mu::ui::window::INTERFACE_BUFF_WINDOW);
-        }
-        break;
-        case eBuff_HonorOfGladiator:
-        {
-            g_UnRegisterBuffTime(buff);
         }
         break;
         default:
@@ -15809,9 +15792,17 @@ void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime)
         g_CharacterRegisterBuff(o, buff);
         GameLogic::Monsters::Setup::NoteServerBuff(*o, static_cast<int>(buff), true);
 
+        if (o == &Hero->Object)
+        {
+            // Any buff of the hero keeps its time, and a new one restarts it (buffs design section 4, P1, P2). The
+            // values the server sent for an earlier activation are gone; an extended C1 07 brings the new ones.
+            g_RegisterBuffTime(buff, bufftime);
+            GameLogic::Buffs::HeroServerBuffValues().Clear(static_cast<int>(buff));
+        }
+
         if (buffclasstype != eBuffClass_Count)
         {
-            InsertBuffLogicalEffect(buff, o, bufftime);
+            InsertBuffLogicalEffect(buff, o);
         }
     }
 }
@@ -15829,6 +15820,12 @@ void UnRegisterBuff(eBuffState buff, OBJECT* o)
     if (CheckExceptionBuff(buff, o, true))
     {
         g_CharacterUnRegisterBuff(o, buff);
+
+        if (o == &Hero->Object)
+        {
+            g_UnRegisterBuffTime(buff);
+            GameLogic::Buffs::HeroServerBuffValues().Clear(static_cast<int>(buff));
+        }
 
         if (buffclasstype != eBuffClass_Count)
         {
