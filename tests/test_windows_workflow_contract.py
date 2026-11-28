@@ -642,6 +642,21 @@ check(
     "PR compilation must restore without creating isolated cache entries",
 )
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
+check(
+    "-DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }}"
+    in step(linux_job, "build-linux", "Build a port-like target"),
+    "Linux port-like build must configure without precompiled headers outside releases, or ccache cannot cache it",
+)
+port_like_build = step(linux_job, "build-linux", "Build a port-like target")
+port_like_report = step(linux_job, "build-linux", "Report port-like compiler cache")
+check(port_like_build.lstrip().startswith("id: port_like") and "ccache --zero-stats" in port_like_build,
+      "Port-like build must have id port_like and zero the compiler cache statistics before it builds")
+for required in ("if: ${{ !cancelled() && steps.port_like.outcome != 'skipped' }}", "ccache --show-stats",
+                 "### Linux compiler cache, port-like target", '"$GITHUB_STEP_SUMMARY"'):
+    check(required in port_like_report, f"Port-like compiler cache report missing {required}")
+port_like_build_at = linux_job.find("- name: Build a port-like target")
+port_like_report_at = linux_job.find("- name: Report port-like compiler cache")
+check(0 <= port_like_build_at < port_like_report_at, "Port-like compiler cache report must follow the port-like build")
 # PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
 # entries out of the repository's 10 GB. Only main pushes save them: the nightly runs beside the pushes, so with both
 # saving, an older commit's entry could be saved last and be the one the prune job keeps.

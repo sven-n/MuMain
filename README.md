@@ -145,6 +145,8 @@ Typed into the chat input, in any build:
 
 - `$fps <value>`, `$vsync on|off`, `$fpscounter on|off`, `$details on|off`, `$glstats on|off`:
   frame timing and rendering statistics.
+- `$ping`: show the ping to the game server for a few seconds, in the top-right corner. The server has to
+  answer round trip requests; on one that doesn't, it reads "no answer".
 - `$effects on|off` and `$effects <system> on|off`, where `<system>` is `sprites`, `particles`,
   `skillmodels`, `boids`, `wingshadow`, `joints` or `wingextralayers`: turn rendering systems
   off to compare their cost.

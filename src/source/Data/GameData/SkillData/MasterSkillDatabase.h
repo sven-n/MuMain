@@ -26,6 +26,12 @@ public:
         return m_skills;
     }
 
+    // Whether a master skill raises the buff attribute at that index (BuffAttributes), resolved when the table builds.
+    bool RaisesAttribute(int attribute) const
+    {
+        return attribute >= 0 && attribute < static_cast<int>(m_raised.size()) && m_raised[attribute];
+    }
+
 private:
     static constexpr int NoEntry = -1;
     static constexpr int MaxSkill = AT_SKILL_MASTER_END;
@@ -35,6 +41,8 @@ private:
     std::vector<MasterSkillDefinition> m_skills;
     // The index in m_skills by skill number, or NoEntry.
     std::array<int, MaxSkill + 1> m_indices{};
+    // By BuffAttributes index: whether a master skill raises it.
+    std::array<bool, Buffs::BuffAttributes.size()> m_raised{};
 };
 } // namespace Data::Skills
 

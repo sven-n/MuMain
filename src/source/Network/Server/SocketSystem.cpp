@@ -468,7 +468,7 @@ void CSocketItemMgr::CheckSocketSetOption()
     m_EquipSetBonusList.clear();
 
     int iSeedSum[6] = { 0, 0, 0, 0, 0, 0 };
-    ITEM* pItem = NULL;
+    const ITEM* pItem = NULL;
     SOCKET_OPTION_INFO* pInfo = NULL;
 
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
@@ -522,7 +522,7 @@ void CSocketItemMgr::CalcSocketStatusBonus()
     memset(&m_StatusBonus, 0, sizeof(SOCKET_OPTION_STATUS_BONUS));
     m_StatusBonus.m_fDefenceRateBonus = 1.0f;
 
-    ITEM* pItem = NULL;
+    const ITEM* pItem = NULL;
     SOCKET_OPTION_INFO* pInfo = NULL;
 
     for (int i = 0; i < MAX_EQUIPMENT; ++i)

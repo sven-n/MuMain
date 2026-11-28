@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "GameLogic/Buffs/BuffValues.h"
+#include "GameLogic/Buffs/BuffServerValues.h"
 #include "Core/Utilities/Random.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -1124,7 +1125,7 @@ EXIT_CALCULATE:
     return (int64_t)Gold;
 }
 
-bool IsRequireEquipItem(ITEM* pItem)
+bool IsRequireEquipItem(const ITEM* pItem)
 {
     if (pItem == NULL) {
         return false;
@@ -1201,12 +1202,12 @@ bool IsRequireEquipItem(ITEM* pItem)
     return bEquipable;
 }
 
-bool AreItemOptionsActive(ITEM* Item)
+bool AreItemOptionsActive(const ITEM* Item)
 {
     return Item->Type != -1 && Item->Durability != 0 && IsRequireEquipItem(Item);
 }
 
-void PlusSpecial(WORD* Value, int Special, ITEM* Item)
+void PlusSpecial(WORD* Value, int Special, const ITEM* Item)
 {
     if (!AreItemOptionsActive(Item))
     {
@@ -1220,7 +1221,7 @@ void PlusSpecial(WORD* Value, int Special, ITEM* Item)
     }
 }
 
-void PlusSpecialPercentOfSlot(WORD* Value, int Special, ITEM* Item)
+void PlusSpecialPercentOfSlot(WORD* Value, int Special, const ITEM* Item)
 {
     if (!AreItemOptionsActive(Item))
     {
@@ -1239,7 +1240,7 @@ void PlusSpecialPercentOfSlot(WORD* Value, int Special, ITEM* Item)
     }
 }
 
-WORD ItemDefense(ITEM* Item)
+WORD ItemDefense(const ITEM* Item)
 {
     if (Item->Type == -1) return 0;
     WORD Defense = Item->Defense;
@@ -1247,7 +1248,7 @@ WORD ItemDefense(ITEM* Item)
     return Defense;
 }
 
-WORD ItemMagicDefense(ITEM* Item)
+WORD ItemMagicDefense(const ITEM* Item)
 {
     if (Item->Type == -1) return 0;
     WORD MagicDefense = Item->MagicDefense;
@@ -1255,7 +1256,7 @@ WORD ItemMagicDefense(ITEM* Item)
     return MagicDefense;
 }
 
-WORD ItemWalkSpeed(ITEM* Item)
+WORD ItemWalkSpeed(const ITEM* Item)
 {
     if (Item->Type == -1) return 0;
     WORD WalkSpeed = Item->WalkSpeed;
@@ -1399,11 +1400,11 @@ void CHARACTER_MACHINE::CalculateDamage()
 {
     WORD    DamageMin, DamageMax;
 
-    ITEM* Right = GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT);
-    ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
-    ITEM* Amulet = GetEffectiveEquipment(EQUIPMENT_AMULET);
-    ITEM* RRing = GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
-    ITEM* LRing = GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
+    const ITEM* Right = GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT);
+    const ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    const ITEM* Amulet = GetEffectiveEquipment(EQUIPMENT_AMULET);
+    const ITEM* RRing = GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
+    const ITEM* LRing = GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
 
     WORD Strength = Character.Strength + Character.AddStrength;
     WORD Dexterity = Character.Dexterity + Character.AddDexterity;
@@ -1486,7 +1487,7 @@ void CHARACTER_MACHINE::CalculateDamage()
         }
     }
 
-    ITEM* wing = GetEffectiveEquipment(EQUIPMENT_WING);
+    const ITEM* wing = GetEffectiveEquipment(EQUIPMENT_WING);
     if (wing->Type != -1)
     {
         ITEM_ATTRIBUTE* p = &ItemAttribute[wing->Type];
@@ -1661,17 +1662,17 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
     Character.MagicDamageMin = Energy / 9;
     Character.MagicDamageMax = Energy / 4;
 
-    ITEM* Right = GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT);
-    ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
-    ITEM* Amulet = GetEffectiveEquipment(EQUIPMENT_AMULET);
-    ITEM* RRing = GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
-    ITEM* LRing = GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
+    const ITEM* Right = GetEffectiveEquipment(EQUIPMENT_WEAPON_RIGHT);
+    const ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    const ITEM* Amulet = GetEffectiveEquipment(EQUIPMENT_AMULET);
+    const ITEM* RRing = GetEffectiveEquipment(EQUIPMENT_RING_RIGHT);
+    const ITEM* LRing = GetEffectiveEquipment(EQUIPMENT_RING_LEFT);
     float   percent;
     WORD    DamageMin = 0;
     WORD    DamageMax = 0;
 
     // 날개
-    ITEM* ipWing = GetEffectiveEquipment(EQUIPMENT_WING);
+    const ITEM* ipWing = GetEffectiveEquipment(EQUIPMENT_WING);
     if (ipWing->Type != -1)
     {
         ITEM_ATTRIBUTE* p = &ItemAttribute[ipWing->Type];
@@ -1810,7 +1811,13 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         Character.MagicDamageMin += value;
         Character.MagicDamageMax += value;
     }
-    if (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower))
+    // The server's value, which knows the caster, of every buff that raises it (Expansion of Wizardry and its master
+    // skills' buffs, buffs design B24); the hero's own formula for the base buff without it.
+    if (const std::optional<double> sent = GameLogic::Buffs::GetHeroSentTotal("minimumWizBaseDmg"); sent.has_value())
+    {
+        Character.MagicDamageMin += GameLogic::Buffs::CutToWhole(*sent);
+    }
+    else if (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower))
     {
         int iAdd_MP = (CharacterAttribute->Energy / 9) * 0.2f;
         Character.MagicDamageMin += iAdd_MP;
@@ -1838,7 +1845,7 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
     Character.CurseDamageMin = wEnergy / 9;
     Character.CurseDamageMax = wEnergy / 4;
 
-    ITEM* pEquipWing = GetEffectiveEquipment(EQUIPMENT_WING);
+    const ITEM* pEquipWing = GetEffectiveEquipment(EQUIPMENT_WING);
     if (pEquipWing->Type != -1)
     {
         ITEM_ATTRIBUTE* pAttribute = &ItemAttribute[pEquipWing->Type];
@@ -1857,7 +1864,7 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
         Character.CurseDamageMax += wDamageMax;
     }
 
-    ITEM* pEquipLeft = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    const ITEM* pEquipLeft = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
     if (pEquipLeft->Type != -1 && pEquipLeft->Durability != 0)
     {
         ITEM_ATTRIBUTE* pAttribute = &ItemAttribute[pEquipLeft->Type];
@@ -2006,7 +2013,7 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
         Character.SuccessfulBlocking = Dexterity / 3;
     }
 
-    ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
+    const ITEM* Left = GetEffectiveEquipment(EQUIPMENT_WEAPON_LEFT);
     if (Left->Type != -1 && Left->Durability != 0)
     {
         ITEM_ATTRIBUTE* p = &ItemAttribute[Left->Type];
@@ -2078,7 +2085,7 @@ void CHARACTER_MACHINE::CalculateDefense()
     WORD    Defense = 0;
     for (int i = EQUIPMENT_WEAPON_LEFT; i <= EQUIPMENT_WING; ++i)
     {
-        ITEM* item = GetEffectiveEquipment(i);
+        const ITEM* item = GetEffectiveEquipment(i);
         if (item->Durability != 0)
         {
             WORD defense = ItemDefense(item);
@@ -2171,7 +2178,7 @@ void CHARACTER_MACHINE::CalculateMagicDefense()
 {
     for (int i = EQUIPMENT_HELM; i <= EQUIPMENT_WING; ++i)
     {
-        ITEM* item = GetEffectiveEquipment(i);
+        const ITEM* item = GetEffectiveEquipment(i);
         if (item->Durability != 0)
         {
             Character.MagicDefense = ItemMagicDefense(item);
@@ -2181,13 +2188,13 @@ void CHARACTER_MACHINE::CalculateMagicDefense()
 
 void CHARACTER_MACHINE::CalculateWalkSpeed()
 {
-    ITEM* boots = GetEffectiveEquipment(EQUIPMENT_BOOTS);
+    const ITEM* boots = GetEffectiveEquipment(EQUIPMENT_BOOTS);
     if (boots->Durability != 0)
     {
         Character.WalkSpeed = ItemWalkSpeed(boots);
     }
 
-    ITEM* wing = GetEffectiveEquipment(EQUIPMENT_WING);
+    const ITEM* wing = GetEffectiveEquipment(EQUIPMENT_WING);
     if (wing->Durability != 0)
     {
         Character.WalkSpeed += ItemWalkSpeed(wing);
@@ -2238,17 +2245,30 @@ void CHARACTER_MACHINE::CalulateMasterLevelNextExperience()
     Master_Level_Data.lNext_MasterLevel_Experince = (iData_Master - (int64_t)3892250000) / (int64_t)2;
 }
 
-ITEM* CHARACTER_MACHINE::GetEffectiveEquipment(int slot)
+namespace
 {
-    ITEM* item = &Equipment[slot];
+// The item of a slot without effect: no item at all.
+const ITEM& NoEffectEquipment()
+{
+    static const ITEM item = []
+    {
+        ITEM empty{};
+        empty.Type = -1;
+        return empty;
+    }();
+    return item;
+}
+} // namespace
+
+const ITEM* CHARACTER_MACHINE::GetEffectiveEquipment(int slot) const
+{
+    const ITEM* item = &Equipment[slot];
     if (item->Type != -1 && !GameLogic::Items::IsExpiredRental(item))
     {
         return item;
     }
 
-    m_NoEffectEquipment = ITEM{};
-    m_NoEffectEquipment.Type = -1;
-    return &m_NoEffectEquipment;
+    return &NoEffectEquipment();
 }
 
 bool CHARACTER_MACHINE::IsZeroDurability()
@@ -2272,10 +2292,17 @@ void CHARACTER_MACHINE::CalculateBasicState()
     Character.AddVitality += static_cast<WORD>(GameLogic::Buffs::GetHeroPowerUpTotal("totalVitality"));
     Character.AddEnergy += static_cast<WORD>(GameLogic::Buffs::GetHeroPowerUpTotal("totalEnergy"));
     Character.AddCharisma += static_cast<WORD>(GameLogic::Buffs::GetHeroPowerUpTotal("totalLeadership"));
-    if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
+    // The server's value, which knows the caster, of every buff that raises it (Increase Health and its master skill's
+    // buff, buffs design B24); the hero's own formula for the base buff without it.
+    if (const std::optional<double> sent = GameLogic::Buffs::GetHeroSentTotal("totalVitality"); sent.has_value())
+    {
+        Character.AddVitality += static_cast<WORD>(std::max(0, GameLogic::Buffs::CutToWhole(*sent)));
+    }
+    else if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
     {
         WORD _AddStat = 0;
-        if (Character.Energy >= 132) {
+        if (Character.Energy >= 132)
+        {
             _AddStat = (WORD)(30 + (WORD)((Character.Energy - 132) / 10));
         }
         if (_AddStat > 200)

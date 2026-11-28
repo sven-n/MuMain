@@ -36,13 +36,13 @@ BOOL IsCorrectSkillType_CommonAttack(INT iSkillSeq);
 
 extern CLASS_ATTRIBUTE ClassAttribute[MAX_CLASS];
 
-bool IsRequireEquipItem(ITEM* pItem);
+bool IsRequireEquipItem(const ITEM* pItem);
 // Whether a worn item's options count: it is there, the hero meets its requirements and its durability is above 0.
-bool AreItemOptionsActive(ITEM* Item);
+bool AreItemOptionsActive(const ITEM* Item);
 // Adds the values of the item's option slots of effect `Special` to `Value` when its options count.
-void PlusSpecial(WORD* Value, int Special, ITEM* Item);
+void PlusSpecial(WORD* Value, int Special, const ITEM* Item);
 // Adds the per cent of `Value` the item's option slots of effect `Special` hold to `Value` when its options count.
-void PlusSpecialPercentOfSlot(WORD* Value, int Special, ITEM* Item);
+void PlusSpecialPercentOfSlot(WORD* Value, int Special, const ITEM* Item);
 
 class CHARACTER_MACHINE
 {
@@ -92,12 +92,9 @@ public:
 
     // The item of an equipment slot as the game uses it: an expired rented item has no effect, so its slot counts
     // as empty, for the stats, the item options, the drawing of the hero and the pets. Never nullptr: an empty
-    // slot gives an item with Type -1. Use Equipment directly for what the player sees in the inventory.
-    ITEM* GetEffectiveEquipment(int slot);
-
-private:
-    // What GetEffectiveEquipment gives for a slot without effect; emptied again at every call.
-    ITEM m_NoEffectEquipment{};
+    // slot gives an item with Type -1, shared and read-only. Use Equipment directly for what the player sees in
+    // the inventory.
+    const ITEM* GetEffectiveEquipment(int slot) const;
 };
 
 inline DWORD GenerateCheckSum2(const BYTE* pbyBuffer, DWORD dwSize, WORD wKey)

@@ -41,6 +41,7 @@
 #include "UI/Theme/ThemeSelection.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Network/RoundTripMeter.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
@@ -490,6 +491,11 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         return Handled();
     }
 #endif
+    if (strCommand.compare(L"$ping") == 0)
+    {
+        Network::Ping().Show(Network::RoundTripMeter::Clock::now());
+        return Handled();
+    }
     if (strCommand.compare(L"$fpscounter on") == 0)
     {
         SetShowFpsCounter(true);

@@ -77,8 +77,8 @@ private:
     void ProcessEnter();
     void RejectEnterRequest(MSGBOX_TYPE popup);
     void ValidateEquipmentForEntry();
-    bool IsRidingUniria(ITEM* pItemHelper);
-    bool HasMoonstonePendant(ITEM* pItemRingLeft, ITEM* pItemRingRight);
+    bool IsRidingUniria(const ITEM* pItemHelper);
+    bool HasMoonstonePendant(const ITEM* pItemRingLeft, const ITEM* pItemRingRight);
 
     void BuildRmlUi();
     void SyncRmlModel();
