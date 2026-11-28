@@ -7,6 +7,7 @@
 #pragma warning(disable : 4786)
 #include "UI/Inventory/ItemGridGeometry.h"
 #include "UI/Inventory/ItemGridModel.h"
+#include <optional>
 #include <vector>
 
 #include "UI/Core/WindowManager.h"
@@ -75,7 +76,7 @@ namespace mu::ui::window
         ITEM* m_pPickedItem;
 
         bool m_bShow;
-        bool m_bUsedOnItem;
+        std::optional<int> m_usedOnIndex;
         POINT m_Pos;
         SIZE m_Size;
         UI::Items::PickupAnchor m_Anchor;
@@ -114,10 +115,13 @@ namespace mu::ui::window
         void ShowPickedItem();
         void HidePickedItem();
 
-        // The held item was used on another item (a jewel on a weapon, ...). It stays in the hand until the server
-        // answers with the update of the target item, which consumes it.
-        void MarkUsedOnItem();
-        bool IsUsedOnItem() const;
+        // The held item was used on the item at `targetIndex` (a jewel on a weapon, ...). It stays in the hand until
+        // the server answers with the update of that item, which consumes it. A refusal clears the mark
+        // (ClearUsedOnItem), so it's a normal held item again.
+        void MarkUsedOnItem(int targetIndex);
+        void ClearUsedOnItem();
+        // The item the held item was used on, if any.
+        std::optional<int> GetUsedOnIndex() const;
 
         void Render3D();
     };

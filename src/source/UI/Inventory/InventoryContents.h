@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <span>
 
 typedef struct tagITEM ITEM;
@@ -20,8 +21,13 @@ void DiscardPickedItem();
 // in the hand, e.g. when a rented item expires while the player moves something else.
 void DiscardPickedItemUpdatedBy(int index);
 // The rule of DiscardPickedItemUpdatedBy: whether the server's update of the item at `updatedIndex` ends a held item
-// which came from `sourcePos` of `source` and was (or wasn't) used on another item.
-bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, bool usedOnItem, int updatedIndex);
+// which came from `sourcePos` of `source` and was used on the item at `usedOnIndex`, if any.
+bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, std::optional<int> usedOnIndex, int updatedIndex);
+// The server refused the use of the item at `refusedUseIndex` (ItemConsumptionFailed). If that's the held item's use,
+// it's a normal held item again, which no later item update ends; the refusal of another use keeps its mark.
+void RefusePickedItemUse(std::optional<int> refusedUseIndex);
+// The rule of RefusePickedItemUse: whether the refused use is the one of the held item from `sourcePos` of `source`.
+bool IsRefusalOfHeldItemUse(STORAGE_TYPE source, int sourcePos, std::optional<int> refusedUseIndex);
 void RestorePickedItem();
 int TransferSourceIndex();
 bool ReceivePlayerTransfer(int index, std::span<const std::uint8_t> itemData);

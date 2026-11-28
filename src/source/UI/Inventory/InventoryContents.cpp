@@ -61,14 +61,32 @@ void DiscardPickedItemUpdatedBy(int index)
         return;
 
     if (IsHeldItemEndedByUpdate(pickedItem->GetSourceStorageType(), pickedItem->GetSourceLinealPos(),
-                                pickedItem->IsUsedOnItem(), index))
+                                pickedItem->GetUsedOnIndex(), index))
         DiscardPickedItem();
 }
 
-bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, bool usedOnItem, int updatedIndex)
+bool IsHeldItemEndedByUpdate(STORAGE_TYPE source, int sourcePos, std::optional<int> usedOnIndex, int updatedIndex)
 {
+    // The update of the target answers the use; any other update, e.g. a rented item which expired, doesn't. A refused
+    // use gets no update of the target at all (OpenMU answers with ItemConsumptionFailed).
+    const bool answersTheUse = usedOnIndex == updatedIndex;
     const bool isUpdatedItem = source == STORAGE_TYPE::INVENTORY && sourcePos == updatedIndex;
-    return usedOnItem || isUpdatedItem;
+    return answersTheUse || isUpdatedItem;
+}
+
+void RefusePickedItemUse(std::optional<int> refusedUseIndex)
+{
+    auto* pickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
+    if (pickedItem == nullptr)
+        return;
+
+    if (IsRefusalOfHeldItemUse(pickedItem->GetSourceStorageType(), pickedItem->GetSourceLinealPos(), refusedUseIndex))
+        pickedItem->ClearUsedOnItem();
+}
+
+bool IsRefusalOfHeldItemUse(STORAGE_TYPE source, int sourcePos, std::optional<int> refusedUseIndex)
+{
+    return source == STORAGE_TYPE::INVENTORY && refusedUseIndex == sourcePos;
 }
 
 void RestorePickedItem()

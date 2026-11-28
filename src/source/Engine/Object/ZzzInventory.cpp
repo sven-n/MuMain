@@ -41,6 +41,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/PendingItemUses.h"
 #include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "GameLogic/Items/TransformationRing.h"
@@ -434,6 +435,8 @@ bool SendRequestUse(int Index, int Target, bool addPoints)
     }
 
     EnableUse = 10;
+    // The protocol's target 0 means none: a use on another item is on an inventory item, never on an equipment slot.
+    GameLogic::Items::HeroPendingItemUses().Add(Index, Target != 0 ? std::optional<int>(Target) : std::nullopt);
     SocketClient->ToGameServer()->SendConsumeItemRequest(Index, Target, addPoints ? FruitUsage::AddPoints : FruitUsage::RemovePoints);
     g_ConsoleDebug->Write(MCD_SEND, L"0x26 [SendRequestUse(%d)]", Index);
     return true;
