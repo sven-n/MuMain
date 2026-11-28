@@ -208,9 +208,6 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 // Asks the server to use the item at Index (on the item at Target). False if nothing was sent: items can't be used
 // while the vault or a trade is open, or while an earlier use waits for its answer.
 bool SendRequestUse(int Index, int Target, bool addPoints = true);
-// The item slot of the last use SendRequestUse sent, if any. The server's refusal (ItemConsumptionFailed) doesn't say
-// which use it answers; this is the best guess.
-std::optional<int> GetLastSentUseIndex();
 bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex);
 bool IsCanUseItem();
 bool IsCanTrade();

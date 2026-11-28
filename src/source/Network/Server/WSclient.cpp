@@ -71,6 +71,7 @@
 #include "GameLogic/NPCs/npcGateSwitch.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/InventoryUtils.h"
+#include "GameLogic/Items/PendingItemUses.h"
 #include "UI/Inventory/InventoryContents.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "GameLogic/Warps/ServerWarpList.h"
@@ -992,6 +993,7 @@ extern void StopMusic();
 void InitGame()
 {
     EnableUse = 0;
+    GameLogic::Items::HeroPendingItemUses().Clear();
     SendGetItem = -1;
     SummonLife = 0;
     SoccerTime = 0;
@@ -1792,7 +1794,10 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
 
     if (Data->Value)
     {
+        // The answer to a use: the used item is gone.
         EnableUse = 0;
+        if (Data->SubCode != 0xff)
+            GameLogic::Items::HeroPendingItemUses().Answered(Data->SubCode);
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x28 [ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
@@ -6509,6 +6514,8 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     itemData = itemData.subspan(0, length);
 
     int itemindex = Data->Index;
+    // The answer to a use on this item (a jewel on a weapon), if one waits.
+    GameLogic::Items::HeroPendingItemUses().Answered(itemindex);
     UI::Inventory::DiscardPickedItemUpdatedBy(itemindex);
 
     if (IsPlayerInventorySlot(itemindex) && UI::Inventory::FindPlayerItem(itemindex))
@@ -7139,10 +7146,10 @@ void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
 
         break;
     case 0xfd:
-        // The server refused the use of an item (ItemConsumptionFailed); the packet doesn't say which, so it's taken
-        // for the last use which was sent.
+        // The server refused the use of an item (ItemConsumptionFailed). It answers the uses in the order they were
+        // sent, so the refusal is the oldest one which waits for an answer.
         EnableUse = 0;
-        UI::Inventory::RefusePickedItemUse(GetLastSentUseIndex());
+        UI::Inventory::RefusePickedItemUse(GameLogic::Items::HeroPendingItemUses().TakeOldest());
         break;
     default:
         // todo: is that ever used?
@@ -7239,7 +7246,9 @@ void ReceiveDurability(const BYTE* ReceiveBuffer)
 
     if (Data->KeyL)
     {
+        // The answer to a use: the used item lost durability.
         EnableUse = 0;
+        GameLogic::Items::HeroPendingItemUses().Answered(Data->Value);
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x2A [ReceiveDurability(%d %d)]", Data->Value, Data->KeyL);
