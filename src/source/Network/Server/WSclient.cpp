@@ -3834,6 +3834,9 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     case AT_HUSTLE:
         SetAction(o, PLAYER_HUSTLE);
         break;
+    case AT_POINT_DANCE:
+        SetAction(o, PLAYER_POINT_DANCE);
+        break;
     case AT_DAMAGE1:
         SetAction(&c->Object, MONSTER01_SHOCK);
         break;
@@ -7917,7 +7920,6 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
         }
     }
     SetActionClass(Hero, &Hero->Object, PLAYER_RUSH1, AT_RUSH1);
-    SendRequestAction(Hero->Object, AT_RUSH1);
 
     UI::Windows::Show(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
 
@@ -7981,11 +7983,9 @@ void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
     {
     case 2:
         SetActionClass(Hero, &Hero->Object, PLAYER_WIN1, AT_WIN1);
-        SendRequestAction(Hero->Object, AT_WIN1);
         break;
     case 0:
         SetActionClass(Hero, &Hero->Object, PLAYER_CRY1, AT_CRY1);
-        SendRequestAction(Hero->Object, AT_CRY1);
         break;
     }
 
